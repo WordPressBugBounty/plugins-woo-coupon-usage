@@ -536,6 +536,20 @@ __( 'Connect your registration form to automatically add affiliates to your mail
 ?>
 
 <?php echo wcusage_output_addon_box(
+__( 'Affiliate Groups', 'woo-coupon-usage' ),
+"wcusage_field_addon_default",
+__( 'Assign affiliates to groups and then configure a variety of settings for that whole group.', 'woo-coupon-usage' ),
+"https://couponaffiliates.com/docs/affiliate-groups",
+"fas fa-users",
+1,
+1,
+0,
+'',
+''
+);
+?>
+
+<?php echo wcusage_output_addon_box(
 __( 'Priority Support', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Get priority support, and your suggestions will have more priority for development.', 'woo-coupon-usage' ),

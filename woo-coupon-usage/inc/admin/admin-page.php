@@ -169,7 +169,7 @@ if ($todayDate >= $dealDateBegin && $todayDate <= $dealDateEnd) { $specialsale =
 		</a>
 
 		<a href="https://twitter.com/CouponAffs" target="_blank" class="wcusage-quicklink" target="_blank">
-			Twitter @CouponAffs
+			Twitter/X @CouponAffs
 		</a>
 
 		<?php if ( !wcu_fs()->can_use_premium_code() ) { ?>

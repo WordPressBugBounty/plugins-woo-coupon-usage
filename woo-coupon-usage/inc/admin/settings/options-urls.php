@@ -8,6 +8,9 @@ function wcusage_field_cb_urls( $args )
     $options = get_option( 'wcusage_options' );
 
     $wcusage_urls_prefix = wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon');
+    $wcusage_src_prefix = wcusage_get_setting_value('wcusage_field_src_prefix', 'src');
+    $wcusage_field_default_ref_url = wcusage_get_setting_value('wcusage_field_default_ref_url', esc_url(home_url()));
+    $wcusage_field_default_ref_url = rtrim($wcusage_field_default_ref_url, '/');
     ?>
 
 	<div id="urls-settings" class="settings-area">
@@ -16,17 +19,40 @@ function wcusage_field_cb_urls( $args )
 
   <hr/>
 
-	<p>- <?php echo esc_html__( 'Enable the Referral URL section on the affiliate dashboard which displays the referral URL generator, along with click statistics, conversion rates, and more.', 'woo-coupon-usage' ); ?></p>
-  
-  <p>- <?php echo esc_html__( 'You can also show their default link anywhere using the shortcode: [couponaffiliates-referral-url]', 'woo-coupon-usage' ); ?></p>
-  
-  <p>- <?php echo esc_html__( 'Any users that click on a referral link will have the coupon code automatically applied to their checkout.', 'woo-coupon-usage' ); ?></p>
-  
-	<br/><hr/>
-
     <!-- Enable Referral URLs -->
     <?php echo wcusage_setting_toggle_option('wcusage_field_urls_enable', 1, esc_html__( 'Enable Referral URLs & Click Tracking', 'woo-coupon-usage' ), '0px'); ?>
 
+    <br/>
+
+    <!-- FAQ: How do referral URLs work? -->
+    <div class="wcu-admin-faq">
+
+      <?php echo wcusage_admin_faq_toggle(
+      "wcu_show_section_qna_urls",
+      "wcu_qna_urls",
+      "FAQ: How do referral URLs work?");
+      ?>
+
+      <div class="wcu-admin-faq-content wcu_qna_urls" id="wcu_qna_urls" style="display: none;">
+
+        <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'This will enable the Referral URL section on the affiliate dashboard which displays the referral URL generator, along with click statistics, conversion rates, and more.', 'woo-coupon-usage' ); ?><br/>
+
+        <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'On the dashboard, the affiliate can generate their own custom links for specific pages or products on your website.', 'woo-coupon-usage' ); ?><br/>
+
+        <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'If enabled below, the referral link will automatically apply the coupon code to their cart.', 'woo-coupon-usage' ); ?><br/>
+
+        <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'If you want conversions to be tracked even if the coupon is not used, enable the setting below under "URL Conversion Tracking".', 'woo-coupon-usage' ); ?><br/>
+
+        <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'You can also show the logged in affiliates default link anywhere using the shortcode: [couponaffiliates-referral-url]', 'woo-coupon-usage' ); ?><br/>
+
+        <a href="https://couponaffiliates.com/docs/referral-urls" target="_blank" class="button button-primary" style="margin-top: 10px;"><?php echo esc_html__( 'View Documentation', 'woo-coupon-usage' ); ?> <span class="fas fa-external-link-alt"></span></a>
+
+        <br/>
+
+      </div>
+
+    </div>
+    
     <?php echo wcusage_setting_toggle('.wcusage_field_urls_enable', '.wcu-field-section-referral-url-settings'); // Show or Hide ?>
     <span class="wcu-field-section-referral-url-settings">
 
@@ -44,94 +70,6 @@ function wcusage_field_cb_urls( $args )
 
       <?php echo wcusage_setting_toggle_option('wcusage_field_apply_instant_enable', 1, 'Attempt to apply coupon instantly on first page visited.', '0px'); ?>
       <i><?php echo esc_html__( 'If enabled, the plugin will attempt to apply the code on the first page they visit. If disabled, it will only apply the code once they visit the cart/checkout pages.', 'woo-coupon-usage' ); ?></i><br/>
-
-      <!-- ********** URL Conversions ********** -->
-      <br/><hr/>
-
-      <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'URL Conversion Tracking', 'woo-coupon-usage' ); ?>:</h3>
-
-      <?php echo wcusage_setting_toggle_option('wcusage_field_url_referrals', 0, 'Track conversions via referral URL even if coupon was not used.', '0px'); ?>
-      <i><?php echo esc_html__( 'If enabled, if someone visits the site via the referral URL and places an order without using the coupon code, it will still be tracked and award the affiliate.', 'woo-coupon-usage' ); ?></i><br/>
-      <i><?php echo esc_html__( 'If disabled, by default the referral will only be tracked if the customer applys the affiliates coupon when placing their order.', 'woo-coupon-usage' ); ?></i><br/>
-
-      <!-- ********** Link Settings ********** -->
-      <br/><hr/>
-
-      <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Referral Link Settings', 'woo-coupon-usage' ); ?>:</h3>
-
-  		<script>
-  		jQuery(function() {
-  		  jQuery('#wcusage_field_urls_prefix').on('input', function(){
-          var source_name = jQuery(this).attr('name');
-          jQuery('#output-prefix').text( jQuery(this).val() );
-  		  });
-  		});
-  		</script>
-
-      <!-- DESC -->
-      <?php echo wcusage_setting_number_option('wcusage_urls_cookie_days', '30', esc_html__( 'Store cookie for how many days?', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'This is how many days after someone clicks on a referral link, that the cookie will be stored to automatically apply the coupon.', 'woo-coupon-usage' ); ?></i><br/>
-      <i><?php echo esc_html__( 'If for some reason the user deletes/removes the coupon manually from their cart, the cookie will also be removed.', 'woo-coupon-usage' ); ?></i><br/>
-
-      <br/>
-
-      <?php echo wcusage_setting_toggle_option('wcusage_remove_cookies', 0, 'Remove all tracking cookies when customer places an order.', '0px'); ?>
-      <i><?php echo esc_html__( 'If enabled, the tracking cookies will be deleted from the customers browser, once the order is completed.', 'woo-coupon-usage' ); ?></i><br/>
-      <i><?php echo esc_html__( 'They would need to click the referral link again for coupons to be automatically applied again, or future orders to be awarded to the affiliate.', 'woo-coupon-usage' ); ?></i><br/>
-
-      <br/>
-
-      <p><span class="fa-solid fa-gear"></span> <strong><?php echo esc_html__( 'Advanced Settings', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_referral_advanced">Show <span class="fa-solid fa-arrow-down"></span></button></p>
-
-      <?php echo wcu_admin_settings_showhide_toggle("wcu_show_referral_advanced", "wcu_referral_advanced", "Show", "Hide"); ?>
-        <div id="wcu_referral_advanced" style="display: none;">
-
-        <br/>
-
-        <!-- Referral URL variable -->
-        <?php echo wcusage_setting_text_option('wcusage_field_urls_prefix', 'coupon', esc_html__( 'Referral URL Variable', 'woo-coupon-usage' ), '0px'); ?>
-        <i><?php echo esc_html__( 'Set the referral URL variable that will be used in your site URL to identify the referrer and to automatically apply that coupon, and track clicks.', 'woo-coupon-usage' ); ?></i><br/>
-        <i><?php echo esc_html__( 'Example URL with coupon code "example10" would be', 'woo-coupon-usage' ); ?>: <?php echo esc_url(get_home_url()) ; ?>/?<span id="output-prefix" style="font-weight: bold;"><?php echo esc_html($wcusage_urls_prefix); ?></span>=example10</i><br/>
-
-        <br/>
-
-        <!-- Default URL -->
-        <?php echo wcusage_setting_text_option('wcusage_field_default_ref_url', esc_url(home_url()), esc_html__( 'Default Page', 'woo-coupon-usage' ), '0px'); ?>
-        <i><?php echo esc_html__( 'The default "Page URL" when affiliates generate referral links in the dashboard. Note: This needs to be a valid link/page on this website only.', 'woo-coupon-usage' ); ?></i><br/>
-        <script>
-            jQuery(document).ready(function() {
-                var defaultURL = "<?php echo esc_url(home_url()); ?>";
-
-                jQuery('#wcusage_field_default_ref_url').on('change', function() {
-                    var url = jQuery(this).val();
-
-                    // Regex pattern for URL validation
-                    var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-                        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name and extension
-                        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-                        '(\\:\\d+)?'+ // port
-                        '(\\/[-a-z\\d%_.~+]*)*'+ // path
-                        '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-                        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-
-                    if(!pattern.test(url)) {
-                        jQuery(this).val(defaultURL);
-                        return;
-                    }
-
-                    // Create an anchor tag to easily parse the URL
-                    var a = document.createElement('a');
-                    a.href = url;
-
-                    // Remove URL parameters if any
-                    url = a.protocol + "//" + a.hostname + a.pathname;
-                    jQuery(this).val(url);
-                });
-            });
-        </script>
-        <br/>
-
-      </div>
 
       <!-- ********** Referral URL Tab ********** -->
       <br/><hr/>
@@ -163,7 +101,143 @@ function wcusage_field_cb_urls( $args )
         <?php echo wcusage_setting_textarea_option('wcusage_field_text_urls', '', esc_html__( 'Custom Text', 'woo-coupon-usage' ), '30px'); ?>
     		<i style="margin-left: 30px;"><?php echo esc_html__( 'Displayed at top of the "referral URL" section on the coupon affiliate dashboard page. HTML tags enabled.', 'woo-coupon-usage' ); ?></i>
 
-        <br/>
+      <!-- ********** Referral URL Tab ********** -->
+      <br/><hr/>
+
+      <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Referral Link Format', 'woo-coupon-usage' ); ?>:</h3>
+
+      <p>
+        <?php echo esc_html__( 'These settings let you customise the format of the referral links that your affiliates can generate on their affiliate dashboard.', 'woo-coupon-usage' ); ?>
+      </p>
+
+      <br/>
+
+      <script>
+      jQuery(function() {
+        jQuery('#wcusage_field_urls_prefix').on('input', function(){
+          var source_name = jQuery(this).attr('name');
+          jQuery('.link-output-prefix').text( jQuery(this).val() );
+        });
+        jQuery('#wcusage_field_default_ref_url').on('input', function(){
+          var source_name = jQuery(this).attr('name');
+          $defaultURL = jQuery(this).val();
+          if( $defaultURL.substr(-1) === '/' ) {
+            $defaultURL = $defaultURL.slice(0, -1);
+          }
+          jQuery('.link-outputurl').text( $defaultURL );
+        });
+      });
+      </script>
+
+      <!-- Referral URL variable -->
+      <?php echo wcusage_setting_text_option('wcusage_field_urls_prefix', 'coupon', esc_html__( 'Referral URL Variable', 'woo-coupon-usage' ), '0px'); ?>
+      <i><?php echo esc_html__( 'Set the referral URL variable that will be used in your site URL to identify the referrer and to automatically apply that coupon, and track clicks.', 'woo-coupon-usage' ); ?></i><br/>
+
+      <br/>
+
+      <!-- Default URL -->
+      <?php echo wcusage_setting_text_option('wcusage_field_default_ref_url', esc_url(home_url()), esc_html__( 'Default Referral URL Page', 'woo-coupon-usage' ), '0px'); ?>
+      <i><?php echo esc_html__( 'The default "Page URL" when affiliates generate referral links in the dashboard. Note: This needs to be a valid link/page on this website only.', 'woo-coupon-usage' ); ?></i><br/>
+      <i><?php echo esc_html__( 'If the affiliate does not enter a custom URL, this will be used as the default landing page for the link.', 'woo-coupon-usage' ); ?></i><br/>
+      <i><?php echo esc_html__( 'This is set to your home page by default, but can be any page on your website.', 'woo-coupon-usage' ); ?></i><br/>
+      
+      <br/>
+
+      <p>
+        <?php echo esc_html__( 'Example default referral URL with coupon code "example" would be', 'woo-coupon-usage' ); ?>:<br/>
+        <span style="font-weight: bold;">
+        <span class="link-output-url"><?php echo esc_url($wcusage_field_default_ref_url); ?></span>/?<span class="link-output-prefix"><?php echo esc_html($wcusage_urls_prefix); ?></span>=example
+        </span>
+      </p>
+
+      <script>
+          jQuery(document).ready(function() {
+
+              var defaultURL = "<?php echo esc_url(home_url()); ?>";
+
+              jQuery('#wcusage_field_default_ref_url').on('change', function() {
+                  var url = jQuery(this).val();
+
+                  // Add https:// if not already
+                  if( url.indexOf('http://') === -1 && url.indexOf('https://') === -1 ) {
+                      url = 'https://' + url;
+                  }
+
+                  // Regex pattern for URL validation
+                  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+                      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name and extension
+                      '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+                      '(\\:\\d+)?'+ // port
+                      '(\\/[-a-z\\d%_.~+]*)*'+ // path
+                      '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+                      '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+
+                  if(!pattern.test(url)) {
+                      jQuery(this).val(defaultURL);
+                      return;
+                  }
+
+                  // Should contain the sites domain
+                  if( url.indexOf(defaultURL) === -1 ) {
+                      alert('The URL must be on this website only.');
+                      jQuery(this).val(defaultURL);
+                      return;
+                  }
+
+                  // Create an anchor tag to easily parse the URL
+                  var a = document.createElement('a');
+                  a.href = url;
+
+                  // Remove URL parameters if any
+                  url = a.protocol + "//" + a.hostname + a.pathname;
+                  jQuery(this).val(url);
+
+                  // Remove slash if at the end
+                  if( url.substr(-1) === '/' ) {
+                      url = url.slice(0, -1);
+                  }
+
+                  // Update the example URL
+                  var source_name = jQuery(this).attr('name');
+                  jQuery('.link-outputurl').text( url );
+
+              });
+          });
+      </script>
+
+        <!-- ********** URL Conversion Tracking ********** -->
+        <br/><hr/>
+
+        <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'URL Conversion Tracking', 'woo-coupon-usage' ); ?>:</h3>
+
+        <?php echo wcusage_setting_toggle_option('wcusage_field_url_referrals', 0, 'Track conversions via referral URL even if coupon was not used.', '0px'); ?>
+        <i><?php echo esc_html__( 'If enabled, if someone visits the site via the referral URL and places an order without using the coupon code, it will still be tracked and award the affiliate.', 'woo-coupon-usage' ); ?></i><br/>
+        <i><?php echo esc_html__( 'If disabled, by default the referral will only be tracked if the customer applys the affiliates coupon when placing their order.', 'woo-coupon-usage' ); ?></i><br/>
+
+        <!-- ********** Referral Cookie Settings ********** -->
+        <br/><hr/>
+
+        <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Referral Cookie Settings', 'woo-coupon-usage' ); ?>:</h3>
+
+        <p><?php echo esc_html__( 'If preferred you can disable cookies completely in the', 'woo-coupon-usage' ); ?>
+          <a href="#" onclick="wcusage_go_to_settings('#tab-debug', '#wcusage_field_store_cookies_p');">
+            <?php echo esc_html__( 'debug settings tab', 'woo-coupon-usage' ); ?></a>.
+        </p><br/>
+
+        <div class="wcu-referral-cookies">
+
+          <!-- DESC -->
+          <?php echo wcusage_setting_number_option('wcusage_urls_cookie_days', '30', esc_html__( 'Store cookie for how many days?', 'woo-coupon-usage' ), '0px'); ?>
+          <i><?php echo esc_html__( 'This is how many days after someone clicks on a referral link, that the cookie will be stored to automatically apply the coupon.', 'woo-coupon-usage' ); ?></i><br/>
+          <i><?php echo esc_html__( 'If for some reason the user deletes/removes the coupon manually from their cart, the cookie will also be removed.', 'woo-coupon-usage' ); ?></i><br/>
+
+          <br/>
+
+          <?php echo wcusage_setting_toggle_option('wcusage_remove_cookies', 0, 'Remove all tracking cookies when customer places an order.', '0px'); ?>
+          <i><?php echo esc_html__( 'If enabled, the tracking cookies will be deleted from the customers browser, once the order is completed.', 'woo-coupon-usage' ); ?></i><br/>
+          <i><?php echo esc_html__( 'They would need to click the referral link again for coupons to be automatically applied again, or future orders to be awarded to the affiliate.', 'woo-coupon-usage' ); ?></i><br/>
+
+        </div>
 
         <!-- ********** Click Log ********** -->
         <br/><hr/>
@@ -230,7 +304,7 @@ function wcusage_field_cb_urls( $args )
           jQuery(function() {
             jQuery('#wcusage_field_src_prefix').on('input', function(){
             var source_name = jQuery(this).attr('name');
-            jQuery('#output-src').text( jQuery(this).val() );
+            jQuery('.link-outputsrc').text( jQuery(this).val() );
             });
           });
           </script>
@@ -240,7 +314,14 @@ function wcusage_field_cb_urls( $args )
           echo wcusage_setting_text_option('wcusage_field_src_prefix', 'src', esc_html__( 'Campaign URL variable', 'woo-coupon-usage' ), '30px');
           ?>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'Set the referral URL variable that will be used to identify the campaign.', 'woo-coupon-usage' ); ?></i><br/>
-          <i style="margin-left: 30px;"><?php echo esc_html__( 'Example URL with campaign "twitter" would be', 'woo-coupon-usage' ); ?>: <?php echo esc_url(get_home_url()) ; ?>/?<span id="output-prefix"><?php echo esc_html($wcusage_urls_prefix); ?></span>=example10&<span id="output-src" style="font-weight: bold;"><?php echo esc_html($wcusage_src_prefix); ?></span>=twitter</i><br/>
+          
+          <br/>
+          
+          <p style="margin-left: 30px;"><?php echo esc_html__( 'Example URL with campaign "twitter" would be', 'woo-coupon-usage' ); ?>:<br/>
+          <span style="font-weight: bold;">
+            <span class="link-output-url"><?php echo esc_url($wcusage_field_default_ref_url); ?></span>/?<span class="link-output-prefix"><?php echo esc_html($wcusage_urls_prefix); ?></span>=example&<span class="link-output-src"><?php echo esc_html($wcusage_src_prefix); ?></span>=twitter
+          </span>
+          </p>
 
           <!-- ********** QR Codes ********** -->
 
@@ -258,6 +339,12 @@ function wcusage_field_cb_urls( $args )
           <h3 id="wcu-setting-header-referral-directlinks">
             <span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Direct Link Tracking', 'woo-coupon-usage' ); ?><?php if( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?>:
           </h3>
+
+          <?php
+          $wcusage_field_store_cookies_domains = wcusage_get_setting_value('wcusage_field_store_cookies_domains', '1');
+          if(!$wcusage_field_store_cookies_domains) { ?>
+            <p><strong><?php echo esc_html__( 'Note:', 'woo-coupon-usage' ); ?></strong> <?php echo esc_html__( 'This feature is disabled because you have disabled the cookie storage.', 'woo-coupon-usage' ); ?></p>
+          <?php } ?>
 
       		<?php echo wcusage_setting_toggle_option('wcusage_field_enable_directlinks', 0, 'Enable Direct Link Tracking', '0px'); ?>
           <i><?php echo esc_html__( 'With this enabled, affiliate users can link their website domain to their coupon.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-direct-link-tracking" target="_blank">Learn More</a>.</i><br/>
@@ -369,7 +456,7 @@ function wcusage_field_cb_urls( $args )
             echo wcusage_setting_toggle_option('wcusage_field_show_social_facebook', 1, 'Facebook', '30px');
 
             // Twitter
-            echo wcusage_setting_toggle_option('wcusage_field_show_social_twitter', 1, 'Twitter', '30px');
+            echo wcusage_setting_toggle_option('wcusage_field_show_social_twitter', 1, 'X (Twitter)', '30px');
 
             // WhatsApp
             echo wcusage_setting_toggle_option('wcusage_field_show_social_whatsapp', 0, 'WhatsApp (Mobile Only)', '30px');

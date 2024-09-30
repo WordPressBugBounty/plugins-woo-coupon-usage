@@ -26,14 +26,23 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         
         $column['roles'] = esc_html__('Role', 'woo-coupon-usage');
 
-        $column['usage'] = esc_html__( 'Total Referrals', 'woo-coupon-usage');
-
         $all_stats = wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_meta', '1');
+        $wcusage_field_hide_all_time = wcusage_get_setting_value('wcusage_field_hide_all_time', '0');
+        if($wcusage_field_hide_all_time) {
+            $all_stats = 0;
+        }
+
         if($all_stats) {
+
+            $column['usage'] = esc_html__( 'Total Referrals', 'woo-coupon-usage');
 
             $column['sales'] = esc_html__( 'Total Sales', 'woo-coupon-usage');
 
             $column['commission'] = esc_html__( 'Total Commission', 'woo-coupon-usage');
+
+        } else {
+
+            $column['usage'] = esc_html__( 'Total Coupon Usage', 'woo-coupon-usage');
 
         }
 
@@ -64,6 +73,59 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         return $column;
 
 	}
+
+    // Add dropdown for filtering by role
+    function extra_tablenav( $which ) {
+        if ( $which == "top" ) {
+            $roles = get_editable_roles();
+            
+            $current_role = '';
+            if(isset($_POST['filter_role'])) {
+                $current_role = sanitize_text_field($_POST['role']);
+            } else {
+                if(isset($_GET['role'])) {
+                    $current_role = $_GET['role'];
+                }   
+            }
+
+            // Move all roles with "coupon_affiliate" prefix to the top of the list
+            $roles = array_merge(
+                array_filter($roles, function($role) {
+                    return strpos($role, 'coupon_affiliate') === 0;
+                }, ARRAY_FILTER_USE_KEY),
+                array_filter($roles, function($role) {
+                    return strpos($role, 'coupon_affiliate') !== 0;
+                }, ARRAY_FILTER_USE_KEY)
+            );
+
+            // Add "(Group)" to the start of the name if role key starts with "coupon_affiliate"
+            foreach ($roles as $role => $details) {
+                if (strpos($role, 'coupon_affiliate') === 0) {
+                    $roles[$role]['name'] = '(Group) ' . $details['name'];
+                }
+            }
+            ?>
+            <div class="alignleft actions">
+                    <?php
+                    // Retain other $_GET parameters in the form submission (like the page identifier)
+                    foreach ($_GET as $key => $value) {
+                        if ($key !== 'role' && $key !== 'filter_role') {
+                            echo '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '">';
+                        }
+                    }
+                    ?>
+                    <select name="role">
+                        <option value=""><?php esc_html_e('All Groups & Roles', 'woo-coupon-usage'); ?></option>
+                        <?php foreach ($roles as $role => $details) { ?>
+                            <option value="<?php echo esc_attr($role); ?>" <?php selected($role, $current_role); ?>><?php echo esc_html($details['name']); ?></option>
+                        <?php } ?>
+                    </select>
+                    <input type="submit" name="filter_role" id="post-query-submit" class="button" value="<?php esc_html_e('Filter', 'woo-coupon-usage'); ?>">
+               
+            </div>
+            <?php
+        }
+    }
 	
     function column_cb($item) {
         return sprintf(
@@ -97,8 +159,17 @@ class WC_Coupon_Users_Table extends WP_List_Table {
 
         $search_query = isset($_POST['s']) ? trim($_POST['s']) : '';
         $search_query = sanitize_text_field($search_query);
+
+        $role = '';
+        if(isset($_POST['filter_role'])) {
+            $role = sanitize_text_field($_POST['role']);
+        } else {
+            if(isset($_GET['role'])) {
+                $role = $_GET['role'];
+            }
+        }
         
-        $users = $this->get_coupon_users( $search_query );
+        $users = $this->get_coupon_users( $search_query, $role );
     
         $total_items = count( $users );
         $this->set_pagination_args( array(
@@ -158,8 +229,8 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         }
     }
 
-    function get_coupon_users($search_query = '') {
-        return wcusage_get_coupon_users($search_query);
+    function get_coupon_users($search_query = '', $role = '') {
+        return wcusage_get_coupon_users($search_query, $role);
     }
     
 	function column_default( $item, $column_name ) {
@@ -171,7 +242,8 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         $usage = 0;
         foreach ($coupons as $coupon) {
             $all_stats = wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_meta', '1');
-            if($all_stats && isset($wcu_alltime_stats)) {
+            $wcusage_hide_all_time = wcusage_get_setting_value('wcusage_field_hide_all_time', '0');
+            if($all_stats && isset($wcu_alltime_stats) && !$wcusage_hide_all_time) {
                 $usage = $wcu_alltime_stats['total_count'];
             }
             if(!$usage) {

@@ -595,9 +595,6 @@ jQuery( document ).ready(function() {
     if ( wcu_fs()->can_use_premium_code() ) {
         ?>
   <?php 
-        echo wcusage_js_settings_tab_toggle( '.wcusage_field_bonuses_enable', '', '#tab-bonuses' );
-        ?>
-  <?php 
         echo wcusage_admin_settings_tab_button(
             "tab-bonuses",
             esc_html__( "Bonuses", "woo-coupon-usage" ),
@@ -855,9 +852,8 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
       <div style="transform: scale(0.8); -webkit-transform-origin-x: 0;">
 
         <div>
-          <div id="wcu-number-settings-save-toggle">
           <strong>Settings not saving automatically?</strong>
-            <?php 
+          <?php 
         echo wcusage_setting_toggle_option(
             'wcusage_field_settings_legacy',
             0,
@@ -865,11 +861,10 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
             '0px'
         );
         ?>
-            <i><?php 
+          <i><?php 
         echo esc_html__( 'This will disable automatic ajax saving, and instead will enable the "Save Settings" button, and you will save all settings at once.', 'woo-coupon-usage' );
         ?></i>
-            <br/><br/>
-          </div>
+          <br/><br/>
         </div>
 
         <script>
@@ -1773,6 +1768,33 @@ if ( !function_exists( 'wcu_admin_settings_showhide_toggle' ) ) {
     }
 
 }
+/*
+* Admin FAQ Toggle
+*/
+function wcusage_admin_faq_toggle(  $id, $class, $title  ) {
+    ?>
+  <?php 
+    echo wcu_admin_settings_showhide_toggle(
+        $id,
+        $class,
+        "Show",
+        "Hide"
+    );
+    ?>
+  <p><span class="dashicons dashicons-info" style="margin-top: 5px;"></span>
+  <?php 
+    echo esc_html( $title );
+    ?>
+  <button class="wcu-showhide-button" type="button" id="<?php 
+    echo esc_attr( $id );
+    ?>">
+  <?php 
+    echo esc_html__( 'Show', 'woo-coupon-usage' );
+    ?> <span class='fa-solid fa-arrow-down'></span>
+  </button></p>
+  <?php 
+}
+
 /**
  * Function to show custom tooltip
  *

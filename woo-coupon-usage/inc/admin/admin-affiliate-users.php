@@ -13,13 +13,25 @@ function wcusage_filter_users_by_affiliates_message($which) {
     return;
   }
 
+  if( !wcusage_check_admin_access() || !isset($_POST['unlink_the_affiliate'])) {
+    return;
+  }
+
   if(isset($_POST['_wpnonce2'])) {
+
     if ( ! wp_verify_nonce( $_POST['_wpnonce2'], 'admin_unlink_affiliate' ) ) {
       wp_die( 'Security check' );
     }
+
     $couponid = $_POST['wcu-id'];
-    wcusage_coupon_affiliate_unlink( $couponid );
+
+    if($couponid) {
+      wcusage_coupon_affiliate_unlink( $couponid );
+    }
+
   }
+
+
 
 }
 add_action('admin_head', 'wcusage_filter_users_by_affiliates_message');
@@ -55,9 +67,7 @@ add_action( 'load-users.php', function() {
 function wcusage_filter_users_custom_button($which) {
   ?>
     <script>
-    jQuery(jQuery(".wrap .wcusage-settings-button")[0]).after('
-    <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New Affiliate</a><a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_affiliates')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Manage Affiliates</a>
-    ');
+    jQuery(jQuery(".wrap .wcusage-settings-button")[0]).after('<a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New Affiliate</a><a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_affiliates')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Manage Affiliates</a>');
     </script>
   <?php
 }
@@ -111,7 +121,7 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
               $dash_page_id = wcusage_get_mla_shortcode_page_id();
               $dash_page = get_page_link($dash_page_id);
               $user_info = get_userdata($user_id);
-              $theoutput = '<a href="'.$dash_page.'?user='.$user_info->user_login.'" title="View MLA Dashboard" target="_blank">MLA <span class="dashicons dashicons-external"></span></a>';
+              $theoutput = '<a href="'.esc_url($dash_page).'?user='.esc_attr($user_info->user_login).'" title="View MLA Dashboard" target="_blank">MLA <span class="dashicons dashicons-external"></span></a>';
             }
             return $theoutput;
          case 'affiliatestorecredit':
@@ -160,7 +170,7 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
 
   $wcusage_tracking_enable = wcusage_get_setting_value('wcusage_field_tracking_enable', 1);
   if( $wcusage_tracking_enable && wcu_fs()->can_use_premium_code() ) {
-    $commission_message = "<strong>" . esc_html__( 'Unpaid Commission', 'woo-coupon-usage' ) . "</strong>: " . $unpaid_commission . "<br/>";
+    $commission_message = "<strong>" . esc_html__( 'Unpaid Commission', 'woo-coupon-usage' ) . "</strong>: " . wp_kses_post($unpaid_commission) . "<br/>";
   } else {
     $commission_message = "";
   }
@@ -168,8 +178,8 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
   if($user_info) {
     $unlink_message = '<form method="post" id="unlink_affiliate" style="display: inline;">'
     . wp_nonce_field( 'admin_unlink_affiliate', '_wpnonce2' )
-    . '<input type="text" id="wcu-id" name="wcu-id" value="'.$couponid.'" style="display: none;">
-    <button href="#!" onClick="'."return confirm('Unassign affiliate user &#8220;".$user_info->user_login."&#8220; from the coupon code &#8220;".$coupon_code."&#8220;? This will not delete the coupon or user, it will simply remove them from the coupon, so they can no longer gain commission or view the affiliate dashboard for it.');".'"
+    . '<input type="text" id="wcu-id" name="wcu-id" value="'.esc_attr($couponid).'" style="display: none;">
+    <button href="#!" onClick="'."return confirm('Unassign affiliate user &#8220;".esc_attr($user_info->user_login)."&#8220; from the coupon code &#8220;".esc_html($coupon_code)."&#8220;? This will not delete the coupon or user, it will simply remove them from the coupon, so they can no longer gain commission or view the affiliate dashboard for it.');".'"
     type="submit" name="unlink_the_affiliate" class="wcu-affiliate-tooltip-unlink-button">Unassign
     </button>
     </form>';
@@ -178,17 +188,17 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
   }
 
   $coupon_code_linked = "<span class='wcusage-users-affiliate-column'>"
-  ."<div class='custom-tooltip'><a href='javascript:void(0);' style='pointer-events:visible;cursor:pointer;color:darkblue;'>".$coupon_code."</a> <span class='dashicons dashicons-info'
+  ."<div class='custom-tooltip'><a href='javascript:void(0);' style='pointer-events:visible;cursor:pointer;color:darkblue;'>".esc_html($coupon_code)."</a> <span class='dashicons dashicons-info'
   style='color: green;font-size: 15px;margin-top: 4px;margin-left: -4px;'></span>
       <div class='tooltip-content'>
       <span style='font-size: 12px;'>"
-      . $commission_message
-      . "<a href='".$dashboard_url."' target='_blank' class='wcu-affiliate-tooltip-dashboard-button' style='text-decoration: underline;'>"
+      . wp_kses_post($commission_message)
+      . "<a href='".esc_url($dashboard_url)."' target='_blank' class='wcu-affiliate-tooltip-dashboard-button' style='text-decoration: underline;'>"
       . esc_html__( 'View Affiliate Dashboard', 'woo-coupon-usage' ) . "<span class='dashicons dashicons-external' style='text-decoration: none;'></span>"
       . "</a>";
       if($wcusage_field_urls_enable) {
         $coupon_code_linked .= '<div class="wcusage-copyable-link" style="margin: 10px 0;"><strong>' . esc_html__( 'Default Referral Link', 'woo-coupon-usage' ) . ':</strong><br/>'
-        . '<input type="text" id="wcusageLink'.$coupon_code.'" value="'.$link.'"
+        . '<input type="text" id="wcusageLink'.esc_attr($coupon_code).'" value="'.esc_url($link).'"
         style="max-width: 125px;width: 75%;max-height: 24px;min-height: 24px;font-size: 10px;" readonly>'
         . '<button type="button" class="wcusage-copy-link-button" style="max-height: 24px;min-height: 24px;"
         title="'.esc_html__( 'Copy Link', 'woo-coupon-usage' ).'"><i class="fa-regular fa-copy"></i></button>'
@@ -196,9 +206,9 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
       } else {
         $coupon_code_linked .= '<br/>';
       }
-      $coupon_code_linked .= "<a href='".get_admin_url()."post.php?post=".$couponid."&action=edit'
+      $coupon_code_linked .= "<a href='".esc_url(get_admin_url())."post.php?post=".esc_attr($couponid)."&action=edit'
       target='_blank' class='wcu-affiliate-tooltip-edit-button' style='text-decoration: underline;'>" . esc_html__( 'Edit Coupon', 'woo-coupon-usage' ) . "</a> - "
-      . $unlink_message
+      . wp_kses_post($unlink_message)
       . "</span>
       </div>
   </div>";
@@ -251,8 +261,8 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
     }
 
     $info = "<span class='wcusage-users-affiliate-column'>"
-    ."<div class='custom-tooltip'><a href='" . admin_url( 'user-edit.php?user_id=' . $user_id ) . "'
-    style='pointer-events:visible;cursor:pointer;color:darkblue;'>".$username."</a> <span class='dashicons dashicons-info'
+    ."<div class='custom-tooltip'><a href='" . esc_url(admin_url( 'user-edit.php?user_id=' . $user_id )) . "'
+    style='pointer-events:visible;cursor:pointer;color:darkblue;'>".esc_html($username)."</a> <span class='dashicons dashicons-info'
     style='color: green;font-size: 15px;margin-top: 4px;margin-left: -4px;'></span>
         <div class='tooltip-content' style='width: auto;max-width: 250px;min-width:125px;'>";
 

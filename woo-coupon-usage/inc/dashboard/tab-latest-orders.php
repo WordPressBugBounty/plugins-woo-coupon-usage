@@ -167,6 +167,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
             $user_id = get_current_user_id();
         }
         $option_show_orderid = wcusage_get_setting_value( 'wcusage_field_orderid', '0' );
+        $wcusage_field_orderid_click = wcusage_get_setting_value( 'wcusage_field_orderid_click', '0' );
         $option_show_status = wcusage_get_setting_value( 'wcusage_field_status', '1' );
         $option_show_ordercountry = wcusage_get_setting_value( 'wcusage_field_ordercountry', '0' );
         $option_show_ordercity = wcusage_get_setting_value( 'wcusage_field_ordercity', '0' );
@@ -722,7 +723,13 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         // Order ID
                         if ( $option_show_orderid ) {
                             echo "<td class='wcuTableCell'>";
+                            if ( $wcusage_field_orderid_click && wcusage_check_admin_access() ) {
+                                echo "<a href='" . esc_url( admin_url( 'post.php?post=' . $orderid . '&action=edit' ) ) . "' target='_blank' title='" . esc_html__( 'View Order in Backend (Admin Only)', 'woo-coupon-usage' ) . "'>";
+                            }
                             echo "#" . esc_html( $orderid );
+                            if ( $wcusage_field_orderid_click && wcusage_check_admin_access() ) {
+                                echo "</a>";
+                            }
                             echo "</td>";
                             $col1 = true;
                         }

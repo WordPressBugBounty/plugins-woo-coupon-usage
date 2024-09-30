@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: Easily create an affiliate program for WooCommerce, based on coupons. Track affiliate commission, coupon usage statistics, referral URLs, and more.
-* Version: 5.15.3
+* Version: 5.16.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -13,7 +13,7 @@
 * Requires Plugins: woocommerce
 *
 * WC requires at least: 3.7
-* WC tested up to: 9.2.3
+* WC tested up to: 9.3.3
 *
 */
 if ( !defined( 'ABSPATH' ) ) {
@@ -192,6 +192,36 @@ if ( function_exists( 'wcu_fs' ) ) {
     }
 
     add_action( 'admin_enqueue_scripts', 'wcusage_include_admin_styles' );
+    /**
+     * Enqueue custom JavaScript for confirming coupon title change.
+     */
+    function enqueue_coupon_title_change_confirmation() {
+        global $post;
+        if ( $post && 'shop_coupon' === $post->post_type ) {
+            // If coupon meta wcu_select_coupon_user exists
+            $coupon_user = get_post_meta( $post->ID, 'wcu_select_coupon_user', true );
+            if ( !$coupon_user ) {
+                return;
+            }
+            // Enqueue the script only on coupon edit page
+            wp_enqueue_script(
+                'coupon-title-change-confirmation',
+                plugin_dir_url( __FILE__ ) . 'js/coupon-title-change-confirmation.js',
+                // Make sure to adjust the path if needed.
+                array('jquery'),
+                // Add jQuery as a dependency
+                false,
+                true
+            );
+            // Pass the current coupon title to the JavaScript.
+            wp_localize_script( 'coupon-title-change-confirmation', 'couponTitleData', array(
+                'currentTitle'   => esc_js( $post->post_title ),
+                'warningMessage' => __( 'Changing the coupon name may cause the affiliate dashboard statistics to be reset. Are you sure you want to proceed?', 'woo-coupon-usage' ),
+            ) );
+        }
+    }
+
+    add_action( 'admin_enqueue_scripts', 'enqueue_coupon_title_change_confirmation' );
     /*** Include Files ***/
     // Admin Settings
     include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/admin-options.php';

@@ -24,7 +24,7 @@ function wcusage_field_cb_custom_tabs( $args )
 
   <hr/>
 
-	<p>- <?php echo esc_html__( 'In this section, you can create your own custom tabs to show on the affiliate dashboard. Shortcode usage supported.', 'woo-coupon-usage' ); ?></p>
+    <p><?php echo esc_html__( 'In this section, you can create your own custom tabs to show on the affiliate dashboard. Shortcode usage supported.', 'woo-coupon-usage' ); ?></p>
 
   <br/><hr/>
 
@@ -58,11 +58,77 @@ function wcusage_field_cb_custom_tabs( $args )
         $wcusage_field_custom_tabs_content = "";
     }
     echo ' <div class="input_fields_wrap"></div>';
+
     echo '<strong>Tab Name:</strong><br/>';
     echo '<input type="text" id="wcusage_field_custom_tabs" checktype="customnumber" custom1="'.esc_attr($i).'" custom2="name" name="wcusage_options[wcusage_field_custom_tabs]['.esc_attr($i).'][name]" value="'.$wcusage_field_custom_tab.'">';
+    echo '<br/><i>' . esc_html__('The name of the tab button.', 'woo-coupon-usage') . '</i>';
+
     echo '<br/><br/>';
+
     echo '<strong>Tab Header:</strong><br/>';
     echo '<input type="text" id="wcusage_field_custom_tabs" checktype="customnumber" custom1="'.esc_attr($i).'" custom2="header" name="wcusage_options[wcusage_field_custom_tabs]['.esc_attr($i).'][header]" value="'.$wcusage_field_custom_tab_header.'">';
+    echo '<br/><i>' . esc_html__('The header text displayed at the top of the tab content.', 'woo-coupon-usage') . '</i>';
+    ?>
+
+    <br/><br/>
+
+    <!-- Select a user role: multi select -->
+    <p class="creative-type-user-role">
+      <label for="user_role"><strong><?php echo esc_html__('Limit to certain user roles & groups?', 'woo-coupon-usage'); ?></strong>
+    </label>
+
+      <br/>
+
+      <!-- User Role Select -->
+      <span class="payouts-role-select-wrapper">
+
+        <span style="height: 50px; width: 250px; overflow-y: auto;
+        display: block; border: 1px solid #ddd; padding: 10px;">
+
+        <?php
+        $thisid = 'wcusage_field_custom_tabs_roles_'.$i;
+        $roles = get_editable_roles();
+        // Re-order with all those containing "coupon_affiliate" at the start
+        $roles2 = array();
+        foreach ($roles as $key => $role) {
+          if (strpos($key, 'coupon_affiliate') !== false) {
+            $roles2[$key] = $role;
+            unset($roles[$key]);
+          }
+        }
+        $roles2 = array_merge($roles2, $roles);
+        foreach ($roles2 as $key => $role) {
+
+          $role_name = $role['name'];
+          if (strpos($key, 'coupon_affiliate') !== false) {
+            $role_name = '(Group) '.$role_name;
+          }
+          $checked = '';
+          if(isset($options[$thisid][$key])) {
+            $checked = 'checked';
+          }
+          
+          echo '<span id="'.esc_attr($thisid).'">
+          <input type="checkbox" checktype="multi"
+          checktypekey="'.esc_attr($key).'"
+          customid="'.esc_attr($thisid).'"
+          name="wcusage_options['.esc_attr($thisid).']['.esc_attr($key).']"
+          '.esc_attr($checked).'> '.esc_attr($role_name).'</span><br/>';
+
+        }
+        ?>
+
+        </span>
+
+      </span>
+
+      <i><?php echo esc_html__('The tab will only be visible to affiliates with any of the selected user roles.', 'woo-coupon-usage'); ?></i>
+      <br/>
+      <i><?php echo esc_html__('If no roles are selected, the tab will be visible to all affiliates.', 'woo-coupon-usage'); ?></i>
+
+    </p>
+
+    <?php
     echo '<br/><br/>';
     $settingstabscontent = array(
         'wpautop' => true,

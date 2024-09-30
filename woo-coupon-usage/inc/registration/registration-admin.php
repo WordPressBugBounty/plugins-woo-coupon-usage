@@ -64,7 +64,12 @@ function wcusage_admin_registrations_page_html() {
                         'id' => $postid,
                     ) );
                     // Custom Action
-                    do_action( 'wcusage_hook_registration_accepted', $userid, $coupon_code );
+                    do_action(
+                        'wcusage_hook_registration_accepted',
+                        $userid,
+                        $coupon_code,
+                        $type
+                    );
                 } else {
                     // Show error if user already exists
                     echo "<div class='notice notice-error is-dismissible' style='position: absolute; width: 75%;'><p>" . esc_html__( 'Coupon code already exists: ', 'woo-coupon-usage' ) . esc_html( $coupon_code ) . "</p></div>";
@@ -613,6 +618,47 @@ function wcusage_admin_new_registration_page() {
         <!-- Coupon Type -->
         <?php 
     $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '0' );
+    ?>
+
+        <!-- Affiliate Group -->
+        <?php 
+    // Loop through user roles that start with "coupon_affiliate"
+    $affiliate_roles = array();
+    $all_roles = wp_roles()->roles;
+    foreach ( $all_roles as $key => $role ) {
+        if ( strpos( $key, 'coupon_affiliate' ) === 0 ) {
+            $affiliate_roles[] = $key;
+        }
+    }
+    if ( $affiliate_roles && count( $affiliate_roles ) > 1 ) {
+        ?>
+          <tr>
+            <th scope="row"><label for="wcu-input-role"><?php 
+        echo esc_html__( 'Affiliate Group', 'woo-coupon-usage' );
+        ?></label></th>
+            <td>
+                <select id="wcu-input-role" name="wcu-input-role">
+                <option value=""><?php 
+        echo esc_html__( '- Default -', 'woo-coupon-usage' );
+        ?></option>
+                <?php 
+        foreach ( $affiliate_roles as $key => $role ) {
+            $role_name = $all_roles[$role]['name'];
+            ?>
+                  <option value="<?php 
+            echo $role;
+            ?>"><?php 
+            echo $role_name;
+            ?></option>
+                  <?php 
+        }
+        ?>
+                </select>
+                <br/><i style="font-size: 10px;">Select a custom group to assign the user to. Keep as default to use the normal settings.</i>
+              </td>
+              </tr>
+          <?php 
+    }
     ?>
 
         <tr>

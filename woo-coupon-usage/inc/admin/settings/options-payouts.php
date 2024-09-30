@@ -19,20 +19,6 @@ function wcusage_field_cb_payouts( $args )
 
   <hr/>
 
-	<p>- <?php echo esc_html__( 'When an order is completed using a users coupon, the commission will be added to the affiliate account assigned to that coupon as "unpaid commission".', 'woo-coupon-usage' ); ?></p>
-
-  <p>- <?php echo esc_html__( 'If an order is refunded then the commission will be removed from the users account.', 'woo-coupon-usage' ); ?></p>
-
-  <p>- <?php echo esc_html__( 'You can set a number of days before affiliates earn their commission. In this case the orders will be checked daily and commission distributed.', 'woo-coupon-usage' ); ?></p>
-
-  <p>- <?php echo esc_html__( 'You can edit a users commission manually by editting the user.', 'woo-coupon-usage' ); ?></p>
-
-  <p>- <?php echo esc_html__( 'Note: "Unpaid Commission" will start from "0" and will only start tracking after you installed the "PRO" version and activated the payouts functionality.', 'woo-coupon-usage' ); ?></p>
-
-	<br/>
-
-  <hr/>
-
     <!-- Enable Payouts Features -->
     <?php echo wcusage_setting_toggle_option('wcusage_field_tracking_enable', 1, esc_html__( 'Enable Payouts Features', 'woo-coupon-usage' ), '0px'); ?>
 
@@ -59,7 +45,46 @@ function wcusage_field_cb_payouts( $args )
       <i><?php echo esc_html__( 'This will show a "Payouts" tab on the coupon usage/info page, so the affiliate can view their unpaid commission, and request payouts.', 'woo-coupon-usage' ); ?></i><br/>
       <i><?php echo esc_html__( 'For this to show, a user/affiliate account must be assigned to that coupon. The tab is only shown to this user.', 'woo-coupon-usage' ); ?></i><br/>
 
-  		<br/>
+  		<br/><br/>
+
+      <?php if ( wcu_fs()->can_use_premium_code() ) { ?>
+      <!-- FAQ: How to payouts work? -->
+      <div class="wcu-admin-faq">
+
+        <?php echo wcusage_admin_faq_toggle(
+        "wcu_show_section_qna_manage_payouts",
+        "wcu_qna_manage_payouts",
+        "FAQ: How do the commission payouts work?");
+        ?>
+
+        <div class="wcu-admin-faq-content wcu_qna_manage_payouts" id="wcu_qna_manage_payouts" style="display: none;">
+        <?php } ?>
+
+          <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'If an order is created using an affiliates coupon, then marked as completed, the commission will be added to the affiliate account as "unpaid commission".', 'woo-coupon-usage' ); ?><br/>
+          
+          <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'The affiliate can then request a payout for this commission in their affiliate dashboard, which will notify you. This can then be paid in the admin "Payouts" page.', 'woo-coupon-usage' ); ?><br/>
+
+          <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'There are also a variety of options available below to automate payout requests/payments, select your payout methods, and much more!', 'woo-coupon-usage' ); ?><br/>
+
+          <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'If an order is refunded then the commission will be removed from the users account.', 'woo-coupon-usage' ); ?><br/>
+
+          <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'Note: "Unpaid Commission" will start from "0" and will only start tracking after you installed the "PRO" version and activated the payouts functionality.', 'woo-coupon-usage' ); ?><br/>
+
+          <a href="https://couponaffiliates.com/docs/pro-payouts" target="_blank" class="button button-primary" style="margin-top: 10px;"><?php echo esc_html__( 'View Documentation', 'woo-coupon-usage' ); ?> <span class="fas fa-external-link-alt"></span></a>
+
+          <br/><br/>
+          
+          <?php if ( wcu_fs()->can_use_premium_code() ) { ?>
+          <strong><?php echo esc_html__( 'For more information, please watch the video below:', 'woo-coupon-usage' ); ?></strong>
+          <br/>
+          <div style="max-width: 720px;">
+          <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/837140385?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Commission Payouts"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+          </div>
+
+        </div>
+
+      </div>
+      <?php } ?>
 
       <hr/>
 
@@ -132,13 +157,20 @@ function wcusage_field_cb_payouts( $args )
           	<input type="hidden" value="0" id="wcusage_field_payoutschedule_freq" data-custom="custom" name="wcusage_options[wcusage_field_payoutschedule_freq]" >
           	<strong><label for="scales"><?php echo esc_html__( 'How often should payout requests be checked & submitted automatically?', 'woo-coupon-usage' ); ?></label></strong><br/>
           	<select name="wcusage_options[wcusage_field_payoutschedule_freq]" id="wcusage_field_payoutschedule_freq">
-          		<option value="monthly" <?php if($wcusage_field_payoutschedule_freq == "monthly") { ?>selected<?php } ?>><?php echo esc_html__( 'Monthly', 'woo-coupon-usage' ); ?></option>
-          		<option value="weekly" <?php if($wcusage_field_payoutschedule_freq == "weekly") { ?>selected<?php } ?>><?php echo esc_html__( 'Weekly', 'woo-coupon-usage' ); ?></option>
-              <option value="daily" <?php if($wcusage_field_payoutschedule_freq == "daily") { ?>selected<?php } ?>><?php echo esc_html__( 'Daily', 'woo-coupon-usage' ); ?></option>
-              <option value="quarterly" <?php if($wcusage_field_payoutschedule_freq == "quarterly") { ?>selected<?php } ?>><?php echo esc_html__( 'Quarterly', 'woo-coupon-usage' ); ?></option>
-            </select>
+              <?php $frequency_options = array('monthly', 'weekly', 'daily', 'quarterly'); ?>
+              <?php foreach ($frequency_options as $option) { ?>
+                <option value="<?php echo esc_attr($option); ?>" <?php if($wcusage_field_payoutschedule_freq == $option) { ?>selected<?php } ?>><?php echo ucfirst(esc_attr($option)); ?></option>           
+              <?php } ?>
+              </select>
           </p>
           <i><?php echo esc_html__( 'Payout requests will be scheduled to send on the first day of the selected schedule.', 'woo-coupon-usage' ); ?></i><br/>
+
+          <br/>
+
+          <!-- Per Payout Method Schedule -->
+          <?php echo wcusage_setting_toggle_option('wcusage_field_enable_payoutschedule_methods', 0, esc_html__( 'Enable to set a different schedule for each payout method', 'woo-coupon-usage' ), '0px'); ?>
+          <i><?php echo esc_html__( 'Enable this to set a different schedule for certain payout methods. If not set, it will still use the default schedule set above.', 'woo-coupon-usage' ); ?></i><br/>
+          <?php echo wcusage_setting_toggle('.wcusage_field_enable_payoutschedule_methods', '.wcusage_field_payouts_freq'); // Show or Hide ?>
 
           <br/>
 
@@ -154,7 +186,6 @@ function wcusage_field_cb_payouts( $args )
              <?php } ?>
           	</select>
           </p>
-
         </span>
 
         <br/><hr/>
@@ -205,11 +236,6 @@ function wcusage_field_cb_payouts( $args )
 
         <br/>
 
-        <?php echo wcusage_setting_user_role('wcusage_field_tr_payouts_paypal_role', "", "Available for user role:", "40px"); ?>
-        <i style="margin-left: 40px;"><?php echo esc_html__( 'If selected, this payout method will only be available for this user role.', 'woo-coupon-usage' ); ?></i><br/>
-
-    		<br/>
-
         <!-- Change Payment Method Label (Default: "Manual") -->
         <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypal_only', 'Manual', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
 
@@ -233,6 +259,27 @@ function wcusage_field_cb_payouts( $args )
 
         </span>
 
+        <!-- Frequency -->
+        <p class="wcusage_field_payouts_freq" style="margin-left: 40px;">
+
+          <br/>
+
+          <?php $wcusage_field_tr_payouts_paypal_freq = wcusage_get_setting_value('wcusage_field_tr_payouts_paypal_freq', ''); ?>
+          <input type="hidden" value="0" id="wcusage_field_tr_payouts_paypal_freq" data-custom="custom" name="wcusage_options[wcusage_field_tr_payouts_paypal_freq]" >
+          <strong><label for="scales"><?php echo esc_html__( 'Scheduled Payout Requests:', 'woo-coupon-usage' ); ?></label></strong><br/>
+          <select name="wcusage_options[wcusage_field_tr_payouts_paypal_freq]" id="wcusage_field_tr_payouts_paypal_freq">
+            <?php $frequency_options = array('monthly', 'weekly', 'daily', 'quarterly'); ?>
+            <option value="">- Default -</option>
+            <?php foreach ($frequency_options as $option) { ?>
+              <option value="<?php echo esc_attr($option); ?>" <?php if($wcusage_field_tr_payouts_paypal_freq == $option) { ?>selected<?php } ?>><?php echo ucfirst(esc_attr($option)); ?></option>           
+            <?php } ?>
+          </select>
+          <br/>
+            </p>
+
+        <!-- User Role -->
+        <?php do_action('wcusage_hook_payouts_user_role_select', 'wcusage_field_tr_payouts_paypal_role'); ?>
+
       </span>
 
       <!-- Enable Manual Payment Method #2 -->
@@ -245,13 +292,6 @@ function wcusage_field_cb_payouts( $args )
 
       <?php echo wcusage_setting_toggle('.wcusage_field_paypal2_enable', '.wcu-field-section-tr-payouts-paypal2'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-paypal2">
-
-        <br/>
-
-        <?php echo wcusage_setting_user_role('wcusage_field_tr_payouts_paypal2_role', "", "Available for user role:", "40px"); ?>
-        <i style="margin-left: 40px;"><?php echo esc_html__( 'If selected, this payout method will only be available for this user role.', 'woo-coupon-usage' ); ?></i><br/>
-
-        <br/>
 
         <!-- Change Payment Method Label (Default: "Manual") -->
         <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypal2_only', 'Manual', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
@@ -276,7 +316,28 @@ function wcusage_field_cb_payouts( $args )
 
         </span>
 
-      </span>
+        <!-- Frequency -->
+        <p class="wcusage_field_payouts_freq" style="margin-left: 40px;">
+
+          <br/>
+
+          <?php $wcusage_field_tr_payouts_paypal2_freq = wcusage_get_setting_value('wcusage_field_tr_payouts_paypal2_freq', ''); ?>
+          <input type="hidden" value="0" id="wcusage_field_tr_payouts_paypal2_freq" data-custom="custom" name="wcusage_options[wcusage_field_tr_payouts_paypal2_freq]" >
+          <strong><label for="scales"><?php echo esc_html__( 'Scheduled Payout Requests:', 'woo-coupon-usage' ); ?></label></strong><br/>
+          <select name="wcusage_options[wcusage_field_tr_payouts_paypal2_freq]" id="wcusage_field_tr_payouts_paypal2_freq">
+            <?php $frequency_options = array('monthly', 'weekly', 'daily', 'quarterly'); ?>
+            <option value="">- Default -</option>
+            <?php foreach ($frequency_options as $option) { ?>
+              <option value="<?php echo esc_attr($option); ?>" <?php if($wcusage_field_tr_payouts_paypal2_freq == $option) { ?>selected<?php } ?>><?php echo ucfirst(esc_attr($option)); ?></option>           
+            <?php } ?>
+          </select>
+          <br/>
+        </span>
+
+        <!-- User Role -->
+        <?php do_action('wcusage_hook_payouts_user_role_select', 'wcusage_field_tr_payouts_paypal2_role'); ?>
+
+      </p>
 
       <!-- Enable Direct Bank Transfer -->
       <div style="margin-bottom: 40px;"></div>
@@ -288,11 +349,6 @@ function wcusage_field_cb_payouts( $args )
 
       <?php echo wcusage_setting_toggle('.wcusage_field_banktransfer_enable', '.wcu-field-section-tr-payouts-banktransfer'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-banktransfer">
-
-        <br/>
-
-        <?php echo wcusage_setting_user_role('wcusage_field_tr_payouts_banktransfer_role', "", "Available for user role:", "40px"); ?>
-        <i style="margin-left: 40px;"><?php echo esc_html__( 'If selected, this payout method will only be available for this user role.', 'woo-coupon-usage' ); ?></i><br/>
 
         <br/>
 
@@ -374,6 +430,9 @@ function wcusage_field_cb_payouts( $args )
         });
         </script>
 
+        <!-- User Role -->
+        <?php do_action('wcusage_hook_payouts_user_role_select', 'wcusage_field_tr_payouts_banktransfer_role'); ?>
+
       </span>
 
       <!-- Enable PayPal Payouts API -->
@@ -389,11 +448,6 @@ function wcusage_field_cb_payouts( $args )
 
       <?php echo wcusage_setting_toggle('.wcusage_field_paypalapi_enable', '.wcu-field-section-tr-payouts-paypalapi'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-paypalapi">
-
-        <br/>
-
-        <?php echo wcusage_setting_user_role('wcusage_field_tr_payouts_paypalapi_role', "", "Available for user role:", "40px"); ?>
-        <i style="margin-left: 40px;"><?php echo esc_html__( 'If selected, this payout method will only be available for this user role.', 'woo-coupon-usage' ); ?></i><br/>
 
         <br/>
 
@@ -477,6 +531,9 @@ function wcusage_field_cb_payouts( $args )
         </span>
 
         <div style="clear: both;"></div>
+        
+        <!-- User Role -->
+        <?php do_action('wcusage_hook_payouts_user_role_select', 'wcusage_field_tr_payouts_paypalapi_role'); ?>
 
       </span>
 
@@ -496,11 +553,6 @@ function wcusage_field_cb_payouts( $args )
 
       <?php echo wcusage_setting_toggle('.wcusage_field_stripeapi_enable', '.wcu-field-section-tr-payouts-stripeapi'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-stripeapi">
-
-        <br/>
-
-        <?php echo wcusage_setting_user_role('wcusage_field_tr_payouts_stripeapi_role', "", "Available for user role:", "40px"); ?>
-        <i style="margin-left: 40px;"><?php echo esc_html__( 'If selected, this payout method will only be available for this user role.', 'woo-coupon-usage' ); ?></i><br/>
 
         <br/>
 
@@ -583,6 +635,9 @@ function wcusage_field_cb_payouts( $args )
 
         <div style="clear: both;"></div>
 
+        <!-- User Role -->
+        <?php do_action('wcusage_hook_payouts_user_role_select', 'wcusage_field_tr_payouts_stripeapi_role'); ?>
+
       </span>
 
       <!-- Enable Store Credit -->
@@ -596,11 +651,6 @@ function wcusage_field_cb_payouts( $args )
 
       <?php echo wcusage_setting_toggle('.wcusage_field_storecredit_enable', '.wcu-field-section-tr-payouts-storecredit'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-storecredit">
-
-        <br/>
-
-        <?php echo wcusage_setting_user_role('wcusage_field_tr_payouts_storecredit_role', "", "Available for user role:", "40px"); ?>
-        <i style="margin-left: 40px;"><?php echo esc_html__( 'If selected, this payout method will only be available for this user role.', 'woo-coupon-usage' ); ?></i><br/>
 
         <br/>
 
@@ -829,6 +879,9 @@ function wcusage_field_cb_payouts( $args )
 
         </span>
 
+        <!-- User Role -->
+        <?php do_action('wcusage_hook_payouts_user_role_select', 'wcusage_field_tr_payouts_storecredit_role'); ?>
+
       </span>
 
       <div style="margin-bottom: 40px;"></div>
@@ -877,4 +930,106 @@ function wcusage_field_cb_payouts( $args )
 	</div>
 
  <?php
+}
+
+/*
+* Payouts User Role Select
+*/
+add_action('wcusage_hook_payouts_user_role_select', 'wcusage_payouts_user_role_select', 10, 1);
+function wcusage_payouts_user_role_select($thisid) {
+
+  $options = get_option('wcusage_options');
+
+  if(!empty($options[$thisid])) {
+    $current_roles = $options[$thisid];
+  } else {
+    $current_roles = '';
+  }
+  ?>
+  
+  <span style="margin-left: 40px;">
+
+  <!-- Toggle Option -->
+  <?php
+  if(empty($current_roles)) {    
+    $toggle_checked = 0;
+  } else {
+    $toggle_checked = 1;
+    $options1 = get_option('wcusage_options');
+    $options1[$thisid . '_toggle'] = 1;
+    update_option('wcusage_options', $options1);
+  }
+  echo wcusage_setting_toggle_option($thisid.'_toggle', $toggle_checked, esc_html__( 'Limit to certain user roles & groups?', 'woo-coupon-usage' ), '40px');
+  echo wcusage_setting_toggle('.'.$thisid.'_toggle', '.payouts-role-select-'.$thisid); // Show or Hide
+  ?>
+
+  <script>
+  jQuery( document ).ready(function() {
+    if(jQuery('.payouts-role-select-<?php echo esc_attr($thisid); ?> input[type="checkbox"]:checked').length > 0) {
+      jQuery('#<?php echo esc_attr($thisid); ?>_toggle_p label.switch').hide();
+    } else {
+      jQuery('#<?php echo esc_attr($thisid); ?>_toggle_p label.switch').show();
+    }
+    jQuery('.payouts-role-select-<?php echo esc_attr($thisid); ?> input[type="checkbox"]').change(function() {
+      if(jQuery('.payouts-role-select-<?php echo esc_attr($thisid); ?> input[type="checkbox"]:checked').length > 0) {
+        jQuery('#<?php echo esc_attr($thisid); ?>_toggle_p label.switch').hide();
+      } else {
+        jQuery('#<?php echo esc_attr($thisid); ?>_toggle_p label.switch').show();
+      }
+    });
+  });
+  </script>
+
+  <!-- User Role Select -->
+  <span class="payouts-role-select-<?php echo esc_attr($thisid); ?>">
+
+    <span style="height: 50px; width: 250px; overflow-y: auto;
+    display: block; margin-left: 40px; border: 1px solid #ddd; padding: 10px;">
+
+    <?php
+    $roles = get_editable_roles();
+    // Re-order with all those containing "coupon_affiliate" at the start
+    $roles2 = array();
+    foreach ($roles as $key => $role) {
+      if (strpos($key, 'coupon_affiliate') !== false) {
+        $roles2[$key] = $role;
+        unset($roles[$key]);
+      }
+    }
+    $roles2 = array_merge($roles2, $roles);
+    foreach ($roles2 as $key => $role) {
+      $name = 'wcusage_options['.$thisid.']['.$key.']';
+      $role_name = $role['name'];
+      if (strpos($key, 'coupon_affiliate') !== false) {
+        $role_name = '(Group) '.$role_name;
+      }
+      $checked = '';
+      if(isset($options[$thisid]) && is_array($options[$thisid])) {
+        if(isset($options[$thisid][$key])) {
+          $checked = 'checked';
+        }
+      } else {
+        if(isset($options[$thisid]) && $options[$thisid] == $key) {
+          $checked = 'checked';
+        }
+      }
+      echo '<span id="'.esc_attr($thisid).'">
+      <input type="checkbox" checktype="multi"
+      class="payouts-role payouts-role-'.esc_attr($key).' wcusage_field_'.esc_attr($thisid).'_role"
+      checktypekey="'.esc_attr($key).'"
+      customid="'.esc_attr($thisid).'"
+      name="'.esc_attr($name).'"
+      '.esc_attr($checked).'> '.esc_attr($role_name).'</span><br/>';
+    }
+    ?>
+
+    </span>
+
+  </span>
+
+  <i style="margin-left: 40px;"><?php echo esc_html__( 'If at-least 1 role is selected, this payout method will only be available for the selected user roles. If none are selected it will be available for all roles.', 'woo-coupon-usage' ); ?></i><br/>
+
+  </span>
+
+  <?php
 }

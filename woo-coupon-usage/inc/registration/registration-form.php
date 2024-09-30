@@ -105,6 +105,7 @@ if ( $wcusage_field_registration_enable ) {
                     $form_title = esc_html__( 'Register New Affiliate Account', 'woo-coupon-usage' );
                 }
                 ?>
+
       <p class="wcusage-register-form-title" style="font-size: 1.2em;"><strong><?php 
                 echo esc_html( $form_title );
                 ?>:</strong></p>
@@ -431,7 +432,8 @@ function wcusage_create_new_registration(
     $accept = "",
     $type = "",
     $info = "",
-    $message = ""
+    $message = "",
+    $role = ""
 ) {
     $the_user = get_user_by( 'login', $username );
     if ( $the_user ) {
@@ -464,7 +466,12 @@ function wcusage_create_new_registration(
                 $type
             );
             // Custom Action
-            do_action( 'wcusage_hook_registration_accepted', $userid, $couponcode );
+            do_action(
+                'wcusage_hook_registration_accepted',
+                $userid,
+                $couponcode,
+                $type
+            );
             $get_user = get_user_by( 'id', $userid );
             // Update MLA invite
             if ( function_exists( 'wcusage_install_mlainvite_data' ) ) {
@@ -475,7 +482,10 @@ function wcusage_create_new_registration(
                     1
                 );
             }
-            $setaffiliaterole = wcusage_set_registration_role( $userid );
+            if ( !$role ) {
+                // Set affiliate role
+                $setaffiliaterole = wcusage_set_registration_role( $userid );
+            }
         } else {
             // Send email to affiliate
             wcusage_email_affiliate_register( $email, $couponcode, $firstname );
@@ -506,8 +516,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
     $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
     $wcusage_registration_recaptcha_key = wcusage_get_setting_value( 'wcusage_registration_recaptcha_key', '' );
     $wcusage_registration_recaptcha_secret = wcusage_get_setting_value( 'wcusage_registration_recaptcha_secret', '' );
-    $recaptcha_default = ( $wcusage_registration_recaptcha_key ? '1' : '0' );
-    $enable_captcha = wcusage_get_setting_value( 'wcusage_registration_enable_captcha', $recaptcha_default );
+    $enable_captcha = wcusage_get_setting_value( 'wcusage_registration_enable_captcha', '' );
     $wcusage_field_registration_emailusername = wcusage_get_setting_value( 'wcusage_field_registration_emailusername', '0' );
     $username = "";
     $password = "";
@@ -552,6 +561,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
     $password = sanitize_text_field( $post_field_values['password'] );
     $password_confirm = sanitize_text_field( $post_field_values['password_confirm'] );
     $message = sanitize_text_field( $post_field_values['message'] );
+    $role = sanitize_text_field( $post_field_values['role'] );
     // Refills the fields if it failed to submit.
     $refillfields = "\r\n  <script>\r\n  jQuery( document ).ready(function() {\r\n    jQuery('#wcu-input-username').val('" . esc_html( $username ) . "');\r\n    jQuery('#wcu-input-email').val('" . esc_html( $email ) . "');\r\n    jQuery('#wcu-input-first-name').val('" . esc_html( $firstname ) . "');\r\n    jQuery('#wcu-input-last-name').val('" . esc_html( $lastname ) . "');\r\n    jQuery('#wcu-input-coupon').val('" . esc_html( $couponcode ) . "');\r\n    jQuery('#wcu-input-website').val('" . esc_html( $website ) . "');\r\n    jQuery('#wcu-input-type').val('" . esc_html( $type ) . "');\r\n    jQuery('#wcu-input-promote').val('" . esc_html( $promote ) . "');\r\n    jQuery('#wcu-input-referrer').val('" . esc_html( $referrer ) . "');\r\n  });\r\n  </script>\r\n  ";
     $captcha_checked = false;
@@ -582,9 +592,9 @@ function wcusage_post_submit_application(  $adminpost  ) {
                 }
                 global $wpdb;
                 $table_name = $wpdb->prefix . 'wcusage_register';
-                $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_name} WHERE couponcode = %s", $couponcode ) );
+                $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE couponcode = %s", $couponcode ) );
                 $thiscoupon = new WC_Coupon($couponcode);
-                if ( $wpdb->num_rows <= 0 && !$thiscoupon->is_valid() ) {
+                if ( $count <= 0 && !$thiscoupon->is_valid() ) {
                     if ( !isset( $_SESSION['wcu_registration_token'] ) || is_admin() ) {
                         // Add User If Admin Post
                         $user_id = "";
@@ -598,7 +608,8 @@ function wcusage_post_submit_application(  $adminpost  ) {
                                     $lastname,
                                     $couponcode,
                                     '',
-                                    $info
+                                    $info,
+                                    $role
                                 );
                                 $user_id = $new_affiliate_user['user_id'];
                             }
@@ -618,7 +629,8 @@ function wcusage_post_submit_application(  $adminpost  ) {
                             $accept,
                             $type,
                             $info,
-                            $message
+                            $message,
+                            $role
                         );
                         // Get MLA fields
                         $mla = "";
@@ -711,13 +723,14 @@ function wcusage_post_submit_application(  $adminpost  ) {
                         $acceptmessage = str_replace( "{username}", $username, $acceptmessage );
                         $acceptmessage = str_replace( "{coupon}", $couponcode, $acceptmessage );
                         // Display message on submit form
-                        echo "<p>" . wp_kses_post( $acceptmessage ) . "</p>";
+                        echo "<p style='margin-top: 20px;'>" . wp_kses_post( $acceptmessage ) . "</p>";
                     }
                 } else {
                     echo $refillfields;
-                    echo "<p style='font-weight: bold; color: red;'>" . sprintf( esc_html__( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ), $couponcode ) . "</p>";
+                    echo "<p style='margin-top: 20px; font-weight: bold; color: red;'>" . sprintf( esc_html__( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ), $couponcode ) . "</p>";
                 }
             }
+            // Session
             $_SESSION['wcu_registration_token'] = uniqid();
         } else {
             if ( isset( $_SESSION["wcu_registration_token"] ) ) {
@@ -725,7 +738,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
             }
         }
     } else {
-        echo "<p style='color: red; font-weight: bold;'>" . esc_html__( 'Please complete the reCAPTCHA.', 'woo-coupon-usage' ) . "</p>";
+        echo "<p style='color: red; font-weight: bold;'>" . esc_html__( 'Please complete the captcha.', 'woo-coupon-usage' ) . "</p>";
         echo $refillfields;
     }
 }
@@ -904,7 +917,8 @@ function wcusage_add_new_affiliate_user(
     $lastname,
     $couponcode,
     $website = "",
-    $info = ""
+    $info = "",
+    $role = ""
 ) {
     $wcusage_field_registration_accepted_role = wcusage_get_setting_value( 'wcusage_field_registration_accepted_role', 'coupon_affiliate' );
     $wcusage_register_role = wcusage_get_setting_value( 'wcusage_field_register_role', '1' );
@@ -917,22 +931,26 @@ function wcusage_add_new_affiliate_user(
         $new_password = wp_generate_password( 15, false );
         $password = $new_password;
     }
-    if ( $wcusage_register_role ) {
-        if ( !$wcusage_field_register_role_only_accept ) {
-            $userrole = $wcusage_field_registration_accepted_role;
-        } else {
-            $userrole = $wcusage_field_registration_pending_role;
-        }
-        if ( $userrole == 'administrator' || $userrole == 'editor' || $userrole == 'author' || $userrole == 'shop_manager' ) {
-            $userrole = 'subscriber';
-        }
-        if ( $role_object = get_role( $userrole ) ) {
-            if ( $role_object->has_cap( 'manage_options' ) ) {
+    if ( !$role ) {
+        if ( $wcusage_register_role ) {
+            if ( !$wcusage_field_register_role_only_accept ) {
+                $userrole = $wcusage_field_registration_accepted_role;
+            } else {
+                $userrole = $wcusage_field_registration_pending_role;
+            }
+            if ( $userrole == 'administrator' || $userrole == 'editor' || $userrole == 'author' || $userrole == 'shop_manager' ) {
                 $userrole = 'subscriber';
             }
+            if ( $role_object = get_role( $userrole ) ) {
+                if ( $role_object->has_cap( 'manage_options' ) ) {
+                    $userrole = 'subscriber';
+                }
+            }
+        } else {
+            $userrole = 'subscriber';
         }
     } else {
-        $userrole = 'subscriber';
+        $userrole = $role;
     }
     $userdata = array(
         'user_login'      => $username,
@@ -1004,6 +1022,7 @@ function wcusage_registration_form_post_get_fields(  $adminpost = 0  ) {
     $promote = "";
     $website = "";
     $type = "";
+    $role = "";
     $info = "";
     $message = "";
     if ( !is_user_logged_in() || $wcusage_registration_enable_admincan && wcusage_check_admin_access() || is_admin() || $adminpost ) {
@@ -1063,6 +1082,7 @@ function wcusage_registration_form_post_get_fields(  $adminpost = 0  ) {
     $return_array['website'] = $website;
     $return_array['type'] = $type;
     $return_array['info'] = $info;
+    $return_array['role'] = $role;
     $return_array['message'] = $message;
     return $return_array;
 }

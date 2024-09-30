@@ -1,10 +1,10 @@
-=== Coupon Affiliates - Affiliate Plugin for WooCommerce ===
+=== Coupon Affiliates – Affiliate Plugin for WooCommerce ===
 Contributors: ElliotVS, freemius, couponaffiliates, RelyWP
 Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliates woocommerce
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
-Tested up to: 6.6.1
-Stable tag: 5.15.3
+Tested up to: 6.6.2
+Stable tag: 5.16.0
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -239,6 +239,33 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 5.16.0 - 30th September 2024 =
+- New: (PRO) Added a new "Affiliate Groups" page to the admin area, to easily manage and add new affiliate groups.
+- Improvement: (PRO) When adding new affiliate users in the admin area, added a field to select an "Affiliate Group" to assign them to, if more than 1 affiliate group exists.
+- Improvement: (PRO) Changed the option to limit payout methods to certain user roles/groups to a multi-select option, so you can select more than one.
+- Improvement: (PRO) Changed the option to limit creatives to certain user roles/groups to a multi-select option, so you can select more than one.
+- Improvement: (PRO) Changed the option to limit bonuses to certain user roles/groups to a multi-select option, so you can select more than one.
+- Improvement: (PRO) Added an option to limit the custom affiliate dashboard tabs to certain user roles/groups.
+- Improvement: On the "Affiliate Users" admin page, added the option to filter by affiliate group and user role.
+- Improvement: (PRO) Added an option to duplicate creatives.
+- Improvement: Added options to choose if cookies should be stored for the referral link and MLA referral links.
+- Tweak: (PRO) Changed the per-coupon commission fields to number fields to ensure only numbers can be entered.
+- Tweak: (PRO) Increased the maximum file size for the payouts PDF upload field to 500KB.
+- Tweak: (PRO) Updated FPDF class to version 1.86.
+- Tweak: Removed the unnecessary space after the coupon in the affiliate dashboard title.
+- Tweak: Added a warning message when editing a coupon that is linked to an affiliate user.
+- Tweak: Updated the Twitter social share buttons to the new X logo.
+- Tweak: Added an option to make the order ID clickable on the recent orders tab of the affiliate dashboard for admin users.
+- Tweak: On the admin settings page, added some "FAQ" tooltips/toggles to some sections to provide more information.
+- Fix: Fixed an issue in some cases with the calculations for the "discount" shown on the affiliate dashboard when an order is partially refunded.
+- Fix: (PRO) Fixed an issue with the payouts PDF statements not being viewable in some PDF viewers.
+- Fix: (PRO) Fix to prevent duplicate empty payout requests from being made.
+- Fix: Fixed a potential issue with the registration form showing a captcha error even if the captcha is not enabled.
+- Other: Updated to Font Awesome 6.6.0
+- Other: Updated to Freemius SDK 2.8.1
+- Other: Tested with WordPress 6.6.2
+- Other: Tested with WooCommerce 9.3.3
 
 = Version 5.15.3 - 9th September 2024 =
 - Tweak: Added a "Delete" option to "Pending" affiliate registrations in the admin area.

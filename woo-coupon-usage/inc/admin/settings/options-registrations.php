@@ -9,19 +9,14 @@ function wcusage_field_cb_registration( $args )
 
     $ispro = ( wcu_fs()->can_use_premium_code() ? 1 : 0 );
     $probrackets = ( $ispro ? "" : " (PRO)" );
+    $wcusage_registration_page = wcusage_get_setting_value('wcusage_registration_page', '');
     ?>
 
   	<h1><?php echo esc_html__( 'Affiliate Registration', 'woo-coupon-usage' ); ?></h1>
 
     <hr/>
 
-    <p>- <?php echo esc_html__( 'Affiliate registration will allow your users to easily register to become affiliate, and automatically create an affiliate coupon for them.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/affiliate-registration" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</p>
-
-    <br/>
-
-    <p>- <strong><?php echo esc_html__( 'To get started with affiliate registration, you will need to add this shortcode to a NEW page:', 'woo-coupon-usage' ); ?> <span style="color: red;">[couponaffiliates-register]</span></strong></p>
-
-    <p>- <strong><?php echo esc_html__( 'Please do not add this shortcode to the same page as your affiliate dashboard shortcode.', 'woo-coupon-usage' ); ?></strong></p>
+    <p><?php echo esc_html__( 'Affiliate registration will allow your users to easily register to become affiliate, and automatically create an affiliate coupon for them.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/affiliate-registration" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</p>
 
     <?php if( !wcu_fs()->can_use_premium_code() ) { ?>
     <br/><p>- <?php echo esc_html__( 'PRO features: Custom form fields, dynamic code generator, auto accept, auto registration, and join button on checkout.', 'woo-coupon-usage' ); ?></p>
@@ -36,10 +31,56 @@ function wcusage_field_cb_registration( $args )
       <?php echo wcusage_setting_toggle('.wcusage_field_registration_enable', '.wcu-field-section-registration-settings'); // Show or Hide ?>
       <span class="wcu-field-section-registration-settings">
 
+        <?php if(!$wcusage_registration_page) { ?>
+        <br/><br/>
+
+        <p>- <strong><?php echo esc_html__( 'To get started with affiliate registration, you will need to add this shortcode to a NEW page:', 'woo-coupon-usage' ); ?> <span style="color: red;">[couponaffiliates-register]</span></strong></p>
+
+        <p>- <strong><?php echo esc_html__( 'Please do not add this shortcode to the same page as your affiliate dashboard shortcode.', 'woo-coupon-usage' ); ?></strong></p>
+        <?php } ?>
+
         <br/><br/>
 
         <!-- Registration Page -->
         <?php echo do_action( 'wcusage_hook_setting_section_registration_page' ); ?>
+
+        <br/><br/>
+
+        <!-- FAQ: How does the affiliate registration system work? -->
+        <div class="wcu-admin-faq">
+
+          <?php echo wcusage_admin_faq_toggle(
+          "wcu_show_section_qna_registrations",
+          "wcu_qna_registrations",
+          "FAQ: How does the affiliate registration system work?");
+          ?>
+
+          <div class="wcu-admin-faq-content wcu_qna_registrations" id="wcu_qna_registrations" style="display: none;">
+
+            <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'Firstly, if you have not already, get started by creating a new page and adding the shortcode: [couponaffiliates-register]', 'woo-coupon-usage' ); ?><br/>
+
+            <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'You can customise the form and add your own custom fields via the below settings.', 'woo-coupon-usage' ); ?><br/>
+
+            <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'When a user submits the form, you will be notified, and can review the application in the admin "Registrations" page.', 'woo-coupon-usage' ); ?><br/>
+
+            <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'When approved, it will generate a coupon code automatically, and assign it to that affiliate user.', 'woo-coupon-usage' ); ?><br/>
+          
+            <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'The user will be notified by email, and can then login to their affiliate dashboard to view their statistics and more.', 'woo-coupon-usage' ); ?><br/>
+
+            <a href="https://couponaffiliates.com/docs/affiliate-registration" target="_blank" class="button button-primary" style="margin-top: 10px;"><?php echo esc_html__( 'View Documentation', 'woo-coupon-usage' ); ?> <span class="fas fa-external-link-alt"></span></a>
+
+            <br/><br/>
+
+            <strong><?php echo esc_html__( 'For more information, please see the video below:', 'woo-coupon-usage' ); ?></strong>
+
+            <br/>
+            <div style="max-width: 720px;">
+            <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/713487822?badge=0&autopause=0&player_id=0&app_id=58479/embed" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>
+            </div>
+
+          </div>
+
+        </div>
 
         <br/><hr/>
 
@@ -234,9 +275,9 @@ function wcusage_field_cb_registration( $args )
           <select name="wcusage_options[wcusage_field_registration_accepted_role]" id="wcusage_field_registration_accepted_role" class="wcusage_field_registration_accepted_role">
             <?php
             $r1 = "";
-            $editable_roles = array_reverse( get_editable_roles() );
+            $editable_roles = get_editable_roles();
               foreach ( $editable_roles as $role => $details ) {
-                  if($role != 'administrator' && $role != 'editor' && $role != 'author' && $role != 'shop_manager') {
+                  if($role != 'administrator' && $role != 'editor' && $role != 'author' && $role != 'shop_manager' && !array_key_exists( 'manage_options', $details['capabilities'] ) ) {
                     $name = translate_user_role( $details['name'] );
                     if ( $wcusage_field_registration_accepted_role === $role ) {
                         $r1 .= "\n\t<option selected='selected' value='" . esc_attr( $role ) . "'>$name</option>";
@@ -273,7 +314,7 @@ function wcusage_field_cb_registration( $args )
             $r2 = "";
             $editable_roles = array_reverse( get_editable_roles() );
               foreach ( $editable_roles as $role => $details ) {
-                  if($role != 'administrator' && $role != 'editor' && $role != 'author' && $role != 'shop_manager') {
+                  if($role != 'administrator' && $role != 'editor' && $role != 'author' && $role != 'shop_manager' && !array_key_exists( 'manage_options', $details['capabilities'] ) ) {
                     $name = translate_user_role( $details['name'] );
                     // Preselect specified role.
                     if ( $wcusage_field_registration_pending_role === $role ) {
@@ -1132,7 +1173,7 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
 
       <br/>
 
-      <!-- Allow logged out users to register for an affiliate coupon. -->
+      <!-- Multiple Template Coupons -->
       <?php echo wcusage_setting_toggle_option('wcusage_field_registration_multiple_template', 0, esc_html__( 'Enable Multiple Templates', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
       <i><?php echo esc_html__( 'With this enabled, multiple template coupons will be available and the affiliate will be able to choose which type they want via the registration form.', 'woo-coupon-usage' ); ?></i>
 
@@ -1161,6 +1202,28 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
 
         <br/>
 
+        <?php echo wcusage_setting_toggle_option('wcusage_field_registration_multiple_template_roles', 0, esc_html__( 'Assign user roles (groups) to specific templates', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
+        <i><?php echo esc_html__( 'With this enabled, you will be able assign a user role to a template coupon, so when someone registers via that template option, they will also be assigned to this user role.', 'woo-coupon-usage' ); ?></i>
+        
+        <script>
+        jQuery( document ).ready(function() {
+          if(jQuery('.wcusage_field_registration_multiple_template_roles').prop('checked')) {
+            jQuery('.wcu-field-section-registration-roles').show();
+          } else {
+            jQuery('.wcu-field-section-registration-roles').hide();
+          }
+          jQuery('.wcusage_field_registration_multiple_template_roles').change(function(){
+            if(jQuery(this).prop('checked')) {
+              jQuery('.wcu-field-section-registration-roles').show();
+            } else {
+              jQuery('.wcu-field-section-registration-roles').hide();
+            }
+          });
+        });
+        </script>
+
+        <br/><br/>
+
         <?php for ($x = 1; $x <= 10; $x++) { ?>
 
           <?php
@@ -1180,6 +1243,39 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
             </div>
             <div style="width: auto; float: left; display: block; margin-left: 10px;">
               <?php echo wcusage_setting_text_option('wcusage_field_registration_coupon_template' . esc_html($template_num), '', esc_html__( 'Template coupon code:', 'woo-coupon-usage' ), '0px'); ?>
+            </div>
+            <!-- User Role -->
+            <div style="width: auto; float: left; display: block; margin-left: 10px;" class="wcu-field-section-registration-roles">
+              <p style="margin: 0;"><strong>
+                <label for="wcusage_field_registration_coupon_template_role<?php echo esc_html($template_num); ?>"><?php echo esc_html__( 'Assign to role:', 'woo-coupon-usage' ); ?></label>
+              </strong></p>
+              <select name="wcusage_options[wcusage_field_registration_coupon_template_role<?php echo esc_html($template_num); ?>]" id="wcusage_field_registration_coupon_template_role<?php echo esc_html($template_num); ?>">
+                <?php
+                $roles = get_editable_roles();
+                // Re-order with all those containing "coupon_affiliate" at the start
+                $roles2 = array();
+                foreach ($roles as $key => $role) {
+                    if (strpos($key, 'coupon_affiliate') !== false) {
+                        $roles2[$key] = $role;
+                        unset($roles[$key]);
+                    }
+                }
+                $roles2 = array_merge($roles2, $roles);
+                ?>
+                <option value="">
+                  <?php echo esc_html__( '-', 'woo-coupon-usage' ); ?>
+                </option>
+                <?php foreach ($roles2 as $role => $details) {
+                  $role_name = $details['name'];
+                  if (strpos($role, 'coupon_affiliate') !== false) {
+                    $role_name = "(Group) " . $role_name;
+                  }
+                  ?>
+                  <?php if($role != 'administrator' && $role != 'editor' && $role != 'author' && $role != 'shop_manager' && !array_key_exists( 'manage_options', $details['capabilities'] ) ) { ?>
+                    <option value="<?php echo esc_html($role); ?>"><?php echo esc_html($role_name); ?></option>
+                  <?php } ?>
+                <?php } ?>
+              </select>
             </div>
             <br/>
           </div>

@@ -223,7 +223,7 @@ if( !function_exists( 'wcusage_setting_section_colours' ) ) {
 
   <br/><hr/>
 
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Stats Icons', 'woo-coupon-usage' ); ?></h3>
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Icons', 'woo-coupon-usage' ); ?></h3>
 
   <!-- Show icons on affiliate dashboard tabs -->
   <?php echo wcusage_setting_toggle_option('wcusage_field_show_tabs_icons', 1, esc_html__( 'Show icons on the affiliate dashboard tabs.', 'woo-coupon-usage' ), '0px'); ?>

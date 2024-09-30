@@ -26,6 +26,9 @@ function wcusage_field_cb_fraud( $args )
     <!-- Allow affiliate user to apply their own coupon code at cart / checkout. -->
     <?php echo wcusage_setting_toggle_option('wcusage_field_allow_assigned_user', 1, esc_html__( 'Allow affiliate user to apply their own coupon code at cart / checkout.', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'When disabled, the affiliate user will be prevented from using their own coupon code (coupons they are assigned to) at cart or checkout.', 'woo-coupon-usage' ); ?></i>
+    <?php echo wcusage_setting_toggle('.wcusage_field_url_referrals', '.wcusage_field_url_referrals_p_info'); // Show or Hide ?>
+    <i class="wcusage_field_url_referrals_p_info"><br/><?php echo esc_html__( 'This will also allow them to use their own referral link and earn commission on their own purchases.', 'woo-coupon-usage' ); ?></i>
+    <br/>
     <i><?php echo esc_html__( 'Unless you have a specific use case, we suggest keeping this disabled as in general it can cause some issues (commission granted to all coupons).', 'woo-coupon-usage' ); ?></i>
 
     <br/><br/>
@@ -70,6 +73,12 @@ function wcusage_field_cb_fraud( $args )
       <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Domains Blacklist', 'woo-coupon-usage' ) . esc_html($probrackets1); ?>:</h3>
 
       <p><?php echo esc_html__( 'Visitors referred directly from any of these domains will not have referrals tracked or coupons applied automatically.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/affiliate-fraud-prevention/" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a></p>
+
+      <?php
+      $wcusage_field_store_cookies_domains = wcusage_get_setting_value('wcusage_field_store_cookies_domains', '1');
+      if(!$wcusage_field_store_cookies_domains) { ?>
+        <p><strong><?php echo esc_html__( 'Note:', 'woo-coupon-usage' ); ?></strong> <?php echo esc_html__( 'This feature is disabled because you have disabled the cookie storage.', 'woo-coupon-usage' ); ?></p>
+      <?php } ?>
 
       <br/>
 

@@ -161,8 +161,7 @@ function wcusage_couponusage(  $atts  ) {
                         }
                         echo '<h2 class="coupon-title">' . wp_kses_post( $dashboard_title );
                         if ( $wcusage_field_load_ajax ) {
-                            ?>
-				<a class="wcusage-refresh-data" href="javascript:void(0);" style="visibility: hidden;">
+                            ?><a class="wcusage-refresh-data" href="javascript:void(0);" style="visibility: hidden;">
 					<i class="fas fa-sync" style="font-size: 16px;" title="<?php 
                             echo esc_html__( "Refresh stats...", "woo-coupon-usage" );
                             ?>"></i>

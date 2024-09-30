@@ -122,6 +122,12 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
         $wcusage_field_show_campaigns = wcusage_get_setting_value( 'wcusage_field_show_campaigns', 1 );
         $wcusage_field_load_ajax = wcusage_get_setting_value( 'wcusage_field_load_ajax', 1 );
         $show_converted = wcusage_get_setting_value( 'wcusage_field_show_click_history_converted', 1 );
+        $show_converted_col = 1;
+        $wcusage_store_cookies = wcusage_get_setting_value( 'wcusage_field_store_cookies', '1' );
+        if ( !$wcusage_store_cookies ) {
+            $show_converted = 0;
+            $show_converted_col = 0;
+        }
         $offset = $page * $wcusage_field_show_click_history_amount;
         if ( $campaign && $campaign != "all" ) {
             $campaignline = " AND campaign = '" . $campaign . "'";
@@ -189,7 +195,9 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
             echo "<table class='wcuTable wcu-table-clicks'>";
             echo "<tr class='wcu-thetitlerow'>";
             echo "<td class='wcuTableHead'>#</td>";
-            echo "<td class='wcuTableHead'><i class='fas fa-cart-plus' title='" . ucfirst( esc_html__( 'Converted?', 'woo-coupon-usage' ) ) . "'></i></td>";
+            if ( $show_converted_col ) {
+                echo "<td class='wcuTableHead'><i class='fas fa-cart-plus' title='" . ucfirst( esc_html__( 'Converted?', 'woo-coupon-usage' ) ) . "'></i></td>";
+            }
             echo "<td class='wcuTableHead' style='max-width: 300px;'>" . ucfirst( esc_html__( 'Landing Page', 'woo-coupon-usage' ) ) . "</td>";
             echo "<td class='wcuTableHead' style='max-width: 350px;'>" . ucfirst( esc_html__( 'Referring URL', 'woo-coupon-usage' ) ) . "</td>";
             echo "<td class='wcuTableHead'>" . ucfirst( esc_html__( 'Date', 'woo-coupon-usage' ) ) . "</td>";

@@ -357,8 +357,11 @@ function wcusage_update_coupon() {
         'ID' => $coupon_id,
         'post_title' => $coupon_name
     );
+
     wp_update_post($post);
+
     update_post_meta($coupon_id, 'wcu_select_coupon_user', $user_id);
+    
     if (wcu_fs()->can_use_premium_code()) {
         update_post_meta($coupon_id, 'wcu_text_coupon_commission', $commission_percent);
         update_post_meta($coupon_id, 'wcu_text_coupon_commission_fixed_order', $commission_order);

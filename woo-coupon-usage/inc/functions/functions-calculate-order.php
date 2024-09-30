@@ -210,23 +210,71 @@ if ( !function_exists( 'wcusage_get_order_totals' ) ) {
         // Retrieve settings
         $wcusage_show_tax = wcusage_get_setting_value( 'wcusage_field_show_tax', '' );
         $commission_include_shipping = wcusage_get_setting_value( 'wcusage_field_commission_include_shipping', '0' );
-        // Define variables
+        // Get order items
+        $items = $order->get_items();
+        // Get order totals
         $get_total = $order->get_total();
         $get_total_tax = $order->get_total_tax();
+        // Get order discounts
         $total_discount = $order->get_total_discount();
+        // Get order tax
         $total_tax = ( $wcusage_show_tax ? 0 : $get_total_tax );
         $remove_tax = wcusage_get_tax_to_remove( $orderid );
+        // Get order refunds
+        $order_refunds = $order->get_refunds();
+        $refunded_quantity = 0;
+        foreach ( $items as $item_id => $item ) {
+            $line_subtotal = $item->get_subtotal();
+            $line_total = $item->get_total();
+            $line_subtotal_tax = $item->get_subtotal_tax();
+            $line_total_tax = $item->get_total_tax();
+            $line_discount = $line_total - $line_subtotal;
+            // (Negative number)
+            $line_discount_per_item = $line_discount / $item->get_quantity();
+            $line_discount_tax = $line_total_tax - $line_subtotal_tax;
+            // (Negative number)
+            $refunded_quantity = 0;
+            foreach ( $order_refunds as $refund ) {
+                foreach ( $refund->get_items() as $item_id => $item2 ) {
+                    if ( $item2->get_product_id() == $item['product_id'] ) {
+                        $refunded_quantity += abs( $item2->get_quantity() );
+                        // Get Refund Qty
+                    }
+                }
+            }
+            $refunded_discount = $line_discount_per_item * $refunded_quantity;
+            $refunded_discount_tax = $line_discount_tax * $refunded_quantity;
+            // How many of this item in order
+            $line_items = $item->get_quantity();
+            $refunded_tax = 0;
+            if ( $refunded_quantity > 0 ) {
+                if ( $line_items > 1 ) {
+                    $refunded_tax = $line_total_tax / $line_items;
+                } else {
+                    $refunded_tax = $line_total_tax;
+                }
+                $refunded_tax = $refunded_tax * $refunded_quantity;
+            } else {
+                $refunded_tax = 0;
+            }
+            if ( !$wcusage_show_tax ) {
+                $total_tax -= $refunded_tax;
+            }
+        }
+        // Get order shipping
         $shipping = ( $commission_include_shipping ? 0 : $order->get_total_shipping() );
+        // Check if tax is included in the order total
         if ( $wcusage_show_tax == 1 ) {
             $total_discount += $order->get_discount_tax();
         }
         // Calculate tax percentage and refunds
         $taxpercent = ( $get_total > 0 ? (float) $get_total_tax / (float) $get_total : 0 );
-        $refundedtax = $order->get_total_refunded() * (float) $taxpercent;
-        $ordertotalrefunded = $order->get_total_refunded() - (float) $refundedtax;
-        // Calculate final totals
+        $ordertotalrefunded = $order->get_total_refunded();
+        // Calculate final order total
         $ordertotal = (float) $get_total + (float) $total_discount - (float) $shipping - (float) $total_tax - (float) $remove_tax - (float) $ordertotalrefunded;
         $ordertotaldiscounted = $ordertotal - (float) $total_discount;
+        $refundeddiscount = $order->get_total_refunded();
+        $ordertotaldiscounted = $ordertotaldiscounted - (float) $refundeddiscount;
         // Format totals
         $ordertotal = number_format(
             (float) $ordertotal,
@@ -805,6 +853,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         // ***** Get Commission Percentage Amount ***** //
                         if ( $product_percent != "" && $product_percent >= 0 && $productpriority || $product_percent > 0 && $option_affiliate == "" ) {
                             // If product priority or product commission set but no other commmission options available.
+                            $product_percent = (int) $product_percent;
                             $product_commission_amount = $product_percent / 100;
                             if ( $wcusage_show_commission_before_discount ) {
                                 $this_line_total_commission += $this_line_subtotal * $deduct_percent * $product_commission_amount;

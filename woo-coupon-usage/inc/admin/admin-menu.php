@@ -109,24 +109,22 @@ function wcusage_options_page() {
             'wcusage_add_affiliate',
             'wcusage_admin_new_registration_page'
         );
-        if ( $wcusage_field_registration_enable ) {
-            add_submenu_page(
-                'wcusage',
-                esc_html__( 'Affiliate Registrations', 'woo-coupon-usage' ),
-                esc_html__( 'Registrations', 'woo-coupon-usage' ),
-                $admin_perms,
-                'wcusage_registrations',
-                'wcusage_admin_registrations_page_html'
-            );
-            add_submenu_page(
-                'wcusage',
-                '',
-                '<hr style="width:100%;height:1px;background:#ddd;border:none;margin: 2px 0 0px 0;">',
-                $admin_perms,
-                'wcu_dummy_page3',
-                '__return_null'
-            );
-        }
+        add_submenu_page(
+            'wcusage',
+            esc_html__( 'Affiliate Registrations', 'woo-coupon-usage' ),
+            esc_html__( 'Registrations', 'woo-coupon-usage' ),
+            $admin_perms,
+            'wcusage_registrations',
+            'wcusage_admin_registrations_page_html'
+        );
+        add_submenu_page(
+            'wcusage',
+            '',
+            '<hr style="width:100%;height:1px;background:#ddd;border:none;margin: 2px 0 0px 0;">',
+            $admin_perms,
+            'wcu_dummy_page3',
+            '__return_null'
+        );
         $wcusage_field_urls_enable = wcusage_get_setting_value( 'wcusage_field_urls_enable', '1' );
         $wcusage_field_show_click_history = wcusage_get_setting_value( 'wcusage_field_show_click_history', '1' );
         if ( $wcusage_field_urls_enable && $wcusage_field_show_click_history ) {

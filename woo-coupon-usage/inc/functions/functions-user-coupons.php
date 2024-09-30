@@ -275,15 +275,13 @@ add_action( 'woocommerce_coupon_options_usage_limit', 'add_wcusage_coupon_data_f
  */
 if ( !function_exists( 'wcusage_save_coupon_settings' ) ) {
     function wcusage_save_coupon_settings(  $post_id  ) {
+        $wcu_select_coupon_user_visual = "";
         if ( isset( $_POST['wcu_select_coupon_user_visual'] ) ) {
             $wcu_select_coupon_user_visual = sanitize_text_field( $_POST['wcu_select_coupon_user_visual'] );
-        } else {
-            $wcu_select_coupon_user_visual = "";
         }
+        $wcu_select_coupon_user = "";
         if ( isset( $_POST['wcu_select_coupon_user'] ) ) {
             $wcu_select_coupon_user = sanitize_text_field( $_POST['wcu_select_coupon_user'] );
-        } else {
-            $wcu_select_coupon_user = "";
         }
         // Updates coupon user if selected
         update_post_meta( $post_id, 'wcu_select_coupon_user', $wcu_select_coupon_user );
@@ -597,7 +595,7 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                                 $usage = $wcu_alltime_stats['total_count'];
                             }
                             echo '<p>' . esc_html__( "Total Usage", "woo-coupon-usage" ) . ': ' . esc_html( $usage ) . '</p>';
-                            echo '<p>' . esc_html__( "Commission", "woo-coupon-usage" ) . ': ' . esc_html( $combined_commission ) . '</p>';
+                            echo '<p>' . esc_html__( "Commission", "woo-coupon-usage" ) . ': ' . wp_kses_post( $combined_commission ) . '</p>';
                             echo '<p style="margin: 0 0 10px 0;"><a class="wcu-coupon-list-button" href="' . esc_url( $uniqueurl ) . '">' . esc_html__( 'Dashboard', 'woo-coupon-usage' ) . ' <i class="far fa-arrow-alt-circle-right"></i></a></p>';
                             echo "</div>";
                             if ( $countcouponsloop == 3 ) {
@@ -719,7 +717,7 @@ add_filter(
  *
  */
 if ( !function_exists( 'wcusage_get_coupon_users' ) ) {
-    function wcusage_get_coupon_users(  $search_query = ''  ) {
+    function wcusage_get_coupon_users(  $search_query = '', $role = ''  ) {
         $args = array(
             'post_type'      => 'shop_coupon',
             'posts_per_page' => -1,
@@ -757,6 +755,11 @@ if ( !function_exists( 'wcusage_get_coupon_users' ) ) {
         $user_query = new WP_User_Query($user_query_args);
         $users_found = $user_query->get_results();
         foreach ( $users_found as $user_info ) {
+            if ( $role ) {
+                if ( !in_array( $role, $user_info->roles ) ) {
+                    continue;
+                }
+            }
             $users[] = array(
                 'ID'       => $user_info->ID,
                 'Username' => $user_info->user_login,

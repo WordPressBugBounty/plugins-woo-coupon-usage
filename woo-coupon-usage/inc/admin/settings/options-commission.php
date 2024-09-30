@@ -50,6 +50,12 @@ function wcusage_field_cb_commission( $args )
 
   <p class="setup-hide" style="font-size: 12px;"><?php echo esc_html__( 'Note: When updating these settings saved data will be refreshed for all dashboards automatically (first page load may take longer).', 'woo-coupon-usage' ); ?></p>
 
+  <p class="setup-hide" style="font-size: 12px;">
+    <?php echo esc_html__( 'If you do not want past orders to be affected when commission stats are refreshed, you can enable this in the', 'woo-coupon-usage' ); ?>
+    <a href="#" onclick="wcusage_go_to_settings('#tab-debug', '#wcusage_field_enable_never_update_commission_meta_p');"
+    style="margin-top: 10px;"><?php echo esc_html__( 'debug settings tab', 'woo-coupon-usage' ); ?></a>.
+  </p>
+
   <br/><hr/>
 
   <!-- ********** Calculations ********** -->

@@ -29,19 +29,45 @@ function wcusage_field_cb( $args ) {
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Dashboard:</h3>
   <?php echo do_action( 'wcusage_hook_setting_section_dashboard_page' ); ?>
 
+  <br/><br/>
+
+  <!-- FAQ: How to create new affiliates & coupons? -->
+  <div class="wcu-admin-faq">
+
+    <?php echo wcusage_admin_faq_toggle(
+    "wcu_show_section_qna_create_affiliates",
+    "wcu_qna_create_affiliates",
+    "FAQ: How do I create new affiliates & coupons?");
+    ?>
+
+    <div class="wcu-admin-faq-content wcu_qna_create_affiliates" id="wcu_qna_create_affiliates" style="display: none;">
+
+      <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'To add new affiliates and assign them to a specific coupon, you can do any of the following 3 options:', 'woo-coupon-usage' ); ?>
+      
+      <br/>
+      
+      <ul>
+        <li style="margin-left: 20px; margin-bottom: 10px;">
+        &bull; [Option 1] <strong>Edit Coupons Manually</strong>: <?php echo esc_html__( 'Go to the', 'woo-coupon-usage' ); ?> <a href="<?php echo esc_url(admin_url("admin.php?page=wcusage_coupons")); ?>"><?php echo esc_html__( 'coupons management page', 'woo-coupon-usage' ); ?></a>, <?php echo esc_html__( 'and add or edit a coupon, then assign users under the "coupon affiliates" tab', 'woo-coupon-usage' ); ?>. (<a href="https://couponaffiliates.com/docs/how-do-i-assign-users-to-coupons" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a>)
+        </li>
+        <li style="margin-left: 20px; margin-bottom: 10px;">
+        &bull; [Option 2] <strong>Add New Affiliates</strong>: <?php echo sprintf(wp_kses_post(__( 'Go to the <a href="%s" target="_blank">Add New Affiliate</a> page to add new affiliates here, which will automatically generate the coupon code for them.', 'woo-coupon-usage' )), admin_url('admin.php?page=wcusage_add_affiliate')); ?> (<a href="https://couponaffiliates.com/docs/manual-affiliate-registrations/" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a>)
+        </li>
+        <li style="margin-left: 20px; margin-bottom: 10px;">
+        &bull; [Option 3] <strong>Registration Form</strong>: <?php echo sprintf(wp_kses_post(__( 'Direct users to the <a href="%s" target="_blank">Affiliate Registration</a> page to allow them to register themselves. When accepted, this will then automatically create the coupon and assign them to it.', 'woo-coupon-usage' )), admin_url('admin.php?page=wcusage_registrations')); ?> (<a href="https://couponaffiliates.com/docs/pro-affiliate-registration" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a>)
+        </li>
+      </ul>
+
+      <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'The affiliate user can then visit the "affiliate dashboard page" to view their affiliate statistics, commissions, referral URLs, etc, for the coupons they are assigned to.', 'woo-coupon-usage' ); ?>
+
+    </div>
+
+  </div>
+  
   <br/><hr/>
 
-  <!-- Assign Affiliates to Coupons -->
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Assign Affiliates to Coupons', 'woo-coupon-usage' ); ?>:</h3>
-
-  <span class="dashicons dashicons-arrow-right"></span> <?php echo sprintf( wp_kses(__( 'To assign users to a specific coupon, go to the <a href="%1$s" target="_blank">coupons page</a>, edit a coupon and assign users under the "coupon affiliates" tab. <a href="%2$s" target="_blank">Learn More.</a>', 'woo-coupon-usage' ), 'post'), esc_url(admin_url("admin.php?page=wcusage_coupons")), 'https://couponaffiliates.com/docs/how-do-i-assign-users-to-coupons' ); ?>
-  <br/><br/><span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'The affiliate user can then visit the "affiliate dashboard page" to view their affiliate statistics, commissions, referral URLs, etc, for the coupons they are assigned to.', 'woo-coupon-usage' ); ?>
-  <br/><br/><span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'Alternatively, you can allow affiliates to register as an affiliate. When accepted, this will then automatically create the coupon and assign them to it.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-affiliate-registration" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a>
-
-  <br/><br/><hr/>
-
   <!-- Order/Sales Tracking -->
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Order/Sales Tracking:</h3>
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Order/Sales Tracking', 'woo-coupon-usage' ); ?>:</h3>
   <?php echo do_action('wcusage_hook_setting_section_ordersalestracking'); ?>
 
   <br/><hr/>
@@ -269,7 +295,6 @@ function wcusage_field_cb( $args ) {
   <?php echo wcu_admin_settings_showhide_toggle("wcu_show_section_orders_tab", "wcu_section_orders_tab", "Show", "Hide"); ?>
   <h3><?php echo esc_html__( '"Recent Orders" Tab', 'woo-coupon-usage' ); ?>: <button style="font-size: 14px; font-weight: normal;" class="wcu-showhide-button" type="button" id="wcu_show_section_orders_tab"><?php echo esc_html__('Show', 'woo-coupon-usage'); ?> <span class='fa-solid fa-arrow-down'></span></button></h3>
   
-  
   <div class="wcu_section_settings" id="wcu_section_orders_tab" style="display: none;">
 
     <!-- Show order ID. -->
@@ -295,7 +320,15 @@ function wcusage_field_cb( $args ) {
 
       <!-- Show order ID. -->
       <?php echo wcusage_setting_toggle_option('wcusage_field_orderid', 0, esc_html__( 'Show order "ID".', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'If the user is an admin, then the ID will also be clickable to open the order page in the backend.', 'woo-coupon-usage' ); ?></i><br/>
+        
+      <?php echo wcusage_setting_toggle('.wcusage_field_orderid', '.wcu-field-orders-id-show'); // Show or Hide ?>
+      <span class="wcu-field-orders-id-show">
+
+        <!-- Show order ID. -->
+        <?php echo wcusage_setting_toggle_option('wcusage_field_orderid_click', 0, esc_html__( 'Make the order "ID" clickable for admins.', 'woo-coupon-usage' ), '40px'); ?>
+        <i style="margin-left: 40px;"><?php echo esc_html__( 'If the user is an admin, then the ID will also be clickable to open the order page in the backend.', 'woo-coupon-usage' ); ?></i><br/>
+
+      </span>
 
       <br/>
 
@@ -305,17 +338,15 @@ function wcusage_field_cb( $args ) {
       <?php echo wcusage_setting_toggle('.wcusage_field_status', '.wcu-field-orders-status-show'); // Show or Hide ?>
       <span class="wcu-field-orders-status-show">
 
-        <br/>
-
         <!-- Show status totals -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_show_orders_table_status_totals', 1, esc_html__( 'Show order status totals below the table.', 'woo-coupon-usage' ), '30px'); ?>
-        <i style="margin-left: 30px;"><?php echo esc_html__( 'When selected, below the orders table it will show the total number of orders for each status. The "Status" column needs to be enabled.', 'woo-coupon-usage' ); ?></i><br/>
+        <?php echo wcusage_setting_toggle_option('wcusage_field_show_orders_table_status_totals', 1, esc_html__( 'Show order status totals below the table.', 'woo-coupon-usage' ), '40px'); ?>
+        <i style="margin-left: 40px;"><?php echo esc_html__( 'When selected, below the orders table it will show the total number of orders for each status. The "Status" column needs to be enabled.', 'woo-coupon-usage' ); ?></i><br/>
 
         <br/>
 
         <!-- Show status filter -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_show_orders_table_filter_status', 1, esc_html__( 'Show "Status" dropdown filter.', 'woo-coupon-usage' ), '30px'); ?>
-        <i style="margin-left: 30px;"><?php echo esc_html__( 'When selected, a "Status" dropdown will be shown as an option when filtering by date range. Will only show if you have more than 1 status enabled.', 'woo-coupon-usage' ); ?></i><br/>
+        <?php echo wcusage_setting_toggle_option('wcusage_field_show_orders_table_filter_status', 1, esc_html__( 'Show "Status" dropdown filter.', 'woo-coupon-usage' ), '40px'); ?>
+        <i style="margin-left: 40px;"><?php echo esc_html__( 'When selected, a "Status" dropdown will be shown as an option when filtering by date range. Will only show if you have more than 1 status enabled.', 'woo-coupon-usage' ); ?></i><br/>
 
       </span>
 
@@ -639,7 +670,7 @@ function wcusage_field_cb( $args ) {
 
     </div>
 
-    <br/><br/><hr/>
+    <br/><hr/>
 
     <!-- Assign Affiliates to Coupons -->
     <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( '"My Account" Menu Link', 'woo-coupon-usage' ); ?>:</h3>
@@ -661,6 +692,8 @@ function wcusage_field_cb( $args ) {
       <i style="margin-left: 30px;"><?php echo esc_html__( 'With this enabled, when the "Affiliate" tab is clicked, instead of redirecting to the normal affiliate dashboard page, it will show the affiliate dashboard as a page/section within "My Account".', 'woo-coupon-usage' ); ?></i>
 
     </span>
+
+    <br/>
 
   </div>
 
@@ -871,7 +904,14 @@ if( !function_exists( 'wcusage_setting_section_ordersalestracking' ) ) {
           } else {
             $name = 'wcusage_field_order_type_custom['.$key.']';
           }
-          echo '<span style="margin-right: 20px;'.esc_attr($extrastyles).'" id="'.esc_attr($thisid).'"><input type="checkbox" style="'.esc_attr($extrastyles).'" checktype="multi" class="order-status-checkbox-'.esc_attr($key).'" checktypekey="'.esc_attr($key).'" customid="wcusage_field_order_type_custom" class="wcusage_field_order_type_custom" name="'.esc_attr($name).'" '.esc_attr($checkedx).'> '.esc_attr($status).'</span>';
+          echo '<span style="margin-right: 20px;'.esc_attr($extrastyles).'" id="'.esc_attr($thisid).'">
+          <input type="checkbox"
+          style="'.esc_attr($extrastyles).'" checktype="multi"
+          class="order-status-checkbox-'.esc_attr($key).'"
+          checktypekey="'.esc_attr($key).'"
+          customid="'.esc_attr($thisid).'"
+          name="'.esc_attr($name).'"
+          '.esc_attr($checkedx).'> '.esc_attr($status).'</span>';
 
 
         }

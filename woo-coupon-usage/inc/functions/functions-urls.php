@@ -132,6 +132,10 @@ add_action('init', 'wcusage_url_cookie', 1);
  if( !function_exists( 'wcusage_do_url_cookie' ) ) {
 	function wcusage_do_url_cookie($cookie, $thereferral, $campaigncookie, $campaign) {
 
+    $options = get_option( 'wcusage_options' );
+
+    $wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
+
     if( isset($_SERVER['HTTP_REFERER']) ) {
       $refpage = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
       $refpage = strtok($refpage, '?');
@@ -140,13 +144,14 @@ add_action('init', 'wcusage_url_cookie', 1);
       $refpage = "";
     }
 
+    do_action('wcusage_before_referral_cookies', $refpage);
+
     if( !wcusage_is_domain_blacklisted($refpage) || !$refpage ) {
 
   		$thereferral = sanitize_text_field($thereferral);
       $campaign = sanitize_text_field($campaign);
   		$cookie = sanitize_text_field($cookie);
 
-  		$options = get_option( 'wcusage_options' );
   		$wcusage_urls_cookie_days = wcusage_get_setting_value('wcusage_urls_cookie_days', '30');
   		$wcusage_urls_enable = wcusage_get_setting_value('wcusage_field_urls_enable', '1');
   		$wcusage_field_track_all_clicks = wcusage_get_setting_value('wcusage_field_track_all_clicks', '1');
@@ -169,8 +174,10 @@ add_action('init', 'wcusage_url_cookie', 1);
             $coupon_id = $coupon->get_id();
           }
 
-  				setcookie('wcusage_referral', $thereferral, $expiry, '/');
-          setcookie("wcusage_referral_code", "", 1);
+          if($wcusage_store_cookies) {
+  				  setcookie('wcusage_referral', $thereferral, $expiry, '/');
+            setcookie("wcusage_referral_code", "", 1);
+          }
 
           if($wcusage_field_show_click_history) {
             
@@ -202,8 +209,10 @@ add_action('init', 'wcusage_url_cookie', 1);
             // If not currently a click ID or track all clicks enabled. Add click to database.
             if( !$clickcookie || ($wcusage_field_track_all_clicks && !$clickcookie_recent) ) {
               $addclick = wcusage_install_clicks_data($coupon_id, $campaign, '', $refpage, 0, $ipaddress);
-              setcookie('wcusage_referral_click', $addclick, $expiry, '/'); // Updates click ID cookie
-              setcookie('wcusage_referral_click_recent', 'true', time() + 60, '/');
+              if($wcusage_store_cookies) {
+                setcookie('wcusage_referral_click', $addclick, $expiry, '/'); // Updates click ID cookie
+                setcookie('wcusage_referral_click_recent', 'true', time() + 60, '/');
+              }
             }
 
           }
@@ -212,8 +221,10 @@ add_action('init', 'wcusage_url_cookie', 1);
 
   			// Campaign Tracking
   			if($thereferral && $campaign) {
-  				$expiry = strtotime('+'.$wcusage_urls_cookie_days.' days');
-  				setcookie('wcusage_referral_campaign', $campaign, $expiry, '/');
+          if($wcusage_store_cookies) {
+  				  $expiry = strtotime('+'.$wcusage_urls_cookie_days.' days');
+  				  setcookie('wcusage_referral_campaign', $campaign, $expiry, '/');
+          }
   		  }
 
   		}
@@ -272,6 +283,15 @@ if( !function_exists( 'wcusage_apply_coupon_to_cart' ) ) {
       wcusage_auto_apply_discount_coupon($thereferral);
     }
 
+    // Apply Coupon Via MLA Link
+    $mla_link_normal = wcusage_get_setting_value('wcusage_field_mla_link_normal', '0');
+    if($mla_link_normal) {
+      $thereferral = wcusage_get_mla_referral_value();
+      if($thereferral && $wcusage_apply_enable && $wcusage_field_apply_instant_enable) {
+        wcusage_auto_apply_discount_coupon($thereferral);
+      }
+    }
+
     // Apply Coupon Via Cookie
     $cookie = wcusage_get_cookie_value("wcusage_referral");
     if($cookie && !is_admin() && $wcusage_apply_enable) {
@@ -281,6 +301,42 @@ if( !function_exists( 'wcusage_apply_coupon_to_cart' ) ) {
 	}
 }
 add_action('wp', 'wcusage_apply_coupon_to_cart', 1);
+
+/**
+ * Check if there is a referrer domain, and creates a cookie for it
+ *
+ */
+function wcusage_set_link_tracking_cookie($refpage) {
+
+  $usage_field_enable_directlinks = wcusage_get_setting_value('wcusage_field_enable_directlinks', '');
+  $wcusage_field_fraud_block_domains = wcusage_get_setting_value('wcusage_field_fraud_block_domains', '');
+  if(!$usage_field_enable_directlinks && !$wcusage_field_fraud_block_domains) { return; }
+
+  $wcusage_field_store_cookies_domains = wcusage_get_setting_value('wcusage_field_store_cookies_domains', '1');
+  if(!$wcusage_field_store_cookies_domains) { return; }
+
+  if ( wcu_fs()->can_use_premium_code() ) {
+
+    if(isset($refpage) && $refpage) {
+
+      $this_domain = $_SERVER['HTTP_HOST'];
+        $this_domain = preg_replace('/^www\./i', '', $this_domain);
+
+      if($this_domain != $refpage) {
+
+        // Set Cookie
+        $wcusage_urls_cookie_days = wcusage_get_setting_value('wcusage_urls_cookie_days', '30');
+        $expiry = strtotime('+'.$wcusage_urls_cookie_days.' days');
+        setcookie('wcusage_referral_domain', $refpage, $expiry, '/');
+
+      }
+
+    }
+
+  }
+
+}
+add_action('wcusage_before_referral_cookies', 'wcusage_set_link_tracking_cookie', 10, 1);
 
 /**
  * On "wp" run updating of landing page id for the last referral click
@@ -328,6 +384,11 @@ if( !function_exists( 'wcusage_update_click_page_value' ) ) {
       $ipaddress = sanitize_text_field($ipaddress);
 
       global $wp_query;
+
+      if(!$wp_query || !isset($wp_query->post->ID)) {
+        return;
+      }
+
       $page = $wp_query->post->ID;
 
       if($page) {

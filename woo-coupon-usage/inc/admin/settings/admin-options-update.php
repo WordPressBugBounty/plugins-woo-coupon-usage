@@ -284,16 +284,20 @@ function wcu_update_toggle() {
 
     if($multi) {
       $order_type_custom = $option_group[$option];
+      $order_type_custom_current = $option_group[$option];
+      if(!is_array($order_type_custom)) {
+        $order_type_custom = array();
+        if($order_type_custom_current) {
+          $order_type_custom = array($order_type_custom_current => "on");
+        }
+      }
       if($value) {
         $order_type_custom[$key] = "on";
       } else {
         unset($order_type_custom[$key]);
       }
-      //$option_group['wcusage_field_text'] = $key . " = " . $order_type_custom[$key];
       $option_group[$option] = $order_type_custom;
     } else {
-      //$current = $option_group[$option];
-      //$new = ($current ? "0" : "1");
       if($value == true) {
         $thevalue = "1";
       }

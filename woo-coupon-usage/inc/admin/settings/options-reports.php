@@ -16,17 +16,34 @@ function wcusage_field_cb_reports( $args )
 
     <hr/>
 
-    <p>- Automatically send an email report (with an attached PDF report) to affiliates every week/month with a summary of their recent referral/commission stats.</p>
-
-    <p>- This includes a nice email report, along with a downloadable PDF version attached to the email.</p>
-    
-    <p>- The email report will use the same email template/styling from the <a href="<?php echo esc_url(admin_url('admin.php?page=wc-settings&tab=email')); ?>">WooCommerce email settings</a>.</p>
-
-    <p>- If you have lots of affiliates, we highly recommend using an SMTP Service Provider via the <a href="https://wordpress.org/plugins/fluent-smtp" target="_blank">FluentSMTP</a> plugin for more reliable email delivery.</p>
-
-    <br/><hr/>
-
     <?php echo wcusage_setting_toggle_option('wcusage_field_enable_reports', 0, 'Enable "Affiliate Reports" Features', '0px'); ?>
+
+    <br/>
+
+    <!-- FAQ: How do affiliate reports work? -->
+    <div class="wcu-admin-faq">
+
+      <?php echo wcusage_admin_faq_toggle(
+      "wcu_show_section_qna_affiliate_reports",
+      "wcu_qna_affiliate_reports",
+      "FAQ: How do affiliate reports work?");
+      ?>
+
+      <div class="wcu-admin-faq-content wcu_qna_affiliate_reports" id="wcu_qna_affiliate_reports" style="display: none;">
+
+        <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'Automatically send an email report (with an attached PDF report) to affiliates every week/month with a summary of their recent referral/commission stats.', 'woo-coupon-usage' ); ?><br/>
+
+        <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'This includes a nice email report, along with a downloadable PDF version attached to the email.', 'woo-coupon-usage' ); ?><br/>
+
+        <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'The email report will use the same email template/styling from the WooCommerce email settings.', 'woo-coupon-usage' ); ?><br/>
+
+        <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'If you have lots of affiliates, we highly recommend using an SMTP Service Provider via the FluentSMTP plugin for more reliable email delivery.', 'woo-coupon-usage' ); ?><br/>
+
+        <a href="https://couponaffiliates.com/docs/pro-affiliate-reports" target="_blank" class="button button-primary" style="margin-top: 10px;"><?php echo esc_html__( 'View Documentation', 'woo-coupon-usage' ); ?> <span class="fas fa-external-link-alt"></span></a>
+
+      </div>
+
+    </div>
 
       <?php echo wcusage_setting_toggle('.wcusage_field_enable_reports', '.wcu-field-section-reports'); // Show or Hide ?>
       <span class="wcu-field-section-reports">

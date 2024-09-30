@@ -2340,3 +2340,35 @@ p label {
 #wcusage-section-order li:hover {
     background-color: #f1f1f1;
 }
+
+/* Admin FAQ */
+
+.wcu-admin-faq {
+    background-color: #f0f9eb;
+    padding: 5px 12px 9px 12px;
+    display: inline-block;
+    border: 1px solid #c6e1b5;
+    border-radius: 25px;
+    margin-bottom: 20px;
+}
+.wcu-admin-faq p {
+    font-size: 15px !important;
+    font-weight: bold;
+    margin: 0;
+}
+.wcu-admin-faq-content {
+    padding-top: 15px;
+    padding-bottom: 10px;
+}
+.wcu-admin-faq iframe {
+    margin-top: 5px;
+    border: 2px solid #c6e1b5;
+    border-radius: 10px;
+}
+
+.wcu-admin-faq .wcu-showhide-button {
+    background: #111111;
+    font-size: 14px;
+    font-weight: normal;
+    margin-left: 5px;
+}
