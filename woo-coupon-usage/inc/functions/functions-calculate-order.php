@@ -171,7 +171,6 @@ function wcusage_coupon_disable_commission(  $coupon_id  ) {
         $wcu_select_coupon_user = get_post_meta( $coupon_id, 'wcu_select_coupon_user', true );
         $user = get_userdata( $wcu_select_coupon_user );
         if ( !$user ) {
-            delete_post_meta( $coupon_id, 'wcu_select_coupon_user' );
             return true;
         }
         if ( !$wcu_select_coupon_user ) {

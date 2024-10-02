@@ -26,7 +26,7 @@ function wcusage_field_cb_design( $args )
   <!-- Tabs Style -->
   <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
   <p>
-    <?php $wcusage_field_tabs_style = wcusage_get_setting_value('wcusage_field_tabs_style', '1'); ?>
+    <?php $wcusage_field_tabs_style = wcusage_get_setting_value('wcusage_field_tabs_style', '2'); ?>
     <input type="hidden" value="0" id="wcusage_field_tabs_style" data-custom="custom" name="wcusage_options[wcusage_field_tabs_style]" >
     <strong><label for="scales"><?php echo esc_html__( 'Tabs Style', 'woo-coupon-usage' ); ?>:</label></strong><br/>
     <select name="wcusage_options[wcusage_field_tabs_style]" id="wcusage_field_tabs_style" class="wcusage_field_tabs_style">
@@ -244,9 +244,10 @@ if( !function_exists( 'wcusage_setting_section_colours' ) ) {
 
   <div style="clear: both;"></div>
 
-  <?php if( !wcu_fs()->can_use_premium_code() ) { ?>
+  <?php if( wcu_fs()->can_use_premium_code() ) { ?>
+  <br/>
   <!-- Line Graph -->
-  <div class="wcusage-settings-style-colors">
+  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
 
     <span <?php if( !wcu_fs()->can_use_premium_code() ) { ?>style="opacity: 0.4 !important; display: block; pointer-events: none;" class="wcu-settings-pro-only"<?php } ?>>
 
@@ -258,9 +259,8 @@ if( !function_exists( 'wcusage_setting_section_colours' ) ) {
     </span>
 
   </div>
-  <?php } ?>
-
   <div style="clear: both;"></div>
+  <?php } ?>
 
   <?php
   }

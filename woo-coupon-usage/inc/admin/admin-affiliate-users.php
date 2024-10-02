@@ -4,61 +4,49 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * On users list show message that filtered by coupon affiliates users only.
+ * Handle unlinking an affiliate from a coupon via URL
  *
+ * @return mixed
  */
-function wcusage_filter_users_by_affiliates_message($which) {
-
-  if( !empty($_GET["page"]) && $_GET["page"] != "users" && $_GET["page"] != "wcusage_affiliates" ) {
-    return;
-  }
-
-  if( !wcusage_check_admin_access() || !isset($_POST['unlink_the_affiliate'])) {
-    return;
-  }
-
-  if(isset($_POST['_wpnonce2'])) {
-
-    if ( ! wp_verify_nonce( $_POST['_wpnonce2'], 'admin_unlink_affiliate' ) ) {
-      wp_die( 'Security check' );
-    }
-
-    $couponid = $_POST['wcu-id'];
-
-    if($couponid) {
-      wcusage_coupon_affiliate_unlink( $couponid );
-    }
-
-  }
-
-
-
-}
-add_action('admin_head', 'wcusage_filter_users_by_affiliates_message');
-
-
-add_action( 'load-users.php', function() {
-
-   $screen = get_current_screen();
-
-    // Only edit post screen:
-   if( 'users' === $screen->id )
-   {
-
-      // Show Message if Coupon Affiliates role selected.
-      if (isset($_GET["role"])) {
-       if($_GET["role"] == "coupon_affiliate") {
-
-         add_action( 'all_admin_notices', function(){
-             echo '<p style="color: green; font-weight: bold; margin-bottom: 0;"><span class="dashicons dashicons-info-outline"></span>&nbsp; Filter: Only showing users with the Coupon Affiliate role.</p>';
-         });
-
-       }
+add_action('admin_init', 'wcusage_handle_unlink_affiliate_via_url');
+function wcusage_handle_unlink_affiliate_via_url() {
+  if (
+      isset($_GET['action']) && $_GET['action'] === 'wcusage_unlink_affiliate' &&
+      isset($_GET['unassign_coupon']) && isset($_GET['_wpnonce'])
+  ) {
+      // Verify nonce for security
+      if (!wp_verify_nonce($_GET['_wpnonce'], 'admin_unlink_affiliate')) {
+          wp_die('Security check failed');
       }
 
-    }
+      // Check permissions
+      if (!current_user_can('manage_woocommerce')) {
+          wp_die('You do not have permission to perform this action.');
+      }
 
-});
+      $couponid = intval($_GET['unassign_coupon']);
+      if ($couponid) {
+          wcusage_coupon_affiliate_unlink($couponid);
+          $current_page = sanitize_text_field($_GET['current_page']);
+          if(!$current_page) {
+            $current_page = 'users.php';
+          } else {
+            $current_page = admin_url('admin.php?page='.$current_page);
+          }
+          $current_search = sanitize_text_field($_GET['current_search']);
+          if($current_search) {
+            $current_page = add_query_arg('s', $current_search, $current_page);
+          }
+          $current_role = sanitize_text_field($_GET['current_role']);
+          if($current_role) {
+            $current_page = add_query_arg('role', $current_role, $current_page);
+          }
+          wp_redirect($current_page);
+      } else {
+          wp_die('Invalid coupon ID.');
+      }
+  }
+}
 
 /**
  * On users list "Add new Affiliate"
@@ -175,16 +163,28 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
     $commission_message = "";
   }
 
-  if($user_info) {
-    $unlink_message = '<form method="post" id="unlink_affiliate" style="display: inline;">'
-    . wp_nonce_field( 'admin_unlink_affiliate', '_wpnonce2' )
-    . '<input type="text" id="wcu-id" name="wcu-id" value="'.esc_attr($couponid).'" style="display: none;">
-    <button href="#!" onClick="'."return confirm('Unassign affiliate user &#8220;".esc_attr($user_info->user_login)."&#8220; from the coupon code &#8220;".esc_html($coupon_code)."&#8220;? This will not delete the coupon or user, it will simply remove them from the coupon, so they can no longer gain commission or view the affiliate dashboard for it.');".'"
-    type="submit" name="unlink_the_affiliate" class="wcu-affiliate-tooltip-unlink-button">Unassign
-    </button>
-    </form>';
+  if ($user_info) {
+    // Get current page after /wp-admin/ without parameters
+    $current_page = sanitize_text_field($_GET['page']);
+    $unlink_url = add_query_arg(
+        array(
+            'action'    => 'wcusage_unlink_affiliate',
+            'unassign_coupon'  => $couponid,
+            'current_page' => $current_page,
+            'current_search' => (isset($_GET['s']) ? sanitize_text_field($_GET['s']) : ''),
+            'current_role' => (isset($_GET['role']) ? sanitize_text_field($_GET['role']) : ''),
+            '_wpnonce'  => wp_create_nonce('admin_unlink_affiliate')
+        ),
+        admin_url('users.php')
+    );
+
+    $unlink_message = '<a href="' . esc_url($unlink_url) . '" onClick="return confirm(\'Unassign affiliate user &#8220;'
+        . esc_attr($user_info->user_login) . '&#8220; from the coupon code &#8220;'
+        . esc_html($coupon_code) . '&#8220;? This will not delete the coupon or user, it will simply remove them from the coupon, so they can no longer gain commission or view the affiliate dashboard for it.\');" 
+        style="text-decoration: underline;"
+        class="wcu-affiliate-tooltip-unlink-button">Unassign</a>';
   } else {
-    $unlink_message = "";
+      $unlink_message = "";
   }
 
   $coupon_code_linked = "<span class='wcusage-users-affiliate-column'>"

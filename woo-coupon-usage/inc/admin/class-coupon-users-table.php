@@ -24,7 +24,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         $column['ID'] = esc_html__('ID', 'woo-coupon-usage');
         $column['Username'] = esc_html__('Username', 'woo-coupon-usage');
         
-        $column['roles'] = esc_html__('Role', 'woo-coupon-usage');
+        $column['roles'] = esc_html__('Group / Role', 'woo-coupon-usage');
 
         $all_stats = wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_meta', '1');
         $wcusage_field_hide_all_time = wcusage_get_setting_value('wcusage_field_hide_all_time', '0');

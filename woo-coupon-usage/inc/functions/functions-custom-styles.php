@@ -100,7 +100,7 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
 		}
 
 		/* Tabs style */
-		<?php $wcusage_field_tabs_style = wcusage_get_setting_value('wcusage_field_tabs_style', '1'); ?>
+		<?php $wcusage_field_tabs_style = wcusage_get_setting_value('wcusage_field_tabs_style', '2'); ?>
 		<?php if($wcusage_field_tabs_style == '2') { ?>
 		@media screen and (min-width: 768px) {
 			.wcutab {

@@ -1330,8 +1330,8 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
       </script>
 
       <?php 
-            echo "<p class='wcu-tab-title coupon-orders-list-title' style='font-size: 22px; margin-bottom: 0;'>" . esc_html__( "Latest orders using coupon", "woo-coupon-usage" ) . ":</p>";
-            // Latest orders using coupon:
+            echo "<p class='wcu-tab-title coupon-orders-list-title' style='font-size: 22px; margin-bottom: 0;'>" . esc_html__( "Recent Orders", "woo-coupon-usage" ) . ":</p>";
+            // Recent Orders
             ?>
 
       <?php 

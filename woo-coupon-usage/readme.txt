@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.6.2
-Stable tag: 5.16.0
+Stable tag: 5.16.1
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -239,6 +239,13 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 5.16.1 - 2nd October 2024 =
+- Improvement: Added an option to edit the affiliate groups a user is assigned to by editing the user in the admin area.
+- Tweak: Edited the default title for the "Recent Orders" tab to "Recent Orders" instead of "Latest orders for coupon".
+- Tweak: On the "Affiliate Users" admin page, changed the "Role" column title to "Group / Role".
+- Fix: Fixed an issue with unassigning users from coupons in the admin area.
+- Fix: Fixed an issue with the affiliate dashboard in some cases not showing when the coupon code contained certain special characters or spaces.
 
 = Version 5.16.0 - 30th September 2024 =
 - New: (PRO) Added a new "Affiliate Groups" page to the admin area, to easily manage and add new affiliate groups.
