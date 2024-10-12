@@ -77,4 +77,5 @@ jQuery(document).ready(function($) {
             'top': tooltipTop,
         });
     }
+
 });

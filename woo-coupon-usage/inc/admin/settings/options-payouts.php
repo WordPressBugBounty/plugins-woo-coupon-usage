@@ -167,13 +167,6 @@ function wcusage_field_cb_payouts( $args )
 
           <br/>
 
-          <!-- Per Payout Method Schedule -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_enable_payoutschedule_methods', 0, esc_html__( 'Enable to set a different schedule for each payout method', 'woo-coupon-usage' ), '0px'); ?>
-          <i><?php echo esc_html__( 'Enable this to set a different schedule for certain payout methods. If not set, it will still use the default schedule set above.', 'woo-coupon-usage' ); ?></i><br/>
-          <?php echo wcusage_setting_toggle('.wcusage_field_enable_payoutschedule_methods', '.wcusage_field_payouts_freq'); // Show or Hide ?>
-
-          <br/>
-
           <!-- DateTime -->
           <p <?php if( !wcu_fs()->can_use_premium_code() || !wcu_fs()->is_premium() ) { ?>style="opacity: 0.4; pointer-events: none;" class="wcu-settings-pro-only"<?php } ?>>
           	<?php $wcusage_field_payoutschedule_time = wcusage_get_setting_value('wcusage_field_payoutschedule_time', '09'); ?>
@@ -259,27 +252,6 @@ function wcusage_field_cb_payouts( $args )
 
         </span>
 
-        <!-- Frequency -->
-        <p class="wcusage_field_payouts_freq" style="margin-left: 40px;">
-
-          <br/>
-
-          <?php $wcusage_field_tr_payouts_paypal_freq = wcusage_get_setting_value('wcusage_field_tr_payouts_paypal_freq', ''); ?>
-          <input type="hidden" value="0" id="wcusage_field_tr_payouts_paypal_freq" data-custom="custom" name="wcusage_options[wcusage_field_tr_payouts_paypal_freq]" >
-          <strong><label for="scales"><?php echo esc_html__( 'Scheduled Payout Requests:', 'woo-coupon-usage' ); ?></label></strong><br/>
-          <select name="wcusage_options[wcusage_field_tr_payouts_paypal_freq]" id="wcusage_field_tr_payouts_paypal_freq">
-            <?php $frequency_options = array('monthly', 'weekly', 'daily', 'quarterly'); ?>
-            <option value="">- Default -</option>
-            <?php foreach ($frequency_options as $option) { ?>
-              <option value="<?php echo esc_attr($option); ?>" <?php if($wcusage_field_tr_payouts_paypal_freq == $option) { ?>selected<?php } ?>><?php echo ucfirst(esc_attr($option)); ?></option>           
-            <?php } ?>
-          </select>
-          <br/>
-            </p>
-
-        <!-- User Role -->
-        <?php do_action('wcusage_hook_payouts_user_role_select', 'wcusage_field_tr_payouts_paypal_role'); ?>
-
       </span>
 
       <!-- Enable Manual Payment Method #2 -->
@@ -316,28 +288,7 @@ function wcusage_field_cb_payouts( $args )
 
         </span>
 
-        <!-- Frequency -->
-        <p class="wcusage_field_payouts_freq" style="margin-left: 40px;">
-
-          <br/>
-
-          <?php $wcusage_field_tr_payouts_paypal2_freq = wcusage_get_setting_value('wcusage_field_tr_payouts_paypal2_freq', ''); ?>
-          <input type="hidden" value="0" id="wcusage_field_tr_payouts_paypal2_freq" data-custom="custom" name="wcusage_options[wcusage_field_tr_payouts_paypal2_freq]" >
-          <strong><label for="scales"><?php echo esc_html__( 'Scheduled Payout Requests:', 'woo-coupon-usage' ); ?></label></strong><br/>
-          <select name="wcusage_options[wcusage_field_tr_payouts_paypal2_freq]" id="wcusage_field_tr_payouts_paypal2_freq">
-            <?php $frequency_options = array('monthly', 'weekly', 'daily', 'quarterly'); ?>
-            <option value="">- Default -</option>
-            <?php foreach ($frequency_options as $option) { ?>
-              <option value="<?php echo esc_attr($option); ?>" <?php if($wcusage_field_tr_payouts_paypal2_freq == $option) { ?>selected<?php } ?>><?php echo ucfirst(esc_attr($option)); ?></option>           
-            <?php } ?>
-          </select>
-          <br/>
-        </span>
-
-        <!-- User Role -->
-        <?php do_action('wcusage_hook_payouts_user_role_select', 'wcusage_field_tr_payouts_paypal2_role'); ?>
-
-      </p>
+      </span>
 
       <!-- Enable Direct Bank Transfer -->
       <div style="margin-bottom: 40px;"></div>

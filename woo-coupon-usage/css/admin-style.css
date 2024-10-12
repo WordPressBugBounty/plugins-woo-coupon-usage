@@ -1222,6 +1222,10 @@ Label the data
     display: block;
 }
 
+.affiliatecoupons .affiliate.column-affiliate {
+    overflow: hidden;
+}
+
 @media screen and (max-width: 782px) {
     .wp-list-table.registration .is-expanded td,
     .wp-list-table.payout .is-expanded td {

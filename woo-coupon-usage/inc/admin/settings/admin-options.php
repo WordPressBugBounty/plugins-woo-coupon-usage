@@ -1394,7 +1394,7 @@ function wcu_admin_enqueue_scripts(  $hook_suffix  ) {
         wp_enqueue_script( 'jquery-ui-core' );
         wp_enqueue_script( 'jquery-ui-sortable' );
         wp_enqueue_script(
-            'my-script-handle',
+            'caffs-admin',
             WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin.js',
             array('jquery', 'wp-color-picker', 'jquery-ui-sortable'),
             '1.1',

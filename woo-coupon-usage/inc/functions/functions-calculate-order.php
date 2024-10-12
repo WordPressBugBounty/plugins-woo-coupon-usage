@@ -232,6 +232,7 @@ if ( !function_exists( 'wcusage_get_order_totals' ) ) {
             $line_discount_per_item = $line_discount / $item->get_quantity();
             $line_discount_tax = $line_total_tax - $line_subtotal_tax;
             // (Negative number)
+            // Get Refunded Quantity
             $refunded_quantity = 0;
             foreach ( $order_refunds as $refund ) {
                 foreach ( $refund->get_items() as $item_id => $item2 ) {
@@ -249,8 +250,10 @@ if ( !function_exists( 'wcusage_get_order_totals' ) ) {
             if ( $refunded_quantity > 0 ) {
                 if ( $line_items > 1 ) {
                     $refunded_tax = $line_total_tax / $line_items;
+                    $total_discount += $refunded_discount / $line_items;
                 } else {
                     $refunded_tax = $line_total_tax;
+                    $total_discount += $refunded_discount;
                 }
                 $refunded_tax = $refunded_tax * $refunded_quantity;
             } else {
@@ -272,8 +275,6 @@ if ( !function_exists( 'wcusage_get_order_totals' ) ) {
         // Calculate final order total
         $ordertotal = (float) $get_total + (float) $total_discount - (float) $shipping - (float) $total_tax - (float) $remove_tax - (float) $ordertotalrefunded;
         $ordertotaldiscounted = $ordertotal - (float) $total_discount;
-        $refundeddiscount = $order->get_total_refunded();
-        $ordertotaldiscounted = $ordertotaldiscounted - (float) $refundeddiscount;
         // Format totals
         $ordertotal = number_format(
             (float) $ordertotal,
@@ -879,6 +880,9 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         // Reset Value
                         //  ***** Get Per Product Commission ***** //
                         if ( $fixed_product_commission != "" && $fixed_product_commission >= 0 && $productpriority || $fixed_product_commission > 0 && $wcu_text_coupon_commission_fixed_product == "" ) {
+                            if ( $deduct_percent ) {
+                                $fixed_product_commission = $fixed_product_commission * $deduct_percent;
+                            }
                             $fixed_product_commission_total += $fixed_product_commission * $this_quantity2;
                         } else {
                             // Get default Fixed Per Product
@@ -889,6 +893,9 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                             }
                             // Update Total
                             if ( is_numeric( $fixed_product_commission ) && is_numeric( $this_quantity2 ) ) {
+                                if ( $deduct_percent ) {
+                                    $fixed_product_commission = $fixed_product_commission * $deduct_percent;
+                                }
                                 $fixed_product_commission_total += $fixed_product_commission * $this_quantity2;
                             }
                             $iscommissionproduct = true;
@@ -908,42 +915,44 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                     // Update Commission Summary
                     if ( $type != "refunds" ) {
                         $this_product_id = $item_data['product_id'];
-                        $this_product_total_combined_commission = $this_line_total_commission + $fixed_product_commission * $this_quantity2;
-                        if ( $wcusage_show_tax_fixed ) {
-                            $this_product_total_combined_commission = $this_product_total_combined_commission * wcusage_get_order_tax_percent( $orderid );
-                        }
-                        if ( !is_array( $commission_summary ) || empty( $commission_summary ) ) {
-                            $commission_summary = array();
-                        }
-                        $commission_summary[$this_product_id]['subtotal'] = number_format(
-                            (float) $this_line_subtotal,
-                            4,
-                            '.',
-                            ''
-                        );
-                        $commission_summary[$this_product_id]['total'] = number_format(
-                            (float) $this_line_total,
-                            4,
-                            '.',
-                            ''
-                        );
-                        $this_line_discount = $this_line_subtotal - $this_line_total;
-                        $commission_summary[$this_product_id]['discount'] = number_format(
-                            (float) $this_line_discount,
-                            4,
-                            '.',
-                            ''
-                        );
-                        if ( !isset( $commission_summary[$this_product_id]['commission'] ) || !$never_update_commission_meta ) {
-                            $commission_summary[$this_product_id]['commission'] = number_format(
-                                (float) $this_product_total_combined_commission,
+                        if ( $this_quantity2 > 0 ) {
+                            $this_product_total_combined_commission = $this_line_total_commission + $fixed_product_commission * $this_quantity2;
+                            if ( $wcusage_show_tax_fixed ) {
+                                $this_product_total_combined_commission = $this_product_total_combined_commission * wcusage_get_order_tax_percent( $orderid );
+                            }
+                            if ( !is_array( $commission_summary ) || empty( $commission_summary ) ) {
+                                $commission_summary = array();
+                            }
+                            $commission_summary[$this_product_id]['subtotal'] = number_format(
+                                (float) $this_line_subtotal,
                                 4,
                                 '.',
                                 ''
                             );
+                            $commission_summary[$this_product_id]['total'] = number_format(
+                                (float) $this_line_total,
+                                4,
+                                '.',
+                                ''
+                            );
+                            $this_line_discount = $this_line_subtotal - $this_line_total;
+                            $commission_summary[$this_product_id]['discount'] = number_format(
+                                (float) $this_line_discount,
+                                4,
+                                '.',
+                                ''
+                            );
+                            if ( !isset( $commission_summary[$this_product_id]['commission'] ) || !$never_update_commission_meta ) {
+                                $commission_summary[$this_product_id]['commission'] = number_format(
+                                    (float) $this_product_total_combined_commission,
+                                    4,
+                                    '.',
+                                    ''
+                                );
+                            }
+                            $commission_summary[$this_product_id]['number'] = $this_quantity2;
+                            $commission_summary[$this_product_id]['id'] = $item_data['product_id'];
                         }
-                        $commission_summary[$this_product_id]['number'] = $this_quantity2;
-                        $commission_summary[$this_product_id]['id'] = $item_data['product_id'];
                     }
                 }
                 // ***** Deduct Custom Discounts Commission ***** //

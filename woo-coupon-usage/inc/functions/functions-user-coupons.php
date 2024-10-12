@@ -203,6 +203,23 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
         echo "<p>You can set the global commission rates for all coupons in the <a href='" . esc_url( admin_url( "admin.php?page=wcusage_settings" ) ) . "'>plugin settings</a> page.<p>";
         echo "<p>Extra features are available with PRO version including custom commission amounts per coupon, email notifications, and more. <a href='" . esc_url( admin_url( "admin.php?page=wcusage-pricing&trial=true" ) ) . "'>UPGRADE</a><p>";
         echo "<img src='" . esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . "images/coupon-settings-pro.png' style='max-width: 100%;'>";
+        ?>
+
+    <?php 
+        if ( !is_plugin_active( 'better-coupon-restrictions/coupon-restrictions.php' ) && !is_plugin_active( 'better-coupon-restrictions-pro/coupon-restrictions-pro.php' ) ) {
+            ?>
+      <br/><hr/>
+      <p>
+      Extra Restrictions:<br/>
+      <?php 
+            echo sprintf( wp_kses_post( __( 'Want more advanced coupon usage restrictions? Check out our %s plugin!', 'woo-coupon-usage' ) ), '<a href="https://relywp.com/plugins/better-coupon-restrictions-woocommerce/?utm_source=caffs-settings" target="_blank">Better Coupon Restrictions</a>' );
+            ?>
+      </p>
+      <?php 
+        }
+        ?>
+
+    <?php 
         echo "</div>";
     }
 
@@ -217,25 +234,25 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields_limits' ) ) {
         if ( !$allow_all_customers ) {
             ?>
     <script>
-      function wcusage_check_extra_limits() {
-        if( jQuery( "#wcu_select_coupon_user_visual" ).val() != "" ) {
-          jQuery('.wcusage-coupon-extra-limits').hide();
-          jQuery('.wcusage-coupon-extra-limits-default-enabled').show();
-        } else {
-          jQuery('.wcusage-coupon-extra-limits').show();
-          jQuery('.wcusage-coupon-extra-limits-default-enabled').hide();
-        }
+    function wcusage_check_extra_limits() {
+      if( jQuery( "#wcu_select_coupon_user_visual" ).val() != "" ) {
+        jQuery('.wcusage-coupon-extra-limits').hide();
+        jQuery('.wcusage-coupon-extra-limits-default-enabled').show();
+      } else {
+        jQuery('.wcusage-coupon-extra-limits').show();
+        jQuery('.wcusage-coupon-extra-limits-default-enabled').hide();
       }
-      jQuery( document ).ready(function() {
-        jQuery( "#wcu_select_coupon_user_visual" ).keyup(function () {
-          wcusage_check_extra_limits();
-        });
-        jQuery( ".selectedusernamedelete" ).click(function(){
-          jQuery('.wcusage-coupon-extra-limits').show();
-          jQuery('.wcusage-coupon-extra-limits-default-enabled').hide();
-        });
+    }
+    jQuery( document ).ready(function() {
+      jQuery( "#wcu_select_coupon_user_visual" ).keyup(function () {
         wcusage_check_extra_limits();
       });
+      jQuery( ".selectedusernamedelete" ).click(function(){
+        jQuery('.wcusage-coupon-extra-limits').show();
+        jQuery('.wcusage-coupon-extra-limits-default-enabled').hide();
+      });
+      wcusage_check_extra_limits();
+    });
     </script>
     <?php 
         }
@@ -246,13 +263,29 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields_limits' ) ) {
     <span class="wcusage-coupon-extra-limits">
 
     <?php 
+        $wcu_enable_first_order_only = get_post_meta( $coupon_get_id, 'wcu_enable_first_order_only', true );
         woocommerce_wp_checkbox( array(
-            'id'          => 'wcu_enable_first_order_only',
+            'id'          => 'wcu_enable_first_order_only_' . rand( 1, 9999 ),
+            'name'        => 'wcu_enable_first_order_only',
+            'class'       => 'wcu_enable_first_order_only',
+            'value'       => $wcu_enable_first_order_only,
             'label'       => esc_html__( 'New customers only?', 'woocommerce' ),
             'description' => esc_html__( 'When checked, this coupon can only be used by new customers on their first order.', 'woo-coupon-usage' ),
         ) );
         ?>
 
+    <?php 
+        if ( !is_plugin_active( 'better-coupon-restrictions/coupon-restrictions.php' ) && !is_plugin_active( 'better-coupon-restrictions-pro/coupon-restrictions-pro.php' ) ) {
+            ?>
+    <p class="form-field" style="font-size: 14px; color: #999;">
+    <?php 
+            echo sprintf( wp_kses_post( __( 'Want more advanced coupon usage restrictions? Check out the %s plugin.', 'woo-coupon-usage' ) ), '<a href="https://relywp.com/plugins/better-coupon-restrictions-woocommerce/?utm_source=caffs-settings" target="_blank">Better Coupon Restrictions</a>' );
+            ?>
+    </p>
+    <?php 
+        }
+        ?>
+    
     </span>
 
     <span class="wcusage-coupon-extra-limits-default-enabled" style="display: none;">

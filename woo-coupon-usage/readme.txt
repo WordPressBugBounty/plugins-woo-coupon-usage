@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.6.2
-Stable tag: 5.16.1
+Stable tag: 5.16.3
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -239,6 +239,18 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 5.16.3 - 12th October 2024 =
+- New: Added a new "HoneyPot Spam Prevention" option to the affiliate registration form settings. This adds a basic honeypot spam prevention method by default for all sites, but the advanced CAPTCHA options are recommended.
+- Tweak: The "new customer only" option for coupons will now work with guest checkouts if the customer has entered their email address and that email address has already placed an order.
+- Tweak: Added a check to prevent the template coupon code from being applied to the cart.
+- Fix: (PRO) Fixed an issue with deleting affiliate groups in the admin area.
+- Fix: (PRO) Fixed an issue with removing affiliates from a group when editing the user in the admin area.
+- Fix: Fixed fully refunded items showing in the commission summary meta data for orders.
+- Fix: Fixed an issue in some cases with the calculations for the "discount" shown on the affiliate dashboard when an order is partially refunded.
+
+= Version 5.16.2 - 3rd October 2024 =
+- Fix (PRO): Fixed a potential issue with some user role/group permissions since the last update.
 
 = Version 5.16.1 - 2nd October 2024 =
 - Improvement: Added an option to edit the affiliate groups a user is assigned to by editing the user in the admin area.

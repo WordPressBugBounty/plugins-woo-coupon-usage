@@ -58,7 +58,6 @@ if ( $wcusage_field_registration_enable ) {
         }
         ?>
 
-    <!-- Recaptcha -->
     <?php 
         if ( $enable_captcha == "1" && isset( $options['wcusage_registration_recaptcha_key'] ) && !wp_script_is( 'g-recaptcha', 'enqueued' ) ) {
             wp_enqueue_script(
@@ -69,10 +68,6 @@ if ( $wcusage_field_registration_enable ) {
                 true
             );
         }
-        ?>
-
-    <!-- Turnstile -->
-    <?php 
         if ( $enable_captcha == "2" && isset( $options['wcusage_registration_turnstile_key'] ) && !wp_script_is( 'cf-turnstile', 'enqueued' ) ) {
             wp_enqueue_script(
                 'cf-turnstile',
@@ -274,6 +269,22 @@ if ( $wcusage_field_registration_enable ) {
                         ?>
 
             <?php 
+                        ?>
+
+            <?php 
+                        $wcusage_registration_enable_honeypot = wcusage_get_setting_value( 'wcusage_registration_enable_honeypot', 1 );
+                        ?>
+            <?php 
+                        if ( $wcusage_registration_enable_honeypot ) {
+                            ?>
+            <!-- HP -->
+            <div style="display: none;">
+              <label for="wcu-input-hp">Dont put anything here..</label>
+              <input type="text" id="wcu-input-hp" name="wcu-input-hp" class="input-text
+              form-control" autocomplete="off" value="">
+            </div>
+            <?php 
+                        }
                         ?>
 
             <!-- Terms -->
@@ -1095,6 +1106,12 @@ function wcusage_registration_form_verify_captcha(  $adminpost  ) {
     if ( !isset( $_POST['wcu-input-email'] ) ) {
         return true;
     }
+    // Check honeypot
+    $wcusage_registration_enable_honeypot = wcusage_get_setting_value( 'wcusage_registration_enable_honeypot', 1 );
+    if ( isset( $_POST['wcu-input-hp'] ) && $_POST['wcu-input-hp'] != "" && $wcusage_registration_enable_honeypot ) {
+        return false;
+    }
+    // Check captcha
     $enable_captcha = wcusage_get_setting_value( 'wcusage_registration_enable_captcha', '' );
     if ( $enable_captcha && !$adminpost ) {
         $recaptcha_secret = "";

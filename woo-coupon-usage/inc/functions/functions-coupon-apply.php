@@ -15,8 +15,20 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_coupons' ) ) {
 
     foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
 
-      $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
+      // Check if template coupon is applied and remove it
+      $wcusage_field_registration_coupon_template = wcusage_get_setting_value('wcusage_field_registration_coupon_template', '');
+      if($wcusage_field_registration_coupon_template) {
+        if($coupon->get_code() == $wcusage_field_registration_coupon_template) {
+          WC()->cart->remove_coupon( $coupon->get_code() );
+          wc_clear_notices();
+          if(current_user_can('manage_options')) {
+            wc_add_notice( esc_html__( "Admin notice: The 'template coupon code' can not be applied to any cart.", "woo-coupon-usage" ), "error" );
+          }
+        }
+      }
 
+      // Check if coupon is expired
+      $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
       if($coupon_user_id) {
 
         $current_coupons++;
@@ -78,7 +90,6 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_coupons' ) ) {
 
     }
 
-
   }
 }
 add_action( 'woocommerce_applied_coupon', 'wcusage_applied_coupon_check_allow_coupons', 10, 0 );
@@ -100,15 +111,14 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_customer' ) ) {
 
         /***** Check existing customer. *****/
 
-        if( is_user_logged_in() ) {
-          $allow_all_customers = wcusage_get_setting_value('wcusage_field_allow_all_customers', 1);
-          $first_order_only = get_post_meta( $coupon->get_id(), 'wcu_enable_first_order_only', true );
-          if( $first_order_only == "yes" || (!$allow_all_customers && $coupon_user_id) ) {
-            if(wcusage_is_existing_customer()) {
-              wc_clear_notices();
-              WC()->cart->remove_coupon( $coupon->get_code() );
-              wc_add_notice( esc_html__( "Sorry, only new customers can use this coupon code.", "woo-coupon-usage" ), "error" );
-            }
+        $allow_all_customers = wcusage_get_setting_value('wcusage_field_allow_all_customers', 1);
+        $first_order_only = get_post_meta( $coupon->get_id(), 'wcu_enable_first_order_only', true );
+        if( $first_order_only == "yes" || !$allow_all_customers ) {
+          $checkout_email = WC()->checkout()->get_value( 'billing_email' );
+          if(wcusage_is_existing_customer($checkout_email)) {
+            wc_clear_notices();
+            WC()->cart->remove_coupon( $coupon->get_code() );
+            wc_add_notice( esc_html__( "Sorry, only new customers can use this coupon code.", "woo-coupon-usage" ), "error" );
           }
         }
 
@@ -154,18 +164,34 @@ add_action( 'woocommerce_update_cart_action_cart_updated', 'wcusage_applied_coup
  *
  */
 if( !function_exists( 'wcusage_is_existing_customer' ) ) {
-  function wcusage_is_existing_customer() {
+  function wcusage_is_existing_customer( $email = "" ) {
+
       // Get current user id
       $user_id = get_current_user_id();
-      // Args for wc_get_orders()
-      $args = array(
-          'status' => array('wc-completed', 'wc-processing', 'wc-pending'), // Only orders with "completed" status
-          'customer_id' => $user_id, // Set current user id
-          'limit' => 1, // Only need to check if at least one order exists
-          'return' => 'ids', // Return Ids
-      );
-      // Get all customer orders
-      $customer_orders = wc_get_orders( $args );
+
+      if( $user_id ) {
+        // Args for wc_get_orders()
+        $args = array(
+            'status' => array('wc-completed', 'wc-processing', 'wc-pending'), // Only orders with "completed" status
+            'customer_id' => $user_id, // Set current user id
+            'limit' => 1, // Only need to check if at least one order exists
+            'return' => 'ids', // Return Ids
+        );
+        // Get all customer orders
+        $customer_orders = wc_get_orders( $args );
+      } else {
+        if($email) {
+          $customer_orders = wc_get_orders( array(
+            'status' => array('wc-completed', 'wc-processing', 'wc-pending'), // Only orders with "completed" status
+            'email' => $email, // Set current user id
+            'limit' => 1, // Only need to check if at least one order exists
+            'return' => 'ids', // Return Ids
+          ) );
+        } else {
+          return false;
+        }
+      }
+
       // Return "true" when customer has already at least one order (false if not)
       return count($customer_orders) > 0 ? true : false;
   }

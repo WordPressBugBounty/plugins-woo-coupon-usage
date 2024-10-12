@@ -352,6 +352,15 @@ function wcusage_field_cb_registration( $args )
 
       <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Form CAPTCHA - Spam Protection', 'woo-coupon-usage' ); ?></h3>
 
+      <!-- Enable HoneyPot Spam Protection -->
+      <?php echo wcusage_setting_toggle_option('wcusage_registration_enable_honeypot', 1, esc_html__( 'Enable HoneyPot Spam Prevention', 'woo-coupon-usage' ), '0px'); ?>
+      <i><?php echo esc_html__( 'With this enabled, a hidden field will be added to the registration form to help prevent spam.', 'woo-coupon-usage' ); ?></i><br/>
+      <i><?php echo esc_html__( 'This is only a basic spam protection method, and is not as effective as CAPTCHA.', 'woo-coupon-usage' ); ?></i><br/>
+
+      <br/>
+
+      <Strong><?php echo esc_html__( 'Advanced CAPTCHA Spam Protection', 'woo-coupon-usage' ); ?>:</Strong><br/>
+
       <!-- Enable Spam CAPTCHA -->
       <?php
       $recaptcha_key = wcusage_get_setting_value('wcusage_registration_recaptcha_key', '');
@@ -385,7 +394,7 @@ function wcusage_field_cb_registration( $args )
       });
       </script>
 
-      <br/><i><?php echo esc_html__( 'Setup CAPTCHA on your affiliate registration form to help prevent spam.', 'woo-coupon-usage' ); ?></i><br/>
+      <br/><i><?php echo esc_html__( 'Setup a CAPTCHA on your affiliate registration form to help prevent spam.', 'woo-coupon-usage' ); ?></i><br/>
 
       <div class="wcu-field-section-registration-captcha">
 
