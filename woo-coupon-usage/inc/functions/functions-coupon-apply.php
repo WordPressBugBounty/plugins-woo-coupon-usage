@@ -105,9 +105,12 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_customer' ) ) {
 
     foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
 
-      if($coupon) {
+      if($coupon && !empty($coupon->get_id())) {
 
         $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
+        if(!$coupon_user_id) {
+          continue;
+        }
 
         /***** Check existing customer. *****/
 
@@ -124,7 +127,7 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_customer' ) ) {
 
         /***** Check if visitor is blacklisted *****/
 
-        if( wcusage_is_customer_blacklisted() && $coupon_user_id ) {
+        if( wcusage_is_customer_blacklisted() ) {
             wc_clear_notices();
             WC()->cart->remove_coupon( $coupon->get_code() );
             wc_add_notice( esc_html__( "Sorry, you can't use this coupon code or it has expired.", "woo-coupon-usage"), "error" );
@@ -133,7 +136,7 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_customer' ) ) {
         /***** Check if referrer domain is blacklisted *****/
 
         $block_domains_manual = wcusage_get_setting_value('wcusage_field_fraud_block_domains_manual', '0');
-        if( wcusage_is_domain_blacklisted() && $coupon_user_id && $block_domains_manual ) {
+        if( wcusage_is_domain_blacklisted() && $block_domains_manual ) {
             wc_clear_notices();
             WC()->cart->remove_coupon( $coupon->get_code() );
             wc_add_notice( esc_html__( "Sorry, you can't use this coupon code or it has expired.", "woo-coupon-usage"), "error" );

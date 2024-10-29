@@ -277,7 +277,7 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields_limits' ) ) {
     <?php 
         if ( !is_plugin_active( 'better-coupon-restrictions/coupon-restrictions.php' ) && !is_plugin_active( 'better-coupon-restrictions-pro/coupon-restrictions-pro.php' ) ) {
             ?>
-    <p class="form-field" style="font-size: 14px; color: #999;">
+    <p class="form-field" style="font-size: 12px; color: #999;">
     <?php 
             echo sprintf( wp_kses_post( __( 'Want more advanced coupon usage restrictions? Check out the %s plugin.', 'woo-coupon-usage' ) ), '<a href="https://relywp.com/plugins/better-coupon-restrictions-woocommerce/?utm_source=caffs-settings" target="_blank">Better Coupon Restrictions</a>' );
             ?>

@@ -413,8 +413,7 @@ function wcusage_setup_page_html() {
           <?php foreach ($questions as $index => $qa): ?>
               <h2 style="margin-top: 24px; cursor: pointer;">
                   <span class="faq-question" id="faq-<?php echo esc_html($index); ?>">
-                  <span class="fa-solid fa-minus"></span>
-                  <?php echo esc_html($qa['question']); ?> <span class="fa-solid fa-arrow-down"></span>
+                    - <?php echo esc_html($qa['question']); ?> <span class="fa-solid fa-arrow-down"></span>
                   </span>
               </h2>
               <div class="faq-answer" style="margin-bottom: 20px;">
@@ -495,7 +494,7 @@ function wcusage_setup_page_html() {
               ?>
               <?php if($specialsale) { ?>
                 <br/><br/>
-                <strong style="color: #ce1a1a; font-size: 14px;"><span class="fas fa-star fa-spin"></span> Black Friday Sale! 30% off with code: BF2023</strong>
+                <strong style="color: #ce1a1a; font-size: 14px;"><span class="fas fa-star fa-spin"></span> Black Friday Sale! 30% off with code: BF2024</strong>
               <?php } ?>
 
             <?php } ?>
@@ -622,27 +621,6 @@ function wcusage_setup_page_update() {
   // 5
   if( isset( $_POST['submit_step5'] ) ) {
 
-    if( isset( $_POST['wcusage_options']['wcusage_field_orders'] ) ) {
-      $option_group['wcusage_field_orders'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_orders'] );
-    }
-
-    $orderstatuses = wc_get_order_statuses();
-    $option_group['wcusage_field_order_type_custom'] = array();
-    foreach( $orderstatuses as $key => $status ){
-      if( isset( $_POST['wcusage_field_order_type_custom'][$key] ) ) {
-        $option_group['wcusage_field_order_type_custom'][$key] = "1";
-      }
-    }
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_order_sort'] ) ) {
-      $option_group['wcusage_field_order_sort'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_order_sort'] );
-    }
-
-  }
-
-  // 6
-  if( isset( $_POST['submit_step6'] ) ) {
-
     if( isset( $_POST['wcusage_options']['wcusage_field_from_email'] ) ) {
       $option_group['wcusage_field_from_email'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_from_email'] );
     }
@@ -667,58 +645,6 @@ function wcusage_setup_page_update() {
       $option_group['wcusage_field_email_message'] = html_entity_decode(stripslashes( $_POST['wcusage_options']['wcusage_field_email_message'] ));
     }
 
-  }
-
-  // 7
-  if( isset( $_POST['submit_step7'] ) ) {
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_color_tab'] ) ) {
-      $option_group['wcusage_field_color_tab'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_color_tab'] );
-    }
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_color_tab_font'] ) ) {
-      $option_group['wcusage_field_color_tab_font'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_color_tab_font'] );
-    }
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_color_tab_hover'] ) ) {
-      $option_group['wcusage_field_color_tab_hover'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_color_tab_hover'] );
-    }
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_color_tab_hover_font'] ) ) {
-      $option_group['wcusage_field_color_tab_hover_font'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_color_tab_hover_font'] );
-    }
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_color_table'] ) ) {
-      $option_group['wcusage_field_color_table'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_color_table'] );
-    }
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_color_table_font'] ) ) {
-      $option_group['wcusage_field_color_table_font'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_color_table_font'] );
-    }
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_color_button'] ) ) {
-      $option_group['wcusage_field_color_button'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_color_button'] );
-    }
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_color_button_font'] ) ) {
-      $option_group['wcusage_field_color_button_font'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_color_button_font'] );
-    }
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_color_button_hover'] ) ) {
-      $option_group['wcusage_field_color_button_hover'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_color_button_hover'] );
-    }
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_color_button_font_hover'] ) ) {
-      $option_group['wcusage_field_color_button_font_hover'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_color_button_font_hover'] );
-    }
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_color_stats_icon'] ) ) {
-      $option_group['wcusage_field_color_stats_icon'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_color_stats_icon'] );
-    }
-
-    if( isset( $_POST['wcusage_options']['wcusage_field_color_line_graph'] ) ) {
-      $option_group['wcusage_field_color_line_graph'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_color_line_graph'] );
-    }
   }
 
   update_option( 'wcusage_options', $option_group );

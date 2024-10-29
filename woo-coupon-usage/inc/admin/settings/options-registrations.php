@@ -888,7 +888,7 @@ function wcusage_field_cb_registration( $args )
               <p><?php echo esc_html__( 'You can get your List ID from here:', 'woo-coupon-usage' ); ?> <a href="https://www.klaviyo.com/lists" target="_blank">https://www.klaviyo.com/lists</a></p>
               <br/>
               <!-- API Key -->
-              <?php echo wcusage_setting_text_option('wcusage_klaviyo_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
+              <?php echo wcusage_setting_text_option('wcusage_klaviyo_api_key', '', esc_html__( 'Private API Key', 'woo-coupon-usage' ), '0px'); ?>
               <br/>
               <!-- List ID -->
               <?php echo wcusage_setting_text_option('wcusage_klaviyo_list_id', '', esc_html__( 'List ID', 'woo-coupon-usage' ), '0px'); ?>

@@ -851,9 +851,10 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
       <div style="transform: scale(0.8); -webkit-transform-origin-x: 0;">
 
-        <div>
-          <strong>Settings not saving automatically?</strong>
-          <?php 
+        <strong><?php 
+        echo esc_html__( 'Settings not saving automatically?', 'woo-coupon-usage' );
+        ?></strong><br/>
+        <?php 
         echo wcusage_setting_toggle_option(
             'wcusage_field_settings_legacy',
             0,
@@ -861,11 +862,10 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
             '0px'
         );
         ?>
-          <i><?php 
+        <i><?php 
         echo esc_html__( 'This will disable automatic ajax saving, and instead will enable the "Save Settings" button, and you will save all settings at once.', 'woo-coupon-usage' );
         ?></i>
-          <br/><br/>
-        </div>
+        <br/><br/>
 
         <script>
         jQuery( document ).ready(function() {
@@ -884,8 +884,8 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         });
         </script>
         <span class="wcu-field-section-save">
+          
           <?php 
-        // output save settings button
         submit_button( 'Save Settings' );
         ?>
 
@@ -1036,7 +1036,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
       <?php 
                 } else {
                     ?>
-        <p style="font-size: 14px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;">Black Friday - 30% discount!<br/>Use code: BF2023</p>
+        <p style="font-size: 14px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;">Black Friday - 30% discount!<br/>Use code: BF2024</p>
       <?php 
                 }
                 ?>

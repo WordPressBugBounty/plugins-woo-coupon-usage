@@ -501,15 +501,21 @@ if( !function_exists( 'wcusage_setting_sectio_email_free' ) ) {
   function wcusage_setting_section_email_free($type = "") {
 
   $options = get_option( 'wcusage_options' );
+
+  if(isset($_SERVER['SERVER_NAME'])) {
+    $admin_email = "admin@" . $_SERVER['SERVER_NAME'];
+  } else {
+    $admin_email = get_bloginfo( 'admin_email' );
+  }
   ?>
 
     <!-- From Email Address -->
-    <?php echo wcusage_setting_text_option('wcusage_field_from_email', '', esc_html__( 'From Email Address:', 'woo-coupon-usage' ), '0px'); ?>
+    <?php echo wcusage_setting_text_option('wcusage_field_from_email', $admin_email, esc_html__( 'From Email Address:', 'woo-coupon-usage' ), '0px'); ?>
 
     <br/>
 
     <!-- From Name -->
-    <?php echo wcusage_setting_text_option('wcusage_field_from_name', '', esc_html__( 'From Name:', 'woo-coupon-usage' ), '0px'); ?>
+    <?php echo wcusage_setting_text_option('wcusage_field_from_name', get_bloginfo( 'name' ), esc_html__( 'From Name:', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( '(If you are using a mail SMTP plugin, the from email and name may be overridden.)', 'woo-coupon-usage' ); ?></i><br/>
     
     <br/>

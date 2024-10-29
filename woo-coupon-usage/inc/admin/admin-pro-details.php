@@ -61,7 +61,7 @@ function wcusage_field_cb_pro_details( $args )
     ?>
     <p style="margin-top: 20px;">
     <?php if($specialsale) { ?>
-      <strong style="color: red;"><span class="fas fa-star fa-spin"></span> Black Friday Sale! 30% off PRO with code: BF2023</strong>
+      <strong style="color: red;"><span class="fas fa-star fa-spin"></span> Black Friday Sale! 30% off PRO with code: BF2024</strong>
     <?php } ?>
     </p>
 

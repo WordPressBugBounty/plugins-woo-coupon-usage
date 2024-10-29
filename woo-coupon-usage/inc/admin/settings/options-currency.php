@@ -25,9 +25,11 @@ function wcusage_field_cb_currency(  $args  ) {
     echo esc_html__( 'NOTE: Updating the conversion rates below will only update the totals for NEW orders (if the affiliate dashboard has been viewed at-least once).', 'woo-coupon-usage' );
     ?></p>
 
-  <p>- <?php 
-    printf( wp_kses_post( __( 'To completely refresh each of your affiliate dashboards stats for past orders, with the new conversion rates, <a href="%s">click here</a>. (The first page load for each dashboard may take slightly longer.)', 'woo-coupon-usage' ) ), esc_url( admin_url( 'admin.php?page=wcusage_settings&refreshstats=true' ) ) );
-    ?></p>
+    <p>
+      - <?php 
+    printf( wp_kses_post( __( 'To completely refresh each of your affiliate dashboards stats for past orders, with the new conversion rates, %s and click "refresh all data". (The first page load for each dashboard may take slightly longer.)', 'woo-coupon-usage' ) ), '<a href="#" onclick="wcusage_go_to_settings(\'#tab-debug\', \'#wcusage_field_enable_coupon_all_stats_meta_p\');">go to the debug settings tab</a>' );
+    ?>
+  </p>
 
   <br/><hr/>
 

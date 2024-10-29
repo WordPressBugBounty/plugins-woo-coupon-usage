@@ -25,6 +25,9 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
     $start_date = sanitize_text_field($start_date);
     $end_date = sanitize_text_field($end_date);
 
+	$start_date = wcusage_convert_date_to_gmt($start_date);
+	$end_date = wcusage_convert_date_to_gmt($end_date);
+
     $coupon_code = strtolower($coupon_code);
     $couponinfo = wcusage_get_coupon_info($coupon_code);
 
@@ -109,13 +112,11 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 			$post_type = "";
 			$post_status = "status";
 			$post_id = "order_id";
-			$start_date = wcusage_convert_date_to_gmt($start_date);
-			$end_date = wcusage_convert_date_to_gmt($end_date);
 		} else {
 			$id = "ID";
 			$posts = "posts";
 			$postmeta = "postmeta";
-			$post_date = "post_date";
+			$post_date = "post_date_gmt";
 			$post_type = "WHERE\r\n p.post_type = 'shop_order'";
 			$post_status = "post_status";
 			$post_id = "post_id";

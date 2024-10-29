@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.6.2
-Stable tag: 5.16.3
+Stable tag: 5.16.4
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -239,6 +239,19 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 5.16.4 - 29th October 2024 =
+- Tweak: Some small tweaks to the admin settings page.
+- Tweak: Some small tweaks to the setup wizard.
+- Tweak: (PRO) The "Custom Creatives Text" now supports paragraphs when displayed on the affiliate dashboard.
+- Fix: (PRO) Fixed a PHP error with the performance bonuses reward check, when using user role restrictions.
+- Fix: (PRO) Fixed an issue with using SVG images for the PDF statements logo.
+- Fix: Potential fix for issue with the "New Customers Only" option showing the message on cart even after reloading the page.
+- Fix: Fixed an occasional issue where the affiliate dashboard would show "No affiliate dashboard found" when viewing the dashboard for a coupon via the unique dashboard link.
+- Fix: (PRO) Fixed an issue with the "Limit to certain user roles & groups?" option for Payout methods not working in some cases.
+- Fix: (PRO) Fixed an issue with the Klaviyo integration.
+- Fix: Fixed an issue with affiliate orders reports when filtered by date and not using GMT timezone in WordPress settings.
+- Other: Updated to Freemius SDK 2.9.0
 
 = Version 5.16.3 - 12th October 2024 =
 - New: Added a new "HoneyPot Spam Prevention" option to the affiliate registration form settings. This adds a basic honeypot spam prevention method by default for all sites, but the advanced CAPTCHA options are recommended.

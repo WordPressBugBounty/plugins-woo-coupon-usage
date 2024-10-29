@@ -49,14 +49,6 @@ strong { color: green; font-size: 16px; }
 h2 { font-size: 22px; }
 </style>
 
-<?php
-// Black Friday Deal
-$todayDate = strtotime('now');
-$dealDateBegin = strtotime('19-11-2022');
-$dealDateEnd = strtotime('01-12-2022');
-if ($todayDate >= $dealDateBegin && $todayDate <= $dealDateEnd) { $specialsale = true; } else { $specialsale = false; }
-?>
-
 <div class="wrap plugin-settings">
 	
 	<div class="wcusage-admin-page-help-col" style="width: calc(100% - 76px);">
@@ -450,22 +442,3 @@ function wcusage_how_to_use_content() {
 
 <?php
 }
-
-/* WP HEAD STYLES */
-function wcusage_admin_header_code() {
-?>
-<?php $wcusage_coupon_hide_woo_marketing =wcusage_get_setting_value('wcusage_field_coupon_hide_woo_marketing', '1');
-if ($wcusage_coupon_hide_woo_marketing) {
-    ?>
-	<style>
-	.post-type-shop_coupon .woocommerce-marketing-coupons,
-    .post-type-shop_coupon .woocommerce-marketing-knowledgebase-card {
-        display: none;
-    }
-	</style>
-    <?php
-}
-?>
-<?php
-}
-add_action( 'admin_head', 'wcusage_admin_header_code' );

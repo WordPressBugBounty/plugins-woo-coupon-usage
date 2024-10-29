@@ -247,11 +247,6 @@ function wcusage_field_cb_debug( $args )
   <i><?php echo esc_html__( 'When someone uses the referral URL, if the code is automatically applied, it will show this message on all pages.', 'woo-coupon-usage' ); ?></i><br/>
   <i><?php echo esc_html__( 'If you dont want the message to always show, toggle this setting on, and it will instead only show on the cart/checkout pages.', 'woo-coupon-usage' ); ?></i><br/>
 
-  <br/>
-
-  <!-- Hide the WooCommerce marketing boxes on coupons list. -->
-  <?php echo wcusage_setting_toggle_option('wcusage_field_coupon_hide_woo_marketing', 1, esc_html__( 'Hide the WooCommerce marketing boxes on coupons list.', 'woo-coupon-usage' ), '0px'); ?>
-
   <br/><hr/>
 
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( '(Admin) WooCommerce Orders "Affiliate Info" Sections', 'woo-coupon-usage' ); ?>:</h3>

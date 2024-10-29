@@ -56,6 +56,7 @@ function wcusage_couponusage(  $atts  ) {
                 $singlecoupon = strtolower( $atts['coupon'] );
                 // Allows Single Coupon Shortcode
                 $singlecoupon = str_replace( "%20", " ", $singlecoupon );
+                // Replace %20 with space
             } else {
                 $singlecoupon = "";
             }
@@ -72,6 +73,7 @@ function wcusage_couponusage(  $atts  ) {
             if ( isset( $_GET['couponid'] ) ) {
                 $urlid = strtolower( $_GET['couponid'] );
             }
+            // Get coupon name
             $show_coupon = "";
             if ( $singlecoupon ) {
                 $show_coupon = strtolower( $singlecoupon );
@@ -80,16 +82,25 @@ function wcusage_couponusage(  $atts  ) {
                     $show_coupon = strtolower( $urlid );
                 }
             }
-            $show_coupon = preg_replace( '/-[^-]*$/', '', $show_coupon );
             // Remove everything after last dash ("-") which is the ID.
+            $show_coupon = preg_replace( '/-[^-]*$/', '', $show_coupon );
+            // Replace %20 with space
             $show_coupon = str_replace( "%20", " ", $show_coupon );
             if ( $show_coupon ) {
-                $args = array(
-                    'post_type'      => 'shop_coupon',
-                    'posts_per_page' => -1,
-                    's'              => $show_coupon,
-                    'cache_results'  => false,
-                );
+                // Get ID of coupon with name $show_coupon
+                $the_coupon_id = wcusage_get_coupon_id( $show_coupon );
+                if ( $the_coupon_id ) {
+                    $args = array(
+                        'post_type' => 'shop_coupon',
+                        'p'         => $the_coupon_id,
+                    );
+                } else {
+                    $args = array(
+                        'post_type'      => 'shop_coupon',
+                        'posts_per_page' => -1,
+                        'cache_results'  => false,
+                    );
+                }
                 $the_query = new WP_Query($args);
                 while ( $the_query->have_posts() ) {
                     $the_query->the_post();

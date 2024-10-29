@@ -27,7 +27,7 @@ function wcusage_field_cb_fraud( $args )
     <?php echo wcusage_setting_toggle_option('wcusage_field_allow_assigned_user', 1, esc_html__( 'Allow affiliate user to apply their own coupon code at cart / checkout.', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'When disabled, the affiliate user will be prevented from using their own coupon code (coupons they are assigned to) at cart or checkout.', 'woo-coupon-usage' ); ?></i>
     <?php echo wcusage_setting_toggle('.wcusage_field_url_referrals', '.wcusage_field_url_referrals_p_info'); // Show or Hide ?>
-    <i class="wcusage_field_url_referrals_p_info"><br/><?php echo esc_html__( 'This will also allow them to use their own referral link and earn commission on their own purchases.', 'woo-coupon-usage' ); ?></i>
+    <br/><i class="wcusage_field_url_referrals_p_info"><?php echo esc_html__( 'This will also allow them to use their own referral link and earn commission on their own purchases.', 'woo-coupon-usage' ); ?></i>
     <br/>
     <i><?php echo esc_html__( 'Unless you have a specific use case, we suggest keeping this disabled as in general it can cause some issues (commission granted to all coupons).', 'woo-coupon-usage' ); ?></i>
 

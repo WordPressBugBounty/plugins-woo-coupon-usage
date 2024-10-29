@@ -622,7 +622,9 @@ function wcusage_post_submit_application(  $adminpost  ) {
                                     $info,
                                     $role
                                 );
-                                $user_id = $new_affiliate_user['user_id'];
+                                if ( isset( $new_affiliate_user['user_id'] ) ) {
+                                    $user_id = $new_affiliate_user['user_id'];
+                                }
                             }
                         }
                         // Create new registration
