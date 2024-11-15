@@ -56,7 +56,6 @@ function wcusage_couponusage(  $atts  ) {
                 $singlecoupon = strtolower( $atts['coupon'] );
                 // Allows Single Coupon Shortcode
                 $singlecoupon = str_replace( "%20", " ", $singlecoupon );
-                // Replace %20 with space
             } else {
                 $singlecoupon = "";
             }

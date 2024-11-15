@@ -3,8 +3,8 @@ Contributors: ElliotVS, freemius, couponaffiliates, RelyWP
 Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliates woocommerce
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
-Tested up to: 6.6.2
-Stable tag: 5.16.4
+Tested up to: 6.7.0
+Stable tag: 5.16.5
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -239,6 +239,14 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 5.16.5 - 15th November 2024 =
+- Fix: (PRO) Fixed an issue with the "Limit to certain user roles & groups?" option for Payout methods not working in some cases.
+- Fix: (PRO) Fixed an issue with the Klaviyo integration.
+- Fix: (PRO) Fixed an issue with permissions for the "Affiliate Groups" page in the admin area.
+- Fix: (PRO) Fixed an issue with the currency values in the "Bonuses" affiliate dashboard tab not showing in the base currency if multi-currency is enabled.
+- Other: Tested with WordPress 6.7.0
+- Other: Tested with WooCommerce 9.4.1
 
 = Version 5.16.4 - 29th October 2024 =
 - Tweak: Some small tweaks to the admin settings page.
@@ -519,63 +527,3 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 - Other: Added translations for "Italian".
 - Other: Tested with WordPress 6.4.2
 - Other: Updated to Freemius SDK 2.6.1
-
-= Version 5.11.2 - 28th November 2023 =
-- Fix: Fixed "DONOTCACHEPAGE constant is already defined" PHP error in certain cases.
-- Other: Tested with WooCommerce 8.3.1
-
-= Version 5.11.1 - 18th November 2023 =
-- Tweak: Now show an error message on the affiliate dashboard if jQuery is not loaded, and ajax loading is enabled in the settings.
-- Fix: Added a fix for a conflict with the "FlyingPress" plugin, which was causing the affiliate dashboard to not load in certain cases.
-- Fix: Added a fix for conflicts with several other caching plugins, by defining DONOTCACHEPAGE constant on the affiliate dashboard page.
-
-= Version 5.11.0 - 15th November 2023 =
-- New: (PRO) Added a new admin "Create Payout Request" page, to allow you to manually submit payout requests for affiliates that have "unpaid commission" available.
-- Tweak: Updated the referral link "Default Page" setting to always check the domain matches the site URL.
-- Tweak: Made a few styling changes to the plugins admin pages.
-- Tweak: Made a few tweaks to the setup wizard, and also removed the "Style" step.
-- Other: Added translations for "Portuguese (Portugal)".
-
-= Version 5.10.2 - 11th November 2023 =
-- Tweak: Made a few tweaks to the settings page and setup wizard.
-- Tweak: Edited the labels for the "Commission Amounts" settings to be more clear. 
-- Fix: Fixed an issue with the affiliate registration form captcha not working with allow_url_fopen disabled.
-- Fix: Fixed an issue with the affiliate registration form auto-login not working when Simple Cloudflare Turnstile plugin is enabled.
-- Other: Updated translations.
-
-= Version 5.10.1 - 10th November 2023 =
-- Tweak: Increased the maximum file size for PDF invoice uploads to 400KB.
-- Tweak: Made a few small changes to the admin settings page.
-- Tweak: Made a few small changes to the setup wizard, with some new information on the final step.
-- Tweak: Added a simple new option to Show or Hide the "Recent Orders" tab on the affiliate dashboard.
-- Fix: Fixed a PHP error in certain occasions when generating admin reports.
-- Fix: Fixed some events not showing in the Activity Log in certain cases.
-- Fix: Fixed an issue with PDF invoice uploads not working in certain cases.
-- Fix: Show the "percent_per_product" discount type as a percentage on the affiliate dashboard.
-- Other: Updated to Freemius SDK 2.6.0
-- Other: Tested with WordPress 6.4.1
-
-= Version 5.10.0 - 25th October 2023 =
-- New: (PRO) Added new "Performance Rewards & Bonuses" module. This allows you to reward your affiliates with bonuses and rewards, based on their performance. <a href="https://couponaffiliates.com/docs/pro-bonuses">Learn More</a>.
-- Improvement: (PRO) Added 2 new "Extra Field" options for the "Bank Transfer" payout method. Also made the "Bank Transfer" details fields required on the affiliate dashboard settings tab, so they can not be left blank.
-- Improvement: Added some bulk actions to the admin "Affiliate Users" list page, to allow you to bulk delete users and their coupons, or bulk unassign users from coupons.
-- Improvement: Added an "Actions" column to the plugins admin "Coupons" list page, with links to edit or delete the coupon.
-- Tweak: (PRO) Changed the "Unpaid Commission" and "Pending Payments" fields when editing a coupon to number fields to prevent invalid values being entered.
-- Tweak: (PRO) Removed the "Coupon Code" field on the "Add New Affiliate" when the "Dynamic Code Generator" is enabled. Made the field required when it is shown.
-- Tweak: Modified the "Add New Affiliate" form to redirect to the "Affiliate Users" list page. It now also shows a "Custom Message" field to include a custom message in the email sent to the user. The checkbox to automatically accept has also been removed, and it will now always automatically accept the user.
-- Tweak: Made a few CSS tweaks/fixes to the affiliate dashboard on mobile.
-- Tweak: Switched the admin CSS styles to use the "wp_enqueue_style" function.
-- Tweak: Automatically unassign user ID from coupons if a user is deleted.
-- Tweak: Improved query for admin coupons list page, to no longer show coupons when the affiliate user has been deleted.
-- Tweak: The "Activity Log" will now only show "new order referral" logs when the order used a coupon that has an affiliate user assigned to it.
-- Fix: Fixed a PHP error in some cases when generating admin reports, causing the report to fail and show 0 for all values.
-- Fix: Added compatibility with the Wordfence login reCAPTCHA when submitting the affiliate registration form.
-- Fix: Fixed issue with affiliate registration form not submitting correctly when a CAPTCHA plugin is being used for login security.
-- Fix: The Turnstile and reCAPTCHA scripts are now enqueued using the "wp_enqueue_script" function, and should no longer conflict with the "Simple Cloudflare Turnstile" plugin.
-- Fix: Fixed a PHP warning in certain occasions when updating a user in the admin area.
-- Fix: Fixed an error on the admin "Referral Visits" page when clicking "View all visits for this referrer" link, if site is on a subdirectory.
-- Fix: Fixed a few instances where /wp-admin was being used instead of admin_url() causing issues on sites which are not installed in the root directory or using a custom /wp-admin path.
-- Fix: Fixed an issue with the admin manual "add new affiliate" form when the "Use the email address as username" option was enabled.
-- Fix: Fixed a rare PHP error occuring in some cases when manually adding a new affiliate user, in certain cases.
-- Fix: Fixed a few other PHP warnings.
-- Other: Tested with WordPress 6.4.0
