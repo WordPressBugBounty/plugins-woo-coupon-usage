@@ -330,7 +330,7 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                 wcusage_delete_order_meta( $orderid, 'wcusage_stats' );
             }
             $get_affstats = wcusage_order_meta( $orderid, 'wcusage_stats', true );
-            if ( is_array( $get_affstats ) && !empty( $get_affstats ) && !$refresh && !$force_update && $use_saved && $save_order_commission_meta ) {
+            if ( is_array( $get_affstats ) && !empty( $get_affstats ) && !empty( $get_affstats['commission'] ) && $get_affstats['commission'] > 0 && !$refresh && !$force_update && $use_saved && $save_order_commission_meta ) {
                 $commission_summary = wcusage_order_meta( $orderid, 'wcusage_commission_summary', true );
                 $totalorders = ( $get_affstats['order'] ?: 0 );
                 $totalordersexcl = ( $get_affstats['orderexcl'] ?: 0 );

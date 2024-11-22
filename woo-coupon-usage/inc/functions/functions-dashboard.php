@@ -214,9 +214,11 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
 
 </div>
 
-<div class="wcutabmobile">
 <?php 
     if ( $wcusage_field_mobile_menu == "dropdown" ) {
+        ?>
+<div class="wcutabmobile">
+<?php 
         if ( $wcusage_page_load ) {
             ?><form method="post" class="wcu-select-tab"><?php 
         }

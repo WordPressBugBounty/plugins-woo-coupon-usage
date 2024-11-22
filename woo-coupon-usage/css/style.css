@@ -74,9 +74,6 @@ form#product_search_form input {
 	display: none;
 }
 @media (max-width: 1000px) {
-	.wcutab {
-		display: none;
-	}
 	.wcutabmobile {
 		display: block;
 	}
@@ -767,6 +764,7 @@ form#product_search_form input {
 	.wcu-order-filters-field {
 		width: calc(100% - 20px);
 		display: block;
+		margin-bottom: 4px;
 	}
 
 	.wcu-order-filters-space {

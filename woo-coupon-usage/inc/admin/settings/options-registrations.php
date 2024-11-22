@@ -814,7 +814,7 @@ function wcusage_field_cb_registration( $args )
               ?>
               <p><?php echo esc_html__( 'MailPoet is not installed or activated.', 'woo-coupon-usage' ); ?></p>
               <p><?php echo esc_html__( 'Please install and activate the MailPoet plugin to use this feature.', 'woo-coupon-usage' ); ?></p>
-              <p><?php echo esc_html__( 'You can download MailPoet here:', 'woo-coupon-usage' ); ?> <a href="https://wordpress.org/plugins/mailpoet/" target="_blank">https://wordpress.org/plugins/mailpoet/</a></p>
+              <p><?php echo esc_html__( 'You can download MailPoet here:', 'woo-coupon-usage' ); ?> <a href="<?php echo admin_url('plugin-install.php?s=mailpoet&tab=search&type=term'); ?>" target="_blank">Add Plugin</a></p>
               <?php } ?>
               </select>
             </div>

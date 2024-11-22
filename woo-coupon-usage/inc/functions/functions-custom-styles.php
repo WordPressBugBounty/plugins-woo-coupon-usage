@@ -123,6 +123,15 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
 		}
 		<?php } ?>
 
+		<?php $wcusage_field_mobile_menu = wcusage_get_setting_value('wcusage_field_mobile_menu', 'dropdown'); ?>
+		<?php if($wcusage_field_mobile_menu == 'dropdown') { ?>
+		@media screen and (max-width: 1000px) {
+			.wcutab {
+				display: none;
+			}
+		}
+		<?php } ?>
+
 		/* Tabs border radius */
 		<?php $wcusage_field_tabs_border = wcusage_get_setting_value('wcusage_field_tabs_border', '1'); ?>
 		<?php if($wcusage_field_tabs_border == '1') { ?>

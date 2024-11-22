@@ -3,8 +3,8 @@ Contributors: ElliotVS, freemius, couponaffiliates, RelyWP
 Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliates woocommerce
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
-Tested up to: 6.7.0
-Stable tag: 5.16.5
+Tested up to: 6.7.1
+Stable tag: 5.16.6
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -239,6 +239,14 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 5.16.6 - 22nd November 2024 =
+- Tweak: (PRO) The "welcome bonus" performance bonus can now be displayed on the affiliate dashboard.
+- Fix: Fixed an issue with the "Mobile Menu Style" option when "Tabs" is selected.
+- Fix: Fixed an issue with displaying the affiliate dashboard for coupons with a "-" in the coupon name.
+- Fix: Fixed an issue with the "Lifetime Commission Expiry" option.
+- Fix: Fixed an "Passing null to parameter" PHP warning showing in the admin area.
+- Other: Tested with WordPress 6.7.1
 
 = Version 5.16.5 - 15th November 2024 =
 - Fix: (PRO) Fixed an issue with the "Limit to certain user roles & groups?" option for Payout methods not working in some cases.

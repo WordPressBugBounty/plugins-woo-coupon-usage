@@ -81,8 +81,8 @@ function wcusage_couponusage(  $atts  ) {
                     $show_coupon = strtolower( $urlid );
                 }
             }
-            // Remove everything after last dash ("-") which is the ID.
-            $show_coupon = preg_replace( '/-[^-]*$/', '', $show_coupon );
+            // Remove everything after last dash ("-") if it is numbers after the dash
+            $show_coupon = preg_replace( '/-\\d+$/', '', $show_coupon );
             // Replace %20 with space
             $show_coupon = str_replace( "%20", " ", $show_coupon );
             if ( $show_coupon ) {
