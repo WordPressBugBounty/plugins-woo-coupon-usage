@@ -215,7 +215,7 @@ __( 'Build "dynamic" creatives, which automatically generate unique and personal
 <?php echo wcusage_output_addon_box(
 __( 'Leaderboards', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
-sprintf(__( 'Create and display leaderboards on your posts or pagesn with rankings for your affiliates total referrals. %s', 'woo-coupon-usage' ), '<br/><a href="'.admin_url('admin.php?page=wcusage_leaderboard').'" style="display: block; margin-top: 10px; line-height: 14px; font-size: 14px;">Generate Leaderboard Shortcode</a>'),
+__( 'Create and display leaderboards on your posts or pages with rankings for your affiliates total referrals.', 'woo-coupon-usage' ),
 "https://couponaffiliates.com/docs/affiliate-leaderboards",
 "fas fa-trophy",
 1,
