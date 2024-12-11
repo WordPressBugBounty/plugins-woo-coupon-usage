@@ -109,14 +109,16 @@ function wcusage_options_page() {
             'wcusage_add_affiliate',
             'wcusage_admin_new_registration_page'
         );
-        add_submenu_page(
-            'wcusage',
-            esc_html__( 'Affiliate Registrations', 'woo-coupon-usage' ),
-            esc_html__( 'Registrations', 'woo-coupon-usage' ),
-            $admin_perms,
-            'wcusage_registrations',
-            'wcusage_admin_registrations_page_html'
-        );
+        if ( $wcusage_field_registration_enable ) {
+            add_submenu_page(
+                'wcusage',
+                esc_html__( 'Affiliate Registrations', 'woo-coupon-usage' ),
+                esc_html__( 'Registrations', 'woo-coupon-usage' ),
+                $admin_perms,
+                'wcusage_registrations',
+                'wcusage_admin_registrations_page_html'
+            );
+        }
         add_submenu_page(
             'wcusage',
             '',

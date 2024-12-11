@@ -90,6 +90,22 @@ function wcusage_field_cb_payouts( $args )
 
       <h3 id ="wcu-setting-header-payouts-general"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Payouts Settings:</h3>
 
+      <?php echo wcusage_setting_toggle_option('wcusage_field_payout_request_button', 1, 'Show "Request Payout" button on affiliate dashboard.', '0px'); ?>
+      <i><?php echo esc_html__( 'When enabled, the "Request Payout" button will be shown on the affiliate dashboard, allowing affiliates to manually request payouts.', 'woo-coupon-usage' ); ?></i><br/>
+      <i><?php echo esc_html__( 'Turn this off if you want to show all their payout details on the payouts tab, but payouts requests themselves will all be handled by admins (or scheduled).', 'woo-coupon-usage' ); ?></i><br/>
+      
+      <br/>
+
+      <?php echo wcusage_setting_toggle_option('wcusage_field_payout_details_required', 1, 'Require payment details to request payout.', '0px'); ?>
+      <i><?php echo esc_html__( 'When enabled, the affiliate will be required to enter their payment details before they can request a payout.', 'woo-coupon-usage' ); ?></i><br/>
+
+      <br/>
+
+      <?php echo wcusage_setting_toggle_option('wcusage_field_payout_custom_amount', 1, 'Allow affiliates to enter a custom payout amount.', '0px'); ?>
+      <i><?php echo esc_html__( 'When enabled, the affiliate can enter a custom amount for their payout request. The minimum amount will still be the payment threshold, and maximum amount is their total available unpaid commission.', 'woo-coupon-usage' ); ?></i><br/>
+
+      <br/>
+
       <!-- How much unpaid commission must be earned before the affiliate can request a payout. -->
       <?php echo wcusage_setting_number_option('wcusage_field_payout_threshold', '0', esc_html__( 'Payment Threshold', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'How much "unpaid commission" must be earned/available, before the affiliate can request a payout.', 'woo-coupon-usage' ); ?></i>
@@ -104,6 +120,8 @@ function wcusage_field_cb_payouts( $args )
 
       <br/>
 
+      <span class="wcu-field-payout-statuses-one">
+
       <!-- DROPDOWN - Order Status Type Field -->
       <p>
   		<strong><label for="scales"><?php echo esc_html__( 'Order status for "unpaid commission" to be granted:', 'woo-coupon-usage' ); ?></label></strong><br/>
@@ -117,7 +135,7 @@ function wcusage_field_cb_payouts( $args )
           } else {
             $checkedx = "";
           }
-          if( ($key != "wc-pending" && $key != "wc-processing" && $key != "wc-on-hold" && $key != "wc-cancelled" && $key != "wc-refunded" && $key != "wc-failed") || $checkedx) {
+          if( ($key != "wc-pending" && $key != "wc-processing" && $key != "wc-on-hold" && $key != "wc-cancelled" && $key != "wc-refunded" && $key != "wc-checkout-draft" && $key != "wc-failed") || $checkedx) {
             echo '<option value="'.esc_attr($key).'" '.esc_attr($checkedx).'>'.wc_get_order_status_name($status).'</span>';
           }
         }
@@ -126,10 +144,133 @@ function wcusage_field_cb_payouts( $args )
         <br/><i><?php echo esc_html__( 'The order status required for "unpaid commission" to be granted. Default "completed" for most sites. This should be the final status for your orders, once it has been paid and delivered.', 'woo-coupon-usage' ); ?></i>
   	   </p>
 
+      </span>
+      <script>
+      // If wcusage_field_payout_status_multiple is enabled, hide .wcu-field-payout-statuses-one on load and change
+      jQuery( document ).ready(function() {
+        if(jQuery('.wcusage_field_payout_status_multiple').is(':checked')) {
+          jQuery('.wcu-field-payout-statuses-one').hide();
+        }
+        jQuery('.wcusage_field_payout_status_multiple').on('change', function() {
+          if(jQuery('.wcusage_field_payout_status_multiple').is(':checked')) {
+            jQuery('.wcu-field-payout-statuses-one').hide();
+          } else {
+            jQuery('.wcu-field-payout-statuses-one').show();
+          }
+        });
+      });
+      </script>
+
+      <?php
+      if( function_exists('wc_get_order_statuses') ) {
+        $orderstatuses = wc_get_order_statuses();
+        // Remove unwanted statuses
+        unset($orderstatuses['wc-pending']);
+        unset($orderstatuses['wc-processing']);
+        unset($orderstatuses['wc-on-hold']);
+        unset($orderstatuses['wc-cancelled']);
+        unset($orderstatuses['wc-refunded']);
+        unset($orderstatuses['wc-failed']);
+        unset($orderstatuses['wc-checkout-draft']);
+      } else {
+        $orderstatuses = array(
+          'wc-completed'  => esc_html__( 'Completed', 'woocommerce' ),
+        );
+      }
+      ?>
+
+      <?php
+      // If more than one order status is in the array
+      $wcusage_field_payout_status_multiple = wcusage_get_setting_value('wcusage_field_payout_status_multiple', 0);
+      if( count($orderstatuses) > 1 || $wcusage_field_payout_status_multiple ) {
+      ?>
+
+      <br/>
+
+       <?php echo wcusage_setting_toggle_option('wcusage_field_payout_status_multiple', 0, esc_html__( 'Advanced: Enable multiple order statuses.', 'woo-coupon-usage' ), '0px'); ?>
+       <i><?php echo esc_html__( 'Only enable this if you have multiple different "final" order statuses that should grant "unpaid commission".', 'woo-coupon-usage' ); ?></i><br/>
+
+       <?php echo wcusage_setting_toggle('.wcusage_field_payout_status_multiple', '.wcu-field-payout-statuses'); // Show or Hide ?>
+       <span class="wcu-field-payout-statuses" style="display: block; margin-left: 40px;">
+
        <br/>
 
-       <?php echo wcusage_setting_toggle_option('wcusage_field_payout_details_required', 1, 'Require payment details to request payout.', '0px'); ?>
-       <i><?php echo esc_html__( 'When enabled, the affiliate will be required to enter their payment details before they can request a payout.', 'woo-coupon-usage' ); ?></i><br/>
+      <p>
+        <?php echo esc_html__( 'Select multiple CUSTOM order statuses that for "unpaid commission" should be granted for. If you only have one, or do not have any custom statuses, turn the "multiple order statuses" option off.', 'woo-coupon-usage' ); ?><br/>
+        <strong style="color: red;">
+          <?php echo esc_html__( 'Only select any "final" order statuses for your orders, once it has been paid and delivered. If you select multiple, make sure no orders are applied to more than one of these statuses at any time.', 'woo-coupon-usage' ); ?>
+        </strong>
+      </p>
+        
+       <br/>
+
+        <!-- Order Status Type Field -->
+        <strong><label for="scales"><?php echo esc_html__( 'Order statuses for "unpaid commission" to be granted:', 'woo-coupon-usage' ); ?></label></strong><br/>
+
+          <?php
+          $wcusage_payout_statuses_custom = wcusage_get_setting_value('wcusage_payout_statuses_custom', array());
+
+          $i = 0;
+          foreach( $orderstatuses as $key => $status ){
+
+            if($status == "Refunded") {
+              if(isset($options['wcusage_payout_statuses_custom'][$key])) {
+                $current = $options['wcusage_payout_statuses_custom'][$key];
+              }
+              if( !isset($current) ) {
+                continue;
+              }
+            }
+
+            $i++;
+            if($i == 1) { $thisid = "wcusage_payout_statuses_custom"; }
+
+            $checkedx = "";
+
+            if($wcusage_payout_statuses_custom) {
+              if( isset($options['wcusage_payout_statuses_custom'][$key]) ) {
+                // Get Current Input Value
+                $current = $options['wcusage_payout_statuses_custom'][$key];
+                // See if Checked
+                if( isset($current) ) {
+                  $checkedx = "checked";
+                }
+              }
+            }
+
+            // Force completed to be checked
+            if($key == "wc-completed") {
+              if(!isset($options['wcusage_payout_statuses_custom']['wc-completed']) || $checkedx) {
+                $option_group = get_option('wcusage_options');
+                $option_group['wcusage_payout_statuses_custom']['wc-completed'] = "on";
+                update_option( 'wcusage_options', $option_group );
+                $checkedx = "checked";
+              }
+            }
+
+            // Output Checkbox
+            $name = 'wcusage_options[wcusage_payout_statuses_custom]['.$key.']';
+            echo '<span style="margin-right: 20px;" id="'.esc_attr($thisid).'">
+            <input type="checkbox"
+            checktype="multi"
+            class="order-status-checkbox-'.esc_attr($key).'"
+            checktypekey="'.esc_attr($key).'"
+            customid="'.esc_attr($thisid).'"
+            name="'.esc_attr($name).'"
+            '.esc_attr($checkedx).'> '.esc_attr($status).'</span>';
+
+          }
+          ?>
+
+          <br/>
+
+        <?php } else { ?>
+
+          <i><?php echo esc_html__( '*You can select multiple statuses if you create more additional custom order statuses. Currently one 1 is available.', 'woo-coupon-usage' ); ?></i>
+
+        <?php } ?>
+
+        </div>
 
        <br/><hr/>
 
@@ -181,7 +322,71 @@ function wcusage_field_cb_payouts( $args )
           </p>
         </span>
 
-        <br/><hr/>
+        <br/>
+
+        <?php echo wcusage_setting_toggle_option('wcusage_field_enable_payoutschedule_limit_types', 0, esc_html__( 'Only schedule payouts for specific payout methods.', 'woo-coupon-usage' ), '0px'); ?>
+        <i><?php echo esc_html__( 'If enabled, you can select which payout methods should be used for scheduled payouts.', 'woo-coupon-usage' ); ?></i><br/>
+
+        <br/>
+
+        <?php echo wcusage_setting_toggle('.wcusage_field_enable_payoutschedule_limit_types', '.wcu-field-payout-methods-one'); // Show or Hide ?>
+        <span class="wcu-field-payout-methods-one">
+
+        <strong><label for="scales"><?php echo esc_html__( 'Select Payout Methods to Schedule:', 'woo-coupon-usage' ); ?></label></strong><br/>
+
+        <i><?php echo esc_html__( 'Select the payout methods that should be scheduled and requested automatically. If an affiliate is using a different payout method to one enabled above, their payouts will not be scheduled.', 'woo-coupon-usage' ); ?></i><br/>
+
+        <br/>
+
+        <?php
+        $wcusage_payoutschedule_methods = wcusage_get_setting_value('wcusage_payoutschedule_methods', array());
+
+        $payoutmethods = array(
+          'paypal' => esc_html__( 'Custom #1', 'woo-coupon-usage' ),
+          'paypal2' => esc_html__( 'Custom #2', 'woo-coupon-usage' ),
+          'banktransfer' => esc_html__( 'Bank Transfer', 'woo-coupon-usage' ),
+          'stripeapi' => esc_html__( 'Stripe', 'woo-coupon-usage' ),
+          'paypalapi' => esc_html__( 'PayPal', 'woo-coupon-usage' ),
+          'credit' => esc_html__( 'Store Credit', 'woo-coupon-usage' ),
+        );
+
+        foreach( $payoutmethods as $key => $method ) {
+
+          $checkedx = "";
+
+          if($wcusage_payoutschedule_methods) {
+            if( isset($options['wcusage_payoutschedule_methods'][$key]) ) {
+              // Get Current Input Value
+              $current = $options['wcusage_payoutschedule_methods'][$key];
+              // See if Checked
+              if( isset($current) ) {
+                $checkedx = "checked";
+              }
+            }
+          }
+
+          // ID
+          $thisid = "wcusage_payoutschedule_methods";
+
+          // Output Checkbox
+          $name = 'wcusage_options[wcusage_payoutschedule_methods]['.$key.']';
+          echo '<span style="margin-right: 20px;" id="'.esc_attr($thisid).'">
+          <input type="checkbox"
+          checktype="multi"
+          class="methods-checkbox-'.esc_attr($key).'"
+          checktypekey="'.esc_attr($key).'"
+          customid="'.esc_attr($thisid).'"
+          name="'.esc_attr($name).'"
+          '.esc_attr($checkedx).'> '.esc_attr($method).'</span>';
+
+        }
+        ?>
+
+        <br/><br/>
+
+        </span>
+
+        <hr/>
 
         <h3 id="wcu-setting-header-payouts-scheduled"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Automatic Payouts', 'woo-coupon-usage' ); ?>:</h3>
 

@@ -176,6 +176,14 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
 			}
 		}
 
+		/* Tabs Font Size */
+		<?php $wcusage_field_tabs_font_size = wcusage_get_setting_value('wcusage_field_tabs_font_size', ''); ?>
+		<?php if($wcusage_field_tabs_font_size) { ?>
+		.wcutab .wcutablinks, .wcutab .ml_wcutablinks {
+			font-size: <?php echo esc_html($wcusage_field_tabs_font_size); ?>px !important;
+		}
+		<?php } ?>
+
   	</style>
 
   <?php

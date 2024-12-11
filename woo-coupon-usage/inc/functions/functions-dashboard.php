@@ -288,45 +288,10 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
             }
         }
         ?>
+
   <?php 
-        if ( $wcusage_field_payouts_enable == '1' ) {
-            ?>
-  <option value="page-payouts" <?php 
-            if ( isset( $_POST['page-payouts'] ) && $wcusage_page_load ) {
-                ?>selected<?php 
-            }
-            ?>><?php 
-            echo esc_html__( "Payouts", "woo-coupon-usage" );
-            ?></option>
-  <?php 
-        }
         ?>
-  <?php 
-        if ( $wcusage_field_rates_enable == '1' ) {
-            ?>
-  <option value="page-rates" <?php 
-            if ( isset( $_POST['page-rates'] ) && $wcusage_page_load ) {
-                ?>selected<?php 
-            }
-            ?>><?php 
-            echo esc_html__( "Rates", "woo-coupon-usage" );
-            ?></option>
-  <?php 
-        }
-        ?>
-  <?php 
-        if ( $wcusage_field_bonuses_enable == '1' && $wcusage_field_bonuses_tab_enable == '1' ) {
-            ?>
-  <option value="page-bonuses" <?php 
-            if ( isset( $_POST['page-bonuses'] ) && $wcusage_page_load ) {
-                ?>selected<?php 
-            }
-            ?>><?php 
-            echo esc_html__( "Bonuses", "woo-coupon-usage" );
-            ?></option>
-  <?php 
-        }
-        ?>
+
   <?php 
         if ( is_user_logged_in() ) {
             if ( $wcusage_field_show_settings_tab_show ) {

@@ -102,7 +102,12 @@ class wcusage_Coupons_Table extends WP_List_Table {
         if(!$coupon) { return ""; }
 
         $coupon_code = $item->post_title;
-        if(!$coupon_code) { return ""; }
+        if(!$coupon_code || empty($coupon_code)) { return ""; }
+
+        $coupon_id = wc_get_coupon_id_by_code($coupon_code);
+        if (!$coupon_id) {
+            return "";
+        }
         
         $disable_commission = wcusage_coupon_disable_commission($coupon);
 
@@ -118,7 +123,6 @@ class wcusage_Coupons_Table extends WP_List_Table {
         $wcusage_urls_prefix = wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon');
 
         $wcu_alltime_stats = get_post_meta($coupon, 'wcu_alltime_stats', true);
-
 
         $usage = 0;
         if($wcu_alltime_stats && isset($wcu_alltime_stats['total_count'])) {

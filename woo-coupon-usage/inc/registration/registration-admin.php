@@ -33,47 +33,52 @@ function wcusage_admin_registrations_page_html() {
             // If Accepted
             if ( isset( $_POST['submitregisteraccept'] ) && $coupon_code ) {
                 $status = "accepted";
-                $thiscoupon = new WC_Coupon($coupon_code);
-                if ( !$thiscoupon->is_valid() ) {
-                    // Update the status of the registration
-                    $setstatus = wcusage_set_registration_status(
-                        $status,
-                        $postid,
-                        $userid,
-                        $coupon_code,
-                        $message,
-                        $type
-                    );
-                    // Update MLA invite
-                    if ( function_exists( 'wcusage_install_mlainvite_data' ) ) {
-                        wcusage_install_mlainvite_data(
-                            '',
-                            $get_user->user_email,
-                            'accepted',
-                            1
+                try {
+                    $thiscoupon = new WC_Coupon($coupon_code);
+                    if ( !$thiscoupon->is_valid() ) {
+                        // Update the status of the registration
+                        $setstatus = wcusage_set_registration_status(
+                            $status,
+                            $postid,
+                            $userid,
+                            $coupon_code,
+                            $message,
+                            $type
+                        );
+                        // Update MLA invite
+                        if ( function_exists( 'wcusage_install_mlainvite_data' ) ) {
+                            wcusage_install_mlainvite_data(
+                                '',
+                                $get_user->user_email,
+                                'accepted',
+                                1
+                            );
+                        }
+                        // Update users role
+                        $setaffiliaterole = wcusage_set_registration_role( $userid );
+                        // Update Code in Registration
+                        global $wpdb;
+                        $table_name = $wpdb->prefix . 'wcusage_register';
+                        $wpdb->update( $table_name, array(
+                            'couponcode' => $coupon_code,
+                        ), array(
+                            'id' => $postid,
+                        ) );
+                        // Custom Action
+                        do_action(
+                            'wcusage_hook_registration_accepted',
+                            $userid,
+                            $coupon_code,
+                            $type
                         );
                     }
-                    // Update users role
-                    $setaffiliaterole = wcusage_set_registration_role( $userid );
-                    // Update Code in Registration
-                    global $wpdb;
-                    $table_name = $wpdb->prefix . 'wcusage_register';
-                    $wpdb->update( $table_name, array(
-                        'couponcode' => $coupon_code,
-                    ), array(
-                        'id' => $postid,
-                    ) );
-                    // Custom Action
-                    do_action(
-                        'wcusage_hook_registration_accepted',
-                        $userid,
-                        $coupon_code,
-                        $type
-                    );
-                } else {
-                    // Show error if user already exists
-                    echo "<div class='notice notice-error is-dismissible' style='position: absolute; width: 75%;'><p>" . esc_html__( 'Coupon code already exists: ', 'woo-coupon-usage' ) . esc_html( $coupon_code ) . "</p></div>";
+                } catch ( Exception $e ) {
+                    // Show error if coupon code does not exist
+                    echo "<div class='notice notice-error is-dismissible' style='position: absolute; width: 75%;'><p>" . esc_html__( 'Failed to create the coupon code: ', 'woo-coupon-usage' ) . esc_html( $coupon_code ) . "</p></div>";
                 }
+            } else {
+                // Show error if user already exists
+                echo "<div class='notice notice-error is-dismissible' style='position: absolute; width: 75%;'><p>" . esc_html__( 'Coupon code already exists: ', 'woo-coupon-usage' ) . esc_html( $coupon_code ) . "</p></div>";
             }
             // If Declined
             if ( isset( $_POST['submitregisterdecline'] ) ) {

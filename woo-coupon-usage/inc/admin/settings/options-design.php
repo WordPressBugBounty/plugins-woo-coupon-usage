@@ -64,6 +64,19 @@ function wcusage_field_cb_design( $args )
   </p>
   </div>
 
+  <!-- Font Size -->
+  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
+  <p>
+    <?php $wcusage_field_tabs_font_size = wcusage_get_setting_value('wcusage_field_tabs_font_size', ''); ?>
+    <input type="hidden" value="0" id="wcusage_field_tabs_font_size" data-custom="custom" name="wcusage_options[wcusage_field_tabs_font_size]" >
+    <strong><label for="scales"><?php echo esc_html__( 'Tabs Font Size', 'woo-coupon-usage' ); ?>:</label></strong><br/>
+    <input type="number" name="wcusage_options[wcusage_field_tabs_font_size]" id="wcusage_field_tabs_font_size"
+    value="<?php echo esc_html($wcusage_field_tabs_font_size); ?>" placeholder="Default"
+    min="10" max="30"
+    class="wcusage_field_tabs_font_size" />
+  </p>
+  </div>
+
   <div style="clear: both;"></div>
 
   <br/>

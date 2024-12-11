@@ -332,6 +332,12 @@ function wcusage_field_cb( $args ) {
 
       <br/>
 
+      <!-- Show order "date". -->
+      <?php echo wcusage_setting_toggle_option('wcusage_field_date', 1, esc_html__( 'Show order "date".', 'woo-coupon-usage' ), '0px'); ?>
+
+      <!-- Show order "time". -->
+      <?php echo wcusage_setting_toggle_option('wcusage_field_time', 0, esc_html__( 'Show order "time".', 'woo-coupon-usage' ), '0px'); ?>
+
       <!-- Show order "status". -->
       <?php echo wcusage_setting_toggle_option('wcusage_field_status', 1, esc_html__( 'Show order "status".', 'woo-coupon-usage' ), '0px'); ?>
 
@@ -966,7 +972,7 @@ if( !function_exists( 'wcusage_setting_section_ordersalestracking' ) ) {
           </script>
           <strong><label for="scales"><?php echo esc_html__( 'By which date should orders be sorted on the affiliate dashboard?', 'woo-coupon-usage' ); ?></label></strong><br/>
           <select name="wcusage_options[wcusage_field_order_sort]" id="wcusage_field_order_sort" onchange="check_order_sort_dropdown()">
-            <option class="wcusage_field_order_sort_option" value="paiddate" <?php if($wcusage_field_order_sort == "paiddate") { ?>selected<?php } ?>><?php echo esc_html__( 'Paid Date', 'woo-coupon-usage' ); ?></option>
+            <option class="wcusage_field_order_sort_option" value="paiddate" <?php if($wcusage_field_order_sort == "paiddate") { ?>selected<?php } ?>><?php echo esc_html__( 'Created Date', 'woo-coupon-usage' ); ?></option>
             <option class="wcusage_field_order_sort_option" value="completeddate" <?php if($wcusage_field_order_sort == "completeddate") { ?>selected<?php } ?>><?php echo esc_html__( 'Completed Date', 'woo-coupon-usage' ); ?></option>
           </select>
           <br/><i><?php echo esc_html__( 'This will determine how the orders are sorted on the affiliate dashboard, either by the day they were paid for, or the day it was set to completed.', 'woo-coupon-usage' ); ?></i>

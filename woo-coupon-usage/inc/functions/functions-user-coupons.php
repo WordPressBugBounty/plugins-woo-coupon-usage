@@ -612,11 +612,15 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                             } elseif ( $discount_type == "fixed_cart" ) {
                                 $discount_msg = wcusage_get_currency_symbol() . $amount;
                             } else {
-                                $discount_msg = $amount . " (" . $discount_type . ")";
+                                if ( $discount_type ) {
+                                    $discount_msg = $amount . " (" . $discount_type . ")";
+                                } else {
+                                    $discount_msg = "";
+                                }
                             }
-                            echo '<p>' . esc_html__( "Discount", "woo-coupon-usage" ) . ': ' . esc_html( $discount_msg ) . '</p>';
-                            //$orders = wcusage_wh_getOrderbyCouponCode( get_the_title(), '0000-00-00', date( "Y-m-d" ), '', 1 );
-                            //$usage = $orders['total_count'];
+                            if ( $discount_msg ) {
+                                echo '<p>' . esc_html__( "Discount", "woo-coupon-usage" ) . ': ' . esc_html( $discount_msg ) . '</p>';
+                            }
                             global $woocommerce;
                             $c = new WC_Coupon(get_the_title());
                             $usage = $c->get_usage_count();

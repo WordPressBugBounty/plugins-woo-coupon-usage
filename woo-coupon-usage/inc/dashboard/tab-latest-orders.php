@@ -168,6 +168,8 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
         }
         $option_show_orderid = wcusage_get_setting_value( 'wcusage_field_orderid', '0' );
         $wcusage_field_orderid_click = wcusage_get_setting_value( 'wcusage_field_orderid_click', '0' );
+        $option_show_date = wcusage_get_setting_value( 'wcusage_field_date', '1' );
+        $option_show_time = wcusage_get_setting_value( 'wcusage_field_time', '0' );
         $option_show_status = wcusage_get_setting_value( 'wcusage_field_status', '1' );
         $option_show_ordercountry = wcusage_get_setting_value( 'wcusage_field_ordercountry', '0' );
         $option_show_ordercity = wcusage_get_setting_value( 'wcusage_field_ordercity', '0' );
@@ -239,13 +241,34 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
         }
         ?>
 
-      .wcu-table-recent-orders td:nth-of-type(<?php 
-        echo esc_html( $wcusage_ro_label_count );
-        ?>):before { content: "<?php 
-        echo esc_html__( "Date", "woo-coupon-usage" );
-        ?>"; }
       <?php 
-        $wcusage_ro_label_count++;
+        if ( $option_show_date ) {
+            ?>
+      .wcu-table-recent-orders td:nth-of-type(<?php 
+            echo esc_html( $wcusage_ro_label_count );
+            ?>):before { content: "<?php 
+            echo esc_html__( "Date", "woo-coupon-usage" );
+            ?>"; }
+      <?php 
+            $wcusage_ro_label_count++;
+            ?>
+      <?php 
+        }
+        ?>      
+
+      <?php 
+        if ( $option_show_time ) {
+            ?>
+      .wcu-table-recent-orders td:nth-of-type(<?php 
+            echo esc_html( $wcusage_ro_label_count );
+            ?>):before { content: "<?php 
+            echo esc_html__( "Time", "woo-coupon-usage" );
+            ?>"; }
+      <?php 
+            $wcusage_ro_label_count++;
+            ?>
+      <?php 
+        }
         ?>
 
       <?php 
@@ -429,9 +452,25 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
             }
             ?>
 
-        <th class='wcuTableHead' style='width: 25%;'><?php 
-            echo esc_html__( 'Date', 'woo-coupon-usage' );
-            ?></th>
+        <?php 
+            if ( $option_show_date ) {
+                ?>
+          <th class='wcuTableHead' style='width: 25%;'><?php 
+                echo esc_html__( 'Date', 'woo-coupon-usage' );
+                ?></th>
+        <?php 
+            }
+            ?>
+
+        <?php 
+            if ( $option_show_time ) {
+                ?>
+          <th class='wcuTableHead'><?php 
+                echo esc_html__( 'Time', 'woo-coupon-usage' );
+                ?></th>
+        <?php 
+            }
+            ?>
 
         <?php 
             if ( $option_show_status ) {
@@ -624,19 +663,23 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         if ( $orderinfo ) {
                             $currencycode = $orderinfo->get_currency();
                         }
-                        $order_date = get_the_time( 'F j, Y', $orderid );
+                        $offset = get_option( 'gmt_offset' );
+                        $order_date = date_i18n( "F j, Y", strtotime( $orderinfo->get_date_created() ) + $offset * HOUR_IN_SECONDS );
                         if ( $orderinfo ) {
                             $completed_date = $orderinfo->get_date_completed();
                             if ( $completed_date ) {
-                                $completed_date = date_i18n( "F j, Y", strtotime( $completed_date ) );
+                                $completed_date = date_i18n( "F j, Y", strtotime( $completed_date ) + $offset * HOUR_IN_SECONDS );
                             } else {
                                 $completed_date = "";
                             }
                         }
                         if ( $wcusage_field_order_sort != "completeddate" ) {
                             $showdate = $order_date;
+                            $showtime = get_the_time( 'U', $orderid );
                         } else {
                             $showdate = $completed_date;
+                            $showtime = strtotime( $completed_date );
+                            $showtime = date_i18n( "g:i a", $showtime );
                         }
                         $wcusage_show_tax = wcusage_get_setting_value( 'wcusage_field_show_tax', '0' );
                         $wcusage_currency_conversion = wcusage_order_meta( $orderid, 'wcusage_currency_conversion', true );
@@ -747,7 +790,21 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                             $colmla = true;
                         }
                         // Date
-                        echo "<td class='wcuTableCell'><strong>" . wp_kses_post( $subicon ) . esc_html( ucfirst( $showdate ) ) . "</strong></td>";
+                        if ( $option_show_date ) {
+                            echo "<td class='wcuTableCell'>";
+                            if ( $completed_date && $wcusage_field_order_sort == "completeddate" ) {
+                                echo "<span title='Completed Date: " . esc_html( $completed_date ) . "'>" . wp_kses_post( $subicon ) . esc_html( ucfirst( $showdate ) ) . "</span>";
+                            } else {
+                                echo "<span title='Order Date: " . esc_html( $order_date ) . "'>" . wp_kses_post( $subicon ) . esc_html( ucfirst( $showdate ) ) . "</span>";
+                            }
+                            echo "</td>";
+                        }
+                        // Time
+                        if ( $option_show_time ) {
+                            echo "<td class='wcuTableCell'>";
+                            echo "<span>" . esc_html( date_i18n( 'g:i a', $showtime ) ) . "</span>";
+                            echo "</td>";
+                        }
                         // Status
                         if ( $option_show_status ) {
                             if ( $wcusage_show_orders_table_status_totals ) {

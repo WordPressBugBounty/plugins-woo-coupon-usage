@@ -54,7 +54,6 @@ function wcusage_couponusage(  $atts  ) {
             $singlecoupon = "";
             if ( isset( $atts['coupon'] ) ) {
                 $singlecoupon = strtolower( $atts['coupon'] );
-                // Allows Single Coupon Shortcode
                 $singlecoupon = str_replace( "%20", " ", $singlecoupon );
             } else {
                 $singlecoupon = "";

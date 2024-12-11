@@ -28,6 +28,8 @@ if( !function_exists( 'wcusage_api_coupon_info' ) ) {
     $return_array['coupon_name'] = $couponinfo[3];
     $return_array['unpaid_commission'] = $couponinfo[2];
     $return_array['pending_payouts'] = $couponinfo[5];
+    $return_array['coupon_user_id'] = $couponinfo[1];
+    $return_array['referral_url'] = $couponinfo[4];
   	return $return_array;
 
   }

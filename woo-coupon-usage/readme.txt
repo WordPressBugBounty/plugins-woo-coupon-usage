@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.7.1
-Stable tag: 5.16.7
+Stable tag: 5.17.0
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -239,6 +239,27 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 5.17.0 - 11th December 2024 =
+- New: (PRO) Added an option to allow affiliate to enter custom payout amounts, instead of being always set to the full amount available to them as "unpaid commission".
+- New: (PRO) Added an option to choose multiple different "completed" order statuses allowed for "unpaid commission" to be earned, instead of only being able to select one completed status.
+- New: (PRO) Added an option to choose if the "Request Payout" button should be shown on the affiliate dashboard.
+- New: (PRO) Added an option to only enable the "Scheduled Payout Requests" feature for specific payout methods.
+- Tweak: (PRO) Tweak to the styling of the "Payouts" tab on the affiliate dashboard.
+- Tweak: (PRO) Now shows the total for "Completed Payments" on the "Payouts" tab on the affiliate dashboard.
+- Tweak: Added an option in the "Design" settings tab to customise the "Tabs Font Size" on the affiliate dashboard.
+- Tweak: Added an option in the "Debug" tab, to hide 0.00 values on checkout summary, for referral coupons if there is no discount.
+- Tweak: Added an option in the "Debug" tab, to customise the "Coupon" text label shown on the checkout for referral coupons.
+- Tweak: Added options in the "General" tab, to show/hide the order date and time on the "Recent Orders" tab of the affiliate dashboard.
+- Tweak: Improved the order date filtering on the affiliate dashboard "recent orders" when the site is set to a timezone other than GMT.
+- Tweak: Added some extra error handling to the affiliate coupons list in the admin area to prevent potential PHP errors.
+- Fix: (PRO) Fixed an issue on some sites with the "Leaderboards" admin page not loading correctly.
+- Fix: Fixed "Payouts" tab link showing the new dropdown mobile menu on the affiliate dashboard for the free version.
+- Fix: Fixed a potential issue with the "new customers only" option for coupons being bypassed in some cases by existing customers when checking out as a guest with an existing email address.
+- Fix: (PRO) Fixed a potential issue with partial refunds giving a PHP error.
+- Dev: (PRO) Added a filter to allow the referral URL for dynamic creative QR codes to be modified.
+- Other: Updated translations.
+- Other: Tested with WooCommerce 9.4.3
 
 = Version 5.16.7 - 23rd November 2024 =
 - Fix: Fixed a critical erroring in the free version in some cases with WordPress 6.7.1.

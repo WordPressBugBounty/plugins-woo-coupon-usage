@@ -246,6 +246,21 @@ function wcusage_field_cb_debug( $args )
   <?php echo wcusage_setting_toggle_option('wcusage_field_coupon_applied_hide', 1, esc_html__( 'Hide the "Coupon code applied successfully." message on all pages except for the cart/checkout pages.', 'woo-coupon-usage' ), '0px'); ?>
   <i><?php echo esc_html__( 'When someone uses the referral URL, if the code is automatically applied, it will show this message on all pages.', 'woo-coupon-usage' ); ?></i><br/>
   <i><?php echo esc_html__( 'If you dont want the message to always show, toggle this setting on, and it will instead only show on the cart/checkout pages.', 'woo-coupon-usage' ); ?></i><br/>
+  
+  <br/><hr/>
+
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Coupon Checkout Settings', 'woo-coupon-usage' ); ?></h3>
+
+  <!-- Hide "0.00" value on checkout from referral coupons. -->
+  <?php echo wcusage_setting_toggle_option('wcusage_field_coupon_hide_zero', 1, esc_html__( 'Hide "0.00" value on checkout from referral coupons.', 'woo-coupon-usage' ), '0px'); ?>
+  <i><?php echo esc_html__( 'When a referral coupon is applied, if the discount is "0.00", it will hide the 0.00 discount line on the checkout page.', 'woo-coupon-usage' ); ?></i><br/>
+
+  <br/>
+
+  <!-- Custom text for "Coupon" on checkout. -->
+  <?php echo wcusage_setting_text_option('wcusage_field_coupon_custom_text', '', esc_html__( 'Custom text for "Coupon" on checkout for affiliate coupons:', 'woo-coupon-usage' ), '0px'); ?>
+  <i><?php echo esc_html__( 'If you want to change the text "Coupon" to something else on the checkout page, enable this option and enter the custom text below.', 'woo-coupon-usage' ); ?></i><br/>
+  <i><?php echo esc_html__( 'This will only be replaced for coupons with an affiliate assigned to it.', 'woo-coupon-usage' ); ?></i><br/>
 
   <br/><hr/>
 

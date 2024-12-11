@@ -153,8 +153,24 @@ add_action( 'woocommerce_before_cart', 'wcusage_applied_coupon_check_allow_custo
 add_action( 'woocommerce_applied_coupon', 'wcusage_applied_coupon_check_allow_customer', 10, 0 );
 
 /**
+ * Revalidate coupons when the email address is updated on checkout.
+ *
+ * @param array $fields Checkout fields.
+ * @param WP_Error $errors Validation errors.
+ */
+function wcusage_validate_checkout_email_on_edit( $fields, $errors ) {
+  if ( isset( $fields['billing_email'] ) ) {
+      wcusage_applied_coupon_check_allow_customer();
+  }
+}
+add_action( 'woocommerce_after_checkout_validation', 'wcusage_validate_checkout_email_on_edit', 10, 2 );
+
+/**
  * Wrapper function for the woocommerce_update_cart_action_cart_updated action.
  *
+ * @param bool $cart_updated Whether the cart was updated.
+ * 
+ * @return bool
  */
 function wcusage_applied_coupon_check_allow_customer_with_param( $cart_updated ) {
   wcusage_applied_coupon_check_allow_customer();
@@ -263,4 +279,56 @@ if( !function_exists( 'wcusage_is_domain_blacklisted' ) ) {
     return false;
 
   }
+}
+
+/*
+* Function that changes the coupon label on the cart page to "Referral code"
+*
+*/
+add_filter( 'woocommerce_cart_totals_coupon_label', 'wcusage_custom_woocommerce_coupon_label', 10, 2 );
+function wcusage_custom_woocommerce_coupon_label( $label, $coupon ) {
+
+  $wcusage_field_coupon_custom_text = wcusage_get_setting_value('wcusage_field_coupon_custom_text', '');
+  if(!$wcusage_field_coupon_custom_text) {
+    return $label;
+  }
+
+  if ( WC()->cart->get_coupon_discount_amount( $coupon->get_code(), true ) == 0 ) {
+    $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
+    if ( $coupon_user_id == get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true ) ) {
+      return str_replace( 'Coupon:', $wcusage_field_coupon_custom_text . ":", $label );
+    } else {
+      return $label;
+    }
+  } else {
+    return $label;
+  }
+
+}
+
+/*
+* Function that hides the £0.00 value of a coupon on the cart page
+*
+*/
+add_filter( 'woocommerce_cart_totals_coupon_html', 'wcusage_custom_woocommerce_coupon_html', 10, 2 );
+function wcusage_custom_woocommerce_coupon_html( $discount_html, $coupon ) {
+  
+    // Check if the setting is enabled
+    $wcusage_field_coupon_hide_zero = wcusage_get_setting_value('wcusage_field_coupon_hide_zero', 0);
+    if(!$wcusage_field_coupon_hide_zero) {
+        return $discount_html;
+    }
+
+    // Get the user ID of the coupon
+    $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
+    if( ! $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true ) ) {
+        return $discount_html;
+    }
+    // Check if the discount amount is £0.00
+    if ( WC()->cart->get_coupon_discount_amount( $coupon->get_code(), true ) == 0 ) {
+        // Hide the £0.00 value but keep the Remove link
+        $discount_html = '<a href="' . esc_url( add_query_arg( 'remove_coupon', $coupon->get_code(), wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" aria-label="' . esc_attr__( 'Remove this item', 'woocommerce' ) . '">' . esc_html__( '[Remove]', 'woocommerce' ) . '</a>';
+    }
+
+    return $discount_html;
 }

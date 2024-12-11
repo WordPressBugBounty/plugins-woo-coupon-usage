@@ -165,6 +165,15 @@ function wcusage_get_default_ref_url() {
 }
 
 /**
+ * Gets the affiliate referral URL
+ */
+function wcusage_get_affiliate_url(  $coupon_code  ) {
+    $prefix = wcusage_get_setting_value( 'wcusage_field_urls_prefix', 'coupon' );
+    $affiliate_url = wcusage_get_default_ref_url() . "?" . $prefix . "=" . $coupon_code;
+    return $affiliate_url;
+}
+
+/**
  * Gets the stats for referral URL
  *
  * @param int $postid

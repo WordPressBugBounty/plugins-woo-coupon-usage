@@ -22,11 +22,11 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
   function wcusage_wh_getOrderbyCouponCode( $coupon_code, $start_date, $end_date, $numberoforders = '', $refresh = 1, $update = 0 ) {
 
     $coupon_code = sanitize_text_field($coupon_code);
-    $start_date = sanitize_text_field($start_date);
-    $end_date = sanitize_text_field($end_date);
+    $get_start_date = sanitize_text_field($start_date);
+    $get_end_date = sanitize_text_field($end_date);
 
-	$start_date = wcusage_convert_date_to_gmt($start_date);
-	$end_date = wcusage_convert_date_to_gmt($end_date);
+	$start_date = wcusage_convert_date_to_gmt($get_start_date, 0);
+	$end_date = wcusage_convert_date_to_gmt($get_end_date, 1);
 
     $coupon_code = strtolower($coupon_code);
     $couponinfo = wcusage_get_coupon_info($coupon_code);
@@ -139,12 +139,12 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 		);
 
 		if ($wcusage_field_order_sort != "completeddate") {
-			$query .= $wpdb->prepare(" AND DATE(p.$post_date) BETWEEN %s AND %s", $start_date, $end_date);
+			$query .= $wpdb->prepare(" AND p.$post_date BETWEEN %s AND %s", $start_date, $end_date);
 		} else {
 			$query .= $wpdb->prepare(" AND p.$id IN (
 				SELECT woi2.$post_id
 				FROM {$wpdb->prefix}$postmeta AS woi2
-				WHERE woi2.meta_key = '_completed_date' AND DATE(woi2.meta_value) BETWEEN %s AND %s)", 
+				WHERE woi2.meta_key = '_completed_date' AND woi2.meta_value BETWEEN %s AND %s)", 
 				$start_date, $end_date
 			);
 		}		
@@ -533,7 +533,7 @@ if( !function_exists( 'wcusage_get_coupon_yearly_totals' ) ) {
 
 // Convert date to GMT
 if( !function_exists( 'wcusage_convert_date_to_gmt' ) ) {
-	function wcusage_convert_date_to_gmt($date) {
+	function wcusage_convert_date_to_gmt($date, $end = 0) {
 		// Convert the date to a timestamp
 		$timestamp = strtotime( $date );
 		if ( ! $timestamp ) {
@@ -542,7 +542,29 @@ if( !function_exists( 'wcusage_convert_date_to_gmt' ) ) {
 		// Convert to GMT using WordPress' built-in timezone functions
 		$gmt_offset = get_option( 'gmt_offset' ); // Get the GMT offset from settings
 		$gmt_timestamp = $timestamp - ( $gmt_offset * HOUR_IN_SECONDS );
+		if($end) {
+			// Add 1 day to the end date
+			$gmt_timestamp = $gmt_timestamp + ( 24 * HOUR_IN_SECONDS );
+			// Take 1 second off the end date
+			$gmt_timestamp = $gmt_timestamp - 1;
+		}
 		// Format and return the GMT date
 		return gmdate( 'Y-m-d H:i:s', $gmt_timestamp );
+	}
+}
+
+// Convert date from GMT
+if( !function_exists( 'wcusage_convert_date_from_gmt' ) ) {
+	function wcusage_convert_date_from_gmt($date) {
+		// Convert the date to a timestamp
+		$timestamp = strtotime( $date );
+		if ( ! $timestamp ) {
+			return $date;
+		}
+		// Convert to GMT using WordPress' built-in timezone functions
+		$gmt_offset = get_option( 'gmt_offset' ); // Get the GMT offset from settings
+		$gmt_timestamp = $timestamp + ( $gmt_offset * HOUR_IN_SECONDS );
+		// Format and return the GMT date
+		return date( 'Y-m-d H:i:s', $gmt_timestamp );
 	}
 }

@@ -849,7 +849,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
       <p style="font-size: 20px; color: green; display: none;" id="wcu-number-settings-saved-message"><i class="fas fa-check-square" style="font-size: 20px; color: green; background: transparent; padding: 0;"></i>&nbsp; <span id="wcu-number-settings-saved">0</span> settings were updated (this session).</p>
 
-      <div style="transform: scale(0.8); -webkit-transform-origin-x: 0;">
+      <span style="transform: scale(0.8); -webkit-transform-origin-x: 0;">
 
         <strong><?php 
         echo esc_html__( 'Settings not saving automatically?', 'woo-coupon-usage' );
@@ -903,7 +903,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
         </span>
 
-      </div>
+      </span>
 
       <br/><p style="display: block; font-size: 15px; margin-bottom: 10px;"><strong>Have a feature suggestion? Found a bug? Need help? <?php 
         if ( wcu_fs()->can_use_premium_code() ) {

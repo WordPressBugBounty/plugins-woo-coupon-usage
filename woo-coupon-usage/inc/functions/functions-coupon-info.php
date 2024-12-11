@@ -99,7 +99,7 @@ if( !function_exists( 'wcusage_get_coupon_info_by_id' ) ) {
 		$unpaid_commission = get_post_meta( $couponid, 'wcu_text_unpaid_commission', true );
 			if(!$unpaid_commission) { $unpaid_commission = 0; }
 
-    $pending_payouts = get_post_meta( $couponid, 'wcu_text_pending_payment_commission', true );
+    	$pending_payouts = get_post_meta( $couponid, 'wcu_text_pending_payment_commission', true );
 			if(!$pending_payouts) { $pending_payouts = 0; }
 
 		$wcusage_justcoupon = wcusage_get_setting_value('wcusage_field_justcoupon', '1');

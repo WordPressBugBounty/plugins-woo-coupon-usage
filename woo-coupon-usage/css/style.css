@@ -496,6 +496,7 @@ form#product_search_form input {
 }
 
 .referral-url-box,
+.payouts-box,
 .creatives-box {
 	background: linear-gradient(#fefefe, #fff);
 	color: #333;
@@ -504,18 +505,25 @@ form#product_search_form input {
 	padding: 10px 20px;
 	margin-top: 10px;
 }
+.payouts-box {
+	margin-top: 28px;
+	padding: 20px 25px 20px 25px;
+}
 
 @media only screen and (max-width: 720px) {
 
 	.referral-url-box,
+	.payouts-box,
 	.creatives-box {
 		padding: 10px 5px;
 	}
 }
 
 .referral-url-box p,
+.payouts-box p,
 .creatives-box p,
-.referral-url-box strong {
+.referral-url-box strong,
+.payouts-box strong {
 	color: #333 !important;
 }
 
@@ -727,12 +735,12 @@ form#product_search_form input {
 
 @media only screen and (min-width: 940px) {
 	.wcu-filters-col1 {
-		width: 75%;
+		width: 80%;
 		float: left;
 	}
 
 	.wcu-filters-col2 {
-		width: 25%;
+		width: 20%;
 		float: left;
 	}
 
