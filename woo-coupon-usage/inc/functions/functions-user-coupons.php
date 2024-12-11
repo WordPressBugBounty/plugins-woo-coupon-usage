@@ -487,8 +487,9 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
         if ( isset( $_GET['couponid'] ) ) {
             $urlid = $_GET['couponid'];
         }
+        $urlid = sanitize_text_field( $urlid );
         if ( $urlid ) {
-            echo do_shortcode( '[couponaffiliates coupon="' . $urlid . '"]' );
+            echo do_shortcode( '[couponaffiliates coupon="' . esc_attr( $urlid ) . '"]' );
         } else {
             ?>
 

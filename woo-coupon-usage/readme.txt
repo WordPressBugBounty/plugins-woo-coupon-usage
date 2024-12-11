@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.7.1
-Stable tag: 5.17.0
+Stable tag: 5.17.1
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -239,6 +239,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 5.17.1 - 11th December 2024 =
+- Security Fix: Fixed a small XSS vulnerability bug (reported by WordFence via Arkadiusz Hydzik).
+- Fix: Fixed an issue with the {discount} merge tag on dynamic creatives.
 
 = Version 5.17.0 - 11th December 2024 =
 - New: (PRO) Added an option to allow affiliate to enter custom payout amounts, instead of being always set to the full amount available to them as "unpaid commission".
