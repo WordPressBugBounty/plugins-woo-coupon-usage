@@ -153,6 +153,18 @@ function wcusage_custom_box_html_content(
     $getinfo = wcusage_get_the_order_coupon_info( $coupon_code, "", $order_id );
     $coupon_info = wcusage_get_coupon_info( $coupon_code );
     $coupon_id = $coupon_info[2];
+    // Refresh Stats Link
+    echo "<p style='position: absolute; right: 10px; top: -2px; margin: 0; padding: 0;'>";
+    echo "<a href='" . esc_url( admin_url( 'post.php?post=' . esc_attr( $order_id ) . '&action=edit&refresh_stats=1' ) ) . "' style='text-decoration: none;'\r\n  onClick='return confirm(\"" . esc_html__( 'Are you sure you want to refresh the affiliate stats for this order? This will delete the current referral stats/commission and recalculate them.', 'woo-coupon-usage' ) . "\");'\r\n  title='" . esc_html__( 'Recalculate the affiliate stats for this order.', 'woo-coupon-usage' ) . "'\r\n  ><span class='dashicons dashicons-update' style='font-size: 14px; height: 14px; display: inline-block; margin-top: 4px;'></span></a>";
+    if ( isset( $_GET['refresh_stats'] ) && $_GET['refresh_stats'] ) {
+        delete_post_meta( $order_id, 'wcusage_commission_summary' );
+        delete_post_meta( $order_id, 'wcusage_stats' );
+        delete_post_meta( $order_id, 'wcusage_total_commission' );
+        // Remove params from URL
+        $url = remove_query_arg( 'refresh_stats' );
+        wp_redirect( $url );
+    }
+    echo "</p>";
     echo "<p>";
     if ( $type == 1 ) {
         echo '(' . esc_html__( 'Lifetime Referrer', 'woo-coupon-usage' ) . ')<br/>';
@@ -167,7 +179,7 @@ function wcusage_custom_box_html_content(
     if ( $order->get_status() != "refunded" && !wcusage_coupon_disable_commission( $coupon_id ) ) {
         echo esc_html__( 'Commission', 'woo-coupon-usage' ) . ": " . wp_kses_post( $getinfo['thecommission'] ) . wp_kses_post( $ispaid ) . "<br/>";
     }
-    echo "<a href='" . esc_url( $getinfo['uniqueurl'] ) . "' target='_blank' style='color: #07bbe3;'>" . esc_html__( 'View Dashboard', 'woo-coupon-usage' ) . "</a>";
+    echo "<a href='" . esc_url( $getinfo['uniqueurl'] ) . "' target='_blank' style='color: #07bbe3;' title='" . esc_html__( 'View the affiliate dashboard for this affiliate coupon.', 'woo-coupon-usage' ) . "'>" . esc_html__( 'View Dashboard', 'woo-coupon-usage' ) . "</a>";
     echo "</p>";
     $wcusage_field_mla_enable = wcusage_get_setting_value( 'wcusage_field_mla_enable', '0' );
     if ( $wcusage_field_mla_enable && wcu_fs()->can_use_premium_code() && !wcusage_coupon_disable_commission( $coupon_id ) ) {

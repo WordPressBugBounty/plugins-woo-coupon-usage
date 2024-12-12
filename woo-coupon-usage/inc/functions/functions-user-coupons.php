@@ -484,12 +484,12 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
         $wcusage_show_coupon_if_single = wcusage_get_setting_value( 'wcusage_field_show_coupon_if_single', '1' );
         $wcusage_field_form_style = wcusage_get_setting_value( 'wcusage_field_form_style', '3' );
         $wcusage_field_form_style_columns = wcusage_get_setting_value( 'wcusage_field_form_style_columns', '1' );
-        if ( isset( $_GET['couponid'] ) ) {
-            $urlid = $_GET['couponid'];
-        }
-        $urlid = sanitize_text_field( $urlid );
+        $urlid = ( isset( $_GET['couponid'] ) ? sanitize_text_field( $_GET['couponid'] ) : "" );
+        $urlid = str_replace( array(']', '[', '"'), '', $urlid );
         if ( $urlid ) {
-            echo do_shortcode( '[couponaffiliates coupon="' . esc_attr( $urlid ) . '"]' );
+            if ( shortcode_exists( 'couponaffiliates' ) ) {
+                echo do_shortcode( '[couponaffiliates coupon="' . esc_attr( $urlid ) . '"]' );
+            }
         } else {
             ?>
 
@@ -551,7 +551,9 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
           <?php 
                     if ( $wcusage_registration_enable && $wcusage_registration_enable_login && $wcusage_registration_enable_logout ) {
                         echo "<div class='wcusage-login-form-col'>";
-                        echo do_shortcode( '[couponaffiliates-register]' );
+                        if ( shortcode_exists( 'couponaffiliates-register' ) ) {
+                            echo do_shortcode( '[couponaffiliates-register]' );
+                        }
                         echo "</div>";
                     }
                     ?>
@@ -572,7 +574,9 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                     $wcusage_field_registration_enable_register_loggedin = wcusage_get_setting_value( 'wcusage_field_registration_enable_register_loggedin', '1' );
                     if ( $wcusage_field_registration_enable_register_loggedin ) {
                         echo "<br/>";
-                        echo do_shortcode( '[couponaffiliates-register]' );
+                        if ( shortcode_exists( 'couponaffiliates-register' ) ) {
+                            echo do_shortcode( '[couponaffiliates-register]' );
+                        }
                     }
                 }
                 $countcoupons = 0;
@@ -588,7 +592,9 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                         if ( wcusage_iscouponusers( $coupon, $current_user_id ) && $lastcoupon != $coupon ) {
                             $coupon = str_replace( ' ', '%20', $coupon );
                             // Fix spaces
-                            echo do_shortcode( "[couponaffiliates coupon=" . $coupon . "]" );
+                            if ( shortcode_exists( 'couponaffiliates' ) ) {
+                                echo do_shortcode( "[couponaffiliates coupon=" . $coupon . "]" );
+                            }
                             echo "<style>.admin-only-list-coupons, .wcu-user-coupon-title, .wcu-user-coupon-linebreak { display: none; }</style>";
                         }
                         $lastcoupon = $coupon;

@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.7.1
-Stable tag: 5.17.1
+Stable tag: 5.17.2
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -240,8 +240,12 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
-= Version 5.17.1 - 11th December 2024 =
+= Version 5.17.2 - 12th December 2024 =
 - Security Fix: Fixed a small XSS vulnerability bug (reported by WordFence via Arkadiusz Hydzik).
+- Tweak: Added a link to the individual admin order edit page to refresh the affiliate stats for that specific order.
+- Other: Updated to Freemius SDK 2.10.1
+
+= Version 5.17.1 - 11th December 2024 =
 - Fix: Fixed an issue with the {discount} merge tag on dynamic creatives.
 
 = Version 5.17.0 - 11th December 2024 =
