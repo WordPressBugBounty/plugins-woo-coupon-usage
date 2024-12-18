@@ -21,16 +21,6 @@ function wcusage_field_cb_commission( $args )
   <?php echo wcusage_setting_toggle_option('wcusage_field_show_commission', 1, esc_html__( 'Enable Commission Calculations & Statistics', 'woo-coupon-usage' ), '0px'); ?>
   <i><?php echo esc_html__( 'When enabled, commission will be calculated and displayed on the affiliate dashboard.', 'woo-coupon-usage' ); ?></i>
 
-  <br/><br/>
-
-  <!-- Enable commission calculation statistics -->
-  <?php echo wcusage_setting_toggle_option('wcusage_field_commission_disable_non_affiliate', 0, esc_html__( 'Hide commission statistics for non-affiliate coupons.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'When enabled, commission statistics are disabled/hidden for coupons that are not assigned to an affiliate user.', 'woo-coupon-usage' ); ?></i>
-  <?php if( wcu_fs()->can_use_premium_code() ) { ?>
-    <br/>
-    <i><?php echo esc_html__( '(PRO) This will also stop "unpaid commission" from being added to non-affiliate coupons.', 'woo-coupon-usage' ); ?></i>
-  <?php } ?>
-
   <br/><br/><hr/>
 
   <!-- ********** Commission Amounts ********** -->
@@ -148,8 +138,6 @@ function wcusage_field_cb_commission( $args )
     <i><?php echo esc_html__( 'Optional: How many days after being assigned as a "lifetime" referral should it expire, and the customer be unlinked from the customer.', 'woo-coupon-usage' ); ?></i><br/>
     <i><?php echo esc_html__( 'Set to "0" for permanent lifetime commission with no expiry time.', 'woo-coupon-usage' ); ?> <?php echo esc_html__( 'Can also be set on a per-coupon basis.', 'woo-coupon-usage' ); ?></i><br/>
 
-    <br/>
-
     </span>
 
     <!-- Per User Role -->
@@ -195,6 +183,26 @@ function wcusage_field_cb_commission( $args )
 
     </span>
 
+    <div style="clear: both;"></div>
+
+    <br/><hr/>
+
+    <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Non-Affiliate Coupon Settings', 'woo-coupon-usage' ); ?>:</h3>
+
+    <!-- Disable commission statistics for non-affiliate coupons. -->
+    <?php echo wcusage_setting_toggle_option('wcusage_field_commission_disable_non_affiliate', 0, esc_html__( 'Hide commission statistics for non-affiliate coupons.', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( 'When enabled, commission statistics are disabled/hidden for coupons that are not assigned to an affiliate user.', 'woo-coupon-usage' ); ?></i>
+
+    <?php echo wcusage_setting_toggle('.wcusage_field_commission_disable_non_affiliate', '.wcu-field-section-non-affiliate'); // Show or Hide ?>
+    <span class="wcu-field-section-non-affiliate">
+    <?php if( wcu_fs()->can_use_premium_code() ) { ?>
+    <br/><br/>
+
+    <?php echo wcusage_setting_toggle_option('wcusage_field_commission_disable_non_affiliate_unpaid', 1, esc_html__( 'Stop "unpaid commission" from being earned for non-affiliate coupons.', 'woo-coupon-usage' ), '40px'); ?>
+    <i style="margin-left: 40px;"><?php echo esc_html__( 'When enabled, the unpaid commission will also not be added to non-affiliate coupons.', 'woo-coupon-usage' ); ?></i>
+    <?php } ?>
+    </span>
+
   </span>
 
 	</div>
@@ -222,14 +230,14 @@ if( !function_exists( 'wcusage_setting_section_commission_amounts' ) ) {
   <?php $textaffiliatecommission = esc_html__( 'Affiliate commission', 'woo-coupon-usage' ) . ": "; ?>
 
   <!-- Percentage Amount Of Total Order -->
-  <?php echo wcusage_setting_number_option('wcusage_field_affiliate', '0', esc_html__('Percentage Commission (% Of Total Order)', 'woo-coupon-usage'), '0px'); ?>
+  <?php echo wcusage_setting_number_option('wcusage_field_affiliate', '0', esc_html__('Percentage Commission (% Of Total Order)', 'woo-coupon-usage'), '0px', '0.01'); ?>
 
   <br/>
 
   <!-- Fixed Amount Per Order -->
   <?php 
   $fixed_order_label = sprintf(esc_html_x('Fixed Commission (%s - Amount Per Order)', 'woo-coupon-usage'), wcusage_get_currency_symbol());
-  echo wcusage_setting_number_option('wcusage_field_affiliate_fixed_order', '0', $fixed_order_label, '0px'); 
+  echo wcusage_setting_number_option('wcusage_field_affiliate_fixed_order', '0', $fixed_order_label, '0px', '0.01'); 
   ?>
 
   <br/>
@@ -237,7 +245,7 @@ if( !function_exists( 'wcusage_setting_section_commission_amounts' ) ) {
   <!-- Fixed Amount Per Product -->
   <?php 
   $fixed_product_label = sprintf(esc_html_x('Fixed Commission (%s - Amount Per Product)', 'woo-coupon-usage'), wcusage_get_currency_symbol());
-  echo wcusage_setting_number_option('wcusage_field_affiliate_fixed_product', '0', $fixed_product_label, '0px'); 
+  echo wcusage_setting_number_option('wcusage_field_affiliate_fixed_product', '0', $fixed_product_label, '0px', '0.01'); 
   ?>
 
   <?php

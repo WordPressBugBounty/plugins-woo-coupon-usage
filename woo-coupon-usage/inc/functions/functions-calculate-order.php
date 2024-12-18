@@ -574,6 +574,29 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                 $return_array['fixed_order_commission'] = $fixed_order_commission;
                 $return_array['commission_summary'] = $commission_summary;
             }
+            // If order status is refunded return 0 values
+            $order_status = "";
+            if ( !empty( $order->get_status() ) ) {
+                $order_status = $order->get_status();
+            }
+            if ( isset( $order_status ) && $order_status == "refunded" ) {
+                $return_array = [];
+                $return_array['ordertotal'] = 0;
+                $return_array['orderdiscount'] = 0;
+                $return_array['ordertotaldiscounted'] = 0;
+                $return_array['affiliatecommission'] = 0;
+                $return_array['totalorders'] = 0;
+                $return_array['totaldiscounts'] = 0;
+                $return_array['totalordersexcl'] = 0;
+                $return_array['totalcommission'] = 0;
+                $return_array['commissionpercentage'] = 0;
+                $return_array['affiliate_commission_amount'] = 0;
+                $return_array['refund_commission_total'] = 0;
+                $return_array['refund_commission_product'] = 0;
+                $return_array['refunded_qty'] = 0;
+                $return_array['fixed_order_commission'] = 0;
+                $return_array['commission_summary'] = [];
+            }
             $return_array = apply_filters(
                 'wcusage_get_calculate_order_data',
                 $return_array,
@@ -1135,6 +1158,14 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         $return_array['fixed_order_commission'] = $fixed_order_commission;
         $return_array['option_affiliate'] = $option_affiliate;
         $return_array['commission_summary'] = $commission_summary;
+        // If order status is refunded, return 0 values
+        if ( $order_status == "refunded" ) {
+            $return_array['totalcommission'] = 0;
+            $return_array['fixed_product_commission_total'] = 0;
+            $return_array['affiliate_commission_amount'] = 0;
+            $return_array['fixed_order_commission'] = 0;
+            $return_array['commission_summary'] = array();
+        }
         return $return_array;
     }
 

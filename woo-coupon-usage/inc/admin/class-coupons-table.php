@@ -136,12 +136,11 @@ class wcusage_Coupons_Table extends WP_List_Table {
 
         switch ($column_name) {
             case 'ID':
-                // return '<a href="' . admin_url('post.php?post=' . $item[$column_name] . '&action=edit') . '"><span class="dashicons dashicons-edit" style="font-size: 15px; margin-top: 4px;"></span> ' . $item[$column_name] . '</a>';
                 $coupon_id = $item->ID;
-                return '<a href="' . admin_url('post.php?post=' . $coupon_id . '&action=edit') . '"><span class="dashicons dashicons-edit" style="font-size: 15px; margin-top: 4px;"></span> ' . $coupon_id . '</a>';                
+                return '<a href="' . esc_url(admin_url('post.php?post=' . $coupon_id . '&action=edit')) . '"><span class="dashicons dashicons-edit" style="font-size: 15px; margin-top: 4px;"></span> ' . esc_html($coupon_id) . '</a>';                
             case 'post_title':
                 $coupon_id = $item->ID;
-                return '<a href="' . admin_url('post.php?post=' . $coupon_id . '&action=edit') . '">' . $coupon_code . '</a>';
+                return '<a href="' . esc_url(admin_url('post.php?post=' . $coupon_id . '&action=edit')) . '">' . esc_html($coupon_code) . '</a>';
             case 'coupon_type':
                 $coupon_type = get_post_meta($item->ID, 'discount_type', true);
                 if(!$coupon_type) {
@@ -154,31 +153,31 @@ class wcusage_Coupons_Table extends WP_List_Table {
                 }
                 if($coupon_type == 'percent') {
                     if($coupon_amount) {
-                        return esc_html__('Percentage Discount', 'woo-coupon-usage') . ' (' . $coupon_amount . '%)';
+                        return esc_html__('Percentage Discount', 'woo-coupon-usage') . ' (' . esc_html($coupon_amount) . '%)';
                     } else {
                         return esc_html__('Percentage Discount', 'woo-coupon-usage');
                     }
                 } elseif($coupon_type == 'fixed_cart') {
                     if($coupon_amount) {
-                        return esc_html__('Fixed Cart Discount', 'woo-coupon-usage') . ' (' . wc_price($coupon_amount) . ')';
+                        return esc_html__('Fixed Cart Discount', 'woo-coupon-usage') . ' (' . wc_price(esc_html($coupon_amount)) . ')';
                     } else {
                         return esc_html__('Fixed Cart Discount', 'woo-coupon-usage');
                     }
                 } elseif($coupon_type == 'fixed_product') {
                     if($coupon_amount) {
-                        return esc_html__('Fixed Product Discount', 'woo-coupon-usage') . ' (' . wc_price($coupon_amount) . ')';
+                        return esc_html__('Fixed Product Discount', 'woo-coupon-usage') . ' (' . wc_price(esc_html($coupon_amount)) . ')';
                     } else {
                         return esc_html__('Fixed Product Discount', 'woo-coupon-usage');
                     }
                 } elseif($coupon_type == 'percent_product') {
                     if($coupon_amount) {
-                        return esc_html__('Percentage Product Discount', 'woo-coupon-usage') . ' (' . $coupon_amount . '%)';
+                        return esc_html__('Percentage Product Discount', 'woo-coupon-usage') . ' (' . esc_html($coupon_amount) . '%)';
                     } else {
                         return esc_html__('Percentage Product Discount', 'woo-coupon-usage');
                     }
                 }
                 if($coupon_amount) {
-                    return $coupon_type . ' (' . $coupon_amount . ')';
+                    return $coupon_type . ' (' . esc_html($coupon_amount) . ')';
                 } else {
                     return $coupon_type;
                 }
@@ -199,7 +198,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
                     }
                 }
                 if($usage > 0 && !$sales) {
-                    return "<span title='".$qmessage."'><strong><i class='fa-solid fa-ellipsis'></i></strong></span></a>";
+                    return "<span title='".esc_html($qmessage)."'><strong><i class='fa-solid fa-ellipsis'></i></strong></span></a>";
                 }
                 return wcusage_format_price($sales);
             case 'commission':
@@ -217,7 +216,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
                     }
                 }
                 if($usage > 0 && !$total_commission) {
-                    return "<span title='".$qmessage."'><strong><i class='fa-solid fa-ellipsis'></i></strong></span></a>";
+                    return "<span title='".esc_html($qmessage)."'><strong><i class='fa-solid fa-ellipsis'></i></strong></span></a>";
                 }
                 return wcusage_format_price($total_commission);
             case 'unpaid_commission':
@@ -236,7 +235,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
                 if($user_info) {
                     $username = $user_info->user_login;
                     $userlink = get_edit_user_link($coupon_user_id);
-                    $usernametext = '<a href="'.$userlink.'" target="_blank">' . $username . '</a>';
+                    $usernametext = '<a href="'.$userlink.'" target="_blank">' . esc_html($username) . '</a>';
                 } else {
                     $usernametext = "-";
                 }
@@ -244,13 +243,13 @@ class wcusage_Coupons_Table extends WP_List_Table {
             case 'dashboard_link':
                 $coupon_info = wcusage_get_coupon_info_by_id($item->ID);
                 $dashboard_link = $coupon_info[4];
-                return '<a href="' . $dashboard_link . '" target="_blank">'.esc_html__('View Dashboard', 'woo-coupon-usage').' <span class="dashicons dashicons-external"></span></a>';
+                return '<a href="' . esc_url($dashboard_link) . '" target="_blank">'.esc_html__('View Dashboard', 'woo-coupon-usage').' <span class="dashicons dashicons-external"></span></a>';
             case 'referral_link':
                 $home_page = get_home_url();
                 $user_info = get_userdata($coupon_user_id);
                 $link = $home_page.'?' . $wcusage_urls_prefix . '='.esc_html($coupon_code);
                 return '<div class="wcusage-copyable-link">'
-                . '<input type="text" id="wcusageLink'.$coupon_code.'" class="wcusage-copy-link-text" value="'.$link.'" title="'.$link.'"
+                . '<input type="text" id="wcusageLink'.esc_attr($coupon_code).'" class="wcusage-copy-link-text" value="'.esc_url($link).'" title="'.esc_url($link).'"
                 style="max-width: 100px;width: 75%;max-height: 24px;min-height: 24px;font-size: 10px;" readonly>'
                 . '<button type="button" class="wcusage-copy-link-button" style="max-height: 20px;min-height: 20px;background: none;border: none;"
                 title="'.esc_html__( 'Copy Link', 'woo-coupon-usage' ).'"><i class="fa-regular fa-copy"></i></button>'
@@ -259,10 +258,15 @@ class wcusage_Coupons_Table extends WP_List_Table {
                 // Delete
                 $actions = array(
                     'edit' => sprintf('<a href="%s">%s</a>', admin_url('post.php?post=' . $item->ID . '&action=edit'), esc_html__('Edit', 'woo-coupon-usage')),
-                    'delete' => sprintf('<a href="%s" style="color: #7a0707;" onclick="return confirm(\'%s\');">%s</a>', wp_nonce_url(admin_url('admin.php?page=wcusage_coupons&delete_coupon=' . $item->ID), 'delete_coupon'), esc_html__('Are you sure you want to delete this coupon?', 'woo-coupon-usage'), esc_html__('Delete', 'woo-coupon-usage'))
+                    'delete' => sprintf('<a href="%s" style="color: #7a0707;"
+                    onclick="return confirm(\"%s\");">%s</a>',
+                    wp_nonce_url(admin_url('admin.php?page=wcusage_coupons&delete_coupon=' . $item->ID),
+                    'delete_coupon'),
+                    esc_html__('Are you sure you want to delete this coupon?', 'woo-coupon-usage'),
+                    esc_html__('Delete', 'woo-coupon-usage'))
                 );
                 foreach ($actions as $key => $action) {
-                    $actions[$key] = '<span class="' . $key . '">' . $action . '</span>';
+                    $actions[$key] = '<span class="' . esc_attr($key) . '">' . wp_kses_post($action) . '</span>';
                 }
                 return implode(' | ', $actions);
             default:
@@ -335,7 +339,8 @@ function wcusage_coupons_page() {
                 $coupon_name = $coupon->post_title;
                 wp_delete_post($coupon_id);
                 $message = esc_html__('Coupon "'.$coupon_name.'" deleted successfully.', 'woo-coupon-usage');
-                echo '<p style="font-weight: bold; color: green;">' . esc_html($message) . '</p>';
+                echo '<p class="notice notice-success is-dismissible"
+                style="font-weight: bold; color: green;">' . esc_html($message) . '</p>';
             }
         }
     }

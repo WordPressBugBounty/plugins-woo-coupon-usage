@@ -72,7 +72,7 @@ if ( !function_exists( 'wcusage_tab_latest_orders' ) ) {
                 global $woocommerce;
                 $c = new WC_Coupon($coupon_code);
                 $the_coupon_usage = $c->get_usage_count();
-                $wcusage_page_load = wcusage_get_setting_value( 'wcusage_field_page_load', '' );
+                $wcusaFge_page_load = wcusage_get_setting_value( 'wcusage_field_page_load', '' );
                 //if($the_coupon_usage > 5000) { $wcusage_page_load = 1; }
                 /**/
                 $wcusage_field_load_ajax = wcusage_get_setting_value( 'wcusage_field_load_ajax', '1' );
@@ -676,9 +676,10 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         if ( $wcusage_field_order_sort != "completeddate" ) {
                             $showdate = $order_date;
                             $showtime = get_the_time( 'U', $orderid );
+                            $showtime = date_i18n( "g:i a", $showtime );
                         } else {
                             $showdate = $completed_date;
-                            $showtime = strtotime( $completed_date );
+                            $showtime = strtotime( $orderinfo->get_date_completed() );
                             $showtime = date_i18n( "g:i a", $showtime );
                         }
                         $wcusage_show_tax = wcusage_get_setting_value( 'wcusage_field_show_tax', '0' );
@@ -802,7 +803,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         // Time
                         if ( $option_show_time ) {
                             echo "<td class='wcuTableCell'>";
-                            echo "<span>" . esc_html( date_i18n( 'g:i a', $showtime ) ) . "</span>";
+                            echo "<span>" . esc_html( $showtime ) . "</span>";
                             echo "</td>";
                         }
                         // Status
@@ -905,7 +906,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         }
                         /* Show the "MORE" products list column / toggle on table */
                         if ( $option_show_list_products == "1" ) {
-                            if ( $orderinfo->get_items() ) {
+                            if ( $orderinfo->get_items() && $orderinfo->get_status() != "refunded" ) {
                                 echo "<td class='wcuTableCell excludeThisClass orderproductstd orderproductstd" . esc_attr( $random ) . "-" . esc_html( $orderid ) . "' style='min-width: 100px; font-size: 16px;'>";
                                 echo "<a class='listproductsbutton' href='javascript:void(0);' id='listproductsbutton-" . esc_attr( $random ) . "-" . esc_html( $orderid ) . "'>" . esc_html__( "MORE", "woo-coupon-usage" ) . " <i class='fas fa-chevron-down'></i> <i class='fas fa-chevron-up' style='display: none;'></i></i></i></a>";
                             } else {

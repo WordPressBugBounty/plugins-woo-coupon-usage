@@ -68,7 +68,7 @@ class wcusage_registrations_List_Table extends WP_List_Table {
         case 'userid':
           $user_info = get_userdata($item[$column_name]);
           if($user_info) {
-  				    return $user_info->user_login . "<br/><a href='".get_edit_user_link($item['userid'])."' target='_blank' title='".__( 'Edit User', 'woo-coupon-usage' )."'><span class='wcu-table-custom-links dashicons dashicons-edit-page'></span></a>";
+  				    return $user_info->user_login . "<br/><a href='".esc_url(get_edit_user_link($item['userid']))."' target='_blank' title='".__( 'Edit User', 'woo-coupon-usage' )."'><span class='wcu-table-custom-links dashicons dashicons-edit-page'></span></a>";
           } else {
               return "-";
           }
@@ -79,8 +79,8 @@ class wcusage_registrations_List_Table extends WP_List_Table {
             $uniqueurl = $coupon_info[4];
             if($coupon_info_main[2]) {
               return get_the_title($coupon_info_main[2])
-              . "<br/><a href='" . admin_url("post.php?post=" . $coupon_info_main[2] . "&action=edit&classic-editor") . "' target='_blank' title='" . __('Edit Coupon', 'woo-coupon-usage') . "'><span class='wcu-table-custom-links dashicons dashicons-edit-page'></span></a>"
-              . " <a href='" . $uniqueurl . "' target='_blank' title='" . __('View Affiliate Dashboard', 'woo-coupon-usage') . "'><span class='wcu-table-custom-links dashicons dashicons-external'></span></a>";
+              . "<br/><a href='" . esc_url(admin_url("post.php?post=" . $coupon_info_main[2] . "&action=edit&classic-editor")) . "' target='_blank' title='" . __('Edit Coupon', 'woo-coupon-usage') . "'><span class='wcu-table-custom-links dashicons dashicons-edit-page'></span></a>"
+              . " <a href='" . esc_url($uniqueurl) . "' target='_blank' title='" . __('View Affiliate Dashboard', 'woo-coupon-usage') . "'><span class='wcu-table-custom-links dashicons dashicons-external'></span></a>";
             } else {
               return $item[$column_name];
             }
@@ -96,48 +96,48 @@ class wcusage_registrations_List_Table extends WP_List_Table {
           $info = "";
 
           if( !empty($item['promote']) || !empty($item['referrer']) || !empty($item[$column_name]) ) {
-            $info .= "<button id='infobtnShow-".$item['id']."' class='reginfobtn'>Show Info <span class='fa-solid fa-arrow-down' style='color: #2271b1;'></span></button>
-            <button id='infobtnHide-".$item['id']."' class='reginfobtn' style='display: none;'>Hide Info <span class='fa-solid fa-arrow-up' style='color: #2271b1;'></span></button>";
+            $info .= "<button id='infobtnShow-".esc_html($item['id'])."' class='reginfobtn'>Show Info <span class='fa-solid fa-arrow-down' style='color: #2271b1;'></span></button>
+            <button id='infobtnHide-".esc_html($item['id'])."' class='reginfobtn' style='display: none;'>Hide Info <span class='fa-solid fa-arrow-up' style='color: #2271b1;'></span></button>";
             $info .= "<script>
             jQuery( document ).ready(function() {
-              jQuery('#infobtnHide-".$item['id']."').click(function(){
-                  jQuery('#info-show-".$item['id']."').hide();
-                  jQuery('#infobtnHide-".$item['id']."').hide();
-                  jQuery('#infobtnShow-".$item['id']."').show();
+              jQuery('#infobtnHide-".esc_html($item['id'])."').click(function(){
+                  jQuery('#info-show-".esc_html($item['id'])."').hide();
+                  jQuery('#infobtnHide-".esc_html($item['id'])."').hide();
+                  jQuery('#infobtnShow-".esc_html($item['id'])."').show();
               });
-              jQuery('#infobtnShow-".$item['id']."').click(function(){
-                  jQuery('#info-show-".$item['id']."').show();
-                  jQuery('#infobtnHide-".$item['id']."').show();
-                  jQuery('#infobtnShow-".$item['id']."').hide();
+              jQuery('#infobtnShow-".esc_html($item['id'])."').click(function(){
+                  jQuery('#info-show-".esc_html($item['id'])."').show();
+                  jQuery('#infobtnHide-".esc_html($item['id'])."').show();
+                  jQuery('#infobtnShow-".esc_html($item['id'])."').hide();
               });
             });
             </script>";
           }
 
-          $info .= "<div id='info-show-".$item['id']."' style='display: none;'>";
+          $info .= "<div id='info-show-".esc_html($item['id'])."' style='display: none;'>";
 
           if (is_object($user_info)) {
             // Full Name
             $item['fullname'] = $user_info->first_name . " " . $user_info->last_name;
             if (!empty($item['fullname']) && $item['fullname'] != " ") {
                 $fullnamefieldlabel = wcusage_get_setting_value('wcusage_field_registration_fullname_text', esc_html__('Full Name', 'woo-coupon-usage'));
-                $info .= "<p><strong>" . $fullnamefieldlabel . "</strong>: " . $item['fullname'] . "</p>";
+                $info .= "<p><strong>" . esc_html($fullnamefieldlabel) . "</strong>: " . esc_html($item['fullname']) . "</p>";
             }
             // Email
             $item['email'] = $user_info->user_email;
             if (!empty($item['email'])) {
                 $emailfieldlabel = wcusage_get_setting_value('wcusage_field_registration_email_text', esc_html__('Email', 'woo-coupon-usage'));
-                $info .= "<p><strong>" . $emailfieldlabel . "</strong>: " . $item['email'] . "</p>";
+                $info .= "<p><strong>" . esc_html($emailfieldlabel) . "</strong>: " . esc_html($item['email']) . "</p>";
             }
           }
 
           if(!empty($item['promote'])) {
             $promotefieldlabel = wcusage_get_setting_value('wcusage_field_registration_promote_text', esc_html__( 'How will you promote us?', 'woo-coupon-usage' ));
-            $info .= "<p><strong>".$promotefieldlabel."</strong><br/>".$item['promote']."</p>";
+            $info .= "<p><strong>".esc_html($promotefieldlabel)."</strong><br/>".esc_html($item['promote'])."</p>";
           }
           if(!empty($item['referrer'])) {
             $referrerfieldlabel = wcusage_get_setting_value('wcusage_field_registration_referrer_text', esc_html__( 'How did you hear about us?', 'woo-coupon-usage' ));
-            $info .= "<p><strong>".$referrerfieldlabel."</strong><br/>".$item['referrer']."</p>";
+            $info .= "<p><strong>".esc_html($referrerfieldlabel)."</strong><br/>".esc_html($item['referrer'])."</p>";
           }
 
 
@@ -145,7 +145,7 @@ class wcusage_registrations_List_Table extends WP_List_Table {
             $info_array = json_decode($item[$column_name]);
             if($info_array) {
               foreach($info_array as $key => $value) {
-                $info .= "<p><strong>".$key."</strong><br/>".$value."</p>";
+                $info .= "<p><strong>".esc_html($key)."</strong><br/>".esc_html($value)."</p>";
               }
             }
           }

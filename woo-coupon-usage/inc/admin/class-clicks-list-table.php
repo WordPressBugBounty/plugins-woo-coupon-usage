@@ -37,11 +37,11 @@ class wcusage_clicks_List_Table extends WP_List_Table {
           if (isset($item[$column_name]) && $item[$column_name] != 0) {
               $coupon_info = wcusage_get_coupon_info_by_id($item[$column_name]);
               $uniqueurl = $coupon_info[4];
-              return "<a href='" . $uniqueurl . "' target='_blank' title='" . __('View Affiliate Dashboard', 'woo-coupon-usage') . "'>"
+              return "<a href='" . esc_url($uniqueurl) . "' target='_blank' title='" . __('View Affiliate Dashboard', 'woo-coupon-usage') . "'>"
                   . get_the_title($item[$column_name])
-                  . "</a> <a href='" . admin_url('post.php?post=' . $item[$column_name] . '&action=edit&classic-editor') . "' target='_blank' title='" . __('Edit Coupon', 'woo-coupon-usage') . "'>"
+                  . "</a> <a href='" . esc_url(admin_url('post.php?post=' . $item[$column_name] . '&action=edit&classic-editor')) . "' target='_blank' title='" . __('Edit Coupon', 'woo-coupon-usage') . "'>"
                   . "<span class='dashicons dashicons-edit-page' style='font-size: 12px; margin-top: 5px; display: inline-block; width: 12px;'></span></a>"
-                  . "<a href='" . admin_url('admin.php?page=wcusage_clicks&coupon=' . get_the_title($item[$column_name])) . "' title='" . __('View all visits for this coupon.', 'woo-coupon-usage') . "'>"
+                  . "<a href='" . esc_url(admin_url('admin.php?page=wcusage_clicks&coupon=' . get_the_title($item[$column_name]))) . "' title='" . __('View all visits for this coupon.', 'woo-coupon-usage') . "'>"
                   . "<span class='dashicons dashicons-search' style='font-size: 12px; margin-top: 5px;'></span></a>";
           } else {
               return "";
@@ -49,14 +49,14 @@ class wcusage_clicks_List_Table extends WP_List_Table {
         case 'campaign':
           if (!empty($item[$column_name])) {
               return ucfirst($item[$column_name])
-                  . "<a href='" . admin_url('admin.php?page=wcusage_clicks&campaign=' . $item[$column_name]) . "' title='" . __('View all visits for this campaign name.', 'woo-coupon-usage') . "'>"
+                  . "<a href='" . esc_url(admin_url('admin.php?page=wcusage_clicks&campaign=' . $item[$column_name])) . "' title='" . __('View all visits for this campaign name.', 'woo-coupon-usage') . "'>"
                   . "<span class='dashicons dashicons-search' style='font-size: 12px; margin-top: 5px;'></span></a>";
           } else {
               return "---";
           }
         case 'page':
   				if(isset($item[$column_name])) {
-            return "<a href='".get_permalink($item[$column_name])."' target='_blank' title='".__( 'View Landing Page', 'woo-coupon-usage' )."'>"
+            return "<a href='".esc_url(get_permalink($item[$column_name]))."' target='_blank' title='".__( 'View Landing Page', 'woo-coupon-usage' )."'>"
             . get_the_title($item[$column_name]) . "</a>";
           } else {
             return "";
@@ -64,7 +64,7 @@ class wcusage_clicks_List_Table extends WP_List_Table {
         case 'referrer':
           if (!empty($item[$column_name])) {
               return $item[$column_name]
-                  . "<a href='".admin_url('admin.php?page=wcusage_clicks&referrer=' . $item[$column_name])."' title='" . __('View all visits for this referrer.', 'woo-coupon-usage') . "'>"
+                  . "<a href='".esc_url(admin_url('admin.php?page=wcusage_clicks&referrer=' . $item[$column_name]))."' title='" . __('View all visits for this referrer.', 'woo-coupon-usage') . "'>"
                   . "<span class='dashicons dashicons-search' style='font-size: 12px; margin-top: 5px;'></span></a>";
           } else {
               return "";

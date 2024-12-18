@@ -144,6 +144,28 @@ if( !function_exists( 'wcusage_update_all_stats_single' ) ) {
 add_action('wcusage_hook_update_all_stats_single', 'wcusage_update_all_stats_single', 10, 4);
 
 /*
+* Run wcusage_hook_reset_order_stats_month on order completed
+*
+* @param int $order_id
+*
+*/
+function wcusage_reset_order_stats_month_on_order_completed($order_id) {
+
+  $order = wc_get_order( $order_id );
+
+  $coupons = $order->get_items( 'coupon' );
+
+  if($coupons) {
+    foreach($coupons as $coupon) {
+      $coupon_code = $coupon->get_code();
+      $couponinfo = wcusage_get_coupon_info($coupon_code);
+      do_action('wcusage_hook_reset_order_stats_month', $order, $couponinfo[2]);
+    }
+  }
+
+}
+
+/*
 * Updates the monthly stats for a coupon based on order
 *
 * @param string $coupon_code

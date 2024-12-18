@@ -95,6 +95,9 @@ function wcusage_fix_cache() {
     if ( ! defined( 'DONOTCACHEPAGE' ) ) {
 		  define( 'DONOTCACHEPAGE', true );
     }
+    if ( function_exists( 'nocache_headers' ) ) {
+      nocache_headers();
+    }
 	}
 }
 add_action( 'template_redirect', 'wcusage_fix_cache' );

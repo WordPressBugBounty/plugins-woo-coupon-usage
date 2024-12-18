@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.7.1
-Stable tag: 5.17.2
+Stable tag: 5.17.3
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -239,6 +239,19 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 5.17.3 - 18th December 2024 =
+- Tweak: Moved the "Hide commission statistics for non-affiliate coupons" option and added another "Stop unpaid commission from being earned for non-affiliate coupons" option to make things more clear on what it does.
+- Tweak: Added some additional sanitisation to various areas of the code for extra precaution.
+- Tweak: Orders with the "Refunded" status will now no longer show any values for the order totals or commission earned, if refunded orders are shown on the affiliate dashboard.
+- Tweak: Added nocache_headers() to the affiliate dashboard page to help prevent caching issues.
+- Fix: Fixed an issue with the "Welcome Bonus" performance bonus.
+- Fix: Fixed an issue with "Lifetime Commission" not working for some websites in some cases.
+- Fix: Fixed an issue with the "Completed Date" option for sorting orders on the affiliate dashboard with HPOS enabled.
+- Fix: Fixed an issue with the new "Time" column on the recent orders tab not showing properly when they are sorted by "Completed Date".
+- Fix: When using the "legacy" save settings button for the admin settings page, it will now allow decimal values for the commission rates.
+- Fix: (PRO) Fixed the "Generate" button for QR codes not being localised for translations.
+- Other: Updated translations.
 
 = Version 5.17.2 - 12th December 2024 =
 - Security Fix: Fixed a small XSS vulnerability bug (reported by WordFence via Arkadiusz Hydzik).

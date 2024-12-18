@@ -142,8 +142,8 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 			$query .= $wpdb->prepare(" AND p.$post_date BETWEEN %s AND %s", $start_date, $end_date);
 		} else {
 			$query .= $wpdb->prepare(" AND p.$id IN (
-				SELECT woi2.$post_id
-				FROM {$wpdb->prefix}$postmeta AS woi2
+				SELECT woi2.post_id
+				FROM {$wpdb->prefix}postmeta AS woi2
 				WHERE woi2.meta_key = '_completed_date' AND woi2.meta_value BETWEEN %s AND %s)", 
 				$start_date, $end_date
 			);

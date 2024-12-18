@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Coupon Affiliates for WooCommerce\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-10-27 23:48+0000\n"
-"PO-Revision-Date: 2024-12-11 11:58+0000\n"
+"PO-Revision-Date: 2024-12-18 15:24+0000\n"
 "Last-Translator: Elliot Sowersby\n"
 "Language-Team: Russian\n"
 "Language: ru_RU\n"
@@ -35,12 +35,12 @@ msgstr ""
 " Вы также можете просмотреть документацию плагина для получения "
 "дополнительной информации обо всех функциях <a href=\"%s\">плагинов</a> ."
 
-#: inc/admin/class-coupons-table.php:337
+#: inc/admin/class-coupons-table.php:341
 #, fuzzy
 msgid "\" deleted successfully."
 msgstr "\" успешно удален."
 
-#: inc/admin/settings/options-payouts.php:529
+#: inc/admin/settings/options-payouts.php:533
 #, fuzzy
 #| msgid "Account Number Field Label"
 msgid "\"Account Number\" Field Label"
@@ -86,7 +86,7 @@ msgstr "Ссылка на меню \"Моя учетная запись\""
 msgid "\"Network\" Tab Text"
 msgstr "Текст вкладки \"Сеть\""
 
-#: inc/admin/settings/options-payouts.php:519
+#: inc/admin/settings/options-payouts.php:523
 #, fuzzy
 #| msgid "Payee Name Field Label"
 msgid "\"Payee Name\" Field Label"
@@ -117,7 +117,7 @@ msgstr "Вкладка «URL-адреса рефералов»"
 msgid "\"Settings\" Tab"
 msgstr "Вкладка «Настройки»"
 
-#: inc/admin/settings/options-payouts.php:524
+#: inc/admin/settings/options-payouts.php:528
 #, fuzzy
 #| msgid "Sort Code Field Label"
 msgid "\"Sort Code\" Field Label"
@@ -236,7 +236,7 @@ msgstr "(Администратор) Журнал действий"
 msgid "(Admin) WooCommerce Orders \"Affiliate Info\" Sections"
 msgstr "(Администратор) Разделы WooCommerce Заказы \"Информация о партнерах\""
 
-#: inc/admin/settings/options-commission.php:283
+#: inc/admin/settings/options-commission.php:291
 #, fuzzy
 msgid ""
 "(Custom discounts include negative fees, store credit, and discounts added "
@@ -245,12 +245,12 @@ msgstr ""
 "(Пользовательские скидки включают отрицательные сборы, кредит магазина и "
 "скидки, добавленные другими плагинами.)"
 
-#: inc/admin/settings/options-payouts.php:852
+#: inc/admin/settings/options-payouts.php:856
 #, fuzzy
 msgid "(Custom) 3rd Party Wallet Plugin Integrations"
 msgstr "(Пользовательский) Интеграция плагинов кошелька 3-й стороны"
 
-#: inc/admin/settings/options-payouts.php:845
+#: inc/admin/settings/options-payouts.php:849
 #, fuzzy
 msgid "(Free) Built-in Store Credit & Wallet System"
 msgstr "(Бесплатно) Встроенная система кредитов и кошельков в магазине"
@@ -458,15 +458,6 @@ msgstr "(ПРО) Заявления"
 msgid "(PRO) Store Credit Payouts – Integrations"
 msgstr "(ПРО) Выплаты по кредитам магазина — интеграции"
 
-#: inc/admin/settings/options-commission.php:31
-#, fuzzy
-msgid ""
-"(PRO) This will also stop \"unpaid commission\" from being added to non-"
-"affiliate coupons."
-msgstr ""
-"(ПЛЮС) Это также предотвратит добавление «невыплаченной комиссии» к "
-"непартнерским купонам."
-
 #: inc/admin/settings/options-help.php:81
 #, fuzzy
 msgid "(PRO) User Registrations as Lifetime Referral"
@@ -530,7 +521,7 @@ msgstr ""
 msgid "-"
 msgstr "-"
 
-#: inc/registration/registration-admin.php:593
+#: inc/registration/registration-admin.php:600
 #, fuzzy
 msgid "- Default -"
 msgstr "-По умолчанию-"
@@ -587,7 +578,7 @@ msgstr ""
 "без флажка, он останется прежним, в случае, если была заработана какая-либо "
 "новая комиссия с момента открытия этой страницы.)"
 
-#: premium-files/pro-addons/payouts/payouts-settings.php:516
+#: premium-files/pro-addons/payouts/payouts-settings.php:554
 #, fuzzy
 msgid ""
 "[Admin] Only the affiliate user for this coupon can setup their Stripe "
@@ -597,7 +588,7 @@ msgstr ""
 "подключение своей учетной записи Stripe."
 
 #: inc/dashboard/tab-settings.php:210
-#: premium-files/pro-addons/payouts/payouts-settings.php:567
+#: premium-files/pro-addons/payouts/payouts-settings.php:608
 #, fuzzy, php-format
 msgid ""
 "[Admin] You can edit the account details for this user in the admin area: %s"
@@ -605,42 +596,42 @@ msgstr ""
 "[Администратор] Вы можете отредактировать данные учетной записи для этого "
 "пользователя в админке: %s"
 
-#: inc/admin/settings/options-payouts.php:770
+#: inc/admin/settings/options-payouts.php:774
 #, fuzzy
 msgid "[Live] API Publishable Key"
 msgstr "[Концерт] Публикуемый ключ API"
 
-#: inc/admin/settings/options-payouts.php:774
+#: inc/admin/settings/options-payouts.php:778
 #, fuzzy
 msgid "[Live] API Secret Key"
 msgstr "[Концерт] Секретный ключ API"
 
-#: inc/admin/settings/options-payouts.php:667
+#: inc/admin/settings/options-payouts.php:671
 #, fuzzy
 msgid "[Live] Client ID"
 msgstr "[Концерт] Идентификатор клиента"
 
-#: inc/admin/settings/options-payouts.php:671
+#: inc/admin/settings/options-payouts.php:675
 #, fuzzy
 msgid "[Live] Client Secret"
 msgstr "[Концерт] Секрет клиента"
 
-#: inc/admin/settings/options-payouts.php:780
+#: inc/admin/settings/options-payouts.php:784
 #, fuzzy
 msgid "[Test] API Publishable Key"
 msgstr "[Тест] Публикуемый ключ API"
 
-#: inc/admin/settings/options-payouts.php:784
+#: inc/admin/settings/options-payouts.php:788
 #, fuzzy
 msgid "[Test] API Secret Key"
 msgstr "[Тест] Секретный ключ API"
 
-#: inc/admin/settings/options-payouts.php:677
+#: inc/admin/settings/options-payouts.php:681
 #, fuzzy
 msgid "[Test] Client ID"
 msgstr "[Тест] Идентификатор клиента"
 
-#: inc/admin/settings/options-payouts.php:681
+#: inc/admin/settings/options-payouts.php:685
 #, fuzzy
 msgid "[Test] Client Secret"
 msgstr "[Тест] Секрет клиента"
@@ -655,13 +646,13 @@ msgstr ""
 "пользовательские таблицы базы данных при удалении плагина. (См. Настройки "
 "отладки)"
 
-#: inc/admin/settings/options-payouts.php:426
-#: inc/admin/settings/options-payouts.php:464
+#: inc/admin/settings/options-payouts.php:430
+#: inc/admin/settings/options-payouts.php:468
 #, fuzzy
 msgid "A custom \"manual\" payment method of your choice."
 msgstr "Пользовательский «ручной» способ оплаты по вашему выбору."
 
-#: inc/admin/settings/options-payouts.php:500
+#: inc/admin/settings/options-payouts.php:504
 #, fuzzy
 msgid "A direct bank transfer payment method (paid manually)."
 msgstr "Способ оплаты прямым банковским переводом (оплачивается вручную)."
@@ -722,6 +713,11 @@ msgstr ""
 "Короткая ссылка также может быть создана только в том случае, если она "
 "указывает на этот веб-сайт."
 
+#: premium-files/pro-addons/payouts/payouts-settings.php:627
+#, fuzzy
+msgid "A user has not yet been assigned to this coupon."
+msgstr "Пользователь еще не назначен на этот купон."
+
 #: premium-files/pro-addons/payouts/statements/functions-statements.php:102
 #: premium-files/pro-addons/payouts/statements/functions-statements.php:149
 #, fuzzy
@@ -757,7 +753,7 @@ msgstr ""
 msgid "Accept"
 msgstr "Принимать"
 
-#: inc/registration/registration-admin.php:149
+#: inc/registration/registration-admin.php:156
 #, fuzzy
 msgid ""
 "Accept and decline affiliate registrations submitted via the affiliate "
@@ -784,7 +780,7 @@ msgid "Acceptance Field"
 msgstr "Поле принятия"
 
 #: inc/registration/class-registrations-list-table.php:161
-#: inc/registration/registration-admin.php:168
+#: inc/registration/registration-admin.php:175
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:51
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:83
 #, fuzzy
@@ -820,7 +816,7 @@ msgstr "Адрес электронной почты учетной запис"
 msgid "Account ID"
 msgstr "Идентификатор учетной записи"
 
-#: inc/admin/settings/options-payouts.php:712
+#: inc/admin/settings/options-payouts.php:716
 #, fuzzy
 msgid "Account Type:"
 msgstr "Тип счета:"
@@ -904,8 +900,8 @@ msgid "Add New"
 msgstr "Добавить новый"
 
 #: inc/admin/admin-menu.php:119 inc/admin/admin-menu.php:120
-#: inc/registration/registration-admin.php:136
-#: inc/registration/registration-admin.php:619
+#: inc/registration/registration-admin.php:143
+#: inc/registration/registration-admin.php:626
 #: inc/admin/settings/admin-options.php:541
 #, fuzzy
 msgid "Add New Affiliate"
@@ -916,7 +912,7 @@ msgstr "Добавить нового партнера"
 msgid "Add New Affiliate Group"
 msgstr "Добавить новую партнерскую группу"
 
-#: inc/registration/registration-admin.php:473
+#: inc/registration/registration-admin.php:480
 #, fuzzy
 msgid "Add New Affiliate:"
 msgstr "Добавить нового партнера:"
@@ -1004,7 +1000,7 @@ msgstr "Адресная строка 3"
 msgid "Address Line 3 (City/State/ZIP)"
 msgstr "Адресная строка 3 (город/штат/ZIP)"
 
-#: premium-files/pro-addons/payouts/payouts-settings.php:579
+#: premium-files/pro-addons/payouts/payouts-settings.php:620
 #, fuzzy
 msgid ""
 "Admin notice: Please enable your preferred payout methods in the plugin "
@@ -1075,7 +1071,7 @@ msgstr "Администратор"
 msgid "Advanced Admin Reports"
 msgstr "Расширенные отчеты администратора"
 
-#: inc/admin/settings/options-commission.php:275
+#: inc/admin/settings/options-commission.php:283
 #, fuzzy
 msgid "Advanced Calculation Settings"
 msgstr "Дополнительные настройки вычислений"
@@ -1085,7 +1081,7 @@ msgstr "Дополнительные настройки вычислений"
 msgid "Advanced CAPTCHA Spam Protection"
 msgstr "Расширенная защита от спама CAPTCHA"
 
-#: inc/admin/settings/options-general.php:937
+#: inc/admin/settings/options-general.php:939
 #, fuzzy
 msgid "Advanced Orders Settings"
 msgstr "Дополнительные настройки заказов"
@@ -1147,7 +1143,7 @@ msgstr "Заявка на партнерскую заявку подана"
 msgid "Affiliate Commission"
 msgstr "Партнерская комиссия"
 
-#: inc/admin/settings/options-commission.php:222
+#: inc/admin/settings/options-commission.php:230
 #, fuzzy
 msgid "Affiliate commission"
 msgstr "Партнерская комиссия"
@@ -1163,7 +1159,7 @@ msgid "Affiliate Coupons"
 msgstr "Партнерские купоны"
 
 #: inc/admin/admin-page.php:292 inc/admin/settings/options-help.php:86
-#: premium-files/pro-addons/multi-level/functions-mla.php:69
+#: premium-files/pro-addons/multi-level/functions-mla.php:71
 #, fuzzy
 msgid "Affiliate Dashboard"
 msgstr "Партнерский кабинет"
@@ -1244,7 +1240,7 @@ msgstr "Отчеты по электронной почте партнеров"
 msgid "Affiliate Fraud Prevention Features"
 msgstr "Функции предотвращения мошенничества с партнерскими программами"
 
-#: inc/registration/registration-admin.php:590
+#: inc/registration/registration-admin.php:597
 #, fuzzy
 msgid "Affiliate Group"
 msgstr "Партнерская группа"
@@ -1428,7 +1424,7 @@ msgid "Align:"
 msgstr "Выровнять:"
 
 #: inc/dashboard/tab-latest-orders.php:878
-#: inc/registration/registration-admin.php:166
+#: inc/registration/registration-admin.php:173
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:81
 #: premium-files/pro-addons/payouts/payouts-admin.php:181
 #, fuzzy
@@ -1556,7 +1552,7 @@ msgstr ""
 "магазина», который они могут использовать для покупок в вашем магазине при "
 "оформлении заказа."
 
-#: inc/admin/settings/options-commission.php:160
+#: inc/admin/settings/options-commission.php:148
 #, fuzzy
 msgid ""
 "Allows you to set custom commission rates per user role. This will replace "
@@ -1721,7 +1717,7 @@ msgstr "Исключается ли стоимость доставки из с�
 msgid "Are you sure you want to delete the"
 msgstr "Вы уверены, что хотите удалить"
 
-#: inc/admin/class-coupons-table.php:262
+#: inc/admin/class-coupons-table.php:265
 #, fuzzy
 msgid "Are you sure you want to delete this coupon?"
 msgstr "Вы уверены, что хотите удалить этот купон?"
@@ -1730,6 +1726,15 @@ msgstr "Вы уверены, что хотите удалить этот куп�
 #, fuzzy
 msgid "Are you sure you want to delete this role?"
 msgstr "Вы уверены, что хотите удалить эту роль?"
+
+#: inc/admin/admin-orders-box.php:144
+#, fuzzy
+msgid ""
+"Are you sure you want to refresh the affiliate stats for this order? This "
+"will delete the current referral stats/commission and recalculate them."
+msgstr ""
+"Вы уверены, что хотите обновить статистику партнеров по этому заказу? При "
+"этом будут удалены текущие реферальные статы/комиссии и пересчитаны они."
 
 #: inc/admin/settings/options-registrations.php:1019
 #, fuzzy
@@ -1848,7 +1853,7 @@ msgstr "Автоматические коэффициенты конверсии
 msgid "Automatic Affiliate Registration"
 msgstr "Автоматическая регистрация партнера"
 
-#: inc/admin/settings/options-payouts.php:387
+#: inc/admin/settings/options-payouts.php:391
 #, fuzzy
 msgid "Automatic Payouts"
 msgstr "Автоматические выплаты"
@@ -1958,16 +1963,16 @@ msgstr "Вернуться к группам"
 msgid "Back To Payouts"
 msgstr "Назад к выплатам"
 
-#: inc/admin/settings/options-design.php:79
 #: inc/admin/settings/options-design.php:92
-#: inc/admin/settings/options-design.php:189
+#: inc/admin/settings/options-design.php:105
 #: inc/admin/settings/options-design.php:202
 #: inc/admin/settings/options-design.php:215
+#: inc/admin/settings/options-design.php:228
 #, fuzzy
 msgid "Background"
 msgstr "Фон"
 
-#: inc/admin/settings/options-payouts.php:343
+#: inc/admin/settings/options-payouts.php:347
 #: premium-files/pro-addons/groups/functions-edit-groups.php:196
 #, fuzzy
 msgid "Bank Transfer"
@@ -2026,7 +2031,7 @@ msgstr "Архив бонусов"
 msgid "Bonus Attributes"
 msgstr "Бонусные атрибуты"
 
-#: inc/admin/settings/options-payouts.php:1009
+#: inc/admin/settings/options-payouts.php:1013
 #, fuzzy
 msgid "Bonus Commission (%)"
 msgstr "Бонусная комиссия (%)"
@@ -2171,12 +2176,12 @@ msgstr "Массовое редактирование: настройки куп
 msgid "Bulk Edit: Product Settings"
 msgstr "Массовое редактирование: настройки продукта"
 
-#: inc/admin/settings/options-design.php:199
+#: inc/admin/settings/options-design.php:212
 #, fuzzy
 msgid "Buttons"
 msgstr "Кнопки"
 
-#: inc/admin/settings/options-design.php:212
+#: inc/admin/settings/options-design.php:225
 #, fuzzy
 msgid "Buttons Hover"
 msgstr "Наведение кнопок"
@@ -2197,13 +2202,13 @@ msgstr ""
 msgid "by more than"
 msgstr "более чем"
 
-#: inc/admin/settings/options-general.php:973
+#: inc/admin/settings/options-general.php:975
 #, fuzzy
 msgid "By which date should orders be sorted on the affiliate dashboard?"
 msgstr ""
 "К какой дате должны быть отсортированы заказы на панели управления партнера?"
 
-#: inc/functions/functions-all-time.php:460
+#: inc/functions/functions-all-time.php:482
 #, fuzzy
 msgid "Calculating statistics"
 msgstr "Расчет статистики"
@@ -2217,7 +2222,7 @@ msgstr ""
 "Расчет статистики по всем рефералам. Поскольку это ваш первый визит, он "
 "займет немного больше времени, чем обычно."
 
-#: inc/admin/settings/options-commission.php:62
+#: inc/admin/settings/options-commission.php:52
 #, fuzzy
 msgid "Calculation Settings"
 msgstr "Настройки расчета"
@@ -2255,7 +2260,7 @@ msgstr "Переменная URL кампании"
 msgid "Campaigns (Referral URL)"
 msgstr "Кампании (реферальный URL)"
 
-#: inc/admin/settings/options-commission.php:149
+#: inc/admin/settings/options-commission.php:139
 #, fuzzy
 msgid "Can also be set on a per-coupon basis."
 msgstr "Также может быть установлен на основе купона."
@@ -2303,7 +2308,7 @@ msgstr ""
 msgid "Capitalize"
 msgstr "Капитализировать"
 
-#: inc/admin/settings/options-payouts.php:984
+#: inc/admin/settings/options-payouts.php:988
 #, fuzzy
 msgid "Cart Discount Text"
 msgstr "Корзина Скидка Текст"
@@ -2472,7 +2477,7 @@ msgstr "Цветовой код:"
 msgid "Color:"
 msgstr "Цвет:"
 
-#: inc/admin/admin-orders-box.php:189 inc/admin/admin-orders-list.php:157
+#: inc/admin/admin-orders-box.php:205 inc/admin/admin-orders-list.php:157
 #: inc/admin-reports/admin-reports.php:152
 #: inc/admin-reports/admin-reports.php:693
 #: inc/admin-reports/admin-reports.php:1289
@@ -2480,7 +2485,7 @@ msgstr "Цвет:"
 #: inc/dashboard/tab-latest-orders.php:223
 #: inc/dashboard/tab-latest-orders.php:291 inc/dashboard/tab-statistics.php:268
 #: inc/functions/functions-dashboard.php:563
-#: inc/functions/functions-user-coupons.php:926
+#: inc/functions/functions-user-coupons.php:935
 #: premium-files/dashboard/tab-monthly-summary.php:175
 #: premium-files/dashboard/tab-monthly-summary.php:202
 #: inc/admin/settings/admin-options.php:417
@@ -2496,7 +2501,7 @@ msgid "Commission + Payouts"
 msgstr "Комиссия + Выплаты"
 
 #: inc/admin/settings/admin-setup.php:223
-#: inc/admin/settings/options-commission.php:37
+#: inc/admin/settings/options-commission.php:27
 #, fuzzy
 msgid "Commission Amounts"
 msgstr "Суммы комиссий"
@@ -2575,7 +2580,7 @@ msgstr "Комиссия за продукт"
 msgid "Commission Percentage Per Order"
 msgstr "Процент комиссии за заказ"
 
-#: inc/admin/settings/options-commission.php:92
+#: inc/admin/settings/options-commission.php:82
 #, fuzzy
 msgid "Commission Priority"
 msgstr "Приоритет комиссии"
@@ -2638,7 +2643,7 @@ msgstr "Сравнение с периодом даты"
 msgid "Completed"
 msgstr "Завершённый"
 
-#: inc/admin/settings/options-general.php:976
+#: inc/admin/settings/options-general.php:978
 #, fuzzy
 msgid "Completed Date"
 msgstr "Дата завершения"
@@ -2748,7 +2753,7 @@ msgid "Copy Dashboard Link"
 msgstr "Ссылка \"Копировать панель мониторинга\""
 
 #: inc/admin/admin-affiliate-users.php:204
-#: inc/admin/class-coupons-table.php:256
+#: inc/admin/class-coupons-table.php:255
 #, fuzzy
 msgid "Copy Link"
 msgstr "Скопировать ссылку"
@@ -2883,7 +2888,7 @@ msgstr "Настройки оформления купонов"
 
 #: inc/admin/admin-url-clicks.php:90 inc/admin/class-coupons-table.php:26
 #: inc/admin/class-referrals-table.php:30
-#: inc/registration/registration-admin.php:525
+#: inc/registration/registration-admin.php:532
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:171
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:258
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:370
@@ -2891,22 +2896,22 @@ msgstr "Настройки оформления купонов"
 msgid "Coupon Code"
 msgstr "Код купона"
 
-#: inc/registration/registration-admin.php:64
+#: inc/registration/registration-admin.php:72
 #, fuzzy
 msgid "Coupon code already exists: "
 msgstr "Код купона уже существует: "
 
-#: inc/registration/registration-admin.php:352
+#: inc/registration/registration-admin.php:359
 #, fuzzy
 msgid "Coupon code successfully created:"
 msgstr "Код купона успешно создан:"
 
-#: inc/registration/registration-admin.php:306
+#: inc/registration/registration-admin.php:313
 #, fuzzy
 msgid "Coupon code was not created. Template has not been selected."
 msgstr "Код купона не был создан. Шаблон не выбран."
 
-#: inc/admin/settings/options-commission.php:102
+#: inc/admin/settings/options-commission.php:92
 #, fuzzy
 msgid "Coupon Commission Settings"
 msgstr "Настройки комиссии купона"
@@ -2939,12 +2944,12 @@ msgid "Coupon Title Prefix"
 msgstr "Префикс заголовка купона"
 
 #: inc/admin/class-coupons-table.php:28
-#: inc/registration/registration-admin.php:539
+#: inc/registration/registration-admin.php:546
 #, fuzzy
 msgid "Coupon Type"
 msgstr "Тип купона"
 
-#: inc/functions/functions-user-coupons.php:1035
+#: inc/functions/functions-user-coupons.php:1044
 #, fuzzy
 msgid "Coupon unlinked from user:"
 msgstr "Купон, отвязанный от пользователя:"
@@ -2954,7 +2959,7 @@ msgstr "Купон, отвязанный от пользователя:"
 msgid "Coupon Usage Restrictions"
 msgstr "Ограничения на использование купонов"
 
-#: inc/admin/admin-menu.php:82 inc/admin/class-coupons-table.php:356
+#: inc/admin/admin-menu.php:82 inc/admin/class-coupons-table.php:361
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:338
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:377
 #, fuzzy
@@ -3057,10 +3062,10 @@ msgstr ""
 msgid "Created"
 msgstr "Созданный"
 
-#: inc/admin/settings/options-general.php:975
+#: inc/admin/settings/options-general.php:977
 #, fuzzy
-msgid "Created Date"
-msgstr "Дата создания"
+msgid "Created Date (Recommended)"
+msgstr "Дата создания (рекомендуется)"
 
 #: inc/admin/admin-page.php:275
 #, fuzzy
@@ -3167,17 +3172,17 @@ msgstr "Изогнутый (5px)"
 msgid "Custom"
 msgstr "Обычай"
 
-#: inc/admin/settings/options-payouts.php:976
+#: inc/admin/settings/options-payouts.php:980
 #, fuzzy
 msgid "Custom \"Affiliate Commission\" Text"
 msgstr "Пользовательский текст \"Партнерская комиссия\""
 
-#: inc/admin/settings/options-payouts.php:990
+#: inc/admin/settings/options-payouts.php:994
 #, fuzzy
 msgid "Custom \"Affiliate store credit available\" Text"
 msgstr "Пользовательский текст \"Доступен кредит в партнерском магазине\""
 
-#: inc/admin/settings/options-payouts.php:996
+#: inc/admin/settings/options-payouts.php:1000
 #, fuzzy
 msgid "Custom \"Apply credit to this order\" Text"
 msgstr "Пользовательский текст \"Применить кредит к этому заказу\""
@@ -3192,22 +3197,22 @@ msgstr "Пользовательское сообщение \"Комиссия\"
 msgid "Custom \"Preferred Coupon Code\" Field Label"
 msgstr "Пользовательская метка поля «Предпочтительный код купона»"
 
-#: inc/admin/settings/options-payouts.php:970
+#: inc/admin/settings/options-payouts.php:974
 #, fuzzy
 msgid "Custom \"Store Credit Balance\" Text"
 msgstr "Пользовательский текст \"Кредитный баланс магазина\""
 
-#: inc/admin/settings/options-payouts.php:341
+#: inc/admin/settings/options-payouts.php:345
 #, fuzzy
 msgid "Custom #1"
 msgstr "Пользовательский #1"
 
-#: inc/admin/settings/options-payouts.php:342
+#: inc/admin/settings/options-payouts.php:346
 #, fuzzy
 msgid "Custom #2"
 msgstr "Пользовательский #2"
 
-#: inc/admin/admin-orders-box.php:146
+#: inc/admin/admin-orders-box.php:162
 #, fuzzy
 msgid "Custom / URL Referral"
 msgstr "Пользовательский / URL-адрес реферала"
@@ -3272,12 +3277,12 @@ msgstr ""
 "Пользовательская информация/текст, отображаемый в разделе «Отслеживание "
 "прямых ссылок» на панели управления партнера."
 
-#: inc/admin/settings/options-payouts.php:440
-#: inc/admin/settings/options-payouts.php:476
-#: inc/admin/settings/options-payouts.php:514
-#: inc/admin/settings/options-payouts.php:618
-#: inc/admin/settings/options-payouts.php:733
-#: inc/admin/settings/options-payouts.php:965
+#: inc/admin/settings/options-payouts.php:444
+#: inc/admin/settings/options-payouts.php:480
+#: inc/admin/settings/options-payouts.php:518
+#: inc/admin/settings/options-payouts.php:622
+#: inc/admin/settings/options-payouts.php:737
+#: inc/admin/settings/options-payouts.php:969
 #, fuzzy
 msgid ""
 "Custom information/text shown when payment method is selected (in the "
@@ -3286,7 +3291,7 @@ msgstr ""
 "Пользовательская информация/текст, отображаемый при выборе способа оплаты (в "
 "настройках панели инструментов)."
 
-#: inc/registration/registration-admin.php:611
+#: inc/registration/registration-admin.php:618
 #, fuzzy
 msgid "Custom Message"
 msgstr "Пользовательское сообщение"
@@ -3296,19 +3301,19 @@ msgstr "Пользовательское сообщение"
 msgid "Custom Paragraph Text"
 msgstr "Настраиваемый текст абзаца"
 
-#: inc/admin/settings/options-payouts.php:424
-#: inc/admin/settings/options-payouts.php:462
+#: inc/admin/settings/options-payouts.php:428
+#: inc/admin/settings/options-payouts.php:466
 #: premium-files/pro-addons/groups/functions-edit-groups.php:194
 #, fuzzy
 msgid "Custom Payment Method"
 msgstr "Пользовательский способ оплаты"
 
-#: inc/admin/settings/options-payouts.php:1055
+#: inc/admin/settings/options-payouts.php:1059
 #, fuzzy
 msgid "Custom Payment Method #1"
 msgstr "Пользовательский способ оплаты #1"
 
-#: inc/admin/settings/options-payouts.php:1056
+#: inc/admin/settings/options-payouts.php:1060
 #, fuzzy
 msgid "Custom Payment Method #2"
 msgstr "Пользовательский способ оплаты #2"
@@ -3318,12 +3323,12 @@ msgstr "Пользовательский способ оплаты #2"
 msgid "Custom Payment Method 2"
 msgstr "Пользовательский способ оплаты 2"
 
-#: inc/admin/settings/options-design.php:128
+#: inc/admin/settings/options-design.php:141
 #, fuzzy
 msgid "Custom Registration Form Title"
 msgstr "Название пользовательской регистрационной формы"
 
-#: inc/admin/settings/options-design.php:134
+#: inc/admin/settings/options-design.php:147
 #, fuzzy
 msgid "Custom Submit Button Text"
 msgstr "Пользовательский текст кнопки \"Отправить\""
@@ -3338,12 +3343,12 @@ msgstr "Пользовательский заголовок вкладки"
 msgid "Custom Tab Name"
 msgstr "Имя пользовательской вкладки"
 
-#: inc/admin/settings/options-commission.php:342
+#: inc/admin/settings/options-commission.php:350
 #, fuzzy
 msgid "Custom Tax Adjustment (%):"
 msgstr "Таможенная налоговая корректировка (%):"
 
-#: inc/admin/settings/options-commission.php:44
+#: inc/admin/settings/options-commission.php:34
 #: inc/admin/settings/options-mla__premium_only.php:312
 #: inc/admin/settings/options-reports.php:231
 #: inc/admin/settings/options-reports.php:244
@@ -3371,7 +3376,7 @@ msgstr ""
 "Пользовательский текст для \"Купона\" при оформлении заказа для партнерских "
 "купонов:"
 
-#: inc/admin/settings/options-commission.php:45
+#: inc/admin/settings/options-commission.php:35
 #, fuzzy
 msgid ""
 "Custom text shown affiliate dashboard for the \"commission\" amount. This "
@@ -3421,7 +3426,7 @@ msgid "DASHBOARD"
 msgstr "ЩИТОК"
 
 #: inc/admin/admin-menu.php:35 inc/admin/admin-menu.php:36
-#: inc/functions/functions-user-coupons.php:928
+#: inc/functions/functions-user-coupons.php:937
 #: inc/admin/settings/admin-setup.php:57
 #: premium-files/pro-addons/payouts/stripe/CreateAccount.php:229
 #, fuzzy
@@ -3479,7 +3484,7 @@ msgstr "День:"
 msgid "Debug"
 msgstr "Отлаживать"
 
-#: inc/admin/settings/options-commission.php:56
+#: inc/admin/settings/options-commission.php:46
 #: inc/admin/settings/options-urls.php:224
 #, fuzzy
 msgid "debug settings tab"
@@ -3498,7 +3503,7 @@ msgid "Decline Application"
 msgstr "Отклонить заявку"
 
 #: inc/registration/class-registrations-list-table.php:167
-#: inc/registration/registration-admin.php:172
+#: inc/registration/registration-admin.php:179
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:57
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:87
 #, fuzzy
@@ -3510,7 +3515,7 @@ msgstr "Отказался"
 msgid "Decreased"
 msgstr "Уменьшенный"
 
-#: inc/admin/settings/options-commission.php:343
+#: inc/admin/settings/options-commission.php:351
 #, fuzzy
 #| msgid ""
 #| "Deduct a custom percentage from the order subtotal, before calculating "
@@ -3522,8 +3527,8 @@ msgstr ""
 "Вычтите пользовательский процент из промежуточных итогов заказа, прежде чем "
 "рассчитывать комиссию."
 
-#: inc/admin/settings/options-design.php:129
-#: inc/admin/settings/options-design.php:135
+#: inc/admin/settings/options-design.php:142
+#: inc/admin/settings/options-design.php:148
 #, fuzzy
 msgid "Default"
 msgstr "По умолчанию"
@@ -3564,7 +3569,7 @@ msgid "Delayed Commission (Payouts)"
 msgstr "Отложенная комиссия (выплаты)"
 
 #: inc/admin/class-clicks-list-table.php:133
-#: inc/admin/class-coupons-table.php:262
+#: inc/admin/class-coupons-table.php:266
 #: inc/registration/class-registrations-list-table.php:211
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:75
 #: premium-files/pro-addons/groups/class-affiliate-groups-list-table.php:56
@@ -3641,12 +3646,12 @@ msgstr "Подробности"
 msgid "Details Submitted"
 msgstr "Предоставленные данные"
 
-#: inc/admin/settings/options-payouts.php:1057
+#: inc/admin/settings/options-payouts.php:1061
 #, fuzzy
 msgid "Direct Bank Transfer"
 msgstr "Прямой банковский перевод"
 
-#: inc/admin/settings/options-payouts.php:498
+#: inc/admin/settings/options-payouts.php:502
 #, fuzzy
 msgid "Direct Bank Transfer (Manual)"
 msgstr "Прямой банковский перевод (ручной)"
@@ -3721,7 +3726,7 @@ msgstr ""
 #: inc/dashboard/tab-statistics.php:230 inc/dashboard/tab-statistics.php:233
 #: inc/dashboard/tab-statistics.php:235 inc/dashboard/tab-statistics.php:237
 #: inc/dashboard/tab-statistics.php:244 inc/dashboard/tab-statistics.php:246
-#: inc/functions/functions-user-coupons.php:909
+#: inc/functions/functions-user-coupons.php:918
 #, fuzzy
 msgid "Discount"
 msgstr "Скидка"
@@ -3803,7 +3808,7 @@ msgstr ""
 "Отобразите пользовательское сообщение в верхней части вкладки креативов на "
 "панели управления партнеров."
 
-#: inc/admin/settings/options-commission.php:363
+#: inc/admin/settings/options-commission.php:371
 #, fuzzy
 msgid "Display adjusted total and subtotal."
 msgstr "Отображение скорректированного общего и промежуточных итогов."
@@ -3910,7 +3915,7 @@ msgstr ""
 "и установить его в настройках плагина! <a href=\"%s\" target=\"_blank\">"
 "Подробнее</a>."
 
-#: inc/functions/functions-user-coupons.php:997
+#: inc/functions/functions-user-coupons.php:1006
 #, fuzzy, php-format
 msgid ""
 "Done! The affiliate statistics for this coupon will be refreshed the next "
@@ -3935,7 +3940,7 @@ msgstr "Скачать CSV"
 msgid "Download Preview"
 msgstr "Скачать предварительную версию"
 
-#: inc/admin/settings/options-design.php:146
+#: inc/admin/settings/options-design.php:159
 #, fuzzy
 msgid "Dropdown"
 msgstr "Выпадающий список"
@@ -3975,7 +3980,7 @@ msgstr ""
 "Отслеживайте партнерскую комиссию, статистику использования купонов, "
 "реферальные URL-адреса и многое другое."
 
-#: inc/admin/class-coupons-table.php:261
+#: inc/admin/class-coupons-table.php:260
 #, fuzzy
 msgid "Edit"
 msgstr "Редактировать"
@@ -4026,7 +4031,7 @@ msgstr "Редактировать неоплаченную комиссию"
 #: inc/dashboard/tab-settings.php:211
 #: inc/registration/class-registrations-list-table.php:71
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:148
-#: premium-files/pro-addons/payouts/payouts-settings.php:568
+#: premium-files/pro-addons/payouts/payouts-settings.php:609
 #, fuzzy
 msgid "Edit User"
 msgstr "Редактирование пользователя"
@@ -4042,7 +4047,7 @@ msgstr "Эллиот Соуэрсби, RelyWP"
 msgid "Email"
 msgstr "Отправить по электронной почте"
 
-#: inc/registration/registration-admin.php:514
+#: inc/registration/registration-admin.php:521
 #: inc/registration/registration-form.php:159
 #, fuzzy
 msgid "Email Address"
@@ -4130,7 +4135,7 @@ msgstr "Тема уведомления по электронной почте"
 
 #: inc/admin/settings/options-help.php:160
 #: inc/admin/settings/options-notifications.php:15
-#: inc/admin/settings/options-payouts.php:1066
+#: inc/admin/settings/options-payouts.php:1070
 #: inc/admin/settings/options-registrations.php:345
 #: inc/admin/settings/options-urls.php:371
 #, fuzzy
@@ -4168,12 +4173,12 @@ msgstr "Включите \"Ajax загрузку\" на Партнерской �
 msgid "Enable \"Creatives\" Features"
 msgstr "Включение функций \"Креативы\""
 
-#: inc/admin/settings/options-commission.php:119
+#: inc/admin/settings/options-commission.php:109
 #, fuzzy
 msgid "Enable \"lifetime commission\" features."
 msgstr "Включите функции пожизненной комиссии."
 
-#: inc/admin/settings/options-commission.php:129
+#: inc/admin/settings/options-commission.php:119
 #, fuzzy
 msgid ""
 "Enable \"lifetime commission\" functionality globally for all affiliate "
@@ -4182,12 +4187,12 @@ msgstr ""
 "Включите функцию «пожизненной комиссии» глобально для всех партнерских "
 "купонов."
 
-#: inc/admin/settings/options-commission.php:76
+#: inc/admin/settings/options-commission.php:66
 #, fuzzy
 msgid "Enable \"Multi-Currency\" Functionality"
 msgstr "Включить «мультивалютную» функциональность"
 
-#: inc/admin/settings/options-commission.php:159
+#: inc/admin/settings/options-commission.php:147
 #, fuzzy
 msgid "Enable \"Per User Role\" Commission"
 msgstr "Включить комиссию \"Роль для каждого пользователя\""
@@ -4215,7 +4220,7 @@ msgstr ""
 msgid "Enable \"tabbed\" layout (recommended)."
 msgstr "Включите макет с вкладками (рекомендуется)."
 
-#: inc/admin/settings/options-design.php:122
+#: inc/admin/settings/options-design.php:135
 #, fuzzy
 msgid "Enable 2 Column Layout"
 msgstr "Включить макет 2 столбца"
@@ -4341,8 +4346,8 @@ msgstr ""
 msgid "Enable terms and conditions checkbox on registration form."
 msgstr "Установите флажок Включить условия в регистрационной форме."
 
-#: inc/admin/settings/options-payouts.php:643
-#: inc/admin/settings/options-payouts.php:746
+#: inc/admin/settings/options-payouts.php:647
+#: inc/admin/settings/options-payouts.php:750
 #, fuzzy
 msgid "Enable Test Mode?"
 msgstr "Включить тестовый режим?"
@@ -4364,7 +4369,7 @@ msgstr ""
 "партнеров каждый месяц / неделю / день, если они соответствуют определенным "
 "критериям."
 
-#: inc/admin/settings/options-commission.php:136
+#: inc/admin/settings/options-commission.php:126
 #, fuzzy
 msgid ""
 "Enable this to only link customer to coupon as \"lifetime referral\" if the "
@@ -4373,7 +4378,7 @@ msgstr ""
 "Включите это, чтобы связать клиента с купоном только как «пожизненный "
 "реферал», если купону назначен партнер пользователя."
 
-#: inc/admin/settings/options-commission.php:130
+#: inc/admin/settings/options-commission.php:120
 #, fuzzy
 msgid ""
 "Enabling this option will enable lifetime commission for ALL your affiliates "
@@ -4478,7 +4483,7 @@ msgid "Enter your city, state and ZIP/postal code to show on statements."
 msgstr ""
 "Введите свой город, штат и почтовый индекс, чтобы отобразить его в выписках."
 
-#: inc/admin/settings/options-commission.php:216
+#: inc/admin/settings/options-commission.php:224
 #, fuzzy
 msgid ""
 "Enter your commission amounts below (0 to disable). If you enter multiple "
@@ -4559,7 +4564,7 @@ msgstr "Ошибка"
 msgid "Error: Coupon does not exist."
 msgstr "Ошибка: Купон не существует."
 
-#: inc/admin/settings/options-commission.php:114
+#: inc/admin/settings/options-commission.php:104
 #, fuzzy
 msgid ""
 "Even if the \"coupon code\" isnt used, the commission and sales will still "
@@ -4613,7 +4618,7 @@ msgstr "Ключ API обменных курсов"
 msgid "exchangeratesapi.io"
 msgstr "exchangeratesapi.io"
 
-#: inc/admin/settings/options-payouts.php:1018
+#: inc/admin/settings/options-payouts.php:1022
 #, fuzzy
 #| msgid "Exclude/Remove taxes from Store Credit in cart"
 msgid "Exclude/Remove taxes from Store Credit in cart."
@@ -4637,10 +4642,10 @@ msgstr "Экспорт"
 msgid "Export to Excel Buttons"
 msgstr "Экспорт в кнопки Excel"
 
-#: inc/admin/settings/options-payouts.php:534
-#: inc/admin/settings/options-payouts.php:539
-#: inc/admin/settings/options-payouts.php:544
-#: inc/admin/settings/options-payouts.php:549
+#: inc/admin/settings/options-payouts.php:538
+#: inc/admin/settings/options-payouts.php:543
+#: inc/admin/settings/options-payouts.php:548
+#: inc/admin/settings/options-payouts.php:553
 #, fuzzy
 msgid "Extra Field Label"
 msgstr "Дополнительная метка поля"
@@ -4655,7 +4660,12 @@ msgstr "Дополнительные поля"
 msgid "Extra Settings"
 msgstr "Дополнительные настройки"
 
-#: inc/admin/settings/options-payouts.php:703
+#: inc/registration/registration-admin.php:66
+#, fuzzy
+msgid "Failed to create the coupon code: "
+msgstr "Не удалось создать код купона: "
+
+#: inc/admin/settings/options-payouts.php:707
 #, fuzzy
 msgid "Fees vary (typically around 1% - 2%). Learn more about Stripe Connect"
 msgstr "Сборы варьируются (обычно около 1% - 2%). Подробнее о Stripe Connect"
@@ -4684,7 +4694,7 @@ msgstr "Файлы"
 msgid "Filter"
 msgstr "Фильтр"
 
-#: inc/registration/registration-admin.php:165
+#: inc/registration/registration-admin.php:172
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:80
 #: premium-files/pro-addons/payouts/payouts-admin.php:180
 #, fuzzy
@@ -4701,7 +4711,7 @@ msgstr "Заканчивать"
 msgid "First & Last Name Required"
 msgstr "Требуется имя и фамилия"
 
-#: inc/registration/registration-admin.php:519
+#: inc/registration/registration-admin.php:526
 #: inc/registration/registration-form.php:145
 #, fuzzy
 msgid "First Name"
@@ -4729,17 +4739,17 @@ msgstr ""
 msgid "Fixed amount on cart."
 msgstr "Фиксированная сумма в корзине."
 
-#: inc/admin/settings/options-commission.php:190
+#: inc/admin/settings/options-commission.php:178
 #, fuzzy
 msgid "Fixed Amount Per Order"
 msgstr "Фиксированная сумма за заказ"
 
-#: inc/admin/settings/options-commission.php:191
+#: inc/admin/settings/options-commission.php:179
 #, fuzzy
 msgid "Fixed Amount Per Product"
 msgstr "Фиксированная сумма за продукт"
 
-#: inc/admin/class-coupons-table.php:163 inc/admin/class-coupons-table.php:165
+#: inc/admin/class-coupons-table.php:162 inc/admin/class-coupons-table.php:164
 #, fuzzy
 msgid "Fixed Cart Discount"
 msgstr "Фиксированная скидка на корзину"
@@ -4759,7 +4769,7 @@ msgstr "Фиксированная комиссия за продукт"
 msgid "Fixed discount on subscription signup."
 msgstr "Фиксированная скидка при регистрации подписки."
 
-#: inc/admin/class-coupons-table.php:169 inc/admin/class-coupons-table.php:171
+#: inc/admin/class-coupons-table.php:168 inc/admin/class-coupons-table.php:170
 #, fuzzy
 msgid "Fixed Product Discount"
 msgstr "Фиксированная скидка на товар"
@@ -4816,7 +4826,7 @@ msgstr ""
 "многоуровневые филиалы, креативы, отчеты по электронной почте и многое "
 "другое, посетите <a href=\"%s\">раздел модулей PRO</a>."
 
-#: inc/registration/registration-admin.php:487
+#: inc/registration/registration-admin.php:494
 #, fuzzy
 msgid ""
 "For affiliate registrations to work properly, you will need to create a "
@@ -4863,7 +4873,7 @@ msgstr ""
 "Для большинства веб-сайтов настройки на этой странице можно игнорировать "
 "(оставить их такими, какие они есть)."
 
-#: inc/admin/settings/options-payouts.php:875
+#: inc/admin/settings/options-payouts.php:879
 #, fuzzy
 msgid ""
 "For most websites, unless you are already using a 3rd party wallet plugin, "
@@ -4892,7 +4902,7 @@ msgstr "Form CAPTCHA - Защита от спама"
 msgid "Form ID"
 msgstr "Идентификатор формы"
 
-#: inc/admin/settings/options-design.php:111
+#: inc/admin/settings/options-design.php:124
 #, fuzzy
 msgid "Form Style"
 msgstr "Стиль формы"
@@ -5001,6 +5011,7 @@ msgstr ""
 "всякий случай, и для отладки."
 
 #: inc/admin/settings/options-registrations.php:1053
+#: premium-files/pro-addons/qr-codes/functions-qr-codes.php:106
 #, fuzzy
 msgid "Generate"
 msgstr "Порождать"
@@ -5091,7 +5102,7 @@ msgstr "ГетРеспондер"
 msgid "Getting Started"
 msgstr "Начало работы"
 
-#: inc/admin/settings/options-payouts.php:1010
+#: inc/admin/settings/options-payouts.php:1014
 #, fuzzy
 msgid ""
 "Give affiliates extra commission % as a bonus for selecting Store Credit as "
@@ -5100,7 +5111,7 @@ msgstr ""
 "Дайте партнерам дополнительную комиссию % в качестве бонуса за выбор Store "
 "Credit в качестве способа выплаты."
 
-#: inc/admin/admin-orders-box.php:173
+#: inc/admin/admin-orders-box.php:189
 #, fuzzy
 msgid "Give unpaid commission to affiliate."
 msgstr "Отдайте невыплаченную комиссию партнеру."
@@ -5234,12 +5245,17 @@ msgstr ""
 "<br/><br/>Для получения более подробной информации перейдите на панель "
 "управления партнера."
 
+#: premium-files/pro-addons/qr-codes/functions-qr-codes.php:107
+#, fuzzy
+msgid "Hide"
+msgstr "Прятать"
+
 #: inc/admin/settings/options-debug.php:255
 #, fuzzy
 msgid "Hide \"0.00\" value on checkout from referral coupons."
 msgstr "Скрыть значение \"0.00\" при оформлении заказа из реферальных купонов."
 
-#: inc/admin/settings/options-commission.php:27
+#: inc/admin/settings/options-commission.php:193
 #, fuzzy
 msgid "Hide commission statistics for non-affiliate coupons."
 msgstr "Скрыть статистику комиссий для непартнерских купонов."
@@ -5434,7 +5450,7 @@ msgstr "Как использовать плагин Coupon Usage Tracker?"
 msgid "How will you promote us?"
 msgstr "Как вы будете продвигать нас?"
 
-#: inc/admin/settings/options-payouts.php:879
+#: inc/admin/settings/options-payouts.php:883
 #, fuzzy
 msgid ""
 "However, if preferred, you can use a 3rd party wallet plugin for the store "
@@ -5456,12 +5472,12 @@ msgstr "https://couponaffiliates.com"
 msgid "https://couponaffiliates.com/"
 msgstr "https://couponaffiliates.com/#about"
 
-#: inc/admin/settings/options-design.php:238
+#: inc/admin/settings/options-design.php:251
 #, fuzzy
 msgid "Icon Colour"
 msgstr "Цвет значка"
 
-#: inc/admin/settings/options-design.php:226
+#: inc/admin/settings/options-design.php:239
 #, fuzzy
 msgid "Icons"
 msgstr "Иконки"
@@ -5484,6 +5500,15 @@ msgstr "Иконки"
 msgid "ID"
 msgstr "ИДЕНТИФИКАТОР"
 
+#: inc/admin/settings/options-general.php:987
+#, fuzzy
+msgid ""
+"Ideally you should only enable \"completed\" order statuses above if you "
+"have \"Completed Date\" selected."
+msgstr ""
+"В идеале вы должны включать статусы «завершенный» заказа выше, только если у "
+"вас выбрана «Дата завершения»."
+
 #: inc/admin/settings/options-payouts.php:63
 #, fuzzy
 msgid ""
@@ -5503,7 +5528,7 @@ msgid ""
 msgstr ""
 "Если заказ будет возвращен, то комиссия будет удалена со счета пользователя."
 
-#: inc/admin/settings/options-payouts.php:1182
+#: inc/admin/settings/options-payouts.php:1186
 #, fuzzy
 msgid ""
 "If at-least 1 role is selected, this payout method will only be available "
@@ -5616,7 +5641,7 @@ msgstr ""
 "адресу и размещает заказ без использования кода купона, он все равно будет "
 "отслеживаться и вознаграждать партнера."
 
-#: inc/admin/settings/options-commission.php:337
+#: inc/admin/settings/options-commission.php:345
 #, fuzzy
 msgid ""
 "If enabled, order tax will be added to the fixed commission calculations."
@@ -5624,7 +5649,7 @@ msgstr ""
 "Если этот параметр включен, к расчетам фиксированной комиссии будет добавлен "
 "налог на заказ."
 
-#: inc/admin/settings/options-commission.php:318
+#: inc/admin/settings/options-commission.php:326
 #, fuzzy
 msgid ""
 "If enabled, order tax will be added to the order subtotal/total/discount for "
@@ -5810,7 +5835,7 @@ msgstr ""
 "Если партнер не вводит пользовательский URL, он будет использоваться в "
 "качестве целевой страницы по умолчанию для ссылки."
 
-#: inc/admin/settings/options-commission.php:173
+#: inc/admin/settings/options-commission.php:161
 #, fuzzy
 msgid ""
 "If the affiliate user is assigned to multiple user roles, it will apply the "
@@ -5848,7 +5873,7 @@ msgstr ""
 "оформлению заказа пользователей. Купон должен быть использован для "
 "отслеживания комиссии."
 
-#: inc/registration/registration-admin.php:481
+#: inc/registration/registration-admin.php:488
 #, fuzzy
 msgid "If the user does not exist, a new one will be created."
 msgstr "Если пользователь не существует, будет создан новый."
@@ -5893,7 +5918,7 @@ msgstr ""
 "в том случае, если они зарегистрируются при первом посещении страницы."
 
 #: inc/dashboard/tab-statistics.php:692
-#: inc/functions/functions-all-time.php:466
+#: inc/functions/functions-all-time.php:488
 #, fuzzy
 msgid ""
 "If this is your first time loading this dashboard, and it's a large coupon, "
@@ -5920,7 +5945,7 @@ msgstr ""
 "Если вы получаете сообщение об ошибке «Не удалось загрузить ajax-запрос» на "
 "партнерской панели"
 
-#: inc/admin/settings/options-commission.php:54
+#: inc/admin/settings/options-commission.php:44
 #, fuzzy
 msgid ""
 "If you do not want past orders to be affected when commission stats are "
@@ -5989,7 +6014,7 @@ msgstr ""
 "Если вам нужно использовать другую базовую валюту (%s), вам нужно будет "
 "перейти на план API «Базовый»."
 
-#: inc/admin/settings/options-commission.php:171
+#: inc/admin/settings/options-commission.php:159
 #, fuzzy
 #| msgid ""
 #| "If you set custom \"coupon\" commission for that affiliate, or \"per "
@@ -6023,7 +6048,7 @@ msgstr ""
 "Если вы хотите изменить текст «Купон» на что-то другое на странице "
 "оформления заказа, включите эту опцию и введите пользовательский текст ниже."
 
-#: inc/admin/settings/options-payouts.php:802
+#: inc/admin/settings/options-payouts.php:806
 #, fuzzy
 msgid ""
 "If you want to show the logged in users current store credit balance "
@@ -6115,7 +6140,7 @@ msgstr ""
 msgid "in"
 msgstr "в"
 
-#: inc/admin/settings/options-payouts.php:597
+#: inc/admin/settings/options-payouts.php:601
 #, fuzzy
 msgid "In most cases PayPal Payouts fees are 2%."
 msgstr "В большинстве случаев PayPal комиссии за выплаты составляют 2%."
@@ -6159,7 +6184,7 @@ msgstr ""
 "В этом разделе вы можете управлять мультивалютными настройками, если вы "
 "используете мультивалютный плагин."
 
-#: inc/admin/settings/options-commission.php:281
+#: inc/admin/settings/options-commission.php:289
 #, fuzzy
 msgid ""
 "Include \"custom discounts\" in % commission calculations & order totals."
@@ -6167,29 +6192,29 @@ msgstr ""
 "Включите «пользовательские скидки» в расчеты % комиссионных и итоговые суммы "
 "заказов."
 
-#: inc/admin/settings/options-commission.php:288
+#: inc/admin/settings/options-commission.php:296
 #, fuzzy
 msgid "Include \"fees\" in % commission calculations & order totals."
 msgstr "Включите «сборы» в расчеты % комиссионных и итоговые суммы заказов."
 
-#: inc/admin/settings/options-commission.php:270
+#: inc/admin/settings/options-commission.php:278
 #, fuzzy
 msgid "Include \"shipping costs\" in % commission calculations & order totals."
 msgstr ""
 "Включите «стоимость доставки» в расчеты % комиссионных и итоговые суммы "
 "заказов."
 
-#: inc/admin/settings/options-commission.php:336
+#: inc/admin/settings/options-commission.php:344
 #, fuzzy
 msgid "Include \"taxes\" in \"fixed\" commission calculations."
 msgstr "Включите «налоги» в «фиксированные» расчеты комиссии."
 
-#: inc/admin/settings/options-commission.php:317
+#: inc/admin/settings/options-commission.php:325
 #, fuzzy
 msgid "Include \"taxes\" in % commission calculations & order totals."
 msgstr "Включите «налоги» в расчеты % комиссионных и итоговые суммы заказов."
 
-#: inc/admin/settings/options-commission.php:264
+#: inc/admin/settings/options-commission.php:272
 #, fuzzy
 msgid "Include the \"coupon discount\" in % commission calculations."
 msgstr "Включите «скидку купона» в расчет % комиссии."
@@ -6219,9 +6244,9 @@ msgstr "Увеличение или уменьшение"
 msgid "Info & Help"
 msgstr "Информация и помощь"
 
-#: inc/admin/settings/options-commission.php:167
-#: inc/admin/settings/options-payouts.php:860
-#: inc/admin/settings/options-payouts.php:873
+#: inc/admin/settings/options-commission.php:155
+#: inc/admin/settings/options-payouts.php:864
+#: inc/admin/settings/options-payouts.php:877
 #: premium-files/pro-addons/payouts/credit/class-wcusage-credit-integration.php:43
 #, fuzzy
 msgid "Information:"
@@ -6237,8 +6262,8 @@ msgstr "Инструкции и детали плагина"
 msgid "Integrations"
 msgstr "Интеграции"
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:131
-#: premium-files/pro-addons/multi-level/functions-mla.php:164
+#: premium-files/pro-addons/multi-level/functions-mla.php:133
+#: premium-files/pro-addons/multi-level/functions-mla.php:166
 #, fuzzy
 msgid "Invite"
 msgstr "Приглашать"
@@ -6294,7 +6319,7 @@ msgstr "IP-адрес"
 msgid "is"
 msgstr "есть"
 
-#: inc/admin/settings/options-commission.php:105
+#: inc/admin/settings/options-commission.php:95
 #, fuzzy
 #| msgid ""
 #| "This option will set one as priority, so if both are set, the commission "
@@ -6417,15 +6442,15 @@ msgstr "Таблицы лидеров"
 
 #: inc/admin/admin-getting-started.php:117
 #: inc/admin/admin-getting-started.php:157
-#: inc/registration/registration-admin.php:161
-#: inc/registration/registration-admin.php:487
-#: inc/registration/registration-admin.php:495
-#: inc/admin/settings/options-commission.php:218
+#: inc/registration/registration-admin.php:168
+#: inc/registration/registration-admin.php:494
+#: inc/registration/registration-admin.php:502
+#: inc/admin/settings/options-commission.php:226
 #: inc/admin/settings/options-creatives__premium_only.php:37
 #: inc/admin/settings/options-mla__premium_only.php:32
 #: inc/admin/settings/options-payouts.php:119
-#: inc/admin/settings/options-payouts.php:597
-#: inc/admin/settings/options-payouts.php:598
+#: inc/admin/settings/options-payouts.php:601
+#: inc/admin/settings/options-payouts.php:602
 #: inc/admin/settings/options-registrations.php:19
 #: inc/admin/settings/options-rewards__premium_only.php:37
 #: inc/admin/tools/admin-bulk-coupons.php:97
@@ -6457,8 +6482,8 @@ msgstr "Узнайте больше о PRO на"
 #: inc/admin/settings/options-general.php:51
 #: inc/admin/settings/options-general.php:54
 #: inc/admin/settings/options-general.php:57
-#: inc/admin/settings/options-payouts.php:704
-#: inc/admin/settings/options-payouts.php:801
+#: inc/admin/settings/options-payouts.php:708
+#: inc/admin/settings/options-payouts.php:805
 #: premium-files/pro-addons/payouts/class-payoutcreate-list-table.php:317
 #, fuzzy
 msgid "Learn More."
@@ -6508,17 +6533,17 @@ msgid "Lets get started..."
 msgstr "Давайте начнем..."
 
 #: inc/admin/admin-page.php:407 inc/admin/admin-pro-details.php:511
-#: inc/admin/settings/options-commission.php:110
+#: inc/admin/settings/options-commission.php:100
 #, fuzzy
 msgid "Lifetime Commission"
 msgstr "Пожизненная комиссия"
 
-#: inc/admin/settings/options-commission.php:147
+#: inc/admin/settings/options-commission.php:137
 #, fuzzy
 msgid "Lifetime Commission Expiry (Days)"
 msgstr "Срок действия пожизненной комиссии (дней)"
 
-#: inc/admin/admin-orders-box.php:143
+#: inc/admin/admin-orders-box.php:159
 #, fuzzy
 msgid "Lifetime Referrer"
 msgstr "Пожизненный реферер"
@@ -6538,7 +6563,7 @@ msgstr "Ограничьте купоны только для новых кли�
 msgid "Limit payout methods available for this group."
 msgstr "Ограничьте доступные для этой группы способы выплат."
 
-#: inc/admin/settings/options-payouts.php:1114
+#: inc/admin/settings/options-payouts.php:1118
 #: inc/admin/settings/options-tabs.php:77
 #: premium-files/pro-addons/creatives/functions-creatives-post-type.php:405
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:503
@@ -6546,7 +6571,7 @@ msgstr "Ограничьте доступные для этой группы с�
 msgid "Limit to certain user roles & groups?"
 msgstr "Ограничение определенными ролями и группами пользователей?"
 
-#: inc/admin/settings/options-design.php:254
+#: inc/admin/settings/options-design.php:267
 #, fuzzy
 msgid "Line Graph"
 msgstr "Линейный график"
@@ -6594,8 +6619,8 @@ msgstr "Загрузка вкладок на партнерской панели
 msgid "Loading"
 msgstr "Погрузка"
 
-#: inc/functions/functions-user-coupons.php:790
-#: premium-files/pro-addons/multi-level/functions-mla.php:222
+#: inc/functions/functions-user-coupons.php:793
+#: premium-files/pro-addons/multi-level/functions-mla.php:224
 #, fuzzy
 msgid "Login"
 msgstr "Логин"
@@ -6607,7 +6632,7 @@ msgid "Login to your account."
 msgstr "Войдите в свою учетную запись."
 
 #: inc/functions/functions-shortcode.php:203
-#: premium-files/pro-addons/multi-level/functions-mla.php:57
+#: premium-files/pro-addons/multi-level/functions-mla.php:59
 #, fuzzy
 msgid "Logout"
 msgstr "Выход"
@@ -6759,7 +6784,7 @@ msgstr "Пометьте эту выплату как ожидающую."
 msgid "Maximum amount of \"latest orders\" to show at once:"
 msgstr "Максимальное количество «последних заказов» для показа сразу:"
 
-#: inc/admin/settings/options-commission.php:294
+#: inc/admin/settings/options-commission.php:302
 #, fuzzy
 msgid "Maximum commission per order:"
 msgstr "Максимальная комиссия за заказ:"
@@ -6808,7 +6833,7 @@ msgstr "Комиссия MLA"
 msgid "MLA Dashboard"
 msgstr "Приборная панель MLA"
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:242
+#: premium-files/pro-addons/multi-level/functions-mla.php:244
 #, fuzzy
 msgid "MLA dashboard is currently unavailable."
 msgstr "Панель мониторинга MLA в настоящее время недоступна."
@@ -6848,12 +6873,12 @@ msgstr ""
 "MLA позволит партнерам привлекать других аффилированных пользователей и "
 "получать комиссионные в зависимости от их реферального уровня."
 
-#: inc/admin/settings/options-design.php:139
+#: inc/admin/settings/options-design.php:152
 #, fuzzy
 msgid "Mobile Menu"
 msgstr "Мобильное меню"
 
-#: inc/admin/settings/options-design.php:144
+#: inc/admin/settings/options-design.php:157
 #, fuzzy
 msgid "Mobile Menu Style"
 msgstr "Стиль мобильного меню"
@@ -6923,7 +6948,7 @@ msgstr "MP4 Скачать:"
 msgid "MP4 Video:"
 msgstr "Видео MP4:"
 
-#: inc/admin/settings/options-commission.php:74
+#: inc/admin/settings/options-commission.php:64
 #: inc/admin/settings/options-currency.php:11
 #, fuzzy
 msgid "Multi-Currency Settings"
@@ -6959,7 +6984,7 @@ msgstr "Многоуровневые партнеры"
 msgid "Multi-Level Affiliates (PRO)"
 msgstr "Многоуровневые аффилиаты (PRO)"
 
-#: inc/functions/functions-user-coupons.php:769
+#: inc/functions/functions-user-coupons.php:772
 #, fuzzy
 msgid "My Affiliate Coupons"
 msgstr "Мои партнерские купоны"
@@ -6990,8 +7015,8 @@ msgstr "Имя / Роль пользователя"
 msgid "Need help?"
 msgstr "Нужна помощь?"
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:107
-#: premium-files/pro-addons/multi-level/functions-mla.php:161
+#: premium-files/pro-addons/multi-level/functions-mla.php:109
+#: premium-files/pro-addons/multi-level/functions-mla.php:163
 #, fuzzy
 msgid "Network"
 msgstr "Сеть"
@@ -7153,7 +7178,7 @@ msgstr "Нет"
 msgid "No affiliate dashboard found."
 msgstr "Партнерская панель инструментов не найдена."
 
-#: inc/functions/functions-user-coupons.php:824
+#: inc/functions/functions-user-coupons.php:829
 #, fuzzy
 msgid "No affiliate dashboard found. Please contact us."
 msgstr ""
@@ -7189,7 +7214,7 @@ msgstr "Купоны для этого заказа не использовал�
 msgid "No creatives are available for this group."
 msgstr "Для этой группы креативы недоступны."
 
-#: inc/admin/settings/options-payouts.php:1054
+#: inc/admin/settings/options-payouts.php:1058
 #, fuzzy
 msgid "No Default"
 msgstr "Нет по умолчанию"
@@ -7209,7 +7234,7 @@ msgstr "Новых партнерских купонов не найдено."
 msgid "No orders found."
 msgstr "Заказов не найдено."
 
-#: premium-files/pro-addons/payouts/payouts-settings.php:576
+#: premium-files/pro-addons/payouts/payouts-settings.php:617
 #, fuzzy
 msgid "No payout methods are available currently."
 msgstr "В настоящее время методы выплат недоступны."
@@ -7248,6 +7273,11 @@ msgstr "Роль не указана."
 #, fuzzy
 msgid "No template coupons assigned."
 msgstr "Шаблоны купонов не назначаются."
+
+#: inc/admin/settings/options-commission.php:190
+#, fuzzy
+msgid "Non-Affiliate Coupon Settings"
+msgstr "Настройки непартнерских купонов"
 
 #: premium-files/pro-addons/creatives/functions-creatives-post-type.php:796
 #: premium-files/pro-addons/creatives/functions-creatives-post-type.php:812
@@ -7293,7 +7323,7 @@ msgstr ""
 "отслеживаться только после того, как вы установили версию «PRO» и "
 "активировали функциональность выплат."
 
-#: inc/admin/settings/options-commission.php:369
+#: inc/admin/settings/options-commission.php:377
 #, fuzzy
 msgid ""
 "Note: Changing these tax settings will affect stats for all coupons and all "
@@ -7337,7 +7367,7 @@ msgstr ""
 "Примечание: При необходимости вы можете настроить дополнительные настройки "
 "расчета на странице настроек плагина."
 
-#: inc/admin/settings/options-general.php:982
+#: inc/admin/settings/options-general.php:984
 #, fuzzy
 msgid ""
 "NOTE: If set to \"Completed Date\", only orders that have been marked as "
@@ -7376,7 +7406,7 @@ msgstr ""
 "этом случае просто отключите его или свяжитесь с нами, чтобы посмотреть, как "
 "его исправить для вас."
 
-#: inc/admin/settings/options-payouts.php:599
+#: inc/admin/settings/options-payouts.php:603
 #, fuzzy
 msgid ""
 "Note: Payouts can only be made if you have the required funds in your PayPal "
@@ -7385,7 +7415,7 @@ msgstr ""
 "Примечание: Выплаты могут быть сделаны только в том случае, если у вас есть "
 "необходимые средства на вашем PayPal счете."
 
-#: inc/admin/settings/options-payouts.php:704
+#: inc/admin/settings/options-payouts.php:708
 #, fuzzy
 msgid ""
 "Note: Payouts can only be made if you have the required funds in your Stripe "
@@ -7447,8 +7477,8 @@ msgstr ""
 "время не имеют установленного коэффициента конверсии, будут сохранять курс, "
 "как курс, установленный ниже (при следующей загрузке партнерской панели)."
 
-#: inc/admin/settings/options-commission.php:51
-#: inc/admin/settings/options-commission.php:299
+#: inc/admin/settings/options-commission.php:41
+#: inc/admin/settings/options-commission.php:307
 #, fuzzy
 msgid ""
 "Note: When updating these settings saved data will be refreshed for all "
@@ -7476,7 +7506,7 @@ msgstr ""
 "Примечание: Вы можете настроить систему регистрации на странице настроек "
 "плагина."
 
-#: inc/registration/registration-admin.php:623
+#: inc/registration/registration-admin.php:630
 #, fuzzy, php-format
 #| msgid ""
 #| "Your users can also register themselves as affiliates using the <a "
@@ -7489,7 +7519,7 @@ msgstr ""
 "используя <a href=\"%s\" target=\"_blank\">форму регистрации партнера</a>."
 
 #: inc/dashboard/tab-statistics.php:691
-#: inc/functions/functions-all-time.php:465
+#: inc/functions/functions-all-time.php:487
 #, fuzzy
 msgid "Notice (admin only): Page constantly loading? Try refreshing the page."
 msgstr ""
@@ -7554,7 +7584,7 @@ msgstr "Один раз в неделю"
 msgid "Once Per Year"
 msgstr "Один раз в год"
 
-#: inc/admin/settings/options-payouts.php:935
+#: inc/admin/settings/options-payouts.php:939
 #, fuzzy
 msgid ""
 "Once you have installed/activated both the integration addon, and the wallet "
@@ -7630,7 +7660,7 @@ msgstr ""
 msgid "Only showing coupons that are assigned to an affiliate user."
 msgstr "Отображение только купонов, назначенных партнерскому пользователю."
 
-#: premium-files/pro-addons/payouts/payouts-settings.php:563
+#: premium-files/pro-addons/payouts/payouts-settings.php:604
 #, fuzzy
 msgid ""
 "Only the user assigned to this coupon can update their payout method details."
@@ -7638,7 +7668,7 @@ msgstr ""
 "Только пользователь, которому назначен этот купон, может обновить информацию "
 "о способе выплаты."
 
-#: inc/admin/settings/options-commission.php:135
+#: inc/admin/settings/options-commission.php:125
 #, fuzzy
 msgid "Only trigger lifetime referral if coupon is assigned to user."
 msgstr ""
@@ -7683,7 +7713,7 @@ msgstr ""
 "Необязательно: Таможенная комиссия \"процент от общего заказа\" за этот "
 "купон."
 
-#: inc/admin/settings/options-commission.php:148
+#: inc/admin/settings/options-commission.php:138
 #, fuzzy
 msgid ""
 "Optional: How many days after being assigned as a \"lifetime\" referral "
@@ -7703,7 +7733,7 @@ msgid "or"
 msgstr "или"
 
 #: inc/dashboard/tab-statistics.php:691
-#: inc/functions/functions-all-time.php:465
+#: inc/functions/functions-all-time.php:487
 #, fuzzy
 #| msgid "Click here"
 msgid "Or click here"
@@ -7766,8 +7796,8 @@ msgstr "Отслеживание заказов/продаж"
 
 #: inc/admin-reports/admin-reports.php:689
 #: premium-files/dashboard/tab-monthly-summary.php:189
-#: premium-files/pro-addons/multi-level/functions-mla.php:123
-#: premium-files/pro-addons/multi-level/functions-mla.php:163
+#: premium-files/pro-addons/multi-level/functions-mla.php:125
+#: premium-files/pro-addons/multi-level/functions-mla.php:165
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:130
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:311
 #: premium-files/pro-addons/pdf-reports/template.php:157
@@ -7780,7 +7810,7 @@ msgstr "Заказы"
 msgid "Other"
 msgstr "Другой"
 
-#: inc/admin/settings/options-design.php:181
+#: inc/admin/settings/options-design.php:194
 #, fuzzy
 msgid "Other Colours"
 msgstr "Другие цвета"
@@ -7926,14 +7956,14 @@ msgstr "Оплата завершена на "
 msgid "Payment Details"
 msgstr "Платежные реквизиты"
 
-#: inc/admin/settings/options-payouts.php:452
-#: inc/admin/settings/options-payouts.php:488
-#: inc/admin/settings/options-payouts.php:612
+#: inc/admin/settings/options-payouts.php:456
+#: inc/admin/settings/options-payouts.php:492
+#: inc/admin/settings/options-payouts.php:616
 #, fuzzy
 msgid "Payment Details Field Label"
 msgstr "Метка поля платежных реквизитов"
 
-#: inc/admin/settings/options-payouts.php:632
+#: inc/admin/settings/options-payouts.php:636
 #, fuzzy
 msgid "Payment Message"
 msgstr "Платежное сообщение"
@@ -7943,27 +7973,27 @@ msgstr "Платежное сообщение"
 msgid "Payment Method"
 msgstr "Способ оплаты"
 
-#: inc/admin/settings/options-payouts.php:439
-#: inc/admin/settings/options-payouts.php:475
-#: inc/admin/settings/options-payouts.php:513
-#: inc/admin/settings/options-payouts.php:617
-#: inc/admin/settings/options-payouts.php:732
-#: inc/admin/settings/options-payouts.php:964
+#: inc/admin/settings/options-payouts.php:443
+#: inc/admin/settings/options-payouts.php:479
+#: inc/admin/settings/options-payouts.php:517
+#: inc/admin/settings/options-payouts.php:621
+#: inc/admin/settings/options-payouts.php:736
+#: inc/admin/settings/options-payouts.php:968
 #, fuzzy
 msgid "Payment Method Information"
 msgstr "Информация о способе оплаты"
 
-#: inc/admin/settings/options-payouts.php:434
-#: inc/admin/settings/options-payouts.php:470
-#: inc/admin/settings/options-payouts.php:508
-#: inc/admin/settings/options-payouts.php:607
-#: inc/admin/settings/options-payouts.php:722
-#: inc/admin/settings/options-payouts.php:958
+#: inc/admin/settings/options-payouts.php:438
+#: inc/admin/settings/options-payouts.php:474
+#: inc/admin/settings/options-payouts.php:512
+#: inc/admin/settings/options-payouts.php:611
+#: inc/admin/settings/options-payouts.php:726
+#: inc/admin/settings/options-payouts.php:962
 #, fuzzy
 msgid "Payment Method Name"
 msgstr "Название способа оплаты"
 
-#: inc/admin/settings/options-payouts.php:627
+#: inc/admin/settings/options-payouts.php:631
 #, fuzzy
 msgid "Payment Subject"
 msgstr "Предмет оплаты"
@@ -8014,7 +8044,7 @@ msgid "Payout ID"
 msgstr "Идентификатор выплаты"
 
 #: premium-files/dashboard/tab-payout.php:99
-#: premium-files/pro-addons/payouts/payouts-settings.php:365
+#: premium-files/pro-addons/payouts/payouts-settings.php:403
 #, fuzzy
 msgid "Payout Method"
 msgstr "Способ выплаты"
@@ -8049,8 +8079,8 @@ msgstr "Детали выписки о выплате"
 #: inc/admin/admin-menu.php:181 inc/functions/functions-dashboard.php:135
 #: inc/functions/functions-dashboard.php:317
 #: inc/admin/settings/admin-options.php:455
-#: premium-files/pro-addons/multi-level/functions-mla.php:140
-#: premium-files/pro-addons/multi-level/functions-mla.php:165
+#: premium-files/pro-addons/multi-level/functions-mla.php:142
+#: premium-files/pro-addons/multi-level/functions-mla.php:167
 #, fuzzy
 msgid "Payouts"
 msgstr "Выплаты"
@@ -8071,25 +8101,25 @@ msgid "Payouts Features"
 msgstr "Функции выплат"
 
 #: inc/admin/settings/admin-options.php:99
-#: premium-files/pro-addons/payouts/payouts-settings.php:123
+#: premium-files/pro-addons/payouts/payouts-settings.php:159
 #, fuzzy
 msgid "Payouts Settings"
 msgstr "Настройки выплат"
 
-#: inc/admin/settings/options-payouts.php:345
+#: inc/admin/settings/options-payouts.php:349
 #, fuzzy
 msgid "PayPal"
 msgstr "PayPal"
 
 #: inc/admin/admin-pro-details.php:370
-#: inc/admin/settings/options-payouts.php:594
-#: inc/admin/settings/options-payouts.php:1058
+#: inc/admin/settings/options-payouts.php:598
+#: inc/admin/settings/options-payouts.php:1062
 #: premium-files/pro-addons/groups/functions-edit-groups.php:197
 #, fuzzy
 msgid "PayPal Payouts"
 msgstr "PayPal Выплаты"
 
-#: inc/admin/settings/options-payouts.php:596
+#: inc/admin/settings/options-payouts.php:600
 #, fuzzy
 msgid ""
 "PayPal Payouts payment method will allow you to one-click pay your "
@@ -8121,7 +8151,7 @@ msgstr ".PDF:"
 
 #: inc/admin-reports/admin-reports.php:696
 #: inc/registration/class-registrations-list-table.php:164
-#: inc/registration/registration-admin.php:170
+#: inc/registration/registration-admin.php:177
 #: premium-files/dashboard/tab-payout.php:274
 #: premium-files/dashboard/tab-payout.php:346
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:54
@@ -8187,12 +8217,12 @@ msgstr ""
 "неоплаченной комиссии партнеров и перемещена в ожидающую комиссию. "
 "Пользователь не может запрашивать больше выплат, если они ожидают выплат."
 
-#: inc/admin/settings/options-commission.php:157
+#: inc/admin/settings/options-commission.php:145
 #, fuzzy
 msgid "Per User Role Commission"
 msgstr "Комиссия за роль пользователя"
 
-#: inc/admin/settings/options-commission.php:189
+#: inc/admin/settings/options-commission.php:177
 #, fuzzy
 msgid "Percentage Amount Of Total Order"
 msgstr "Процентная сумма от общего заказа"
@@ -8202,12 +8232,12 @@ msgstr "Процентная сумма от общего заказа"
 msgid "Percentage based on the \"main\" affiliate commission earnings"
 msgstr "Процент от «основного» заработка партнерской комиссии"
 
-#: inc/admin/settings/options-commission.php:225
+#: inc/admin/settings/options-commission.php:233
 #, fuzzy
 msgid "Percentage Commission (% Of Total Order)"
 msgstr "Процентная комиссия (% от общей суммы заказа)"
 
-#: inc/admin/class-coupons-table.php:157 inc/admin/class-coupons-table.php:159
+#: inc/admin/class-coupons-table.php:156 inc/admin/class-coupons-table.php:158
 #, fuzzy
 msgid "Percentage Discount"
 msgstr "Процентная скидка"
@@ -8217,7 +8247,7 @@ msgstr "Процентная скидка"
 msgid "Percentage discount on cart."
 msgstr "Процентная скидка на корзину."
 
-#: inc/admin/class-coupons-table.php:175 inc/admin/class-coupons-table.php:177
+#: inc/admin/class-coupons-table.php:174 inc/admin/class-coupons-table.php:176
 #, fuzzy
 msgid "Percentage Product Discount"
 msgstr "Процентная скидка на товар"
@@ -8296,7 +8326,7 @@ msgstr ""
 "Пожалуйста, не добавляйте этот шорткод на ту же страницу, что и шорткод "
 "вашей партнерской панели."
 
-#: inc/functions/functions-all-time.php:476
+#: inc/functions/functions-all-time.php:498
 #, fuzzy
 msgid "Please do not reload the page until it is complete."
 msgstr "Пожалуйста, не перезагружайте страницу, пока она не будет завершена."
@@ -8389,7 +8419,7 @@ msgstr "Настройки плагина"
 msgid "Preferred Coupon Code"
 msgstr "Предпочтительный код купона"
 
-#: inc/admin/settings/options-payouts.php:598
+#: inc/admin/settings/options-payouts.php:602
 #, fuzzy
 msgid ""
 "Prerequisites: To use PayPal Payouts, you will need a PayPal business "
@@ -8480,7 +8510,7 @@ msgstr "Продукт"
 msgid "Product Commission Rates"
 msgstr "Комиссионные ставки по продукту"
 
-#: inc/admin/settings/options-commission.php:101
+#: inc/admin/settings/options-commission.php:91
 #, fuzzy
 msgid "Product Commission Settings"
 msgstr "Настройки комиссии по продукту"
@@ -8566,6 +8596,11 @@ msgstr ""
 "зарегистрироваться. При регистрации новых партнеров также будет "
 "автоматически создан новый код купона."
 
+#: inc/admin/admin-orders-box.php:145
+#, fuzzy
+msgid "Recalculate the affiliate stats for this order."
+msgstr "Пересчитайте партнерскую статистику по этому заказу."
+
 #: inc/admin/admin-dashboard.php:744
 #, fuzzy
 msgid "Recent Activity"
@@ -8638,7 +8673,7 @@ msgstr ""
 "Рекомендованный. Это покажет клики, конверсии и статистику коэффициента "
 "конверсии для реферальных URL-адресов."
 
-#: inc/functions/functions-user-coupons.php:897
+#: inc/functions/functions-user-coupons.php:906
 #, fuzzy
 msgid "Recurring"
 msgstr "Повторяющийся"
@@ -8830,7 +8865,7 @@ msgid "Refund Store Credit"
 msgstr "Возврат кредита магазина"
 
 #: inc/registration/registration-form.php:89
-#: inc/admin/settings/options-design.php:129
+#: inc/admin/settings/options-design.php:142
 #, fuzzy
 msgid "Register New Affiliate Account"
 msgstr "Зарегистрируйте новый партнерский счет"
@@ -8851,7 +8886,7 @@ msgstr "Зарегистрирован: Ожидает утверждения"
 msgid "Registration"
 msgstr "Регистрация"
 
-#: inc/admin/settings/options-design.php:106
+#: inc/admin/settings/options-design.php:119
 #, fuzzy
 msgid "Registration & Login Form"
 msgstr "Форма регистрации и входа в систему"
@@ -9094,7 +9129,7 @@ msgid "Save Changes"
 msgstr "Сохранить изменения"
 
 #: inc/dashboard/tab-settings.php:113
-#: premium-files/pro-addons/payouts/payouts-settings.php:553
+#: premium-files/pro-addons/payouts/payouts-settings.php:594
 #: premium-files/pro-addons/payouts/statements/functions-statements.php:96
 #, fuzzy
 msgid "Save changes"
@@ -9207,6 +9242,17 @@ msgstr ""
 #, fuzzy
 msgid "Select Payout Methods to Schedule:"
 msgstr "Выберите способы выплат для планирования:"
+
+#: inc/admin/settings/options-payouts.php:337
+#, fuzzy
+msgid ""
+"Select the payout methods that should be scheduled and requested "
+"automatically. If an affiliate is using a different payout method to one "
+"enabled above, their payouts will not be scheduled."
+msgstr ""
+"Выберите способы выплаты, которые должны быть запланированы и запрошены "
+"автоматически. Если партнер использует другой способ выплат, его выплаты не "
+"будут запланированы."
 
 #: inc/admin/settings/options-notifications.php:665
 #, fuzzy
@@ -9372,7 +9418,7 @@ msgid "Set a different user role for pending affiliate users."
 msgstr ""
 "Задайте другую роль пользователя для ожидающих аффилированных пользователей."
 
-#: inc/admin/settings/options-payouts.php:400
+#: inc/admin/settings/options-payouts.php:404
 #, fuzzy
 msgid ""
 "Set a threshold on the maximum amount that can be paid automatically. Any "
@@ -9431,7 +9477,7 @@ msgstr ""
 "использоваться в URL-адресе вашего сайта, чтобы идентифицировать реферера и "
 "родительского партнера для этого пользователя."
 
-#: inc/admin/settings/options-commission.php:169
+#: inc/admin/settings/options-commission.php:157
 #, fuzzy
 msgid ""
 "Set the custom commission rates for each user role below (this is the role "
@@ -9470,7 +9516,7 @@ msgstr ""
 "Задайте переменную URL-адреса реферала, которая будет использоваться для "
 "идентификации кампании."
 
-#: inc/admin/settings/options-commission.php:149
+#: inc/admin/settings/options-commission.php:139
 #, fuzzy
 msgid "Set to \"0\" for permanent lifetime commission with no expiry time."
 msgstr ""
@@ -9490,8 +9536,8 @@ msgstr "ПАРАМЕТРЫ"
 #: inc/admin/admin-menu.php:63 inc/dashboard/tab-settings.php:63
 #: inc/functions/functions-dashboard.php:210
 #: inc/functions/functions-dashboard.php:339
-#: premium-files/pro-addons/multi-level/functions-mla.php:148
-#: premium-files/pro-addons/multi-level/functions-mla.php:166
+#: premium-files/pro-addons/multi-level/functions-mla.php:150
+#: premium-files/pro-addons/multi-level/functions-mla.php:168
 #, fuzzy
 msgid "Settings"
 msgstr "Параметры"
@@ -9790,7 +9836,7 @@ msgstr "Отобразить вкладку \"Настройки\"."
 msgid "Show \"Status\" dropdown filter."
 msgstr "Показать выпадающий фильтр \"Статус\"."
 
-#: inc/admin/settings/options-payouts.php:1003
+#: inc/admin/settings/options-payouts.php:1007
 #, fuzzy
 msgid "Show \"Store Credit\" column on admin users list?"
 msgstr ""
@@ -9894,7 +9940,7 @@ msgstr ""
 "Покажите таблицу с ежемесячной сводкой заказов на купон с общими продажами, "
 "комиссией и т. Д."
 
-#: inc/admin/class-coupons-table.php:367
+#: inc/admin/class-coupons-table.php:372
 #, fuzzy
 msgid "Show Affiliate Coupons Only"
 msgstr "Показывать только партнерские купоны"
@@ -9935,7 +9981,7 @@ msgstr ""
 "Автоматически отображать полную информацию о странице купона, если есть "
 "только один купон."
 
-#: inc/admin/settings/options-design.php:229
+#: inc/admin/settings/options-design.php:242
 #, fuzzy
 msgid "Show icons on the affiliate dashboard tabs."
 msgstr "Отображение значков на вкладках партнерской панели."
@@ -9980,8 +10026,8 @@ msgstr "Показать порядок \"всего\"."
 msgid "Show order status totals below the table."
 msgstr "Отображение итогов состояния заказа под таблицей."
 
-#: inc/admin/settings/options-payouts.php:444
-#: inc/admin/settings/options-payouts.php:480
+#: inc/admin/settings/options-payouts.php:448
+#: inc/admin/settings/options-payouts.php:484
 #, fuzzy
 msgid "Show Payment Details Field"
 msgstr "Показать поле Платежные реквизиты"
@@ -10070,7 +10116,7 @@ msgstr "Отображение купонов где"
 msgid "Showing coupons where sales have"
 msgstr "Отображение купонов, в которых продажи"
 
-#: inc/admin/settings/options-payouts.php:991
+#: inc/admin/settings/options-payouts.php:995
 #, fuzzy
 msgid ""
 "Shown on the cart/checkout page when they have credit available to spend."
@@ -10101,7 +10147,7 @@ msgstr ""
 "Просто добавьте шорткод %s на новую страницу, затем выберите страницу из "
 "раскрывающегося списка ниже."
 
-#: inc/functions/functions-all-time.php:475
+#: inc/functions/functions-all-time.php:497
 #, fuzzy
 msgid "Since this is your first visit, it will take longer than normal."
 msgstr "Поскольку это ваш первый визит, это займет больше времени, чем обычно."
@@ -10210,7 +10256,7 @@ msgstr "К сожалению, этот домен недействителен.
 msgid "Sorry, this domain is not allowed."
 msgstr "К сожалению, этот домен не разрешен."
 
-#: premium-files/pro-addons/payouts/payouts-settings.php:561
+#: premium-files/pro-addons/payouts/payouts-settings.php:602
 #, fuzzy
 msgid "Sorry, this is not your coupon affiliate dashboard."
 msgstr "Извините, это не ваша партнерская панель купонов."
@@ -10266,12 +10312,12 @@ msgstr ""
 "К сожалению, у вас нет разрешения через панель управления MLA для "
 "пользователя:"
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:209
+#: premium-files/pro-addons/multi-level/functions-mla.php:211
 #, fuzzy
 msgid "Sorry, you do not have permission to view the MLA dashboard."
 msgstr "К сожалению, у вас нет разрешения на просмотр панели мониторинга MLA."
 
-#: inc/functions/functions-user-coupons.php:836
+#: inc/functions/functions-user-coupons.php:841
 #, fuzzy
 msgid "Sorry, you don't currently have any active affiliate coupons."
 msgstr "К сожалению, в настоящее время у вас нет активных партнерских купонов."
@@ -10369,6 +10415,12 @@ msgstr "Статус"
 msgid "Statuses"
 msgstr "Статусы"
 
+#: inc/admin/settings/options-commission.php:201
+#, fuzzy
+msgid "Stop \"unpaid commission\" from being earned for non-affiliate coupons."
+msgstr ""
+"Прекратите зарабатывание «невыплаченной комиссии» за непартнерские купоны."
+
 #: inc/admin/settings/options-urls.php:230
 #, fuzzy
 #| msgid "Store cookie for how many days"
@@ -10392,19 +10444,19 @@ msgid "Store cookies for referral links (recommended)."
 msgstr "Храните файлы cookie для реферальных ссылок (рекомендуется)."
 
 #: inc/admin/class-coupon-users-table.php:58
-#: inc/admin/settings/options-payouts.php:346
+#: inc/admin/settings/options-payouts.php:350
 #: premium-files/pro-addons/groups/functions-edit-groups.php:199
 #, fuzzy
 msgid "Store Credit"
 msgstr "Кредит магазина"
 
-#: inc/admin/settings/options-payouts.php:799
-#: inc/admin/settings/options-payouts.php:1060
+#: inc/admin/settings/options-payouts.php:803
+#: inc/admin/settings/options-payouts.php:1064
 #, fuzzy
 msgid "Store Credit / Wallet"
 msgstr "Кредит магазина / Кошелек"
 
-#: premium-files/pro-addons/payouts/payouts-settings.php:258
+#: premium-files/pro-addons/payouts/payouts-settings.php:296
 #: premium-files/pro-addons/payouts/credit/functions-balance.php:51
 #, fuzzy
 msgid "Store Credit Balance"
@@ -10420,7 +10472,7 @@ msgstr "Скидка на кредит в магазине"
 msgid "Store Credit Payouts"
 msgstr "Выплаты по кредитам в магазине"
 
-#: inc/admin/settings/options-payouts.php:801
+#: inc/admin/settings/options-payouts.php:805
 #, fuzzy
 #| msgid ""
 #| "Store credit payouts will allow affiliates to have commission paid out "
@@ -10450,29 +10502,29 @@ msgstr "кредит магазина успешно выплачен польз
 msgid "Strict Fraud Prevention"
 msgstr "Строгое предотвращение мошенничества"
 
-#: inc/admin/settings/options-payouts.php:344
+#: inc/admin/settings/options-payouts.php:348
 #, fuzzy
 msgid "Stripe"
 msgstr "Полоса"
 
-#: inc/admin/settings/options-payouts.php:727
+#: inc/admin/settings/options-payouts.php:731
 #, fuzzy
 msgid "Stripe Account Label"
 msgstr "Полосатая метка учетной записи"
 
 #: inc/admin/admin-pro-details.php:384
-#: inc/admin/settings/options-payouts.php:1059
+#: inc/admin/settings/options-payouts.php:1063
 #: premium-files/pro-addons/groups/functions-edit-groups.php:198
 #, fuzzy
 msgid "Stripe Payouts"
 msgstr "Выплаты в полоску"
 
-#: inc/admin/settings/options-payouts.php:696
+#: inc/admin/settings/options-payouts.php:700
 #, fuzzy
 msgid "Stripe Payouts (\"Connect\")"
 msgstr "Выплаты в полосу («Подключиться»)"
 
-#: inc/admin/settings/options-payouts.php:702
+#: inc/admin/settings/options-payouts.php:706
 #, fuzzy
 msgid ""
 "Stripe Payouts payment method will allow you to one-click pay your "
@@ -10486,7 +10538,7 @@ msgstr ""
 msgid "Style #1 - Basic (Legacy)"
 msgstr "Стиль #1 - Базовый (Legacy)"
 
-#: inc/admin/settings/options-design.php:113
+#: inc/admin/settings/options-design.php:126
 #, fuzzy
 msgid "Style #1 - Default"
 msgstr "Стиль #1 - По умолчанию"
@@ -10496,12 +10548,12 @@ msgstr "Стиль #1 - По умолчанию"
 msgid "Style #2 - Full Width (Modern)"
 msgstr "Модель #2 - Полная ширина (Модерн)"
 
-#: inc/admin/settings/options-design.php:114
+#: inc/admin/settings/options-design.php:127
 #, fuzzy
 msgid "Style #2 - Modern (Bold)"
 msgstr "Стиль #2 - Модерн (Жирный)"
 
-#: inc/admin/settings/options-design.php:115
+#: inc/admin/settings/options-design.php:128
 #, fuzzy
 msgid "Style #3 - Modern (Compact)"
 msgstr "Стиль #3 - Модерн (Компактный)"
@@ -10516,19 +10568,19 @@ msgstr "Стиль:"
 msgid "Sub-affiliate summary"
 msgstr "Субпартнерская сводка"
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:99
-#: premium-files/pro-addons/multi-level/functions-mla.php:160
+#: premium-files/pro-addons/multi-level/functions-mla.php:101
+#: premium-files/pro-addons/multi-level/functions-mla.php:162
 #, fuzzy
 msgid "Sub-Affiliates"
 msgstr "Субпартнеры"
 
-#: inc/admin/settings/options-payouts.php:941
+#: inc/admin/settings/options-payouts.php:945
 #, fuzzy
 msgid "Submit a feature request."
 msgstr "Отправьте запрос на функцию."
 
 #: inc/registration/registration-form.php:481
-#: inc/admin/settings/options-design.php:135
+#: inc/admin/settings/options-design.php:148
 #, fuzzy
 msgid "Submit Application"
 msgstr "Подать заявку"
@@ -10582,8 +10634,8 @@ msgstr "Успех"
 msgid "Success! Redirecting"
 msgstr "Успех! Перенаправление"
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:115
-#: premium-files/pro-addons/multi-level/functions-mla.php:162
+#: premium-files/pro-addons/multi-level/functions-mla.php:117
+#: premium-files/pro-addons/multi-level/functions-mla.php:164
 #, fuzzy
 msgid "Summary"
 msgstr "Сводка"
@@ -10593,19 +10645,19 @@ msgstr "Сводка"
 msgid "Supported merge tags"
 msgstr "Поддерживаемые теги слияния"
 
-#: inc/admin/settings/options-design.php:71
+#: inc/admin/settings/options-design.php:84
 #, fuzzy
 msgid "Tab Colours"
 msgstr "Цвета вкладок"
 
-#: inc/admin/settings/options-design.php:186
+#: inc/admin/settings/options-design.php:199
 #, fuzzy
 msgid "Table Header & Footer"
 msgstr "Верхний и нижний колонтитулы таблицы"
 
 #: inc/admin/settings/admin-options.php:469
-#: inc/admin/settings/options-design.php:76
-#: inc/admin/settings/options-design.php:147
+#: inc/admin/settings/options-design.php:89
+#: inc/admin/settings/options-design.php:160
 #, fuzzy
 msgid "Tabs"
 msgstr "Вкладки"
@@ -10615,7 +10667,12 @@ msgstr "Вкладки"
 msgid "Tabs Border Radius"
 msgstr "Радиус границы табуляции"
 
-#: inc/admin/settings/options-design.php:89
+#: inc/admin/settings/options-design.php:72
+#, fuzzy
+msgid "Tabs Font Size"
+msgstr "Табуляции Размер шрифта"
+
+#: inc/admin/settings/options-design.php:102
 #, fuzzy
 msgid "Tabs Hover"
 msgstr "Наведение вкладок"
@@ -10646,7 +10703,7 @@ msgid "Tax Rate"
 msgstr "Налоговая ставка"
 
 #: inc/admin/settings/admin-setup.php:241
-#: inc/admin/settings/options-commission.php:68
+#: inc/admin/settings/options-commission.php:58
 #, fuzzy
 msgid "Tax Settings"
 msgstr "Налоговые настройки"
@@ -10707,11 +10764,11 @@ msgstr "Шаблон Подарочный купон Код:"
 msgid "Terms and Conditions Notice"
 msgstr "Уведомление об условиях и положениях"
 
-#: inc/admin/settings/options-design.php:82
 #: inc/admin/settings/options-design.php:95
-#: inc/admin/settings/options-design.php:192
+#: inc/admin/settings/options-design.php:108
 #: inc/admin/settings/options-design.php:205
 #: inc/admin/settings/options-design.php:218
+#: inc/admin/settings/options-design.php:231
 #: inc/admin/settings/options-invoices__premium_only.php:233
 #: inc/admin/settings/options-invoices__premium_only.php:239
 #: inc/admin/settings/options-invoices__premium_only.php:245
@@ -10732,7 +10789,7 @@ msgstr "Поле текстовой области"
 msgid "Text Field"
 msgstr "Текстовое поле"
 
-#: inc/admin/settings/options-payouts.php:971
+#: inc/admin/settings/options-payouts.php:975
 #, fuzzy
 msgid "Text shown next to the users store credit balance."
 msgstr "Текст, отображаемый рядом с кредитным балансом пользователя."
@@ -10766,8 +10823,8 @@ msgstr ""
 "Для использования этого вознаграждения необходимо включить метод выплаты "
 "«Кредит в магазине»."
 
-#: inc/registration/registration-admin.php:161
-#: inc/registration/registration-admin.php:495
+#: inc/registration/registration-admin.php:168
+#: inc/registration/registration-admin.php:502
 #, fuzzy
 msgid ""
 "The \"template coupon\" you have set does not exist. Please make sure you "
@@ -10886,7 +10943,7 @@ msgstr ""
 "<strong>суммы, заработанной основным партнером</strong>. Это НЕ вычитается "
 "из основного заработка партнеров."
 
-#: inc/admin/admin-orders-box.php:242
+#: inc/admin/admin-orders-box.php:260
 #, fuzzy
 msgid "The coupon code you entered does not exist."
 msgstr "Введенный вами код купона не существует."
@@ -10933,7 +10990,7 @@ msgstr ""
 msgid "The first name of the affiliate."
 msgstr "Имя партнера."
 
-#: inc/admin/settings/options-payouts.php:883
+#: inc/admin/settings/options-payouts.php:887
 #, fuzzy
 msgid ""
 "The following integration addons are available to download and install right "
@@ -11009,7 +11066,7 @@ msgstr ""
 msgid "The name of the tab button."
 msgstr "Название кнопки вкладки."
 
-#: inc/admin/settings/options-payouts.php:959
+#: inc/admin/settings/options-payouts.php:963
 #, fuzzy
 msgid ""
 "The name of your Store Credit wallet, show in the payout method selection "
@@ -11210,7 +11267,7 @@ msgstr ""
 "Эти настройки позволяют вам настроить формат реферальных ссылок, которые "
 "ваши партнеры могут генерировать на своей партнерской панели."
 
-#: inc/admin/settings/options-commission.php:218
+#: inc/admin/settings/options-commission.php:226
 #, fuzzy
 msgid "These values be overridden on a per coupon and/or per product basis."
 msgstr "Эти значения переопределяются на основе купона и/или продукта."
@@ -11244,7 +11301,7 @@ msgstr ""
 "Им нужно будет снова нажать на реферальную ссылку, чтобы купоны снова "
 "автоматически применялись или будущие заказы были присуждены партнеру."
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:352
+#: premium-files/pro-addons/multi-level/functions-mla.php:354
 #, fuzzy
 msgid ""
 "This affiliate is a part of your MLA network. You are viewing their "
@@ -11253,7 +11310,7 @@ msgstr ""
 "Этот партнер является частью вашей сети MLA. Вы просматриваете их статистику "
 "и комиссионные доходы."
 
-#: inc/admin/settings/options-commission.php:295
+#: inc/admin/settings/options-commission.php:303
 #, fuzzy
 msgid ""
 "This allows you to set the maximum commission amount that is calculated and "
@@ -11262,7 +11319,7 @@ msgstr ""
 "Это позволяет вам установить максимальную сумму комиссии, которая "
 "рассчитывается и может быть заработана за заказ, привлеченный партнерами."
 
-#: inc/admin/settings/options-payouts.php:1011
+#: inc/admin/settings/options-payouts.php:1015
 #, fuzzy
 msgid ""
 "This bonus is not applied on the dashboard or when they request payouts. It "
@@ -11371,7 +11428,7 @@ msgid ""
 msgstr ""
 "Это лишь базовый метод защиты от спама, и он не так эффективен, как CAPTCHA."
 
-#: inc/admin/settings/options-payouts.php:865
+#: inc/admin/settings/options-payouts.php:869
 #, fuzzy
 msgid ""
 "This is our default store credit system, built directly into this plugin. (A "
@@ -11423,7 +11480,7 @@ msgid ""
 msgstr ""
 "Это показано в самом верху pdf-инструкций. Рекомендуемый размер 340 x 70"
 
-#: inc/admin/settings/options-payouts.php:997
+#: inc/admin/settings/options-payouts.php:1001
 #, fuzzy
 msgid ""
 "This is shown below the message above, next to a checkbox, allowing them to "
@@ -11553,7 +11610,7 @@ msgstr ""
 "Это сообщение отображается на странице, как только пользователь отправляет "
 "форму заявки. Заполнитель {couponcode} будет заменен выбранным кодом купона."
 
-#: inc/admin/settings/options-payouts.php:985
+#: inc/admin/settings/options-payouts.php:989
 #, fuzzy
 msgid ""
 "This is the name of the discount shown on the cart page, when store credit "
@@ -11634,7 +11691,7 @@ msgstr ""
 msgid "This may take a few seconds..."
 msgstr "Это может занять несколько секунд..."
 
-#: inc/admin/settings/options-general.php:984
+#: inc/admin/settings/options-general.php:986
 #, fuzzy
 msgid ""
 "This may therefore disregard some of the order statuses that are checked "
@@ -11661,7 +11718,7 @@ msgstr ""
 msgid "This Month"
 msgstr "В этом месяце"
 
-#: inc/admin/settings/options-commission.php:120
+#: inc/admin/settings/options-commission.php:110
 #, fuzzy
 msgid ""
 "This option will allow you to enable \"lifetime commission\" either globally,"
@@ -11699,7 +11756,7 @@ msgstr ""
 "ошибки, проблемы или конфликты с другими темами / плагинами, пожалуйста, "
 "свяжитесь с нами, и это будет рассмотрено."
 
-#: inc/admin/settings/options-commission.php:104
+#: inc/admin/settings/options-commission.php:94
 #, fuzzy
 msgid ""
 "This setting is required in case you have set custom commission amounts on "
@@ -11830,7 +11887,7 @@ msgstr ""
 "панели управления партнера, например, вы можете установить его на \"Код "
 "купона:\"."
 
-#: inc/admin/settings/options-general.php:978
+#: inc/admin/settings/options-general.php:980
 #, fuzzy
 msgid ""
 "This will determine how the orders are sorted on the affiliate dashboard, "
@@ -12001,7 +12058,7 @@ msgid ""
 "This will only be replaced for coupons with an affiliate assigned to it."
 msgstr "Он будет заменен только для купонов с назначенным на него партнером."
 
-#: inc/admin/settings/options-payouts.php:1019
+#: inc/admin/settings/options-payouts.php:1023
 #, fuzzy
 msgid ""
 "This will remove/deduct the tax amount from the store credit, if it is added "
@@ -12059,7 +12116,7 @@ msgstr ""
 "партнерской странице для пользователей, вышедших из системы (вместе с формой "
 "входа)."
 
-#: inc/admin/settings/options-payouts.php:1004
+#: inc/admin/settings/options-payouts.php:1008
 #, fuzzy
 msgid ""
 "This will show the current \"Store Credit\" for each user on the \"All "
@@ -12130,7 +12187,7 @@ msgstr ""
 "Это будет работать так же, как если бы пользователь нажал кнопку «Запросить "
 "выплату» на своей панели инструментов."
 
-#: inc/admin/settings/options-payouts.php:399
+#: inc/admin/settings/options-payouts.php:403
 #, fuzzy
 msgid "Threshold for automatic payouts"
 msgstr "Порог для автоматических выплат"
@@ -12326,7 +12383,7 @@ msgstr ""
 "Чтобы управлять (и включать) уведомления по электронной почте для "
 "партнерских приложений, перейдите на вкладку настроек «Электронные письма»."
 
-#: inc/admin/settings/options-payouts.php:1069
+#: inc/admin/settings/options-payouts.php:1073
 #, fuzzy
 msgid ""
 "To manage (and enable) email notifications for payouts, go to the \"Emails\" "
@@ -12669,7 +12726,7 @@ msgid "Total sales referred this year"
 msgstr "Общий объем продаж в этом году"
 
 #: inc/admin/class-coupons-table.php:30 inc/dashboard/tab-statistics.php:219
-#: inc/functions/functions-user-coupons.php:924
+#: inc/functions/functions-user-coupons.php:933
 #: premium-files/pro-addons/multi-level/functions-mla-network.php:117
 #, fuzzy
 msgid "Total Usage"
@@ -12687,7 +12744,7 @@ msgstr "общее использование"
 msgid "Totals"
 msgstr "Итоги"
 
-#: inc/admin/settings/options-commission.php:141
+#: inc/admin/settings/options-commission.php:131
 #, fuzzy
 msgid "Track user registrations as a lifetime referral."
 msgstr "Отслеживайте регистрацию пользователей как пожизненного реферала."
@@ -12786,25 +12843,29 @@ msgstr "Неоплаченная комиссия"
 msgid "unpaid commission"
 msgstr "неоплаченная комиссия"
 
-#: inc/admin/admin-orders-box.php:179
+#: inc/admin/admin-orders-box.php:195
 #, fuzzy
 msgid "Unpaid Commission granted to affiliate, ready for payout request."
 msgstr ""
 "Невыплаченная комиссия предоставляется партнеру, готовому к запросу на "
 "выплату."
 
-#: inc/admin/admin-orders-box.php:163
+#: inc/admin/admin-orders-box.php:179
 #, fuzzy
+#| msgid ""
+#| "Unpaid Commission not granted to affiliate. Since this order is completed "
+#| "it will no longer grant commission and needs applying manually if you "
+#| "wish to reward commission for this order."
 msgid ""
 "Unpaid Commission not granted to affiliate. Since this order is completed it "
 "will no longer grant commission and needs applying manually if you wish to "
-"reward commission for this order."
+"reward commission for this order. Click the \"update\" link."
 msgstr ""
 "Невыплаченная комиссия партнеру не предоставляется. Поскольку этот заказ "
 "выполнен, он больше не будет предоставлять комиссию и должен применяться "
 "вручную, если вы хотите вознаградить комиссию за этот заказ."
 
-#: inc/admin/admin-orders-box.php:161
+#: inc/admin/admin-orders-box.php:177
 #, fuzzy
 msgid ""
 "Unpaid Commission not yet granted to affiliate. This will be granted when "
@@ -12903,7 +12964,7 @@ msgstr "Настройки URL-адреса"
 msgid "Usage"
 msgstr "Употребление"
 
-#: inc/admin/settings/options-payouts.php:998
+#: inc/admin/settings/options-payouts.php:1002
 #, fuzzy
 msgid "Use merge tag {credit} to show the amount of credit they can apply."
 msgstr ""
@@ -12925,7 +12986,7 @@ msgstr ""
 "будет сгенерирован уникальный креатив, который будет отображаться для "
 "каждого партнера на вкладке креативов."
 
-#: inc/registration/registration-admin.php:476
+#: inc/registration/registration-admin.php:483
 #, fuzzy
 msgid "Use this page to manually add a new affiliate registration."
 msgstr ""
@@ -12980,7 +13041,7 @@ msgstr ""
 msgid "Use {username} to insert the affiliate username."
 msgstr "Используйте {username}, чтобы вставить имя пользователя партнера."
 
-#: inc/admin/settings/options-payouts.php:977
+#: inc/admin/settings/options-payouts.php:981
 #, fuzzy
 msgid "Used when describing the store credit payment/transaction in the logs."
 msgstr ""
@@ -13043,7 +13104,7 @@ msgstr "Роль пользователя:"
 
 #: inc/admin/class-coupon-users-table.php:25
 #: inc/registration/class-registrations-list-table.php:253
-#: inc/registration/registration-admin.php:509
+#: inc/registration/registration-admin.php:516
 #: inc/registration/registration-form.php:139
 #: inc/registration/registration-form.php:154
 #: inc/admin/tools/admin-bulk-coupons.php:108
@@ -13172,8 +13233,8 @@ msgstr "ПОСМОТРЕТЬ КРЕАТИВЫ"
 msgid "View Creatives"
 msgstr "Посмотреть креативы"
 
-#: inc/admin/admin-list.php:127 inc/admin/admin-orders-box.php:191
-#: inc/admin/class-coupons-table.php:247
+#: inc/admin/admin-list.php:127 inc/admin/admin-orders-box.php:208
+#: inc/admin/class-coupons-table.php:246
 #: premium-files/pro-addons/multi-level/functions-mla-network.php:129
 #: premium-files/pro-addons/payouts/stripe/CreateAccount.php:167
 #, fuzzy
@@ -13228,6 +13289,11 @@ msgstr "Просмотр отчетов"
 #, fuzzy
 msgid "View setup guide"
 msgstr "Просмотреть руководство по настройке"
+
+#: inc/admin/admin-orders-box.php:207
+#, fuzzy
+msgid "View the affiliate dashboard for this affiliate coupon."
+msgstr "Просмотрите партнерскую панель для этого партнерского купона."
 
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:247
 #, fuzzy
@@ -13286,7 +13352,7 @@ msgstr ""
 "Посетители, перенаправленные непосредственно из любого из этих доменов, не "
 "будут отслеживать рефералов или автоматически применять купоны."
 
-#: inc/admin/settings/options-payouts.php:842
+#: inc/admin/settings/options-payouts.php:846
 #, fuzzy
 msgid "Wallet System"
 msgstr "Система кошельков"
@@ -13311,12 +13377,12 @@ msgstr ""
 msgid "Want more advanced features?"
 msgstr "Хотите более продвинутые функции?"
 
-#: inc/admin/settings/options-payouts.php:941
+#: inc/admin/settings/options-payouts.php:945
 #, fuzzy
 msgid "Want us to create a new plugin integration?"
 msgstr "Хотите, чтобы мы создали новую интеграцию плагинов?"
 
-#: inc/admin/settings/options-payouts.php:391
+#: inc/admin/settings/options-payouts.php:395
 #, fuzzy
 msgid ""
 "Warning: If you use this option, you should be even more careful of "
@@ -13329,7 +13395,7 @@ msgstr ""
 "просматривать и принимать выплаты вручную, просто чтобы вы могли убедиться, "
 "что каждая выплата действительна и не мошенническая."
 
-#: inc/registration/registration-admin.php:155
+#: inc/registration/registration-admin.php:162
 #, fuzzy
 msgid ""
 "Warning: You will want to create a \"template coupon\" and assign it in the "
@@ -13412,7 +13478,7 @@ msgid "What toggles should be shown for statistics and line graphs?"
 msgstr ""
 "Какие переключатели должны отображаться для статистики и линейных графиков?"
 
-#: inc/registration/registration-admin.php:536
+#: inc/registration/registration-admin.php:543
 #: inc/registration/registration-form.php:205
 #, fuzzy
 msgid "What type of coupon would you like?"
@@ -13487,7 +13553,7 @@ msgstr ""
 "При проверке этот купон может быть использован только новыми клиентами при "
 "их первом заказе."
 
-#: inc/registration/registration-admin.php:479
+#: inc/registration/registration-admin.php:486
 #, fuzzy
 #| msgid ""
 #| "When completing this form, it will automatically submit an affiliate "
@@ -13542,7 +13608,7 @@ msgstr ""
 "собственный код купона (купоны, которым они назначены) в корзине или "
 "оформлении заказа."
 
-#: inc/admin/settings/options-commission.php:289
+#: inc/admin/settings/options-commission.php:297
 #, fuzzy
 msgid ""
 "When enabled, % commission will be calculated based on the order "
@@ -13553,7 +13619,7 @@ msgstr ""
 "/ общей суммы заказа, включая «сборы». Он также будет добавлен к "
 "промежуточному/общему итогу, показанному в статистике."
 
-#: inc/admin/settings/options-commission.php:271
+#: inc/admin/settings/options-commission.php:279
 #, fuzzy
 msgid ""
 "When enabled, % commission will be calculated based on the order "
@@ -13562,7 +13628,7 @@ msgstr ""
 "При включении % комиссия будет рассчитываться на основе промежуточного итога "
 "заказа / общей суммы, включая «стоимость доставки»."
 
-#: inc/admin/settings/options-commission.php:282
+#: inc/admin/settings/options-commission.php:290
 #, fuzzy
 msgid ""
 "When enabled, % commission will be calculated before any custom discounts "
@@ -13573,7 +13639,7 @@ msgstr ""
 "пользовательские скидки будут вычтены из промежуточного итога / итога. Он "
 "также будет добавлен к промежуточному/общему итогу, показанному в статистике."
 
-#: inc/admin/settings/options-commission.php:265
+#: inc/admin/settings/options-commission.php:273
 #, fuzzy
 msgid ""
 "When enabled, % commission will be calculated on the order subtotal (instead "
@@ -13646,7 +13712,7 @@ msgstr ""
 "всегда будут конфиденциальными и будут видны только назначенному "
 "пользователю (и администраторам)."
 
-#: inc/admin/settings/options-commission.php:28
+#: inc/admin/settings/options-commission.php:194
 #, fuzzy
 msgid ""
 "When enabled, commission statistics are disabled/hidden for coupons that are "
@@ -13738,7 +13804,16 @@ msgstr ""
 "ставки для НОВЫХ ордеров. Единственный раз, когда он БУДЕТ обновлен, это "
 "если заказ будет возвращен."
 
-#: inc/admin/settings/options-commission.php:364
+#: inc/admin/settings/options-commission.php:202
+#, fuzzy
+msgid ""
+"When enabled, the unpaid commission will also not be added to non-affiliate "
+"coupons."
+msgstr ""
+"Когда эта функция включена, невыплаченная комиссия также не будет "
+"добавляться к непартнерским купонам."
+
+#: inc/admin/settings/options-commission.php:372
 #, fuzzy
 msgid ""
 "When enabled, this will also show the adjusted \"total\" and \"subtotal\" "
@@ -13811,7 +13886,7 @@ msgstr ""
 "отредактировать код купона, который они ввели, прежде чем одобрить "
 "регистрацию партнера."
 
-#: inc/admin/settings/options-commission.php:175
+#: inc/admin/settings/options-commission.php:163
 #, fuzzy
 msgid ""
 "When updating these settings, you may need to click the \"REFRESH ALL DATA\" "
@@ -13854,7 +13929,7 @@ msgstr "Где я могу получить поддержку плагинов?
 msgid "where product ID is"
 msgstr "где идентификатор товара"
 
-#: inc/admin/settings/options-commission.php:99
+#: inc/admin/settings/options-commission.php:89
 #, fuzzy
 msgid "Which custom commission values should be applied as priority?"
 msgstr ""
@@ -13875,7 +13950,7 @@ msgstr ""
 "С помощью отчетов администратора вы можете просматривать статистику и "
 "аналитику для всех ваших купонов и партнеров."
 
-#: inc/admin/settings/options-commission.php:113
+#: inc/admin/settings/options-commission.php:103
 #, fuzzy
 msgid ""
 "With lifetime commission enabled, once someone uses the affiliates coupon "
@@ -13963,7 +14038,7 @@ msgstr ""
 "Если этот параметр отключен, подавать заявку могут только вошедшие в систему "
 "пользователи."
 
-#: inc/admin/settings/options-payouts.php:390
+#: inc/admin/settings/options-payouts.php:394
 #, fuzzy
 msgid ""
 "With this enabled commission will be paid instantly into the affiliate "
@@ -14086,7 +14161,7 @@ msgstr ""
 "комиссией (если партнер направил клиента) и заказами на продление, "
 "отображаемыми на панели инструментов."
 
-#: inc/admin/settings/options-commission.php:142
+#: inc/admin/settings/options-commission.php:132
 #, fuzzy
 msgid ""
 "With this enabled, if someone follows a referral link and registers (creates "
@@ -14164,7 +14239,7 @@ msgstr ""
 "При включении этого будет доступно несколько шаблонных купонов, и партнер "
 "сможет выбрать, какой тип он хочет через регистрационную форму."
 
-#: inc/admin/settings/options-design.php:123
+#: inc/admin/settings/options-design.php:136
 #, fuzzy
 msgid ""
 "With this enabled, some of the fields on the form will be displayed in 2 "
@@ -14182,7 +14257,7 @@ msgstr ""
 "Если это включено, партнер может запросить выплату только в том случае, если "
 "он приложил счет -файл PDF)."
 
-#: inc/admin/settings/options-payouts.php:406
+#: inc/admin/settings/options-payouts.php:410
 #, fuzzy
 msgid ""
 "With this enabled, the first ever payout request by an affiliate will "
@@ -14337,7 +14412,7 @@ msgstr ""
 "Все в настрой! Выплаты по кредитам магазина теперь будут добавляться на "
 "кошелек пользователя «%s» автоматически в один клик."
 
-#: inc/admin/settings/options-payouts.php:862
+#: inc/admin/settings/options-payouts.php:866
 #, fuzzy
 msgid ""
 "You are all set! Store credit payouts will now be added to the users wallet "
@@ -14688,7 +14763,7 @@ msgstr "Вы заслужили награду!"
 msgid "You have made a new referral sale!"
 msgstr "Вы совершили новую реферальную продажу!"
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:215
+#: premium-files/pro-addons/multi-level/functions-mla.php:217
 #, fuzzy
 msgid "You must be logged in to view the MLA dashboard."
 msgstr "Для просмотра панели мониторинга MLA необходимо войти в систему."

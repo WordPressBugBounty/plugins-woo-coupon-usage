@@ -141,70 +141,75 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
         } else {
           $affiliate_user = 'an affiliate';
         }
-        $event_message = "New order referral of " . $order_total . " by " . $affiliate_user . ": " . "<a href='" . admin_url('post.php?post=' . $event_id . '&action=edit') . "'>#" . $event_id . "</a>";
+        $event_message = "New order referral of " . $order_total . " by " . $affiliate_user . ": " . "<a href='" . esc_url(admin_url('post.php?post=' . $event_id . '&action=edit')) . "'>#" . $event_id . "</a>";
       } else {
-        $event_message = "New order referral: " . "<a href='" . admin_url('post.php?post=' . $event_id . '&action=edit') . "'>#" . $event_id . "</a>";
+        $event_message = "New order referral: " . "<a href='" . esc_url(admin_url('post.php?post=' . $event_id . '&action=edit')) . "'>#" . esc_html($event_id) . "</a>";
       }
       break;
     case 'registration':
-      $event_message = "New affiliate registration (".$event_id."):" . " " . $info;
+      $event_message = "New affiliate registration (".esc_html($event_id)."):" . " " . wp_kses_post($info);
       break;
     case 'registration_accept':
-      $event_message = "Affiliate registration accepted:" . " " . $info;
+      $event_message = "Affiliate registration accepted:" . " " . wp_kses_post($info);
       break;
     case 'mla_invite':
-      $event_message = $info . " was invited to an affiliate network.";
+      $event_message = wp_kses_post($info) . " was invited to an affiliate network.";
       break;
     case 'direct_link_domain':
-      $event_message = "Direct link domain request:" . " " . $info;
+      $event_message = "Direct link domain request:" . " " . wp_kses_post($info);
       break;
     case 'payout_request':
-      $event_message = "New payout request (#".$event_id."):" . " " . wcusage_format_price($info);
+      $event_message = "New payout request (#".esc_html($event_id)."):" . " " . wcusage_format_price(wp_kses_post($info));
       break;
     case 'payout_paid':
-      $event_message = "Payout request paid (#".$event_id."):" . " " . wcusage_format_price($info);
+      $event_message = "Payout request paid (#".esc_html($event_id)."):" . " " . wcusage_format_price(wp_kses_post($info));
       break;
     case 'payout_reversed':
-      $event_message = "Payout request reversed (#".$event_id."):" . " " . wcusage_format_price($info);
+      $event_message = "Payout request reversed (#".esc_html($event_id)."):" . " " . wcusage_format_price(wp_kses_post($info));
       break;
     case 'new_campaign':
-      $event_message = "New campaign added by an affiliate:" . " " . $info;
+      $event_message = "New campaign added by an affiliate:" . " " . wp_kses_post($info);
       break;
     case 'commission_added':
       $coupon_info = wcusage_get_coupon_info_by_id($event_id);
       $coupon_name = $coupon_info[3];
-      $event_message = "Unpaid commission added to '".$coupon_name."':" . " " . $info;
+      $event_message = "Unpaid commission added to '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
       break;
     case 'commission_removed':
       $coupon_info = wcusage_get_coupon_info_by_id($event_id);
       $coupon_name = $coupon_info[3];
-      $event_message = "Unpaid commission removed from '".$coupon_name."':" . " " . $info;
+      $event_message = "Unpaid commission removed from '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
       break;
     case 'reward_earned':
       $coupon_info = wcusage_get_coupon_info_by_id($info);
       $coupon_name = $coupon_info[3];
-      $coupon_name = '<a href="'.get_edit_post_link($info).'">'.$coupon_name.'</a>';
+      $coupon_name = '<a href="'.get_edit_post_link($info).'">'.esc_html($coupon_name).'</a>';
       $user_id = $coupon_info[1];
       $username = get_the_author_meta( 'user_login', $user_id );
-      $username = '<a href="'.get_edit_user_link($user_id).'">'.$username.'</a>';
+      $username = '<a href="'.get_edit_user_link($user_id).'">'.esc_html($username).'</a>';
+      if($username == '') {
+        $username = '';
+      } else {
+        $username = "by " . $username . " ";
+      }
       $post_id = $event_id;
       $post_title = get_the_title($post_id);
-      $post_title = '<a href="'.get_edit_post_link($post_id).'">'.$post_title.'</a>';
-      $event_message = "Reward '".$post_title."' was earned by '".$username."' via coupon: ".$coupon_name."";
+      $post_title = '<a href="'.esc_url(get_edit_post_link($post_id)).'">'.esc_html($post_title).'</a>';
+      $event_message = "Reward '".wp_kses_post($post_title)."' was earned ".wp_kses_post($username)."via coupon: ".wp_kses_post($coupon_name)."";
       if ($action_reward_bonus) {
-        $event_message .= "<br/>Bonus 'unpaid commission' added to coupon: ".wcusage_format_price($bonus_amount);
+        $event_message .= "<br/>Bonus 'unpaid commission' added to coupon: ".wcusage_format_price(esc_html($bonus_amount));
       }
       if ($action_reward_credit) {
         $wcusage_field_storecredit_enable = wcusage_get_setting_value('wcusage_field_storecredit_enable', '0');
         if($wcusage_field_storecredit_enable) {
-          $event_message .= "<br/>Bonus store credit added to user wallet: ".wcusage_format_price($credit_amount);
+          $event_message .= "<br/>Bonus store credit added to user wallet: ".wcusage_format_price(esc_html($credit_amount));
         }
       }
       if ($action_change_commission) {
         $event_message .= "<br/>Commission rates were updated for the affiliate coupon.";
       }
       if ($action_free_product) {
-        $event_message .= "<br/>Free product order created for: ".$product_quantity." x ".get_the_title($product_id)."";
+        $event_message .= "<br/>Free product order created for: ".esc_html($product_quantity)." x ".esc_html(get_the_title($product_id))."";
       }
       if ($action_free_coupon) {
         $event_message .= "<br/>Free gift coupon was created for the user.";
@@ -213,7 +218,7 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
         $event_message .= "<br/>Custom reward email sent to user.";
       }
       if ($action_assign_role) {
-        $event_message .= "<br/>User role added to user: ".$new_user_role;
+        $event_message .= "<br/>User role added to user: ".esc_html($new_user_role);
       }
       break;
   }
