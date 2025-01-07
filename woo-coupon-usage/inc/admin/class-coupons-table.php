@@ -255,18 +255,40 @@ class wcusage_Coupons_Table extends WP_List_Table {
                 title="'.esc_html__( 'Copy Link', 'woo-coupon-usage' ).'"><i class="fa-regular fa-copy"></i></button>'
                 . '</div>';
             case 'the-actions':
+                $allowed_html = array(
+                    'a' => array(
+                        'href' => array(),
+                        'title' => array(),
+                        'onclick' => array(),
+                        'style' => array(),
+                        'class' => array()
+                    ),
+                    'span' => array(
+                        'class' => array()
+                    )
+                );
                 // Delete
+                // Create actions.
                 $actions = array(
-                    'edit' => sprintf('<a href="%s">%s</a>', admin_url('post.php?post=' . $item->ID . '&action=edit'), esc_html__('Edit', 'woo-coupon-usage')),
-                    'delete' => sprintf('<a href="%s" style="color: #7a0707;"
-                    onclick="return confirm(\"%s\");">%s</a>',
-                    wp_nonce_url(admin_url('admin.php?page=wcusage_coupons&delete_coupon=' . $item->ID),
-                    'delete_coupon'),
-                    esc_html__('Are you sure you want to delete this coupon?', 'woo-coupon-usage'),
-                    esc_html__('Delete', 'woo-coupon-usage'))
+                    'edit'   => sprintf(
+                        '<a href="%s">%s</a>',
+                        esc_url( admin_url( 'post.php?post=' . $item->ID . '&action=edit' ) ),
+                        esc_html__( 'Edit', 'woo-coupon-usage' )
+                    ),
+                    'delete' => sprintf(
+                        '<a href="%s" onclick="return confirm(\'%s\');" style="color: #7a0707;">%s</a>',
+                        esc_url(
+                            wp_nonce_url(
+                                admin_url( 'admin.php?page=wcusage_coupons&delete_coupon=' . $item->ID ),
+                                'delete_coupon'
+                            )
+                        ),
+                        esc_html__( 'Are you sure you want to delete this coupon?', 'woo-coupon-usage' ),
+                        esc_html__( 'Delete', 'woo-coupon-usage' )
+                    ),
                 );
                 foreach ($actions as $key => $action) {
-                    $actions[$key] = '<span class="' . esc_attr($key) . '">' . wp_kses_post($action) . '</span>';
+                    $actions[$key] = '<span class="' . esc_attr($key) . '">' . wp_kses($action, $allowed_html) . '</span>';
                 }
                 return implode(' | ', $actions);
             default:
@@ -339,7 +361,7 @@ function wcusage_coupons_page() {
                 $coupon_name = $coupon->post_title;
                 wp_delete_post($coupon_id);
                 $message = esc_html__('Coupon "'.$coupon_name.'" deleted successfully.', 'woo-coupon-usage');
-                echo '<p class="notice notice-success is-dismissible"
+                echo '<p class="notice notice-success is-dismissible" style="padding: 10px; margin: 10px 0;"
                 style="font-weight: bold; color: green;">' . esc_html($message) . '</p>';
             }
         }

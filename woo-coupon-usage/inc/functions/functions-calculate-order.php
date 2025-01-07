@@ -1426,11 +1426,11 @@ if ( !function_exists( 'wcusage_get_total_fees' ) ) {
             foreach ( $order->get_items( 'fee' ) as $item_id => $item_fee ) {
                 // Negative Fees (Extra Discounts)
                 if ( $item_fee->get_total() <= 0 ) {
-                    $fee_total_remove += $item_fee->get_total();
+                    $fee_total_remove += (float) $item_fee->get_total();
                 }
                 // Positive Fees
                 if ( $item_fee->get_total() >= 0 ) {
-                    $fee_total_add += $item_fee->get_total();
+                    $fee_total_add += (float) $item_fee->get_total();
                 }
             }
         }

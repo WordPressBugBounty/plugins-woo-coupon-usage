@@ -103,6 +103,23 @@ function wcusage_fix_cache() {
 add_action( 'template_redirect', 'wcusage_fix_cache' );
 
 /**
+ * Filter to control Elementor's page caching.
+ *
+ * @param bool $allow Whether to allow page cache. Default true.
+ * @return bool Modified cache allowance.
+ */
+function wcusage_elementor_page_cache_control( $use_cache, $post_id ) {
+  $post_id = get_the_ID();
+  $dashboard_page = wcusage_get_setting_value('wcusage_dashboard_page', '');
+  $mla_dashboard_page = wcusage_get_setting_value('wcusage_mla_dashboard_page', '');
+  if( $post_id == $dashboard_page || $post_id == $mla_dashboard_page || is_account_page() ) {
+      return false;
+  }
+  return $use_cache;
+}
+add_filter( 'elementor/frontend/use_cache', 'wcusage_elementor_page_cache_control', 10, 2 );
+
+/**
  * Round down number to decimals
  *
  * @param int $decimal

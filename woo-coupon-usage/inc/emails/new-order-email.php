@@ -85,35 +85,74 @@ if(wcusage_get_setting_value('wcusage_field_email_order_status', 'wc-completed')
 /**
  * Include affiliate details in admin order email
  */
-if( !function_exists( 'wcusage_admin_order_email' ) ) {
-  function wcusage_admin_order_email( $order, $sent_to_admin, $plain_text, $email ) {
+if ( ! function_exists( 'wcusage_admin_order_email' ) ) {
+    function wcusage_admin_order_email( $order, $sent_to_admin, $plain_text, $email ) {
 
-	if ( $email->id === 'new_order' && $sent_to_admin ) {
+        if ( $email->id === 'new_order' && $sent_to_admin ) {
 
-		$order_id = $order->get_id();
+            $order_id = $order->get_id();
 
-		$affiliate = wcusage_order_meta($order_id,'wcusage_affiliate_user');
-		$commission = wcusage_order_meta($order_id,'wcusage_total_commission');
+            $affiliate = wcusage_order_meta( $order_id, 'wcusage_affiliate_user' );
+            $commission = wcusage_order_meta( $order_id, 'wcusage_total_commission' );
 
-		if($affiliate) {
+            if ( $affiliate ) {
 
-			$user_info = get_userdata($affiliate);
+                $user_info = get_userdata( $affiliate );
+                $user_login = $user_info->user_login;
+                $user_email = $user_info->user_email;
 
-			$user_login = $user_info->user_login;
-			$user_email = $user_info->user_email;
+                // Affiliate Information Table
+                echo '<h2>' . esc_html__( 'Affiliate Information', 'wcusage' ) . '</h2>';
+                echo '<table style="width: 100%; border-collapse: collapse; border: 1px solid #e5e5e5;" cellspacing="0" cellpadding="6" border="1">';
+                echo '<tbody>';
+                echo '<tr>';
+                echo '<th style="text-align: left; padding: 12px; background-color: #f7f7f7;">' . esc_html__( 'Affiliate', 'wcusage' ) . '</th>';
+                echo '<td style="padding: 12px;">' . esc_html( $user_login ) . '</td>';
+                echo '</tr>';
 
-			$affiliate_info = "<h2>Affiliate Information</h2>";
-			$affiliate_info .= "<p><strong>Affiliate:</strong> " . $user_login . "</p>";
-			$affiliate_info .= "<p><strong>Email:</strong> " . $user_email . "</p>";
-			$affiliate_info .= "<p><strong>Commission:</strong> " . wcusage_format_price($commission) . "</p><br/><br/>";
-			
-			echo $affiliate_info;
+                // If coupons exist, display Coupon Information Table
+                $coupons = $order->get_used_coupons();
+                if ( $coupons ) {
 
-		}
+                    foreach ( $coupons as $coupon_code ) {
 
-	}
+						echo '<tr>';
+						
+                        $coupon = new WC_Coupon( $coupon_code );
+						$couponid = $coupon->get_id();
+                        $coupon_name = $coupon->get_code();
+                        $coupon_amount = $coupon->get_amount();
+                        $coupon_type = $coupon->get_discount_type();
+                        $coupon_description = $coupon->get_description();
+						
+						$coupon_info = wcusage_get_coupon_info_by_id($couponid);
+						if(!$coupon_info[1]) {
+							continue;
+						}
 
-  }
+						$dashboard_link = $coupon_info[4];
+
+						echo '<th style="text-align: left; padding: 12px; background-color: #f7f7f7;">' . esc_html__( 'Coupon', 'wcusage' ) . '</th>';
+
+						echo '<td style="padding: 12px;">' . esc_html( strtoupper($coupon_name) ) . ' (<a href="' . esc_url( $dashboard_link ) . '" target="_blank">' . esc_html__( 'View Dashboard', 'wcusage' ) . '</a>)</td>';
+
+						echo '</tr>';
+
+                    }
+
+                }
+
+				echo '<tr>';
+                echo '<th style="text-align: left; padding: 12px; background-color: #f7f7f7;">' . esc_html__( 'Commission', 'wcusage' ) . '</th>';
+                echo '<td style="padding: 12px;">' . wp_kses_post( wcusage_format_price( $commission ) ) . '</td>';
+                echo '</tr>';
+
+                echo '</tbody>';
+                echo '</table><br/><br/>';
+
+            }
+        }
+    }
 }
 add_action( 'woocommerce_email_customer_details', 'wcusage_admin_order_email', 999, 4 );
 
@@ -206,6 +245,10 @@ function wcusage_new_order_affiliate_email_create($coupon_code, $order_id = "", 
 		$wcusage_email_message = str_replace("{listproducts}", $list_products, $wcusage_email_message);
 		$wcusage_email_message = str_replace("{email}", $user_email, $wcusage_email_message);
 
+		// Filter for custom tags
+		$wcusage_email_message = apply_filters('wcusage_filter_new_order_email_message', $wcusage_email_message, $order_id, $coupon_code);
+
+		// Send email
 		$to = $user_email . "," . $wcu_notifications_extra;
 		$subject = $wcusage_email_subject;
 		$body = $wcusage_email_message;

@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.7.1
-Stable tag: 5.17.3
+Stable tag: 5.18.0
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -240,6 +240,13 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= Version 5.18.0 - 7th January 2025 =
+- New: (PRO) Added dynamic landing pages functionality.
+- New: Added a new "Affiliate Information" section to the WooCommerce admin new order emails.
+- Tweak: Added a warning and confirmation message when trying to delete a coupon on the admin affiliate coupons page.
+- Fix: (PRO) Fixed an issue with generating QR codes for landing page URLs.
+- Other: Tested with WooCommerce 9.5.1
+
 = Version 5.17.3 - 18th December 2024 =
 - Tweak: Moved the "Hide commission statistics for non-affiliate coupons" option and added another "Stop unpaid commission from being earned for non-affiliate coupons" option to make things more clear on what it does.
 - Tweak: Added some additional sanitisation to various areas of the code for extra precaution.
@@ -385,198 +392,4 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 - New: (PRO) Added a leaderboards feature that lets you display a leaderboard of your top affiliates using a shortcode: [couponaffiliates-leaderboard]. You can set the number of affiliates to display, and the time period to show the stats for (all, month, or year).
 - Tweak: Removed the "Orders" section from the setup wizard.
 
-= Version 5.14.6.1 - 14th August 2024 =
-- Tweak: (PRO) Clear the "wcu_store_credit_in_cart" user meta when an order is placed by the user.
-- Fix: (PRO) Fixed an issue with applying store credit on cart (with the built-in credit system) not showing the correct amount in some cases.
-
-= Version 5.14.6 - 12th August 2024 =
-- Tweak: (PRO) Increased the maximum number of "Template Coupons" that can be set with the "Multiple Templates" feature to 10.
-- Fix: Fixed some HTML formatting issues on the affiliate dashboard in some cases.
-- Fix: (PRO) Fixed an issue with the dynamic code generator not working properly with custom text in the template in some cases.
-- Fix: (PRO) Fixed an issue with the responsive navigation when both the normal and MLA dashboard shortcodes are used on the same page.
-- Fix: (PRO) Fixed an issue with applying store credit on cart (with the built-in credit system) not showing the correct amount when the store has inclusive tax enabled.
-- Fix: (PRO) Fixed an issue with the payout request button if the available credit was exactly the same as the minimum payout amount.
-- Other: Updated to Freemius SDK 2.7.4
-
-= Version 5.14.5 - 5th August 2024 =
-- Fix: Fixed an issue where in some cases applying a coupon manually on checkout would not automatically refresh the cart totals until the page is manually refreshed.
-- Fix: (PRO) Fixed an issue with applying store credit on cart (with the built-in credit system) not showing the correct amount when the store has inclusive tax enabled.
-- Other: Tested with WordPress 6.6.1
-
-= Version 5.14.4 - 31st July 2024 =
-- Fix: (PRO) Fixed an issue with performance bonuses on the affiliate dashboard, not showing the correct price format for EUR and some other currency formats.
-- Fix: (PRO) Fixed the responsive navigation on the multi-level affiliate dashboard for mobile.
-
-= Version 5.14.3 - 18th July 2024 =
-- Tweak: As an admin, when viewing the affiliate dashboard for another users coupon, it now shows their username in the header, and their account details in the settings tab, with a link to edit that user.
-- Tweak: (PRO) As an admin, when viewing the affiliate dashboard for another users coupon, you can now view and edit that affiliate users payouts settings.
-- Tweak: (PRO) Made some small changes to the commission line charts.
-- Fix: (PRO) Fixed a small issue with the performance bonus options since the last update.
-- Fix: Fixed an issue with unlinking affiliates from coupons on the "Affiliate Users" admin page.
-- Fix: (PRO) Fixed an issue with the new mobile navigation dropdown not working for custom tabs (since 5.14.0).
-- Fix: (PRO) Fixed an issue with the commission line graph not loading when the "Show Commission Earnings summary with toggles" option is disabled.
-- Fix: Fixed an issue with the option to allow users to join the affiliate program on checkout not working in some cases.
-- Fix: Fixed an issue with the "{listproducts}" merge tag not working for the "New Order Referral" email notifications.
-- Dev: Added some extra classess to certain elements on the affiliate dashboard to allow for easier custom styling.
-- Other: Added "WooCommerce" as a "Required Plugin" in the plugin header comment.
-- Other: Tested with WordPress 6.6.0
-- Other: Tested with WooCommerce 9.1.2
-
-= Version 5.14.2 - 15th July 2024 =
-- New: Added a "Newly Created" trigger to the performance bonuses which now allows you to give a welcome bonus to new affiliates.
-- Tweak: Added an option to set a prefix for the coupon code shown in the header of the affiliate dashboard.
-- Tweak: Added a login link to the message shown when the affiliate registration form is submitted but the username or email already exists.
-- Tweak: (PRO) Edited the number fields for the MLA tier commission rates to be incrementing by decimals to allow for decimal values.
-- Fix: Fixed an issue with the referral URL links not working properly when the sites permalink structure is set to "Plain".
-- Fix: (PRO) Fixed an issue with the MLA invite links not working properly when the sites permalink structure is set to "Plain".
-- Fix: Fixed an issue with the "Coupon Referral Orders" admin page sometimes being a little slow since 5.14.0.
-- Fix: (PRO) Fixed an issue with the affiliate registration checkbox custom field, when set to required.
-- Fix: Fixed some admin pages that were giving the following PHP warning: Function wpdb::prepare was called incorrectly.
-- Fix: Fixed a PHP warning sometimes showing when submitting the affiliate registration form.
-- Fix: Fixed some PHP warnings in the admin area ("preg_replace(): Passing null to parameter").
-- Other: Updated to Freemius SDK 2.7.2
-
-= Version 5.14.1 - 29th June 2024 =
-- Fix: Fixed a few small styling issues on the affiliate dashboard since the last update.
-
-= Version 5.14.0 - 28th June 2024 =
-- Improvement: Updated the affiliate dashboard navigation on mobile to be more user-friendly. It now uses a dropdown menu for the tabs.
-- Improvement: Made several small styling and layout tweaks to the affiliate dashboard on mobile.
-- Fix: Fixed an issue with the affiliate registration system when multiple templates are enabled.
-- Fix: Fixed an issue with the total items and pagination on the "Coupon Referral Orders" admin page.
-- Fix: (PRO) Fixed an issue with the "Commission Priority" option not defaulting automatically to the "Product" option, even though it was showing as selected.
-- Other: Tested with WordPress 6.5.5
-- Other: Tested with WooCommerce 9.0.2
-
-= Version 5.13.1 - 12th June 2024 =
-- Improvement: Added an option to choose which order status the "New Order Referral" email is sent for, rather than being limited to "Completed" orders.
-- Improvement: Added new "Affiliate Information" to the admin new order emails.
-- Tweak: Added shortcode to display payouts section: [couponaffiliates-payouts]
-- Fix: Fixed an issue with the "Disable registration form for existing affiliate users" setting.
-- Fix: (PRO) Fixed an issue with the auto accept affiliate registrations option when multiple templates is disabled.
-- Fix: (PRO) Fixed an issue with commission still showing in the monthly summary products list with "Enable Commission Calculations & Statistics" disabled.
-- Other: Tested with WordPress 6.5.4
-- Other: Tested with WooCommerce 8.9.3
-
-= Version 5.13.0 - 25th April 2024 =
-- New: (PRO) Added new mailing list integrations to automatically add affiliate users to your mailing list.
-- Tweak: Added [couponaffiliates_store_credit_apply] shortcode to display field to apply store credit to cart. Can be used on the checkout if WooCommerce block checkout is enabled.
-- Tweak: Updated the "Coupon Referral Orders" page to properly show 20 orders per page. Previously it would hide non-coupon orders but still count them in the pagination.
-- Fix: (PRO) Fixed an issue with the template coupon "multiple templates" when manually adding a new affiliate user.
-- Fix: (PRO) Fixed an issue with the "Copy Code" button on the "Creatives" tab sometimes including a diplicate "https" in the referral URL.
-
-= Version 5.12.17 - 16th April 2024 =
-- Tweak: Made some small tweaks to the mobile responsive design of the affiliate dashboard.
-- Tweak: When "Hide the "all-time" stats on statistics tab and line graph" is enabled, it will no longer waste time calculating the all-time stats on first load of the affiliate dashboard.
-- Tweak: (PRO) Updated the QR Code generator used for the dynamic creatives to use a local library (chillerlan/php-qrcode) instead of the Google Charts API.
-- Tweak: (PRO) Updated the email PDF reports to display in the correct WooCommerce currency format.
-- Tweak: (PRO) Made a few changes to the "Delay Commission (Number of Days)" code to make it more reliable and faster in certain cases.
-- Fix: Fixed an issue with the all-time stats not updating in some cases for new coupons.
-- Fix: (PRO) Fixed an issue with the "Make the invoice upload option required" setting when disabled still requiring the invoice upload.
-- Other: Tested with WordPress 6.5.2
-- Other: Updated to Freemius SDK 2.7.0
-
-= Version 5.12.16 - 4th April 2024 =
-- Fix: (PRO) Fixed an issue with the "template" attribute on the [couponaffiliates-register] shortcode not working in some cases.
-- Fix: Fixed a text/HTML formatting issue on the single order page for some websites.
-- Other: Tested with WordPress 6.5.0
-
-= Version 5.12.15 - 22nd March 2024 =
-- Tweak: (PRO) Small tweak to the MLA referral email to not send in certain cases.
-- Fix: Fixed a text/HTML formatting issue on the Statistics tab of the affiliate dashboard in some cases, since the 5.12.9 update.
-
-= Version 5.12.14 - 20th March 2024 =
-- Fix: Fixed an "Array to string conversion" PHP error on the settings page for some of the dropdown options, since the 5.12.9 update.
-
-= Version 5.12.13 - 20th March 2024 =
-- Fix: Fixed an issue on the edit coupon page, with no longer being able to select an affiliate user from the dropdown.
-- Fix: (PRO) Fixed a PHP warning on the "Product Rates" tab on the affiliate dashboard.
-- Other: Tested with WooCommerce 8.7.0
-
-= Version 5.12.12 - 14th March 2024 =
-- Tweak: Made a few small security enhancements to some SQL calls in the plugin for future proofing.
-
-= Version 5.12.11 - 12th March 2024 =
-- Fix: Fixed a few more text/HTML formatting issues since the 5.12.9 update.
-- Fix (PRO): Fixed a PHP warning when editing users with MLA enabled.
-
-= Version 5.12.10 - 8th March 2024 =
-- Fix: Fixed a few text/HTML formatting issues since the last update.
-
-= Version 5.12.9 - 7th March 2024 =
-- Tweak: Made a variety of small code tweaks and improvements to the plugin, including some additional "escaping" of data.
-- Other: Tested with WordPress 6.4.3
-
-= Version 5.12.8 - 7th March 2024 =
-- Improvement: Added new "template" attribute to the [couponaffiliates-register] shortcode to allow you to set the default template coupon (if you have multiple templates). This will hide the field and auto-select that coupon when users register with that form. Example usage: [couponaffiliates-register template="my-template-coupon"]
-- Fix: Fixed the password reset link included in the new affiliate user account email in some cases not working.
-- Fix: Fixed a PHP error on the settings page for some sites on older versions of WooCommerce.
-- Fix: Fixed an issue with copying the referral URLs on the admin "Coupons" and "Affiliate Users" pages.
-- Fix: Fixed a security bug reported by Patchstack.
-
-= Version 5.12.7 - 24th January 2024 =
-- Fix: Fixed an issue with the "Coupon Affiliate" meta box not showing any more on the single orders pages for some websites.
-- Fix: Fixed an error on the "Coupon Affiliate Users" admin page in some cases.
-
-= Version 5.12.6 - 19th January 2024 =
-- Tweak: Small change to the "Coupon Orders" page query to improve performance and HPOS compatibilty.
-- Fix: Fixed an error on the "Coupons" admin page in some cases.
-
-= Version 5.12.5 - 19th January 2024 =
-- Tweak: Small tweaks to the new QR code generator.
-- Fix: Fixed the "Name" column on the "Recent Orders" tab of the affiliate dashboard, sometimes being blank in certain cases.
-- Fix: Fixed some PHP errors that some users were experiencing on the coupons and coupon orders pages.
-- Other: Tested with WooCommerce 8.5.1
-
-= Version 5.12.4 - 15th January 2024 =
-- New: (PRO) Added a color picker under the QR code generator, to allow affiliates to change the color of the QR code.
-- Tweak: (PRO) Update the QR code generator to no longer use the Google Charts API, and instead use a local QR code generator library with no dependencies.
-- Tweak: Made a few small optimisations to the code run when referral links are clicked. When the "Enable Click History Logs" option is disabled, it will no longer log the clicks in the database.
-- Fix: Fixed an issue with admin reports "only show coupons assigned to an affiliate user" option not working when disabled, to show coupons without an affiliate user assigned in the reports.
-- Fix: Fixed the "Name" column on the "Recent Orders" tab of the affiliate dashboard, sometimes being blank in certain cases. It will now show the username or "Guest" if name is empty.
-- Other: Updated to Freemius SDK 2.6.2
-
-= Version 5.12.3 - 22nd December 2023 =
-- Improvement: Admin reports will now load faster, especially when the "only show coupons assigned to an affiliate user" option is selected.
-- Improvement: On the Coupon Affiliate Users page, hovering over the username will now show a tooltip with all the affiliate user details that were submitted on the registration form.
-- Tweak: When the "Hide commission statistics for non-affiliate coupons" option is enabled, it will not give "unpaid commission" to coupons that do not have an affiliate user assigned to it.
-- Tweak: Made a few small tweaks/improvements to the code for setting the cookies when a referral link is clicked.
-- Fix: Fixed a few small bugs with admin reports.
-- Fix: Removed HTML tags from the notification emails if the {commission} merge tag is used.
-- Dev: Added some extra hooks for when affiliate registrations are created, accepted, and declined.
-
-= Version 5.12.2 - 14th December 2023 =
-- New: (PRO) Added a "Quarterly" option to the "Scheduled Payout Requests" and "Affiliate Email Reports" features.
-- Tweak: On the affiliate dashboard, if the discount is 0% and free shipping is enabled, it will now say "Free Shipping" in the "Discount" box on the "Statistics" tab.
-- Tweak: Prevent duplicate affiliate registration submissions from the same user within a short time period.
-- Tweak: No longer send the admin "New Affiliate Application" email when the affiliate user was added by an admin.
-- Tweak: (PRO) Updated styling on the download qr code button to match the other buttons.
-- Tweak: Improved inconsistent spacing of certain content/sections on affiliate dashboard on certain themes.
-- Fix: Fixed the "Generate Dashboard Page" button on the setup wizard not working in certain cases.
-- Other: Added Freemius multi-site support.
-- Other: Tested with WooCommerce 8.4.0
-
-= Version 5.12.1 - 12th December 2023 =
-- Tweak: Improved the speed/performance of loading the affiliate data on the WooCommerce orders page in some cases.
-- Tweak: On the "Product Commission Rates" table, the "Commission Rate" column will no longer show 0% if there is no percentage commission whilst there is a fixed commission.
-- Fix: (PRO) Fixed issue with the store credit option sometimes not showing on the cart for certain themes.
-
-= Version 5.12.0 - 7th December 2023 =
-- New: Added a new "Referred Order Cancelled" email notification, which is sent to the affiliate when an order is cancelled, refunded, or failed. This can be enabled in the "Emails" settings tab.
-- New: On the "Coupon Affiliate Users" admin page, the tooltip shown when hovering over the coupon code, will now show the default referral link for the affilaite coupon, along with a copy button.
-- New: On the "Coupons" admin page for the plugin, there is now a new "Default Referral Link" column, which shows the default referral link for the coupon, along with a copy button.
-- New: Added some new options to customise the affiliate dashboard tabs styling in the "Design" settings tab. There is now a new "full width" style available, along with the option to select a custom border radius and padding.
-- New: Added an option to set a custom "Preferred Coupon Code" field label on the affiliate registration form.
-- Improvement: You can now easily include the default referral link in the "Affiliate Application Accepted" email by using the {referralurl}
-- Tweak: (PRO) Hidden the "MLA" dashboard link on the WordPress users page if MLA is set to invite only, and the user does not have access.
-- Tweak: (PRO) If MLA Dashboard is set to "Invite Only", admins can now still view view the MLA Dashboard for any user if they themselves are not approved.
-- Tweak: (PRO) Added the "pointer" cursor style to the export buttons on the affiliate dashboard.
-- Tweak: Moved the "Affiliate" link on the "My Account" page to before the logout link.
-- Tweak: A few small improvements to the plugins "Coupons" admin page.
-- Fix: (PRO) Fixed a PHP warning when MLA is enabled but the MLA dashboard page has not been selected in the settings.
-- Fix: (PRO) Fixed the "Unpaid Commission" and "Pending Payouts" fields when editing a coupon, to allow you to enter decimal values.
-- Fix: (PRO) The store credit balance amount shown on the affiliate dashboard "payouts settings" is now formatted to show as a currency value.
-- Dev: Added a filter to programmatically change the page ID for the affiliate dashboard option, and MLA dashboard option.
-- Other: Added translations for "Italian".
-- Other: Tested with WordPress 6.4.2
-- Other: Updated to Freemius SDK 2.6.1
+<a href="https://roadmap.couponaffiliates.com/updates/">View the full changelog</a>

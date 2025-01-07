@@ -196,6 +196,12 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
 
 }
 add_action(
+    'woocommerce_checkout_update_order_meta',
+    'wcusage_new_order_update_stats',
+    10,
+    2
+);
+add_action(
     'woocommerce_order_status_changed',
     'wcusage_new_order_update_stats',
     10,

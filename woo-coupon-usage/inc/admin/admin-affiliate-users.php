@@ -165,7 +165,11 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
 
   if ($user_info) {
     // Get current page after /wp-admin/ without parameters
-    $current_page = sanitize_text_field($_GET['page']);
+    if(isset($_GET['page'])) {
+      $current_page = sanitize_text_field($_GET['page']);
+    } else {
+      $current_page = '';
+    }
     $unlink_url = add_query_arg(
         array(
             'action'    => 'wcusage_unlink_affiliate',
