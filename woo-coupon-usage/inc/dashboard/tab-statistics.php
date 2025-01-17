@@ -147,9 +147,11 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                     $wcusage_monthly_summary_data_orders = array();
                 }
                 // Delete old months that are not needed
-                foreach ( $wcusage_monthly_summary_data_orders as $key => $value ) {
-                    if ( $key != strtotime( $date1month ) && $key != strtotime( $date2month ) && $key != strtotime( $date3month ) ) {
-                        $wcusage_monthly_summary_data_orders[strtotime( $key )] = "";
+                if ( is_array( $wcusage_monthly_summary_data_orders ) && count( $wcusage_monthly_summary_data_orders ) > 12 ) {
+                    foreach ( $wcusage_monthly_summary_data_orders as $key => $value ) {
+                        if ( $key != strtotime( $date1month ) && $key != strtotime( $date2month ) && $key != strtotime( $date3month ) ) {
+                            $wcusage_monthly_summary_data_orders[strtotime( $key )] = "";
+                        }
                     }
                 }
                 // This Month

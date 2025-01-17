@@ -88,6 +88,11 @@ if(wcusage_get_setting_value('wcusage_field_email_order_status', 'wc-completed')
 if ( ! function_exists( 'wcusage_admin_order_email' ) ) {
     function wcusage_admin_order_email( $order, $sent_to_admin, $plain_text, $email ) {
 
+		$wcusage_field_new_order_info = wcusage_get_setting_value('wcusage_field_new_order_info', '1');
+		if(!$wcusage_field_new_order_info) {
+			return;
+		}
+
         if ( $email->id === 'new_order' && $sent_to_admin ) {
 
             $order_id = $order->get_id();
@@ -102,11 +107,11 @@ if ( ! function_exists( 'wcusage_admin_order_email' ) ) {
                 $user_email = $user_info->user_email;
 
                 // Affiliate Information Table
-                echo '<h2>' . esc_html__( 'Affiliate Information', 'wcusage' ) . '</h2>';
+                echo '<h2>' . esc_html__( 'Affiliate Information', 'woo-coupon-usage' ) . '</h2>';
                 echo '<table style="width: 100%; border-collapse: collapse; border: 1px solid #e5e5e5;" cellspacing="0" cellpadding="6" border="1">';
                 echo '<tbody>';
                 echo '<tr>';
-                echo '<th style="text-align: left; padding: 12px; background-color: #f7f7f7;">' . esc_html__( 'Affiliate', 'wcusage' ) . '</th>';
+                echo '<th style="text-align: left; padding: 12px; background-color: #f7f7f7;">' . esc_html__( 'Affiliate', 'woo-coupon-usage' ) . '</th>';
                 echo '<td style="padding: 12px;">' . esc_html( $user_login ) . '</td>';
                 echo '</tr>';
 
@@ -132,9 +137,9 @@ if ( ! function_exists( 'wcusage_admin_order_email' ) ) {
 
 						$dashboard_link = $coupon_info[4];
 
-						echo '<th style="text-align: left; padding: 12px; background-color: #f7f7f7;">' . esc_html__( 'Coupon', 'wcusage' ) . '</th>';
+						echo '<th style="text-align: left; padding: 12px; background-color: #f7f7f7;">' . esc_html__( 'Coupon', 'woo-coupon-usage' ) . '</th>';
 
-						echo '<td style="padding: 12px;">' . esc_html( strtoupper($coupon_name) ) . ' (<a href="' . esc_url( $dashboard_link ) . '" target="_blank">' . esc_html__( 'View Dashboard', 'wcusage' ) . '</a>)</td>';
+						echo '<td style="padding: 12px;">' . esc_html( strtoupper($coupon_name) ) . ' (<a href="' . esc_url( $dashboard_link ) . '" target="_blank">' . esc_html__( 'View Dashboard', 'woo-coupon-usage' ) . '</a>)</td>';
 
 						echo '</tr>';
 
@@ -143,7 +148,7 @@ if ( ! function_exists( 'wcusage_admin_order_email' ) ) {
                 }
 
 				echo '<tr>';
-                echo '<th style="text-align: left; padding: 12px; background-color: #f7f7f7;">' . esc_html__( 'Commission', 'wcusage' ) . '</th>';
+                echo '<th style="text-align: left; padding: 12px; background-color: #f7f7f7;">' . esc_html__( 'Commission', 'woo-coupon-usage' ) . '</th>';
                 echo '<td style="padding: 12px;">' . wp_kses_post( wcusage_format_price( $commission ) ) . '</td>';
                 echo '</tr>';
 

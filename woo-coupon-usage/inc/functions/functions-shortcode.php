@@ -258,6 +258,13 @@ function wcusage_couponusage(  $atts  ) {
                                 update_post_meta( $postid, 'wcu_last_refreshed', '' );
                                 $force_refresh_stats = 1;
                             }
+                            // Force refresh stats if coupon usage is more than 0, but stats are
+                            if ( isset( $the_coupon_usage ) && $the_coupon_usage > 0 ) {
+                                $wcu_alltime_stats = get_post_meta( $postid, 'wcu_alltime_stats', true );
+                                if ( !$wcu_alltime_stats || empty( $wcu_alltime_stats['total_count'] || $wcu_alltime_stats['total_count'] == 0 ) ) {
+                                    $force_refresh_stats = 1;
+                                }
+                            }
                             // Check if force refresh not done
                             $wcu_last_refreshed = get_post_meta( $postid, 'wcu_last_refreshed', true );
                             if ( !$wcu_last_refreshed ) {

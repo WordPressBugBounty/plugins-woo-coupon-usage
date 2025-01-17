@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Coupon Affiliates for WooCommerce\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-10-27 23:48+0000\n"
-"PO-Revision-Date: 2024-12-18 15:26+0000\n"
+"PO-Revision-Date: 2025-01-17 13:04+0000\n"
 "Last-Translator: Elliot Sowersby\n"
 "Language-Team: Chinese (China)\n"
 "Language: zh_CN\n"
@@ -31,7 +31,7 @@ msgid ""
 "information on all the plugins features."
 msgstr " 您还可以查看插件文档，了解有关所有 <a href=\"%s\">插件</a> 功能的更多信息。"
 
-#: inc/admin/class-coupons-table.php:341
+#: inc/admin/class-coupons-table.php:363
 #, fuzzy
 msgid "\" deleted successfully."
 msgstr "“删除成功。"
@@ -688,7 +688,7 @@ msgid ""
 "the same as a referral URL."
 msgstr "能够将着陆页链接到附属优惠券，然后该优惠券将与转介 URL 工作相同。"
 
-#: inc/registration/class-registrations-list-table.php:190
+#: inc/registration/class-registrations-list-table.php:189
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:93
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:94
 #, fuzzy
@@ -702,7 +702,7 @@ msgid ""
 "registration form."
 msgstr "接受和拒绝通过联盟注册表提交的联盟注册。"
 
-#: inc/registration/class-registrations-list-table.php:189
+#: inc/registration/class-registrations-list-table.php:188
 #, fuzzy
 msgid "Accept Application"
 msgstr "接受申请"
@@ -717,7 +717,7 @@ msgstr "接受或拒绝联盟会员的直接链接跟踪域名。"
 msgid "Acceptance Field"
 msgstr "验收字段"
 
-#: inc/registration/class-registrations-list-table.php:161
+#: inc/registration/class-registrations-list-table.php:160
 #: inc/registration/registration-admin.php:175
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:51
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:83
@@ -763,7 +763,7 @@ msgid "Account Verified"
 msgstr "已验证的帐户"
 
 #: inc/admin/class-clicks-list-table.php:183
-#: inc/registration/class-registrations-list-table.php:259
+#: inc/registration/class-registrations-list-table.php:258
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:174
 #, fuzzy
 msgid "Action"
@@ -821,6 +821,7 @@ msgid "Add Domain"
 msgstr "添加域"
 
 #: premium-files/pro-addons/campaigns/functions-campaigns.php:307
+#: premium-files/pro-addons/creatives/functions-creatives-post-type.php:21
 #: premium-files/pro-addons/groups/functions-affiliate-groups.php:18
 #: premium-files/pro-addons/groups/functions-edit-groups.php:293
 #: premium-files/pro-addons/groups/functions-edit-groups.php:364
@@ -860,6 +861,11 @@ msgstr "添加新奖金"
 #: inc/admin/settings/options-creatives__premium_only.php:62
 #, fuzzy
 msgid "ADD NEW CREATIVE"
+msgstr "添加新广告素材"
+
+#: premium-files/pro-addons/creatives/functions-creatives-post-type.php:20
+#, fuzzy
+msgid "Add New Creative"
 msgstr "添加新广告素材"
 
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:72
@@ -984,7 +990,7 @@ msgstr "管理员 - 所有“会员仪表板”链接的列表"
 #: inc/admin/settings/options-notifications.php:96
 #: inc/admin/settings/options-notifications.php:139
 #: inc/admin/settings/options-notifications.php:233
-#: inc/admin/settings/options-notifications.php:716
+#: inc/admin/settings/options-notifications.php:719
 #, fuzzy
 msgid "Administrator"
 msgstr "管理员"
@@ -1019,44 +1025,46 @@ msgstr "高级注册功能"
 msgid "Advanced: Enable multiple order statuses."
 msgstr "高级： 启用多个订单状态。"
 
-#: inc/admin/admin-orders-box.php:90 inc/admin/admin-orders-box.php:101
+#: inc/admin/admin-orders-box.php:88 inc/admin/admin-orders-box.php:99
 #, fuzzy
 msgid "Affiiliate Info not available."
 msgstr "未提供辅助信息。"
 
-#: inc/admin/admin-dashboard.php:523 inc/admin/admin-dashboard.php:585
-#: inc/admin/admin-dashboard.php:653 inc/functions/functions-wc-tab.php:17
+#: inc/admin/admin-dashboard.php:526 inc/admin/admin-dashboard.php:588
+#: inc/admin/admin-dashboard.php:656 inc/emails/new-order-email.php:114
+#: inc/functions/functions-wc-tab.php:17
+#: inc/admin/tools/admin-bulk-product-rates.php:58
 #, fuzzy
 msgid "Affiliate"
 msgstr "联盟"
 
-#: inc/admin/settings/options-notifications.php:677
+#: inc/admin/settings/options-notifications.php:680
 #, fuzzy
 msgid "Affiliate Account Login Details"
 msgstr "联盟帐户登录详细信息"
 
-#: inc/admin/settings/options-notifications.php:755
+#: inc/admin/settings/options-notifications.php:758
 #, fuzzy
 msgid "Affiliate Application Accepted"
 msgstr "已接受联盟申请"
 
-#: inc/admin/settings/options-notifications.php:769
+#: inc/admin/settings/options-notifications.php:772
 #, fuzzy
 msgid "Affiliate Application Accepted!"
 msgstr "接受联盟申请！"
 
-#: inc/admin/settings/options-notifications.php:812
+#: inc/admin/settings/options-notifications.php:815
 #, fuzzy
 msgid "Affiliate Application Declined"
 msgstr "联盟申请被拒绝"
 
-#: inc/admin/settings/options-notifications.php:798
+#: inc/admin/settings/options-notifications.php:801
 #, fuzzy
 msgid "Affiliate Application declined"
 msgstr "联盟申请被拒绝"
 
-#: inc/admin/settings/options-notifications.php:618
-#: inc/admin/settings/options-notifications.php:632
+#: inc/admin/settings/options-notifications.php:621
+#: inc/admin/settings/options-notifications.php:635
 #, fuzzy
 msgid "Affiliate Application Submitted"
 msgstr "已提交联盟申请"
@@ -1181,6 +1189,11 @@ msgid ""
 "you can then configure a variety of settings for that group."
 msgstr "关联组用于将关联分配给特定用户角色，因此您可以为该组配置各种设置。"
 
+#: inc/emails/new-order-email.php:110
+#, fuzzy
+msgid "Affiliate Information"
+msgstr "联盟信息"
+
 #: inc/admin/admin-page.php:412 inc/admin/settings/options-urls.php:545
 #, fuzzy
 msgid "Affiliate Landing Pages"
@@ -1223,7 +1236,7 @@ msgstr "联盟计划邀请"
 msgid "Affiliate Registration"
 msgstr "联盟注册"
 
-#: inc/admin/settings/options-notifications.php:607
+#: inc/admin/settings/options-notifications.php:610
 #, fuzzy
 msgid "Affiliate Registration Emails"
 msgstr "联盟注册电子邮件"
@@ -1258,7 +1271,7 @@ msgstr "联盟注册"
 msgid "Affiliate Reports Settings"
 msgstr "联盟报告设置"
 
-#: inc/admin/admin-dashboard.php:735
+#: inc/admin/admin-dashboard.php:738
 #, fuzzy
 msgid "Affiliate Statistics (Last 7 Days)"
 msgstr "联盟统计（最近7天）"
@@ -1274,8 +1287,8 @@ msgstr "更改这些状态时，联盟统计信息将自动刷新。"
 msgid "Affiliate store credit available"
 msgstr "联盟商店积分可用"
 
-#: inc/admin/admin-orders-list.php:272 inc/admin/class-coupons-table.php:45
-#: inc/admin/class-referrals-table.php:31
+#: inc/admin/admin-orders-box.php:209 inc/admin/admin-orders-list.php:272
+#: inc/admin/class-coupons-table.php:45 inc/admin/class-referrals-table.php:31
 #: inc/admin-reports/admin-reports.php:1280
 #: inc/admin-reports/admin-reports.php:1307
 #: inc/admin/settings/options-notifications.php:36
@@ -1283,14 +1296,19 @@ msgstr "联盟商店积分可用"
 #: inc/admin/settings/options-notifications.php:275
 #: inc/admin/settings/options-notifications.php:320
 #: inc/admin/settings/options-notifications.php:373
-#: inc/admin/settings/options-notifications.php:550
-#: inc/admin/settings/options-notifications.php:622
-#: inc/admin/settings/options-notifications.php:667
-#: inc/admin/settings/options-notifications.php:759
-#: inc/admin/settings/options-notifications.php:802
+#: inc/admin/settings/options-notifications.php:553
+#: inc/admin/settings/options-notifications.php:625
+#: inc/admin/settings/options-notifications.php:670
+#: inc/admin/settings/options-notifications.php:762
+#: inc/admin/settings/options-notifications.php:805
 #, fuzzy
 msgid "Affiliate User"
 msgstr "联盟用户"
+
+#: inc/admin/tools/admin-bulk-edit-coupons.php:93
+#, fuzzy
+msgid "Affiliate Username"
+msgstr "联盟用户名"
 
 #: inc/admin/admin-menu.php:110 inc/admin/admin-menu.php:111
 #, fuzzy
@@ -1330,7 +1348,7 @@ msgstr "关联公司可以选择付款方式，然后请求并跟踪未付佣金
 msgid "Align:"
 msgstr "對齊："
 
-#: inc/dashboard/tab-latest-orders.php:878
+#: inc/dashboard/tab-latest-orders.php:879
 #: inc/registration/registration-admin.php:173
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:81
 #: premium-files/pro-addons/payouts/payouts-admin.php:181
@@ -1378,7 +1396,7 @@ msgstr "所有用户"
 msgid "All-Time"
 msgstr "史无前例"
 
-#: inc/dashboard/tab-statistics.php:290
+#: inc/dashboard/tab-statistics.php:292
 #: inc/admin/settings/options-general.php:199
 #: inc/admin/settings/options-general.php:210
 #, fuzzy
@@ -1482,7 +1500,7 @@ msgstr "或者，您可以允许附属公司注册为附属公司。接受后，
 msgid "Always Enabled"
 msgstr "始终启用"
 
-#: inc/admin/admin-dashboard.php:656 premium-files/dashboard/tab-payout.php:214
+#: inc/admin/admin-dashboard.php:659 premium-files/dashboard/tab-payout.php:214
 #: premium-files/dashboard/tab-payout.php:242
 #: premium-files/dashboard/tab-payout.php:308
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:226
@@ -1587,7 +1605,7 @@ msgstr "运费是否不包括在统计和计算中？"
 msgid "Are you sure you want to delete the"
 msgstr "您确定要删除"
 
-#: inc/admin/class-coupons-table.php:265
+#: inc/admin/class-coupons-table.php:286
 #, fuzzy
 msgid "Are you sure you want to delete this coupon?"
 msgstr "您确定要删除此优惠券吗？"
@@ -1597,7 +1615,7 @@ msgstr "您确定要删除此优惠券吗？"
 msgid "Are you sure you want to delete this role?"
 msgstr "是否确实要删除此角色？"
 
-#: inc/admin/admin-orders-box.php:144
+#: inc/admin/admin-orders-box.php:142
 #, fuzzy
 msgid ""
 "Are you sure you want to refresh the affiliate stats for this order? This "
@@ -1652,6 +1670,12 @@ msgid ""
 "Assign affiliates to groups and then configure a variety of settings for "
 "that whole group."
 msgstr "将 Affiliates 分配给组，然后为整个组配置各种设置。"
+
+#: premium-files/pro-addons/landing-pages/meta-landing-pages.php:51
+#, fuzzy
+msgid ""
+"Assign this landing page to an affiliate coupon. Enter the exact coupon code."
+msgstr "将此登录页面分配给联盟优惠券。输入确切的优惠券代码。"
 
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:380
 #, fuzzy
@@ -1776,6 +1800,11 @@ msgid ""
 "Automatically submit \"payout requests\" for your affiliates, every month, "
 "week or day, if they meet certain criteria."
 msgstr "每月、每周或每天自动为您的关联公司提交\"付款请求\"，如果它们符合某些标准。"
+
+#: premium-files/pro-addons/landing-pages/meta-landing-pages.php:85
+#, fuzzy
+msgid "Available merge tags:"
+msgstr "可用的合并标签："
 
 #: inc/admin/settings/options-creatives__premium_only.php:29
 #: inc/admin/settings/options-invoices__premium_only.php:13
@@ -1938,13 +1967,20 @@ msgstr "批量将会员优惠券分配给订单。输入订单 ID 和相应的�
 msgid "Bulk assign per-product commission rates, on a per-affiliate basis."
 msgstr "基于每个会员批量分配每个产品的佣金率。"
 
+#: inc/admin/tools/admin-bulk-product-rates.php:48
+#, fuzzy
+msgid ""
+"Bulk assign per-product commission rates, on a per-affiliate basis. Any "
+"existing rates will also be updated."
+msgstr "按联盟成员批量分配每个产品的佣金率。任何现有费率也将更新。"
+
 #: inc/admin/admin-tools.php:45 inc/admin/settings/options-help.php:199
 #: inc/admin/tools/admin-bulk-assign-orders.php:35
 #, fuzzy
 msgid "Bulk Assign: Coupons to Orders"
 msgstr "批量分配：订单优惠券"
 
-#: inc/admin/admin-tools.php:64
+#: inc/admin/admin-tools.php:64 inc/admin/tools/admin-bulk-product-rates.php:46
 #, fuzzy
 msgid "Bulk Assign: Per-Affiliate Product Rates"
 msgstr "批量分配：每个关联产品费率"
@@ -1983,11 +2019,13 @@ msgid "Bulk edit, import, or export the per-product commission settings."
 msgstr "批量编辑、导入或导出每个产品的佣金设置。"
 
 #: inc/admin/admin-tools.php:39 inc/admin/settings/options-help.php:197
+#: inc/admin/tools/admin-bulk-edit-coupons.php:77
 #, fuzzy
 msgid "Bulk Edit: Coupon Settings"
 msgstr "批量编辑：优惠券设置"
 
 #: inc/admin/admin-tools.php:57 inc/admin/settings/options-help.php:198
+#: inc/admin/tools/admin-bulk-edit-products.php:52
 #, fuzzy
 msgid "Bulk Edit: Product Settings"
 msgstr "批量编辑：产品设置"
@@ -2025,7 +2063,7 @@ msgstr "到该日期，应在关联仪表板上排序订单？"
 msgid "Calculating statistics"
 msgstr "计算统计数据"
 
-#: inc/dashboard/tab-statistics.php:683
+#: inc/dashboard/tab-statistics.php:685
 #, fuzzy
 msgid ""
 "Calculating statistics for all referrals. Since this is your first visit, it "
@@ -2038,7 +2076,7 @@ msgid "Calculation Settings"
 msgstr "计算设置"
 
 #: inc/admin/admin-url-clicks.php:92 inc/functions/functions-url-clicks.php:231
-#: inc/functions/functions-urls.php:713
+#: inc/functions/functions-urls.php:716
 #: premium-files/pro-addons/direct-link/functions-direct-link.php:417
 #: premium-files/pro-addons/direct-link/functions-direct-link.php:434
 #, fuzzy
@@ -2273,14 +2311,14 @@ msgstr "颜色代码："
 msgid "Color:"
 msgstr "颜色："
 
-#: inc/admin/admin-orders-box.php:205 inc/admin/admin-orders-list.php:157
+#: inc/admin/admin-orders-box.php:212 inc/admin/admin-orders-list.php:157
 #: inc/admin-reports/admin-reports.php:152
 #: inc/admin-reports/admin-reports.php:693
 #: inc/admin-reports/admin-reports.php:1289
 #: inc/admin-reports/admin-reports.php:1353
 #: inc/dashboard/tab-latest-orders.php:223
-#: inc/dashboard/tab-latest-orders.php:291 inc/dashboard/tab-statistics.php:268
-#: inc/functions/functions-dashboard.php:563
+#: inc/dashboard/tab-latest-orders.php:291 inc/dashboard/tab-statistics.php:270
+#: inc/emails/new-order-email.php:151 inc/functions/functions-dashboard.php:563
 #: inc/functions/functions-user-coupons.php:935
 #: premium-files/dashboard/tab-monthly-summary.php:175
 #: premium-files/dashboard/tab-monthly-summary.php:202
@@ -2325,12 +2363,17 @@ msgstr "佣金收入"
 msgid "Commission Earnings Per Tier"
 msgstr "每层佣金收益"
 
+#: inc/admin/tools/admin-bulk-edit-products.php:68
+#, fuzzy
+msgid "Commission Fixed"
+msgstr "固定佣金"
+
 #: inc/admin/admin-orders-list.php:324
 #, fuzzy
 msgid "Commission granted to affiliate, ready for payout request."
 msgstr "佣金授予联盟会员，准备付款请求。"
 
-#: inc/dashboard/tab-statistics.php:51 inc/dashboard/tab-statistics.php:332
+#: inc/dashboard/tab-statistics.php:51 inc/dashboard/tab-statistics.php:334
 #: inc/admin/settings/options-general.php:118
 #, fuzzy
 msgid "Commission Graph"
@@ -2348,7 +2391,7 @@ msgstr "佣金尚未授予联盟会员。"
 
 #: inc/admin/admin-menu.php:180 inc/admin/admin-page.php:119
 #: inc/admin/admin-page.php:379 inc/dashboard/tab-statistics.php:53
-#: inc/dashboard/tab-statistics.php:405
+#: inc/dashboard/tab-statistics.php:407
 #: premium-files/dashboard/tab-payout.php:87
 #: inc/admin/settings/options-general.php:120
 #, fuzzy
@@ -2370,6 +2413,12 @@ msgstr "佣金支付设置指南（PRO）："
 #, fuzzy
 msgid "Commission Per Product"
 msgstr "每件产品的佣金"
+
+#: inc/admin/tools/admin-bulk-edit-coupons.php:95
+#: inc/admin/tools/admin-bulk-edit-products.php:67
+#, fuzzy
+msgid "Commission Percent"
+msgstr "佣金百分比"
 
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:308
 #, fuzzy
@@ -2403,7 +2452,7 @@ msgstr "用户从自己的MLA子附属公司获得的佣金。"
 msgid "Commission the user earned from their own referral link."
 msgstr "用户从自己的推荐链接中获得的佣金。"
 
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:119
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:126
 #, fuzzy
 msgid "Commission Tier"
 msgstr "佣金等级"
@@ -2414,6 +2463,16 @@ msgid ""
 "Commission will be earned for every renewal order in the subscription, at "
 "the rates you have set."
 msgstr "订阅中的每一个续订订单都将按您设定的费率赚取佣金。"
+
+#: inc/admin/tools/admin-bulk-edit-coupons.php:96
+#, fuzzy
+msgid "Commission £ - Order"
+msgstr "佣金 £ - 订单"
+
+#: inc/admin/tools/admin-bulk-edit-coupons.php:97
+#, fuzzy
+msgid "Commission £ - Product"
+msgstr "佣金 £ - 产品"
 
 #: inc/admin/settings/options-invoices__premium_only.php:81
 #: premium-files/pro-addons/payouts/statements/functions-statements.php:65
@@ -2431,7 +2490,7 @@ msgstr "与另一个日期范围进行比较"
 msgid "Comparing with date period"
 msgstr "与日期期间相比"
 
-#: inc/admin/settings/options-notifications.php:566
+#: inc/admin/settings/options-notifications.php:569
 #, fuzzy
 msgid "Completed"
 msgstr "完成"
@@ -2446,7 +2505,7 @@ msgstr "完成日期"
 msgid "Completed Payments"
 msgstr "已完成付款"
 
-#: inc/dashboard/tab-statistics.php:421
+#: inc/dashboard/tab-statistics.php:423
 #, fuzzy
 msgid "Completed Payments:"
 msgstr "已完成付款："
@@ -2486,7 +2545,7 @@ msgstr "继续进入“设置”页面"
 #: inc/admin-reports/admin-reports.php:632
 #: inc/admin-reports/admin-reports.php:1390
 #: inc/admin-reports/admin-reports.php:1421
-#: inc/functions/functions-urls.php:728
+#: inc/functions/functions-urls.php:731
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:166
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:369
 #: premium-files/pro-addons/pdf-reports/template.php:207
@@ -2494,7 +2553,7 @@ msgstr "继续进入“设置”页面"
 msgid "Conversion Rate"
 msgstr "转换率"
 
-#: inc/admin/admin-dashboard.php:459 inc/admin/admin-url-clicks.php:96
+#: inc/admin/admin-dashboard.php:462 inc/admin/admin-url-clicks.php:96
 #: inc/admin/admin-url-clicks.php:97 inc/admin/class-clicks-list-table.php:182
 #: inc/functions/functions-url-clicks.php:245
 #, fuzzy
@@ -2523,7 +2582,7 @@ msgstr "Cookie 设置"
 
 #: inc/dashboard/tab-referral-url.php:83
 #: premium-files/dashboard/tab-product-rates.php:178
-#: premium-files/pro-addons/landing-pages/functions-landing-pages.php:80
+#: premium-files/pro-addons/landing-pages/functions-landing-pages.php:98
 #: premium-files/pro-addons/multi-level/functions-mla-invite.php:159
 #, fuzzy
 msgid "Copy"
@@ -2540,7 +2599,7 @@ msgstr "复制代码"
 msgid "Copy Dashboard Link"
 msgstr "复制仪表板链接"
 
-#: inc/admin/admin-affiliate-users.php:204
+#: inc/admin/admin-affiliate-users.php:208
 #: inc/admin/class-coupons-table.php:255
 #, fuzzy
 msgid "Copy Link"
@@ -2552,18 +2611,19 @@ msgstr "复制链接"
 msgid "Country"
 msgstr "国家"
 
-#: inc/admin/admin-dashboard.php:457 inc/admin/admin-dashboard.php:524
-#: inc/admin/admin-dashboard.php:587 inc/admin/admin-dashboard.php:655
+#: inc/admin/admin-dashboard.php:460 inc/admin/admin-dashboard.php:527
+#: inc/admin/admin-dashboard.php:590 inc/admin/admin-dashboard.php:658
 #: inc/dashboard/tab-latest-orders.php:188
-#: inc/dashboard/tab-latest-orders.php:268
-#: inc/registration/class-registrations-list-table.php:188
-#: inc/registration/class-registrations-list-table.php:193
-#: inc/registration/class-registrations-list-table.php:208
-#: inc/registration/class-registrations-list-table.php:254
+#: inc/dashboard/tab-latest-orders.php:268 inc/emails/new-order-email.php:140
+#: inc/registration/class-registrations-list-table.php:187
+#: inc/registration/class-registrations-list-table.php:192
+#: inc/registration/class-registrations-list-table.php:207
+#: inc/registration/class-registrations-list-table.php:253
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:72
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:92
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:114
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:121
+#: premium-files/pro-addons/payouts/class-payoutcreate-list-table.php:12
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:427
 #, fuzzy
 msgid "Coupon"
@@ -2579,6 +2639,12 @@ msgstr "优惠券 / 附属公司"
 msgid "Coupon Affiliate - Bonuses"
 msgstr "优惠券联盟 - 奖金"
 
+#. Unique ID
+#: premium-files/pro-addons/landing-pages/meta-landing-pages.php:18
+#, fuzzy
+msgid "Coupon Affiliate Landing Pages"
+msgstr "优惠券联盟登陆页面"
+
 #: inc/admin/class-coupon-users-table.php:386
 #, fuzzy
 msgid "Coupon Affiliate Users"
@@ -2589,10 +2655,51 @@ msgstr "优惠券会员用户"
 msgid "Coupon Affiliates"
 msgstr "优惠券附属公司"
 
-#: inc/admin/admin-affiliate-users.php:302
+#: inc/admin/admin-affiliate-users.php:306
+#: premium-files/pro-addons/product-settings/products-coupons.php:9
 #, fuzzy
 msgid "Coupon Affiliates & Commission"
 msgstr "优惠券附属公司 + 佣金"
+
+#: premium-files/functions-premium.php:23
+#, fuzzy
+msgid "Coupon Affiliates - Affiliate Groups"
+msgstr "优惠券联盟 - 联盟组"
+
+#: premium-files/functions-premium.php:310
+#, fuzzy
+msgid "Coupon Affiliates - Bank Transfer Settings"
+msgstr "优惠券联盟 - 银行转账设置"
+
+#: premium-files/functions-premium.php:398
+#, fuzzy
+msgid "Coupon Affiliates - Lifetime Affiliate Settings"
+msgstr "优惠券联盟 - 终身联盟设置"
+
+#: premium-files/functions-premium.php:85
+#, fuzzy
+msgid "Coupon Affiliates - MLA Commission"
+msgstr "优惠券附属公司 - MLA 佣金"
+
+#: premium-files/functions-premium.php:66
+#, fuzzy
+msgid "Coupon Affiliates - MLA Dashboard"
+msgstr "优惠券附属公司 - MLA 仪表板"
+
+#: premium-files/functions-premium.php:119
+#, fuzzy
+msgid "Coupon Affiliates - MLA Parent Users"
+msgstr "优惠券附属公司 - MLA 家长用户"
+
+#: premium-files/functions-premium.php:203
+#, fuzzy
+msgid "Coupon Affiliates - Payment Settings"
+msgstr "优惠券联盟 - 支付设置"
+
+#: premium-files/functions-premium.php:379
+#, fuzzy
+msgid "Coupon Affiliates - Store Credit"
+msgstr "优惠券联盟 - 商店积分"
 
 #: inc/admin/settings/admin-setup.php:376
 #, fuzzy, php-format
@@ -2703,11 +2810,17 @@ msgstr "优惠券格式"
 
 #: inc/admin-reports/admin-reports.php:1279
 #: inc/admin-reports/admin-reports.php:1300
+#: inc/admin/tools/admin-bulk-edit-coupons.php:89
 #, fuzzy
 msgid "Coupon ID"
 msgstr "优惠券 ID"
 
-#: inc/dashboard/tab-statistics.php:49 inc/dashboard/tab-statistics.php:210
+#: premium-files/pro-addons/pdf-reports/functions-reports-post-type.php:78
+#, fuzzy
+msgid "Coupon ID:"
+msgstr "优惠券 ID："
+
+#: inc/dashboard/tab-statistics.php:49 inc/dashboard/tab-statistics.php:212
 #: inc/admin/settings/options-general.php:116
 #, fuzzy
 msgid "Coupon Info"
@@ -2717,6 +2830,11 @@ msgstr "优惠券信息"
 #, fuzzy
 msgid "coupon list page"
 msgstr "优惠券列表页面"
+
+#: inc/admin/tools/admin-bulk-edit-coupons.php:90
+#, fuzzy
+msgid "Coupon Name"
+msgstr "优惠券名称"
 
 #: inc/admin/settings/options-general.php:641
 #, fuzzy
@@ -2739,9 +2857,10 @@ msgstr "优惠券与用户取消链接："
 msgid "Coupon Usage Restrictions"
 msgstr "优惠券使用限制"
 
-#: inc/admin/admin-menu.php:82 inc/admin/class-coupons-table.php:361
+#: inc/admin/admin-menu.php:82 inc/admin/class-coupons-table.php:383
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:338
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:377
+#: premium-files/pro-addons/payouts/class-payoutcreate-list-table.php:13
 #, fuzzy
 msgid "Coupons"
 msgstr "优惠 券"
@@ -2831,7 +2950,7 @@ msgid ""
 "affiliate dashboard."
 msgstr "创建自己的选项卡，在关联仪表板上显示自定义部分和内容。"
 
-#: inc/admin/admin-dashboard.php:525
+#: inc/admin/admin-dashboard.php:528
 #, fuzzy
 msgid "Created"
 msgstr "创建"
@@ -2920,6 +3039,13 @@ msgstr "本周"
 msgid "Current Year"
 msgstr "本年度"
 
+#: inc/admin/tools/admin-bulk-edit-products.php:54
+#, fuzzy
+msgid ""
+"Currently \"Per-Affiliate Product Commission Rates\" can only be edited by "
+"viewing/editing the individual product."
+msgstr "目前，“每个联盟产品的佣金率”只能通过查看/编辑单个产品来编辑。"
+
 #: inc/admin/settings/options-registrations.php:403
 #, fuzzy
 msgid "Currently only reCAPTCHA \"v2\" is supported."
@@ -2984,7 +3110,7 @@ msgstr "定制 #1"
 msgid "Custom #2"
 msgstr "定制 #2"
 
-#: inc/admin/admin-orders-box.php:162
+#: inc/admin/admin-orders-box.php:160
 #, fuzzy
 msgid "Custom / URL Referral"
 msgstr "自定义/网址推荐"
@@ -3076,11 +3202,13 @@ msgstr "自定义段落文本"
 msgid "Custom Payment Method"
 msgstr "自定义支付方法"
 
+#: premium-files/functions-premium.php:253
 #: inc/admin/settings/options-payouts.php:1059
 #, fuzzy
 msgid "Custom Payment Method #1"
 msgstr "自定义付款方式#1"
 
+#: premium-files/functions-premium.php:259
 #: inc/admin/settings/options-payouts.php:1060
 #, fuzzy
 msgid "Custom Payment Method #2"
@@ -3196,8 +3324,8 @@ msgstr "挡泥板"
 msgid "Dashboard Link"
 msgstr "仪表板链接"
 
-#: inc/admin/admin-dashboard.php:456 inc/admin/admin-dashboard.php:586
-#: inc/admin/admin-dashboard.php:654 inc/admin/class-activity-list-table.php:79
+#: inc/admin/admin-dashboard.php:459 inc/admin/admin-dashboard.php:589
+#: inc/admin/admin-dashboard.php:657 inc/admin/class-activity-list-table.php:79
 #: inc/dashboard/tab-latest-orders.php:193
 #: inc/dashboard/tab-latest-orders.php:272
 #: inc/functions/functions-url-clicks.php:236
@@ -3248,19 +3376,19 @@ msgstr "调试"
 msgid "debug settings tab"
 msgstr "调试设置选项卡"
 
-#: inc/registration/class-registrations-list-table.php:195
+#: inc/registration/class-registrations-list-table.php:194
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:115
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:116
 #, fuzzy
 msgid "Decline"
 msgstr "下降"
 
-#: inc/registration/class-registrations-list-table.php:194
+#: inc/registration/class-registrations-list-table.php:193
 #, fuzzy
 msgid "Decline Application"
 msgstr "拒绝应用"
 
-#: inc/registration/class-registrations-list-table.php:167
+#: inc/registration/class-registrations-list-table.php:166
 #: inc/registration/registration-admin.php:179
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:57
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:87
@@ -3299,7 +3427,7 @@ msgstr "显示的\"最新订单\"的默认金额："
 msgid "Default number of months to show"
 msgstr "要显示的默认月数"
 
-#: inc/admin/admin-affiliate-users.php:200
+#: inc/admin/admin-affiliate-users.php:204
 #, fuzzy
 msgid "Default Referral Link"
 msgstr "默认推荐链接"
@@ -3325,8 +3453,8 @@ msgid "Delayed Commission (Payouts)"
 msgstr "延迟佣金（付款）"
 
 #: inc/admin/class-clicks-list-table.php:133
-#: inc/admin/class-coupons-table.php:266
-#: inc/registration/class-registrations-list-table.php:211
+#: inc/admin/class-coupons-table.php:287
+#: inc/registration/class-registrations-list-table.php:210
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:75
 #: premium-files/pro-addons/groups/class-affiliate-groups-list-table.php:56
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:368
@@ -3354,7 +3482,7 @@ msgstr "删除此域。"
 msgid "Delete this payout."
 msgstr "删除此付款。"
 
-#: inc/registration/class-registrations-list-table.php:209
+#: inc/registration/class-registrations-list-table.php:208
 #, fuzzy
 msgid "Delete this registration."
 msgstr "删除此注册。"
@@ -3467,14 +3595,24 @@ msgid ""
 msgstr "禁用这些将阻止插件将 Cookie 存储在访问者浏览器中。"
 
 #: inc/dashboard/tab-latest-orders.php:213
-#: inc/dashboard/tab-latest-orders.php:285 inc/dashboard/tab-statistics.php:228
-#: inc/dashboard/tab-statistics.php:230 inc/dashboard/tab-statistics.php:233
-#: inc/dashboard/tab-statistics.php:235 inc/dashboard/tab-statistics.php:237
-#: inc/dashboard/tab-statistics.php:244 inc/dashboard/tab-statistics.php:246
+#: inc/dashboard/tab-latest-orders.php:285 inc/dashboard/tab-statistics.php:230
+#: inc/dashboard/tab-statistics.php:232 inc/dashboard/tab-statistics.php:235
+#: inc/dashboard/tab-statistics.php:237 inc/dashboard/tab-statistics.php:239
+#: inc/dashboard/tab-statistics.php:246 inc/dashboard/tab-statistics.php:248
 #: inc/functions/functions-user-coupons.php:918
 #, fuzzy
 msgid "Discount"
 msgstr "折扣"
+
+#: inc/admin/tools/admin-bulk-edit-coupons.php:92
+#, fuzzy
+msgid "Discount Amount"
+msgstr "折扣金额"
+
+#: inc/admin/tools/admin-bulk-edit-coupons.php:91
+#, fuzzy
+msgid "Discount Type"
+msgstr "折扣类型"
 
 #: inc/admin-reports/admin-reports.php:690
 #: inc/admin-reports/admin-reports.php:1285
@@ -3648,7 +3786,7 @@ msgid ""
 msgstr "做！下次加载联盟仪表板时，此优惠券的 <a href=\"%s\">联盟</a> 统计信息将刷新。"
 
 #: premium-files/dashboard/tab-creatives.php:461
-#: premium-files/pro-addons/qr-codes/functions-qr-codes.php:114
+#: premium-files/pro-addons/qr-codes/functions-qr-codes.php:118
 #, fuzzy
 msgid "Download"
 msgstr "下载"
@@ -3693,6 +3831,11 @@ msgstr "动态广告素材"
 msgid "Dynamic Image Customisation"
 msgstr "动态图像定制"
 
+#: premium-files/pro-addons/landing-pages/meta-landing-pages.php:81
+#, fuzzy
+msgid "Dynamic Landing Page?"
+msgstr "动态登陆页面？"
+
 #. Description of the plugin
 #, fuzzy
 msgid ""
@@ -3700,7 +3843,7 @@ msgid ""
 "affiliate commission, coupon usage statistics, referral URLs, and more."
 msgstr "轻松创建基于优惠券的 Woo 商业联盟计划。跟踪附属佣金、优惠券使用统计、转介网网等。"
 
-#: inc/admin/class-coupons-table.php:260
+#: inc/admin/class-coupons-table.php:276
 #, fuzzy
 msgid "Edit"
 msgstr "编辑"
@@ -3725,20 +3868,30 @@ msgstr "编辑关联组"
 msgid "Edit Bonus"
 msgstr "编辑奖金"
 
-#: inc/admin/admin-affiliate-users.php:210
+#: inc/admin/admin-affiliate-users.php:214
 #: inc/admin/class-clicks-list-table.php:42
 #: inc/admin-reports/admin-reports.php:1273
-#: inc/registration/class-registrations-list-table.php:82
+#: inc/registration/class-registrations-list-table.php:81
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:44
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:157
 #, fuzzy
 msgid "Edit Coupon"
 msgstr "编辑优惠券"
 
+#: premium-files/pro-addons/creatives/functions-creatives-post-type.php:22
+#, fuzzy
+msgid "Edit Creative"
+msgstr "编辑广告素材"
+
 #: premium-files/pro-addons/groups/class-affiliate-groups-list-table.php:53
 #: premium-files/pro-addons/groups/class-affiliate-groups-list-table.php:59
 #, fuzzy
 msgid "Edit Group"
+msgstr "编辑组"
+
+#: premium-files/functions-premium.php:25
+#, fuzzy
+msgid "Edit Groups"
 msgstr "编辑组"
 
 #: inc/admin/admin-page.php:385
@@ -3747,7 +3900,7 @@ msgid "Edit Unpaid Commission"
 msgstr "编辑未付佣金"
 
 #: inc/dashboard/tab-settings.php:211
-#: inc/registration/class-registrations-list-table.php:71
+#: inc/registration/class-registrations-list-table.php:70
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:148
 #: premium-files/pro-addons/payouts/payouts-settings.php:609
 #, fuzzy
@@ -3759,7 +3912,7 @@ msgstr "编辑用户"
 msgid "Elliot Sowersby, RelyWP"
 msgstr "艾略特·索尔斯比，雷利WP"
 
-#: inc/registration/class-registrations-list-table.php:129
+#: inc/registration/class-registrations-list-table.php:128
 #: premium-files/pro-addons/multi-level/functions-mla-invite.php:232
 #, fuzzy
 msgid "Email"
@@ -3786,12 +3939,12 @@ msgstr "接收管理员通知的电子邮件地址："
 #: inc/admin/settings/options-notifications.php:375
 #: inc/admin/settings/options-notifications.php:417
 #: inc/admin/settings/options-notifications.php:458
-#: inc/admin/settings/options-notifications.php:552
-#: inc/admin/settings/options-notifications.php:624
-#: inc/admin/settings/options-notifications.php:669
-#: inc/admin/settings/options-notifications.php:718
-#: inc/admin/settings/options-notifications.php:761
-#: inc/admin/settings/options-notifications.php:804
+#: inc/admin/settings/options-notifications.php:555
+#: inc/admin/settings/options-notifications.php:627
+#: inc/admin/settings/options-notifications.php:672
+#: inc/admin/settings/options-notifications.php:721
+#: inc/admin/settings/options-notifications.php:764
+#: inc/admin/settings/options-notifications.php:807
 #, fuzzy
 msgid "Email Customizer"
 msgstr "电子邮件定制器"
@@ -3816,12 +3969,12 @@ msgstr "电子邮件消息："
 #: inc/admin/settings/options-notifications.php:393
 #: inc/admin/settings/options-notifications.php:434
 #: inc/admin/settings/options-notifications.php:475
-#: inc/admin/settings/options-notifications.php:580
-#: inc/admin/settings/options-notifications.php:645
-#: inc/admin/settings/options-notifications.php:694
-#: inc/admin/settings/options-notifications.php:737
-#: inc/admin/settings/options-notifications.php:780
-#: inc/admin/settings/options-notifications.php:821
+#: inc/admin/settings/options-notifications.php:583
+#: inc/admin/settings/options-notifications.php:648
+#: inc/admin/settings/options-notifications.php:697
+#: inc/admin/settings/options-notifications.php:740
+#: inc/admin/settings/options-notifications.php:783
+#: inc/admin/settings/options-notifications.php:824
 #, fuzzy
 msgid "Email Notification Message"
 msgstr "电子邮件通知消息"
@@ -3841,12 +3994,12 @@ msgstr "电子邮件通知设置"
 #: inc/admin/settings/options-notifications.php:383
 #: inc/admin/settings/options-notifications.php:425
 #: inc/admin/settings/options-notifications.php:466
-#: inc/admin/settings/options-notifications.php:574
-#: inc/admin/settings/options-notifications.php:632
-#: inc/admin/settings/options-notifications.php:677
-#: inc/admin/settings/options-notifications.php:726
-#: inc/admin/settings/options-notifications.php:769
-#: inc/admin/settings/options-notifications.php:812
+#: inc/admin/settings/options-notifications.php:577
+#: inc/admin/settings/options-notifications.php:635
+#: inc/admin/settings/options-notifications.php:680
+#: inc/admin/settings/options-notifications.php:729
+#: inc/admin/settings/options-notifications.php:772
+#: inc/admin/settings/options-notifications.php:815
 #, fuzzy
 msgid "Email Notification Subject"
 msgstr "电子邮件通知主题"
@@ -3875,6 +4028,12 @@ msgstr "电子邮件主题："
 #, fuzzy
 msgid "Emails"
 msgstr "电子邮件"
+
+#: inc/admin/settings/options-notifications.php:530
+#, fuzzy
+msgid ""
+"Enable \"Affiliate Information\" section in the admin \"New Order\" email."
+msgstr "启用管理员“New Order”电子邮件中的“Affiliate Information”部分。"
 
 #: inc/admin/settings/options-urls.php:548
 #, fuzzy
@@ -4106,7 +4265,7 @@ msgstr "启用此功能将允许在没有 ID 的情况下使用唯一的优惠�
 
 #: inc/admin-reports/admin-reports.php:72
 #: inc/admin-reports/admin-reports.php:117
-#: inc/dashboard/tab-latest-orders.php:850
+#: inc/dashboard/tab-latest-orders.php:851
 #: premium-files/dashboard/tab-monthly-summary.php:582
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:255
 #, fuzzy
@@ -4297,7 +4456,7 @@ msgstr "从购物车中的商店信用额中排除/移除税费"
 msgid "Expiration Date:"
 msgstr "有效期："
 
-#: inc/dashboard/tab-latest-orders.php:915
+#: inc/dashboard/tab-latest-orders.php:916
 #: premium-files/dashboard/tab-monthly-summary.php:604
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:276
 #, fuzzy
@@ -4355,7 +4514,7 @@ msgid "Files"
 msgstr "文件"
 
 #: inc/admin/class-coupon-users-table.php:123
-#: inc/dashboard/tab-latest-orders.php:894
+#: inc/dashboard/tab-latest-orders.php:895
 #: premium-files/dashboard/tab-monthly-summary.php:584
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:255
 #, fuzzy
@@ -4397,6 +4556,11 @@ msgstr "首先，如果您还没有，请先创建一个新页面并添加简码
 msgid ""
 "Firstly, we need to create the main affiliate dashboard page on your website."
 msgstr "首先，我们需要在您的网站上创建主要的联盟仪表板页面。"
+
+#: inc/admin/tools/admin-bulk-product-rates.php:60
+#, fuzzy
+msgid "Fixed"
+msgstr "固定"
 
 #: inc/functions/functions-shortcode.php:265
 #, fuzzy
@@ -4569,7 +4733,7 @@ msgstr "欺诈"
 msgid "Fraud Prevention & Usage Restrictions"
 msgstr "欺诈预防和使用限制"
 
-#: inc/dashboard/tab-statistics.php:244
+#: inc/dashboard/tab-statistics.php:246
 #, fuzzy
 msgid "Free Shipping"
 msgstr "免费送货"
@@ -4605,7 +4769,7 @@ msgstr "从电子邮件地址："
 msgid "From Name:"
 msgstr "从名称："
 
-#: inc/registration/class-registrations-list-table.php:123
+#: inc/registration/class-registrations-list-table.php:122
 #, fuzzy
 msgid "Full Name"
 msgstr "全名"
@@ -4648,7 +4812,7 @@ msgid ""
 msgstr "一般来说，不应该有任何理由关闭这些，但它在这里只是万一，并调试。"
 
 #: inc/admin/settings/options-registrations.php:1053
-#: premium-files/pro-addons/qr-codes/functions-qr-codes.php:106
+#: premium-files/pro-addons/qr-codes/functions-qr-codes.php:110
 #, fuzzy
 msgid "Generate"
 msgstr "生成"
@@ -4740,7 +4904,7 @@ msgid ""
 "their payout method."
 msgstr "为联盟会员提供额外的佣金百分比，作为选择商店信用额作为其支付方式的奖金。"
 
-#: inc/admin/admin-orders-box.php:189
+#: inc/admin/admin-orders-box.php:187
 #, fuzzy
 msgid "Give unpaid commission to affiliate."
 msgstr "向会员提供未付佣金。"
@@ -4864,7 +5028,7 @@ msgid ""
 "affiliate dashboard for more details."
 msgstr "嗨{first_name}，恭喜你，<br/><br/>你刚刚获得了奖励！<br/><br/>查看您的会员仪表板以获取更多详细信息。"
 
-#: premium-files/pro-addons/qr-codes/functions-qr-codes.php:107
+#: premium-files/pro-addons/qr-codes/functions-qr-codes.php:111
 #, fuzzy
 msgid "Hide"
 msgstr "隐藏"
@@ -4907,7 +5071,7 @@ msgstr "水平边距："
 msgid "How are referral URLs generated?"
 msgstr "引荐 URL 是如何生成的？"
 
-#: inc/registration/class-registrations-list-table.php:139
+#: inc/registration/class-registrations-list-table.php:138
 #: inc/registration/registration-form.php:287
 #, fuzzy
 msgid "How did you hear about us?"
@@ -5047,7 +5211,7 @@ msgstr "如何在WooCommerce中跟踪优惠券使用情况？"
 msgid "How to use the Coupon Usage Tracker plugin?"
 msgstr "如何使用优惠券使用跟踪器插件？"
 
-#: inc/registration/class-registrations-list-table.php:135
+#: inc/registration/class-registrations-list-table.php:134
 #: inc/registration/registration-form.php:275
 #, fuzzy
 msgid "How will you promote us?"
@@ -5087,7 +5251,7 @@ msgstr "图标"
 #: inc/admin/class-coupon-users-table.php:24
 #: inc/admin/class-coupons-table.php:24 inc/dashboard/tab-latest-orders.php:183
 #: inc/dashboard/tab-latest-orders.php:265
-#: inc/registration/class-registrations-list-table.php:252
+#: inc/registration/class-registrations-list-table.php:251
 #: premium-files/dashboard/tab-payout.php:213
 #: premium-files/dashboard/tab-payout.php:241
 #: premium-files/dashboard/tab-payout.php:307
@@ -5425,7 +5589,7 @@ msgid ""
 "they register on their first page visit."
 msgstr "如果禁用此功能，则只有当推荐人在首次访问页面时注册时，它才能尝试跟踪推荐。"
 
-#: inc/dashboard/tab-statistics.php:692
+#: inc/dashboard/tab-statistics.php:694
 #: inc/functions/functions-all-time.php:488
 #, fuzzy
 msgid ""
@@ -5807,7 +5971,7 @@ msgstr "克拉维约（Klaviyo）"
 msgid "Landing Page"
 msgstr "着陆页"
 
-#: premium-files/pro-addons/landing-pages/functions-landing-pages.php:63
+#: premium-files/pro-addons/landing-pages/functions-landing-pages.php:74
 #, fuzzy
 msgid "Landing Pages"
 msgstr "着陆页"
@@ -5834,7 +5998,7 @@ msgstr "过去30天"
 msgid "Last 7 Days"
 msgstr "过去 7 天"
 
-#: inc/dashboard/tab-statistics.php:172
+#: inc/dashboard/tab-statistics.php:174
 #: inc/admin/settings/options-general.php:210
 #, fuzzy
 msgid "Last Month"
@@ -5860,13 +6024,13 @@ msgstr "最新消息和更新"
 msgid "Latest orders referred by your sub-affiliates"
 msgstr "您的子关联公司推荐的最新订单"
 
-#: inc/admin/admin-dashboard.php:759
+#: inc/admin/admin-dashboard.php:762
 #, fuzzy
 msgid "Latest Referral Visits"
 msgstr "最新推荐访问"
 
-#: inc/admin/admin-dashboard.php:750 inc/dashboard/tab-statistics.php:52
-#: inc/dashboard/tab-statistics.php:350
+#: inc/admin/admin-dashboard.php:753 inc/dashboard/tab-statistics.php:52
+#: inc/dashboard/tab-statistics.php:352
 #: inc/admin/settings/options-general.php:119
 #, fuzzy
 msgid "Latest Referrals"
@@ -5894,6 +6058,11 @@ msgstr "排行榜"
 #, fuzzy
 msgid "Learn More"
 msgstr "了解更多信息"
+
+#: premium-files/pro-addons/landing-pages/meta-landing-pages.php:105
+#, fuzzy
+msgid "Learn more about how dynamic landing pages works."
+msgstr "详细了解动态着陆页的工作原理。"
 
 #: inc/admin/settings/admin-setup.php:388
 #, fuzzy
@@ -5966,6 +6135,16 @@ msgstr "少"
 msgid "Lets get started..."
 msgstr "让我们开始吧..."
 
+#: premium-files/functions-premium.php:403
+#, fuzzy
+msgid "Lifetime Affiliate Referrer (Coupon Code)"
+msgstr "终身联盟推荐人（优惠券代码）"
+
+#: premium-files/functions-premium.php:411
+#, fuzzy
+msgid "Lifetime Affiliate: Expire Date"
+msgstr "终身会员：到期日期"
+
 #: inc/admin/admin-page.php:407 inc/admin/admin-pro-details.php:511
 #: inc/admin/settings/options-commission.php:100
 #, fuzzy
@@ -5977,7 +6156,7 @@ msgstr "终身委员会"
 msgid "Lifetime Commission Expiry (Days)"
 msgstr "终身佣金到期（天）"
 
-#: inc/admin/admin-orders-box.php:159
+#: inc/admin/admin-orders-box.php:157
 #, fuzzy
 msgid "Lifetime Referrer"
 msgstr "终身推荐人"
@@ -6043,8 +6222,8 @@ msgstr "用 ajax 单独加载每个页面。"
 msgid "Load tabs on affiliate dashboard as separate pages."
 msgstr "将联盟仪表板上的加载选项卡作为单独的页面。"
 
-#: inc/dashboard/tab-latest-orders.php:1046
-#: inc/dashboard/tab-referral-url.php:465 inc/dashboard/tab-statistics.php:688
+#: inc/dashboard/tab-latest-orders.php:1047
+#: inc/dashboard/tab-referral-url.php:465 inc/dashboard/tab-statistics.php:690
 #: premium-files/dashboard/tab-bonuses.php:152
 #: premium-files/dashboard/tab-monthly-summary.php:741
 #: premium-files/pro-addons/multi-level/functions-mla-orders.php:218
@@ -6213,7 +6392,7 @@ msgstr "一次显示的“最新订单”数量上限："
 msgid "Maximum commission per order:"
 msgstr "每笔订单的最高佣金："
 
-#: inc/dashboard/tab-latest-orders.php:702
+#: inc/dashboard/tab-latest-orders.php:703
 #, fuzzy
 msgid "Maximum orders per request reached"
 msgstr "每个请求达到的最大订单"
@@ -6246,6 +6425,16 @@ msgstr "方法"
 msgid "MLA"
 msgstr "断续器"
 
+#: premium-files/functions-premium.php:97
+#, fuzzy
+msgid "MLA - Pending Payments"
+msgstr "MLA - 待处理付款"
+
+#: premium-files/functions-premium.php:90
+#, fuzzy
+msgid "MLA - Unpaid Commission"
+msgstr "MLA - 未付佣金"
+
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:346
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:387
 #, fuzzy
@@ -6256,6 +6445,11 @@ msgstr "MLA委员会"
 #, fuzzy
 msgid "MLA Dashboard"
 msgstr "MLA 仪表板"
+
+#: premium-files/functions-premium.php:71
+#, fuzzy
+msgid "MLA Dashboard Access"
+msgstr "MLA 仪表板访问"
 
 #: premium-files/pro-addons/multi-level/functions-mla.php:244
 #, fuzzy
@@ -6336,7 +6530,7 @@ msgstr "每月"
 msgid "Monthly Summary"
 msgstr "每月摘要"
 
-#: inc/dashboard/tab-latest-orders.php:645
+#: inc/dashboard/tab-latest-orders.php:646
 #: premium-files/dashboard/tab-monthly-summary.php:424
 #, fuzzy
 msgid "MORE"
@@ -6451,13 +6645,13 @@ msgstr "切勿更新过去订单的已保存\"佣金\"值。"
 msgid "New \"Direct Link Tracking\" Domain"
 msgstr "新的\"直接链接跟踪\"域"
 
-#: inc/admin/settings/options-notifications.php:663
+#: inc/admin/settings/options-notifications.php:666
 #, fuzzy
 msgid "New Affiliate Account Created"
 msgstr "新联盟帐户已创建"
 
-#: inc/admin/settings/options-notifications.php:712
-#: inc/admin/settings/options-notifications.php:726
+#: inc/admin/settings/options-notifications.php:715
+#: inc/admin/settings/options-notifications.php:729
 #, fuzzy
 msgid "New Affiliate Application"
 msgstr "新的联盟应用程序"
@@ -6487,7 +6681,7 @@ msgstr "仅限新客户（首笔订单）"
 msgid "New Domain Request (Direct Link Tracking)"
 msgstr "新域请求（直接链接跟踪）"
 
-#: inc/admin/settings/options-notifications.php:545
+#: inc/admin/settings/options-notifications.php:548
 #, fuzzy
 msgid "New Order Referral"
 msgstr "新订单推荐"
@@ -6507,7 +6701,7 @@ msgstr "新的付款请求（批量计划）"
 msgid "New Payout Request: {coupon}"
 msgstr "新的支付请求： [优惠券]"
 
-#: inc/admin/settings/options-notifications.php:533
+#: inc/admin/settings/options-notifications.php:536
 #, fuzzy
 msgid "New Referral Emails"
 msgstr "新的推荐电子邮件"
@@ -6538,7 +6732,7 @@ msgstr "新订阅（父订单）"
 msgid "New User Role:"
 msgstr "新用户角色："
 
-#: inc/admin/admin-dashboard.php:767
+#: inc/admin/admin-dashboard.php:770
 #, fuzzy
 msgid "Newest Affiliate Coupons"
 msgstr "最新联盟优惠券"
@@ -6588,7 +6782,7 @@ msgstr "接下来，您需要在您的网站上创建联盟注册页面。"
 msgid "No"
 msgstr "不"
 
-#: inc/functions/functions-shortcode.php:488
+#: inc/functions/functions-shortcode.php:496
 #, fuzzy
 msgid "No affiliate dashboard found."
 msgstr "未找到联盟仪表板。"
@@ -6613,12 +6807,12 @@ msgstr "无活动"
 msgid "No clicks available."
 msgstr "没有可用的点击次数。"
 
-#: inc/functions/functions-shortcode.php:505
+#: inc/functions/functions-shortcode.php:513
 #, fuzzy
 msgid "No coupon ID has been selected."
 msgstr "未选择优惠券 ID。"
 
-#: inc/admin/admin-orders-box.php:85
+#: inc/admin/admin-orders-box.php:83
 #, fuzzy
 msgid "No coupons were used for this order."
 msgstr "此订单不使用优惠券。"
@@ -6633,17 +6827,17 @@ msgstr "此组没有可用的广告素材。"
 msgid "No Default"
 msgstr "无默认值"
 
-#: inc/dashboard/tab-statistics.php:246
+#: inc/dashboard/tab-statistics.php:248
 #, fuzzy
 msgid "No Discount"
 msgstr "无折扣"
 
-#: inc/admin/admin-dashboard.php:561
+#: inc/admin/admin-dashboard.php:564
 #, fuzzy
 msgid "No new affiliate coupons found."
 msgstr "未找到新的联盟优惠券。"
 
-#: inc/dashboard/tab-latest-orders.php:799
+#: inc/dashboard/tab-latest-orders.php:800
 #, fuzzy
 msgid "No orders found."
 msgstr "未找到订单。"
@@ -6658,22 +6852,22 @@ msgstr "目前没有支付方法。"
 msgid "No recent activity found."
 msgstr "未找到最近的活动。"
 
-#: inc/admin/admin-dashboard.php:489
+#: inc/admin/admin-dashboard.php:492
 #, fuzzy
 msgid "No recent clicks found."
 msgstr "未找到最近的点击次数。"
 
-#: inc/admin/admin-dashboard.php:695
+#: inc/admin/admin-dashboard.php:698
 #, fuzzy
 msgid "No recent payouts found."
 msgstr "未找到最近的付款。"
 
-#: inc/admin/admin-dashboard.php:432
+#: inc/admin/admin-dashboard.php:435
 #, fuzzy
 msgid "No recent referral orders found."
 msgstr "未找到最近的推荐订单。"
 
-#: inc/admin/admin-dashboard.php:625
+#: inc/admin/admin-dashboard.php:628
 #, fuzzy
 msgid "No recent registrations found."
 msgstr "未找到最近的注册。"
@@ -6879,7 +7073,7 @@ msgid ""
 "href=\"%s\" target=\"_blank\">affiliate registration form</a>."
 msgstr "您的用户还可以使用 <a href=\"%s\" target=\"_blank\">会员注册表</a>将自己注册为会员。"
 
-#: inc/dashboard/tab-statistics.php:691
+#: inc/dashboard/tab-statistics.php:693
 #: inc/functions/functions-all-time.php:487
 #, fuzzy
 msgid "Notice (admin only): Page constantly loading? Try refreshing the page."
@@ -7064,7 +7258,7 @@ msgstr "选项（每行一个）"
 msgid "or"
 msgstr "或"
 
-#: inc/dashboard/tab-statistics.php:691
+#: inc/dashboard/tab-statistics.php:693
 #: inc/functions/functions-all-time.php:487
 #, fuzzy
 #| msgid "Click here"
@@ -7103,7 +7297,7 @@ msgstr "订单状态"
 msgid "Order status for \"unpaid commission\" to be granted:"
 msgstr "授予\"未付佣金\"的订单状态："
 
-#: inc/admin/settings/options-notifications.php:563
+#: inc/admin/settings/options-notifications.php:566
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:344
 #, fuzzy
 msgid "Order Status:"
@@ -7156,7 +7350,7 @@ msgid "Other Features"
 msgstr "其他功能"
 
 #: inc/admin/admin-page.php:431
-#: inc/registration/class-registrations-list-table.php:257
+#: inc/registration/class-registrations-list-table.php:256
 #, fuzzy
 msgid "Other Information"
 msgstr "其他信息"
@@ -7370,6 +7564,12 @@ msgstr "支付金额"
 msgid "Payout ID"
 msgstr "支付 ID"
 
+#: premium-files/pro-addons/payouts/statements/functions-statements-post-type.php:83
+#, fuzzy
+msgid "Payout ID:"
+msgstr "收款 ID："
+
+#: premium-files/functions-premium.php:207
 #: premium-files/dashboard/tab-payout.php:99
 #: premium-files/pro-addons/payouts/payouts-settings.php:403
 #, fuzzy
@@ -7444,6 +7644,11 @@ msgstr "PayPal"
 msgid "PayPal Payouts"
 msgstr "PayPal支出"
 
+#: premium-files/functions-premium.php:265
+#, fuzzy
+msgid "PayPal Payouts Email"
+msgstr "PayPal 收款电子邮件"
+
 #: inc/admin/settings/options-payouts.php:600
 #, fuzzy
 msgid ""
@@ -7473,7 +7678,7 @@ msgid "PDF:"
 msgstr ".PDF："
 
 #: inc/admin-reports/admin-reports.php:696
-#: inc/registration/class-registrations-list-table.php:164
+#: inc/registration/class-registrations-list-table.php:163
 #: inc/registration/registration-admin.php:177
 #: premium-files/dashboard/tab-payout.php:274
 #: premium-files/dashboard/tab-payout.php:346
@@ -7485,7 +7690,7 @@ msgstr ".PDF："
 msgid "Pending"
 msgstr "待定"
 
-#: inc/admin/admin-dashboard.php:776
+#: inc/admin/admin-dashboard.php:779
 #, fuzzy
 msgid "Pending Affiliate Registrations"
 msgstr "待处理的联盟注册"
@@ -7505,7 +7710,7 @@ msgstr "待批准"
 msgid "Pending Payments"
 msgstr "待付款"
 
-#: inc/dashboard/tab-statistics.php:419
+#: inc/dashboard/tab-statistics.php:421
 #, fuzzy
 msgid "Pending Payments:"
 msgstr "待付款："
@@ -7516,7 +7721,7 @@ msgstr "待付款："
 msgid "Pending Payout"
 msgstr "待付款"
 
-#: inc/admin/admin-dashboard.php:789
+#: inc/admin/admin-dashboard.php:792
 #, fuzzy
 msgid "Pending Payout Requests"
 msgstr "待处理的付款请求"
@@ -7541,6 +7746,11 @@ msgstr "待定：当付款被设定为待定时，金额将从关联公司未付
 #, fuzzy
 msgid "Per User Role Commission"
 msgstr "每用户角色佣金"
+
+#: inc/admin/tools/admin-bulk-product-rates.php:59
+#, fuzzy
+msgid "Percent"
+msgstr "百分之"
 
 #: inc/admin/settings/options-commission.php:177
 #, fuzzy
@@ -7687,7 +7897,7 @@ msgid ""
 "settings below."
 msgstr "更新此号码时，请刷新页面，以添加/删除下面的新设置。"
 
-#: inc/dashboard/tab-latest-orders.php:702
+#: inc/dashboard/tab-latest-orders.php:703
 #, fuzzy
 msgid "Please shorten your date range to show all orders."
 msgstr "请缩短您的日期范围以显示所有订单。"
@@ -7787,7 +7997,7 @@ msgstr "专业版设置"
 msgid "Pro Version:"
 msgstr "专业版："
 
-#: inc/admin/settings/options-notifications.php:568
+#: inc/admin/settings/options-notifications.php:571
 #, fuzzy
 msgid "Processing"
 msgstr "加工"
@@ -7809,6 +8019,8 @@ msgstr "产品佣金率"
 msgid "Product Commission Settings"
 msgstr "产品委员会设置"
 
+#: inc/admin/tools/admin-bulk-edit-products.php:65
+#: inc/admin/tools/admin-bulk-product-rates.php:56
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:332
 #, fuzzy
 msgid "Product ID"
@@ -7818,6 +8030,11 @@ msgstr "产品编号"
 #, fuzzy
 msgid "Product ID or Name.."
 msgstr "产品ID或名称.."
+
+#: inc/admin/tools/admin-bulk-edit-products.php:66
+#, fuzzy
+msgid "Product Name"
+msgstr "产品名称"
 
 #: premium-files/dashboard/tab-product-rates.php:87
 #: premium-files/dashboard/tab-product-rates.php:109
@@ -7887,12 +8104,12 @@ msgstr ""
 "准备好开始了吗？在会员 <a href=\"%s\" target=\"_blank\">页面上</a> 创建您的第一个会员用户，或与他人共享您的 <a "
 "href=\"%s\">会员注册表</a> 以进行注册。任何新的会员注册也将自动创建他们的新优惠券代码。"
 
-#: inc/admin/admin-orders-box.php:145
+#: inc/admin/admin-orders-box.php:143
 #, fuzzy
 msgid "Recalculate the affiliate stats for this order."
 msgstr "重新计算此订单的联盟统计数据。"
 
-#: inc/admin/admin-dashboard.php:744
+#: inc/admin/admin-dashboard.php:747
 #, fuzzy
 msgid "Recent Activity"
 msgstr "近期活动"
@@ -7902,9 +8119,9 @@ msgstr "近期活动"
 msgid "Recent Clicks"
 msgstr "最近点击"
 
-#: inc/dashboard/tab-latest-orders.php:834
 #: inc/dashboard/tab-latest-orders.php:835
-#: inc/dashboard/tab-latest-orders.php:1032
+#: inc/dashboard/tab-latest-orders.php:836
+#: inc/dashboard/tab-latest-orders.php:1033
 #: inc/functions/functions-dashboard.php:67
 #: inc/functions/functions-dashboard.php:292
 #, fuzzy
@@ -7926,12 +8143,12 @@ msgstr "近期订单表"
 #: inc/admin/settings/options-notifications.php:373
 #: inc/admin/settings/options-notifications.php:415
 #: inc/admin/settings/options-notifications.php:456
-#: inc/admin/settings/options-notifications.php:550
-#: inc/admin/settings/options-notifications.php:622
-#: inc/admin/settings/options-notifications.php:667
-#: inc/admin/settings/options-notifications.php:716
-#: inc/admin/settings/options-notifications.php:759
-#: inc/admin/settings/options-notifications.php:802
+#: inc/admin/settings/options-notifications.php:553
+#: inc/admin/settings/options-notifications.php:625
+#: inc/admin/settings/options-notifications.php:670
+#: inc/admin/settings/options-notifications.php:719
+#: inc/admin/settings/options-notifications.php:762
+#: inc/admin/settings/options-notifications.php:805
 #, fuzzy
 msgid "Recipient"
 msgstr "收件人"
@@ -8020,7 +8237,7 @@ msgstr "引荐 Cookie 设置"
 
 #: inc/admin/class-coupons-table.php:52 inc/dashboard/tab-referral-url.php:82
 #: premium-files/dashboard/tab-product-rates.php:115
-#: premium-files/pro-addons/landing-pages/functions-landing-pages.php:79
+#: premium-files/pro-addons/landing-pages/functions-landing-pages.php:97
 #: premium-files/pro-addons/multi-level/functions-mla-invite.php:159
 #, fuzzy
 msgid "Referral Link"
@@ -8041,12 +8258,12 @@ msgstr "推荐链接设置"
 msgid "Referral Links / URLs"
 msgstr "推荐链接/网址"
 
-#: inc/functions/functions-urls.php:715
+#: inc/functions/functions-urls.php:718
 #, fuzzy
 msgid "Referral Statistics"
 msgstr "转介统计"
 
-#: inc/functions/functions-urls.php:713
+#: inc/functions/functions-urls.php:716
 #, fuzzy
 msgid "Referral Statistics for"
 msgstr "转介统计"
@@ -8116,7 +8333,7 @@ msgstr "引荐网址 – 概述"
 msgid "Referred Order Cancelled"
 msgstr "推荐订单已取消"
 
-#: inc/admin/admin-dashboard.php:458
+#: inc/admin/admin-dashboard.php:461
 #, fuzzy
 msgid "Referrer Domain"
 msgstr "引荐来源域名"
@@ -8230,6 +8447,11 @@ msgstr "报告完成！"
 #, fuzzy
 msgid "Report created for"
 msgstr "为"
+
+#: premium-files/pro-addons/pdf-reports/functions-reports-post-type.php:64
+#, fuzzy
+msgid "Report Details"
+msgstr "报告详细信息"
 
 #: inc/admin/settings/options-reports.php:207
 #, fuzzy
@@ -8464,6 +8686,11 @@ msgstr "搜索奖金"
 msgid "Search Coupons"
 msgstr "搜索优惠券"
 
+#: premium-files/pro-addons/creatives/functions-creatives-post-type.php:24
+#, fuzzy
+msgid "Search Creatives"
+msgstr "搜索广告素材"
+
 #: inc/admin/settings/options-registrations.php:409
 #: inc/admin/settings/options-registrations.php:420
 #, fuzzy
@@ -8511,7 +8738,7 @@ msgid ""
 "enabled above, their payouts will not be scheduled."
 msgstr "选择应自动安排和请求的收款方式。如果联盟成员使用的收款方式与上述启用的收款方式不同，则不会安排他们的收款。"
 
-#: inc/admin/settings/options-notifications.php:665
+#: inc/admin/settings/options-notifications.php:668
 #, fuzzy
 msgid ""
 "Send a custom new user account email (replaces default registration email)."
@@ -8531,7 +8758,7 @@ msgid ""
 "requests (this will be sent instead of multiple individual emails)."
 msgstr "当有 1 个或更多\"计划\"付款请求时，向管理员发送电子邮件（这将发送而不是多个单个电子邮件）。"
 
-#: inc/admin/settings/options-notifications.php:714
+#: inc/admin/settings/options-notifications.php:717
 #, fuzzy
 msgid "Send an email to admin when there is a new affiliate application."
 msgstr "当有新的联盟应用程序时，向管理员发送电子邮件。"
@@ -8557,19 +8784,19 @@ msgid ""
 "Link Tracking."
 msgstr "当联盟用户的域被拒绝进行直接链接跟踪时，向他们发送电子邮件。"
 
-#: inc/admin/settings/options-notifications.php:757
+#: inc/admin/settings/options-notifications.php:760
 #, fuzzy
 msgid ""
 "Send an email to affiliate when their affiliate application is accepted."
 msgstr "当其联盟申请被接受时，向联盟发送电子邮件。"
 
-#: inc/admin/settings/options-notifications.php:800
+#: inc/admin/settings/options-notifications.php:803
 #, fuzzy
 msgid ""
 "Send an email to affiliate when their affiliate application is declined."
 msgstr "当其联盟申请被拒绝时，向联盟发送电子邮件。"
 
-#: inc/admin/settings/options-notifications.php:620
+#: inc/admin/settings/options-notifications.php:623
 #, fuzzy
 msgid ""
 "Send an email to affiliate when they submit the affiliate application form."
@@ -8589,7 +8816,7 @@ msgid ""
 "paid."
 msgstr "当付款请求被成功标记为已付时，向关联公司发送电子邮件。"
 
-#: inc/admin/settings/options-notifications.php:548
+#: inc/admin/settings/options-notifications.php:551
 #, fuzzy
 msgid "Send an email to affiliates whenever their coupon code is used."
 msgstr "每当使用他们的优惠券代码时，向附属公司发送电子邮件。"
@@ -8696,7 +8923,7 @@ msgid ""
 "of the affiliate user). Leave empty to use default rates."
 msgstr "在下面为每个用户角色设置自定义佣金率（这是联盟用户的角色）。留空以使用默认费率。"
 
-#: inc/admin/admin-orders-box.php:115
+#: inc/admin/admin-orders-box.php:113
 #, fuzzy
 msgid ""
 "Set the primary referral coupon for this order. This will override all other "
@@ -9123,7 +9350,7 @@ msgid ""
 "sales, commission, and more."
 msgstr "显示一张表格，其中每月汇总优惠券的订单，总销售额、佣金等。"
 
-#: inc/admin/class-coupons-table.php:372
+#: inc/admin/class-coupons-table.php:394
 #, fuzzy
 msgid "Show Affiliate Coupons Only"
 msgstr "仅显示会员优惠券"
@@ -9379,7 +9606,7 @@ msgid "Sorry, only new customers can use this coupon code."
 msgstr "抱歉，只有新客户可以使用此优惠券代码。"
 
 #: inc/dashboard/tab-settings.php:120 inc/dashboard/tab-settings.php:229
-#: inc/functions/functions-shortcode.php:471
+#: inc/functions/functions-shortcode.php:479
 #: premium-files/dashboard/tab-payout.php:462
 #, fuzzy
 msgid "Sorry, this coupon is not assigned to you."
@@ -9477,7 +9704,7 @@ msgstr "正方形 （0px）"
 
 #: inc/admin-reports/admin-reports.php:65
 #: inc/admin-reports/admin-reports.php:113
-#: inc/dashboard/tab-latest-orders.php:848
+#: inc/dashboard/tab-latest-orders.php:849
 #: premium-files/dashboard/tab-monthly-summary.php:582
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:255
 #, fuzzy
@@ -9503,6 +9730,11 @@ msgstr "开始您的免费 7 天试用"
 #, fuzzy
 msgid "Statement"
 msgstr "陈述"
+
+#: premium-files/pro-addons/payouts/statements/functions-statements-post-type.php:69
+#, fuzzy
+msgid "Statement Details"
+msgstr "对账单详情"
 
 #: inc/admin/settings/options-invoices__premium_only.php:219
 #, fuzzy
@@ -9535,11 +9767,11 @@ msgstr "统计学"
 msgid "Statistics Text Alignment"
 msgstr "统计信息文本对齐方式"
 
-#: inc/admin/admin-dashboard.php:588 inc/admin/admin-dashboard.php:657
+#: inc/admin/admin-dashboard.php:591 inc/admin/admin-dashboard.php:660
 #: inc/dashboard/tab-latest-orders.php:203
 #: inc/dashboard/tab-latest-orders.php:280
-#: inc/dashboard/tab-latest-orders.php:876
-#: inc/registration/class-registrations-list-table.php:258
+#: inc/dashboard/tab-latest-orders.php:877
+#: inc/registration/class-registrations-list-table.php:257
 #: premium-files/dashboard/tab-payout.php:216
 #: premium-files/dashboard/tab-payout.php:244
 #: premium-files/dashboard/tab-payout.php:310
@@ -9597,6 +9829,7 @@ msgstr "商店信用"
 msgid "Store Credit / Wallet"
 msgstr "商店信用/钱包"
 
+#: premium-files/functions-premium.php:383
 #: premium-files/pro-addons/payouts/payouts-settings.php:296
 #: premium-files/pro-addons/payouts/credit/functions-balance.php:51
 #, fuzzy
@@ -9649,6 +9882,26 @@ msgstr "条纹"
 #, fuzzy
 msgid "Stripe Account Label"
 msgstr "条纹帐户标签"
+
+#: premium-files/functions-premium.php:271
+#, fuzzy
+msgid "Stripe Connect Account"
+msgstr "Stripe Connect 账户"
+
+#: premium-files/functions-premium.php:283
+#, fuzzy
+msgid "Stripe Connect Account (TEST MODE)"
+msgstr "Stripe Connect 账户（测试模式）"
+
+#: premium-files/functions-premium.php:277
+#, fuzzy
+msgid "Stripe Connect Account Type"
+msgstr "Stripe Connect 账户类型"
+
+#: premium-files/functions-premium.php:289
+#, fuzzy
+msgid "Stripe Connect Account Type (TEST MODE)"
+msgstr "Stripe Connect 账户类型（测试模式）"
 
 #: inc/admin/admin-pro-details.php:384
 #: inc/admin/settings/options-payouts.php:1063
@@ -9776,7 +10029,7 @@ msgstr "成功！重 定向"
 msgid "Summary"
 msgstr "总结"
 
-#: inc/admin/settings/options-notifications.php:844
+#: inc/admin/settings/options-notifications.php:847
 #, fuzzy
 msgid "Supported merge tags"
 msgstr "支持的合并标记"
@@ -9859,7 +10112,7 @@ msgstr "税/增值税号码"
 msgid "Taxes"
 msgstr "税"
 
-#: inc/registration/class-registrations-list-table.php:256
+#: inc/registration/class-registrations-list-table.php:255
 #, fuzzy
 msgid "Template"
 msgstr "模板"
@@ -10048,7 +10301,7 @@ msgid ""
 "deducted from the main affiliates earnings."
 msgstr "多层次等级的佣金是根据<strong>主要联盟会员赚取的金额</strong>的百分比计算的。这不会从主要联盟会员的收入中扣除。"
 
-#: inc/admin/admin-orders-box.php:260
+#: inc/admin/admin-orders-box.php:269
 #, fuzzy
 msgid "The coupon code you entered does not exist."
 msgstr "您输入的优惠券代码不存在。"
@@ -10370,12 +10623,12 @@ msgid ""
 "This bonus was granted as an initial award for becoming a new affiliate."
 msgstr "此奖金是作为成为新会员的初始奖励而授予的。"
 
-#: inc/admin/admin-orders-box.php:119
+#: inc/admin/admin-orders-box.php:117
 #, fuzzy
 msgid "This can not be edited for a lifetime affiliate referral."
 msgstr "对于终身会员推荐，这无法编辑。"
 
-#: inc/admin/admin-orders-box.php:120
+#: inc/admin/admin-orders-box.php:118
 #, fuzzy
 msgid "This can not be edited when the order is completed."
 msgstr "订单完成后无法编辑。"
@@ -10666,7 +10919,7 @@ msgid ""
 "filling out the registration form (enable this in \"registration settings\")."
 msgstr "这意味着您需要手动编辑现有用户到\"优惠券联盟\"，或让他们在填写注册表时自动分配到此角色（在\"注册设置\"中启用此）。"
 
-#: inc/dashboard/tab-statistics.php:171
+#: inc/dashboard/tab-statistics.php:173
 #: inc/admin/settings/options-general.php:210
 #, fuzzy
 msgid "This Month"
@@ -10691,6 +10944,12 @@ msgstr "此选项将启用页面上的\"联盟着陆页\"元框，以便您为�
 msgid ""
 "This page displays all the users that are assigned to an affiliate coupon."
 msgstr "此页面显示分配给联盟优惠券的所有用户。"
+
+#: premium-files/pro-addons/landing-pages/meta-landing-pages.php:52
+#, fuzzy
+msgid ""
+"This page will then act the same as a referral URL for that affiliate coupon."
+msgstr "然后，此页面将充当与该联盟优惠券的推荐 URL 相同的 URL。"
 
 #: inc/admin/settings/options-debug.php:21
 #, fuzzy
@@ -11214,75 +11473,75 @@ msgid ""
 "settings tab."
 msgstr "要请求付款，您首先需要在设置选项卡中输入付款详细信息。"
 
-#: inc/admin/settings/options-notifications.php:897
+#: inc/admin/settings/options-notifications.php:900
 #, fuzzy
 msgid "to show a list of all the payouts."
 msgstr "以显示所有付款的列表。"
 
-#: inc/admin/settings/options-notifications.php:867
+#: inc/admin/settings/options-notifications.php:870
 #, fuzzy
 msgid "to show a list of the products purchased (and quantities)."
 msgstr "显示所购买的产品列表（和数量）。"
 
-#: inc/admin/settings/options-notifications.php:870
+#: inc/admin/settings/options-notifications.php:873
 #, fuzzy
 msgid "to show the account username."
 msgstr "以显示帐户用户名。"
 
-#: inc/admin/settings/options-notifications.php:891
+#: inc/admin/settings/options-notifications.php:894
 #, fuzzy
 msgid "to show the admin URL to manage payouts."
 msgstr "以显示管理付款的管理员 URL。"
 
-#: inc/admin/settings/options-notifications.php:882
+#: inc/admin/settings/options-notifications.php:885
 #, fuzzy
 msgid "to show the admin URL."
 msgstr "以显示管理员网址。"
 
-#: inc/admin/settings/options-notifications.php:876
+#: inc/admin/settings/options-notifications.php:879
 #, fuzzy
 msgid "to show the affiliate dashboard URL."
 msgstr "以显示联盟仪表板 URL。"
 
-#: inc/admin/settings/options-notifications.php:924
+#: inc/admin/settings/options-notifications.php:927
 #, fuzzy
 msgid ""
 "to show the affiliate registration \"How did you hear about us?\" field "
 "value."
 msgstr "以显示会员注册“您是如何得知我们的？"
 
-#: inc/admin/settings/options-notifications.php:921
+#: inc/admin/settings/options-notifications.php:924
 #, fuzzy
 msgid ""
 "to show the affiliate registration \"How will you promote us?\" field value."
 msgstr "以显示会员注册“您将如何推广我们？”字段值。"
 
-#: inc/admin/settings/options-notifications.php:918
+#: inc/admin/settings/options-notifications.php:921
 #, fuzzy
 msgid "to show the affiliate registration \"Website\" field value."
 msgstr "以显示会员注册“网站”字段值。"
 
-#: inc/admin/settings/options-notifications.php:915
+#: inc/admin/settings/options-notifications.php:918
 #, fuzzy
 msgid "to show the affiliate registration custom field values."
 msgstr "以显示会员注册自定义字段值。"
 
-#: inc/admin/settings/options-notifications.php:879
+#: inc/admin/settings/options-notifications.php:882
 #, fuzzy
 msgid "to show the affiliates default referral URL."
 msgstr "以显示会员的默认引荐 URL。"
 
-#: inc/admin/settings/options-notifications.php:888
+#: inc/admin/settings/options-notifications.php:891
 #, fuzzy
 msgid "to show the amount."
 msgstr "以显示金额。"
 
-#: inc/admin/settings/options-notifications.php:858
+#: inc/admin/settings/options-notifications.php:861
 #, fuzzy
 msgid "to show the coupon code."
 msgstr "显示优惠券代码。"
 
-#: inc/admin/settings/options-notifications.php:885
+#: inc/admin/settings/options-notifications.php:888
 #, fuzzy
 #| msgid ""
 #| "to show the custom message entered when admins accept/decline affiliate "
@@ -11292,75 +11551,75 @@ msgid ""
 "registrations."
 msgstr "显示管理员接受/拒绝联盟应用程序时输入的自定义消息。"
 
-#: inc/admin/settings/options-notifications.php:903
+#: inc/admin/settings/options-notifications.php:906
 #, fuzzy
 msgid "to show the domain."
 msgstr "以显示域。"
 
-#: inc/admin/settings/options-notifications.php:930
+#: inc/admin/settings/options-notifications.php:933
 #, fuzzy
 msgid "to show the fixed MLA commission earned."
 msgstr "以显示赚取的固定MLA佣金。"
 
-#: inc/admin/settings/options-notifications.php:906
+#: inc/admin/settings/options-notifications.php:909
 #, fuzzy
 msgid ""
 "to show the invite referral UR (with hyperlink) for the registration form."
 msgstr "以显示注册表的邀请推荐 UR（带超链接）。"
 
-#: inc/admin/settings/options-notifications.php:909
+#: inc/admin/settings/options-notifications.php:912
 #, fuzzy
 msgid ""
 "to show the invite referral URL without hyperlink (to create your own "
 "link/button)."
 msgstr "以显示不带超链接的邀请推荐 URL（以创建您自己的链接/按钮）。"
 
-#: inc/admin/settings/options-notifications.php:894
+#: inc/admin/settings/options-notifications.php:897
 #, fuzzy
 msgid "to show the number."
 msgstr "以显示数字。"
 
-#: inc/admin/settings/options-notifications.php:864
+#: inc/admin/settings/options-notifications.php:867
 #, fuzzy
 msgid "to show the order ID."
 msgstr "显示订单 ID。"
 
-#: inc/admin/settings/options-notifications.php:933
+#: inc/admin/settings/options-notifications.php:936
 #, fuzzy
 msgid "to show the order status."
 msgstr "以显示订单状态。"
 
-#: inc/admin/settings/options-notifications.php:873
+#: inc/admin/settings/options-notifications.php:876
 #, fuzzy
 msgid "to show the password reset URL."
 msgstr "以显示密码重置 URL。"
 
-#: inc/admin/settings/options-notifications.php:900
+#: inc/admin/settings/options-notifications.php:903
 #, fuzzy
 msgid "to show the payout method."
 msgstr "以显示付款方式。"
 
-#: inc/admin/settings/options-notifications.php:927
+#: inc/admin/settings/options-notifications.php:930
 #, fuzzy
 msgid "to show the percentage MLA commission earned."
 msgstr "以显示赚取的 MLA 佣金百分比。"
 
-#: inc/admin/settings/options-notifications.php:861
+#: inc/admin/settings/options-notifications.php:864
 #, fuzzy
 msgid "to show the users commission earned on that order."
 msgstr "显示用户在该订单上获得的佣金。"
 
-#: inc/admin/settings/options-notifications.php:852
+#: inc/admin/settings/options-notifications.php:855
 #, fuzzy
 msgid "to show the users display name."
 msgstr "显示用户显示名称。"
 
-#: inc/admin/settings/options-notifications.php:855
+#: inc/admin/settings/options-notifications.php:858
 #, fuzzy
 msgid "to show the users email address."
 msgstr "向用户显示电子邮件地址。"
 
-#: inc/admin/settings/options-notifications.php:912
+#: inc/admin/settings/options-notifications.php:915
 #, fuzzy
 msgid "to the sub-affiliate username."
 msgstr "到子联盟用户名。"
@@ -11399,7 +11658,7 @@ msgstr "总"
 msgid "Total Affiliates"
 msgstr "联盟总数"
 
-#: inc/admin-reports/admin-reports.php:614 inc/functions/functions-urls.php:719
+#: inc/admin-reports/admin-reports.php:614 inc/functions/functions-urls.php:722
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:158
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:367
 #: premium-files/pro-addons/pdf-reports/template.php:205
@@ -11409,7 +11668,7 @@ msgstr "总点击次数"
 
 #: inc/admin/class-coupon-users-table.php:41
 #: inc/admin/class-coupons-table.php:37 inc/admin-reports/admin-reports.php:574
-#: inc/dashboard/tab-statistics.php:557
+#: inc/dashboard/tab-statistics.php:559
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:350
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:392
 #, fuzzy
@@ -11427,7 +11686,7 @@ msgstr "赚取的佣金总额"
 msgid "Total commission earned this month"
 msgstr "本月赚取的总佣金"
 
-#: inc/admin-reports/admin-reports.php:623 inc/functions/functions-urls.php:724
+#: inc/admin-reports/admin-reports.php:623 inc/functions/functions-urls.php:727
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:162
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:368
 #: premium-files/pro-addons/pdf-reports/template.php:206
@@ -11440,7 +11699,7 @@ msgstr "总转换"
 msgid "Total Coupon Usage"
 msgstr "优惠券总使用量"
 
-#: inc/admin-reports/admin-reports.php:552 inc/dashboard/tab-statistics.php:546
+#: inc/admin-reports/admin-reports.php:552 inc/dashboard/tab-statistics.php:548
 #, fuzzy
 msgid "Total Discounts"
 msgstr "总折扣"
@@ -11477,7 +11736,7 @@ msgstr "推荐总数"
 
 #: inc/admin/class-coupon-users-table.php:39
 #: inc/admin/class-coupons-table.php:35 inc/admin-reports/admin-reports.php:543
-#: inc/dashboard/tab-statistics.php:540
+#: inc/dashboard/tab-statistics.php:542
 #, fuzzy
 msgid "Total Sales"
 msgstr "总销售额"
@@ -11507,9 +11766,9 @@ msgstr "本月推荐的总销售额"
 msgid "Total sales referred this year"
 msgstr "今年推荐的总销售额"
 
-#: inc/admin/class-coupons-table.php:30 inc/dashboard/tab-statistics.php:219
+#: inc/admin/class-coupons-table.php:30 inc/dashboard/tab-statistics.php:221
 #: inc/functions/functions-user-coupons.php:933
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:117
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:124
 #, fuzzy
 msgid "Total Usage"
 msgstr "总使用量"
@@ -11519,7 +11778,7 @@ msgstr "总使用量"
 msgid "total usage"
 msgstr "总使用量"
 
-#: inc/dashboard/tab-latest-orders.php:737
+#: inc/dashboard/tab-latest-orders.php:738
 #: premium-files/dashboard/tab-monthly-summary.php:494
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:564
 #, fuzzy
@@ -11573,6 +11832,7 @@ msgid "Twitter Text"
 msgstr "推特文本"
 
 #: inc/admin/settings/options-registrations.php:590
+#: inc/admin/tools/admin-bulk-product-rates.php:57
 #, fuzzy
 msgid "Type"
 msgstr "类型"
@@ -11617,12 +11877,12 @@ msgstr "未付佣金"
 msgid "unpaid commission"
 msgstr "未付佣金"
 
-#: inc/admin/admin-orders-box.php:195
+#: inc/admin/admin-orders-box.php:193
 #, fuzzy
 msgid "Unpaid Commission granted to affiliate, ready for payout request."
 msgstr "向会员授予未支付的佣金，准备支付请求。"
 
-#: inc/admin/admin-orders-box.php:179
+#: inc/admin/admin-orders-box.php:177
 #, fuzzy
 #| msgid ""
 #| "Unpaid Commission not granted to affiliate. Since this order is completed "
@@ -11634,7 +11894,7 @@ msgid ""
 "reward commission for this order. Click the \"update\" link."
 msgstr "未支付的佣金未授予会员。由于此订单已完成，它将不再授予佣金，如果您希望奖励此订单的佣金，则需要手动申请。"
 
-#: inc/admin/admin-orders-box.php:177
+#: inc/admin/admin-orders-box.php:175
 #, fuzzy
 msgid ""
 "Unpaid Commission not yet granted to affiliate. This will be granted when "
@@ -11648,7 +11908,7 @@ msgid ""
 "threshold, and payout details."
 msgstr "未支付的佣金，并且还满足任何其他要求，例如付款门槛和支付详细信息。"
 
-#: inc/dashboard/tab-statistics.php:417
+#: inc/dashboard/tab-statistics.php:419
 #, fuzzy
 msgid "Unpaid Commission:"
 msgstr "未付佣金："
@@ -11657,6 +11917,11 @@ msgstr "未付佣金："
 #, fuzzy
 msgid "Update Bonus"
 msgstr "更新奖金"
+
+#: premium-files/pro-addons/creatives/functions-creatives-post-type.php:23
+#, fuzzy
+msgid "Update Creatives"
+msgstr "更新广告素材"
 
 #: inc/admin/admin-page.php:363 inc/admin/admin-pro-details.php:705
 #, fuzzy
@@ -11754,6 +12019,18 @@ msgid ""
 "settings later if needed."
 msgstr "使用此快速表单以基本默认设置自动生成模板优惠券代码。如果需要，您可以稍后自定义更高级的优惠券设置。"
 
+#: inc/admin/tools/admin-bulk-edit-coupons.php:78
+#, fuzzy
+msgid "Use this tool to bulk edit your coupon settings."
+msgstr "使用此工具批量编辑您的优惠券设置。"
+
+#: inc/admin/tools/admin-bulk-edit-products.php:53
+#, fuzzy
+msgid ""
+"Use this tool to bulk edit your per-product commission settings. The "
+"username must exist or it will not be updated."
+msgstr "使用此工具批量编辑您的每件商品佣金设置。用户名必须存在，否则不会更新。"
+
 #: premium-files/pro-addons/creatives/functions-creatives-post-type.php:477
 #, fuzzy
 msgid "Use {company} to insert the affiliate company name."
@@ -11800,10 +12077,10 @@ msgstr "如果您只是想要一个通用的\"联盟\"页面来引导联营公�
 
 #: premium-files/functions-premium.php:161
 #: inc/admin/class-activity-list-table.php:80
-#: inc/registration/class-registrations-list-table.php:188
-#: inc/registration/class-registrations-list-table.php:193
-#: inc/registration/class-registrations-list-table.php:208
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:108
+#: inc/registration/class-registrations-list-table.php:187
+#: inc/registration/class-registrations-list-table.php:192
+#: inc/registration/class-registrations-list-table.php:207
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:115
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:330
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:367
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:300
@@ -11845,7 +12122,7 @@ msgid "User role:"
 msgstr "用户角色："
 
 #: inc/admin/class-coupon-users-table.php:25
-#: inc/registration/class-registrations-list-table.php:253
+#: inc/registration/class-registrations-list-table.php:252
 #: inc/registration/registration-admin.php:516
 #: inc/registration/registration-form.php:139
 #: inc/registration/registration-form.php:154
@@ -11894,10 +12171,10 @@ msgid ""
 "program."
 msgstr "查看您的联盟计划中发生的所有活动的日志。"
 
-#: inc/admin/admin-affiliate-users.php:197
+#: inc/admin/admin-affiliate-users.php:201
 #: inc/admin/class-clicks-list-table.php:40
 #: inc/admin-reports/admin-reports.php:1272
-#: inc/registration/class-registrations-list-table.php:83
+#: inc/registration/class-registrations-list-table.php:82
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:45
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:158
 #, fuzzy
@@ -11969,9 +12246,9 @@ msgstr "查看广告素材"
 msgid "View Creatives"
 msgstr "查看广告素材"
 
-#: inc/admin/admin-list.php:127 inc/admin/admin-orders-box.php:208
-#: inc/admin/class-coupons-table.php:246
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:129
+#: inc/admin/admin-list.php:127 inc/admin/admin-orders-box.php:217
+#: inc/admin/class-coupons-table.php:246 inc/emails/new-order-email.php:142
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:136
 #: premium-files/pro-addons/payouts/stripe/CreateAccount.php:167
 #, fuzzy
 msgid "View Dashboard"
@@ -12001,12 +12278,12 @@ msgstr "在条纹中查看"
 msgid "View Landing Page"
 msgstr "查看着陆页面"
 
-#: inc/dashboard/tab-statistics.php:350 inc/dashboard/tab-statistics.php:405
+#: inc/dashboard/tab-statistics.php:352 inc/dashboard/tab-statistics.php:407
 #, fuzzy
 msgid "View More"
 msgstr "查看更多"
 
-#: inc/dashboard/tab-latest-orders.php:516
+#: inc/dashboard/tab-latest-orders.php:517
 #, fuzzy
 msgid "View Order in Backend (Admin Only)"
 msgstr "在后端查看订单（仅限管理员）"
@@ -12026,7 +12303,7 @@ msgstr "查看报告"
 msgid "View setup guide"
 msgstr "查看设置指南"
 
-#: inc/admin/admin-orders-box.php:207
+#: inc/admin/admin-orders-box.php:216
 #, fuzzy
 msgid "View the affiliate dashboard for this affiliate coupon."
 msgstr "查看此联盟优惠券的联盟仪表板。"
@@ -12149,7 +12426,7 @@ msgid ""
 "issues or paying too much commission."
 msgstr "我们强烈建议您将此选项保留为禁用状态，因为它可能会导致一些问题或支付过多的佣金。"
 
-#: inc/registration/class-registrations-list-table.php:255
+#: inc/registration/class-registrations-list-table.php:254
 #, fuzzy
 msgid "Website"
 msgstr "网站"
@@ -13177,8 +13454,8 @@ msgid ""
 "payout requests for all affiliates with more than"
 msgstr "您当前已启用定期提现。这将自动为超过"
 
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:144
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:235
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:151
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:242
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:75
 #, fuzzy
 #| msgid "You don&#39t currently have any sub-affiliates."
@@ -13208,7 +13485,7 @@ msgstr "您拥有专业版许可证！请停用免费版本并安装PRO版本以
 msgid "You have earned a reward!"
 msgstr "您已经获得了奖励！"
 
-#: inc/admin/settings/options-notifications.php:574
+#: inc/admin/settings/options-notifications.php:577
 #, fuzzy
 msgid "You have made a new referral sale!"
 msgstr "您已经进行了新的推荐销售！"
@@ -13270,7 +13547,7 @@ msgstr "您的帐户"
 msgid "Your affiliate application has been submitted."
 msgstr "您的联盟申请已提交。"
 
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:206
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:213
 #, fuzzy
 msgid "Your affiliate network:"
 msgstr "您的联盟网络："

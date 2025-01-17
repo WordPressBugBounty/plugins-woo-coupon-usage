@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.7.1
-Stable tag: 5.18.0
+Stable tag: 5.18.1
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -239,6 +239,24 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 5.18.1 - 17th January 2025 =
+- New: Added an option to the "Emails" settings tab to enable/disable the "Affiliate Information" in the admin "New Order" email.
+- Tweak: Cancelled orders will now show as "0.00" values if displayed on the affiliate dashboard.
+- Tweak: In the "Coupon Affiliate" meta box for the admin edit orders page, added links to the referral code and affiliate user.
+- Tweak: Small tweak to the loading animation on the affiliate dashboard.
+- Tweak: (PRO) Decimal numbers can now be entered for the per-product commission fields.
+- Fix: (PRO) Fixed an error on the MLA dashboard in some cases.
+- Fix: (PRO) Fixed the dates for scheduling monthly email reports to be localised.
+- Fix: (PRO) Fixed an issue with the new dynamic landing pages feature causing other link rewrites not to work, like the my account page menu links.
+- Fix: Fixed issue with "Enable legacy (bulk) saving for settings page" toggle not showing in some cases.
+- Fix: Fixed undefined array key "wcusage_field_paypal_enable" error in some cases.
+- Fix: Fixed a "headers already sent" error on the cart page in some cases.
+- Fix: On the admin dashboard, in the "Latest Referrals" section, fixed the "Affiliate" column sometimes being empty.
+- Fix: Fixed a rare fatal error on the affiliate dashboard when viewing a MLA sub-affiliates dashboard as the parent affiliate.
+- Fix: Fixed some localisation issues.
+- Other: Updated translations.
+- Other: Tested with WooCommerce 9.5.2
 
 = Version 5.18.0 - 7th January 2025 =
 - New: (PRO) Added dynamic landing pages functionality.

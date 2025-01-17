@@ -25,7 +25,6 @@ class wcusage_registrations_List_Table extends WP_List_Table {
     function column_default($item, $column_name){
 
 		$options = get_option( 'wcusage_options' );
-		$paypal_enable = $options['wcusage_field_paypal_enable'];
 
     $wcusage_coupon_multiple = wcusage_get_setting_value('wcusage_field_registration_multiple_template', '0');
     if( !$wcusage_coupon_multiple || !wcu_fs()->can_use_premium_code() ) { echo "<style>.column-type { display: none; }</style>"; }

@@ -74,8 +74,8 @@ function wcusage_bulk_coupon_page() {
     <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
 
     <div class="wrap wcusage-bulk-edit-coupons wcusage-tools">
-        <h2><?php echo esc_html__('Bulk Edit: Coupon Settings', 'your-text-domain'); ?></h2>
-        <p><?php echo esc_html__('Use this tool to bulk edit your coupon settings.', 'your-text-domain'); ?></p>
+        <h2><?php echo esc_html__('Bulk Edit: Coupon Settings', 'woo-coupon-usage'); ?></h2>
+        <p><?php echo esc_html__('Use this tool to bulk edit your coupon settings.', 'woo-coupon-usage'); ?></p>
         <br/>
         <button id="import-csv" class="button">Import CSV</button>
         <button id="export-csv" class="button">Export CSV</button>
@@ -86,15 +86,15 @@ function wcusage_bulk_coupon_page() {
             <div class="wcu-scrollable-table">
                 <table id="wcusage-tools-rows">
                     <tr>
-                        <th><?php echo esc_html__('Coupon ID', 'your-text-domain'); ?></th>
-                        <th><?php echo esc_html__('Coupon Name', 'your-text-domain'); ?></th>
-                        <th><?php echo esc_html__('Discount Type', 'your-text-domain'); ?></th>
-                        <th><?php echo esc_html__('Discount Amount', 'your-text-domain'); ?></th>
-                        <th><?php echo esc_html__('Affiliate Username', 'your-text-domain'); ?></th>
+                        <th><?php echo esc_html__('Coupon ID', 'woo-coupon-usage'); ?></th>
+                        <th><?php echo esc_html__('Coupon Name', 'woo-coupon-usage'); ?></th>
+                        <th><?php echo esc_html__('Discount Type', 'woo-coupon-usage'); ?></th>
+                        <th><?php echo esc_html__('Discount Amount', 'woo-coupon-usage'); ?></th>
+                        <th><?php echo esc_html__('Affiliate Username', 'woo-coupon-usage'); ?></th>
                         <?php if (wcu_fs()->can_use_premium_code()) { ?>
-                        <th><?php echo esc_html__('Commission Percent', 'your-text-domain'); ?></th>
-                        <th><?php echo esc_html__('Commission £ - Order', 'your-text-domain'); ?></th>
-                        <th><?php echo esc_html__('Commission £ - Product', 'your-text-domain'); ?></th>
+                        <th><?php echo esc_html__('Commission Percent', 'woo-coupon-usage'); ?></th>
+                        <th><?php echo esc_html__('Commission £ - Order', 'woo-coupon-usage'); ?></th>
+                        <th><?php echo esc_html__('Commission £ - Product', 'woo-coupon-usage'); ?></th>
                         <?php } ?>
                     </tr>
                     <?php wcusage_bulk_coupon_fields(); ?>

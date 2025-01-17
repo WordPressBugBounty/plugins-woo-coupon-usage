@@ -832,7 +832,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         ?>
 
   	<!-- Generate Settings Page Area -->
-  	<form class="wcusage-settings-form" action="options.php" method="post" style="margin-top: 10px; <?php 
+  	<form class="wcusage_row_setting wcusage-settings-form" action="options.php" method="post" style="margin-top: 10px; <?php 
         if ( wcu_fs()->can_use_premium_code() ) {
             ?>width: 97.5%;<?php 
         }
@@ -862,7 +862,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
             '0px'
         );
         ?>
-        <i><?php 
+        <i style="margin-top: -5px;"><?php 
         echo esc_html__( 'This will disable automatic ajax saving, and instead will enable the "Save Settings" button, and you will save all settings at once.', 'woo-coupon-usage' );
         ?></i>
         <br/><br/>

@@ -819,7 +819,7 @@ Label the data
     }
 }
 
-.wcusage_row .switch {
+.wcusage_row .switch, .wcusage_row_setting .switch {
     position: relative;
     display: inline-block;
     width: 60px;
@@ -828,7 +828,7 @@ Label the data
     margin: 2px;
 }
 
-.wcusage_row .switch input {
+.wcusage_row .switch input, .wcusage_row_setting .switch input {
     opacity: 0;
     width: 0;
     height: 0;
@@ -840,7 +840,7 @@ Label the data
     pointer-events: none !important;
 }
 
-.wcusage_row .slider {
+.wcusage_row .slider, .wcusage_row_setting .slider {
     position: absolute;
     cursor: pointer;
     top: 0;
@@ -855,7 +855,7 @@ Label the data
     box-shadow: inset 0 2px 0 #707070;
 }
 
-.wcusage_row .slider:before {
+.wcusage_row .slider:before, .wcusage_row_setting .slider:before {
     position: absolute;
     content: "";
     height: 26px;
@@ -877,16 +877,16 @@ Label the data
     transition: 0s;
 }
 
-.wcusage_row input:checked+.slider {
+.wcusage_row input:checked+.slider, .wcusage_row_setting input:checked+.slider {
     background-color: #2196F3;
     box-shadow: inset 0 2px 0 #707070;
 }
 
-.wcusage_row input:focus+.slider {
+.wcusage_row input:focus+.slider, .wcusage_row_setting input:focus+.slider {
     box-shadow: inset 0 2px 0 #707070;
 }
 
-.wcusage_row input:checked+.slider:before {
+.wcusage_row input:checked+.slider:before, .wcusage_row_setting input:checked+.slider:before {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
     transform: translateX(26px);
@@ -985,11 +985,11 @@ Label the data
 }
 
 /* Rounded sliders */
-.wcusage_row .slider.round {
+.wcusage_row .slider.round, .wcusage_row_setting .slider.round {
     border-radius: 34px;
 }
 
-.wcusage_row .slider.round:before {
+.wcusage_row .slider.round:before, .wcusage_row_setting .slider.round:before {  
     border-radius: 50%;
 }
 
@@ -1903,6 +1903,7 @@ p label {
 
 .wcu-loading-loader {
     width: 100px;
+    margin-left: 10px;
 }
 
 /* Info Boxes */

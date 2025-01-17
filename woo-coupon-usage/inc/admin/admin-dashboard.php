@@ -411,6 +411,9 @@ function wcusage_dashboard_page_section_referrals() {
                 $name = $user->user_login;
               }
             }
+            if(!$name || $name == "" || $name == " ") {
+              $name = $user->user_login;
+            }
             ?>
             <tr class="wcusage-admin-table-col-row">
               <td><a href="<?php echo esc_url(get_edit_user_link($user_id)); ?>" title="<?php echo esc_html($user->user_login); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>

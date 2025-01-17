@@ -579,7 +579,7 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
             if ( !empty( $order->get_status() ) ) {
                 $order_status = $order->get_status();
             }
-            if ( isset( $order_status ) && $order_status == "refunded" ) {
+            if ( isset( $order_status ) && ($order_status == "refunded" || $order_status == "cancelled") ) {
                 $return_array = [];
                 $return_array['ordertotal'] = 0;
                 $return_array['orderdiscount'] = 0;

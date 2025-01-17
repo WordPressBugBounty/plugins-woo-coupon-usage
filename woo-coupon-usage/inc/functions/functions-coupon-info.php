@@ -16,9 +16,9 @@ if( !function_exists( 'wcusage_get_coupon_info' ) ) {
 
 		try {
 
-			$coupon = new WC_Coupon($coupon_code);
-			if($coupon) {
-				$couponid = $coupon->get_id();
+			if($coupon_code) {
+
+				$couponid = wcusage_get_coupon_id($coupon_code);
 
 				$coupon_commission_percent = get_post_meta( $couponid, 'wcu_text_coupon_commission', true );
 					if(!$coupon_commission_percent) { $coupon_commission_percent = wcusage_get_setting_value('wcusage_field_affiliate', '0'); }

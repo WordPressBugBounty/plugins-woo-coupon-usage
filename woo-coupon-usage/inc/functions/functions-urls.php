@@ -466,6 +466,9 @@ if( !function_exists( 'wcusage_auto_apply_discount_coupon' ) ) {
 if( !function_exists( 'wcusage_action_woocommerce_removed_coupon' ) ) {
 	function wcusage_action_woocommerce_removed_coupon( $coupon_code ) {
     if(!$coupon_code) { return; }
+    if (headers_sent()) {
+      return;
+    }
     $cookie = isset($_COOKIE['wcusage_referral']) ? strtolower($_COOKIE['wcusage_referral']) : '';
     $coupon_code = strtolower($coupon_code);
     if (isset($_COOKIE['wcusage_referral']) && $cookie == $coupon_code) {

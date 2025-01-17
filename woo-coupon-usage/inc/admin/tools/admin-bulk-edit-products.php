@@ -49,9 +49,9 @@ function wcusage_bulk_product_page() {
     <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
 
     <div class="wrap wcusage-bulk-edit-products wcusage-tools">
-        <h2><?php echo esc_html__('Bulk Edit: Product Settings', 'your-text-domain'); ?></h2>
-        <p><?php echo esc_html__('Use this tool to bulk edit your per-product commission settings. The username must exist or it will not be updated.', 'your-text-domain'); ?></p>
-        <p><?php echo esc_html__('Currently "Per-Affiliate Product Commission Rates" can only be edited by viewing/editing the individual product.', 'your-text-domain'); ?></p>
+        <h2><?php echo esc_html__('Bulk Edit: Product Settings', 'woo-coupon-usage'); ?></h2>
+        <p><?php echo esc_html__('Use this tool to bulk edit your per-product commission settings. The username must exist or it will not be updated.', 'woo-coupon-usage'); ?></p>
+        <p><?php echo esc_html__('Currently "Per-Affiliate Product Commission Rates" can only be edited by viewing/editing the individual product.', 'woo-coupon-usage'); ?></p>
         <br/>
         <button id="import-csv" class="button">Import CSV</button>
         <button id="export-csv" class="button">Export CSV</button>
@@ -62,10 +62,10 @@ function wcusage_bulk_product_page() {
             <div class="wcu-scrollable-table">
                 <table id="wcusage-tools-rows">
                     <tr>
-                        <th><?php echo esc_html__('Product ID', 'your-text-domain'); ?></th>
-                        <th><?php echo esc_html__('Product Name', 'your-text-domain'); ?></th>
-                        <th><?php echo esc_html__('Commission Percent', 'your-text-domain'); ?></th>
-                        <th><?php echo esc_html__('Commission Fixed', 'your-text-domain'); ?></th>
+                        <th><?php echo esc_html__('Product ID', 'woo-coupon-usage'); ?></th>
+                        <th><?php echo esc_html__('Product Name', 'woo-coupon-usage'); ?></th>
+                        <th><?php echo esc_html__('Commission Percent', 'woo-coupon-usage'); ?></th>
+                        <th><?php echo esc_html__('Commission Fixed', 'woo-coupon-usage'); ?></th>
                     </tr>
                     <?php wcusage_bulk_product_fields(); ?>
                 </table>

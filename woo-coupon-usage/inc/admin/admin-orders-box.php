@@ -3,30 +3,27 @@
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
-if ( !class_exists( 'SitePress' ) ) {
-    // Temp fix for WPML conflict
-    function wcusage_add_custom_box() {
-        if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
-            $screen = wc_get_page_screen_id( 'shop-order' );
-        } else {
-            $screen = 'shop_order';
-        }
-        add_meta_box(
-            'wcusage_affiliate_info',
-            // Unique ID
-            'Coupon Affiliate',
-            // Box title
-            'wcusage_custom_box_html',
-            // Content callback, must be of type callable
-            $screen,
-            // Post type
-            'side',
-            'high'
-        );
+function wcusage_add_custom_box() {
+    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+        $screen = wc_get_page_screen_id( 'shop-order' );
+    } else {
+        $screen = 'shop_order';
     }
-
-    add_action( 'add_meta_boxes', 'wcusage_add_custom_box' );
+    add_meta_box(
+        'wcusage_affiliate_info',
+        // Unique ID
+        'Coupon Affiliate',
+        // Box title
+        'wcusage_custom_box_html',
+        // Content callback, must be of type callable
+        $screen,
+        // Post type
+        'side',
+        'high'
+    );
 }
+
+add_action( 'add_meta_boxes', 'wcusage_add_custom_box' );
 // Display the metabox content
 function wcusage_custom_box_html(  $post  ) {
     $options = get_option( 'wcusage_options' );
@@ -44,7 +41,7 @@ function wcusage_custom_box_html(  $post  ) {
     }
     $order = wc_get_order( $post_id );
     if ( $order ) {
-        if ( $wcusage_show_column_code && !class_exists( 'SitePress' ) ) {
+        if ( $wcusage_show_column_code ) {
             $affiliate = array();
             $coupon_codes = array();
             $lifetimeaffiliate = wcusage_order_meta( $post_id, 'lifetime_affiliate_coupon_referrer' );
@@ -173,12 +170,21 @@ function wcusage_custom_box_html_content(
         echo '<strong>(' . esc_html__( 'Custom / URL Referral', 'woo-coupon-usage' ) . ')</strong><br/>';
     }
     $ispaid = "";
-    // Message
-    echo 'Referral Code: ' . esc_html( $coupon_code ) . '<br/>';
-    echo wp_kses_post( $getinfo['affililiateusertext'] );
+    // Show the coupon code
+    if ( isset( $coupon_id ) && $coupon_id ) {
+        echo 'Referral Code: <a href="' . esc_url( admin_url( 'post.php?post=' . esc_attr( $coupon_id ) . '&action=edit' ) ) . '" target="_blank" style="color: #07bbe3;">' . esc_html( $coupon_code ) . '</a><br/>';
+    }
+    // Show the affiliate user
+    $wcusage_affiliate_user = wcusage_order_meta( $order_id, 'wcusage_affiliate_user' );
+    if ( $wcusage_affiliate_user ) {
+        $affiliate = get_user_by( 'ID', $wcusage_affiliate_user );
+        $affiliate_username = $affiliate->user_login;
+        echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ) . ": <a href='" . esc_url( admin_url( "user-edit.php?user_id=" . $wcusage_affiliate_user ) ) . "' target='_blank' style='color: #07bbe3;'>" . esc_html( $affiliate_username ) . "</a><br/>";
+    }
     if ( $order->get_status() != "refunded" && !wcusage_coupon_disable_commission( $coupon_id ) ) {
         echo esc_html__( 'Commission', 'woo-coupon-usage' ) . ": " . wp_kses_post( $getinfo['thecommission'] ) . wp_kses_post( $ispaid ) . "<br/>";
     }
+    // Show the affiliate dashboard link
     echo "<a href='" . esc_url( $getinfo['uniqueurl'] ) . "' target='_blank' style='color: #07bbe3;' title='" . esc_html__( 'View the affiliate dashboard for this affiliate coupon.', 'woo-coupon-usage' ) . "'>" . esc_html__( 'View Dashboard', 'woo-coupon-usage' ) . "</a>";
     echo "</p>";
     $wcusage_field_mla_enable = wcusage_get_setting_value( 'wcusage_field_mla_enable', '0' );

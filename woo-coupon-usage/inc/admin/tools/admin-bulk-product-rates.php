@@ -43,9 +43,9 @@ function wcusage_bulk_assign_rates_page() {
     ?>
     <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
     <div class="wrap wcusage-tools">
-        <h2><?php echo esc_html__('Bulk Assign: Per-Affiliate Product Rates', 'your-text-domain'); ?></h2>
+        <h2><?php echo esc_html__('Bulk Assign: Per-Affiliate Product Rates', 'woo-coupon-usage'); ?></h2>
         <p></p>
-        <p><?php echo esc_html__('Bulk assign per-product commission rates, on a per-affiliate basis. Any existing rates will also be updated.', 'your-text-domain'); ?></p>
+        <p><?php echo esc_html__('Bulk assign per-product commission rates, on a per-affiliate basis. Any existing rates will also be updated.', 'woo-coupon-usage'); ?></p>
         <form id="bulk-assign-coupon-form" method="POST">
             <input type="hidden" name="action" value="assign_rates">
             <input type="hidden" name="_wpnonce" value="<?php echo esc_html($nonce); ?>">
@@ -53,11 +53,11 @@ function wcusage_bulk_assign_rates_page() {
             <div class="wcu-scrollable-table">
                 <table id="wcusage-tools-rows" style="margin: 0;">
                     <tr style="text-align: left;">
-                        <th><?php echo esc_html__('Product ID', 'your-text-domain'); ?></th>
-                        <th><?php echo esc_html__('Type', 'your-text-domain'); ?></th>
-                        <th class='the-type'><?php echo esc_html__('Affiliate', 'your-text-domain'); ?></th>
-                        <th><?php echo esc_html__('Percent', 'your-text-domain'); ?></th>
-                        <th><?php echo esc_html__('Fixed', 'your-text-domain'); ?></th>
+                        <th><?php echo esc_html__('Product ID', 'woo-coupon-usage'); ?></th>
+                        <th><?php echo esc_html__('Type', 'woo-coupon-usage'); ?></th>
+                        <th class='the-type'><?php echo esc_html__('Affiliate', 'woo-coupon-usage'); ?></th>
+                        <th><?php echo esc_html__('Percent', 'woo-coupon-usage'); ?></th>
+                        <th><?php echo esc_html__('Fixed', 'woo-coupon-usage'); ?></th>
                     </tr>
                     <?php wcusage_bulk_assign_rates_fields(); ?>
                 </table>

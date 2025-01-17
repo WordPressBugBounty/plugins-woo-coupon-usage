@@ -910,7 +910,7 @@ if( !function_exists( 'wcusage_setting_section_ordersalestracking' ) ) {
           } else {
             $name = 'wcusage_field_order_type_custom['.$key.']';
           }
-          echo '<span style="margin-right: 20px;'.esc_attr($extrastyles).'" id="'.esc_attr($thisid).'">
+          echo '<span style="display: inline-block; margin: 10px 20px 10px 0;'.esc_attr($extrastyles).'" id="'.esc_attr($thisid).'">
           <input type="checkbox"
           style="'.esc_attr($extrastyles).'" checktype="multi"
           class="order-status-checkbox-'.esc_attr($key).'"
