@@ -742,10 +742,18 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         $this_refunded_quantity = 0;
                         $this_total_refunded_quantity = 0;
                         $this_line_total_commission = 0;
-                        if ( isset( $item_data['product_id'] ) ) {
-                            $this_id = $item_data['product_id'];
+                        $parent_id = $item_data['product_id'];
+                        // Get the product or variation ID
+                        if ( isset( $item_data['variation_id'] ) && $item_data['variation_id'] != 0 ) {
+                            // If it's a variation, use the variation ID
+                            $this_id = $item_data['variation_id'];
                         } else {
-                            $this_id = 0;
+                            if ( isset( $item_data['product_id'] ) ) {
+                                // Otherwise, use the product ID
+                                $this_id = $item_data['product_id'];
+                            } else {
+                                $this_id = 0;
+                            }
                         }
                         // Count this products refunds
                         foreach ( $order->get_refunds() as $refund ) {
@@ -798,12 +806,42 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         }
                         $wcu_text_coupon_commission_fixed_product = get_post_meta( $getcoupon[2], 'wcu_text_coupon_commission_fixed_product', true );
                         // Get Coupon Fixed Per Product
+                        $product_percent = "";
+                        $fixed_product_commission = "";
+                        // Get Product Categories
+                        $product_cats = get_the_terms( $parent_id, 'product_cat' );
+                        // Check product categories for "wcu_product_cat_commission_percent" meta
+                        if ( is_array( $product_cats ) || is_object( $product_cats ) ) {
+                            foreach ( $product_cats as $product_cat ) {
+                                $product_cat_id = $product_cat->term_id;
+                                $product_cat_percent = get_term_meta( $product_cat_id, 'wcu_product_cat_commission_percent', true );
+                                $product_cat_fixed = get_term_meta( $product_cat_id, 'wcu_product_cat_commission_fixed', true );
+                                if ( $product_cat_percent != "" ) {
+                                    $product_percent = $product_cat_percent;
+                                }
+                                if ( $product_cat_fixed != "" ) {
+                                    $fixed_product_commission = $product_cat_fixed;
+                                }
+                            }
+                        }
                         // Default Per Product Rates
-                        $product_percent = get_post_meta( $this_id, 'wcu_product_commission_percent', true );
-                        $fixed_product_commission = get_post_meta( $this_id, 'wcu_product_commission_fixed', true );
+                        $this_product_percent = get_post_meta( $this_id, 'wcu_product_commission_percent', true );
+                        $this_product_percent_parent = get_post_meta( $parent_id, 'wcu_product_commission_percent', true );
+                        if ( is_numeric( $this_product_percent ) && $this_product_percent != "" ) {
+                            $product_percent = $this_product_percent;
+                        } elseif ( is_numeric( $this_product_percent_parent ) && $this_product_percent_parent != "" ) {
+                            $product_percent = $this_product_percent_parent;
+                        }
+                        $this_product_fixed = get_post_meta( $this_id, 'wcu_product_commission_fixed', true );
+                        $this_product_fixed_parent = get_post_meta( $parent_id, 'wcu_product_commission_fixed', true );
+                        if ( is_numeric( $this_product_fixed ) && $this_product_fixed != "" ) {
+                            $fixed_product_commission = $this_product_fixed;
+                        } elseif ( is_numeric( $this_product_fixed_parent ) && $this_product_fixed_parent != "" ) {
+                            $fixed_product_commission = $this_product_fixed_parent;
+                        }
                         // Per Affiliate Product Rates
-                        $product_per_user_rates = get_post_meta( $this_id, 'wcu_product_per_user_rates', true );
-                        // check if $product_per_user_rates is array
+                        $product_per_user_rates = get_post_meta( $parent_id, 'wcu_product_per_user_rates', true );
+                        // Check if $product_per_user_rates is array
                         if ( is_array( $product_per_user_rates ) ) {
                             foreach ( $product_per_user_rates as $product_per_user_rate ) {
                                 if ( isset( $product_per_user_rate['type'] ) ) {
@@ -937,12 +975,13 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                     }
                     // Update Commission Summary
                     if ( $type != "refunds" ) {
-                        $this_product_id = $item_data['product_id'];
+                        if ( isset( $item_data['variation_id'] ) && $item_data['variation_id'] != 0 ) {
+                            $this_product_id = $item_data['variation_id'];
+                        } else {
+                            $this_product_id = $item_data['product_id'];
+                        }
                         if ( $this_quantity2 > 0 ) {
                             $this_product_total_combined_commission = $this_line_total_commission + $fixed_product_commission * $this_quantity2;
-                            if ( $wcusage_show_tax_fixed ) {
-                                $this_product_total_combined_commission = $this_product_total_combined_commission * wcusage_get_order_tax_percent( $orderid );
-                            }
                             if ( !is_array( $commission_summary ) || empty( $commission_summary ) ) {
                                 $commission_summary = array();
                             }

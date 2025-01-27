@@ -65,6 +65,7 @@ if ( !function_exists( 'wcusage_tab_latest_orders' ) ) {
                 $option_show_amount = wcusage_get_setting_value( 'wcusage_field_amount', '1' );
                 $option_show_amount_saved = wcusage_get_setting_value( 'wcusage_field_amount_saved', '1' );
                 $option_show_shipping = wcusage_get_setting_value( 'wcusage_field_show_shipping', '0' );
+                $option_show_tax = wcusage_get_setting_value( 'wcusage_field_show_order_tax', '0' );
                 $option_show_list_products = wcusage_get_setting_value( 'wcusage_field_list_products', '1' );
                 $wcusage_show_commission = wcusage_get_setting_value( 'wcusage_field_show_commission', '1' );
                 $isordersstartset = false;
@@ -178,6 +179,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
         $option_show_amount = wcusage_get_setting_value( 'wcusage_field_amount', '1' );
         $option_show_amount_saved = wcusage_get_setting_value( 'wcusage_field_amount_saved', '1' );
         $option_show_shipping = wcusage_get_setting_value( 'wcusage_field_show_shipping', '0' );
+        $option_show_tax = wcusage_get_setting_value( 'wcusage_field_show_order_tax', '0' );
         $option_show_list_products = wcusage_get_setting_value( 'wcusage_field_list_products', '1' );
         $wcusage_show_commission = wcusage_get_setting_value( 'wcusage_field_show_commission', '1' );
         // Check if disable non affiliate commission
@@ -360,6 +362,19 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
         ?>
 
       <?php 
+        if ( $option_show_tax ) {
+            ?>
+        .wcu-table-recent-orders td:nth-of-type(<?php 
+            echo esc_html( $wcusage_ro_label_count );
+            ?>):before { content: "Tax"; }
+        <?php 
+            $wcusage_ro_label_count++;
+            ?>
+      <?php 
+        }
+        ?>
+
+      <?php 
         if ( $option_show_ordercountry ) {
             ?>
         .wcu-table-recent-orders td:nth-of-type(<?php 
@@ -503,6 +518,16 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                 ?><th class='wcuTableHead'><?php 
                 echo esc_html__( 'Total', 'woo-coupon-usage' );
                 ?></th><?php 
+            }
+            ?>
+
+        <?php 
+            if ( $option_show_tax ) {
+                ?>
+          <th class='wcuTableHead'><?php 
+                echo esc_html__( 'Tax', 'woo-coupon-usage' );
+                ?></th>
+        <?php 
             }
             ?>
 
@@ -841,6 +866,12 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                                 ''
                             ) ) . "</td>";
                         }
+                        // Tax
+                        if ( $option_show_tax != "0" ) {
+                            echo "<td class='wcuTableCell'> " . wcusage_format_price( $orderinfo->get_total_tax() ) . "</td>";
+                            $col7 = true;
+                        }
+                        // Commission
                         if ( $orders['total_commission'] > 0 && $wcusage_show_commission ) {
                             echo "<td class='wcuTableCell'> ";
                             if ( $type == "mla" ) {

@@ -887,9 +887,9 @@ Label the data
 }
 
 .wcusage_row input:checked+.slider:before, .wcusage_row_setting input:checked+.slider:before {
-    -webkit-transform: translateX(26px);
-    -ms-transform: translateX(26px);
-    transform: translateX(26px);
+    -webkit-transform: translateX(26px) !important;
+    -ms-transform: translateX(26px) !important;
+    transform: translateX(26px) !important;
 }
 
 .wcusage-settings-form .switch .slider.round {

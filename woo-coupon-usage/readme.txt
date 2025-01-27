@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.7.1
-Stable tag: 5.18.1
+Stable tag: 5.19.0
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -240,12 +240,32 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= Version 5.19.0 - 27th January 2025 =
+- New: (PRO) Added new option to set commission rates on a "per product category" basis.
+- New: (PRO) Added new option to set commission rates on a "per product variation" basis.
+- Tweak: (PRO) The "product rates" tab will now show each of the individual product variations, if the variation has a different commission rate. There is also a new option to display all product variations always (even with the same commission rates as parent) in the settings.
+- Tweak: (PRO) The "product rates" tab will now show a "No products found." message when searching but no products are found for the search term.
+- Tweak: Added an option to show the order tax on the "Recent Orders" tab of the affiliate dashboard.
+- Tweak: On the "recent orders" tab of the affiliate dashboard, in the order summary ("MORE") it will now show the product variations next to the product name if there are any.
+- Tweak: Small tweak to the styling of the toggles on the admin settings page in some cases.
+- Tweak: On the admin pages, admin notices will now be aligned better at the top of the page.
+- Fix: (PRO) Fixed a PHP warning when saving products.
+- Fix: (PRO) Fixed an issue with the "MLA Dashboard" link on the affiliate dashboad when viewing a sub-affiliate dashboard.
+- Fix: (PRO) Fixed an issue with saving the "assign to a new user role or affiliate group" option "New User Role" field for performance bonuses.
+- Fix: Fixed an issue with the "New customers only?" option when set for individual coupons and no affiliate is assigned to the coupon.
+- Fix: Fixed an issue in some cases where the name fields were not clickable on the affiliate registration form.
+- Other: Updated to Freemius SDK 2.11.0
+- Other: Tested with WooCommerce 9.6.0
+
+= Version 5.18.2 - 17th January 2025 =
+- Fix: (PRO) Fixed an issue with the new dynamic landing pages feature causing other link rewrites not to work, like the my account page menu links.
+
 = Version 5.18.1 - 17th January 2025 =
 - New: Added an option to the "Emails" settings tab to enable/disable the "Affiliate Information" in the admin "New Order" email.
+- Tweak: (PRO) Decimal numbers can now be entered for the per-product commission fields.
 - Tweak: Cancelled orders will now show as "0.00" values if displayed on the affiliate dashboard.
 - Tweak: In the "Coupon Affiliate" meta box for the admin edit orders page, added links to the referral code and affiliate user.
 - Tweak: Small tweak to the loading animation on the affiliate dashboard.
-- Tweak: (PRO) Decimal numbers can now be entered for the per-product commission fields.
 - Fix: (PRO) Fixed an error on the MLA dashboard in some cases.
 - Fix: (PRO) Fixed the dates for scheduling monthly email reports to be localised.
 - Fix: (PRO) Fixed an issue with the new dynamic landing pages feature causing other link rewrites not to work, like the my account page menu links.

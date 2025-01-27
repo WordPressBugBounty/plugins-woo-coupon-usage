@@ -21,6 +21,12 @@ if( !function_exists( 'wcu_fs_uninstall_cleanup' ) ) {
       $wcusage_field_deactivate_delete = 0;
     }
 
+    // Return if either plugin "woo-coupon-usage" or "woo-coupon-usage-pro" is active.
+    if( is_plugin_active( 'woo-coupon-usage/woo-coupon-usage.php' ) || is_plugin_active( 'woo-coupon-usage-pro/woo-coupon-usage-pro.php' ) ) {
+      return;
+    }
+
+    // Delete data if option is enabled.
     if($wcusage_field_deactivate_delete) {
 
       global $wpdb;

@@ -107,11 +107,6 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_customer' ) ) {
 
       if($coupon && !empty($coupon->get_id())) {
 
-        $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
-        if(!$coupon_user_id) {
-          continue;
-        }
-
         /***** Check existing customer. *****/
 
         $allow_all_customers = wcusage_get_setting_value('wcusage_field_allow_all_customers', 1);
@@ -123,6 +118,13 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_customer' ) ) {
             WC()->cart->remove_coupon( $coupon->get_code() );
             wc_add_notice( esc_html__( "Sorry, only new customers can use this coupon code.", "woo-coupon-usage" ), "error" );
           }
+        }
+
+        /***** Check if user assigned to coupon *****/
+
+        $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
+        if(!$coupon_user_id) {
+          continue;
         }
 
         /***** Check if visitor is blacklisted *****/

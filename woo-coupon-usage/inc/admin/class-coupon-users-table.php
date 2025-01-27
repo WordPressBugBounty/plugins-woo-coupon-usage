@@ -382,7 +382,7 @@ function wcusage_coupon_users_page() {
 
     <style>@media screen and (min-width: 782px) { .wcusage_users_page_desc { margin-bottom: -40px; } }</style>
 	<div class="wrap wcusage_users_page_header">
-		<h2 class="wcusage-admin-title">
+		<h2 class="wp-heading-inline wcusage-admin-title">
         <?php echo esc_html__('Coupon Affiliate Users', 'woo-coupon-usage'); ?>
         <span class="wcusage-admin-title-buttons">
             <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New Affiliate</a>

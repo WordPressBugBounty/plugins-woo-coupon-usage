@@ -389,7 +389,12 @@ function wcusage_field_cb( $args ) {
       <br/>
 
       <!-- Show shipping costs. -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_show_shipping', 0, esc_html__( 'Show shipping costs.', 'woo-coupon-usage' ), '0px'); ?>
+      <?php echo wcusage_setting_toggle_option('wcusage_field_show_shipping', 0, esc_html__( 'Show "shipping" costs column.', 'woo-coupon-usage' ), '0px'); ?>
+
+      <br/>
+
+      <!-- Show tax costs. -->
+      <?php echo wcusage_setting_toggle_option('wcusage_field_show_order_tax', 0, esc_html__( 'Show order "tax" column.', 'woo-coupon-usage' ), '0px'); ?>
 
       <br/>
 
@@ -559,6 +564,15 @@ function wcusage_field_cb( $args ) {
 
       <p>
         <?php echo wcusage_setting_number_option("wcusage_field_rates_per_page", "20", esc_html__( 'Products Per Page', 'woo-coupon-usage' ), "40px"); ?>
+      </p>
+
+      <br/>
+
+      <p>
+        <?php echo wcusage_setting_toggle_option('wcusage_field_rates_show_all_variations', 0, esc_html__( 'Show All Product Variations', 'woo-coupon-usage' ), '40px'); ?>
+        <i style="margin-left: 40px;"><?php echo esc_html__( 'If enabled, all variations of a product will be shown in the table as seperate rows.', 'woo-coupon-usage' ); ?></i>
+        <br/>
+        <i style="margin-left: 40px;"><?php echo esc_html__( 'If disabled, only the parent product will be shown - and variations that have per-variation commission rates set different to the parent.', 'woo-coupon-usage' ); ?></i>
       </p>
 
       <br/>

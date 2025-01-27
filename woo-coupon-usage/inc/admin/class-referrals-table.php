@@ -257,15 +257,15 @@ function wcusage_orders_page() {
     }
     </style>
     <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
-    <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
     <div class="wrap">
-    <h2 class="wcusage-admin-title" style="margin-bottom: -15px;">
+    <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
+    <h1 class="wcusage-admin-title" style="margin-bottom: -15px;">
     <?php echo esc_html__('Affiliate Orders (Referrals)', 'woo-coupon-usage'); ?>
     <span class="wcusage-admin-title-buttons">
         <a href="<?php echo esc_url(('post-new.php?post_type=shop_order')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New Order</a>
         <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-bulk-assign-coupons')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Assign Orders to Affiliates</a>
     </span>
-    </h2>
+    </h1>
     <br/>
     <?php
     echo '<form id="referrals-table" method="GET">';

@@ -8,9 +8,9 @@ function wcusage_tools_page() {
 
     <div class="wrap admin-tools" style="margin: 0;">
 
-        <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
-
         <div class="wrap">
+
+            <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
 
             <h1>Coupon Affiliates - Admin Tools</h1>
             <br/>

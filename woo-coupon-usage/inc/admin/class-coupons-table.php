@@ -376,10 +376,10 @@ function wcusage_coupons_page() {
     $page_url_without_affiliate_only = remove_query_arg('affiliate_only', $page_url);
     ?>
     <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
-    <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
     <div class="wrap">
+    <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
         <form method="get">
-            <h1 class="wcusage-admin-title wcusage-admin-title-coupons">
+            <h1 class="wp-heading-inline wcusage-admin-title wcusage-admin-title-coupons">
                 <?php echo esc_html__('Coupons', 'woo-coupon-usage'); ?>
                 <span class="wcusage-admin-title-buttons">
                     <a href="<?php echo esc_url(admin_url('post-new.php?post_type=shop_coupon')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add Coupon</a>
@@ -388,7 +388,7 @@ function wcusage_coupons_page() {
                     <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-bulk-edit-coupon')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Bulk Edit Coupons</a>
                 </span>
                 <br/>
-                <span class="wcusage-admin-title-filters">
+                <span class="wcusage-admin-title-filters" style="margin-bottom: 10px;">
                     <input type="hidden" name="page" value="<?php echo esc_html($_REQUEST['page']); ?>" />
                     <input type="checkbox" name="affiliate_only" value="true" <?php echo $affiliate_only ? 'checked' : ''; ?> onchange="this.form.submit();">
                     <?php echo esc_html__('Show Affiliate Coupons Only', 'woo-coupon-usage'); ?>

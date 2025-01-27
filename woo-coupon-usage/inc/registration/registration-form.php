@@ -210,6 +210,8 @@ if ( $wcusage_field_registration_enable ) {
                             }
                             ?>
 
+              <div style="clear: both;"></div>
+
               <p class="wcu-register-field-col-email <?php 
                             if ( !$wcusage_field_registration_emailusername ) {
                                 ?>wcu-register-field-col-2<?php 
@@ -300,6 +302,8 @@ if ( $wcusage_field_registration_enable ) {
             <?php 
                         }
                         ?>
+
+            <div style="clear: both;"></div>
 
             <!-- Recaptcha -->
             <?php 

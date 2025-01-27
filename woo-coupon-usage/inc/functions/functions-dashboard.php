@@ -619,7 +619,23 @@ function wcusage_get_detailed_products_summary_tr(
                 }
             }
             if ( is_numeric( $key ) ) {
-                $product_title = get_the_title( $key );
+                $product_title = get_the_title( $key ) . " (" . $key . ")";
+                $product = wc_get_product( $key );
+                if ( $product ) {
+                    $product_title = $product->get_name();
+                    if ( $product->is_type( 'variation' ) ) {
+                        $attributes = $product->get_attributes();
+                        $product_title .= " (";
+                        if ( $attributes ) {
+                            foreach ( $attributes as $attribute ) {
+                                $product_title .= $attribute . ", ";
+                            }
+                            $product_title = rtrim( $product_title, ", " );
+                        }
+                        $product_title = rtrim( $product_title, ", " );
+                        $product_title .= ")";
+                    }
+                }
             } else {
                 $product_title = $key;
             }

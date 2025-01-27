@@ -116,7 +116,11 @@ if ( ! function_exists( 'wcusage_admin_order_email' ) ) {
                 echo '</tr>';
 
                 // If coupons exist, display Coupon Information Table
-                $coupons = $order->get_used_coupons();
+				if ( version_compare( WC_VERSION, 3.7, ">=" ) ) {
+					$coupons = $order->get_coupon_codes();
+				} else {
+					$coupons = $order->get_used_coupons();
+				}
                 if ( $coupons ) {
 
                     foreach ( $coupons as $coupon_code ) {
