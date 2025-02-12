@@ -185,7 +185,7 @@
 @media only screen and (min-width: 720px) {
     .wcusage-settings form {
         background: #fff;
-        padding: 4px 14px;
+        padding: 10px 14px;
         border-radius: 10px;
     }
 }
@@ -1749,7 +1749,7 @@ p label {
 
 .wcusage-get-started {
     background: #F8F8FF;
-    padding: 4px 15px;
+    padding: 12px 12px;
     border-radius: 10px;
 }
 

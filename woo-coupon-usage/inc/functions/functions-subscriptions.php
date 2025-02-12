@@ -160,6 +160,7 @@ if ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php'
  */
 if ( !function_exists( 'wcusage_check_if_renewal_allowed' ) ) {
     function wcusage_check_if_renewal_allowed(  $order_id  ) {
+        $renewalcheck = true;
         if ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ) ) {
             $subscriptions_ids = wcs_get_subscriptions_for_order( $order_id, array(
                 'order_type' => 'any',
@@ -196,6 +197,8 @@ if ( !function_exists( 'wcusage_check_if_renewal_allowed' ) ) {
             $renewalcheck = true;
             // subs off
         }
+        // Custom filter
+        $renewalcheck = apply_filters( 'wcusage_is_renewal_allowed', $renewalcheck, $order_id );
         return $renewalcheck;
     }
 

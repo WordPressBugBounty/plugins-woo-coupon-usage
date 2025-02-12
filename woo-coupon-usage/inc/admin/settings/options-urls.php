@@ -15,12 +15,12 @@ function wcusage_field_cb_urls( $args )
 
 	<div id="urls-settings" class="settings-area">
 
-	<h1><?php echo esc_html__( 'Referral URLs', 'woo-coupon-usage' ); ?></h1>
+	<h1><?php echo esc_html__( 'Referral Links', 'woo-coupon-usage' ); ?></h1>
 
   <hr/>
 
-    <!-- Enable Referral URLs -->
-    <?php echo wcusage_setting_toggle_option('wcusage_field_urls_enable', 1, esc_html__( 'Enable Referral URLs & Click Tracking', 'woo-coupon-usage' ), '0px'); ?>
+    <!-- Enable Referral Links -->
+    <?php echo wcusage_setting_toggle_option('wcusage_field_urls_enable', 1, esc_html__( 'Enable Referral URL Generation & Click Tracking', 'woo-coupon-usage' ), '0px'); ?>
 
     <br/>
 
@@ -76,7 +76,7 @@ function wcusage_field_cb_urls( $args )
 
       <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( '"Referral URL" Tab', 'woo-coupon-usage' ); ?>:</h3>
 
-      <!-- Enable Referral URLs -->
+      <!-- Enable Referral Links -->
       <?php echo wcusage_setting_toggle_option('wcusage_field_urls_tab_enable', 1, esc_html__( 'Enable "Referral URL" tab on the affiliate dashboard.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'Recommended. This will allow them to view and generate their own referrral URLs, click history, campaigns, etc.', 'woo-coupon-usage' ); ?></i><br/>
 
@@ -523,7 +523,7 @@ function wcusage_field_cb_urls( $args )
 
           <br/>
 
-          <!-- Enable Referral URLs -->
+          <!-- Enable Referral Links -->
           <?php echo wcusage_setting_toggle_option('wcusage_field_creatives_enable', 1, esc_html__( 'Enable "Creatives" Features', 'woo-coupon-usage' ), '0px'); ?>
 
           <?php echo wcusage_setting_toggle('.wcusage_field_creatives_enable', '.wcu-field-section-referral-url-creatives-settings'); // Show or Hide ?>

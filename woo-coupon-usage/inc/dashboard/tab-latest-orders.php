@@ -620,6 +620,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
         $col8 = 0;
         $col9 = 0;
         $col10 = 0;
+        $col11 = 0;
         $colmla = 0;
         $total_statuses = array();
         foreach ( $orders as $item ) {
@@ -830,6 +831,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                             echo "<td class='wcuTableCell'>";
                             echo "<span>" . esc_html( $showtime ) . "</span>";
                             echo "</td>";
+                            $coltime = true;
                         }
                         // Status
                         if ( $option_show_status ) {
@@ -869,7 +871,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         // Tax
                         if ( $option_show_tax != "0" ) {
                             echo "<td class='wcuTableCell'> " . wcusage_format_price( $orderinfo->get_total_tax() ) . "</td>";
-                            $col7 = true;
+                            $col11 = true;
                         }
                         // Commission
                         if ( $orders['total_commission'] > 0 && $wcusage_show_commission ) {
@@ -965,9 +967,11 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                                     $productcols = 2 + $extracols - 1;
                                     ?>
 
+                <span class="excludeThisClass">
+
                   <tbody style="margin-bottom: 15px;" id="listproducts-<?php 
                                     echo esc_html( $random ) . "-" . esc_html( $orderid );
-                                    ?>" class="listtheproducts listtheproducts-summary"<?php 
+                                    ?>" class="listtheproducts listtheproducts-summary excludeThisClass"<?php 
                                     if ( $option_show_list_products ) {
                                         ?> style="display: none;"<?php 
                                     }
@@ -988,8 +992,8 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
 
                   <tbody id="listproductsb-<?php 
                                     echo esc_html( $random ) . "-" . esc_html( $orderid );
-                                    ?>" style="display: none;">
-                    <tr class="listtheproducts listtheproducts-small">
+                                    ?>" style="display: none;" class="excludeThisClass">
+                    <tr class="listtheproducts listtheproducts-small excludeThisClass">
                       <?php 
                                     do_action(
                                         'wcusage_hook_get_basic_list_order_products',
@@ -1051,6 +1055,9 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                 if ( $colstatus ) {
                     echo "<td class='wcuTableFoot'></td>";
                 }
+                if ( $coltime ) {
+                    echo "<td class='wcuTableFoot'></td>";
+                }
                 if ( $colmla ) {
                     echo "<td class='wcuTableFoot'></td>";
                 }
@@ -1103,6 +1110,9 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                     echo "<td class='wcuTableFoot'></td>";
                 }
                 if ( $col7 ) {
+                    echo "<td class='wcuTableFoot'></td>";
+                }
+                if ( $col11 ) {
                     echo "<td class='wcuTableFoot'></td>";
                 }
                 ?>
@@ -1410,7 +1420,10 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
             echo esc_url( admin_url( 'admin-ajax.php' ) );
             ?>',
             data: data,
-            success: function(data){ jQuery('.show_orders').html(data); },
+            success: function(data){
+              jQuery('#wcuTable2').remove();
+              jQuery('.show_orders').html(data);
+            },
             error: function(data){ jQuery('.show_orders').html('<?php 
             echo wp_kses_post( $ajaxerrormessage );
             ?>'); }

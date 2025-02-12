@@ -107,10 +107,18 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_customer' ) ) {
 
       if($coupon && !empty($coupon->get_id())) {
 
+        $first_order_only = get_post_meta( $coupon->get_id(), 'wcu_enable_first_order_only', true );
+
+        /***** Check if user assigned to coupon *****/
+
+        $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
+        if(!$coupon_user_id && $first_order_only != "yes") {
+          continue;
+        }
+
         /***** Check existing customer. *****/
 
         $allow_all_customers = wcusage_get_setting_value('wcusage_field_allow_all_customers', 1);
-        $first_order_only = get_post_meta( $coupon->get_id(), 'wcu_enable_first_order_only', true );
         if( $first_order_only == "yes" || !$allow_all_customers ) {
           $checkout_email = WC()->checkout()->get_value( 'billing_email' );
           if(wcusage_is_existing_customer($checkout_email)) {
@@ -118,13 +126,6 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_customer' ) ) {
             WC()->cart->remove_coupon( $coupon->get_code() );
             wc_add_notice( esc_html__( "Sorry, only new customers can use this coupon code.", "woo-coupon-usage" ), "error" );
           }
-        }
-
-        /***** Check if user assigned to coupon *****/
-
-        $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
-        if(!$coupon_user_id) {
-          continue;
         }
 
         /***** Check if visitor is blacklisted *****/
@@ -295,6 +296,12 @@ function wcusage_custom_woocommerce_coupon_label( $label, $coupon ) {
     return $label;
   }
 
+  // Get the user ID of the coupon
+  $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
+  if( ! $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true ) ) {
+      return $label;
+  }
+
   if ( WC()->cart->get_coupon_discount_amount( $coupon->get_code(), true ) == 0 ) {
     $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
     if ( $coupon_user_id == get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true ) ) {
@@ -309,10 +316,10 @@ function wcusage_custom_woocommerce_coupon_label( $label, $coupon ) {
 }
 
 /*
-* Function that hides the £0.00 value of a coupon on the cart page
+* Function that hides the £0.00 value of a coupon on the cart and checkout page
 *
 */
-add_filter( 'woocommerce_cart_totals_coupon_html', 'wcusage_custom_woocommerce_coupon_html', 10, 2 );
+add_filter( 'woocommerce_cart_totals_coupon_html', 'wcusage_custom_woocommerce_coupon_html', 1000, 2 );
 function wcusage_custom_woocommerce_coupon_html( $discount_html, $coupon ) {
   
     // Check if the setting is enabled
@@ -326,6 +333,7 @@ function wcusage_custom_woocommerce_coupon_html( $discount_html, $coupon ) {
     if( ! $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true ) ) {
         return $discount_html;
     }
+    
     // Check if the discount amount is £0.00
     if ( WC()->cart->get_coupon_discount_amount( $coupon->get_code(), true ) == 0 ) {
         // Hide the £0.00 value but keep the Remove link

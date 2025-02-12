@@ -192,6 +192,11 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 			continue;
 		}
 
+		$renewalcheck = wcusage_check_if_renewal_allowed($order_id);
+		if(!$renewalcheck) {
+			continue;
+		}
+
         if($order_id) {
 		
 			$theorderstatus = $order->get_status();

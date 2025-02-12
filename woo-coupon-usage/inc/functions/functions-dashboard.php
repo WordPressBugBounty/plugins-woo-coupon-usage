@@ -521,7 +521,7 @@ function wcusage_get_detailed_products_summary_tr(
     $disable_commission = wcusage_coupon_disable_commission( $postid );
     ?>
 
-  <tr class="wcuTableRow listtheproducts-summary-head">
+  <tr class="wcuTableRow listtheproducts-summary-head excludeThisClass">
     <td class='wcuTableHead-summary' colspan="<?php 
     echo esc_attr( $productcols );
     ?>">
@@ -641,7 +641,7 @@ function wcusage_get_detailed_products_summary_tr(
             }
             if ( $the_total > 0 ) {
                 ?>
-      <tr class="wcuTableRowDropdown">
+      <tr class="wcuTableRowDropdown excludeThisClass">
         <td class='wcuTableCell' colspan="<?php 
                 echo esc_attr( $productcols );
                 ?>" style="padding: 0 !important;">

@@ -418,12 +418,12 @@ function wcusage_field_cb( $args ) {
 
   <div class="wcu_section_settings" id="wcu_section_urls_tab" style="display: none;">
 
-  <!-- Enable Referral URLs -->
-  <?php echo wcusage_setting_toggle_option('wcusage_field_urls_enable', 1, esc_html__( 'Enable Referral URLs & Click Tracking', 'woo-coupon-usage' ), '0px'); ?>
+  <!-- Enable Referral Links -->
+  <?php echo wcusage_setting_toggle_option('wcusage_field_urls_enable', 1, esc_html__( 'Enable Referral Links & Click Tracking', 'woo-coupon-usage' ), '0px'); ?>
 
   <br/>
 
-  <p><?php echo esc_html__( 'To customise the "Referral URLs" tab, please go to the referral URL settings:', 'woo-coupon-usage' ); ?> <a href="#" onclick="wcusage_go_to_settings('#tab-urls', '#affiliate-reports-settings');">Click Here</a></p>
+  <p><?php echo esc_html__( 'To customise the "Referral Links" tab, please go to the referral URL settings:', 'woo-coupon-usage' ); ?> <a href="#" onclick="wcusage_go_to_settings('#tab-urls', '#affiliate-reports-settings');">Click Here</a></p>
 
   </div>
 
@@ -740,12 +740,36 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
       <?php
       $dashboardpage = "";
       if ( isset($options['wcusage_dashboard_page']) ) {
-          //echo "Page: " . $options['wcusage_dashboard_page'] . "<br/>";
           $dashboardpage = $options['wcusage_dashboard_page'];
-      } else {
-          $dashboardpage = wcusage_get_coupon_shortcode_page_id();
       }
-      //echo "test: " . $dashboardpage . "<br/>";
+      // Check this page contains the [couponaffiliates] shortcode
+      if ( $dashboardpage ) {
+        $page = get_post($dashboardpage);
+        if ( !has_shortcode($page->post_content, 'couponaffiliates') ) {
+          $options_update = get_option('wcusage_options');
+          $options_update['wcusage_dashboard_page'] = "";
+          update_option('wcusage_options', $options_update);
+          $dashboardpage = $options_update['wcusage_dashboard_page'];
+        }
+      }
+      // If the page is not set, try to find it
+      if ( !isset($options['wcusage_dashboard_page']) || !$dashboardpage ) {
+        $dashboardpage = wcusage_get_coupon_shortcode_page_id();
+        if($dashboardpage) {
+          $options_update = get_option('wcusage_options');
+          $options_update['wcusage_dashboard_page'] = $dashboardpage;
+          update_option('wcusage_options', $options_update);
+        }
+      }
+      // Show warning if the page does not contain the shortcode
+      if ( isset($options['wcusage_dashboard_page']) && $options['wcusage_dashboard_page'] && !$dashboardpage ) {
+        $page = get_post($dashboardpage);
+        if ( !has_shortcode($page->post_content, 'couponaffiliates') ) {
+            echo "<p style='color: red; margin: 5px 0;'><strong>".esc_html__( 'Fix required: The selected page you have selected previously did not contain the [couponaffiliates] shortcode.', 'woo-coupon-usage' )."</strong></p>";
+            echo "<p style='color: red; margin: 5px 0;'><strong>".esc_html__( 'Please select a page that contains the [couponaffiliates] shortcode.', 'woo-coupon-usage' )."</strong></p>";
+          }
+      }
+      // Show the dropdown
       $dropdown_args = array(
           'post_type'        => 'page',
           'selected'         => esc_html($dashboardpage),
@@ -761,8 +785,22 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
       }
       wp_dropdown_pages( $dropdown_args );
 
-      // Show the link
-      echo "<br/><a style='margin-top: 5px; display: inline-block;' id='dashboard_link' href='".esc_url(get_permalink($dashboardpage))."' target='_blank'>".esc_url(get_permalink($dashboardpage))."</a>";
+      if(!$dashboardpage) {
+      ?>
+      <br/>
+      <!-- Link to GET create_new_dashboard as 1 -->
+      <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_settings&create_new_dashboard=1')); ?>" style="margin: 5px 0; display: inline-block;">
+        <button type="button" name="submitnewpage" class="button button-secondary">
+          <strong><?php echo esc_html__( "Generate Dashboard Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-circle-arrow-right"></span></strong>
+        </button>
+      </a>
+      <?php } ?>
+      
+      <?php
+      if($dashboardpage) {
+        // Show the link
+        echo "<br/><a style='margin-top: 5px; display: inline-block;' id='dashboard_link' href='".esc_url(get_permalink($dashboardpage))."' target='_blank'>".esc_url(get_permalink($dashboardpage))."</a>";
+      }
       ?>
 
       <script type="text/javascript">

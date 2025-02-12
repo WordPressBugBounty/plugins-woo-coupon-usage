@@ -226,21 +226,21 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
         } else {
             if ( $page == 0 ) {
                 ?>
-			  <p><?php 
+					<p><?php 
                 echo esc_html__( 'There have been no clicks for this campaign yet.', 'woo-coupon-usage' );
                 ?></p>
-        <script>
-        jQuery(document).ready(function(){
-          jQuery( ".wcu-clicks-pagination" ).hide();
-        });
-        </script>
-        <?php 
+				<script>
+				jQuery(document).ready(function(){
+				jQuery( ".wcu-clicks-pagination" ).hide();
+				});
+				</script>
+				<?php 
             } else {
                 ?>
-        <p><?php 
+				<p><?php 
                 echo esc_html__( 'No clicks available.', 'woo-coupon-usage' );
                 ?></p>
-        <?php 
+				<?php 
             }
         }
     }

@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action( 'wcusage_hook_getting_started_create', 'wcusage_getting_started_create' );
 function wcusage_getting_started_create() {
 
-    if ( isset( $_POST['submitnewpage'] ) || isset( $_POST['submitnewpage2'] ) ) {
+    if ( isset( $_POST['submitnewpage'] ) || isset( $_POST['submitnewpage2'] ) || isset( $_GET['create_new_dashboard'] ) ) {
 
     $current_user_id = get_current_user_id();
 
@@ -53,6 +53,13 @@ function wcusage_getting_started_create() {
     $option_group['wcusage_dashboard_page'] = $new_page_id;
     update_option( 'wcusage_options', $option_group );
 
+    }
+
+    // Remove GET variable from URL
+    if(isset($_GET['create_new_dashboard'])) {
+      $url = remove_query_arg('create_new_dashboard');
+      wp_redirect($url);
+      exit;
     }
 
 }
@@ -123,9 +130,11 @@ function wcusage_getting_started() {
   		<?php echo esc_html__( "(5) To view our step-by-step setup guide", "woo-coupon-usage" ); ?> <a href='https://couponaffiliates.com/docs/setup-guide-free' target='_blank'><?php echo esc_html__( "click here", "woo-coupon-usage" ); ?></a>.
   		</p>
 
-      <button type="submit" name="submitnewpage" style="width: 250px; display: block; margin-bottom: -17px;" />
+      <p style="margin-bottom: -15px;">
+      <button type="submit" name="submitnewpage" class="button button-secondary" style="display: inline-block;">
         <?php echo esc_html__( "Generate Dashboard Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-circle-arrow-right"></span>
       </button>
+      </p>
       <br/>
       <div style="clear: both;"></div>
 
@@ -165,7 +174,7 @@ function wcusage_getting_started2() {
 		<?php echo esc_html__( "(5) To view our plugin setup guide", "woo-coupon-usage" ); ?> <a href="https://couponaffiliates.com/docs/setup-guide-free" target="_blank"><?php echo esc_html__( "click here", "woo-coupon-usage" ); ?></a>.
 		</p>
 
-		<button type="button" name="submitnewpage">
+		<button type="button" name="submitnewpage" class="button button-secondary">
       <?php echo esc_html__( "Generate Dashboard Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-circle-arrow-right"></span>
     </button>
 

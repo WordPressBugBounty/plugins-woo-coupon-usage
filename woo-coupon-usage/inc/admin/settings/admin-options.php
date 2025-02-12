@@ -417,7 +417,7 @@ jQuery( document ).ready(function() {
   <?php 
     echo wcusage_admin_settings_tab_button(
         "tab-urls",
-        esc_html__( "Referral URLs", "woo-coupon-usage" ),
+        esc_html__( "Referral Links", "woo-coupon-usage" ),
         "fas fa-link",
         0,
         ''
@@ -1107,10 +1107,33 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         ?>
 
    </div>
+
+   <div style="clear: both;"></div>
+
+   <br/>
+
+    <span style="display: inline-block; background: #fff; padding: 10px; border-radius: 5px; margin-top: 20px; font-size: 15px;">
+    <?php 
+        $pluginname = "woo-coupon-usage";
+        $plugin = get_plugin_data( WP_PLUGIN_DIR . '/' . $pluginname . '/' . $pluginname . '.php', false, false );
+        $pluginversion = $plugin['Version'];
+        ?>
+    Coupon Affiliates Version <?php 
+        echo esc_html( $pluginversion );
+        ?>. <a href="https://roadmap.couponaffiliates.com/updates" target="_blank">View Changelog</a>.
+    <br/><br/>
+    Developed and supported by <a href="https://relywp.com">RelyWP Ltd</a>.
+    </span>
+
    <?php 
     }
 
 }
+function wcusage_get_plugin_version(  $pluginname  ) {
+    $plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $pluginname . '/' . $pluginname . '.php', false, false );
+    return $plugin_data['Version'];
+}
+
 /**
  * Script for showing section when toggle is on/off
  *

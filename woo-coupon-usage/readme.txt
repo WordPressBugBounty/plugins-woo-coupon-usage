@@ -3,8 +3,8 @@ Contributors: ElliotVS, freemius, couponaffiliates, RelyWP
 Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliates woocommerce
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
-Tested up to: 6.7.1
-Stable tag: 5.19.0
+Tested up to: 6.7.2
+Stable tag: 5.19.1
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -239,6 +239,18 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 5.19.1 - 12th February 2025 =
+- Improvement: Modified the admin reports to generate in batches to help prevent timeouts on large sites.
+- Tweak: Added a solution to prevent issues/confusion when setting up the affiliate dashboard page in the settings.
+- Fix: Fixed an issue with the custom text for "Coupon" on checkout for affiliate coupons, applying to all coupons rather than just the affiliate coupons.
+- Fix: Fixed alignment of the "Recent Orders" table footer on the affiliate dashboard since the last update.
+- Fix: (PRO) Fixed the export feature on the recent orders tab of the affiliate dashboard not taking into account filters, and tidied up the export file too.
+- Fix: Fixed an issue with the "New Customers Only" global setting being applied to all coupons, rather than just the affiliate coupons.
+- Fix: Fixed a undefined array key "wcu_enable_reports" PHP warning.
+- Dev: Added a filter to modify the wcusage_check_if_renewal_allowed() function.
+- Other: Tested with WordPress 6.7.2
+- Other: Tested with WooCommerce 9.6.1
 
 = Version 5.19.0 - 27th January 2025 =
 - New: (PRO) Added new option to set commission rates on a "per product category" basis.

@@ -290,11 +290,11 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
           <span class="wcu-order-filterusage-field">
             <strong>Total Usage</strong> is
             <select id="wcu-orders-filterusage-type" name="wcu_orders_filterusage_type">
-              <option value="more or equal"><?php 
-        echo esc_html__( "Equal or More", "woo-coupon-usage" );
-        ?></option>
               <option value="more"><?php 
         echo esc_html__( "More", "woo-coupon-usage" );
+        ?></option>
+              <option value="more or equal"><?php 
+        echo esc_html__( "Equal or More", "woo-coupon-usage" );
         ?></option>
               <option value="less or equal"><?php 
         echo esc_html__( "Equal or Less", "woo-coupon-usage" );
@@ -480,18 +480,19 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
   });
 
   jQuery(document).on("click", "#generate-new-report", function(){
-    jQuery(".wcu-admin-reports-form").show();
-    jQuery(".loaded-stats").hide();
+    location.reload();
   });
 
   jQuery(document).on("click", "#wcu-monthly-orders-button", function(){
     jQuery(".wcu-admin-reports-form").hide();
+    jQuery(".show_data").html("");
+    jQuery(".loaded-stats").hide();
   });
 
   jQuery(document).on("click", "#wcu-monthly-orders-button", function(){
     jQuery(document).one("ajaxStop", function() {
 
-        var checkusage = jQuery('.total-usage').text();
+        // Check the field total fields and update the stats
 
         jQuery(".wcu-loading-image").hide();
         jQuery(".loaded-stats").show();
@@ -505,176 +506,57 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
             'total-discounts',
             'total-commission',
             'unpaid-commission',
-            'pending-commission'
+            'pending-commission',
+            'total-clicks',
+            'total-conversions',
+            'total-conversion-rate'
         ];
         foreach ( $stattypes as $stat ) {
-            $currencysym = "";
-            if ( $stat != 'total-usage' ) {
-                $currencysym = wcusage_get_currency_symbol();
-            }
             ?>
-
-          // Calc Sums Total Usage
-          var sum = 0;
-          var showvalue = 0;
-          var totalitems = 0;
-
-          jQuery('.item-<?php 
-            echo esc_html( $stat );
-            ?>').each(function(){
-              if(parseFloat(jQuery(this).text())) {
-                totalitems++;
-                sum += parseFloat(jQuery(this).text());  // Or this.innerHTML, this.innerText
-              }
-          });
-          showvalue = parseFloat(sum);
+        
+          var thetotal = 0;
           <?php 
-            if ( $stat != 'total-usage' ) {
+            if ( $stat == 'total-sales' || $stat == 'total-discounts' || $stat == 'total-commission' || $stat == 'unpaid-commission' || $stat == 'pending-commission' ) {
                 ?>
-            var showvalue = sum.toFixed(2);
+            jQuery(".final-<?php 
+                echo esc_html( $stat );
+                ?>").each(function(){
+              thetotal += parseFloat(jQuery(this).val());
+            });
+            jQuery(".<?php 
+                echo esc_html( $stat );
+                ?>").text(thetotal.toFixed(2));
           <?php 
-            }
-            ?>
-          jQuery('.<?php 
-            echo esc_html( $stat );
-            ?>').text( showvalue );
-
-              // DIFFERENCE
-              var sum2 = 0;
-              jQuery('.item-<?php 
-            echo esc_html( $stat );
-            ?>-old').each(function(){
-                  if(parseFloat(jQuery(this).text())) {
-                    sum2 += parseFloat(jQuery(this).text());  // Or this.innerHTML, this.innerText
-                  }
-                  <?php 
-            if ( $stat != 'total-usage' ) {
+            } elseif ( $stat == 'total-conversion-rate' ) {
                 ?>
-                    sum2 = parseFloat(sum2.toFixed(2));
-                  <?php 
+            // Get the total clicks and conversions conversion rate
+            var totalclicks = parseFloat(jQuery(".final-total-clicks").val());
+            var totalconversions = parseFloat(jQuery(".final-total-conversions").val());
+            var totalconversionrate = 0;
+            if ( totalclicks > 0 ) {
+              totalconversionrate = (totalconversions / totalclicks) * 100;
+            }
+            jQuery(".<?php 
+                echo esc_html( $stat );
+                ?>").text(totalconversionrate.toFixed(2));
+          <?php 
+            } else {
+                ?>
+            jQuery(".final-<?php 
+                echo esc_html( $stat );
+                ?>").each(function(){
+              thetotal += parseInt(jQuery(this).val());
+            });          
+            jQuery(".<?php 
+                echo esc_html( $stat );
+                ?>").text(thetotal.toFixed(0));
+          <?php 
             }
             ?>
-              });
 
-              var decreaseValue = sum - sum2;
-              if(sum > sum2) {
-                var incicon = "<i class='fas fa-arrow-up'></i>";
-                var inccolor = "green";
-              } else {
-                var incicon = "<i class='fas fa-arrow-down'></i>";
-                var inccolor = "red";
-              }
-              var compare = incicon + " " + Math.abs( ( (decreaseValue / sum) * 100 ).toFixed(2) ) + "%";
-
-              jQuery('.<?php 
-            echo esc_html( $stat );
-            ?>-old').html( "<span style='display: block; color: "+inccolor+"; font-size: 12px;' title='Previous: <?php 
-            echo esc_html( $currencysym );
-            ?>" + sum2 + "'>" + compare + "</span>" );
-
-          <?php 
+        <?php 
         }
         ?>
-
-
-        // ***** Referral URL Statistics ***** //
-
-        // Calc Sums Total Clicks
-        var sum = 0;
-        jQuery('.item-total-clicks').each(function(){
-           sum += parseFloat(jQuery(this).text());  // Or this.innerHTML, this.innerText
-        });
-        jQuery('.total-clicks').text(sum);
-        var convclicks = sum;
-
-          // DIFFERENCE
-          var sum2 = 0;
-          jQuery('.item-total-clicks-old').each(function(){
-              if(parseFloat(jQuery(this).text())) {
-                sum2 += parseFloat(jQuery(this).text());  // Or this.innerHTML, this.innerText
-              }
-          });
-          sum2 = sum2.toFixed(2);
-
-          var decreaseValue = sum - sum2;
-          if(sum > sum2) {
-            var incicon = "<i class='fas fa-arrow-up'></i>";
-            var inccolor = "green";
-          } else {
-            var incicon = "<i class='fas fa-arrow-down'></i>";
-            var inccolor = "red";
-          }
-          var compare = incicon + " " + Math.abs( ( (decreaseValue / sum) * 100 ).toFixed(2) ) + "%";
-
-          jQuery('.total-clicks-old').html( "<span style='display: block; color: "+inccolor+"; font-size: 12px;' title='Previous: " + sum2 + "'>" + compare + "</span>" );
-          var convclicks2 = sum2;
-
-        // Calc Sums Total Conversions
-        var sum = 0;
-        jQuery('.item-total-conversions').each(function(){
-           sum += parseFloat(jQuery(this).text());  // Or this.innerHTML, this.innerText
-        });
-        jQuery('.total-conversions').text(sum);
-        var convs = sum;
-
-            // DIFFERENCE
-            var sum2 = 0;
-            jQuery('.item-total-conversions-old').each(function(){
-                if(parseFloat(jQuery(this).text())) {
-                  sum2 += parseFloat(jQuery(this).text());  // Or this.innerHTML, this.innerText
-                }
-            });
-            sum2 = sum2.toFixed(2);
-
-            var decreaseValue = sum - sum2;
-            if(sum > sum2) {
-              var incicon = "<i class='fas fa-arrow-up'></i>";
-              var inccolor = "green";
-            } else {
-              var incicon = "<i class='fas fa-arrow-down'></i>";
-              var inccolor = "red";
-            }
-            var compare = incicon + " " + Math.abs( ( (decreaseValue / sum) * 100 ).toFixed(2) ) + "%";
-
-            jQuery('.total-conversions-old').html( "<span style='display: block; color: "+inccolor+"; font-size: 12px;' title='Previous: " + sum2 + "'>" + compare + "</span>" );
-            var convs2 = sum2;
-
-        // Calc Sums Conversion Rate
-        var sum = (convs / convclicks) * 100;
-        sum = sum.toFixed(2);
-        if(isNaN(sum)) {
-          sum = 0;
-        }
-        jQuery('.total-conversion-rate').text(sum);
-
-          // DIFFERENCE
-          var sum2 = (convs2 / convclicks2) * 100;
-          sum2 = sum2.toFixed(2);
-
-          var decreaseValue = sum - sum2;
-          if(sum > sum2) {
-            var incicon = "<i class='fas fa-arrow-up'></i>";
-            var inccolor = "green";
-          } else {
-            var incicon = "<i class='fas fa-arrow-down'></i>";
-            var inccolor = "red";
-          }
-          var compare = incicon + " " + Math.abs(decreaseValue.toFixed(2)) + "%";
-
-          jQuery('.total-conversion-rate-old').html( "<span style='display: block; color: "+inccolor+"; font-size: 12px;' title='Previous: " + sum2 + "'>" + compare + "</span>" );
-
-
-        // ***** Sort By Total Sales *****/
-
-        var divList = jQuery(".coupon-item-box");
-        divList.sort(function(a, b){
-            return jQuery(b).data("usage")-jQuery(a).data("usage")
-        });
-        jQuery("#table-coupon-items").html(divList);
-        jQuery( "#sort-by-usage" ).css("font-weight","Bold");
-
-        // Sort by usage
-        jQuery( "#sort-by-usage" ).click();
 
     });
   });
@@ -705,7 +587,10 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
     <div class="loaded-stats">
 
     <p style="margin: 0;">
-    <a id="generate-new-report" href="#" onclick="return false;" style="text-decoration: none; font-weight: bold;">
+    <a id="generate-new-report" href="<?php 
+        echo esc_url( admin_url( 'admin.php?page=wcusage_admin_reports' ) );
+        ?>"
+    style="text-decoration: none; font-weight: bold;">
       <?php 
         echo esc_html__( "GENERATE NEW REPORT", "woo-coupon-usage" );
         ?> <i class="fas fa-angle-double-right"></i>
@@ -937,7 +822,11 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
         class="wcu-button-export-admin"
         value="<?php 
         echo esc_html__( "Download CSV", "woo-coupon-usage" );
-        ?> &#x025B8;"
+        ?> &#x025B8; <?php 
+        if ( !wcu_fs()->can_use_premium_code() ) {
+            ?> (Pro)<?php 
+        }
+        ?>"
         <?php 
         if ( !wcu_fs()->can_use_premium_code() ) {
             ?>style="cursor: default;" onclick="return false;"<?php 
@@ -983,7 +872,8 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
 
   </div>
 
-  <script>
+
+<script>
   jQuery(document).ready(function(){
 
     jQuery.expr.pseudos.Contains = function(a, i, m) {
@@ -1007,9 +897,6 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
     });
 
     // Show/hide stats to prevent it showing randomly
-    jQuery('#generate-new-report').on('click', function(){
-       jQuery('.loaded-stats-wrapper').css('display', 'none');
-    });
     jQuery('.wcu-button-search-report-admin').on('click', function(){
        jQuery('.loaded-stats-wrapper').css('display', 'block');
     });
@@ -1033,59 +920,75 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
 
           jQuery('.show_data').html('');
 
-          var data = {
-            action: 'wcusage_load_admin_reports',
-            _ajax_nonce: '<?php 
+          function fetchReports(offset = 0) {
+              var response = '';
+              var data = {
+                  action: 'wcusage_load_admin_reports',
+                  _ajax_nonce: '<?php 
         echo esc_html( wp_create_nonce( 'wcusage_admin_ajax_nonce' ) );
         ?>',
-            wcu_orders_start: jQuery('input[name=wcu_monthly_orders_start]').val(),
-            wcu_orders_end: jQuery('input[name=wcu_monthly_orders_end]').val(),
-            <?php 
+                  offset: offset,
+                  limit: 500,
+                  timestamp: new Date().getTime(),
+                  wcu_orders_start: jQuery('input[name=wcu_monthly_orders_start]').val(),
+                  wcu_orders_end: jQuery('input[name=wcu_monthly_orders_end]').val(),
+                  <?php 
         ?>
-            <?php 
+                  <?php 
         if ( !wcu_fs()->can_use_premium_code() ) {
             ?>
-              wcu_orders_start_compare: "",
-              wcu_orders_end_compare: "",
-              wcu_compare: "",
-              wcu_orders_filtercompare_type: "",
-              wcu_orders_filtercompare_amount: "",
-            <?php 
+                    wcu_orders_start_compare: "",
+                    wcu_orders_end_compare: "",
+                    wcu_compare: "",
+                    wcu_orders_filtercompare_type: "",
+                    wcu_orders_filtercompare_amount: "",
+                  <?php 
         }
         ?>
-              wcu_orders_filterusage_type: jQuery('select[name=wcu_orders_filterusage_type]').val(),
-              wcu_orders_filterusage_amount: jQuery('input[name=wcu_orders_filterusage_amount]').val(),
-              wcu_orders_filtersales_type: jQuery('select[name=wcu_orders_filtersales_type]').val(),
-              wcu_orders_filtersales_amount: jQuery('input[name=wcu_orders_filtersales_amount]').val(),
-              wcu_orders_filtercommission_type: jQuery('select[name=wcu_orders_filtercommission_type]').val(),
-              wcu_orders_filtercommission_amount: jQuery('input[name=wcu_orders_filtercommission_amount]').val(),
-              wcu_orders_filterconversions_type: jQuery('select[name=wcu_orders_filterconversions_type]').val(),
-              wcu_orders_filterconversions_amount: jQuery('input[name=wcu_orders_filterconversions_amount]').val(),
-              wcu_orders_filterunpaid_type: jQuery('select[name=wcu_orders_filterunpaid_type]').val(),
-              wcu_orders_filterunpaid_amount: jQuery('input[name=wcu_orders_filterunpaid_amount]').val(),
-              wcu_report_users_only: jQuery('input[name=wcu_report_users_only]').prop('checked'),
-              wcu_report_show_sales: jQuery('input[name=wcu_report_show_sales]').prop('checked'),
-              wcu_report_show_commission: jQuery('input[name=wcu_report_show_commission]').prop('checked'),
-              wcu_report_show_url: jQuery('input[name=wcu_report_show_url]').prop('checked'),
-              wcu_report_show_products: jQuery('input[name=wcu_report_show_products]').prop('checked')
-          };
-          jQuery.ajax({
-              type: 'POST',
-              url: ajaxurl,
-              data: data,
-              success: function(data){
-                jQuery('.show_data').html(data);
-                setTimeout(function(){
-                  if(jQuery('.total-usage').text() == 0) {
-                    jQuery('.after-report-complete').prepend("<p style='font-size: 12px; margin-top: 20px;'><i class='fas fa-exclamation-triangle'></i> "
-                    + "<?php 
-        echo sprintf( wp_kses_post( "If you are having issues with generating empty reports, <a href='%s' target='_blank'>click here</a>.", "woo-coupon-usage" ), "https://couponaffiliates.com/docs/how-to-fix-empty-admin-reports/" );
-        ?></p>");
-                  } else {
-                    jQuery('.after-report-complete').html("");
+                    wcu_orders_filterusage_type: jQuery('select[name=wcu_orders_filterusage_type]').val(),
+                    wcu_orders_filterusage_amount: jQuery('input[name=wcu_orders_filterusage_amount]').val(),
+                    wcu_orders_filtersales_type: jQuery('select[name=wcu_orders_filtersales_type]').val(),
+                    wcu_orders_filtersales_amount: jQuery('input[name=wcu_orders_filtersales_amount]').val(),
+                    wcu_orders_filtercommission_type: jQuery('select[name=wcu_orders_filtercommission_type]').val(),
+                    wcu_orders_filtercommission_amount: jQuery('input[name=wcu_orders_filtercommission_amount]').val(),
+                    wcu_orders_filterconversions_type: jQuery('select[name=wcu_orders_filterconversions_type]').val(),
+                    wcu_orders_filterconversions_amount: jQuery('input[name=wcu_orders_filterconversions_amount]').val(),
+                    wcu_orders_filterunpaid_type: jQuery('select[name=wcu_orders_filterunpaid_type]').val(),
+                    wcu_orders_filterunpaid_amount: jQuery('input[name=wcu_orders_filterunpaid_amount]').val(),
+                    wcu_report_users_only: jQuery('input[name=wcu_report_users_only]').prop('checked'),
+                    wcu_report_show_sales: jQuery('input[name=wcu_report_show_sales]').prop('checked'),
+                    wcu_report_show_commission: jQuery('input[name=wcu_report_show_commission]').prop('checked'),
+                    wcu_report_show_url: jQuery('input[name=wcu_report_show_url]').prop('checked'),
+                    wcu_report_show_products: jQuery('input[name=wcu_report_show_products]').prop('checked')
+              };
+
+              jQuery.ajax({
+                  type: 'POST',
+                  url: ajaxurl,
+                  data: data,
+                  beforeSend: function() {
+                      jQuery(".wcu-loading-image").show();
+                  },
+                  success: function(response){
+                      if (response.hasMoreData) {
+                          jQuery('.show_data').append(response.html);
+                          fetchReports(offset + 500); // Fetch next batch
+                      } else {
+                          jQuery('.show_data').append(response.html);
+                          jQuery(".wcu-loading-image").hide();
+                          jQuery(".loaded-stats").show();
+                      }
+                  },
+                  error: function(xhr, status, error) {
+                      console.error("Error loading reports: " + error);
                   }
-                }, 5000);
-              }
+              });
+          }
+
+          // Start batch fetching when the "Generate Report" button is clicked
+          jQuery(document).on("click", "#wcu-monthly-orders-button", function() {
+              jQuery(".show_data").html(""); // Clear previous results
+              fetchReports(); // Start fetching data in batches
           });
 
         });
@@ -1151,9 +1054,13 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
         $wcu_report_show_sales,
         $wcu_report_show_commission,
         $wcu_report_show_url,
-        $wcu_report_show_products
+        $wcu_report_show_products,
+        $limit,
+        $offset
     ) {
         $options = get_option( 'wcusage_options' );
+        // Clear all the previous
+        ob_clean();
         if ( !$wcu_compare ) {
             $wcu_compare == "false";
         }
@@ -1298,20 +1205,24 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
         $wcusage_field_tracking_enable = wcusage_get_setting_value( 'wcusage_field_tracking_enable', 1 );
         if ( !$wcu_report_users_only || $wcu_report_users_only == "false" ) {
             $args = array(
-                'posts_per_page' => -1,
-                'orderby'        => 'title',
-                'order'          => 'asc',
-                'post_type'      => 'shop_coupon',
-                'post_status'    => 'publish',
+                'posts_per_page'  => $limit,
+                'offset'          => $offset,
+                'orderby'         => 'title',
+                'order'           => 'asc',
+                'post_type'       => 'shop_coupon',
+                'post_status'     => 'publish',
+                'query_timestamp' => time(),
             );
         } else {
             $args = array(
-                'posts_per_page' => -1,
-                'orderby'        => 'title',
-                'order'          => 'asc',
-                'post_type'      => 'shop_coupon',
-                'post_status'    => 'publish',
-                'meta_query'     => array(array(
+                'posts_per_page'  => $limit,
+                'offset'          => $offset,
+                'orderby'         => 'title',
+                'order'           => 'asc',
+                'post_type'       => 'shop_coupon',
+                'post_status'     => 'publish',
+                'query_timestamp' => time(),
+                'meta_query'      => array(array(
                     'key'     => 'wcu_select_coupon_user',
                     'value'   => '',
                     'compare' => '!=',
@@ -1321,6 +1232,17 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
         $coupons = get_posts( $args );
         $coupons = array_unique( $coupons, SORT_REGULAR );
         echo "<table id='table-coupon-items'>";
+        // Initialize statistics
+        $stats = [
+            'total_usage'        => 0,
+            'total_sales'        => 0.0,
+            'total_discounts'    => 0.0,
+            'total_commission'   => 0.0,
+            'unpaid_commission'  => 0.0,
+            'pending_commission' => 0.0,
+            'total_clicks'       => 0,
+            'total_conversions'  => 0,
+        ];
         $previous_coupon = "";
         foreach ( $coupons as $coupon ) {
             if ( $previous_coupon == $coupon ) {
@@ -1360,6 +1282,16 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
             $clickcount = $url_stats['clicks'];
             $convertedcount = $url_stats['convertedcount'];
             $conversionrate = $url_stats['conversionrate'];
+            // Accumulate stats
+            $stats['total_usage'] += $total_count;
+            $stats['total_sales'] += $total_orders;
+            $stats['total_discounts'] += $full_discount;
+            $stats['total_commission'] += $total_commission;
+            $stats['unpaid_commission'] += $unpaid_commission;
+            $stats['pending_commission'] += $pending_payments;
+            $stats['total_clicks'] += $clickcount;
+            $stats['total_conversions'] += $convertedcount;
+            $stats['conversion_rate'] = ( $stats['total_clicks'] > 0 ? round( $stats['total_conversions'] / $stats['total_clicks'] * 100, 2 ) : 0 );
             // User Data
             $usernamefull = "";
             if ( $coupon_user_id ) {
@@ -1905,6 +1837,16 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
       <?php 
             }
         }
+        // Output the total stats as hidden fields
+        echo '<input class="final-total-usage" value="' . esc_attr( $stats['total_usage'] ) . '" style="display: none;">';
+        echo '<input class="final-total-sales" value="' . esc_attr( $stats['total_sales'] ) . '" style="display: none;">';
+        echo '<input class="final-total-discounts" value="' . esc_attr( $stats['total_discounts'] ) . '" style="display: none;">';
+        echo '<input class="final-total-commission" value="' . esc_attr( $stats['total_commission'] ) . '" style="display: none;">';
+        echo '<input class="final-unpaid-commission" value="' . esc_attr( $stats['unpaid_commission'] ) . '" style="display: none;">';
+        echo '<input class="final-pending-commission" value="' . esc_attr( $stats['pending_commission'] ) . '" style="display: none;">';
+        echo '<input class="final-total-clicks" value="' . esc_attr( $stats['total_clicks'] ) . '" style="display: none;">';
+        echo '<input class="final-total-conversions" value="' . esc_attr( $stats['total_conversions'] ) . '" style="display: none;">';
+        echo '<input class="final-total-conversion-rate" value="' . esc_attr( $stats['conversion_rate'] ) . '" style="display: none;">';
         ?>
   </table>
 
@@ -1924,7 +1866,7 @@ add_action(
     'wcusage_hook_get_admin_report_data',
     'wcusage_get_admin_report_data',
     10,
-    22
+    24
 );
 /**
  * Scripts For Sorting Admin Reports

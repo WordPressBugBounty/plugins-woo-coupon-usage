@@ -44,7 +44,11 @@ if ( !function_exists( 'wcusage_tab_settings' ) ) {
             $wcu_enable_notifications = get_post_meta( $postid, 'wcu_enable_notifications', true );
             // email_reports
             if ( $enable_reports_user_option ) {
-                $post_wcu_email_reports = sanitize_text_field( $_POST['wcu_enable_reports'] );
+                if ( isset( $_POST['wcu_enable_reports'] ) ) {
+                    $post_wcu_email_reports = sanitize_text_field( $_POST['wcu_enable_reports'] );
+                } else {
+                    $post_wcu_email_reports = "";
+                }
                 if ( $post_wcu_email_reports == "" ) {
                     $post_wcu_email_reports = 0;
                 }
@@ -52,7 +56,11 @@ if ( !function_exists( 'wcusage_tab_settings' ) ) {
                 $wcu_enable_reports = get_post_meta( $postid, 'wcu_enable_reports', true );
             }
             // wcu_notifications_extra
-            $post_wcu_notifications_extra = sanitize_text_field( $_POST['wcu_notifications_extra'] );
+            if ( isset( $_POST['wcu_notifications_extra'] ) ) {
+                $post_wcu_notifications_extra = sanitize_text_field( $_POST['wcu_notifications_extra'] );
+            } else {
+                $post_wcu_notifications_extra = "";
+            }
             update_post_meta( $postid, 'wcu_notifications_extra', $post_wcu_notifications_extra );
             $wcu_notifications_extra = get_post_meta( $postid, 'wcu_notifications_extra', true );
         }
