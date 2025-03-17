@@ -174,7 +174,7 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 
 		$dp = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
 
-		//looping through all the order_id
+		// looping through all the order_id
 		foreach ( $orders as $key => $the_order ) {
 
 		$order_id = $the_order->order_id;
@@ -295,20 +295,20 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 						foreach (array_keys($a1 + $a2) as $key) {
 							$a1_total = isset($a1[$key]['total']) && is_numeric($a1[$key]['total']) ? $a1[$key]['total'] : 0;
 							$a2_total = isset($a2[$key]['total']) && is_numeric($a2[$key]['total']) ? $a2[$key]['total'] : 0;
+							$a2_total = wcusage_convert_order_value_to_currency($order, $a2_total);
 							$total1 = $a1_total + $a2_total;
-							$total1 = wcusage_convert_order_value_to_currency($order, $total1);
 							$commission_summary[$key]['total'] = $total1;
 
 							$a1_subtotal = isset($a1[$key]['subtotal']) && is_numeric($a1[$key]['subtotal']) ? $a1[$key]['subtotal'] : 0;
 							$a2_subtotal = isset($a2[$key]['subtotal']) && is_numeric($a2[$key]['subtotal']) ? $a2[$key]['subtotal'] : 0;
+							$a2_subtotal = wcusage_convert_order_value_to_currency($order, $a2_subtotal);
 							$subtotal1 = $a1_subtotal + $a2_subtotal;
-							$subtotal1 = wcusage_convert_order_value_to_currency($order, $subtotal1);
 							$commission_summary[$key]['subtotal'] = $subtotal1;
 							
 							$a1_commission = isset($a1[$key]['commission']) && is_numeric($a1[$key]['commission']) ? $a1[$key]['commission'] : 0;
 							$a2_commission = isset($a2[$key]['commission']) && is_numeric($a2[$key]['commission']) ? $a2[$key]['commission'] : 0;
+							$a2_commission = wcusage_convert_order_value_to_currency($order, $a2_commission);
 							$commission1 = $a1_commission + $a2_commission;
-							$commission1 = wcusage_convert_order_value_to_currency($order, $commission1);
 							$commission_summary[$key]['commission'] = $commission1;
 
 							$a1_number = isset($a1[$key]['number']) && is_numeric($a1[$key]['number']) ? $a1[$key]['number'] : 0;
@@ -389,6 +389,7 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
   		$list_of_products = "";
   	}
 
+	$return_array['orders'] = $orders;
   	$return_array['list_of_products'] = $list_of_products;
   	$return_array['total_count'] = $total_count;
   	$return_array['full_discount'] = $total_discount;

@@ -96,6 +96,23 @@ function wcusage_field_cb_custom_tabs( $args )
             unset($roles[$key]);
           }
         }
+
+        if(isset($options[$thisid])) {
+          $current_selected_roles = $options[$thisid];
+        } else {
+          $current_selected_roles = array();
+        }
+        // Loop through selected roles, if any don't exist remove it from the array
+        foreach ($current_selected_roles as $key => $role) {
+          $rolesx = get_editable_roles();
+          if (!isset($rolesx[$key])) {
+            $options_new = get_option('wcusage_options');
+            unset($options_new[$thisid][$key]);
+            update_option('wcusage_options', $options_new);
+            unset($options[$thisid][$key]);
+          }
+        }
+
         $roles2 = array_merge($roles2, $roles);
         foreach ($roles2 as $key => $role) {
 
@@ -127,6 +144,51 @@ function wcusage_field_cb_custom_tabs( $args )
       <i><?php echo esc_html__('If no roles are selected, the tab will be visible to all affiliates.', 'woo-coupon-usage'); ?></i>
 
     </p>
+
+    <br/>
+
+    <!-- Pick a font awesome icon -->
+    <p class="creative-type-icon">
+      <label for="icon"><strong><?php echo esc_html__('Tab Icon:', 'woo-coupon-usage'); ?></strong>
+    </label>
+
+      <br/>
+
+      <?php
+      if(isset($options['wcusage_field_custom_tabs_icon_'.$i])) {
+        $thisid = 'wcusage_field_custom_tabs_icon_'.$i;
+      } else {
+        $thisid = 'wcusage_field_custom_tabs_icon_'.$i;
+      }
+      // Get 20 good icons that could be used for tabs, books, news etc
+      $icons = array('cog', 'user', 'chart-line', 'chart-bar', 'chart-pie',
+      'money-bill', 'dollar-sign', 'credit-card', 'gift', 'trophy', 'email',
+      'envelope', 'envelope-open', 'comment', 'comments',
+      'star', 'newspaper', 'book', 'file-alt', 'file-invoice-dollar');
+      // Display a select dropdown with these icons and an example of the icon inside the select
+      echo '<select name="wcusage_options[wcusage_field_custom_tabs_icon_'.esc_attr($i).']" id="wcusage_field_custom_tabs_icon_'.esc_attr($i).'">';
+      // Empty option first
+      echo '<option value="">'.esc_html__('Select an icon', 'woo-coupon-usage').'</option>';
+      foreach ($icons as $icon) {
+        $selected = '';
+        if(isset($options[$thisid]) && $options[$thisid] == $icon) {
+          $selected = 'selected';
+        }
+        echo '<option value="'.esc_attr($icon).'" '.esc_attr($selected).'>'.$icon.'</option>';
+      }
+      echo '</select>';
+      ?>
+      <span class="icon-example">
+        <i class="fas fa-<?php echo esc_html($options[$thisid]); ?>" style="font-size: 20px; background: none; color: #333;"></i>
+      </span>
+      <script>
+      jQuery(document).ready(function(){
+        jQuery('#wcusage_field_custom_tabs_icon_<?php echo esc_html($i); ?>').change(function(){
+          var icon = jQuery(this).val();
+          jQuery('.icon-example').html('<i class="fas fa-'+icon+'" style="font-size: 20px; background: none; color: #333;"></i>');
+        });      
+      });
+      </script>
 
     <?php
     echo '<br/><br/>';

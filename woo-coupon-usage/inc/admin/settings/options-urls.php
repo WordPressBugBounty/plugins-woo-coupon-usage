@@ -68,7 +68,7 @@ function wcusage_field_cb_urls( $args )
 
       <br/>
 
-      <?php echo wcusage_setting_toggle_option('wcusage_field_apply_instant_enable', 1, 'Attempt to apply coupon instantly on first page visited.', '0px'); ?>
+      <?php echo wcusage_setting_toggle_option('wcusage_field_apply_instant_enable', 1, esc_html__( 'Attempt to apply coupon instantly on first page visited.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'If enabled, the plugin will attempt to apply the code on the first page they visit. If disabled, it will only apply the code once they visit the cart/checkout pages.', 'woo-coupon-usage' ); ?></i><br/>
 
       <!-- ********** Referral URL Tab ********** -->
@@ -210,7 +210,7 @@ function wcusage_field_cb_urls( $args )
 
         <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'URL Conversion Tracking', 'woo-coupon-usage' ); ?>:</h3>
 
-        <?php echo wcusage_setting_toggle_option('wcusage_field_url_referrals', 0, 'Track conversions via referral URL even if coupon was not used.', '0px'); ?>
+        <?php echo wcusage_setting_toggle_option('wcusage_field_url_referrals', 0, esc_html__( 'Track conversions via referral URL even if coupon was not used.', 'woo-coupon-usage' ), '0px'); ?>
         <i><?php echo esc_html__( 'If enabled, if someone visits the site via the referral URL and places an order without using the coupon code, it will still be tracked and award the affiliate.', 'woo-coupon-usage' ); ?></i><br/>
         <i><?php echo esc_html__( 'If disabled, by default the referral will only be tracked if the customer applys the affiliates coupon when placing their order.', 'woo-coupon-usage' ); ?></i><br/>
 
@@ -233,7 +233,7 @@ function wcusage_field_cb_urls( $args )
 
           <br/>
 
-          <?php echo wcusage_setting_toggle_option('wcusage_remove_cookies', 0, 'Remove all tracking cookies when customer places an order.', '0px'); ?>
+          <?php echo wcusage_setting_toggle_option('wcusage_remove_cookies', 0, esc_html__( 'Remove all tracking cookies when customer places an order.', 'woo-coupon-usage' ), '0px'); ?>
           <i><?php echo esc_html__( 'If enabled, the tracking cookies will be deleted from the customers browser, once the order is completed.', 'woo-coupon-usage' ); ?></i><br/>
           <i><?php echo esc_html__( 'They would need to click the referral link again for coupons to be automatically applied again, or future orders to be awarded to the affiliate.', 'woo-coupon-usage' ); ?></i><br/>
 
@@ -244,7 +244,7 @@ function wcusage_field_cb_urls( $args )
 
         <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Click / Visit History', 'woo-coupon-usage' ); ?>:</h3>
 
-        <?php echo wcusage_setting_toggle_option('wcusage_field_show_click_history', 1, 'Enable "Click History" Logs', '0px'); ?>
+        <?php echo wcusage_setting_toggle_option('wcusage_field_show_click_history', 1, esc_html__( 'Enable "Click History" Logs', 'woo-coupon-usage' ), '0px'); ?>
         <i><?php echo esc_html__( 'This will show a table with a log of the latest referral URL clicks/visits for the affiliate coupons referral URL (or selected campaign).', 'woo-coupon-usage' ); ?></i><br/>
 
         <?php echo wcusage_setting_toggle('.wcusage_field_show_click_history', '.wcu-field-section-click-history'); // Show or Hide ?>
@@ -260,7 +260,7 @@ function wcusage_field_cb_urls( $args )
 
           <br/>
 
-          <?php echo wcusage_setting_toggle_option('wcusage_field_show_click_history_pagination', 1, 'Enable Pagination', '30px'); ?>
+          <?php echo wcusage_setting_toggle_option('wcusage_field_show_click_history_pagination', 1, esc_html__( 'Enable Pagination', 'woo-coupon-usage' ), '30px'); ?>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'This will allow affiliates to filter through their whole click history with pagination.', 'woo-coupon-usage' ); ?></i><br/>
 
           <br/>
@@ -270,13 +270,13 @@ function wcusage_field_cb_urls( $args )
 
           <br/>
 
-          <?php echo wcusage_setting_toggle_option('wcusage_field_track_click_ip', 1, 'Store visitors "IP Address" for referral clicks, instead of a random ID.', '30px'); ?>
+          <?php echo wcusage_setting_toggle_option('wcusage_field_track_click_ip', 1, esc_html__( 'Store visitors "IP Address" for referral clicks, instead of a random ID.', 'woo-coupon-usage' ), '30px'); ?>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'The IP address will be stored in the "clicks" database table. The IP address is only used to check if a click has already been tracked for that visitor.', 'woo-coupon-usage' ); ?></i><br/>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'If disabled, it will instead store an extra random ID as a cookie for new referral clicks ("wcusage_referral_id") which will then work in the same way.', 'woo-coupon-usage' ); ?></i><br/>
 
       		<br/>
 
-          <?php echo wcusage_setting_toggle_option('wcusage_field_track_all_clicks', 1, 'Track all new referral URL clicks from the same visitor/user.', '30px'); ?>
+          <?php echo wcusage_setting_toggle_option('wcusage_field_track_all_clicks', 1, esc_html__( 'Track all new referral URL clicks from the same visitor/user.', 'woo-coupon-usage' ), '30px'); ?>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'If enabled, all new referral URL clicks from the same user will be tracked (and increases total clicks + visit logged in click history). Only the latest click will be converted if they make a purchase.', 'woo-coupon-usage' ); ?></i><br/>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'If disabled, only the first click from the visitor will be tracked (until the cookie expires).', 'woo-coupon-usage' ); ?></i><br/>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'Note: If enabled, any new clicks (from the same visitor) within the same minute as another will not be logged, and will keep the same ID as the initial click (to prevent spamming the logs).', 'woo-coupon-usage' ); ?></i><br/>
@@ -293,7 +293,7 @@ function wcusage_field_cb_urls( $args )
             <span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Referral Campaigns', 'woo-coupon-usage' ); ?><?php if( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?>:
           </h3>
 
-      		<?php echo wcusage_setting_toggle_option('wcusage_field_show_campaigns', 1, 'Enable Referral Campaign Features', '0px'); ?>
+      		<?php echo wcusage_setting_toggle_option('wcusage_field_show_campaigns', 1, esc_html__( 'Enable Referral Campaign Features', 'woo-coupon-usage' ), '0px'); ?>
           <i><?php echo esc_html__( 'With this enabled, in the "referral URL" section your affiliates will be able to create "campaigns", to generate custom URLs, track clicks, sales, conversation rate for specific referral campaigns.', 'woo-coupon-usage' ); ?></i><br/>
 
           <br/>
@@ -330,7 +330,7 @@ function wcusage_field_cb_urls( $args )
             <span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'QR Code Generator', 'woo-coupon-usage' ); ?><?php if( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?>:
           </h3>
 
-      		<?php echo wcusage_setting_toggle_option('wcusage_field_show_qrcodes', 0, 'Enable QR Code Generator', '0px'); ?>
+      		<?php echo wcusage_setting_toggle_option('wcusage_field_show_qrcodes', 0, esc_html__( 'Enable QR Code Generator', 'woo-coupon-usage' ), '0px'); ?>
           <i><?php echo esc_html__( 'With this enabled, affiliate users can click a button to generate a QR code for their referral link.', 'woo-coupon-usage' ); ?></i><br/>
 
           <!-- ********** Direct Links ********** -->
@@ -346,7 +346,7 @@ function wcusage_field_cb_urls( $args )
             <p><strong><?php echo esc_html__( 'Note:', 'woo-coupon-usage' ); ?></strong> <?php echo esc_html__( 'This feature is disabled because you have disabled the cookie storage.', 'woo-coupon-usage' ); ?></p>
           <?php } ?>
 
-      		<?php echo wcusage_setting_toggle_option('wcusage_field_enable_directlinks', 0, 'Enable Direct Link Tracking', '0px'); ?>
+      		<?php echo wcusage_setting_toggle_option('wcusage_field_enable_directlinks', 0, esc_html__( 'Enable Direct Link Tracking', 'woo-coupon-usage' ), '0px'); ?>
           <i><?php echo esc_html__( 'With this enabled, affiliate users can link their website domain to their coupon.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-direct-link-tracking" target="_blank">Learn More</a>.</i><br/>
           <i><?php echo esc_html__( 'Upon approval, they can then directly link to your site, directly from theirs, without needing to use a referral URL, and it will still be tracked.', 'woo-coupon-usage' ); ?></i><br/>
           <i><?php echo esc_html__( 'When an affiliate adds a new domain to their account, an email will be sent to your admin email, with a link to approve or deny the domain.', 'woo-coupon-usage' ); ?></i><br/>
@@ -403,7 +403,7 @@ function wcusage_field_cb_urls( $args )
             <span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Short URLs', 'woo-coupon-usage' ); ?><?php if( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?>:
           </h3>
 
-      		<?php echo wcusage_setting_toggle_option('wcusage_field_show_shortlink', 0, 'Enable Short URL Generator', '0px'); ?>
+      		<?php echo wcusage_setting_toggle_option('wcusage_field_show_shortlink', 0, esc_html__( 'Enable Short URL Generator', 'woo-coupon-usage' ), '0px'); ?>
           <i><?php echo esc_html__( 'With this enabled, affiliate users can click a button to automatically generate a short URL for their referral link.', 'woo-coupon-usage' ); ?></i><br/>
                     <i><?php echo esc_html__( 'A shortlink will only be created once for the same URL. A shortlink can also only be created if the URL is pointing to this website', 'woo-coupon-usage' ); ?> (<?php echo esc_html($domain2); ?>).</i><br/>
           <i><?php echo esc_html__( 'Shortlinks are stored as a custom post type and can be viewed in "Short URLs" menu link under "Coupon Affiliates" in the admin area (visible when enabled).', 'woo-coupon-usage' ); ?></i><br/>

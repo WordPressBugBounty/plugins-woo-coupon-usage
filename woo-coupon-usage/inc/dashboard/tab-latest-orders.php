@@ -41,7 +41,7 @@ if ( !function_exists( 'wcusage_tab_latest_orders' ) ) {
                 'message' => '',
             );
         }
-        if ( $requests_session['status'] ) {
+        if ( isset( $requests_session['status'] ) && $requests_session['status'] ) {
             echo esc_html( $requests_session['message'] );
         } else {
             $couponinfo = wcusage_get_coupon_info_by_id( $postid );
@@ -749,7 +749,13 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         $totalordersexcl = $calculateorder['totalordersexcl'];
                         $totalcommission = $calculateorder['totalcommission'];
                         if ( $type == "mla" ) {
-                            $totalcommission = wcusage_mla_get_commission_from_tier( $totalcommission, $tier );
+                            $totalcommission = wcusage_mla_get_commission_from_tier(
+                                $totalcommission,
+                                $tier,
+                                '1',
+                                $orderid,
+                                $coupon_code
+                            );
                         }
                         $combined_totalcommission += (float) $totalcommission;
                         $affiliatecommission = "";
@@ -1374,26 +1380,18 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
             ?>>
 
       <script>
-      <?php 
-            if ( $wcusage_field_load_ajax_per_page ) {
-                ?>
-      jQuery( "#tab-page-orders" ).one('click', wcusage_run_tab_page_orders);
-      <?php 
-            }
-            ?>
-      jQuery( ".wcusage-refresh-data" ).on('click', wcusage_run_tab_page_orders);
-
       function wcusage_run_tab_page_orders() {
         /* 3 second disable on click button */
-        jQuery( "#wcu-orders-button" ).css("opacity", "0.5");
-        jQuery( "#wcu-orders-button" ).css("pointer-events", "none");
-        setTimeout(function(){
-          jQuery( "#wcu-orders-button" ).css("opacity", "1");
-          jQuery( "#wcu-orders-button" ).css("pointer-events", "auto");
-        }, 3*1000);
+        jQuery("#wcu-orders-button").css("opacity", "0.5");
+        jQuery("#wcu-orders-button").css("pointer-events", "none");
+        setTimeout(function() {
+          jQuery("#wcu-orders-button").css("opacity", "1");
+          jQuery("#wcu-orders-button").css("pointer-events", "auto");
+        }, 3 * 1000);
 
         /* Set content to empty */
         jQuery('.show_orders').html('');
+        jQuery('.wcu-loading-orders').show();
 
         /* Ajax request */
         var data = {
@@ -1415,20 +1413,34 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
             ?>',
         };
         jQuery.ajax({
-            type: 'POST',
-            url: '<?php 
+          type: 'POST',
+          url: '<?php 
             echo esc_url( admin_url( 'admin-ajax.php' ) );
             ?>',
-            data: data,
-            success: function(data){
-              jQuery('#wcuTable2').remove();
-              jQuery('.show_orders').html(data);
-            },
-            error: function(data){ jQuery('.show_orders').html('<?php 
+          data: data,
+          success: function(data) {
+          jQuery('#wcu3 .wcuTable').remove();
+          jQuery('.show_orders').html(data);
+          jQuery('.wcu-loading-orders').hide();
+          },
+          error: function(data) {
+          jQuery('.show_orders').html('<?php 
             echo wp_kses_post( $ajaxerrormessage );
-            ?>'); }
+            ?>');
+          }
         });
       }
+
+      jQuery(document).ready(function() {
+        <?php 
+            if ( $wcusage_field_load_ajax_per_page ) {
+                ?>
+        jQuery("#tab-page-orders").one('click', wcusage_run_tab_page_orders);
+        <?php 
+            }
+            ?>
+        jQuery(".wcusage-refresh-data").on('click', wcusage_run_tab_page_orders);
+      });
       </script>
 
       <?php 

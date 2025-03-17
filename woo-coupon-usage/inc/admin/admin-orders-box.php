@@ -175,7 +175,7 @@ function wcusage_custom_box_html_content(
         echo 'Referral Code: <a href="' . esc_url( admin_url( 'post.php?post=' . esc_attr( $coupon_id ) . '&action=edit' ) ) . '" target="_blank" style="color: #07bbe3;">' . esc_html( $coupon_code ) . '</a><br/>';
     }
     // Show the affiliate user
-    $wcusage_affiliate_user = wcusage_order_meta( $order_id, 'wcusage_affiliate_user' );
+    $wcusage_affiliate_user = $coupon_info[1];
     if ( $wcusage_affiliate_user ) {
         $affiliate = get_user_by( 'ID', $wcusage_affiliate_user );
         $affiliate_username = $affiliate->user_login;
@@ -198,7 +198,13 @@ function wcusage_custom_box_html_content(
                 $parent_user_id = $parent_user_info->ID;
                 $coupon_info = wcusage_get_coupon_info( $coupon_code );
                 $coupon_id = $coupon_info[2];
-                $parent_commission = wcusage_mla_get_commission_from_tier( $getinfo['thecommissionnum'], $key );
+                $parent_commission = wcusage_mla_get_commission_from_tier(
+                    $getinfo['thecommissionnum'],
+                    $key,
+                    1,
+                    $order_id,
+                    $coupon_code
+                );
                 echo "<br/>(" . esc_html( $key ) . ") <a href='" . esc_url( admin_url( "user-edit.php?user_id=" . $parent_user_id ) ) . "' target='_blank' style='color: #07bbe3;'>" . esc_html( $parent_user_name ) . "</a>: " . wp_kses_post( wcusage_format_price( esc_html( $parent_commission ) ) );
             }
             echo "</p>";

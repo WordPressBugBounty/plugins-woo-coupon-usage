@@ -168,7 +168,7 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
 	  <div style="clear: both;"></div>
 
     <!-- Heading -->
-	<p class="wcusage-subheader wcusage-title-referral-clicks" style='font-size: 22px; float: left; margin-top: 20px; margin-bottom: 10px;' id='wcu-recent-clicks-section'><?php 
+	<p class="wcu-tab-title wcusage-subheader wcusage-title-referral-clicks" style='font-size: 22px; float: left; margin-top: 20px; margin-bottom: 10px;' id='wcu-recent-clicks-section'><?php 
         echo esc_html__( 'Recent Clicks', 'woo-coupon-usage' );
         ?>:</p>
 

@@ -318,8 +318,14 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
         $use_saved = "0",
         $force_update = "0"
     ) {
-        $getcoupon = wcusage_get_coupon_info( $coupon_code );
-        $couponuser = $getcoupon[1];
+        if ( isset( $coupon_code ) ) {
+            $getcoupon = wcusage_get_coupon_info( $coupon_code );
+            $couponuser = $getcoupon[1];
+            $couponid = $getcoupon[2];
+        } else {
+            $couponuser = "";
+            $couponid = "";
+        }
         $order = wc_get_order( $orderid );
         // if is order
         if ( $order instanceof WC_Order ) {
@@ -535,6 +541,17 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                         $all_commission = $max_commission;
                     }
                 }
+                // Filter to edit all_commission
+                if ( $all_commission ) {
+                    $all_commission = apply_filters(
+                        'wcusage_calculate_edit_commission',
+                        $all_commission,
+                        $orderid,
+                        $couponid,
+                        $couponuser
+                    );
+                }
+                // Filter to edit allstats
                 $allstats['commission'] = number_format(
                     (float) $all_commission,
                     2,
@@ -654,7 +671,9 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         $affiliatedone2 = false;
         $meta_data = [];
         $getcoupon = wcusage_get_coupon_info( $coupon_code );
+        $couponuser = $getcoupon[1];
         $user = get_userdata( $getcoupon[1] );
+        $couponid = $getcoupon[2];
         $wcusage_show_commission_before_discount = wcusage_get_setting_value( 'wcusage_field_commission_before_discount', '0' );
         $wcusage_field_commission_before_discount_custom = wcusage_get_setting_value( 'wcusage_field_commission_before_discount_custom', '0' );
         $wcusage_field_commission_include_fees = wcusage_get_setting_value( 'wcusage_field_commission_include_fees', '0' );

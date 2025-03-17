@@ -45,6 +45,17 @@ if( !function_exists( 'wcusage_get_coupon_shortcode_page' ) ) {
 	$options = get_option( 'wcusage_options' );
 	$structure = get_option( 'permalink_structure' );
 
+	$wcusage_field_portal_enable = wcusage_get_setting_value('wcusage_field_portal_enable', '0');
+	$portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+	if($wcusage_field_portal_enable && $portal_slug) {
+		$thepageurl = get_site_url() . '/' . $portal_slug . '/';
+		if($seperate) {
+			$seperatepermalink = "?";
+			$thepageurl = $thepageurl . $seperatepermalink;
+		}
+		return $thepageurl;
+	}
+
     $wcusage_dashboard_page = "";
     if(isset($options['wcusage_dashboard_page'])) {
       $wcusage_dashboard_page = $options['wcusage_dashboard_page'];

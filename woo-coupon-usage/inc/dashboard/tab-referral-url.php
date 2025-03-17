@@ -394,6 +394,8 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_referral_url_stats' ) ) {
 
       });
 
+      jQuery( document ).ready(function() {
+      
       <?php 
                 if ( $wcusage_field_load_ajax_per_page ) {
                     ?>
@@ -404,6 +406,8 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_referral_url_stats' ) ) {
       jQuery( ".wcusage-refresh-data" ).on('click', wcusage_run_tab_page_links);
 
       jQuery( ".wcusage-refresh-data" ).click(function() { jQuery( "#wcu-referral-campaign" ).change(); });
+      
+      });
 
       function wcusage_run_tab_page_links() {
 

@@ -713,9 +713,9 @@ if( !function_exists( 'wcusage_get_referral_url_stats' ) ) {
         echo "<div id='wcu-referral-statistics'>";
 
     			if($campaign) {
-    				echo "<p class='wcusage-subheader wcusage-title-referral-stats' style='font-size: 22px; margin-bottom: 10px;'>" . esc_html__( 'Referral Statistics for', 'woo-coupon-usage' ) . " '" . esc_html(ucfirst($campaign)) . "' " . esc_html__( 'Campaign', 'woo-coupon-usage' ) . ":</p>";
+    				echo "<p class='wcu-tab-title wcusage-subheader wcusage-title-referral-stats' style='font-size: 22px; margin-bottom: 10px;'>" . esc_html__( 'Referral Statistics for', 'woo-coupon-usage' ) . " '" . esc_html(ucfirst($campaign)) . "' " . esc_html__( 'Campaign', 'woo-coupon-usage' ) . ":</p>";
     			} else {
-    				echo "<p class='wcusage-subheader wcusage-title-referral-stats' style='font-size: 22px; margin-bottom: 10px;'>" . esc_html__( 'Referral Statistics', 'woo-coupon-usage' ) . ":</p>";
+    				echo "<p class='wcu-tab-title wcusage-subheader wcusage-title-referral-stats' style='font-size: 22px; margin-bottom: 10px;'>" . esc_html__( 'Referral Statistics', 'woo-coupon-usage' ) . ":</p>";
     			}
 
     			echo '<div class="wcusage-info-box wcusage-info-box-clicks">';

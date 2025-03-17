@@ -31,7 +31,7 @@ function wcusage_get_options_update_scripts($ids, $action, $val, $gettype) {
               wcu_ajax_update_the_options(jQuery(this), 'class', 'wcu-update-toggle', 1, key, '<?php echo esc_html($ids); ?>');
             }
           }
-        }, 100));
+        }, 250));
       <?php } ?>
     });
     </script>

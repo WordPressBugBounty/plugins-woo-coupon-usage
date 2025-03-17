@@ -3,6 +3,7 @@
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
+use Automattic\WooCommerce\Utilities\OrderUtil;
 /**
  * Displays the admin reports page
  *
@@ -920,15 +921,13 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
 
           jQuery('.show_data').html('');
 
-          function fetchReports(offset = 0) {
+          function fetchReports() {
               var response = '';
               var data = {
                   action: 'wcusage_load_admin_reports',
                   _ajax_nonce: '<?php 
         echo esc_html( wp_create_nonce( 'wcusage_admin_ajax_nonce' ) );
         ?>',
-                  offset: offset,
-                  limit: 500,
                   timestamp: new Date().getTime(),
                   wcu_orders_start: jQuery('input[name=wcu_monthly_orders_start]').val(),
                   wcu_orders_end: jQuery('input[name=wcu_monthly_orders_end]').val(),
@@ -970,14 +969,9 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
                       jQuery(".wcu-loading-image").show();
                   },
                   success: function(response){
-                      if (response.hasMoreData) {
-                          jQuery('.show_data').append(response.html);
-                          fetchReports(offset + 500); // Fetch next batch
-                      } else {
-                          jQuery('.show_data').append(response.html);
-                          jQuery(".wcu-loading-image").hide();
-                          jQuery(".loaded-stats").show();
-                      }
+                    jQuery('.show_data').append(response.html);
+                    jQuery(".wcu-loading-image").hide();
+                    jQuery(".loaded-stats").show();
                   },
                   error: function(xhr, status, error) {
                       console.error("Error loading reports: " + error);
@@ -985,7 +979,7 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
               });
           }
 
-          // Start batch fetching when the "Generate Report" button is clicked
+          // Start fetching when the "Generate Report" button is clicked
           jQuery(document).on("click", "#wcu-monthly-orders-button", function() {
               jQuery(".show_data").html(""); // Clear previous results
               fetchReports(); // Start fetching data in batches
@@ -1007,30 +1001,36 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
 
 }
 /**
- * Gets the admin reports data for the values submitted via the create report form
- *
- * @param date $wcu_orders_start
- * @param date $wcu_orders_end
- * @param date $wcu_orders_start_compare
- * @param date $wcu_orders_end_compare
- * @param bool $wcu_compare
- * @param string $wcu_orders_filtercompare_type
- * @param int $wcu_orders_filtercompare_amount
- * @param string $wcu_orders_filterusage_type
- * @param int $wcu_orders_filterusage_amount
- * @param string $wcu_orders_filtersales_type
- * @param int $wcu_orders_filtersales_amount
- * @param string $wcu_orders_filtercommission_type
- * @param int $wcu_orders_filtercommission_amount
- * @param string $wcu_orders_filterconversions_type
- * @param int $wcu_orders_filterconversions_amount
- * @param string $wcu_orders_filterunpaid_type
- * @param int $wcu_orders_filterunpaid_amount
- * @param bool $wcu_report_users_only
- *
- * @return mixed
- *
- */
+* Gets the admin reports data for the values submitted via the create report form
+*
+* @param date $wcu_orders_start
+* @param date $wcu_orders_end
+* @param date $wcu_orders_start_compare
+* @param date $wcu_orders_end_compare
+* @param bool $wcu_compare
+* @param string $wcu_orders_filtercompare_type
+* @param int $wcu_orders_filtercompare_amount
+* @param string $wcu_orders_filterusage_type
+* @param int $wcu_orders_filterusage_amount
+* @param string $wcu_orders_filtersales_type
+* @param int $wcu_orders_filtersales_amount
+* @param string $wcu_orders_filtercommission_type
+* @param int $wcu_orders_filtercommission_amount
+* @param string $wcu_orders_filterconversions_type
+* @param int $wcu_orders_filterconversions_amount
+* @param string $wcu_orders_filterunpaid_type
+* @param int $wcu_orders_filterunpaid_amount
+* @param bool $wcu_report_users_only
+*
+* @return mixed
+*
+*/
+add_action(
+    'wcusage_hook_get_admin_report_data',
+    'wcusage_get_admin_report_data',
+    10,
+    24
+);
 if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
     function wcusage_get_admin_report_data(
         $wcu_orders_start,
@@ -1054,82 +1054,75 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
         $wcu_report_show_sales,
         $wcu_report_show_commission,
         $wcu_report_show_url,
-        $wcu_report_show_products,
-        $limit,
-        $offset
+        $wcu_report_show_products
     ) {
+        global $wpdb;
         $options = get_option( 'wcusage_options' );
-        // Clear all the previous
+        // Clear all the previous output
         ob_clean();
         if ( !$wcu_compare ) {
-            $wcu_compare == "false";
+            $wcu_compare = "false";
         }
+        // Free version date restrictions
         if ( !wcu_fs()->can_use_premium_code() ) {
             if ( strtotime( $wcu_orders_start ) < strtotime( "-1 month" ) || !$wcu_orders_start ) {
                 $wcu_orders_start = date( "Y-m-d", strtotime( "-1 month" ) );
             }
-            if ( strtotime( $wcu_orders_end ) > strtotime( 'now' ) || strtotime( $wcu_orders_end ) > strtotime( 'now' ) || !$wcu_orders_end ) {
+            if ( strtotime( $wcu_orders_end ) > strtotime( 'now' ) || !$wcu_orders_end ) {
                 $wcu_orders_end = date( "Y-m-d" );
             }
         }
+        // Comparison text
         if ( $wcu_orders_filtercompare_type == "both" ) {
             $comparetypetext = "have increased or decreased";
-        }
-        if ( $wcu_orders_filtercompare_type == "more" ) {
+        } elseif ( $wcu_orders_filtercompare_type == "more" ) {
             $comparetypetext = "have increased";
-        }
-        if ( $wcu_orders_filtercompare_type == "less" ) {
+        } elseif ( $wcu_orders_filtercompare_type == "less" ) {
             $comparetypetext = "have decreased";
         }
-        $width = "<script>document.write(screen.width);</script>";
-        // ***** Get the report details message ***** //
-        ?>
-    <?php 
+        // Report details message
         $reportscripthtml = "<div class='report-complete-box'><h2>" . esc_html__( "Report Complete!", "woo-coupon-usage" ) . "</h2><p>";
         $reportscripthtml .= "<i class='fas fa-check-circle'></i> " . esc_html__( "Report created for", "woo-coupon-usage" ) . " " . date_i18n( 'j F Y', strtotime( $wcu_orders_start ) ) . " to " . date_i18n( 'j F Y', strtotime( $wcu_orders_end ) );
         if ( $wcu_compare == "true" ) {
             $reportscripthtml .= "<br/><i class='fas fa-check-circle'></i> " . esc_html__( "Comparing with date period", "woo-coupon-usage" ) . " " . date_i18n( 'F j, Y', strtotime( $wcu_orders_start_compare ) ) . " " . esc_html__( "to", "woo-coupon-usage" ) . " " . date_i18n( 'F j, Y', strtotime( $wcu_orders_end_compare ) );
-            if ( $wcu_orders_filtercompare_type == "both" && $wcu_orders_filtercompare_amount == 0 ) {
-            } else {
+            if ( $wcu_orders_filtercompare_type != "both" || $wcu_orders_filtercompare_amount != 0 ) {
                 $reportscripthtml .= "<br/><i class='fas fa-check-circle'></i> " . esc_html__( "Showing coupons where sales have", "woo-coupon-usage" ) . " " . $comparetypetext . " " . esc_html__( "by more than", "woo-coupon-usage" ) . " " . $wcu_orders_filtercompare_amount . "%.";
             }
         }
-        $arrayextrafilters = array(
-            array(
+        $arrayextrafilters = [
+            [
                 esc_html__( "total usage", "woo-coupon-usage" ),
                 $wcu_orders_filterusage_type,
                 $wcu_orders_filterusage_amount,
                 $wcu_orders_filterusage_amount
-            ),
-            array(
+            ],
+            [
                 esc_html__( "total sales", "woo-coupon-usage" ),
                 $wcu_orders_filtersales_type,
                 $wcu_orders_filtersales_amount,
                 wcusage_get_currency_symbol() . $wcu_orders_filtersales_amount
-            ),
-            array(
+            ],
+            [
                 esc_html__( "commission earned", "woo-coupon-usage" ),
                 $wcu_orders_filtercommission_type,
                 $wcu_orders_filtercommission_amount,
                 wcusage_get_currency_symbol() . $wcu_orders_filtercommission_amount
-            ),
-            array(
+            ],
+            [
                 esc_html__( "unpaid commission", "woo-coupon-usage" ),
                 $wcu_orders_filterunpaid_type,
                 $wcu_orders_filterunpaid_amount,
                 wcusage_get_currency_symbol() . $wcu_orders_filterunpaid_amount
-            ),
-            array(
+            ],
+            [
                 esc_html__( "URL conversion rate", "woo-coupon-usage" ),
                 $wcu_orders_filterconversions_type,
                 $wcu_orders_filterconversions_amount,
                 $wcu_orders_filterconversions_amount . "%"
-            )
-        );
+            ]
+        ];
         foreach ( $arrayextrafilters as $filter ) {
-            if ( $filter[1] == "more or equal" && $filter[2] == 0 || $filter[1] == "more or equal" && $filter[2] == "" ) {
-                // Nothing
-            } else {
+            if ( !($filter[1] == "more or equal" && $filter[2] == 0) ) {
                 $reportscripthtml .= "<br/><i class='fas fa-check-circle'></i> " . esc_html__( "Showing coupons where", "woo-coupon-usage" ) . " " . $filter[0] . " " . esc_html__( "is", "woo-coupon-usage" ) . " " . $filter[1] . " " . esc_html__( "than", "woo-coupon-usage" ) . " " . $filter[3] . ".";
             }
         }
@@ -1137,102 +1130,225 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
             $reportscripthtml .= "<br/><i class='fas fa-check-circle'></i> " . esc_html__( "Only showing coupons that are assigned to an affiliate user.", "woo-coupon-usage" );
         }
         $reportscripthtml .= "</p></div>";
+        // Update report title
         ?>
-
-    <!-- Display the report details message -->
-
-    <script>
-    jQuery(document).ready(function(){
-      jQuery("#report-complete-title").html("<?php 
+  <script>
+  jQuery(document).ready(function(){
+    jQuery("#report-complete-title").html("<?php 
         echo $reportscripthtml;
         ?>");
-    });
-    </script>
+  });
+  </script>
 
-    <!-- Styles to Show/Hide Sections in Report -->
-
-    <?php 
+  <!-- Styles to Show/Hide Sections -->
+  <?php 
         if ( $wcu_report_show_sales == "false" ) {
             ?>
-    <style>
-    .wcusage-reports-stats-section-sales {
-      display: none !important;
-    }
-    </style>
-    <?php 
+  <style>.wcusage-reports-stats-section-sales { display: none !important; }</style>
+  <?php 
         }
         ?>
-
-    <?php 
+  <?php 
         if ( $wcu_report_show_commission == "false" ) {
             ?>
-    <style>
-    .wcusage-reports-stats-section-commission {
-      display: none !important;
-    }
-    </style>
-    <?php 
+  <style>.wcusage-reports-stats-section-commission { display: none !important; }</style>
+  <?php 
         }
         ?>
-
-    <?php 
+  <?php 
         if ( $wcu_report_show_url == "false" ) {
             ?>
-    <style>
-    .wcusage-reports-stats-section-url {
-      display: none !important;
-    }
-    </style>
-    <?php 
+  <style>.wcusage-reports-stats-section-url { display: none !important; }</style>
+  <?php 
         }
         ?>
-
-    <?php 
+  <?php 
         if ( $wcu_compare == "true" ) {
             ?>
-    <style>
-    .all-time-previous, .all-time-side-text {
-      display: block !important;
-    }
-    </style>
-    <?php 
+  <style>.all-time-previous, .all-time-side-text { display: block !important; }</style>
+  <?php 
         }
         ?>
 
-    <!-- Get Coupons -->
-
-    <?php 
+  <?php 
         $wcusage_field_tracking_enable = wcusage_get_setting_value( 'wcusage_field_tracking_enable', 1 );
-        if ( !$wcu_report_users_only || $wcu_report_users_only == "false" ) {
-            $args = array(
-                'posts_per_page'  => $limit,
-                'offset'          => $offset,
-                'orderby'         => 'title',
-                'order'           => 'asc',
-                'post_type'       => 'shop_coupon',
-                'post_status'     => 'publish',
-                'query_timestamp' => time(),
-            );
-        } else {
-            $args = array(
-                'posts_per_page'  => $limit,
-                'offset'          => $offset,
-                'orderby'         => 'title',
-                'order'           => 'asc',
-                'post_type'       => 'shop_coupon',
-                'post_status'     => 'publish',
-                'query_timestamp' => time(),
-                'meta_query'      => array(array(
-                    'key'     => 'wcu_select_coupon_user',
-                    'value'   => '',
-                    'compare' => '!=',
-                )),
-            );
+        // Get coupons for the batch
+        $args = [
+            'posts_per_page'  => -1,
+            'orderby'         => 'title',
+            'order'           => 'asc',
+            'post_type'       => 'shop_coupon',
+            'post_status'     => 'publish',
+            'query_timestamp' => time(),
+        ];
+        if ( $wcu_report_users_only == "true" ) {
+            $args['meta_query'] = [[
+                'key'     => 'wcu_select_coupon_user',
+                'value'   => '',
+                'compare' => '!=',
+            ]];
         }
         $coupons = get_posts( $args );
         $coupons = array_unique( $coupons, SORT_REGULAR );
-        echo "<table id='table-coupon-items'>";
-        // Initialize statistics
+        // Initialize coupon stats array
+        $coupon_stats = [];
+        foreach ( $coupons as $coupon ) {
+            $coupon_code = strtolower( $coupon->post_title );
+            $coupon_stats[$coupon_code] = [
+                'id'                       => $coupon->ID,
+                'total_count'              => 0,
+                'total_orders'             => 0.0,
+                'total_commission'         => 0.0,
+                'full_discount'            => 0.0,
+                'list_of_products'         => [],
+                'total_count_compare'      => 0,
+                'total_orders_compare'     => 0.0,
+                'total_commission_compare' => 0.0,
+                'full_discount_compare'    => 0.0,
+                'clickcount'               => 0,
+                'convertedcount'           => 0,
+                'conversionrate'           => 0,
+                'clickcount_compare'       => 0,
+                'convertedcount_compare'   => 0,
+                'conversionrate_compare'   => 0,
+                'unpaid_commission'        => 0.0,
+                'pending_payments'         => 0.0,
+                'user_id'                  => 0,
+                'uniqueurl'                => '',
+            ];
+        }
+        // Fetch all orders once
+        $start_date_gmt = wcusage_convert_date_to_gmt( $wcu_orders_start, 0 );
+        $end_date_gmt = wcusage_convert_date_to_gmt( $wcu_orders_end, 1 );
+        $wcusage_field_order_type_custom = wcusage_get_setting_value( 'wcusage_field_order_type_custom', '' );
+        if ( !$wcusage_field_order_type_custom ) {
+            $statuses = wc_get_order_statuses();
+            if ( isset( $statuses['wc-refunded'] ) ) {
+                unset($statuses['wc-refunded']);
+            }
+        } else {
+            $statuses = $wcusage_field_order_type_custom;
+        }
+        $status_list = "'" . implode( "','", array_keys( $statuses ) ) . "'";
+        if ( class_exists( 'Automattic\\WooCommerce\\Utilities\\OrderUtil' ) && OrderUtil::custom_orders_table_usage_is_enabled() ) {
+            $id = "id";
+            $posts = "wc_orders";
+            $postmeta = "wc_orders_meta";
+            $post_date = "date_created_gmt";
+            $post_status = "status";
+            $post_id = "order_id";
+        } else {
+            $id = "ID";
+            $posts = "posts";
+            $postmeta = "postmeta";
+            $post_date = "post_date_gmt";
+            $post_status = "post_status";
+            $post_id = "post_id";
+        }
+        $query = $wpdb->prepare( "SELECT DISTINCT p.{$id} AS order_id, p.{$post_date} AS order_date\r\n      FROM {$wpdb->prefix}{$posts} AS p\r\n      LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS woi\r\n          ON p.{$id} = woi.order_id AND woi.order_item_type = 'coupon'\r\n      LEFT JOIN {$wpdb->prefix}{$postmeta} AS woi2\r\n          ON p.{$id} = woi2.{$post_id} AND (\r\n              woi2.meta_key = 'lifetime_affiliate_coupon_referrer' OR\r\n              woi2.meta_key = 'wcusage_referrer_coupon'\r\n          )\r\n      WHERE p.{$post_status} IN ({$status_list})\r\n      AND (woi.order_id IS NOT NULL OR woi2.meta_key IS NOT NULL)\r\n      AND p.{$post_date} BETWEEN %s AND %s", $start_date_gmt, $end_date_gmt );
+        $orders = $wpdb->get_results( $query );
+        // Process orders for main date range
+        foreach ( $orders as $order_data ) {
+            $order_id = $order_data->order_id;
+            $order = wc_get_order( $order_id );
+            if ( !$order ) {
+                continue;
+            }
+            // Retrieve meta fields and applied coupons
+            $lifetime_coupon = strtolower( get_post_meta( $order_id, 'lifetime_affiliate_coupon_referrer', true ) );
+            $referrer_coupon = strtolower( get_post_meta( $order_id, 'wcusage_referrer_coupon', true ) );
+            $applied_coupons = array_map( 'strtolower', $order->get_coupon_codes() );
+            // Skip if renewal check fails (assuming this is part of your system)
+            $renewalcheck = wcusage_check_if_renewal_allowed( $order_id );
+            if ( !$renewalcheck ) {
+                continue;
+            }
+            // Determine which coupon code to use
+            if ( $lifetime_coupon && isset( $coupon_stats[$lifetime_coupon] ) ) {
+                $coupon_to_use = $lifetime_coupon;
+            } elseif ( $referrer_coupon && isset( $coupon_stats[$referrer_coupon] ) ) {
+                $coupon_to_use = $referrer_coupon;
+            } else {
+                // Fallback to applied coupons only if no meta fields are set
+                $relevant_coupons = array_intersect( $applied_coupons, array_keys( $coupon_stats ) );
+                if ( empty( $relevant_coupons ) ) {
+                    continue;
+                }
+                foreach ( $relevant_coupons as $coupon_code ) {
+                    $calculateorder = wcusage_calculate_order_data(
+                        $order_id,
+                        $coupon_code,
+                        0,
+                        1
+                    );
+                    if ( isset( $calculateorder['totalorders'] ) ) {
+                        $coupon_stats[$coupon_code]['total_count'] += 1;
+                        $coupon_stats[$coupon_code]['total_orders'] += (float) $calculateorder['totalorders'];
+                        $coupon_stats[$coupon_code]['total_commission'] += (float) $calculateorder['totalcommission'];
+                        $coupon_stats[$coupon_code]['full_discount'] += (float) $calculateorder['totaldiscounts'];
+                    }
+                    // Add products to the list of products
+                    $product_ids = $order->get_items();
+                    foreach ( $product_ids as $product_id => $product_data ) {
+                        $product = wc_get_product( $product_data['product_id'] );
+                        $product_name = $product->get_name();
+                        $product_qty = $product_data['quantity'];
+                        if ( !isset( $coupon_stats[$coupon_code]['list_of_products'][$product_name] ) ) {
+                            $coupon_stats[$coupon_code]['list_of_products'][$product_name] = 0;
+                        }
+                        $coupon_stats[$coupon_code]['list_of_products'][$product_name] += $product_qty;
+                    }
+                }
+                continue;
+                // Move to next order after processing applied coupons
+            }
+            // Add products to the list of products
+            $product_ids = $order->get_items();
+            foreach ( $product_ids as $product_id => $product_data ) {
+                $product = wc_get_product( $product_data['product_id'] );
+                $product_name = $product->get_name();
+                $product_qty = $product_data['quantity'];
+                if ( !isset( $coupon_stats[$coupon_to_use]['list_of_products'][$product_name] ) ) {
+                    $coupon_stats[$coupon_to_use]['list_of_products'][$product_name] = 0;
+                }
+                $coupon_stats[$coupon_to_use]['list_of_products'][$product_name] += $product_qty;
+            }
+        }
+        // Fetch orders for comparison date range if applicable
+        if ( $wcu_compare == "true" && wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() ) {
+            $start_date_compare_gmt = wcusage_convert_date_to_gmt( $wcu_orders_start_compare, 0 );
+            $end_date_compare_gmt = wcusage_convert_date_to_gmt( $wcu_orders_end_compare, 1 );
+            $query_compare = $wpdb->prepare( "SELECT DISTINCT p.{$id} AS order_id, p.{$post_date} AS order_date\r\n          FROM {$wpdb->prefix}{$posts} AS p\r\n          LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS woi\r\n              ON p.{$id} = woi.order_id AND woi.order_item_type = 'coupon'\r\n          LEFT JOIN {$wpdb->prefix}{$postmeta} AS woi2\r\n              ON p.{$id} = woi2.{$post_id} AND (\r\n                  woi2.meta_key = 'lifetime_affiliate_coupon_referrer' OR\r\n                  woi2.meta_key = 'wcusage_referrer_coupon'\r\n              )\r\n          WHERE p.{$post_status} IN ({$status_list})\r\n          AND (woi.order_id IS NOT NULL OR woi2.meta_key IS NOT NULL)\r\n          AND p.{$post_date} BETWEEN %s AND %s", $start_date_compare_gmt, $end_date_compare_gmt );
+            $orders_compare = $wpdb->get_results( $query_compare );
+            foreach ( $orders_compare as $order_data ) {
+                $order_id = $order_data->order_id;
+                $order = wc_get_order( $order_id );
+                if ( !$order ) {
+                    continue;
+                }
+                $applied_coupons = array_map( 'strtolower', $order->get_coupon_codes() );
+                $lifetime_coupon = strtolower( get_post_meta( $order_id, 'lifetime_affiliate_coupon_referrer', true ) );
+                $referrer_coupon = strtolower( get_post_meta( $order_id, 'wcusage_referrer_coupon', true ) );
+                $meta_coupons = array_filter( [$lifetime_coupon, $referrer_coupon] );
+                $associated_coupons = array_unique( array_merge( $applied_coupons, $meta_coupons ) );
+                $relevant_coupons = array_intersect( $associated_coupons, array_keys( $coupon_stats ) );
+                foreach ( $relevant_coupons as $coupon_code ) {
+                    $calculateorder = wcusage_calculate_order_data(
+                        $order_id,
+                        $coupon_code,
+                        0,
+                        1
+                    );
+                    if ( isset( $calculateorder['totalorders'] ) ) {
+                        $coupon_stats[$coupon_code]['total_count_compare'] += 1;
+                        $coupon_stats[$coupon_code]['total_orders_compare'] += (float) $calculateorder['totalorders'];
+                        $coupon_stats[$coupon_code]['total_commission_compare'] += (float) $calculateorder['totalcommission'];
+                        $coupon_stats[$coupon_code]['full_discount_compare'] += (float) $calculateorder['totaldiscounts'];
+                    }
+                }
+            }
+        }
+        // Populate additional coupon data
         $stats = [
             'total_usage'        => 0,
             'total_sales'        => 0.0,
@@ -1242,602 +1358,474 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
             'pending_commission' => 0.0,
             'total_clicks'       => 0,
             'total_conversions'  => 0,
+            'conversion_rate'    => 0,
         ];
-        $previous_coupon = "";
+        echo "<table id='table-coupon-items'>";
         foreach ( $coupons as $coupon ) {
-            if ( $previous_coupon == $coupon ) {
-                continue;
-                // Skip duplicates (if any)
-            }
-            $previous_coupon = $coupon;
-            $coupon_code = $coupon->post_title;
+            $coupon_code = strtolower( $coupon->post_title );
             $coupon_id = $coupon->ID;
             $coupon_info = wcusage_get_coupon_info_by_id( $coupon_id );
-            $coupon_user_id = $coupon_info[1];
-            $unpaid_commission = $coupon_info[2];
-            if ( !$unpaid_commission ) {
-                $unpaid_commission = 0.0;
-            }
-            $pending_payments = get_post_meta( $coupon_id, 'wcu_text_pending_payment_commission', true );
-            if ( !$pending_payments ) {
-                $pending_payments = 0.0;
-            }
-            $uniqueurl = $coupon_info[4];
-            // Main Data
-            $fullorders = wcusage_wh_getOrderbyCouponCode(
-                $coupon_code,
-                $wcu_orders_start,
-                $wcu_orders_end,
-                '',
-                1
-            );
-            $fullorders = array_reverse( $fullorders );
-            $total_count = $fullorders['total_count'];
-            $total_count_compare = "";
-            $total_orders = $fullorders['total_orders'];
-            $total_commission = $fullorders['total_commission'];
-            $list_of_products = $fullorders['list_of_products'];
-            $full_discount = $fullorders['full_discount'];
+            $coupon_stats[$coupon_code]['user_id'] = $coupon_info[1];
+            $coupon_stats[$coupon_code]['unpaid_commission'] = ( $coupon_info[2] ?: 0.0 );
+            $coupon_stats[$coupon_code]['uniqueurl'] = $coupon_info[4];
+            $coupon_stats[$coupon_code]['pending_payments'] = ( get_post_meta( $coupon_id, 'wcu_text_pending_payment_commission', true ) ?: 0.0 );
             $url_stats = wcusage_get_url_stats( $coupon_id, $wcu_orders_start, $wcu_orders_end );
-            $clickcount = $url_stats['clicks'];
-            $convertedcount = $url_stats['convertedcount'];
-            $conversionrate = $url_stats['conversionrate'];
-            // Accumulate stats
-            $stats['total_usage'] += $total_count;
-            $stats['total_sales'] += $total_orders;
-            $stats['total_discounts'] += $full_discount;
-            $stats['total_commission'] += $total_commission;
-            $stats['unpaid_commission'] += $unpaid_commission;
-            $stats['pending_commission'] += $pending_payments;
-            $stats['total_clicks'] += $clickcount;
-            $stats['total_conversions'] += $convertedcount;
-            $stats['conversion_rate'] = ( $stats['total_clicks'] > 0 ? round( $stats['total_conversions'] / $stats['total_clicks'] * 100, 2 ) : 0 );
-            // User Data
-            $usernamefull = "";
-            if ( $coupon_user_id ) {
-                $user_info = get_userdata( $coupon_user_id );
-                if ( $user_info ) {
-                    $username = mb_strimwidth(
-                        $user_info->user_login,
-                        0,
-                        14,
-                        "..."
-                    );
-                    $usernamefull = $user_info->user_login;
-                } else {
-                    $username = "---";
-                }
-            } else {
-                $username = "---";
+            $coupon_stats[$coupon_code]['clickcount'] = $url_stats['clicks'];
+            $coupon_stats[$coupon_code]['convertedcount'] = $url_stats['convertedcount'];
+            $coupon_stats[$coupon_code]['conversionrate'] = $url_stats['conversionrate'];
+            if ( $wcu_compare == "true" && wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() ) {
+                $url_stats_compare = wcusage_get_url_stats( $coupon_id, $wcu_orders_start_compare, $wcu_orders_end_compare );
+                $coupon_stats[$coupon_code]['clickcount_compare'] = $url_stats_compare['clicks'];
+                $coupon_stats[$coupon_code]['convertedcount_compare'] = $url_stats_compare['convertedcount'];
+                $coupon_stats[$coupon_code]['conversionrate_compare'] = $url_stats_compare['conversionrate'];
             }
-            // Check Data filters
+            // Calculate differences for comparison
+            $diff_total_count = ( $wcu_compare == "true" ? wcusage_getPercentageChange2( $coupon_stats[$coupon_code]['total_count'], $coupon_stats[$coupon_code]['total_count_compare'], false ) : '' );
+            $diff_total_orders = ( $wcu_compare == "true" ? wcusage_getPercentageChange2( $coupon_stats[$coupon_code]['total_orders'], $coupon_stats[$coupon_code]['total_orders_compare'], true ) : '' );
+            $diff_total_commission = ( $wcu_compare == "true" ? wcusage_getPercentageChange2( $coupon_stats[$coupon_code]['total_commission'], $coupon_stats[$coupon_code]['total_commission_compare'], true ) : '' );
+            $diff_full_discount = ( $wcu_compare == "true" ? wcusage_getPercentageChange2( $coupon_stats[$coupon_code]['full_discount'], $coupon_stats[$coupon_code]['full_discount_compare'], true ) : '' );
+            $diff_clickcount = ( $wcu_compare == "true" ? wcusage_getPercentageChange2( $coupon_stats[$coupon_code]['clickcount'], $coupon_stats[$coupon_code]['clickcount_compare'], false ) : '' );
+            $diff_convertedcount = ( $wcu_compare == "true" ? wcusage_getPercentageChange2( $coupon_stats[$coupon_code]['convertedcount'], $coupon_stats[$coupon_code]['convertedcount_compare'], false ) : '' );
+            $diff_conversionrate = ( $wcu_compare == "true" ? wcusage_getPercentageChange2( $coupon_stats[$coupon_code]['conversionrate'], $coupon_stats[$coupon_code]['conversionrate_compare'], false ) : '' );
+            $diff_total_orders_num = ( $wcu_compare == "true" ? wcusage_getPercentageChangeNum( $coupon_stats[$coupon_code]['total_orders'], $coupon_stats[$coupon_code]['total_orders_compare'] ) : 0 );
+            // User data
+            $usernamefull = ( $coupon_stats[$coupon_code]['user_id'] && ($user_info = get_userdata( $coupon_stats[$coupon_code]['user_id'] )) ? $user_info->user_login : "---" );
+            $username = ( $usernamefull === "---" ? "---" : mb_strimwidth(
+                $usernamefull,
+                0,
+                14,
+                "..."
+            ) );
+            // Apply filters
             $checkshowthis = true;
-            // Filter Assigned To User
-            if ( $wcu_report_users_only == "true" && !$coupon_user_id ) {
+            if ( $wcu_report_users_only == "true" && !$coupon_stats[$coupon_code]['user_id'] ) {
                 $checkshowthis = false;
             }
-            // ***** Only show coupons with usage ***** //
-            // Sales More
-            if ( $wcu_orders_filterusage_type == "more" && $total_count <= $wcu_orders_filterusage_amount ) {
+            if ( $wcu_compare == "true" && wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() ) {
+                if ( $wcu_orders_filtercompare_type == "more" && $wcu_orders_filtercompare_amount >= $diff_total_orders_num ) {
+                    $checkshowthis = false;
+                }
+                if ( $wcu_orders_filtercompare_type == "less" && -abs( $wcu_orders_filtercompare_amount ) <= $diff_total_orders_num ) {
+                    $checkshowthis = false;
+                }
+            }
+            // Usage filters
+            if ( $wcu_orders_filterusage_type == "more" && $coupon_stats[$coupon_code]['total_count'] <= $wcu_orders_filterusage_amount ) {
                 $checkshowthis = false;
             }
-            // Sales More Equal
-            if ( $wcu_orders_filterusage_type == "more or equal" && $total_count < $wcu_orders_filterusage_amount ) {
+            if ( $wcu_orders_filterusage_type == "more or equal" && $coupon_stats[$coupon_code]['total_count'] < $wcu_orders_filterusage_amount ) {
                 $checkshowthis = false;
             }
-            // Sales Less
-            if ( $wcu_orders_filterusage_type == "less" && $total_count >= $wcu_orders_filterusage_amount ) {
+            if ( $wcu_orders_filterusage_type == "less" && $coupon_stats[$coupon_code]['total_count'] >= $wcu_orders_filterusage_amount ) {
                 $checkshowthis = false;
             }
-            // Sales Less Equal
-            if ( $wcu_orders_filterusage_type == "less or equal" && $total_count > $wcu_orders_filterusage_amount ) {
+            if ( $wcu_orders_filterusage_type == "less or equal" && $coupon_stats[$coupon_code]['total_count'] > $wcu_orders_filterusage_amount ) {
                 $checkshowthis = false;
             }
-            // Equal
-            if ( $wcu_orders_filterusage_type == "equal" && $total_count != $wcu_orders_filterusage_amount ) {
+            if ( $wcu_orders_filterusage_type == "equal" && $coupon_stats[$coupon_code]['total_count'] != $wcu_orders_filterusage_amount ) {
                 $checkshowthis = false;
             }
-            // ***** Only show coupons with sales ***** //
-            // Sales More
-            if ( $wcu_orders_filtersales_type == "more" && $total_orders <= $wcu_orders_filtersales_amount ) {
+            // Sales filters
+            if ( $wcu_orders_filtersales_type == "more" && $coupon_stats[$coupon_code]['total_orders'] <= $wcu_orders_filtersales_amount ) {
                 $checkshowthis = false;
             }
-            // Sales More Equal
-            if ( $wcu_orders_filtersales_type == "more or equal" && $total_orders < $wcu_orders_filtersales_amount ) {
+            if ( $wcu_orders_filtersales_type == "more or equal" && $coupon_stats[$coupon_code]['total_orders'] < $wcu_orders_filtersales_amount ) {
                 $checkshowthis = false;
             }
-            // Sales Less
-            if ( $wcu_orders_filtersales_type == "less" && $total_orders >= $wcu_orders_filtersales_amount ) {
+            if ( $wcu_orders_filtersales_type == "less" && $coupon_stats[$coupon_code]['total_orders'] >= $wcu_orders_filtersales_amount ) {
                 $checkshowthis = false;
             }
-            // Sales Less Equal
-            if ( $wcu_orders_filtersales_type == "less or equal" && $total_orders > $wcu_orders_filtersales_amount ) {
+            if ( $wcu_orders_filtersales_type == "less or equal" && $coupon_stats[$coupon_code]['total_orders'] > $wcu_orders_filtersales_amount ) {
                 $checkshowthis = false;
             }
-            // Equal
-            if ( $wcu_orders_filtersales_type == "equal" && $total_orders != $wcu_orders_filtersales_amount ) {
+            if ( $wcu_orders_filtersales_type == "equal" && $coupon_stats[$coupon_code]['total_orders'] != $wcu_orders_filtersales_amount ) {
                 $checkshowthis = false;
             }
-            // ***** Only show coupons with commission ***** //
-            // Sales More
-            if ( $wcu_orders_filtercommission_type == "more" && $total_commission <= $wcu_orders_filtercommission_amount ) {
+            // Commission filters
+            if ( $wcu_orders_filtercommission_type == "more" && $coupon_stats[$coupon_code]['total_commission'] <= $wcu_orders_filtercommission_amount ) {
                 $checkshowthis = false;
             }
-            // Sales More Equal
-            if ( $wcu_orders_filtercommission_type == "more or equal" && $total_commission < $wcu_orders_filtercommission_amount ) {
+            if ( $wcu_orders_filtercommission_type == "more or equal" && $coupon_stats[$coupon_code]['total_commission'] < $wcu_orders_filtercommission_amount ) {
                 $checkshowthis = false;
             }
-            // Sales Less
-            if ( $wcu_orders_filtercommission_type == "less" && $total_commission >= $wcu_orders_filtercommission_amount ) {
+            if ( $wcu_orders_filtercommission_type == "less" && $coupon_stats[$coupon_code]['total_commission'] >= $wcu_orders_filtercommission_amount ) {
                 $checkshowthis = false;
             }
-            // Sales Less Equal
-            if ( $wcu_orders_filtercommission_type == "less or equal" && $total_commission > $wcu_orders_filtercommission_amount ) {
+            if ( $wcu_orders_filtercommission_type == "less or equal" && $coupon_stats[$coupon_code]['total_commission'] > $wcu_orders_filtercommission_amount ) {
                 $checkshowthis = false;
             }
-            // Equal
-            if ( $wcu_orders_filtercommission_type == "equal" && $total_commission != $wcu_orders_filtercommission_amount ) {
+            if ( $wcu_orders_filtercommission_type == "equal" && $coupon_stats[$coupon_code]['total_commission'] != $wcu_orders_filtercommission_amount ) {
                 $checkshowthis = false;
             }
-            // ***** Only show coupons with conversion rate ***** //
-            // Sales More
-            if ( $wcu_orders_filterconversions_type == "more" && round( $conversionrate, 2 ) <= $wcu_orders_filterconversions_amount ) {
+            // Conversion rate filters
+            if ( $wcu_orders_filterconversions_type == "more" && round( $coupon_stats[$coupon_code]['conversionrate'], 2 ) <= $wcu_orders_filterconversions_amount ) {
                 $checkshowthis = false;
             }
-            // Sales More Equal
-            if ( $wcu_orders_filterconversions_type == "more or equal" && round( $conversionrate, 2 ) < $wcu_orders_filterconversions_amount ) {
+            if ( $wcu_orders_filterconversions_type == "more or equal" && round( $coupon_stats[$coupon_code]['conversionrate'], 2 ) < $wcu_orders_filterconversions_amount ) {
                 $checkshowthis = false;
             }
-            // Sales Less
-            if ( $wcu_orders_filterconversions_type == "less" && round( $conversionrate, 2 ) >= $wcu_orders_filterconversions_amount ) {
+            if ( $wcu_orders_filterconversions_type == "less" && round( $coupon_stats[$coupon_code]['conversionrate'], 2 ) >= $wcu_orders_filterconversions_amount ) {
                 $checkshowthis = false;
             }
-            // Sales Less Equal
-            if ( $wcu_orders_filterconversions_type == "less or equal" && round( $conversionrate, 2 ) > $wcu_orders_filterconversions_amount ) {
+            if ( $wcu_orders_filterconversions_type == "less or equal" && round( $coupon_stats[$coupon_code]['conversionrate'], 2 ) > $wcu_orders_filterconversions_amount ) {
                 $checkshowthis = false;
             }
-            // Equal
-            if ( $wcu_orders_filterconversions_type == "equal" && round( $conversionrate, 2 ) != $wcu_orders_filterconversions_amount ) {
+            if ( $wcu_orders_filterconversions_type == "equal" && round( $coupon_stats[$coupon_code]['conversionrate'], 2 ) != $wcu_orders_filterconversions_amount ) {
                 $checkshowthis = false;
             }
-            // ***** Only show coupons with unpaid commission ***** //
-            // Sales More
-            if ( $wcu_orders_filterunpaid_type == "more" && $unpaid_commission <= $wcu_orders_filterunpaid_amount ) {
+            // Unpaid commission filters
+            if ( $wcu_orders_filterunpaid_type == "more" && $coupon_stats[$coupon_code]['unpaid_commission'] <= $wcu_orders_filterunpaid_amount ) {
                 $checkshowthis = false;
             }
-            // Sales More Equal
-            if ( $wcu_orders_filterunpaid_type == "more or equal" && $unpaid_commission < $wcu_orders_filterunpaid_amount ) {
+            if ( $wcu_orders_filterunpaid_type == "more or equal" && $coupon_stats[$coupon_code]['unpaid_commission'] < $wcu_orders_filterunpaid_amount ) {
                 $checkshowthis = false;
             }
-            // Sales Less
-            if ( $wcu_orders_filterunpaid_type == "less" && $unpaid_commission >= $wcu_orders_filterunpaid_amount ) {
+            if ( $wcu_orders_filterunpaid_type == "less" && $coupon_stats[$coupon_code]['unpaid_commission'] >= $wcu_orders_filterunpaid_amount ) {
                 $checkshowthis = false;
             }
-            // Sales Less Equal
-            if ( $wcu_orders_filterunpaid_type == "less or equal" && $unpaid_commission > $wcu_orders_filterunpaid_amount ) {
+            if ( $wcu_orders_filterunpaid_type == "less or equal" && $coupon_stats[$coupon_code]['unpaid_commission'] > $wcu_orders_filterunpaid_amount ) {
                 $checkshowthis = false;
             }
-            // Equal
-            if ( $wcu_orders_filterunpaid_type == "equal" && $unpaid_commission != $wcu_orders_filterunpaid_amount ) {
+            if ( $wcu_orders_filterunpaid_type == "equal" && $coupon_stats[$coupon_code]['unpaid_commission'] != $wcu_orders_filterunpaid_amount ) {
                 $checkshowthis = false;
             }
-            // ***** Display Data ***** //
+            // Display data if it passes filters
             if ( $checkshowthis ) {
+                $stats['total_usage'] += $coupon_stats[$coupon_code]['total_count'];
+                $stats['total_sales'] += $coupon_stats[$coupon_code]['total_orders'];
+                $stats['total_discounts'] += $coupon_stats[$coupon_code]['full_discount'];
+                $stats['total_commission'] += $coupon_stats[$coupon_code]['total_commission'];
+                $stats['unpaid_commission'] += $coupon_stats[$coupon_code]['unpaid_commission'];
+                $stats['pending_commission'] += $coupon_stats[$coupon_code]['pending_payments'];
+                $stats['total_clicks'] += $coupon_stats[$coupon_code]['clickcount'];
+                $stats['total_conversions'] += $coupon_stats[$coupon_code]['convertedcount'];
                 ?>
-      <tbody class="coupon-item-box"
-      data-usage="<?php 
-                echo esc_attr( $total_count );
+          <tbody class="coupon-item-box"
+              data-usage="<?php 
+                echo esc_attr( $coupon_stats[$coupon_code]['total_count'] );
                 ?>"
-      data-orders="<?php 
-                echo esc_attr( $total_orders );
+              data-orders="<?php 
+                echo esc_attr( $coupon_stats[$coupon_code]['total_orders'] );
                 ?>"
-      data-commission="<?php 
-                echo esc_attr( $total_commission );
+              data-commission="<?php 
+                echo esc_attr( $coupon_stats[$coupon_code]['total_commission'] );
                 ?>"
-      data-discounts="<?php 
-                echo esc_attr( $full_discount );
+              data-discounts="<?php 
+                echo esc_attr( $coupon_stats[$coupon_code]['full_discount'] );
                 ?>"
-      data-unpaid="<?php 
-                echo esc_attr( $unpaid_commission );
+              data-unpaid="<?php 
+                echo esc_attr( $coupon_stats[$coupon_code]['unpaid_commission'] );
                 ?>"
-      data-pending="<?php 
-                echo esc_attr( $pending_payments );
+              data-pending="<?php 
+                echo esc_attr( $coupon_stats[$coupon_code]['pending_payments'] );
                 ?>"
-      >
-          <tr class="coupon-data-row " style="padding: 20px 15px 0 15px;">
-          <td colspan="7">
-            <span class="wcu-coupon-name" style="font-size: 20px; margin-bottom: 10px; display: block; font-weight: bold;">
-              <a href="<?php 
-                echo esc_html( $uniqueurl );
+          >
+              <tr class="coupon-data-row" style="padding: 20px 15px 0 15px;">
+                  <td colspan="7">
+                      <span class="wcu-coupon-name" style="font-size: 20px; margin-bottom: 10px; display: block; font-weight: bold;">
+                          <a href="<?php 
+                echo esc_html( $coupon_stats[$coupon_code]['uniqueurl'] );
                 ?>" target="_blank" style="text-decoration: none;" title="<?php 
                 echo esc_html__( "View Affiliate Dashboard", "woo-coupon-usage" );
                 ?>"><?php 
                 echo esc_html( $coupon_code );
                 ?></a>
-              <span style="font-size: 10px;" ><a href="<?php 
+                          <span style="font-size: 10px;"><a href="<?php 
                 echo esc_url( get_edit_post_link( $coupon_id ) );
                 ?>" target="_blank" title="<?php 
                 echo esc_html__( "Edit Coupon", "woo-coupon-usage" );
                 ?>"><i class="fas fa-edit"></i></a></span>
-            </span>
-          </td>
-          </tr>
-          <tr class="coupon-data-row-head" style="padding: 0 15px 0px 15px; margin: 0px 0;">
-
-            <td class="wcu-r-td wcu-r-td-id" style="min-width: 90px;"><?php 
+                      </span>
+                  </td>
+              </tr>
+              <tr class="coupon-data-row-head" style="padding: 0 15px 0px 15px; margin: 0px 0;">
+                  <td class="wcu-r-td wcu-r-td-id" style="min-width: 90px;"><?php 
                 echo esc_html__( "Coupon ID", "woo-coupon-usage" );
                 ?> <a class="hide-col-id wcu-hide-col" href="#" onclick="return false;" title="Remove Column"><i class="fas fa-times"></i></a></td>
-            <td class="wcu-r-td wcu-r-td-120 wcu-r-td-affiliate"><?php 
+                  <td class="wcu-r-td wcu-r-td-120 wcu-r-td-affiliate"><?php 
                 echo esc_html__( "Affiliate User", "woo-coupon-usage" );
                 ?> <a class="hide-col-affiliate wcu-hide-col" href="#" onclick="return false;" title="Remove Column"><i class="fas fa-times"></i></a></td>
-
-            <?php 
+                  <?php 
                 if ( $wcu_report_show_sales != "false" ) {
                     ?>
-            <td class="wcu-r-td wcu-r-td-120 wcu-r-td-usage"><?php 
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-usage"><?php 
                     echo esc_html__( "Usage", "woo-coupon-usage" );
                     ?> <a class="hide-col-usage wcu-hide-col" href="#" onclick="return false;" title="Remove Column"><i class="fas fa-times"></i></a></td>
-            <td class="wcu-r-td wcu-r-td-120 wcu-r-td-sales"><?php 
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-sales"><?php 
                     echo esc_html__( "Sales", "woo-coupon-usage" );
                     ?> <a class="hide-col-sales wcu-hide-col" href="#" onclick="return false;" title="Remove Column"><i class="fas fa-times"></i></a></td>
-            <td class="wcu-r-td wcu-r-td-120 wcu-r-td-discounts"><?php 
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-discounts"><?php 
                     echo esc_html__( "Discounts", "woo-coupon-usage" );
                     ?> <a class="hide-col-discounts wcu-hide-col" href="#" onclick="return false;" title="Remove Column"><i class="fas fa-times"></i></a></td>
-            <?php 
+                  <?php 
                 }
                 ?>
-
-            <?php 
+                  <?php 
                 if ( $wcu_report_show_commission != "false" ) {
                     ?>
-              <td class="wcu-r-td wcu-r-td-120 wcu-r-td-commission"><?php 
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-commission"><?php 
                     echo esc_html__( "Commission", "woo-coupon-usage" );
                     ?> <a class="hide-col-commission wcu-hide-col" href="#" onclick="return false;" title="Remove Column"><i class="fas fa-times"></i></a></td>
-              <?php 
+                      <?php 
                     if ( $wcusage_field_tracking_enable && wcu_fs()->can_use_premium_code() ) {
                         ?>
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-unpaid"><?php 
+                          <td class="wcu-r-td wcu-r-td-120 wcu-r-td-unpaid"><?php 
                         echo esc_html__( "Unpaid Commission", "woo-coupon-usage" );
                         ?> <a class="hide-col-unpaid wcu-hide-col" href="#" onclick="return false;" title="Remove Column"><i class="fas fa-times"></i></a></td>
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-pending"><?php 
+                          <td class="wcu-r-td wcu-r-td-120 wcu-r-td-pending"><?php 
                         echo esc_html__( "Pending Payout", "woo-coupon-usage" );
                         ?> <a class="hide-col-pending wcu-hide-col" href="#" onclick="return false;" title="Remove Column"><i class="fas fa-times"></i></a></td>
-              <?php 
+                      <?php 
                     }
                     ?>
-            <?php 
+                  <?php 
                 }
                 ?>
-
-          </tr>
-          <tr class="coupon-data-row coupon-data-row-main" style="padding: 0 15px 0px 15px; margin: 0 0 20px 0;">
-
-            <td class="wcu-r-td wcu-r-td-120 wcu-r-td-id coupon-data-row-head-mobile excludeThisClassExport">
-              <?php 
+              </tr>
+              <tr class="coupon-data-row coupon-data-row-main" style="padding: 0 15px 0px 15px; margin: 0 0 20px 0;">
+                  <td class="wcu-r-td wcu-r-td-120 wcu-r-td-id coupon-data-row-head-mobile excludeThisClassExport"><?php 
                 echo esc_html__( "Coupon ID", "woo-coupon-usage" );
-                ?>
-            </td>
-            <td class="wcu-r-td wcu-r-td-id" style="min-width: 90px;">
-              <?php 
+                ?></td>
+                  <td class="wcu-r-td wcu-r-td-id" style="min-width: 90px;"><?php 
                 echo esc_html( $coupon_id );
-                ?>
-            </td>
-
-            <td class="wcu-r-td wcu-r-td-120 wcu-r-td-affiliate coupon-data-row-head-mobile excludeThisClassExport">
-              <?php 
+                ?></td>
+                  <td class="wcu-r-td wcu-r-td-120 wcu-r-td-affiliate coupon-data-row-head-mobile excludeThisClassExport"><?php 
                 echo esc_html__( "Affiliate User", "woo-coupon-usage" );
-                ?>
-            </td>
-            <td class="wcu-r-td wcu-r-td-120 wcu-r-td-affiliate">
-              <span title="<?php 
+                ?></td>
+                  <td class="wcu-r-td wcu-r-td-120 wcu-r-td-affiliate"><span title="<?php 
                 echo esc_html( $usernamefull );
                 ?>"><?php 
                 echo esc_html( $username );
-                ?></span>
-            </td>
-
-            <?php 
+                ?></span></td>
+                  <?php 
                 if ( $wcu_report_show_sales != "false" ) {
                     ?>
-
-              <td class="wcu-r-td wcu-r-td-120 wcu-r-td-usage coupon-data-row-head-mobile excludeThisClassExport">
-                <?php 
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-usage coupon-data-row-head-mobile excludeThisClassExport"><?php 
                     echo esc_html__( "Usage", "woo-coupon-usage" );
-                    ?>
-              </td>
-              <td class="wcu-r-td wcu-r-td-120 wcu-r-td-usage" id="total-usage-<?php 
+                    ?></td>
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-usage" id="total-usage-<?php 
                     echo esc_html( $coupon_id );
                     ?>">
-                <span class="item-total-usage"><?php 
-                    echo esc_html( $total_count );
+                          <span class="item-total-usage"><?php 
+                    echo esc_html( $coupon_stats[$coupon_code]['total_count'] );
                     ?></span>
-                <span class="item-total-usage-old" style="display: none;"><?php 
-                    echo esc_html( $total_count_compare );
+                          <span class="item-total-usage-old" style="display: none;"><?php 
+                    echo esc_html( $coupon_stats[$coupon_code]['total_count_compare'] );
                     ?></span>
-                <?php 
+                          <?php 
                     if ( $wcu_compare == "true" ) {
-                        ?>
-                  <br/><span style="font-size: 10px;"><?php 
+                        ?><br/><span style="font-size: 10px;"><?php 
                         echo wp_kses_post( $diff_total_count );
-                        ?></span>
-                <?php 
+                        ?></span><?php 
                     }
                     ?>
-              </td>
-
-              <td class="wcu-r-td wcu-r-td-120 wcu-r-td-sales coupon-data-row-head-mobile excludeThisClassExport">
-                <?php 
+                      </td>
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-sales coupon-data-row-head-mobile excludeThisClassExport"><?php 
                     echo esc_html__( "Sales", "woo-coupon-usage" );
-                    ?>
-              </td>
-              <td class="wcu-r-td wcu-r-td-120 wcu-r-td-sales" id="total-sales-<?php 
+                    ?></td>
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-sales" id="total-sales-<?php 
                     echo esc_html( $coupon_id );
                     ?>">
-                <?php 
+                          <?php 
                     echo wcusage_get_currency_symbol();
                     ?><span class="item-total-sales"><?php 
-                    echo str_replace( ',', '', number_format( (float) $total_orders, 2 ) );
+                    echo str_replace( ',', '', number_format( (float) $coupon_stats[$coupon_code]['total_orders'], 2 ) );
                     ?></span>
-                <?php 
+                          <?php 
                     if ( $wcu_compare == "true" ) {
-                        ?>
-                  <br/><span style="font-size: 10px;"><?php 
+                        ?><br/><span style="font-size: 10px;"><?php 
                         echo wp_kses_post( $diff_total_orders );
-                        ?></span>
-                  <span class="item-total-sales-old" style="display: none;"><?php 
-                        echo esc_html( $total_orders_compare );
-                        ?></span>
-                <?php 
+                        ?></span><span class="item-total-sales-old" style="display: none;"><?php 
+                        echo esc_html( $coupon_stats[$coupon_code]['total_orders_compare'] );
+                        ?></span><?php 
                     }
                     ?>
-              </td>
-
-              <td class="wcu-r-td wcu-r-td-120 wcu-r-td-discounts coupon-data-row-head-mobile excludeThisClassExport">
-                <?php 
+                      </td>
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-discounts coupon-data-row-head-mobile excludeThisClassExport"><?php 
                     echo esc_html__( "Discounts", "woo-coupon-usage" );
-                    ?>
-              </td>
-              <td class="wcu-r-td wcu-r-td-120 wcu-r-td-discounts" id="total-discounts-<?php 
+                    ?></td>
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-discounts" id="total-discounts-<?php 
                     echo esc_html( $coupon_id );
                     ?>">
-                <?php 
+                          <?php 
                     echo wcusage_get_currency_symbol();
                     ?><span class="item-total-discounts"><?php 
-                    echo str_replace( ',', '', number_format( (float) $full_discount, 2 ) );
+                    echo str_replace( ',', '', number_format( (float) $coupon_stats[$coupon_code]['full_discount'], 2 ) );
                     ?></span>
-                <?php 
+                          <?php 
                     if ( $wcu_compare == "true" ) {
-                        ?>
-                  <br/><span style="font-size: 10px;"><?php 
+                        ?><br/><span style="font-size: 10px;"><?php 
                         echo wp_kses_post( $diff_full_discount );
-                        ?></span>
-                  <span class="item-total-discounts-old" style="display: none;"><?php 
-                        echo esc_html( $full_discount_compare );
-                        ?></span>
-                <?php 
+                        ?></span><span class="item-total-discounts-old" style="display: none;"><?php 
+                        echo esc_html( $coupon_stats[$coupon_code]['full_discount_compare'] );
+                        ?></span><?php 
                     }
                     ?>
-              </td>
-
-            <?php 
+                      </td>
+                  <?php 
                 }
                 ?>
-
-            <?php 
+                  <?php 
                 if ( $wcu_report_show_commission != "false" ) {
                     ?>
-
-              <td class="wcu-r-td wcu-r-td-120 wcu-r-td-commission coupon-data-row-head-mobile excludeThisClassExport">
-                <?php 
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-commission coupon-data-row-head-mobile excludeThisClassExport"><?php 
                     echo esc_html__( "Commission", "woo-coupon-usage" );
-                    ?>
-              </td>
-              <td class="wcu-r-td wcu-r-td-120 wcu-r-td-commission" id="total-commission-<?php 
+                    ?></td>
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-commission" id="total-commission-<?php 
                     echo esc_html( $coupon_id );
                     ?>">
-                <?php 
+                          <?php 
                     echo wcusage_get_currency_symbol();
                     ?><span class="item-total-commission"><?php 
-                    echo str_replace( ',', '', number_format( (float) $total_commission, 2 ) );
+                    echo str_replace( ',', '', number_format( (float) $coupon_stats[$coupon_code]['total_commission'], 2 ) );
                     ?></span>
-                <?php 
+                          <?php 
                     if ( $wcu_compare == "true" ) {
-                        ?>
-                  <br/><span style="font-size: 10px;"><?php 
+                        ?><br/><span style="font-size: 10px;"><?php 
                         echo wp_kses_post( $diff_total_commission );
-                        ?></span>
-                  <span class="item-total-commission-old" style="display: none;"><?php 
-                        echo esc_html( $total_commission_compare );
-                        ?></span>
-                <?php 
+                        ?></span><span class="item-total-commission-old" style="display: none;"><?php 
+                        echo esc_html( $coupon_stats[$coupon_code]['total_commission_compare'] );
+                        ?></span><?php 
                     }
                     ?>
-              </td>
-
-              <?php 
+                      </td>
+                      <?php 
                     if ( $wcusage_field_tracking_enable && wcu_fs()->can_use_premium_code() ) {
                         ?>
-
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-unpaid coupon-data-row-head-mobile excludeThisClassExport">
-                  <?php 
+                          <td class="wcu-r-td wcu-r-td-120 wcu-r-td-unpaid coupon-data-row-head-mobile excludeThisClassExport"><?php 
                         echo esc_html__( "Unpaid Commission", "woo-coupon-usage" );
-                        ?>
-                </td>
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-unpaid">
-                  <?php 
+                        ?></td>
+                          <td class="wcu-r-td wcu-r-td-120 wcu-r-td-unpaid"><?php 
                         echo wcusage_get_currency_symbol();
                         ?><span class="item-unpaid-commission"><?php 
-                        echo str_replace( ',', '', number_format( (float) $unpaid_commission, 2 ) );
-                        ?></span>
-                </td>
-
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-pending coupon-data-row-head-mobile excludeThisClassExport">
-                  <?php 
+                        echo str_replace( ',', '', number_format( (float) $coupon_stats[$coupon_code]['unpaid_commission'], 2 ) );
+                        ?></span></td>
+                          <td class="wcu-r-td wcu-r-td-120 wcu-r-td-pending coupon-data-row-head-mobile excludeThisClassExport"><?php 
                         echo esc_html__( "Pending Payout", "woo-coupon-usage" );
-                        ?>
-                </td>
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-pending">
-                  <?php 
+                        ?></td>
+                          <td class="wcu-r-td wcu-r-td-120 wcu-r-td-pending"><?php 
                         echo wcusage_get_currency_symbol();
                         ?><span class="item-pending-commission"><?php 
-                        echo str_replace( ',', '', number_format( (float) $pending_payments, 2 ) );
-                        ?></span>
-                </td>
-
-              <?php 
+                        echo str_replace( ',', '', number_format( (float) $coupon_stats[$coupon_code]['pending_payments'], 2 ) );
+                        ?></span></td>
+                      <?php 
                     }
                     ?>
-
-            <?php 
+                  <?php 
                 }
                 ?>
-
-            </tr>
-
-            <?php 
+              </tr>
+              <?php 
                 if ( $wcu_report_show_url != "false" ) {
                     ?>
-
-              <tr class="coupon-data-row-head wcu-r-td-products" style="padding: 0 15px 0px 15px; margin: 0px 0;">
-                  <td class="wcu-r-td wcu-r-td-120 break wcu-r-td-clicks"><?php 
+                  <tr class="coupon-data-row-head wcu-r-td-products" style="padding: 0 15px 0px 15px; margin: 0px 0;">
+                      <td class="wcu-r-td wcu-r-td-120 break wcu-r-td-clicks"><?php 
                     echo esc_html__( "Referral URL Clicks", "woo-coupon-usage" );
                     ?> <a class="hide-col-clicks wcu-hide-col" href="#" onclick="return false;" title="Remove Column"><i class="fas fa-times"></i></a></td>
-                  <td class="wcu-r-td wcu-r-td-120 break wcu-r-td-conversions"><?php 
+                      <td class="wcu-r-td wcu-r-td-120 break wcu-r-td-conversions"><?php 
                     echo esc_html__( "Referral URL Conversions", "woo-coupon-usage" );
                     ?> <a class="hide-col-conversions wcu-hide-col" href="#" onclick="return false;" title="Remove Column"><i class="fas fa-times"></i></a></td>
-                  <td class="wcu-r-td wcu-r-td-120 break wcu-r-td-conversion-rate"><?php 
+                      <td class="wcu-r-td wcu-r-td-120 break wcu-r-td-conversion-rate"><?php 
                     echo esc_html__( "Conversion Rate", "woo-coupon-usage" );
                     ?> <a class="hide-col-conversion-rate wcu-hide-col" href="#" onclick="return false;" title="Remove Column"><i class="fas fa-times"></i></a></td>
-              </tr>
-
-              <tr class="coupon-data-row coupon-data-row-main" style="padding: 0 15px 0px 15px; margin: 0 0 20px 0;">
-
-                <!-- Clicks -->
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-clicks coupon-data-row-head-mobile excludeThisClassExport">
-                  <?php 
+                  </tr>
+                  <tr class="coupon-data-row coupon-data-row-main" style="padding: 0 15px 0px 15px; margin: 0 0 20px 0;">
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-clicks coupon-data-row-head-mobile excludeThisClassExport"><?php 
                     echo esc_html__( "Referral URL Clicks", "woo-coupon-usage" );
-                    ?>
-                </td>
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-clicks" id="total-clicks-<?php 
+                    ?></td>
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-clicks" id="total-clicks-<?php 
                     echo esc_attr( $coupon_id );
                     ?>">
-                  <span class="item-total-clicks"><?php 
-                    echo esc_html( $clickcount );
+                          <span class="item-total-clicks"><?php 
+                    echo esc_html( $coupon_stats[$coupon_code]['clickcount'] );
                     ?></span>
-                  <?php 
+                          <?php 
                     if ( $wcu_compare == "true" ) {
-                        ?>
-                    <br/><span style="font-size: 10px;"><?php 
+                        ?><br/><span style="font-size: 10px;"><?php 
                         echo wp_kses_post( $diff_clickcount );
-                        ?></span>
-                    <span class="item-total-clicks-old" style="display: none;"><?php 
-                        echo esc_html( $clickcount_compare );
-                        ?></span>
-                  <?php 
+                        ?></span><span class="item-total-clicks-old" style="display: none;"><?php 
+                        echo esc_html( $coupon_stats[$coupon_code]['clickcount_compare'] );
+                        ?></span><?php 
                     }
                     ?>
-                </td>
-
-                <!-- Conversions -->
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-conversions coupon-data-row-head-mobile excludeThisClassExport">
-                  <?php 
+                      </td>
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-conversions coupon-data-row-head-mobile excludeThisClassExport"><?php 
                     echo esc_html__( "Referral URL Conversions", "woo-coupon-usage" );
-                    ?>
-                </td>
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-conversions" id="total-conversions-<?php 
+                    ?></td>
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-conversions" id="total-conversions-<?php 
                     echo esc_html( $coupon_id );
                     ?>">
-                  <span class="item-total-conversions"><?php 
-                    echo esc_html( $convertedcount );
+                          <span class="item-total-conversions"><?php 
+                    echo esc_html( $coupon_stats[$coupon_code]['convertedcount'] );
                     ?></span>
-                  <?php 
+                          <?php 
                     if ( $wcu_compare == "true" ) {
-                        ?>
-                    <br/><span style="font-size: 10px;"><?php 
+                        ?><br/><span style="font-size: 10px;"><?php 
                         echo wp_kses_post( $diff_convertedcount );
-                        ?></span>
-                    <span class="item-total-conversions-old" style="display: none;"><?php 
-                        echo esc_html( $convertedcount_compare );
-                        ?></span>
-                  <?php 
+                        ?></span><span class="item-total-conversions-old" style="display: none;"><?php 
+                        echo esc_html( $coupon_stats[$coupon_code]['convertedcount_compare'] );
+                        ?></span><?php 
                     }
                     ?>
-                </td>
-
-                <!-- Conversion Rate -->
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-conversion-rate coupon-data-row-head-mobile excludeThisClassExport">
-                  <?php 
+                      </td>
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-conversion-rate coupon-data-row-head-mobile excludeThisClassExport"><?php 
                     echo esc_html__( "Conversion Rate", "woo-coupon-usage" );
-                    ?>
-                </td>
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-conversion-rate" id="total-conversion-rate-<?php 
+                    ?></td>
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-conversion-rate" id="total-conversion-rate-<?php 
                     echo esc_html( $coupon_id );
                     ?>">
-                  <span class="item-total-conversion-rate"><?php 
-                    echo esc_html( round( $conversionrate, 2 ) );
+                          <span class="item-total-conversion-rate"><?php 
+                    echo esc_html( round( $coupon_stats[$coupon_code]['conversionrate'], 2 ) );
                     ?></span>%
-                  <?php 
+                          <?php 
                     if ( $wcu_compare == "true" ) {
-                        ?>
-                    <br/><span style="font-size: 10px;"><?php 
+                        ?><br/><span style="font-size: 10px;"><?php 
                         echo wp_kses_post( $diff_conversionrate );
-                        ?></span>
-                    <span class="item-total-conversion-rate-old" style="display: none;"><?php 
-                        echo esc_html( $conversionrate_compare );
-                        ?></span>
-                  <?php 
+                        ?></span><span class="item-total-conversion-rate-old" style="display: none;"><?php 
+                        echo esc_html( $coupon_stats[$coupon_code]['conversionrate_compare'] );
+                        ?></span><?php 
                     }
                     ?>
-                </td>
-
-              </tr>
-
-            <?php 
+                      </td>
+                  </tr>
+              <?php 
                 }
                 ?>
-
-            <?php 
+              <?php 
                 if ( $wcu_report_show_products != "false" ) {
                     ?>
-
-              <tr class="coupon-data-row-head wcu-r-td-products" style="padding: 0 15px 0px 15px; margin: 0px 0;">
-                  <td class="wcu-r-td wcu-r-td-120 break wcu-r-td-products"><?php 
+                  <tr class="coupon-data-row-head wcu-r-td-products" style="padding: 0 15px 0px 15px; margin: 0px 0;">
+                      <td class="wcu-r-td wcu-r-td-120 break wcu-r-td-products"><?php 
                     echo esc_html__( "Products", "woo-coupon-usage" );
                     ?> <a class="hide-col-products wcu-hide-col" href="#" onclick="return false;" title="Remove Column"><i class="fas fa-times"></i></a></td>
-              </tr>
-
-              <tr class="coupon-data-row coupon-data-row-main wcu-r-td-products" style="padding: 0 15px 20px 15px; margin: 0;">
-                <td class="wcu-r-td wcu-r-td-120 wcu-r-td-products coupon-data-row-head-mobile excludeThisClassExport">
-                  <?php 
+                  </tr>
+                  <tr class="coupon-data-row coupon-data-row-main wcu-r-td-products" style="padding: 0 15px 20px 15px; margin: 0;">
+                      <td class="wcu-r-td wcu-r-td-120 wcu-r-td-products coupon-data-row-head-mobile excludeThisClassExport"><?php 
                     echo esc_html__( "Products", "woo-coupon-usage" );
-                    ?>
-                </td>
-                <td class="wcu-r-td break wcu-r-td-products">
-                <?php 
-                    if ( $list_of_products ) {
-                        foreach ( $list_of_products as $key => $value ) {
-                            $product = wc_get_product( $key );
+                    ?></td>
+                      <td class="wcu-r-td break wcu-r-td-products">
+                          <?php 
+                    if ( $coupon_stats[$coupon_code]['list_of_products'] ) {
+                        foreach ( $coupon_stats[$coupon_code]['list_of_products'] as $key => $value ) {
+                            $product_name = $key;
                             if ( $product ) {
-                                echo "&#8226; " . esc_html( $value ) . " x " . esc_html( $product->get_name() ) . "<br/>";
+                                echo "• " . esc_html( $value ) . " x " . esc_html( $product_name ) . "<br/>";
                             }
                         }
                     } else {
                         echo "0 products sold";
                     }
                     ?>
-                </td>
-              </tr>
-
-            <?php 
+                      </td>
+                  </tr>
+              <?php 
                 }
                 ?>
-
-      </tbody>
-
-      <?php 
+          </tbody>
+          <?php 
             }
         }
-        // Output the total stats as hidden fields
+        // Output total stats as hidden fields
         echo '<input class="final-total-usage" value="' . esc_attr( $stats['total_usage'] ) . '" style="display: none;">';
         echo '<input class="final-total-sales" value="' . esc_attr( $stats['total_sales'] ) . '" style="display: none;">';
         echo '<input class="final-total-discounts" value="' . esc_attr( $stats['total_discounts'] ) . '" style="display: none;">';
@@ -1846,28 +1834,17 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
         echo '<input class="final-pending-commission" value="' . esc_attr( $stats['pending_commission'] ) . '" style="display: none;">';
         echo '<input class="final-total-clicks" value="' . esc_attr( $stats['total_clicks'] ) . '" style="display: none;">';
         echo '<input class="final-total-conversions" value="' . esc_attr( $stats['total_conversions'] ) . '" style="display: none;">';
+        $stats['conversion_rate'] = ( $stats['total_clicks'] > 0 ? round( $stats['total_conversions'] / $stats['total_clicks'] * 100, 2 ) : 0 );
         echo '<input class="final-total-conversion-rate" value="' . esc_attr( $stats['conversion_rate'] ) . '" style="display: none;">';
         ?>
   </table>
 
   <?php 
         do_action( 'wcusage_hook_get_admin_report_scripts_sorting' );
-        ?> <!-- Insert "Scripts - Sorting" -->
-
-  <?php 
         do_action( 'wcusage_hook_get_admin_report_scripts_remove_row' );
-        ?> <!-- Insert "Scripts - Remove Cols Buttons" -->
-
-  <?php 
     }
 
 }
-add_action(
-    'wcusage_hook_get_admin_report_data',
-    'wcusage_get_admin_report_data',
-    10,
-    24
-);
 /**
  * Scripts For Sorting Admin Reports
  *

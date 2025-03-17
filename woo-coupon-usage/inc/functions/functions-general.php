@@ -13,7 +13,6 @@ add_filter( 'wcu_meta_content', 'convert_chars' );
 add_filter( 'wcu_meta_content', 'wpautop' );
 add_filter( 'wcu_meta_content', 'shortcode_unautop' );
 add_filter( 'wcu_meta_content', 'prepend_attachment' );
-add_filter( 'wcu_meta_content', 'do_shortcode' );
 
 /**
  * Load admin ajax only on pages that include main plugin shortcode.
@@ -57,7 +56,12 @@ if( !function_exists( 'wcusage_fix_defer_js' ) ) {
       $post_id = get_the_ID();
       $dashboard_page = wcusage_get_setting_value('wcusage_dashboard_page', '');
       $mla_dashboard_page = wcusage_get_setting_value('wcusage_mla_dashboard_page', '');
-      if( $post_id == $dashboard_page || $post_id == $mla_dashboard_page || is_account_page() ) {
+      $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+      if( $post_id == $dashboard_page
+      || $post_id == $mla_dashboard_page
+      || is_account_page()
+      || ( !is_admin() && isset($_SERVER['REQUEST_URI']) && strpos( $_SERVER['REQUEST_URI'], $wcusage_portal_slug ) !== false ) ) {
+
         // WP Rocket
         if ( is_plugin_active( 'wp-rocket/wp-rocket.php' ) ) {
           add_filter( 'pre_get_rocket_option_defer_all_js', '__return_zero' );
@@ -78,6 +82,7 @@ if( !function_exists( 'wcusage_fix_defer_js' ) ) {
             return $exclude_keywords;
           });
         }
+
       }
     }
   }
@@ -91,7 +96,11 @@ function wcusage_fix_cache() {
 	$post_id = get_the_ID();
 	$dashboard_page = wcusage_get_setting_value('wcusage_dashboard_page', '');
 	$mla_dashboard_page = wcusage_get_setting_value('wcusage_mla_dashboard_page', '');
-	if( $post_id == $dashboard_page || $post_id == $mla_dashboard_page || is_account_page() ) {
+  $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+	if( $post_id == $dashboard_page
+  || $post_id == $mla_dashboard_page
+  || is_account_page()
+  || ( !is_admin() && isset($_SERVER['REQUEST_URI']) && strpos( $_SERVER['REQUEST_URI'], $wcusage_portal_slug ) !== false ) ) {
     if ( ! defined( 'DONOTCACHEPAGE' ) ) {
 		  define( 'DONOTCACHEPAGE', true );
     }
@@ -112,7 +121,11 @@ function wcusage_elementor_page_cache_control( $use_cache, $post_id ) {
   $post_id = get_the_ID();
   $dashboard_page = wcusage_get_setting_value('wcusage_dashboard_page', '');
   $mla_dashboard_page = wcusage_get_setting_value('wcusage_mla_dashboard_page', '');
-  if( $post_id == $dashboard_page || $post_id == $mla_dashboard_page || is_account_page() ) {
+  $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');  
+  if( $post_id == $dashboard_page
+  || $post_id == $mla_dashboard_page
+  || is_account_page()
+  || ( !is_admin() && isset($_SERVER['REQUEST_URI']) && strpos( $_SERVER['REQUEST_URI'], $wcusage_portal_slug ) !== false ) ) {
       return false;
   }
   return $use_cache;
@@ -167,19 +180,49 @@ if( !function_exists( 'wcusage_trim_number' ) ) {
  * @return mixed
  *
  */
-if( !function_exists( 'wcusage_customer_edit_account_html_shortcode' ) ) {
-  function wcusage_customer_edit_account_html_shortcode( $atts ) {
+function wcusage_customer_edit_account_html_shortcode($atts) {
+  // Define shortcode attributes
+  $atts = shortcode_atts(
+      array(
+        'user' => '',
+        'text' => 'Edit Account',
+      ),
+      $atts,
+      'user_account_edit'
+  );
 
-      // Attributes
-      extract( shortcode_atts( array(
-        'user' => get_current_user_id(),
-        'text' => 'Edit Account' ), $atts ) );
-
-      return wc_get_template_html( 'myaccount/form-edit-account.php', array( 'user' => get_user_by( 'id', $user ), 'text' => $text ) );
-
+  // Check if WooCommerce is active
+  if (!class_exists('WooCommerce')) {
+      return 'WooCommerce is not active';
   }
+
+  // Check if user is provided
+  if (empty($atts['user'])) {
+      return 'Please provide a user ID';
+  }
+
+  // Verify user exists
+  $user = get_user_by('id', $atts['user']);
+  if (!$user) {
+      return 'Invalid user ID';
+  }
+
+  // Check if user is logged in and has permission
+  if (!is_user_logged_in() || (!current_user_can('edit_users') && get_current_user_id() != $atts['user'])) {
+      return 'You don\'t have permission to edit this account';
+  }
+
+  // Start output buffering
+  ob_start();
+
+  // Include WooCommerce account edit form
+  wc_get_template('myaccount/form-edit-account.php', array(
+      'user' => $user
+  ));
+
+  return ob_get_clean();
 }
-add_shortcode( 'wcusage_customer_edit_account_html', 'wcusage_customer_edit_account_html_shortcode' );
+add_shortcode('wcusage_customer_edit_account_html', 'wcusage_customer_edit_account_html_shortcode');
 
 /**
  * Function to create the redirect for shortcode page when edit profilee
@@ -194,6 +237,16 @@ if( !function_exists( 'wcusage_custom_profile_redirect' ) ) {
   				exit;
   			}
   		}
+
+      $wcusage_field_portal_enable = wcusage_get_setting_value('wcusage_field_portal_enable', '0');
+      $portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+  
+      if($wcusage_field_portal_enable && $portal_slug) {
+        if ( strpos( $_SERVER['REQUEST_URI'], $portal_slug ) !== false ) {
+          wp_redirect( $_SERVER['REQUEST_URI'] );
+          exit;
+        }
+      }
 
   }
 }
@@ -224,6 +277,16 @@ if( !function_exists( 'wcusage_custom_login_redirect' ) ) {
   				exit;
 
   			}
+
+        $wcusage_field_portal_enable = wcusage_get_setting_value('wcusage_field_portal_enable', '0');
+        $portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+        if($wcusage_field_portal_enable && $portal_slug) {
+          if ( strpos( $prev_path, $portal_slug ) !== false ) {
+            $redirect = home_url() . $portal_slug;
+            wp_safe_redirect( $redirect, 302 );
+            exit;
+          }
+        }
 
   		}
 

@@ -40,14 +40,14 @@ function wcusage_dashboard_page_header() {
     <?php } ?>
     <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage" title="View Dashboard"><img src="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL); ?>images/coupon-affiliates-logo.png" style="display: inline-block; width: 100%; max-width: 290px; text-align: left; margin: 12px 0 10px 0;"></a>
     <?php if( wcu_fs()->is_free_plan() ) { ?>
-      <a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-circle-question"></span> Support Ticket</div></a>
+      <a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-circle-question"></span> <?php echo esc_html__('Support Ticket', 'woo-coupon-usage'); ?></div></a>
     <?php } else { ?>
-      <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage-contact" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-star"></span> Support Ticket</div></a>
+      <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage-contact" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-star"></span> <?php echo esc_html__('Support Ticket', 'woo-coupon-usage'); ?></div></a>
     <?php } ?>
-    <a href="https://couponaffiliates.com/docs?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-book"></span> Documentation</div></a>
+    <a href="https://couponaffiliates.com/docs?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-book"></span> <?php echo esc_html__('Documentation', 'woo-coupon-usage'); ?></div></a>
      <a href="#" id="show-changelog"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-sync"></span> Updates <span class="changelog-new" style="display: none; background: green; padding: 2px; font-size: 10px; line-height: 10px; border-radius: 2px; color: #fff;">New</span></div></a>
-     <a href="https://roadmap.couponaffiliates.com/roadmap" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-list"></span> Roadmap</div></a>
-     <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_settings"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-cog"></span> Settings</div></a>
+     <a href="https://roadmap.couponaffiliates.com/roadmap" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-list"></span> <?php echo esc_html__('Roadmap', 'woo-coupon-usage'); ?></div></a>
+     <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_settings"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-cog"></span> <?php echo esc_html__('Settings', 'woo-coupon-usage'); ?></div></a>
   </div>
 
 	<div style="clear: both;"></div>

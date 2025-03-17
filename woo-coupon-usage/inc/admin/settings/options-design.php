@@ -21,6 +21,8 @@ function wcusage_field_cb_design( $args )
 	<br/>
   <?php } ?>
 
+  <div class="affiliate-dashboard-page-settings">
+
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Affiliate Dashboard Tabs', 'woo-coupon-usage' ); ?></h3>
 
   <!-- Tabs Style -->
@@ -81,12 +83,26 @@ function wcusage_field_cb_design( $args )
 
   <br/>
 
+  </div>
+
+  <span class="affiliate-dashboard-page-settings">
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Tab Colours', 'woo-coupon-usage' ); ?></h3>
+  </span>
+
+  <span class="wcu-field-section-portal">
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Portal Colours', 'woo-coupon-usage' ); ?></h3>
+  </span>  
 
   <!-- Tabs -->
   <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
 
+    <span class="affiliate-dashboard-page-settings">
     <h3><?php echo esc_html__( 'Tabs', 'woo-coupon-usage' ); ?></h3>
+    </span>
+
+    <span class="wcu-field-section-portal">
+    <h3><?php echo esc_html__( 'Sidebar Background', 'woo-coupon-usage' ); ?></h3>
+    </span>
 
     <!-- Background -->
     <?php echo wcusage_setting_color_option('wcusage_field_color_tab', '#1b3e47', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
@@ -99,7 +115,13 @@ function wcusage_field_cb_design( $args )
   <!-- Tabs Hover -->
   <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
 
+    <span class="affiliate-dashboard-page-settings">
     <h3><?php echo esc_html__( 'Tabs Hover', 'woo-coupon-usage' ); ?></h3>
+    </span>
+
+    <span class="wcu-field-section-portal">
+    <h3><?php echo esc_html__( 'Sidebar Link Hover', 'woo-coupon-usage' ); ?></h3>
+    </span>
 
     <!-- Background -->
     <?php echo wcusage_setting_color_option('wcusage_field_color_tab_hover', '#005d75', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>

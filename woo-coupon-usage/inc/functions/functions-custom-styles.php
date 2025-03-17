@@ -58,7 +58,8 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
         #wcu6 .woocommerce-EditAccountForm .woocommerce-Button, #ml-wcu4 .woocommerce-EditAccountForm .woocommerce-Button,
         #wcu-add-campaign-button, #wcu-add-directlink-button, #wcu-add-mlainvite-button,
         .wcu-save-settings-button, #wcu6 button, #wcu-register-button, .wcusage-login-form-col .woocommerce-button,
-        .wcusage_copylink, .wcusage_creativelink, .wcu-coupon-list-button, .product-rates-search, .product-rates-copy, #wcu-download-qr {
+        .wcusage_copylink, .wcusage_creativelink, .wcu-coupon-list-button, .product-rates-search, .product-rates-copy, #wcu-download-qr,
+		.login-registration-container .woocommerce-form-login__submit {
   				background: <?php echo esc_html($wcusage_color_button); ?> !important;
   				color: <?php echo esc_html($wcusage_color_button_font); ?> !important;
   				text-shadow: 0 0 2px #000;
@@ -76,7 +77,8 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
         #wcu6 .woocommerce-EditAccountForm .woocommerce-Button:hover, #ml-wcu4 .woocommerce-EditAccountForm .woocommerce-Button:hover,
         #wcu-add-campaign-button:hover, #wcu-add-directlink-button:hover, #wcu-add-mlainvite-button:hover,
         .wcu-save-settings-button:hover, #wcu6 button:hover, #wcu-register-button:hover, .wcusage-login-form-col .woocommerce-button:hover,
-        .wcusage_copylink:hover, .wcusage_creativelink:hover, .wcu-coupon-list-button:hover, .product-rates-search:hover, .product-rates-copy:hover, #wcu-download-qr:hover {
+        .wcusage_copylink:hover, .wcusage_creativelink:hover, .wcu-coupon-list-button:hover, .product-rates-search:hover, .product-rates-copy:hover, #wcu-download-qr:hover,
+		.login-registration-container .woocommerce-form-login__submit:hover {
   				background: <?php echo esc_html($wcusage_color_button_hover); ?> !important;
   				color: <?php echo esc_html($wcusage_color_button_font_hover); ?> !important;
   			}

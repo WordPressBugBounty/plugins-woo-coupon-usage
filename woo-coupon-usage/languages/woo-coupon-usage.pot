@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Coupon Affiliates for WooCommerce\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-17 13:02+0000\n"
+"POT-Creation-Date: 2025-03-17 15:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -24,7 +24,7 @@ msgstr ""
 msgid " / Product"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:408
+#: inc/admin/settings/admin-setup.php:412
 #, php-format
 msgid ""
 " You can also view the <a href=\"%s\">plugin documentation</a> for more "
@@ -39,7 +39,7 @@ msgstr ""
 msgid "\"Account Number\" Field Label"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:617
+#: inc/admin/settings/options-general.php:678
 msgid "\"Bonuses\" Tab"
 msgstr ""
 
@@ -47,7 +47,7 @@ msgstr ""
 msgid "\"Coupon Affiliate\" User Role"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:498
+#: inc/admin/settings/options-general.php:503
 msgid "\"Creatives\" Tab"
 msgstr ""
 
@@ -59,15 +59,15 @@ msgstr ""
 msgid "\"How will you promote us?\" Field"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:448
+#: inc/admin/settings/options-general.php:453
 msgid "\"Monthly Summary\" Tab"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:682
+#: inc/admin/settings/options-general.php:743
 msgid "\"My Account\" Menu Link"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:319
+#: inc/admin/settings/options-mla__premium_only.php:534
 msgid "\"Network\" Tab Text"
 msgstr ""
 
@@ -75,7 +75,7 @@ msgstr ""
 msgid "\"Payee Name\" Field Label"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:526
+#: inc/admin/settings/options-general.php:531
 msgid "\"Rates\" Tab"
 msgstr ""
 
@@ -87,11 +87,11 @@ msgstr ""
 msgid "\"Referral URL\" Tab"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:412
+#: inc/admin/settings/options-general.php:417
 msgid "\"Referrral URLs\" Tab"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:428
+#: inc/admin/settings/options-general.php:433
 msgid "\"Settings\" Tab"
 msgstr ""
 
@@ -103,7 +103,7 @@ msgstr ""
 msgid "\"Statistics\" Tab"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:314
+#: inc/admin/settings/options-mla__premium_only.php:529
 msgid "\"Sub-Affiliates\" Tab Text"
 msgstr ""
 
@@ -130,47 +130,47 @@ msgstr ""
 msgid "%s - Fixed Amount Per Product"
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:111
-#: inc/admin/admin-getting-started.php:149
+#: inc/admin/admin-getting-started.php:118
+#: inc/admin/admin-getting-started.php:158
 msgid ""
 "(1) Add the shortcode [couponaffiliates] to a frontend page (click the "
 "button below to generate automatically)."
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:114
+#: inc/admin/admin-getting-started.php:121
 msgid ""
 "(2) As an admin, you will see a full list of affiliate coupons and dashboard "
 "links on the"
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:153
+#: inc/admin/admin-getting-started.php:162
 msgid ""
 "(2) As an admin, you will see a full list of dashboard URLs to share with "
 "affiliates on the"
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:117
-#: inc/admin/admin-getting-started.php:157
+#: inc/admin/admin-getting-started.php:124
+#: inc/admin/admin-getting-started.php:166
 msgid ""
 "(3) You can assign/link users to coupons so they can access their coupons "
 "affiliate dashboard directly, without needing the unique link."
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:161
+#: inc/admin/admin-getting-started.php:170
 msgid "(4) Customise the plugin on the"
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:120
+#: inc/admin/admin-getting-started.php:127
 msgid ""
 "(4) Customise the settings on this page below, and view the 'How To Use' tab "
 "for more help on getting started."
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:165
+#: inc/admin/admin-getting-started.php:174
 msgid "(5) To view our plugin setup guide"
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:123
+#: inc/admin/admin-getting-started.php:130
 msgid "(5) To view our step-by-step setup guide"
 msgstr ""
 
@@ -182,7 +182,7 @@ msgstr ""
 msgid "(Admin) WooCommerce Orders \"Affiliate Info\" Sections"
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:291
+#: inc/admin/settings/options-commission.php:293
 msgid ""
 "(Custom discounts include negative fees, store credit, and discounts added "
 "by other plugins.)"
@@ -194,6 +194,12 @@ msgstr ""
 
 #: inc/admin/settings/options-payouts.php:849
 msgid "(Free) Built-in Store Credit & Wallet System"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:434
+msgid ""
+"(Global Setting) This affiliate coupon can only be used by new customers on "
+"their first order."
 msgstr ""
 
 #: inc/admin/settings/options-notifications.php:519
@@ -374,7 +380,7 @@ msgstr ""
 msgid "(Start typing username, then select from the options.)"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:131
+#: inc/admin/settings/options-mla__premium_only.php:206
 msgid "(The page that has the [couponaffiliates-mla] shortcode on.)"
 msgstr ""
 
@@ -382,7 +388,7 @@ msgstr ""
 msgid "(The page that has the [couponaffiliates-register] shortcode on.)"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:784
+#: inc/admin/settings/options-general.php:888
 msgid "(The page that has the [couponaffiliates] shortcode on.)"
 msgstr ""
 
@@ -410,7 +416,7 @@ msgstr ""
 msgid "- Disabled -"
 msgstr ""
 
-#: premium-files/pro-addons/direct-link/functions-direct-link.php:370
+#: premium-files/pro-addons/direct-link/functions-direct-link.php:372
 msgid "- No Campaign -"
 msgstr ""
 
@@ -418,15 +424,9 @@ msgstr ""
 msgid "0"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:395
+#: inc/admin/settings/admin-setup.php:399
 #, php-format
 msgid "<a href=\"%s\" target=\"_blank\">Learn more about referral URLs.</a>"
-msgstr ""
-
-#: inc/functions/functions-user-coupons.php:226
-msgid ""
-"<i>Custom date to begin displaying past coupon data. Leave empty to show "
-"full history.</i>"
 msgstr ""
 
 #: inc/functions/functions-user-coupons.php:327
@@ -437,14 +437,14 @@ msgid ""
 "since you opened this page.)"
 msgstr ""
 
-#: premium-files/pro-addons/payouts/payouts-settings.php:554
+#: premium-files/pro-addons/payouts/payouts-settings.php:560
 msgid ""
 "[Admin] Only the affiliate user for this coupon can setup their Stripe "
 "account connection."
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:210
-#: premium-files/pro-addons/payouts/payouts-settings.php:608
+#: inc/dashboard/tab-settings.php:168
+#: premium-files/pro-addons/payouts/payouts-settings.php:614
 #, php-format
 msgid ""
 "[Admin] You can edit the account details for this user in the admin area: %s"
@@ -497,7 +497,7 @@ msgstr ""
 msgid "A direct bank transfer payment method (paid manually)."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:192
+#: inc/admin/settings/options-mla__premium_only.php:407
 msgid "A fixed amount earned for sub-affiliate referrals"
 msgstr ""
 
@@ -515,7 +515,7 @@ msgid ""
 msgstr ""
 
 #: inc/admin/settings/options-creatives__premium_only.php:44
-#: inc/admin/settings/options-general.php:505
+#: inc/admin/settings/options-general.php:510
 msgid ""
 "A new \"creatives\" tab will be shown in the affiliate dashboard displaying "
 "these creatives, including a HTML code for them to copy and paste, to show "
@@ -532,7 +532,7 @@ msgid ""
 "only be created if the URL is pointing to this website"
 msgstr ""
 
-#: premium-files/pro-addons/payouts/payouts-settings.php:627
+#: premium-files/pro-addons/payouts/payouts-settings.php:633
 msgid "A user has not yet been assigned to this coupon."
 msgstr ""
 
@@ -596,7 +596,7 @@ msgid ""
 "features on the admin reports."
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:202
+#: inc/dashboard/tab-settings.php:90 inc/dashboard/tab-settings.php:161
 msgid "Account Details"
 msgstr ""
 
@@ -640,7 +640,7 @@ msgstr ""
 msgid "ActiveCampaign"
 msgstr ""
 
-#: inc/admin/admin-menu.php:321 inc/admin/admin-tools.php:27
+#: inc/admin/admin-menu.php:324 inc/admin/admin-tools.php:27
 msgid "Activity Log"
 msgstr ""
 
@@ -656,7 +656,7 @@ msgid ""
 "short URL for their referral link automatically."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:684
+#: inc/admin/settings/options-general.php:745
 msgid "Add an \"Affiliate\" menu link to the \"My Account\" page."
 msgstr ""
 
@@ -664,9 +664,9 @@ msgstr ""
 msgid "Add Domain"
 msgstr ""
 
-#: premium-files/pro-addons/campaigns/functions-campaigns.php:307
+#: premium-files/pro-addons/campaigns/functions-campaigns.php:309
 #: premium-files/pro-addons/creatives/functions-creatives-post-type.php:21
-#: premium-files/pro-addons/groups/functions-affiliate-groups.php:18
+#: premium-files/pro-addons/groups/functions-affiliate-groups.php:20
 #: premium-files/pro-addons/groups/functions-edit-groups.php:293
 #: premium-files/pro-addons/groups/functions-edit-groups.php:364
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:18
@@ -680,7 +680,7 @@ msgstr ""
 msgid "Add New Affiliate"
 msgstr ""
 
-#: premium-files/pro-addons/groups/functions-add-groups.php:48
+#: premium-files/pro-addons/groups/functions-add-groups.php:50
 msgid "Add New Affiliate Group"
 msgstr ""
 
@@ -705,7 +705,7 @@ msgid "Add New Creative"
 msgstr ""
 
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:72
-#: premium-files/pro-addons/direct-link/functions-direct-link.php:376
+#: premium-files/pro-addons/direct-link/functions-direct-link.php:378
 msgid "Add New Domain"
 msgstr ""
 
@@ -717,7 +717,7 @@ msgstr ""
 msgid "ADD NEW DYNAMIC CREATIVE"
 msgstr ""
 
-#: premium-files/pro-addons/groups/functions-add-groups.php:68
+#: premium-files/pro-addons/groups/functions-add-groups.php:70
 msgid "Add Role"
 msgstr ""
 
@@ -735,7 +735,17 @@ msgstr ""
 msgid "Add to Blacklist"
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:103
+#: inc/functions/functions-user-coupons.php:250
+msgid "Additional Email Addresses"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:252
+msgid ""
+"Additional email addresses to send the affiliate email notifications. "
+"Separate each email with a comma."
+msgstr ""
+
+#: inc/dashboard/tab-settings.php:120
 msgid "Additional Email Addresses: (Separate with Comma)"
 msgstr ""
 
@@ -757,7 +767,7 @@ msgstr ""
 msgid "Address Line 3 (City/State/ZIP)"
 msgstr ""
 
-#: premium-files/pro-addons/payouts/payouts-settings.php:620
+#: premium-files/pro-addons/payouts/payouts-settings.php:626
 msgid ""
 "Admin notice: Please enable your preferred payout methods in the plugin "
 "settings, under the \"Payouts\" tab."
@@ -780,11 +790,11 @@ msgstr ""
 msgid "Admin Quicklinks"
 msgstr ""
 
-#: inc/admin/admin-menu.php:309 inc/admin/admin-tools.php:21
+#: inc/admin/admin-menu.php:311 inc/admin/admin-tools.php:21
 msgid "Admin Reports"
 msgstr ""
 
-#: inc/admin/admin-menu.php:308 inc/admin-reports/admin-reports.php:29
+#: inc/admin/admin-menu.php:310 inc/admin-reports/admin-reports.php:31
 #: inc/admin/settings/options-help.php:128
 msgid "Admin Reports & Analytics"
 msgstr ""
@@ -812,7 +822,7 @@ msgstr ""
 msgid "Advanced Admin Reports"
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:283
+#: inc/admin/settings/options-commission.php:285
 msgid "Advanced Calculation Settings"
 msgstr ""
 
@@ -820,7 +830,7 @@ msgstr ""
 msgid "Advanced CAPTCHA Spam Protection"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:939
+#: inc/admin/settings/options-general.php:1202
 msgid "Advanced Orders Settings"
 msgstr ""
 
@@ -872,7 +882,7 @@ msgstr ""
 msgid "Affiliate Commission"
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:230
+#: inc/admin/settings/options-commission.php:232
 msgid "Affiliate commission"
 msgstr ""
 
@@ -885,15 +895,16 @@ msgid "Affiliate Coupons"
 msgstr ""
 
 #: inc/admin/admin-page.php:292 inc/admin/settings/options-help.php:86
-#: premium-files/pro-addons/multi-level/functions-mla.php:71
+#: premium-files/pro-addons/multi-level/functions-mla.php:82
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:194
 msgid "Affiliate Dashboard"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:639
+#: inc/admin/settings/options-general.php:700
 msgid "Affiliate Dashboard - Header"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:646
+#: inc/admin/settings/options-general.php:707
 msgid "Affiliate Dashboard - Login Form"
 msgstr ""
 
@@ -905,7 +916,7 @@ msgstr ""
 msgid "Affiliate Dashboard - Privacy"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:653
+#: inc/admin/settings/options-general.php:714
 msgid "Affiliate Dashboard - Profile"
 msgstr ""
 
@@ -921,11 +932,11 @@ msgstr ""
 msgid "Affiliate dashboard page"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:790
+#: inc/admin/settings/options-general.php:894
 msgid "Affiliate Dashboard Page (ID):"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:725
+#: inc/admin/settings/options-general.php:788
 msgid "Affiliate Dashboard Page:"
 msgstr ""
 
@@ -933,7 +944,7 @@ msgstr ""
 msgid "Affiliate Dashboard Statistics"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:24
+#: inc/admin/settings/options-design.php:26
 msgid "Affiliate Dashboard Tabs"
 msgstr ""
 
@@ -955,11 +966,11 @@ msgid "Affiliate Group"
 msgstr ""
 
 #: inc/admin/admin-pro-details.php:539
-#: premium-files/pro-addons/groups/functions-affiliate-groups.php:16
+#: premium-files/pro-addons/groups/functions-affiliate-groups.php:18
 msgid "Affiliate Groups"
 msgstr ""
 
-#: premium-files/pro-addons/groups/functions-affiliate-groups.php:24
+#: premium-files/pro-addons/groups/functions-affiliate-groups.php:26
 msgid ""
 "Affiliate groups are used to assign affiliates to specific user roles, so "
 "you can then configure a variety of settings for that group."
@@ -991,6 +1002,18 @@ msgstr ""
 
 #: inc/admin/admin-menu.php:216
 msgid "Affiliate Performance Bonuses"
+msgstr ""
+
+#: inc/portal/template.php:207 inc/admin/settings/options-general.php:917
+msgid "Affiliate Portal"
+msgstr ""
+
+#: inc/admin/settings/options-general.php:1023
+msgid "Affiliate Portal Logo"
+msgstr ""
+
+#: inc/admin/settings/options-general.php:942
+msgid "Affiliate Portal URL: "
 msgstr ""
 
 #: inc/admin/settings/options-notifications.php:369
@@ -1033,7 +1056,7 @@ msgstr ""
 msgid "Affiliate Statistics (Last 7 Days)"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:927
+#: inc/admin/settings/options-general.php:1190
 msgid ""
 "Affiliate stats will be automatically refreshed when changing these statuses."
 msgstr ""
@@ -1042,10 +1065,13 @@ msgstr ""
 msgid "Affiliate store credit available"
 msgstr ""
 
-#: inc/admin/admin-orders-box.php:209 inc/admin/admin-orders-list.php:272
+#: inc/admin/admin-orders-box.php:209 inc/admin/admin-orders-list.php:273
 #: inc/admin/class-coupons-table.php:45 inc/admin/class-referrals-table.php:31
-#: inc/admin-reports/admin-reports.php:1280
-#: inc/admin-reports/admin-reports.php:1307
+#: inc/admin-reports/admin-reports.php:1191
+#: inc/admin-reports/admin-reports.php:1208
+#: inc/functions/functions-user-coupons.php:148
+#: inc/functions/functions-user-coupons.php:177
+#: inc/functions/functions-user-coupons.php:1034
 #: inc/admin/settings/options-notifications.php:36
 #: inc/admin/settings/options-notifications.php:180
 #: inc/admin/settings/options-notifications.php:275
@@ -1095,7 +1121,7 @@ msgstr ""
 msgid "Align:"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:879
+#: inc/dashboard/tab-latest-orders.php:909
 #: inc/registration/registration-admin.php:173
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:81
 #: premium-files/pro-addons/payouts/payouts-admin.php:181
@@ -1110,6 +1136,10 @@ msgstr ""
 msgid "All Campaigns"
 msgstr ""
 
+#: inc/admin/settings/options-general.php:593
+msgid "All Categories"
+msgstr ""
+
 #: inc/admin/settings/options-fraud.php:50
 msgid "All Existing & New Customers"
 msgstr ""
@@ -1122,7 +1152,7 @@ msgstr ""
 msgid "All Groups & Roles"
 msgstr ""
 
-#: inc/admin/settings/admin-options.php:1024
+#: inc/admin/settings/admin-options.php:1046
 msgid "All Roles"
 msgstr ""
 
@@ -1153,6 +1183,10 @@ msgstr ""
 
 #: inc/admin/settings/options-fraud.php:27
 msgid "Allow affiliate user to apply their own coupon code at cart / checkout."
+msgstr ""
+
+#: inc/admin/settings/options-payouts.php:104
+msgid "Allow affiliates to enter a custom payout amount."
 msgstr ""
 
 #: inc/admin/admin-pro-details.php:428
@@ -1220,7 +1254,7 @@ msgstr ""
 
 #: inc/admin/admin-dashboard.php:659 premium-files/dashboard/tab-payout.php:214
 #: premium-files/dashboard/tab-payout.php:242
-#: premium-files/dashboard/tab-payout.php:308
+#: premium-files/dashboard/tab-payout.php:309
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:226
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:271
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:300
@@ -1258,7 +1292,7 @@ msgid ""
 "your Stripe account."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:51
+#: inc/admin/settings/options-general.php:36
 msgid ""
 "and add or edit a coupon, then assign users under the \"coupon affiliates\" "
 "tab"
@@ -1304,7 +1338,7 @@ msgstr ""
 msgid "Are shipping costs excluded from stats and calculations?"
 msgstr ""
 
-#: premium-files/pro-addons/campaigns/functions-campaigns.php:247
+#: premium-files/pro-addons/campaigns/functions-campaigns.php:249
 msgid "Are you sure you want to delete the"
 msgstr ""
 
@@ -1314,6 +1348,13 @@ msgstr ""
 
 #: premium-files/pro-addons/groups/class-affiliate-groups-list-table.php:55
 msgid "Are you sure you want to delete this role?"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:1036
+msgid ""
+"Are you sure you want to refresh all this coupons affiliate dashboard data? "
+"The next time you visit the affiliate dashboard, it may take significantly "
+"longer to load (first visit)."
 msgstr ""
 
 #: inc/admin/admin-orders-box.php:142
@@ -1388,6 +1429,10 @@ msgstr ""
 msgid "at"
 msgstr ""
 
+#: inc/admin/settings/options-urls.php:71
+msgid "Attempt to apply coupon instantly on first page visited."
+msgstr ""
+
 #: inc/admin/settings/options-registrations.php:831
 msgid "Audience ID"
 msgstr ""
@@ -1396,7 +1441,7 @@ msgstr ""
 msgid "Auto Apply Coupon"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:328
+#: inc/admin/settings/options-mla__premium_only.php:543
 msgid "Auto-assign referred customers as an MLA sub-affiliate."
 msgstr ""
 
@@ -1490,11 +1535,16 @@ msgstr ""
 msgid "Back To Payouts"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:92
-#: inc/admin/settings/options-design.php:105
-#: inc/admin/settings/options-design.php:202
-#: inc/admin/settings/options-design.php:215
-#: inc/admin/settings/options-design.php:228
+#: inc/portal/template.php:598
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:274
+msgid "Back to site"
+msgstr ""
+
+#: inc/admin/settings/options-design.php:108
+#: inc/admin/settings/options-design.php:127
+#: inc/admin/settings/options-design.php:224
+#: inc/admin/settings/options-design.php:237
+#: inc/admin/settings/options-design.php:250
 msgid "Background"
 msgstr ""
 
@@ -1515,7 +1565,7 @@ msgstr ""
 msgid "Batch size:"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:318
+#: inc/admin/settings/admin-setup.php:322
 msgid ""
 "Be sure to watch the setup guide video below, for a detailed walkthrough."
 msgstr ""
@@ -1557,7 +1607,7 @@ msgid "Bonus Credit:"
 msgstr ""
 
 #: inc/functions/functions-dashboard.php:187
-#: inc/functions/functions-dashboard.php:327
+#: inc/functions/functions-dashboard.php:327 inc/portal/template.php:566
 #: inc/admin/settings/admin-options.php:480
 msgid "Bonuses"
 msgstr ""
@@ -1658,12 +1708,19 @@ msgstr ""
 msgid "Bulk Edit: Product Settings"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:212
+#: inc/admin/settings/options-design.php:234
 msgid "Buttons"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:225
+#: inc/admin/settings/options-design.php:247
 msgid "Buttons Hover"
+msgstr ""
+
+#: inc/admin/settings/options-commission.php:268
+msgid ""
+"By default the order totals displayed on the dashboard, and used for % "
+"commission calculations exclude shipping costs, fees, taxes, and discounts "
+"(recommended)."
 msgstr ""
 
 #: inc/admin/settings/options-registrations.php:443
@@ -1672,12 +1729,12 @@ msgid ""
 "registration form for the affiliate to enter their prefered coupon code name."
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:130
-#: inc/admin-reports/admin-reports.php:911
+#: inc/admin-reports/admin-reports.php:132
+#: inc/admin-reports/admin-reports.php:808
 msgid "by more than"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:975
+#: inc/admin/settings/options-general.php:1238
 msgid "By which date should orders be sorted on the affiliate dashboard?"
 msgstr ""
 
@@ -1685,7 +1742,7 @@ msgstr ""
 msgid "Calculating statistics"
 msgstr ""
 
-#: inc/dashboard/tab-statistics.php:685
+#: inc/dashboard/tab-statistics.php:673
 msgid ""
 "Calculating statistics for all referrals. Since this is your first visit, it "
 "will take a little longer than normal."
@@ -1702,7 +1759,7 @@ msgstr ""
 msgid "Campaign"
 msgstr ""
 
-#: premium-files/pro-addons/campaigns/functions-campaigns.php:247
+#: premium-files/pro-addons/campaigns/functions-campaigns.php:249
 msgid "campaign"
 msgstr ""
 
@@ -1710,7 +1767,7 @@ msgstr ""
 msgid "Campaign Name"
 msgstr ""
 
-#: premium-files/pro-addons/campaigns/functions-campaigns.php:306
+#: premium-files/pro-addons/campaigns/functions-campaigns.php:308
 msgid "Campaign name"
 msgstr ""
 
@@ -1730,7 +1787,7 @@ msgstr ""
 msgid "Can I assign affiliate users to multiple coupons?"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:402
+#: inc/admin/settings/admin-setup.php:406
 msgid "Can I view the dashboard for each of my affiliates?"
 msgstr ""
 
@@ -1742,8 +1799,8 @@ msgstr ""
 msgid "Cancel this payout request."
 msgstr ""
 
-#: premium-files/dashboard/tab-payout.php:273
-#: premium-files/dashboard/tab-payout.php:345
+#: premium-files/dashboard/tab-payout.php:274
+#: premium-files/dashboard/tab-payout.php:344
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:137
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:139
 #: premium-files/pro-addons/payouts/payouts-admin.php:187
@@ -1828,8 +1885,8 @@ msgstr ""
 msgid "Checkout Page: Join Affiliate Program"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:238
-#: inc/dashboard/tab-latest-orders.php:304
+#: inc/dashboard/tab-latest-orders.php:245
+#: inc/dashboard/tab-latest-orders.php:315
 msgid "City"
 msgstr ""
 
@@ -1847,8 +1904,8 @@ msgstr ""
 msgid "Click for more details"
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:123
-#: inc/admin/admin-getting-started.php:165 inc/admin/admin-page.php:302
+#: inc/admin/admin-getting-started.php:130
+#: inc/admin/admin-getting-started.php:174 inc/admin/admin-page.php:302
 #: inc/admin/admin-page.php:307 inc/admin/admin-page.php:381
 msgid "click here"
 msgstr ""
@@ -1891,27 +1948,41 @@ msgid "Color:"
 msgstr ""
 
 #: inc/admin/admin-orders-box.php:212 inc/admin/admin-orders-list.php:157
-#: inc/admin-reports/admin-reports.php:152
-#: inc/admin-reports/admin-reports.php:693
-#: inc/admin-reports/admin-reports.php:1289
-#: inc/admin-reports/admin-reports.php:1353
-#: inc/dashboard/tab-latest-orders.php:223
-#: inc/dashboard/tab-latest-orders.php:291 inc/dashboard/tab-statistics.php:270
-#: inc/emails/new-order-email.php:151 inc/functions/functions-dashboard.php:563
-#: inc/functions/functions-user-coupons.php:935
+#: inc/admin-reports/admin-reports.php:154
+#: inc/admin-reports/admin-reports.php:573
+#: inc/admin-reports/admin-reports.php:1198
+#: inc/admin-reports/admin-reports.php:1229
+#: inc/dashboard/tab-latest-orders.php:225
+#: inc/dashboard/tab-latest-orders.php:302 inc/dashboard/tab-statistics.php:270
+#: inc/emails/new-order-email.php:155 inc/functions/functions-dashboard.php:563
+#: inc/functions/functions-user-coupons.php:943
 #: premium-files/dashboard/tab-monthly-summary.php:175
 #: premium-files/dashboard/tab-monthly-summary.php:202
 #: inc/admin/settings/admin-options.php:417
 #: inc/admin/settings/admin-setup.php:63
-#: premium-files/pro-addons/charts/charts.php:179
+#: premium-files/pro-addons/charts/charts.php:205
 msgid "Commission"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:193
+msgid "Commission %"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:200
+#, php-format
+msgid "Commission %s - Order"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:207
+#, php-format
+msgid "Commission %s - Product"
 msgstr ""
 
 #: inc/admin/settings/options-help.php:68
 msgid "Commission + Payouts"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:223
+#: inc/admin/settings/admin-setup.php:227
 #: inc/admin/settings/options-commission.php:27
 msgid "Commission Amounts"
 msgstr ""
@@ -1922,7 +1993,7 @@ msgstr ""
 msgid "Commission Earned"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:920
+#: inc/admin-reports/admin-reports.php:816
 msgid "commission earned"
 msgstr ""
 
@@ -1931,15 +2002,11 @@ msgstr ""
 msgid "Commission Earnings"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:167
-msgid "Commission Earnings Per Tier"
-msgstr ""
-
 #: inc/admin/tools/admin-bulk-edit-products.php:68
 msgid "Commission Fixed"
 msgstr ""
 
-#: inc/admin/admin-orders-list.php:324
+#: inc/admin/admin-orders-list.php:325
 msgid "Commission granted to affiliate, ready for payout request."
 msgstr ""
 
@@ -1952,13 +2019,13 @@ msgstr ""
 msgid "Commission Line Graphs"
 msgstr ""
 
-#: inc/admin/admin-orders-list.php:322
+#: inc/admin/admin-orders-list.php:323
 msgid "Commission not yet granted to affiliate."
 msgstr ""
 
 #: inc/admin/admin-menu.php:180 inc/admin/admin-page.php:119
 #: inc/admin/admin-page.php:379 inc/dashboard/tab-statistics.php:53
-#: inc/dashboard/tab-statistics.php:407
+#: inc/dashboard/tab-statistics.php:393
 #: premium-files/dashboard/tab-payout.php:87
 #: inc/admin/settings/options-general.php:120
 msgid "Commission Payouts"
@@ -1968,12 +2035,12 @@ msgstr ""
 msgid "Commission Payouts Features"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:432
+#: inc/admin/settings/admin-setup.php:436
 msgid "Commission payouts setup guide (PRO):"
 msgstr ""
 
-#: premium-files/dashboard/tab-product-rates.php:88
-#: premium-files/dashboard/tab-product-rates.php:112
+#: premium-files/dashboard/tab-product-rates.php:109
+#: premium-files/dashboard/tab-product-rates.php:142
 msgid "Commission Per Product"
 msgstr ""
 
@@ -1990,8 +2057,8 @@ msgstr ""
 msgid "Commission Priority"
 msgstr ""
 
-#: premium-files/dashboard/tab-product-rates.php:86
-#: premium-files/dashboard/tab-product-rates.php:106
+#: premium-files/dashboard/tab-product-rates.php:107
+#: premium-files/dashboard/tab-product-rates.php:134
 msgid "Commission Rate"
 msgstr ""
 
@@ -2008,7 +2075,7 @@ msgstr ""
 msgid "Commission the user earned from their own referral link."
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:126
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:127
 msgid "Commission Tier"
 msgstr ""
 
@@ -2031,11 +2098,11 @@ msgstr ""
 msgid "Company Name"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:107
+#: inc/admin-reports/admin-reports.php:109
 msgid "Compare with another date range"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:904
+#: inc/admin-reports/admin-reports.php:803
 msgid "Comparing with date period"
 msgstr ""
 
@@ -2043,19 +2110,19 @@ msgstr ""
 msgid "Completed"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:978
+#: inc/admin/settings/options-general.php:1241
 msgid "Completed Date"
 msgstr ""
 
-#: premium-files/dashboard/tab-payout.php:302
+#: premium-files/dashboard/tab-payout.php:303
 msgid "Completed Payments"
 msgstr ""
 
-#: inc/dashboard/tab-statistics.php:423
+#: inc/dashboard/tab-statistics.php:409
 msgid "Completed Payments:"
 msgstr ""
 
-#: inc/registration/registration-form.php:168
+#: inc/registration/registration-form.php:170
 msgid "Confirm Password"
 msgstr ""
 
@@ -2076,15 +2143,15 @@ msgstr ""
 msgid "Connected"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:326
-#: inc/admin/settings/admin-setup.php:354
-#: inc/admin/settings/admin-setup.php:468
+#: inc/admin/settings/admin-setup.php:330
+#: inc/admin/settings/admin-setup.php:358
+#: inc/admin/settings/admin-setup.php:472
 msgid "Continue to Settings Page"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:632
-#: inc/admin-reports/admin-reports.php:1390
-#: inc/admin-reports/admin-reports.php:1421
+#: inc/admin-reports/admin-reports.php:512
+#: inc/admin-reports/admin-reports.php:1246
+#: inc/admin-reports/admin-reports.php:1259
 #: inc/functions/functions-urls.php:731
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:166
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:369
@@ -2115,14 +2182,15 @@ msgid "Cookie Settings"
 msgstr ""
 
 #: inc/dashboard/tab-referral-url.php:83
-#: premium-files/dashboard/tab-product-rates.php:178
+#: premium-files/dashboard/tab-product-rates.php:224
+#: premium-files/dashboard/tab-product-rates.php:342
 #: premium-files/pro-addons/landing-pages/functions-landing-pages.php:98
-#: premium-files/pro-addons/multi-level/functions-mla-invite.php:159
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:163
 msgid "Copy"
 msgstr ""
 
 #: premium-files/dashboard/tab-creatives.php:517
-#: premium-files/dashboard/tab-creatives.php:594
+#: premium-files/dashboard/tab-creatives.php:596
 msgid "Copy Code"
 msgstr ""
 
@@ -2135,15 +2203,15 @@ msgstr ""
 msgid "Copy Link"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:233
-#: inc/dashboard/tab-latest-orders.php:300
+#: inc/dashboard/tab-latest-orders.php:240
+#: inc/dashboard/tab-latest-orders.php:311
 msgid "Country"
 msgstr ""
 
 #: inc/admin/admin-dashboard.php:460 inc/admin/admin-dashboard.php:527
 #: inc/admin/admin-dashboard.php:590 inc/admin/admin-dashboard.php:658
-#: inc/dashboard/tab-latest-orders.php:188
-#: inc/dashboard/tab-latest-orders.php:268 inc/emails/new-order-email.php:140
+#: inc/dashboard/tab-latest-orders.php:190
+#: inc/dashboard/tab-latest-orders.php:275 inc/emails/new-order-email.php:144
 #: inc/registration/class-registrations-list-table.php:187
 #: inc/registration/class-registrations-list-table.php:192
 #: inc/registration/class-registrations-list-table.php:207
@@ -2191,6 +2259,10 @@ msgstr ""
 msgid "Coupon Affiliates - Bank Transfer Settings"
 msgstr ""
 
+#: inc/functions/functions-user-coupons.php:405
+msgid "Coupon Affiliates - Extra Limits:"
+msgstr ""
+
 #: premium-files/functions-premium.php:398
 msgid "Coupon Affiliates - Lifetime Affiliate Settings"
 msgstr ""
@@ -2215,7 +2287,7 @@ msgstr ""
 msgid "Coupon Affiliates - Store Credit"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:376
+#: inc/admin/settings/admin-setup.php:380
 #, php-format
 msgid ""
 "Coupon Affiliates enhances affiliate marketing by integrating coupons as a "
@@ -2235,7 +2307,7 @@ msgstr ""
 msgid "Coupon Affiliates for WooCommerce (PRO)"
 msgstr ""
 
-#: inc/admin/admin-menu.php:320
+#: inc/admin/admin-menu.php:323
 msgid "Coupon Affiliates: Activity Log"
 msgstr ""
 
@@ -2247,7 +2319,7 @@ msgstr ""
 msgid "Coupon Affiliates: Info & Help"
 msgstr ""
 
-#: inc/admin/admin-menu.php:415
+#: inc/admin/admin-menu.php:418
 msgid "Coupon Affiliates: PRO Modules"
 msgstr ""
 
@@ -2296,8 +2368,12 @@ msgstr ""
 msgid "Coupon Format"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:1279
-#: inc/admin-reports/admin-reports.php:1300
+#: inc/functions/functions-user-coupons.php:225
+msgid "Coupon History Start Date"
+msgstr ""
+
+#: inc/admin-reports/admin-reports.php:1190
+#: inc/admin-reports/admin-reports.php:1206
 #: inc/admin/tools/admin-bulk-edit-coupons.php:89
 msgid "Coupon ID"
 msgstr ""
@@ -2319,7 +2395,7 @@ msgstr ""
 msgid "Coupon Name"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:641
+#: inc/admin/settings/options-general.php:702
 msgid "Coupon Title Prefix"
 msgstr ""
 
@@ -2328,7 +2404,7 @@ msgstr ""
 msgid "Coupon Type"
 msgstr ""
 
-#: inc/functions/functions-user-coupons.php:1044
+#: inc/functions/functions-user-coupons.php:1054
 msgid "Coupon unlinked from user:"
 msgstr ""
 
@@ -2348,7 +2424,7 @@ msgid "Coupons List"
 msgstr ""
 
 #: inc/admin/admin-page.php:284 inc/admin/admin-page.php:386
-#: inc/admin/settings/options-general.php:51
+#: inc/admin/settings/options-general.php:36
 msgid "coupons management page"
 msgstr ""
 
@@ -2367,12 +2443,16 @@ msgid "Create a new coupon code"
 msgstr ""
 
 #: inc/admin/settings/admin-options.php:290
-#: inc/admin/settings/admin-setup.php:320
+#: inc/admin/settings/admin-setup.php:324
 msgid "Create a new support ticket"
 msgstr ""
 
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:372
 msgid "Create a new template coupon"
+msgstr ""
+
+#: inc/admin/settings/admin-options.php:701
+msgid "Create a support ticket."
 msgstr ""
 
 #: inc/admin/settings/options-help.php:115
@@ -2399,9 +2479,9 @@ msgstr ""
 msgid "Create Support Ticket"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:331
-#: inc/admin/settings/admin-setup.php:359
-#: inc/admin/settings/admin-setup.php:473
+#: inc/admin/settings/admin-setup.php:335
+#: inc/admin/settings/admin-setup.php:363
+#: inc/admin/settings/admin-setup.php:477
 msgid "Create Your First Affiliate"
 msgstr ""
 
@@ -2415,7 +2495,7 @@ msgstr ""
 msgid "Created"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:977
+#: inc/admin/settings/options-general.php:1240
 msgid "Created Date (Recommended)"
 msgstr ""
 
@@ -2434,7 +2514,7 @@ msgstr ""
 #: inc/admin/admin-menu.php:287 inc/admin/admin-page.php:390
 #: inc/admin/admin-pro-details.php:174
 #: inc/functions/functions-dashboard.php:109
-#: inc/functions/functions-dashboard.php:303
+#: inc/functions/functions-dashboard.php:303 inc/portal/template.php:563
 #: premium-files/dashboard/tab-creatives.php:74
 #: inc/admin/settings/admin-options.php:475
 #: inc/admin/settings/options-creatives__premium_only.php:33
@@ -2496,11 +2576,11 @@ msgstr ""
 
 #: inc/admin/settings/options-currency.php:186
 msgid ""
-"Currently the APILayer free plan supports all base currencies and 1000 "
+"Currently the APILayer free plan supports all base currencies and 100 "
 "requests/month which is all that is required."
 msgstr ""
 
-#: inc/admin/settings/options-design.php:46
+#: inc/admin/settings/options-design.php:48
 msgid "Curved (5px)"
 msgstr ""
 
@@ -2559,6 +2639,10 @@ msgstr ""
 msgid "Custom Bonuses Text"
 msgstr ""
 
+#: inc/functions/functions-user-coupons.php:214
+msgid "Custom Commission Message"
+msgstr ""
+
 #: inc/admin/admin-pro-details.php:230
 msgid "Custom Commission Per Coupon, Product, or User Role"
 msgstr ""
@@ -2569,6 +2653,12 @@ msgstr ""
 
 #: inc/admin/admin-pro-details.php:497
 msgid "Custom Dashboard Tabs"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:226
+msgid ""
+"Custom date to begin displaying past coupon data. Leave empty to show full "
+"history."
 msgstr ""
 
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:446
@@ -2632,28 +2722,28 @@ msgstr ""
 msgid "Custom Payment Method 2"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:141
+#: inc/admin/settings/options-design.php:163
 msgid "Custom Registration Form Title"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:147
+#: inc/admin/settings/options-design.php:169
 msgid "Custom Submit Button Text"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:549
+#: inc/admin/settings/options-general.php:554
 msgid "Custom Tab Header"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:543
+#: inc/admin/settings/options-general.php:548
 msgid "Custom Tab Name"
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:350
+#: inc/admin/settings/options-commission.php:352
 msgid "Custom Tax Adjustment (%):"
 msgstr ""
 
 #: inc/admin/settings/options-commission.php:34
-#: inc/admin/settings/options-mla__premium_only.php:312
+#: inc/admin/settings/options-mla__premium_only.php:527
 #: inc/admin/settings/options-reports.php:231
 #: inc/admin/settings/options-reports.php:244
 #: inc/admin/settings/options-reports.php:257
@@ -2666,7 +2756,7 @@ msgid "Custom Text / Description"
 msgstr ""
 
 #: inc/admin/settings/options-general.php:151
-#: inc/admin/settings/options-general.php:555
+#: inc/admin/settings/options-general.php:560
 msgid "Custom Text / Information"
 msgstr ""
 
@@ -2694,6 +2784,14 @@ msgid ""
 "functionality exactly how you want."
 msgstr ""
 
+#: inc/admin/settings/options-general.php:950
+msgid "Customise the Affiliate Portal:"
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:108
+msgid "Customise the MLA Affiliate Portal:"
+msgstr ""
+
 #: inc/admin/settings/options-general.php:95
 msgid "Customise the order of sections displayed on the \"Statistics\" tab."
 msgstr ""
@@ -2709,7 +2807,7 @@ msgid "DASHBOARD"
 msgstr ""
 
 #: inc/admin/admin-menu.php:35 inc/admin/admin-menu.php:36
-#: inc/functions/functions-user-coupons.php:937
+#: inc/functions/functions-user-coupons.php:946
 #: inc/admin/settings/admin-setup.php:57
 #: premium-files/pro-addons/payouts/stripe/CreateAccount.php:229
 msgid "Dashboard"
@@ -2719,18 +2817,22 @@ msgstr ""
 msgid "Dashboard Link"
 msgstr ""
 
+#: inc/admin/settings/options-general.php:64
+msgid "Dashboard Page"
+msgstr ""
+
 #: inc/admin/admin-dashboard.php:459 inc/admin/admin-dashboard.php:589
 #: inc/admin/admin-dashboard.php:657 inc/admin/class-activity-list-table.php:79
-#: inc/dashboard/tab-latest-orders.php:193
-#: inc/dashboard/tab-latest-orders.php:272
+#: inc/dashboard/tab-latest-orders.php:195
+#: inc/dashboard/tab-latest-orders.php:279
 #: inc/functions/functions-url-clicks.php:236
-#: premium-files/pro-addons/charts/charts.php:178
+#: premium-files/pro-addons/charts/charts.php:204
 #: premium-files/pro-addons/payouts/statements/template.php:192
 #: premium-files/pro-addons/payouts/statements/template.php:254
 msgid "Date"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:88
+#: inc/admin-reports/admin-reports.php:90
 msgid "Date comparisons and more filters are available with the"
 msgstr ""
 
@@ -2739,13 +2841,13 @@ msgid "Date Field"
 msgstr ""
 
 #: premium-files/dashboard/tab-payout.php:218
-#: premium-files/dashboard/tab-payout.php:312
+#: premium-files/dashboard/tab-payout.php:313
 msgid "Date Paid"
 msgstr ""
 
 #: premium-files/dashboard/tab-payout.php:217
 #: premium-files/dashboard/tab-payout.php:245
-#: premium-files/dashboard/tab-payout.php:311
+#: premium-files/dashboard/tab-payout.php:312
 msgid "Date Requested"
 msgstr ""
 
@@ -2780,18 +2882,22 @@ msgstr ""
 msgid "Declined"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:128
+#: inc/admin-reports/admin-reports.php:130
 msgid "Decreased"
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:351
+#: inc/admin/settings/options-commission.php:353
 msgid ""
 "Deduct a custom percentage from the order subtotal, before calculating the "
 "commission (% commission)."
 msgstr ""
 
-#: inc/admin/settings/options-design.php:142
-#: inc/admin/settings/options-design.php:148
+#: inc/admin/settings/options-mla__premium_only.php:332
+msgid "Deduct parent affiliate commission from sub-affiliate commission."
+msgstr ""
+
+#: inc/admin/settings/options-design.php:164
+#: inc/admin/settings/options-design.php:170
 msgid "Default"
 msgstr ""
 
@@ -2799,7 +2905,7 @@ msgstr ""
 msgid "Default amount of \"latest orders\" to show:"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:484
+#: inc/admin/settings/options-general.php:489
 msgid "Default number of months to show"
 msgstr ""
 
@@ -2910,7 +3016,7 @@ msgstr ""
 msgid "Direct Link Tracking Restrictions"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:57
+#: inc/admin/settings/options-general.php:42
 #, php-format
 msgid ""
 "Direct users to the <a href=\"%s\" target=\"_blank\">Affiliate "
@@ -2932,18 +3038,23 @@ msgid ""
 "dashboard."
 msgstr ""
 
+#: inc/functions/functions-user-coupons.php:239
+#: inc/functions/functions-user-coupons.php:274
+msgid "Disabled"
+msgstr ""
+
 #: inc/admin/settings/options-debug.php:166
 msgid ""
 "Disabling these will prevent cookies from being stored by the plugin in the "
 "visitors browsers."
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:213
-#: inc/dashboard/tab-latest-orders.php:285 inc/dashboard/tab-statistics.php:230
+#: inc/dashboard/tab-latest-orders.php:215
+#: inc/dashboard/tab-latest-orders.php:292 inc/dashboard/tab-statistics.php:230
 #: inc/dashboard/tab-statistics.php:232 inc/dashboard/tab-statistics.php:235
 #: inc/dashboard/tab-statistics.php:237 inc/dashboard/tab-statistics.php:239
 #: inc/dashboard/tab-statistics.php:246 inc/dashboard/tab-statistics.php:248
-#: inc/functions/functions-user-coupons.php:918
+#: inc/functions/functions-user-coupons.php:926
 msgid "Discount"
 msgstr ""
 
@@ -2955,9 +3066,9 @@ msgstr ""
 msgid "Discount Type"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:690
-#: inc/admin-reports/admin-reports.php:1285
-#: inc/admin-reports/admin-reports.php:1338
+#: inc/admin-reports/admin-reports.php:570
+#: inc/admin-reports/admin-reports.php:1195
+#: inc/admin-reports/admin-reports.php:1222
 #: premium-files/dashboard/tab-monthly-summary.php:173
 #: premium-files/dashboard/tab-monthly-summary.php:195
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:126
@@ -2989,11 +3100,11 @@ msgid ""
 "dashboard."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:320
+#: inc/admin/settings/options-mla__premium_only.php:535
 msgid "Display a custom message at the top of the \"Network\" tab."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:315
+#: inc/admin/settings/options-mla__premium_only.php:530
 msgid "Display a custom message at the top of the \"Sub-Affiliates\" tab."
 msgstr ""
 
@@ -3009,7 +3120,7 @@ msgid ""
 "dashboard."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:371
+#: inc/admin/settings/options-commission.php:373
 msgid "Display adjusted total and subtotal."
 msgstr ""
 
@@ -3018,7 +3129,7 @@ msgid "Display Affiliate Registration Form"
 msgstr ""
 
 #: premium-files/pro-addons/groups/class-affiliate-groups-list-table.php:33
-#: premium-files/pro-addons/groups/functions-add-groups.php:54
+#: premium-files/pro-addons/groups/functions-add-groups.php:56
 msgid "Display Name"
 msgstr ""
 
@@ -3027,7 +3138,7 @@ msgid ""
 "Display orders and reward commission for WooCommerce subscription renewals"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:697
+#: inc/admin/settings/options-general.php:758
 msgid ""
 "Display the affiliate dashboard as a page within the \"My Account\" section."
 msgstr ""
@@ -3042,6 +3153,10 @@ msgstr ""
 msgid ""
 "Displayed at top the \"statistics\" section on the coupon affiliate "
 "dashboard page. HTML tags enabled."
+msgstr ""
+
+#: inc/admin/admin-dashboard.php:47
+msgid "Documentation"
 msgstr ""
 
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:72
@@ -3082,7 +3197,7 @@ msgstr ""
 msgid "Domains Blacklist"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:311
+#: inc/admin/settings/admin-setup.php:315
 #, php-format
 msgid ""
 "Don't forget to <a href=\"%s\" target=\"_blank\">create your template "
@@ -3090,7 +3205,7 @@ msgid ""
 "target=\"_blank\">Learn More</a>."
 msgstr ""
 
-#: inc/functions/functions-user-coupons.php:1006
+#: inc/functions/functions-user-coupons.php:1015
 #, php-format
 msgid ""
 "Done! The affiliate statistics for this coupon will be refreshed the next "
@@ -3102,7 +3217,7 @@ msgstr ""
 msgid "Download"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:679
+#: inc/admin-reports/admin-reports.php:559
 msgid "Download CSV"
 msgstr ""
 
@@ -3110,7 +3225,7 @@ msgstr ""
 msgid "Download Preview"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:159
+#: inc/admin/settings/options-design.php:181
 msgid "Dropdown"
 msgstr ""
 
@@ -3166,7 +3281,7 @@ msgstr ""
 
 #: inc/admin/admin-affiliate-users.php:214
 #: inc/admin/class-clicks-list-table.php:42
-#: inc/admin-reports/admin-reports.php:1273
+#: inc/admin-reports/admin-reports.php:1185
 #: inc/registration/class-registrations-list-table.php:81
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:44
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:157
@@ -3190,10 +3305,10 @@ msgstr ""
 msgid "Edit Unpaid Commission"
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:211
+#: inc/dashboard/tab-settings.php:169
 #: inc/registration/class-registrations-list-table.php:70
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:148
-#: premium-files/pro-addons/payouts/payouts-settings.php:609
+#: premium-files/pro-addons/payouts/payouts-settings.php:615
 msgid "Edit User"
 msgstr ""
 
@@ -3202,12 +3317,12 @@ msgid "Elliot Sowersby, RelyWP"
 msgstr ""
 
 #: inc/registration/class-registrations-list-table.php:128
-#: premium-files/pro-addons/multi-level/functions-mla-invite.php:232
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:236
 msgid "Email"
 msgstr ""
 
 #: inc/registration/registration-admin.php:521
-#: inc/registration/registration-form.php:159
+#: inc/registration/registration-form.php:161
 msgid "Email Address"
 msgstr ""
 
@@ -3261,7 +3376,7 @@ msgstr ""
 msgid "Email Notification Message"
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:65
+#: inc/dashboard/tab-settings.php:97
 msgid "Email Notification Settings"
 msgstr ""
 
@@ -3284,12 +3399,16 @@ msgstr ""
 msgid "Email Notification Subject"
 msgstr ""
 
-#: inc/admin/settings/options-help.php:160
+#: inc/dashboard/tab-settings.php:88 inc/admin/settings/options-help.php:160
 #: inc/admin/settings/options-notifications.php:15
 #: inc/admin/settings/options-payouts.php:1070
 #: inc/admin/settings/options-registrations.php:345
 #: inc/admin/settings/options-urls.php:371
 msgid "Email Notifications"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:230
+msgid "Email Notifications:"
 msgstr ""
 
 #: inc/admin/settings/options-urls.php:504
@@ -3316,6 +3435,10 @@ msgstr ""
 
 #: inc/admin/settings/options-debug.php:77
 msgid "Enable \"Ajax Loading\" on Affiliate Dashboard."
+msgstr ""
+
+#: inc/admin/settings/options-urls.php:247
+msgid "Enable \"Click History\" Logs"
 msgstr ""
 
 #: inc/admin/settings/options-urls.php:527
@@ -3356,7 +3479,7 @@ msgstr ""
 msgid "Enable \"tabbed\" layout (recommended)."
 msgstr ""
 
-#: inc/admin/settings/options-design.php:135
+#: inc/admin/settings/options-design.php:157
 msgid "Enable 2 Column Layout"
 msgstr ""
 
@@ -3364,16 +3487,24 @@ msgstr ""
 msgid "Enable Activity Log"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:162
+#: inc/functions/functions-user-coupons.php:236
+msgid "Enable affiliate email notifications."
+msgstr ""
+
+#: inc/admin/settings/options-general.php:932
+msgid "Enable Affiliate Portal"
+msgstr ""
+
+#: inc/admin/settings/admin-setup.php:166
 #: inc/admin/settings/options-registrations.php:28
 msgid "Enable Affiliate Registration Features"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:670
+#: inc/admin/settings/options-general.php:731
 msgid "Enable button to export an Excel file of \"monthly summary\" table."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:675
+#: inc/admin/settings/options-general.php:736
 msgid "Enable button to export an Excel file of \"recent orders\" table."
 msgstr ""
 
@@ -3385,16 +3516,28 @@ msgstr ""
 msgid "Enable Coupon Codes"
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:72
+#: inc/admin/settings/options-urls.php:349
+msgid "Enable Direct Link Tracking"
+msgstr ""
+
+#: inc/dashboard/tab-settings.php:100
 msgid "Enable Email Notifications"
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:91
+#: inc/dashboard/tab-settings.php:116
 msgid "Enable Email Reports"
 msgstr ""
 
 #: inc/admin/settings/options-registrations.php:356
 msgid "Enable HoneyPot Spam Prevention"
+msgstr ""
+
+#: inc/admin/settings/admin-options.php:668
+msgid "Enable legacy (bulk) saving for settings page."
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:271
+msgid "Enable lifetime commission for this coupon."
 msgstr ""
 
 #: inc/admin/settings/options-currency.php:40
@@ -3411,6 +3554,10 @@ msgid ""
 "orders in the backend."
 msgstr ""
 
+#: inc/admin/settings/options-urls.php:263
+msgid "Enable Pagination"
+msgstr ""
+
 #: inc/admin/settings/options-payouts.php:44
 msgid "Enable Payout Requests & Log Features"
 msgstr ""
@@ -3425,13 +3572,28 @@ msgid ""
 "affiliates account on order completion, ready for payout."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:622
+#: inc/admin/settings/options-general.php:683
 msgid "Enable Performance Bonuses"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:417
+#: inc/admin/settings/options-urls.php:333
+msgid "Enable QR Code Generator"
+msgstr ""
+
+#: inc/admin/settings/options-urls.php:296
+msgid "Enable Referral Campaign Features"
+msgstr ""
+
+#: inc/admin/settings/options-general.php:422
+msgid "Enable Referral Links & Click Tracking"
+msgstr ""
+
 #: inc/admin/settings/options-urls.php:23
-msgid "Enable Referral URLs & Click Tracking"
+msgid "Enable Referral URL Generation & Click Tracking"
+msgstr ""
+
+#: inc/admin/settings/options-urls.php:406
+msgid "Enable Short URL Generator"
 msgstr ""
 
 #: inc/admin/admin-pro-details.php:133
@@ -3466,6 +3628,11 @@ msgid ""
 "coupon has a user affiliate assigned to it."
 msgstr ""
 
+#: inc/functions/functions-user-coupons.php:238
+#: inc/functions/functions-user-coupons.php:275
+msgid "Enabled"
+msgstr ""
+
 #: inc/admin/settings/options-commission.php:120
 msgid ""
 "Enabling this option will enable lifetime commission for ALL your affiliates "
@@ -3487,9 +3654,9 @@ msgid ""
 "used without the ID, but both URLs will still work."
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:72
-#: inc/admin-reports/admin-reports.php:117
-#: inc/dashboard/tab-latest-orders.php:851
+#: inc/admin-reports/admin-reports.php:74
+#: inc/admin-reports/admin-reports.php:119
+#: inc/dashboard/tab-latest-orders.php:881
 #: premium-files/dashboard/tab-monthly-summary.php:582
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:255
 msgid "End"
@@ -3523,7 +3690,7 @@ msgstr ""
 msgid "Enter the user ID for the affiliate user."
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla-invite.php:133
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:137
 msgid "Enter user email address..."
 msgstr ""
 
@@ -3539,7 +3706,7 @@ msgstr ""
 msgid "Enter your city, state and ZIP/postal code to show on statements."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:224
+#: inc/admin/settings/options-commission.php:226
 msgid ""
 "Enter your commission amounts below (0 to disable). If you enter multiple "
 "types, they will be combined. For example you could have: 10% of total order,"
@@ -3550,7 +3717,7 @@ msgstr ""
 msgid "Enter your Company Name to show on statements."
 msgstr ""
 
-#: premium-files/pro-addons/direct-link/functions-direct-link.php:365
+#: premium-files/pro-addons/direct-link/functions-direct-link.php:367
 msgid "Enter your domain..."
 msgstr ""
 
@@ -3564,28 +3731,28 @@ msgstr ""
 msgid "Enter your VAT/Tax number to show on statements."
 msgstr ""
 
+#: inc/admin-reports/admin-reports.php:198
+#: inc/admin-reports/admin-reports.php:216
+#: inc/admin-reports/admin-reports.php:235
+#: inc/admin-reports/admin-reports.php:257
+#: inc/admin-reports/admin-reports.php:284
+msgid "Equal"
+msgstr ""
+
 #: inc/admin-reports/admin-reports.php:196
 #: inc/admin-reports/admin-reports.php:214
 #: inc/admin-reports/admin-reports.php:233
 #: inc/admin-reports/admin-reports.php:255
 #: inc/admin-reports/admin-reports.php:282
-msgid "Equal"
-msgstr ""
-
-#: inc/admin-reports/admin-reports.php:194
-#: inc/admin-reports/admin-reports.php:212
-#: inc/admin-reports/admin-reports.php:231
-#: inc/admin-reports/admin-reports.php:253
-#: inc/admin-reports/admin-reports.php:280
 msgid "Equal or Less"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:192
-#: inc/admin-reports/admin-reports.php:210
-#: inc/admin-reports/admin-reports.php:229
-#: inc/admin-reports/admin-reports.php:251
-#: inc/admin-reports/admin-reports.php:267
-#: inc/admin-reports/admin-reports.php:278
+#: inc/admin-reports/admin-reports.php:195
+#: inc/admin-reports/admin-reports.php:212
+#: inc/admin-reports/admin-reports.php:231
+#: inc/admin-reports/admin-reports.php:253
+#: inc/admin-reports/admin-reports.php:269
+#: inc/admin-reports/admin-reports.php:280
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:162
 msgid "Equal or More"
 msgstr ""
@@ -3618,7 +3785,7 @@ msgstr ""
 msgid "Example URL with campaign \"twitter\" would be"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:221
+#: inc/admin/settings/options-mla__premium_only.php:436
 msgid "Example URL with user \"example\" would be"
 msgstr ""
 
@@ -3644,15 +3811,22 @@ msgstr ""
 msgid "Expiration Date:"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:916
+#: inc/dashboard/tab-latest-orders.php:946
 #: premium-files/dashboard/tab-monthly-summary.php:604
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:276
 msgid "Export"
 msgstr ""
 
 #: inc/admin/admin-pro-details.php:483
-#: inc/admin/settings/options-general.php:667
+#: inc/admin/settings/options-general.php:728
 msgid "Export to Excel Buttons"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:352
+#, php-format
+msgid ""
+"Extra features are available with PRO version including custom commission "
+"amounts per coupon, email notifications, and more. <a href=\"%s\">UPGRADE</a>"
 msgstr ""
 
 #: inc/admin/settings/options-payouts.php:538
@@ -3664,6 +3838,10 @@ msgstr ""
 
 #: inc/admin/settings/options-registrations.php:498
 msgid "Extra Fields"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:362
+msgid "Extra Restrictions"
 msgstr ""
 
 #: inc/admin/settings/options-debug.php:237
@@ -3687,13 +3865,13 @@ msgid "Field Label:"
 msgstr ""
 
 #: premium-files/dashboard/tab-payout.php:247
-#: premium-files/dashboard/tab-payout.php:314
+#: premium-files/dashboard/tab-payout.php:315
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:430
 msgid "Files"
 msgstr ""
 
 #: inc/admin/class-coupon-users-table.php:123
-#: inc/dashboard/tab-latest-orders.php:895
+#: inc/dashboard/tab-latest-orders.php:925
 #: premium-files/dashboard/tab-monthly-summary.php:584
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:255
 msgid "Filter"
@@ -3724,13 +3902,23 @@ msgid ""
 "adding the shortcode: [couponaffiliates-register]"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:119
+#: inc/admin/settings/admin-setup.php:121
 msgid ""
 "Firstly, we need to create the main affiliate dashboard page on your website."
 msgstr ""
 
+#: inc/admin/settings/options-general.php:817
+msgid ""
+"Fix required: The selected page you have selected previously did not contain "
+"the [couponaffiliates] shortcode."
+msgstr ""
+
 #: inc/admin/tools/admin-bulk-product-rates.php:60
 msgid "Fixed"
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:358
+msgid "Fixed Amount ($)"
 msgstr ""
 
 #: inc/functions/functions-shortcode.php:265
@@ -3747,6 +3935,16 @@ msgstr ""
 
 #: inc/admin/class-coupons-table.php:162 inc/admin/class-coupons-table.php:164
 msgid "Fixed Cart Discount"
+msgstr ""
+
+#: inc/admin/settings/options-commission.php:241
+#, php-format
+msgid "Fixed Commission (%s - Amount Per Order)"
+msgstr ""
+
+#: inc/admin/settings/options-commission.php:249
+#, php-format
+msgid "Fixed Commission (%s - Amount Per Product)"
 msgstr ""
 
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:313
@@ -3781,7 +3979,11 @@ msgid ""
 "\"Coupon Affiliates & Commission\" data settings tab."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:929
+#: inc/admin/settings/options-general.php:1035
+msgid "Footer Text"
+msgstr ""
+
+#: inc/admin/settings/options-general.php:1192
 msgid ""
 "For \"commission payouts\" in PRO, for \"unpaid commission\" to be granted, "
 "the order status must be \"completed\"."
@@ -3791,7 +3993,7 @@ msgstr ""
 msgid "for a solution."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:316
+#: inc/admin/settings/admin-setup.php:320
 #, php-format
 msgid ""
 "For advanced features like automated payouts, multi-level affiliates, "
@@ -3850,7 +4052,7 @@ msgstr ""
 msgid "Form ID"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:124
+#: inc/admin/settings/options-design.php:146
 msgid "Form Style"
 msgstr ""
 
@@ -3875,11 +4077,11 @@ msgstr ""
 msgid "Free Shipping"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:81
+#: inc/admin-reports/admin-reports.php:83
 msgid "Free version can display reports for up to the past 1 month."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:422
+#: inc/admin/settings/admin-setup.php:426
 msgid "Free Version:"
 msgstr ""
 
@@ -3887,7 +4089,7 @@ msgstr ""
 msgid "Frequency:"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:366
+#: inc/admin/settings/admin-setup.php:370
 msgid "Frequently Asked Questions:"
 msgstr ""
 
@@ -3913,7 +4115,7 @@ msgstr ""
 msgid "General"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:263
+#: inc/admin/settings/admin-setup.php:267
 #: inc/admin/settings/options-notifications.php:20
 msgid "General Email Settings"
 msgstr ""
@@ -3924,7 +4126,7 @@ msgstr ""
 
 #: inc/admin/settings/admin-options.php:26
 #: inc/admin/settings/options-general.php:15
-#: inc/admin/settings/options-mla__premium_only.php:94
+#: inc/admin/settings/options-mla__premium_only.php:161
 msgid "General Settings"
 msgstr ""
 
@@ -3939,7 +4141,7 @@ msgstr ""
 msgid "Generate"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:58
+#: inc/admin-reports/admin-reports.php:60
 msgid "Generate a new admin report"
 msgstr ""
 
@@ -3957,21 +4159,22 @@ msgstr ""
 msgid "Generate Coupon"
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:127
-#: inc/admin/admin-getting-started.php:169
-#: inc/admin/admin-getting-started.php:182
+#: inc/admin/admin-getting-started.php:135
+#: inc/admin/admin-getting-started.php:178
+#: inc/admin/admin-getting-started.php:191
+#: inc/admin/settings/options-general.php:845
 msgid "Generate Dashboard Page"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:512
+#: inc/admin-reports/admin-reports.php:392
 msgid "GENERATE NEW REPORT"
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:191
+#: inc/admin/admin-getting-started.php:200
 msgid "Generate Registration Page"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:298
+#: inc/admin-reports/admin-reports.php:300
 msgid "GENERATE REPORT"
 msgstr ""
 
@@ -3981,7 +4184,7 @@ msgid ""
 "program."
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:497
+#: inc/admin-reports/admin-reports.php:376
 msgid "Generating Report"
 msgstr ""
 
@@ -4034,11 +4237,11 @@ msgstr ""
 msgid "Go to Page"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:51
+#: inc/admin/settings/options-general.php:36
 msgid "Go to the"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:54
+#: inc/admin/settings/options-general.php:39
 #, php-format
 msgid ""
 "Go to the <a href=\"%s\" target=\"_blank\">Add New Affiliate</a> page to add "
@@ -4095,11 +4298,11 @@ msgstr ""
 msgid "Help Documentation"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:340
+#: inc/admin/settings/admin-setup.php:344
 msgid "Here is a video guide explaining how to get started with the plugin"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:291
+#: inc/admin/settings/admin-setup.php:295
 msgid "Here's some of the next steps you can take:"
 msgstr ""
 
@@ -4118,11 +4321,11 @@ msgstr ""
 msgid "Hide \"0.00\" value on checkout from referral coupons."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:193
+#: inc/admin/settings/options-commission.php:195
 msgid "Hide commission statistics for non-affiliate coupons."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:692
+#: inc/admin/settings/options-general.php:753
 msgid "Hide link for non-affiliate users."
 msgstr ""
 
@@ -4140,12 +4343,12 @@ msgstr ""
 msgid "Horizontal Margin (X):"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:391
+#: inc/admin/settings/admin-setup.php:395
 msgid "How are referral URLs generated?"
 msgstr ""
 
 #: inc/registration/class-registrations-list-table.php:138
-#: inc/registration/registration-form.php:287
+#: inc/registration/registration-form.php:289
 msgid "How did you hear about us?"
 msgstr ""
 
@@ -4157,7 +4360,7 @@ msgstr ""
 msgid "How do I change commission rates for new orders only?"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:381
+#: inc/admin/settings/admin-setup.php:385
 msgid "How do I create affiliate users?"
 msgstr ""
 
@@ -4165,7 +4368,7 @@ msgstr ""
 msgid "How do I get support?"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:398
+#: inc/admin/settings/admin-setup.php:402
 msgid "How do I give affiliate users access to their own dashboard?"
 msgstr ""
 
@@ -4183,7 +4386,7 @@ msgstr ""
 msgid "How do I only show “completed” orders on affiliate dashboard?"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:386
+#: inc/admin/settings/admin-setup.php:390
 msgid "How do I pay my affiliates?"
 msgstr ""
 
@@ -4193,7 +4396,15 @@ msgid ""
 "2 - 4. On mobile devices this will be responsive, and only shows 1 per row."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:485
+#: inc/functions/functions-user-coupons.php:285
+msgid ""
+"How many days after being assigned as a \"lifetime\" referral should it "
+"expire, and the customer be unlinked from the customer. Leave empty to use "
+"the default global setting. Set to \"0\" for permanent lifetime commission "
+"with no expiry time."
+msgstr ""
+
+#: inc/admin/settings/options-general.php:490
 msgid "How many months to show on the \"monthly summary\" table by default."
 msgstr ""
 
@@ -4235,7 +4446,7 @@ msgstr ""
 msgid "How to fix “ERROR: Failed to load ajax request.”"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:338
+#: inc/admin/settings/admin-setup.php:342
 msgid "How To Get Started"
 msgstr ""
 
@@ -4256,7 +4467,7 @@ msgid "How to use the Coupon Usage Tracker plugin?"
 msgstr ""
 
 #: inc/registration/class-registrations-list-table.php:134
-#: inc/registration/registration-form.php:275
+#: inc/registration/registration-form.php:277
 msgid "How will you promote us?"
 msgstr ""
 
@@ -4275,32 +4486,32 @@ msgstr ""
 msgid "https://couponaffiliates.com/"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:251
+#: inc/admin/settings/options-design.php:273
 msgid "Icon Colour"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:239
+#: inc/admin/settings/options-design.php:261
 msgid "Icons"
 msgstr ""
 
 #: inc/admin/class-activity-list-table.php:78
 #: inc/admin/class-clicks-list-table.php:175
 #: inc/admin/class-coupon-users-table.php:24
-#: inc/admin/class-coupons-table.php:24 inc/dashboard/tab-latest-orders.php:183
-#: inc/dashboard/tab-latest-orders.php:265
+#: inc/admin/class-coupons-table.php:24 inc/dashboard/tab-latest-orders.php:185
+#: inc/dashboard/tab-latest-orders.php:272
 #: inc/registration/class-registrations-list-table.php:251
 #: premium-files/dashboard/tab-payout.php:213
 #: premium-files/dashboard/tab-payout.php:241
-#: premium-files/dashboard/tab-payout.php:307
-#: premium-files/dashboard/tab-product-rates.php:84
-#: premium-files/dashboard/tab-product-rates.php:100
+#: premium-files/dashboard/tab-payout.php:308
+#: premium-files/dashboard/tab-product-rates.php:105
+#: premium-files/dashboard/tab-product-rates.php:122
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:170
-#: premium-files/pro-addons/multi-level/functions-mla-invite.php:230
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:234
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:424
 msgid "ID"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:987
+#: inc/admin/settings/options-general.php:1250
 msgid ""
 "Ideally you should only enable \"completed\" order statuses above if you "
 "have \"Completed Date\" selected."
@@ -4324,6 +4535,12 @@ msgid ""
 "If at-least 1 role is selected, this payout method will only be available "
 "for the selected user roles. If none are selected it will be available for "
 "all roles."
+msgstr ""
+
+#: premium-files/pro-addons/payouts/class-payoutcreate-list-table.php:326
+msgid ""
+"If automatic payouts are enabled, this will also trigger the automated "
+"payout for Stripe, PayPal and Store Credit."
 msgstr ""
 
 #: inc/admin/settings/options-debug.php:170
@@ -4358,6 +4575,12 @@ msgid ""
 "commission."
 msgstr ""
 
+#: inc/admin/settings/options-general.php:575
+msgid ""
+"If disabled, only the parent product will be shown - and variations that "
+"have per-variation commission rates set different to the parent."
+msgstr ""
+
 #: inc/admin/settings/options-debug.php:178
 msgid ""
 "If disabled, then it will only be able to try to automatically apply the "
@@ -4378,6 +4601,12 @@ msgid ""
 "latest click will be converted if they make a purchase."
 msgstr ""
 
+#: inc/admin/settings/options-general.php:573
+msgid ""
+"If enabled, all variations of a product will be shown in the table as "
+"seperate rows."
+msgstr ""
+
 #: inc/admin/settings/options-reports.php:97
 msgid ""
 "If enabled, an option will be displayed in the affiliate dashboard settings "
@@ -4391,19 +4620,19 @@ msgid ""
 "affiliate."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:345
+#: inc/admin/settings/options-commission.php:347
 msgid ""
 "If enabled, order tax will be added to the fixed commission calculations."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:326
+#: inc/admin/settings/options-commission.php:328
 msgid ""
 "If enabled, order tax will be added to the order subtotal/total/discount for "
 "orders in the statistics, and when calculating percentage (%) commission "
 "calculations."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:143
+#: inc/admin/settings/options-mla__premium_only.php:249
 msgid ""
 "If enabled, the \"MLA Dashboard\" will only be accessible to specific "
 "affiliate users that you give access to (edit the user and enable \"MLA "
@@ -4470,7 +4699,7 @@ msgid ""
 "cart, the cookie will also be removed."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:394
+#: inc/admin/settings/admin-setup.php:398
 #, php-format
 msgid ""
 "If needed, you can <a href=\"%s\" target=\"_blank\">make the link alone "
@@ -4478,7 +4707,7 @@ msgid ""
 "ensuring affiliates receive credit for every sale referred."
 msgstr ""
 
-#: inc/admin/settings/options-tabs.php:127
+#: inc/admin/settings/options-tabs.php:144
 msgid "If no roles are selected, the tab will be visible to all affiliates."
 msgstr ""
 
@@ -4526,6 +4755,12 @@ msgid ""
 "award/bonus."
 msgstr ""
 
+#: inc/admin/settings/options-general.php:926
+msgid ""
+"If the portal is enabled, all affiliate dashboard links will direct the "
+"affiliate to the portal page, instead of the regular dashboard page."
+msgstr ""
+
 #: inc/admin/admin-page.php:332
 msgid ""
 "If the referral URL is clicked, the coupon code will automatically be "
@@ -4562,7 +4797,7 @@ msgid ""
 "they register on their first page visit."
 msgstr ""
 
-#: inc/dashboard/tab-statistics.php:694
+#: inc/dashboard/tab-statistics.php:682
 #: inc/functions/functions-all-time.php:488
 msgid ""
 "If this is your first time loading this dashboard, and it's a large coupon, "
@@ -4612,7 +4847,7 @@ msgid ""
 "Provider via the FluentSMTP plugin for more reliable email delivery."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:407
+#: inc/admin/settings/admin-setup.php:411
 #, php-format
 msgid ""
 "If you need help getting started, or have any questions at all, you can <a "
@@ -4640,6 +4875,12 @@ msgid ""
 "the setting below under \"URL Conversion Tracking\"."
 msgstr ""
 
+#: inc/admin/settings/options-mla__premium_only.php:270
+msgid ""
+"If you want to automatically give access to the MLA Dashboard for certain "
+"user roles, select them below."
+msgstr ""
+
 #: inc/admin/settings/options-debug.php:262
 msgid ""
 "If you want to change the text \"Coupon\" to something else on the checkout "
@@ -4659,6 +4900,10 @@ msgid ""
 "redirected to the \"Payouts\" page to view, manage and finalize the payout."
 msgstr ""
 
+#: premium-files/dashboard/tab-product-rates.php:126
+msgid "Image"
+msgstr ""
+
 #: premium-files/pro-addons/creatives/functions-creatives-post-type.php:372
 msgid "Image:"
 msgstr ""
@@ -4673,10 +4918,6 @@ msgstr ""
 
 #: inc/admin/settings/options-help.php:201
 msgid "Import/Export Custom Tables"
-msgstr ""
-
-#: inc/admin/settings/options-mla__premium_only.php:159
-msgid "Important Information"
 msgstr ""
 
 #: inc/admin/settings/options-urls.php:439
@@ -4699,7 +4940,7 @@ msgid ""
 "referrals."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:220
+#: inc/admin/settings/options-mla__premium_only.php:435
 msgid ""
 "Important: This needs to be different to your normal affiliate referral URL "
 "prefix."
@@ -4738,28 +4979,28 @@ msgid ""
 "multi currency plugin."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:289
+#: inc/admin/settings/options-commission.php:291
 msgid ""
 "Include \"custom discounts\" in % commission calculations & order totals."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:296
+#: inc/admin/settings/options-commission.php:298
 msgid "Include \"fees\" in % commission calculations & order totals."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:278
+#: inc/admin/settings/options-commission.php:280
 msgid "Include \"shipping costs\" in % commission calculations & order totals."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:344
+#: inc/admin/settings/options-commission.php:346
 msgid "Include \"taxes\" in \"fixed\" commission calculations."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:325
+#: inc/admin/settings/options-commission.php:327
 msgid "Include \"taxes\" in % commission calculations & order totals."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:272
+#: inc/admin/settings/options-commission.php:274
 msgid "Include the \"coupon discount\" in % commission calculations."
 msgstr ""
 
@@ -4771,11 +5012,11 @@ msgstr ""
 msgid "Increase all future commission earnings by percentage"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:127
+#: inc/admin-reports/admin-reports.php:129
 msgid "Increased"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:126
+#: inc/admin-reports/admin-reports.php:128
 msgid "Increased or Decreased"
 msgstr ""
 
@@ -4790,6 +5031,13 @@ msgstr ""
 msgid "Information:"
 msgstr ""
 
+#: inc/admin/settings/options-general.php:923
+msgid ""
+"Instead of being a shortcode displayed on a page within your theme, the "
+"affiliate portal is its own standalone full-screen page with a modern unique "
+"design."
+msgstr ""
+
 #: inc/admin/admin-page.php:90
 msgid "Instructions & Plugin Details"
 msgstr ""
@@ -4798,8 +5046,10 @@ msgstr ""
 msgid "Integrations"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:133
-#: premium-files/pro-addons/multi-level/functions-mla.php:166
+#: premium-files/pro-addons/multi-level/functions-mla.php:144
+#: premium-files/pro-addons/multi-level/functions-mla.php:177
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:268
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:433
 msgid "Invite"
 msgstr ""
 
@@ -4807,7 +5057,7 @@ msgstr ""
 msgid "Invite new members to your affiliate network:"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla-invite.php:255
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:259
 msgid "Invite Sent"
 msgstr ""
 
@@ -4815,7 +5065,7 @@ msgstr ""
 msgid "Invite sent to"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:218
+#: inc/admin/settings/options-mla__premium_only.php:433
 msgid "Invite URL Variable"
 msgstr ""
 
@@ -4839,7 +5089,7 @@ msgstr ""
 msgid "IP Address"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:928
+#: inc/admin-reports/admin-reports.php:822
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:160
 msgid "is"
 msgstr ""
@@ -4850,7 +5100,7 @@ msgid ""
 "your chosen priority will be used."
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:502
+#: inc/admin-reports/admin-reports.php:381
 msgid ""
 "It will take longer if you select a large date range, or have lots of orders "
 "and coupons."
@@ -4886,7 +5136,7 @@ msgstr ""
 msgid "Landing Pages Text"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:62
+#: inc/admin/settings/options-design.php:64
 msgid "Large (12px)"
 msgstr ""
 
@@ -4935,12 +5185,12 @@ msgstr ""
 msgid "Leaderboards"
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:117
-#: inc/admin/admin-getting-started.php:157
+#: inc/admin/admin-getting-started.php:124
+#: inc/admin/admin-getting-started.php:166
 #: inc/registration/registration-admin.php:168
 #: inc/registration/registration-admin.php:494
 #: inc/registration/registration-admin.php:502
-#: inc/admin/settings/options-commission.php:226
+#: inc/admin/settings/options-commission.php:228
 #: inc/admin/settings/options-creatives__premium_only.php:37
 #: inc/admin/settings/options-mla__premium_only.php:32
 #: inc/admin/settings/options-payouts.php:119
@@ -4956,7 +5206,7 @@ msgstr ""
 msgid "Learn more about how dynamic landing pages works."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:388
+#: inc/admin/settings/admin-setup.php:392
 msgid "Learn more about payouts."
 msgstr ""
 
@@ -4974,16 +5224,16 @@ msgstr ""
 #: inc/admin/settings/options-fraud.php:70
 #: inc/admin/settings/options-fraud.php:84
 #: inc/admin/settings/options-fraud.php:108
-#: inc/admin/settings/options-general.php:51
-#: inc/admin/settings/options-general.php:54
-#: inc/admin/settings/options-general.php:57
+#: inc/admin/settings/options-general.php:36
+#: inc/admin/settings/options-general.php:39
+#: inc/admin/settings/options-general.php:42
 #: inc/admin/settings/options-payouts.php:708
 #: inc/admin/settings/options-payouts.php:805
 #: premium-files/pro-addons/payouts/class-payoutcreate-list-table.php:317
 msgid "Learn More."
 msgstr ""
 
-#: premium-files/pro-addons/groups/functions-affiliate-groups.php:29
+#: premium-files/pro-addons/groups/functions-affiliate-groups.php:31
 msgid "Learn more."
 msgstr ""
 
@@ -5004,11 +5254,11 @@ msgstr ""
 msgid "Left"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:195
-#: inc/admin-reports/admin-reports.php:213
-#: inc/admin-reports/admin-reports.php:232
-#: inc/admin-reports/admin-reports.php:254
-#: inc/admin-reports/admin-reports.php:281
+#: inc/admin-reports/admin-reports.php:197
+#: inc/admin-reports/admin-reports.php:215
+#: inc/admin-reports/admin-reports.php:234
+#: inc/admin-reports/admin-reports.php:256
+#: inc/admin-reports/admin-reports.php:283
 msgid "Less"
 msgstr ""
 
@@ -5029,8 +5279,16 @@ msgstr ""
 msgid "Lifetime Commission"
 msgstr ""
 
+#: inc/functions/functions-user-coupons.php:283
+msgid "Lifetime Commission Expiry"
+msgstr ""
+
 #: inc/admin/settings/options-commission.php:137
 msgid "Lifetime Commission Expiry (Days)"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:270
+msgid "Lifetime Commission:"
 msgstr ""
 
 #: inc/admin/admin-orders-box.php:157
@@ -5056,7 +5314,7 @@ msgstr ""
 msgid "Limit to certain user roles & groups?"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:267
+#: inc/admin/settings/options-design.php:289
 msgid "Line Graph"
 msgstr ""
 
@@ -5086,27 +5344,29 @@ msgstr ""
 msgid "Load tabs on affiliate dashboard as separate pages."
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:1047
-#: inc/dashboard/tab-referral-url.php:465 inc/dashboard/tab-statistics.php:690
+#: inc/dashboard/tab-latest-orders.php:1086
+#: inc/dashboard/tab-referral-url.php:469 inc/dashboard/tab-statistics.php:678
 #: premium-files/dashboard/tab-bonuses.php:152
-#: premium-files/dashboard/tab-monthly-summary.php:741
+#: premium-files/dashboard/tab-monthly-summary.php:745
 #: premium-files/pro-addons/multi-level/functions-mla-orders.php:218
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:196
 msgid "Loading"
 msgstr ""
 
-#: inc/functions/functions-user-coupons.php:793
-#: premium-files/pro-addons/multi-level/functions-mla.php:224
+#: inc/functions/functions-user-coupons.php:793 inc/portal/template.php:300
+#: premium-files/pro-addons/multi-level/functions-mla.php:235
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:129
 msgid "Login"
 msgstr ""
 
-#: inc/registration/registration-form.php:1018
-#: inc/registration/registration-form.php:1026
+#: inc/registration/registration-form.php:1022
+#: inc/registration/registration-form.php:1030
 msgid "Login to your account."
 msgstr ""
 
-#: inc/functions/functions-shortcode.php:203
-#: premium-files/pro-addons/multi-level/functions-mla.php:59
+#: inc/functions/functions-shortcode.php:203 inc/portal/template.php:450
+#: premium-files/pro-addons/multi-level/functions-mla.php:70
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:208
 msgid "Logout"
 msgstr ""
 
@@ -5141,11 +5401,11 @@ msgid ""
 "assigned user."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:142
+#: inc/admin/settings/options-mla__premium_only.php:248
 msgid "Make MLA Dashboard \"Invite Only\""
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:226
+#: inc/admin/settings/options-mla__premium_only.php:441
 msgid "Make MLA invite links also work as a normal referral link."
 msgstr ""
 
@@ -5217,15 +5477,15 @@ msgstr ""
 msgid "Maximum amount of \"latest orders\" to show at once:"
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:302
+#: inc/admin/settings/options-commission.php:304
 msgid "Maximum commission per order:"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:703
+#: inc/dashboard/tab-latest-orders.php:728
 msgid "Maximum orders per request reached"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:61
+#: inc/admin/settings/options-design.php:63
 msgid "Medium (10px)"
 msgstr ""
 
@@ -5239,7 +5499,7 @@ msgstr ""
 
 #: premium-files/dashboard/tab-payout.php:215
 #: premium-files/dashboard/tab-payout.php:243
-#: premium-files/dashboard/tab-payout.php:309
+#: premium-files/dashboard/tab-payout.php:310
 #: premium-files/pro-addons/payouts/statements/template.php:198
 msgid "Method"
 msgstr ""
@@ -5256,12 +5516,24 @@ msgstr ""
 msgid "MLA - Unpaid Commission"
 msgstr ""
 
+#: inc/admin/settings/options-mla__premium_only.php:264
+msgid "MLA access for user roles & groups"
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:98
+msgid "MLA Affiliate Portal"
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:103
+msgid "MLA Affiliate Portal URL: "
+msgstr ""
+
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:346
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:387
 msgid "MLA Commission"
 msgstr ""
 
-#: inc/functions/functions-shortcode.php:216
+#: inc/functions/functions-shortcode.php:216 inc/portal/template.php:437
 msgid "MLA Dashboard"
 msgstr ""
 
@@ -5269,20 +5541,28 @@ msgstr ""
 msgid "MLA Dashboard Access"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:244
+#: premium-files/pro-addons/multi-level/functions-mla.php:255
 msgid "MLA dashboard is currently unavailable."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:128
+#: inc/admin/settings/options-mla__premium_only.php:193
 msgid "MLA Dashboard Page (ID):"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:101
+#: inc/admin/settings/options-mla__premium_only.php:168
 msgid "MLA Dashboard Page:"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:231
+#: inc/admin/settings/options-mla__premium_only.php:446
 msgid "MLA Dashboard Sections"
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:121
+msgid "MLA Portal Page Slug"
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:116
+msgid "MLA Portal Page Title"
 msgstr ""
 
 #: inc/admin/settings/admin-options.php:202
@@ -5300,11 +5580,11 @@ msgid ""
 "commission depending on their referral tier."
 msgstr ""
 
-#: inc/admin/settings/options-design.php:152
+#: inc/admin/settings/options-design.php:174
 msgid "Mobile Menu"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:157
+#: inc/admin/settings/options-design.php:179
 msgid "Mobile Menu Style"
 msgstr ""
 
@@ -5322,28 +5602,28 @@ msgstr ""
 msgid "Month:"
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:81 inc/admin/settings/options-reports.php:67
+#: inc/dashboard/tab-settings.php:107 inc/admin/settings/options-reports.php:67
 msgid "Monthly"
 msgstr ""
 
 #: inc/admin/admin-pro-details.php:160 inc/functions/functions-dashboard.php:50
-#: inc/functions/functions-dashboard.php:289
+#: inc/functions/functions-dashboard.php:289 inc/portal/template.php:560
 #: premium-files/dashboard/tab-monthly-summary.php:566
 #: premium-files/dashboard/tab-monthly-summary.php:567
-#: premium-files/dashboard/tab-monthly-summary.php:728
+#: premium-files/dashboard/tab-monthly-summary.php:732
 msgid "Monthly Summary"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:646
+#: inc/dashboard/tab-latest-orders.php:669
 #: premium-files/dashboard/tab-monthly-summary.php:424
 msgid "MORE"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:193
-#: inc/admin-reports/admin-reports.php:211
-#: inc/admin-reports/admin-reports.php:230
-#: inc/admin-reports/admin-reports.php:252
-#: inc/admin-reports/admin-reports.php:279
+#: inc/admin-reports/admin-reports.php:194
+#: inc/admin-reports/admin-reports.php:213
+#: inc/admin-reports/admin-reports.php:232
+#: inc/admin-reports/admin-reports.php:254
+#: inc/admin-reports/admin-reports.php:281
 msgid "More"
 msgstr ""
 
@@ -5382,6 +5662,10 @@ msgstr ""
 msgid "Multi-Level Affiliate Marketing"
 msgstr ""
 
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:50
+msgid "Multi-Level Affiliate Portal"
+msgstr ""
+
 #: inc/admin/settings/options-help.php:133
 msgid "Multi-Level Affiliates"
 msgstr ""
@@ -5402,8 +5686,8 @@ msgstr ""
 msgid "My PRO features and settings are not showing. How do I fix this?"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:243
-#: inc/dashboard/tab-latest-orders.php:308
+#: inc/dashboard/tab-latest-orders.php:250
+#: inc/dashboard/tab-latest-orders.php:319
 msgid "Name"
 msgstr ""
 
@@ -5411,12 +5695,18 @@ msgstr ""
 msgid "Name / User Role"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:320
+#: inc/admin/settings/admin-setup.php:324
 msgid "Need help?"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:109
-#: premium-files/pro-addons/multi-level/functions-mla.php:163
+#: inc/admin/settings/admin-options.php:701
+msgid "Need help? Have a suggestion? Found a bug?"
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/functions-mla.php:120
+#: premium-files/pro-addons/multi-level/functions-mla.php:174
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:265
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:430
 msgid "Network"
 msgstr ""
 
@@ -5451,6 +5741,11 @@ msgstr ""
 
 #: inc/admin/settings/options-fraud.php:51
 msgid "New Customers Only (First Order)"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:416
+#: inc/functions/functions-user-coupons.php:433
+msgid "New customers only?"
 msgstr ""
 
 #: inc/admin/settings/options-notifications.php:243
@@ -5490,7 +5785,7 @@ msgstr ""
 msgid "New Sub-Affiliate Signup"
 msgstr ""
 
-#: inc/functions/functions-subscriptions.php:254
+#: inc/functions/functions-subscriptions.php:261
 msgid "New Subscription (Parent Order)"
 msgstr ""
 
@@ -5506,13 +5801,13 @@ msgstr ""
 msgid "Newly Created (Welcome Bonus)"
 msgstr ""
 
-#: inc/dashboard/tab-referral-url.php:450
-#: premium-files/dashboard/tab-product-rates.php:245
+#: inc/dashboard/tab-referral-url.php:454
+#: premium-files/dashboard/tab-product-rates.php:412
 msgid "Next"
 msgstr ""
 
-#: inc/dashboard/tab-referral-url.php:450
-#: premium-files/dashboard/tab-product-rates.php:245
+#: inc/dashboard/tab-referral-url.php:454
+#: premium-files/dashboard/tab-product-rates.php:412
 msgid "Next Page"
 msgstr ""
 
@@ -5529,13 +5824,17 @@ msgid ""
 "in the new \"Creatives\" tab on the affiliate dashboard."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:171
+#: inc/admin/settings/admin-setup.php:175
 msgid ""
 "Next, you need to create the affiliate registration page on your website."
 msgstr ""
 
 #: inc/admin/class-clicks-list-table.php:118
 msgid "No"
+msgstr ""
+
+#: inc/portal/template.php:65
+msgid "No affiliate coupons assigned to your account."
 msgstr ""
 
 #: inc/functions/functions-shortcode.php:496
@@ -5554,6 +5853,10 @@ msgstr ""
 msgid "No Campaign"
 msgstr ""
 
+#: inc/admin/settings/options-general.php:610
+msgid "No categories found"
+msgstr ""
+
 #: inc/functions/functions-url-clicks.php:285
 msgid "No clicks available."
 msgstr ""
@@ -5570,6 +5873,16 @@ msgstr ""
 msgid "No creatives are available for this group."
 msgstr ""
 
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:337
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:350
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:363
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:376
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:389
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:402
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:414
+msgid "No data available for this tab."
+msgstr ""
+
 #: inc/admin/settings/options-payouts.php:1058
 msgid "No Default"
 msgstr ""
@@ -5582,12 +5895,16 @@ msgstr ""
 msgid "No new affiliate coupons found."
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:800
+#: inc/dashboard/tab-latest-orders.php:830
 msgid "No orders found."
 msgstr ""
 
-#: premium-files/pro-addons/payouts/payouts-settings.php:617
+#: premium-files/pro-addons/payouts/payouts-settings.php:623
 msgid "No payout methods are available currently."
+msgstr ""
+
+#: premium-files/dashboard/tab-product-rates.php:427
+msgid "No products found."
 msgstr ""
 
 #: inc/admin/admin-dashboard.php:335
@@ -5618,7 +5935,7 @@ msgstr ""
 msgid "No template coupons assigned."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:190
+#: inc/admin/settings/options-commission.php:192
 msgid "Non-Affiliate Coupon Settings"
 msgstr ""
 
@@ -5654,7 +5971,7 @@ msgid ""
 "functionality."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:377
+#: inc/admin/settings/options-commission.php:379
 msgid ""
 "Note: Changing these tax settings will affect stats for all coupons and all "
 "new/past orders. Stats are refreshed next time there is a new order (for "
@@ -5675,13 +5992,13 @@ msgid ""
 "initial click (to prevent spamming the logs)."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:247
+#: inc/admin/settings/admin-setup.php:251
 msgid ""
 "Note: If required, you can customise more calculation settings in the plugin "
 "settings page."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:984
+#: inc/admin/settings/options-general.php:1247
 msgid ""
 "NOTE: If set to \"Completed Date\", only orders that have been marked as "
 "\"completed\" (at-least once) can be displayed on the dashboard."
@@ -5717,7 +6034,7 @@ msgid ""
 "account."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:514
+#: inc/admin/settings/admin-setup.php:518
 msgid "Note: There are lots more options available in the settings page."
 msgstr ""
 
@@ -5754,19 +6071,19 @@ msgid ""
 msgstr ""
 
 #: inc/admin/settings/options-commission.php:41
-#: inc/admin/settings/options-commission.php:307
+#: inc/admin/settings/options-commission.php:309
 msgid ""
 "Note: When updating these settings saved data will be refreshed for all "
 "dashboards automatically (first page load may take longer)."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:268
+#: inc/admin/settings/admin-setup.php:272
 msgid ""
 "Note: You can customise some other email notifications on the plugin "
 "settings page later if needed."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:204
+#: inc/admin/settings/admin-setup.php:208
 msgid ""
 "Note: You can customise the registration system more in the plugin settings "
 "page."
@@ -5779,7 +6096,7 @@ msgid ""
 "href=\"%s\" target=\"_blank\">affiliate registration form</a>."
 msgstr ""
 
-#: inc/dashboard/tab-statistics.php:693
+#: inc/dashboard/tab-statistics.php:681
 #: inc/functions/functions-all-time.php:487
 msgid "Notice (admin only): Page constantly loading? Try refreshing the page."
 msgstr ""
@@ -5800,7 +6117,7 @@ msgstr ""
 msgid "Number of Extra Currencies"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:152
+#: inc/admin/settings/options-mla__premium_only.php:368
 msgid "Number of Tiers"
 msgstr ""
 
@@ -5859,11 +6176,11 @@ msgid ""
 "to more than one of these statuses at any time."
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:142
+#: inc/admin-reports/admin-reports.php:144
 msgid "Only show coupons assigned to an affiliate user."
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:124
+#: inc/admin-reports/admin-reports.php:126
 msgid "Only show coupons where sales have"
 msgstr ""
 
@@ -5878,11 +6195,11 @@ msgid ""
 "Only show/include tax on the statement if user has entered a tax/VAT number."
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:934
+#: inc/admin-reports/admin-reports.php:827
 msgid "Only showing coupons that are assigned to an affiliate user."
 msgstr ""
 
-#: premium-files/pro-addons/payouts/payouts-settings.php:604
+#: premium-files/pro-addons/payouts/payouts-settings.php:610
 msgid ""
 "Only the user assigned to this coupon can update their payout method details."
 msgstr ""
@@ -5896,7 +6213,7 @@ msgid ""
 "Oops, an error occurred when attempting to send PayPal payment for payout"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:348
+#: inc/admin/settings/admin-setup.php:352
 msgid "Open setup guide in new tab"
 msgstr ""
 
@@ -5932,17 +6249,17 @@ msgstr ""
 msgid "or"
 msgstr ""
 
-#: inc/dashboard/tab-statistics.php:693
+#: inc/dashboard/tab-statistics.php:681
 #: inc/functions/functions-all-time.php:487
 msgid "Or click here"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla-invite.php:147
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:151
 msgid "Or share your referral link:"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:131
-#: inc/admin/settings/admin-setup.php:185
+#: inc/admin/settings/admin-setup.php:133
+#: inc/admin/settings/admin-setup.php:189
 msgid ""
 "Or you can click the button below to automatically generate the page for you:"
 msgstr ""
@@ -5980,13 +6297,15 @@ msgstr ""
 msgid "Order/Sales Tracking"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:689
+#: inc/admin-reports/admin-reports.php:569
 #: premium-files/dashboard/tab-monthly-summary.php:189
-#: premium-files/pro-addons/multi-level/functions-mla.php:125
-#: premium-files/pro-addons/multi-level/functions-mla.php:165
+#: premium-files/pro-addons/multi-level/functions-mla.php:136
+#: premium-files/pro-addons/multi-level/functions-mla.php:176
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:130
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:311
 #: premium-files/pro-addons/pdf-reports/template.php:157
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:267
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:432
 msgid "Orders"
 msgstr ""
 
@@ -5994,11 +6313,11 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:194
+#: inc/admin/settings/options-design.php:216
 msgid "Other Colours"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:635
+#: inc/admin/settings/options-general.php:696
 msgid "Other Dashboard Settings"
 msgstr ""
 
@@ -6011,7 +6330,7 @@ msgstr ""
 msgid "Other Information"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:325
+#: inc/admin/settings/options-mla__premium_only.php:540
 msgid "Other MLA Settings"
 msgstr ""
 
@@ -6027,7 +6346,7 @@ msgstr ""
 msgid "over"
 msgstr ""
 
-#: premium-files/dashboard/tab-product-rates.php:213
+#: premium-files/dashboard/tab-product-rates.php:380
 msgid "Page"
 msgstr ""
 
@@ -6035,8 +6354,8 @@ msgstr ""
 msgid "Page URL"
 msgstr ""
 
-#: premium-files/dashboard/tab-payout.php:272
-#: premium-files/dashboard/tab-payout.php:344
+#: premium-files/dashboard/tab-payout.php:273
+#: premium-files/dashboard/tab-payout.php:343
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:133
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:328
 #: premium-files/pro-addons/payouts/payouts-admin.php:183
@@ -6071,7 +6390,7 @@ msgstr ""
 msgid "Parent User"
 msgstr ""
 
-#: inc/registration/registration-form.php:163
+#: inc/registration/registration-form.php:165
 msgid "Password"
 msgstr ""
 
@@ -6191,7 +6510,7 @@ msgstr ""
 
 #: premium-files/functions-premium.php:207
 #: premium-files/dashboard/tab-payout.php:99
-#: premium-files/pro-addons/payouts/payouts-settings.php:403
+#: premium-files/pro-addons/payouts/payouts-settings.php:409
 msgid "Payout Method"
 msgstr ""
 
@@ -6209,15 +6528,21 @@ msgid ""
 "schedule."
 msgstr ""
 
+#: inc/dashboard/tab-settings.php:79
+msgid "Payout Settings"
+msgstr ""
+
 #: premium-files/pro-addons/payouts/statements/functions-statements.php:136
 msgid "Payout Statement Details"
 msgstr ""
 
 #: inc/admin/admin-menu.php:181 inc/functions/functions-dashboard.php:135
-#: inc/functions/functions-dashboard.php:317
+#: inc/functions/functions-dashboard.php:317 inc/portal/template.php:565
 #: inc/admin/settings/admin-options.php:455
-#: premium-files/pro-addons/multi-level/functions-mla.php:142
-#: premium-files/pro-addons/multi-level/functions-mla.php:167
+#: premium-files/pro-addons/multi-level/functions-mla.php:153
+#: premium-files/pro-addons/multi-level/functions-mla.php:178
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:269
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:434
 msgid "Payouts"
 msgstr ""
 
@@ -6234,7 +6559,7 @@ msgid "Payouts Features"
 msgstr ""
 
 #: inc/admin/settings/admin-options.php:99
-#: premium-files/pro-addons/payouts/payouts-settings.php:159
+#: premium-files/pro-addons/payouts/payouts-settings.php:165
 msgid "Payouts Settings"
 msgstr ""
 
@@ -6275,11 +6600,11 @@ msgstr ""
 msgid "PDF:"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:696
+#: inc/admin-reports/admin-reports.php:576
 #: inc/registration/class-registrations-list-table.php:163
 #: inc/registration/registration-admin.php:177
-#: premium-files/dashboard/tab-payout.php:274
-#: premium-files/dashboard/tab-payout.php:346
+#: premium-files/dashboard/tab-payout.php:275
+#: premium-files/dashboard/tab-payout.php:345
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:54
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:85
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:144
@@ -6299,16 +6624,17 @@ msgstr ""
 msgid "Pending Approval"
 msgstr ""
 
+#: inc/functions/functions-user-coupons.php:315
 #: premium-files/dashboard/tab-payout.php:237
 msgid "Pending Payments"
 msgstr ""
 
-#: inc/dashboard/tab-statistics.php:421
+#: inc/dashboard/tab-statistics.php:407
 msgid "Pending Payments:"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:1292
-#: inc/admin-reports/admin-reports.php:1373
+#: inc/admin-reports/admin-reports.php:1201
+#: inc/admin-reports/admin-reports.php:1237
 msgid "Pending Payout"
 msgstr ""
 
@@ -6316,7 +6642,7 @@ msgstr ""
 msgid "Pending Payout Requests"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:592
+#: inc/admin-reports/admin-reports.php:472
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:148
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:340
 #: premium-files/pro-addons/pdf-reports/template.php:182
@@ -6342,11 +6668,15 @@ msgstr ""
 msgid "Percentage Amount Of Total Order"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:188
+#: inc/admin/settings/options-mla__premium_only.php:399
 msgid "Percentage based on the \"main\" affiliate commission earnings"
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:233
+#: inc/admin/settings/options-mla__premium_only.php:403
+msgid "Percentage based on the total order amount"
+msgstr ""
+
+#: inc/admin/settings/options-commission.php:235
 msgid "Percentage Commission (% Of Total Order)"
 msgstr ""
 
@@ -6356,6 +6686,14 @@ msgstr ""
 
 #: inc/functions/functions-shortcode.php:266
 msgid "Percentage discount on cart."
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:342
+msgid "Percentage of Affiliates Earnings (%)"
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:350
+msgid "Percentage of Order Total (%)"
 msgstr ""
 
 #: inc/admin/class-coupons-table.php:174 inc/admin/class-coupons-table.php:176
@@ -6398,7 +6736,7 @@ msgstr ""
 msgid "Please CLEAR YOUR CACHE to ensure frontend changes are applied."
 msgstr ""
 
-#: inc/registration/registration-form.php:913
+#: inc/registration/registration-form.php:917
 msgid "Please complete the captcha."
 msgstr ""
 
@@ -6451,14 +6789,18 @@ msgid ""
 "when you update this number."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:155
+#: inc/admin/settings/options-mla__premium_only.php:371
 #: inc/admin/settings/options-registrations.php:568
 msgid ""
 "Please refresh the page when you update this number, to add/remove the new "
 "settings below."
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:703
+#: inc/admin/settings/options-general.php:818
+msgid "Please select a page that contains the [couponaffiliates] shortcode."
+msgstr ""
+
+#: inc/dashboard/tab-latest-orders.php:728
 msgid "Please shorten your date range to show all orders."
 msgstr ""
 
@@ -6478,7 +6820,23 @@ msgstr ""
 msgid "Plugin Settings"
 msgstr ""
 
-#: inc/registration/registration-form.php:179
+#: inc/admin/settings/options-general.php:1045
+msgid "Portal Colors"
+msgstr ""
+
+#: inc/admin/settings/options-design.php:93
+msgid "Portal Colours"
+msgstr ""
+
+#: inc/admin/settings/options-general.php:963
+msgid "Portal Page Slug"
+msgstr ""
+
+#: inc/admin/settings/options-general.php:958
+msgid "Portal Page Title"
+msgstr ""
+
+#: inc/registration/registration-form.php:181
 msgid "Preferred Coupon Code"
 msgstr ""
 
@@ -6493,15 +6851,15 @@ msgstr ""
 msgid "Preview"
 msgstr ""
 
-#: inc/dashboard/tab-referral-url.php:446
+#: inc/dashboard/tab-referral-url.php:450
 #: inc/functions/functions-percentage-change.php:108
 #: inc/functions/functions-percentage-change.php:110
-#: premium-files/dashboard/tab-product-rates.php:237
+#: premium-files/dashboard/tab-product-rates.php:404
 msgid "Previous"
 msgstr ""
 
-#: inc/dashboard/tab-referral-url.php:446
-#: premium-files/dashboard/tab-product-rates.php:237
+#: inc/dashboard/tab-referral-url.php:450
+#: premium-files/dashboard/tab-product-rates.php:404
 msgid "Previous Page"
 msgstr ""
 
@@ -6527,7 +6885,7 @@ msgid ""
 "registration, and join button on checkout."
 msgstr ""
 
-#: inc/admin/admin-menu.php:416 inc/admin/settings/admin-options.php:499
+#: inc/admin/admin-menu.php:419 inc/admin/settings/admin-options.php:499
 msgid "PRO Modules"
 msgstr ""
 
@@ -6535,7 +6893,7 @@ msgstr ""
 msgid "PRO Settings"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:427
+#: inc/admin/settings/admin-setup.php:431
 msgid "Pro Version:"
 msgstr ""
 
@@ -6544,12 +6902,16 @@ msgid "Processing"
 msgstr ""
 
 #: inc/functions/functions-dashboard.php:553
-#: premium-files/dashboard/tab-product-rates.php:85
-#: premium-files/dashboard/tab-product-rates.php:103
+#: premium-files/dashboard/tab-product-rates.php:106
+#: premium-files/dashboard/tab-product-rates.php:130
 msgid "Product"
 msgstr ""
 
-#: premium-files/dashboard/tab-product-rates.php:40
+#: inc/admin/settings/options-general.php:582
+msgid "Product Category"
+msgstr ""
+
+#: premium-files/dashboard/tab-product-rates.php:60
 msgid "Product Commission Rates"
 msgstr ""
 
@@ -6563,7 +6925,7 @@ msgstr ""
 msgid "Product ID"
 msgstr ""
 
-#: premium-files/dashboard/tab-product-rates.php:58
+#: premium-files/dashboard/tab-product-rates.php:78
 msgid "Product ID or Name.."
 msgstr ""
 
@@ -6571,8 +6933,8 @@ msgstr ""
 msgid "Product Name"
 msgstr ""
 
-#: premium-files/dashboard/tab-product-rates.php:87
-#: premium-files/dashboard/tab-product-rates.php:109
+#: premium-files/dashboard/tab-product-rates.php:108
+#: premium-files/dashboard/tab-product-rates.php:138
 msgid "Product Price"
 msgstr ""
 
@@ -6580,15 +6942,15 @@ msgstr ""
 msgid "Product Quantity"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:154
-#: inc/admin-reports/admin-reports.php:1438
-#: inc/admin-reports/admin-reports.php:1443
-#: inc/dashboard/tab-latest-orders.php:248
+#: inc/admin-reports/admin-reports.php:156
+#: inc/admin-reports/admin-reports.php:1268
+#: inc/admin-reports/admin-reports.php:1271
+#: inc/dashboard/tab-latest-orders.php:255
 #: inc/functions/functions-dashboard.php:494
 msgid "Products"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:561
+#: inc/admin/settings/options-general.php:566
 msgid "Products Per Page"
 msgstr ""
 
@@ -6605,7 +6967,7 @@ msgstr ""
 msgid "Quantity"
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:87 inc/admin/settings/options-reports.php:69
+#: inc/dashboard/tab-settings.php:111 inc/admin/settings/options-reports.php:69
 msgid "Quarterly"
 msgstr ""
 
@@ -6614,11 +6976,11 @@ msgid "Radio Field"
 msgstr ""
 
 #: inc/functions/functions-dashboard.php:160
-#: inc/functions/functions-dashboard.php:322
+#: inc/functions/functions-dashboard.php:322 inc/portal/template.php:564
 msgid "Rates"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:314
+#: inc/admin/settings/admin-setup.php:318
 #, php-format
 msgid ""
 "Ready to get started? Create your first affiliate user on the <a href=\"%s\" "
@@ -6639,11 +7001,11 @@ msgstr ""
 msgid "Recent Clicks"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:835
-#: inc/dashboard/tab-latest-orders.php:836
-#: inc/dashboard/tab-latest-orders.php:1033
+#: inc/dashboard/tab-latest-orders.php:865
+#: inc/dashboard/tab-latest-orders.php:866
+#: inc/dashboard/tab-latest-orders.php:1072
 #: inc/functions/functions-dashboard.php:67
-#: inc/functions/functions-dashboard.php:292
+#: inc/functions/functions-dashboard.php:292 inc/portal/template.php:561
 msgid "Recent Orders"
 msgstr ""
 
@@ -6688,7 +7050,7 @@ msgid ""
 "statistics for referral URLs."
 msgstr ""
 
-#: inc/functions/functions-user-coupons.php:906
+#: inc/functions/functions-user-coupons.php:914
 msgid "Recurring"
 msgstr ""
 
@@ -6738,9 +7100,9 @@ msgid "Referral Cookie Settings"
 msgstr ""
 
 #: inc/admin/class-coupons-table.php:52 inc/dashboard/tab-referral-url.php:82
-#: premium-files/dashboard/tab-product-rates.php:115
+#: premium-files/dashboard/tab-product-rates.php:146
 #: premium-files/pro-addons/landing-pages/functions-landing-pages.php:97
-#: premium-files/pro-addons/multi-level/functions-mla-invite.php:159
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:163
 msgid "Referral Link"
 msgstr ""
 
@@ -6748,12 +7110,23 @@ msgstr ""
 msgid "Referral Link Format"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:202
+#: inc/admin/settings/options-mla__premium_only.php:417
 msgid "Referral Link Settings"
+msgstr ""
+
+#: inc/admin/admin-page.php:329 inc/admin/settings/admin-options.php:420
+#: inc/admin/settings/options-urls.php:18
+msgid "Referral Links"
 msgstr ""
 
 #: inc/admin/settings/options-help.php:97
 msgid "Referral Links / URLs"
+msgstr ""
+
+#: inc/admin/admin-page.php:331
+msgid ""
+"Referral Links can be generated by the affiliate on the affiliate dashboard "
+"page."
 msgstr ""
 
 #: inc/functions/functions-urls.php:718
@@ -6766,7 +7139,7 @@ msgstr ""
 
 #: inc/dashboard/tab-referral-url.php:40
 #: inc/functions/functions-dashboard.php:85
-#: inc/functions/functions-dashboard.php:295
+#: inc/functions/functions-dashboard.php:295 inc/portal/template.php:562
 msgid "Referral URL"
 msgstr ""
 
@@ -6774,13 +7147,13 @@ msgstr ""
 msgid "Referral URL Click History (Visits)"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:1388
-#: inc/admin-reports/admin-reports.php:1397
+#: inc/admin-reports/admin-reports.php:1244
+#: inc/admin-reports/admin-reports.php:1249
 msgid "Referral URL Clicks"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:1389
-#: inc/admin-reports/admin-reports.php:1409
+#: inc/admin-reports/admin-reports.php:1245
+#: inc/admin-reports/admin-reports.php:1254
 msgid "Referral URL Conversions"
 msgstr ""
 
@@ -6796,16 +7169,8 @@ msgstr ""
 msgid "Referral URL Visits (Clicks)"
 msgstr ""
 
-#: inc/admin/admin-page.php:329 inc/admin-reports/admin-reports.php:153
-#: inc/admin/settings/admin-options.php:420
-#: inc/admin/settings/options-urls.php:18
+#: inc/admin-reports/admin-reports.php:155
 msgid "Referral URLs"
-msgstr ""
-
-#: inc/admin/admin-page.php:331
-msgid ""
-"Referral URLs can be generated by the affiliate on the affiliate dashboard "
-"page."
 msgstr ""
 
 #: inc/admin/settings/options-help.php:99
@@ -6828,6 +7193,7 @@ msgstr ""
 msgid "Referring URL"
 msgstr ""
 
+#: inc/functions/functions-user-coupons.php:1037
 #: inc/admin/settings/options-debug.php:67
 msgid "REFRESH ALL DATA"
 msgstr ""
@@ -6841,15 +7207,15 @@ msgid "Refund Store Credit"
 msgstr ""
 
 #: inc/registration/registration-form.php:89
-#: inc/admin/settings/options-design.php:142
+#: inc/admin/settings/options-design.php:164
 msgid "Register New Affiliate Account"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla-invite.php:249
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:253
 msgid "Registered: Active"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla-invite.php:252
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:256
 msgid "Registered: Pending Approval"
 msgstr ""
 
@@ -6858,7 +7224,7 @@ msgstr ""
 msgid "Registration"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:119
+#: inc/admin/settings/options-design.php:141
 msgid "Registration & Login Form"
 msgstr ""
 
@@ -6886,6 +7252,10 @@ msgstr ""
 msgid "Registrations"
 msgstr ""
 
+#: inc/admin/settings/options-urls.php:236
+msgid "Remove all tracking cookies when customer places an order."
+msgstr ""
+
 #: inc/admin/settings/options-debug.php:240
 msgid "Remove coupon ID from unique coupon dashboard URLs."
 msgstr ""
@@ -6900,11 +7270,11 @@ msgid ""
 "is accepted."
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:897
+#: inc/admin-reports/admin-reports.php:798
 msgid "Report Complete!"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:899
+#: inc/admin-reports/admin-reports.php:799
 msgid "Report created for"
 msgstr ""
 
@@ -6943,7 +7313,11 @@ msgstr ""
 msgid "Request Payout"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:827
+#: inc/admin/settings/options-payouts.php:99
+msgid "Require payment details to request payout."
+msgstr ""
+
+#: inc/admin/settings/options-general.php:1090
 msgid "Required order status to show on affiliate dashboard:"
 msgstr ""
 
@@ -7007,6 +7381,10 @@ msgstr ""
 msgid "Right"
 msgstr ""
 
+#: inc/admin/admin-dashboard.php:49
+msgid "Roadmap"
+msgstr ""
+
 #: premium-files/pro-addons/groups/functions-add-groups.php:33
 msgid "Role already exists. Please choose a different display name."
 msgstr ""
@@ -7015,7 +7393,7 @@ msgstr ""
 msgid "Rotation:"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:47
+#: inc/admin/settings/options-design.php:49
 msgid "Rounded (25px)"
 msgstr ""
 
@@ -7025,20 +7403,20 @@ msgid ""
 "prevent timeouts or ajax issues."
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:151
-#: inc/admin-reports/admin-reports.php:1284
-#: inc/admin-reports/admin-reports.php:1327
+#: inc/admin-reports/admin-reports.php:153
+#: inc/admin-reports/admin-reports.php:1194
+#: inc/admin-reports/admin-reports.php:1217
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:122
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:309
 #: premium-files/pro-addons/pdf-reports/template.php:155
 msgid "Sales"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:148
-#: inc/admin/settings/admin-setup.php:211
-#: inc/admin/settings/admin-setup.php:229
-#: inc/admin/settings/admin-setup.php:252
-#: inc/admin/settings/admin-setup.php:274
+#: inc/admin/settings/admin-setup.php:152
+#: inc/admin/settings/admin-setup.php:215
+#: inc/admin/settings/admin-setup.php:233
+#: inc/admin/settings/admin-setup.php:256
+#: inc/admin/settings/admin-setup.php:278
 msgid "Save & Continue"
 msgstr ""
 
@@ -7046,10 +7424,14 @@ msgstr ""
 msgid "Save Changes"
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:113
-#: premium-files/pro-addons/payouts/payouts-settings.php:594
+#: inc/dashboard/tab-settings.php:128
+#: premium-files/pro-addons/payouts/payouts-settings.php:600
 #: premium-files/pro-addons/payouts/statements/functions-statements.php:96
 msgid "Save changes"
+msgstr ""
+
+#: inc/admin/settings/admin-options.php:690
+msgid "Save Settings"
 msgstr ""
 
 #: inc/admin/settings/options-debug.php:41
@@ -7096,7 +7478,7 @@ msgstr ""
 msgid "Search Bonus"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:649
+#: inc/admin-reports/admin-reports.php:529
 msgid "Search Coupons"
 msgstr ""
 
@@ -7117,8 +7499,16 @@ msgstr ""
 msgid "Select a Campaign"
 msgstr ""
 
+#: inc/admin/settings/options-general.php:616
+msgid "Select a product category to filter the products shown in the table."
+msgstr ""
+
 #: inc/admin/settings/options-currency.php:116
 msgid "Select an API Provider:"
+msgstr ""
+
+#: inc/admin/settings/options-tabs.php:171
+msgid "Select an icon"
 msgstr ""
 
 #: inc/admin/settings/options-registrations.php:1210
@@ -7231,7 +7621,7 @@ msgid ""
 "program invitation."
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla-invite.php:138
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:142
 msgid "Send Invite"
 msgstr ""
 
@@ -7284,7 +7674,7 @@ msgstr ""
 msgid "Set new commission rates for the affiliate coupon"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:219
+#: inc/admin/settings/options-mla__premium_only.php:434
 msgid ""
 "Set the affiliate invite URL variable that will be used in your site URL to "
 "identify the referrer and parent affiliate for that user."
@@ -7326,11 +7716,15 @@ msgstr ""
 msgid "SETTINGS"
 msgstr ""
 
-#: inc/admin/admin-menu.php:63 inc/dashboard/tab-settings.php:63
-#: inc/functions/functions-dashboard.php:210
-#: inc/functions/functions-dashboard.php:339
-#: premium-files/pro-addons/multi-level/functions-mla.php:150
-#: premium-files/pro-addons/multi-level/functions-mla.php:168
+#: inc/admin/admin-dashboard.php:50 inc/admin/admin-menu.php:63
+#: inc/dashboard/tab-settings.php:65 inc/functions/functions-dashboard.php:210
+#: inc/functions/functions-dashboard.php:339 inc/portal/template.php:442
+#: inc/portal/template.php:567
+#: premium-files/pro-addons/multi-level/functions-mla.php:161
+#: premium-files/pro-addons/multi-level/functions-mla.php:179
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:199
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:270
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:435
 msgid "Settings"
 msgstr ""
 
@@ -7342,7 +7736,15 @@ msgstr ""
 msgid "Settings not saving automatically?"
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:161 inc/admin/admin-page.php:258
+#: inc/admin/settings/admin-options.php:693
+#, php-format
+msgid ""
+"Settings not saving? Try disabling \"legacy\" saving, or increasing your PHP "
+"\"max_input_vars\" in your hosting configuration to 3000 or higher "
+"(currently %s)."
+msgstr ""
+
+#: inc/admin/admin-getting-started.php:170 inc/admin/admin-page.php:258
 #: inc/admin/admin-page.php:316
 msgid "settings page"
 msgstr ""
@@ -7372,11 +7774,11 @@ msgstr ""
 msgid "Setup Wizard"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:287
+#: inc/admin/settings/admin-setup.php:291
 msgid "Setup Wizard Complete!"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:296
+#: inc/dashboard/tab-latest-orders.php:307
 msgid "Shipping"
 msgstr ""
 
@@ -7407,24 +7809,26 @@ msgid ""
 "enabled)."
 msgstr ""
 
-#: inc/admin/settings/admin-options.php:1298
+#: inc/admin/settings/admin-options.php:1320
 #: inc/admin/settings/options-general.php:88
 #: inc/admin/settings/options-general.php:296
-#: inc/admin/settings/options-general.php:412
-#: inc/admin/settings/options-general.php:428
-#: inc/admin/settings/options-general.php:448
-#: inc/admin/settings/options-general.php:498
-#: inc/admin/settings/options-general.php:526
-#: inc/admin/settings/options-general.php:617
-#: inc/admin/settings/options-general.php:635
+#: inc/admin/settings/options-general.php:417
+#: inc/admin/settings/options-general.php:433
+#: inc/admin/settings/options-general.php:453
+#: inc/admin/settings/options-general.php:503
+#: inc/admin/settings/options-general.php:531
+#: inc/admin/settings/options-general.php:678
+#: inc/admin/settings/options-general.php:696
+#: inc/admin/settings/options-general.php:951
+#: inc/admin/settings/options-mla__premium_only.php:109
 msgid "Show"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:476
+#: inc/admin/settings/options-general.php:481
 msgid "Show \"% Change\" Column."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:438
+#: inc/admin/settings/options-general.php:443
 msgid "Show \"Account Details\" section in the \"Settings\" tab."
 msgstr ""
 
@@ -7448,15 +7852,15 @@ msgstr ""
 msgid "Show \"Commission Payouts\" summary."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:597
+#: inc/admin/settings/options-general.php:658
 msgid "Show \"Commission Per Product\" Column"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:585
+#: inc/admin/settings/options-general.php:646
 msgid "Show \"Commission Rate\" Column"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:473
+#: inc/admin/settings/options-general.php:478
 msgid "Show \"Commission\" Column."
 msgstr ""
 
@@ -7468,19 +7872,23 @@ msgstr ""
 msgid "Show \"Coupon Info\" summary."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:274
+#: inc/admin/settings/options-mla__premium_only.php:489
 msgid "Show \"Coupons\" Column."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:467
+#: inc/admin/settings/options-general.php:472
 msgid "Show \"Discounts\" Column."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:573
+#: inc/admin/settings/options-general.php:628
 msgid "Show \"ID\" Column"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:298
+#: inc/admin/settings/options-general.php:634
+msgid "Show \"Image\" Column"
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:513
 msgid "Show \"Invite\" tab."
 msgstr ""
 
@@ -7492,47 +7900,47 @@ msgstr ""
 msgid "Show \"Latest Referrals\" summary."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:280
+#: inc/admin/settings/options-mla__premium_only.php:495
 msgid "Show \"MLA Commission\" Column."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:136
+#: inc/admin/settings/options-mla__premium_only.php:242
 msgid "Show \"MLA Dashboard\" link on the main coupon affiliate dashboard."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:458
+#: inc/admin/settings/options-general.php:463
 msgid "Show \"Month\" Column."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:453
+#: inc/admin/settings/options-general.php:458
 msgid "Show \"monthly summary\" table section on affiliate dashboard."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:479
+#: inc/admin/settings/options-general.php:484
 msgid "Show \"More\" Column (Toggle for products summary/list)."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:246
+#: inc/admin/settings/options-mla__premium_only.php:461
 msgid "Show \"Network\" tab."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:461
+#: inc/admin/settings/options-general.php:466
 msgid "Show \"Order Count\" Column."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:293
+#: inc/admin/settings/options-mla__premium_only.php:508
 msgid "Show \"Orders\" tab."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:303
+#: inc/admin/settings/options-mla__premium_only.php:518
 msgid "Show \"Payouts\" tab."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:591
+#: inc/admin/settings/options-general.php:652
 msgid "Show \"Product Price\" Column"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:579
+#: inc/admin/settings/options-general.php:640
 msgid "Show \"Product\" Column"
 msgstr ""
 
@@ -7540,24 +7948,32 @@ msgstr ""
 msgid "Show \"Recent Orders\" Tab"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:277
+#: inc/admin/settings/options-mla__premium_only.php:492
 msgid "Show \"Referral Commission\" Column."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:603
+#: inc/admin/settings/options-general.php:664
 msgid "Show \"Referral Link\" Column"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:255
+#: inc/admin/settings/options-payouts.php:93
+msgid "Show \"Request Payout\" button on affiliate dashboard."
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:470
 msgid "Show \"Send Email\" Button"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:433
+#: inc/admin/settings/options-general.php:438
 msgid "Show \"Settings\" tab on the affiliate dashboard."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:308
+#: inc/admin/settings/options-mla__premium_only.php:523
 msgid "Show \"Settings\" tab."
+msgstr ""
+
+#: inc/admin/settings/options-general.php:392
+msgid "Show \"shipping\" costs column."
 msgstr ""
 
 #: inc/admin/settings/options-general.php:354
@@ -7568,15 +7984,15 @@ msgstr ""
 msgid "Show \"Store Credit\" column on admin users list?"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:234
+#: inc/admin/settings/options-mla__premium_only.php:449
 msgid "Show \"Sub-Affiliates\" tab."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:262
+#: inc/admin/settings/options-mla__premium_only.php:477
 msgid "Show \"Summary\" tab."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:271
+#: inc/admin/settings/options-mla__premium_only.php:486
 msgid "Show \"Tier\" Column."
 msgstr ""
 
@@ -7584,7 +8000,7 @@ msgstr ""
 msgid "Show \"Total Commission\" box."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:283
+#: inc/admin/settings/options-mla__premium_only.php:498
 msgid "Show \"Total Commission\" Column."
 msgstr ""
 
@@ -7596,24 +8012,24 @@ msgstr ""
 msgid "Show \"Total Sales\" box."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:464
+#: inc/admin/settings/options-general.php:469
 msgid "Show \"Total Sales\" Column."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:470
+#: inc/admin/settings/options-general.php:475
 msgid "Show \"Total\" Column."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:268
+#: inc/admin/settings/options-mla__premium_only.php:483
 msgid "Show \"User\" Column."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:239
-#: inc/admin/settings/options-mla__premium_only.php:253
+#: inc/admin/settings/options-mla__premium_only.php:454
+#: inc/admin/settings/options-mla__premium_only.php:468
 msgid "Show \"View Dashboard\" Button"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:286
+#: inc/admin/settings/options-mla__premium_only.php:501
 msgid "Show \"Your Commission\" Column."
 msgstr ""
 
@@ -7646,6 +8062,10 @@ msgstr ""
 msgid "Show Affiliate Coupons Only"
 msgstr ""
 
+#: inc/admin/settings/options-general.php:572
+msgid "Show All Product Variations"
+msgstr ""
+
 #: inc/admin/admin-pro-details.php:485
 msgid ""
 "Show an \"export to excel\" button for the \"monthly summary\" and \"recent "
@@ -7668,15 +8088,19 @@ msgstr ""
 msgid "Show customer \"last name\"."
 msgstr ""
 
+#: inc/admin/settings/options-general.php:1040
+msgid "Show Dark Mode Toggle"
+msgstr ""
+
 #: inc/admin/settings/options-debug.php:208
 msgid "Show full coupon page info automatically, if there is only one coupon."
 msgstr ""
 
-#: inc/admin/settings/options-design.php:242
+#: inc/admin/settings/options-design.php:264
 msgid "Show icons on the affiliate dashboard tabs."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:656
+#: inc/admin/settings/options-general.php:717
 msgid "Show logout link on affiliate dashboard (top right)."
 msgstr ""
 
@@ -7696,6 +8120,10 @@ msgstr ""
 msgid "Show order \"status\"."
 msgstr ""
 
+#: inc/admin/settings/options-general.php:397
+msgid "Show order \"tax\" column."
+msgstr ""
+
 #: inc/admin/settings/options-general.php:339
 msgid "Show order \"time\"."
 msgstr ""
@@ -7713,11 +8141,11 @@ msgstr ""
 msgid "Show Payment Details Field"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:397
+#: inc/admin/settings/options-general.php:402
 msgid "Show products summary/list for orders (\"MORE\" column)."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:251
+#: inc/admin/settings/options-mla__premium_only.php:466
 msgid "Show Profile Image (Gravatar)"
 msgstr ""
 
@@ -7729,12 +8157,8 @@ msgstr ""
 msgid "Show registration form on affiliate dashboard page (logged out users)."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:567
+#: inc/admin/settings/options-general.php:622
 msgid "Show Search Field"
-msgstr ""
-
-#: inc/admin/settings/options-general.php:392
-msgid "Show shipping costs."
 msgstr ""
 
 #: inc/admin/admin-pro-details.php:470
@@ -7742,15 +8166,15 @@ msgid ""
 "Show some nice line graphs on the statistics tab of the affiliate dashboard."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:402
+#: inc/admin/settings/options-general.php:407
 msgid "Show the combined totals for all orders within the selected date range."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:661
+#: inc/admin/settings/options-general.php:722
 msgid "Show username on affiliate dashboard (top right)."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:648
+#: inc/admin/settings/options-general.php:709
 msgid ""
 "Show WooCommerce login form on affiliate dashboard page when users are "
 "logged out."
@@ -7761,17 +8185,25 @@ msgid ""
 "Show/enable custom translation settings (discontinued - not recommended)."
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:928
+#: inc/admin-reports/admin-reports.php:822
 msgid "Showing coupons where"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:911
+#: inc/admin-reports/admin-reports.php:808
 msgid "Showing coupons where sales have"
 msgstr ""
 
 #: inc/admin/settings/options-payouts.php:995
 msgid ""
 "Shown on the cart/checkout page when they have credit available to spend."
+msgstr ""
+
+#: inc/admin/settings/options-design.php:104
+msgid "Sidebar Background"
+msgstr ""
+
+#: inc/admin/settings/options-design.php:123
+msgid "Sidebar Link Hover"
 msgstr ""
 
 #: inc/admin/settings/options-currency.php:182
@@ -7782,8 +8214,8 @@ msgstr ""
 msgid "Signup for a free \"Exchangerates API\" account to get your API key"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:123
-#: inc/admin/settings/admin-setup.php:175
+#: inc/admin/settings/admin-setup.php:125
+#: inc/admin/settings/admin-setup.php:179
 #, php-format
 msgid ""
 "Simply add the %s shortcode to a new page, then select the page from the "
@@ -7815,20 +8247,25 @@ msgstr ""
 msgid "Size:"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:517
+#: inc/admin/settings/admin-setup.php:521
 msgid "Skip Setup Wizard / Go To Settings Page"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:60
+#: inc/admin/settings/options-design.php:62
 msgid "Small (8px)"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:163
+#: inc/admin/settings/options-mla__premium_only.php:346
 msgid ""
-"So for example, after the commission calculations, if the main affiliate "
-"earns $20 commission for an order, and you set \"tier 1\" to 20%, then the "
-"tier 1 parent will receive $4 commission, and the main affiliate still earns "
-"$20. So in total it would be $24 commission paid."
+"So for example, if order amount is $100 and the main affiliate rate is 50%, "
+"then the main affiliate earns $50. If the tier 1 commission is set to 10%, "
+"the tier 1 commission would be $5."
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:354
+msgid ""
+"So for example, if the total order amount is $100, and the tier 1 commission "
+"is set to 10%, the tier commission would be $10."
 msgstr ""
 
 #: inc/admin/admin-pro-details.php:258
@@ -7839,38 +8276,38 @@ msgstr ""
 msgid "Social Sharing Buttons"
 msgstr ""
 
-#: inc/functions/functions-coupon-apply.php:124
+#: inc/functions/functions-coupon-apply.php:127
 msgid "Sorry, only new customers can use this coupon code."
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:120 inc/dashboard/tab-settings.php:229
+#: inc/dashboard/tab-settings.php:215 inc/dashboard/tab-settings.php:245
 #: inc/functions/functions-shortcode.php:479
-#: premium-files/dashboard/tab-payout.php:462
+#: premium-files/dashboard/tab-payout.php:461
 msgid "Sorry, this coupon is not assigned to you."
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:207
+#: inc/dashboard/tab-settings.php:165
 msgid ""
 "Sorry, this coupon is not assigned to you. You can only edit your own "
 "account details."
 msgstr ""
 
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:206
-#: premium-files/pro-addons/direct-link/functions-direct-link.php:298
+#: premium-files/pro-addons/direct-link/functions-direct-link.php:296
 msgid "Sorry, this domain is already being used."
 msgstr ""
 
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:209
-#: premium-files/pro-addons/direct-link/functions-direct-link.php:302
+#: premium-files/pro-addons/direct-link/functions-direct-link.php:300
 msgid "Sorry, this domain is invalid. Please try again."
 msgstr ""
 
 #: premium-files/pro-addons/direct-link/direct-link-admin.php:212
-#: premium-files/pro-addons/direct-link/functions-direct-link.php:306
+#: premium-files/pro-addons/direct-link/functions-direct-link.php:304
 msgid "Sorry, this domain is not allowed."
 msgstr ""
 
-#: premium-files/pro-addons/payouts/payouts-settings.php:602
+#: premium-files/pro-addons/payouts/payouts-settings.php:608
 msgid "Sorry, this is not your coupon affiliate dashboard."
 msgstr ""
 
@@ -7880,11 +8317,11 @@ msgid ""
 "update the payment details for this coupon."
 msgstr ""
 
-#: premium-files/pro-addons/payouts/statements/template.php:325
+#: premium-files/pro-addons/payouts/statements/template.php:330
 msgid "Sorry, this statement is not linked to your account."
 msgstr ""
 
-#: inc/registration/registration-form.php:543
+#: inc/registration/registration-form.php:547
 msgid "Sorry, you are not currently allowed to apply as an affiliate."
 msgstr ""
 
@@ -7892,8 +8329,8 @@ msgstr ""
 msgid "Sorry, you can only use one affiliate coupon per order."
 msgstr ""
 
-#: inc/functions/functions-coupon-apply.php:133
-#: inc/functions/functions-coupon-apply.php:142
+#: inc/functions/functions-coupon-apply.php:136
+#: inc/functions/functions-coupon-apply.php:145
 #: premium-files/pro-addons/direct-link/functions-direct-link-fraud.php:67
 msgid "Sorry, you can't use this coupon code or it has expired."
 msgstr ""
@@ -7902,11 +8339,13 @@ msgstr ""
 msgid "Sorry, you can't use your own affiliate coupon code."
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:27
+#: premium-files/pro-addons/multi-level/functions-mla.php:33
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:139
 msgid "Sorry, you do not have permission to view the MLA dashboard for user:"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:211
+#: premium-files/pro-addons/multi-level/functions-mla.php:222
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:226
 msgid "Sorry, you do not have permission to view the MLA dashboard."
 msgstr ""
 
@@ -7918,13 +8357,13 @@ msgstr ""
 msgid "Specific User ID:"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:48
+#: inc/admin/settings/options-design.php:50
 msgid "Square (0px)"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:65
-#: inc/admin-reports/admin-reports.php:113
-#: inc/dashboard/tab-latest-orders.php:849
+#: inc/admin-reports/admin-reports.php:67
+#: inc/admin-reports/admin-reports.php:115
+#: inc/dashboard/tab-latest-orders.php:879
 #: premium-files/dashboard/tab-monthly-summary.php:582
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:255
 msgid "Start"
@@ -7932,6 +8371,10 @@ msgstr ""
 
 #: premium-files/pro-addons/creatives/functions-creatives-post-type.php:867
 msgid "Start Date:"
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:151
+msgid "Start typing username here..."
 msgstr ""
 
 #: inc/admin/admin-pro-details.php:52
@@ -7963,12 +8406,16 @@ msgstr ""
 msgid "Statement Header Image (Logo)"
 msgstr ""
 
+#: inc/dashboard/tab-settings.php:85
+msgid "Statement Settings"
+msgstr ""
+
 #: inc/admin/admin-menu.php:201
 msgid "Statements"
 msgstr ""
 
 #: inc/functions/functions-dashboard.php:32
-#: inc/functions/functions-dashboard.php:285
+#: inc/functions/functions-dashboard.php:285 inc/portal/template.php:559
 msgid "Statistics"
 msgstr ""
 
@@ -7977,17 +8424,17 @@ msgid "Statistics Text Alignment"
 msgstr ""
 
 #: inc/admin/admin-dashboard.php:591 inc/admin/admin-dashboard.php:660
-#: inc/dashboard/tab-latest-orders.php:203
-#: inc/dashboard/tab-latest-orders.php:280
-#: inc/dashboard/tab-latest-orders.php:877
+#: inc/dashboard/tab-latest-orders.php:205
+#: inc/dashboard/tab-latest-orders.php:287
+#: inc/dashboard/tab-latest-orders.php:907
 #: inc/registration/class-registrations-list-table.php:257
 #: premium-files/dashboard/tab-payout.php:216
 #: premium-files/dashboard/tab-payout.php:244
-#: premium-files/dashboard/tab-payout.php:310
+#: premium-files/dashboard/tab-payout.php:311
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:173
 #: premium-files/pro-addons/direct-link/functions-direct-link.php:416
 #: premium-files/pro-addons/direct-link/functions-direct-link.php:431
-#: premium-files/pro-addons/multi-level/functions-mla-invite.php:234
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:238
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:425
 #: premium-files/pro-addons/payouts/statements/template.php:301
 msgid "Status"
@@ -7997,7 +8444,7 @@ msgstr ""
 msgid "Statuses"
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:201
+#: inc/admin/settings/options-commission.php:203
 msgid "Stop \"unpaid commission\" from being earned for non-affiliate coupons."
 msgstr ""
 
@@ -8029,7 +8476,7 @@ msgid "Store Credit / Wallet"
 msgstr ""
 
 #: premium-files/functions-premium.php:383
-#: premium-files/pro-addons/payouts/payouts-settings.php:296
+#: premium-files/pro-addons/payouts/payouts-settings.php:302
 #: premium-files/pro-addons/payouts/credit/functions-balance.php:51
 msgid "Store Credit Balance"
 msgstr ""
@@ -8055,6 +8502,11 @@ msgstr ""
 
 #: premium-files/pro-addons/payouts/credit/CreatePayout.php:40
 msgid "store credit was successfully paid to user"
+msgstr ""
+
+#: inc/admin/settings/options-urls.php:273
+msgid ""
+"Store visitors \"IP Address\" for referral clicks, instead of a random ID."
 msgstr ""
 
 #: inc/admin/settings/options-urls.php:377
@@ -8101,23 +8553,23 @@ msgid ""
 "affiliates directly into their Stripe / bank account."
 msgstr ""
 
-#: inc/admin/settings/options-design.php:33
+#: inc/admin/settings/options-design.php:35
 msgid "Style #1 - Basic (Legacy)"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:126
+#: inc/admin/settings/options-design.php:148
 msgid "Style #1 - Default"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:34
+#: inc/admin/settings/options-design.php:36
 msgid "Style #2 - Full Width (Modern)"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:127
+#: inc/admin/settings/options-design.php:149
 msgid "Style #2 - Modern (Bold)"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:128
+#: inc/admin/settings/options-design.php:150
 msgid "Style #3 - Modern (Compact)"
 msgstr ""
 
@@ -8129,8 +8581,10 @@ msgstr ""
 msgid "Sub-affiliate summary"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:101
-#: premium-files/pro-addons/multi-level/functions-mla.php:162
+#: premium-files/pro-addons/multi-level/functions-mla.php:112
+#: premium-files/pro-addons/multi-level/functions-mla.php:173
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:264
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:429
 msgid "Sub-Affiliates"
 msgstr ""
 
@@ -8138,8 +8592,8 @@ msgstr ""
 msgid "Submit a feature request."
 msgstr ""
 
-#: inc/registration/registration-form.php:481
-#: inc/admin/settings/options-design.php:148
+#: inc/registration/registration-form.php:485
+#: inc/admin/settings/options-design.php:170
 msgid "Submit Application"
 msgstr ""
 
@@ -8147,7 +8601,7 @@ msgstr ""
 msgid "Submit Payout Requests"
 msgstr ""
 
-#: inc/functions/functions-subscriptions.php:248
+#: inc/functions/functions-subscriptions.php:255
 msgid "Subscription Renewal Order"
 msgstr ""
 
@@ -8163,8 +8617,8 @@ msgstr ""
 msgid "Subscriptions (Recurring Referrals)"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:208
-#: inc/dashboard/tab-latest-orders.php:283
+#: inc/dashboard/tab-latest-orders.php:210
+#: inc/dashboard/tab-latest-orders.php:290
 #: inc/functions/functions-dashboard.php:542
 #: premium-files/dashboard/tab-monthly-summary.php:172
 #: premium-files/dashboard/tab-monthly-summary.php:192
@@ -8180,53 +8634,64 @@ msgstr ""
 msgid "Success"
 msgstr ""
 
-#: inc/registration/registration-form.php:841
+#: inc/registration/registration-form.php:845
 msgid "Success! Redirecting"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:117
-#: premium-files/pro-addons/multi-level/functions-mla.php:164
+#: premium-files/pro-addons/multi-level/functions-mla.php:128
+#: premium-files/pro-addons/multi-level/functions-mla.php:175
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:266
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:431
 msgid "Summary"
+msgstr ""
+
+#: inc/admin/admin-dashboard.php:43 inc/admin/admin-dashboard.php:45
+msgid "Support Ticket"
 msgstr ""
 
 #: inc/admin/settings/options-notifications.php:847
 msgid "Supported merge tags"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:84
+#: inc/admin/settings/options-design.php:89
 msgid "Tab Colours"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:199
+#: inc/admin/settings/options-tabs.php:152
+msgid "Tab Icon:"
+msgstr ""
+
+#: inc/admin/settings/options-design.php:221
 msgid "Table Header & Footer"
 msgstr ""
 
 #: inc/admin/settings/admin-options.php:469
-#: inc/admin/settings/options-design.php:89
-#: inc/admin/settings/options-design.php:160
+#: inc/admin/settings/options-design.php:100
+#: inc/admin/settings/options-design.php:182
 msgid "Tabs"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:44
+#: inc/admin/settings/options-design.php:46
 msgid "Tabs Border Radius"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:72
+#: inc/admin/settings/options-design.php:74
 msgid "Tabs Font Size"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:102
+#: inc/admin/settings/options-design.php:119
 msgid "Tabs Hover"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:58
+#: inc/admin/settings/options-design.php:60
 msgid "Tabs Size / Padding"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:31
+#: inc/admin/settings/options-design.php:33
 msgid "Tabs Style"
 msgstr ""
 
+#: inc/dashboard/tab-latest-orders.php:297
 #: premium-files/pro-addons/payouts/statements/template.php:246
 msgid "Tax"
 msgstr ""
@@ -8239,7 +8704,7 @@ msgstr ""
 msgid "Tax Rate"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:241
+#: inc/admin/settings/admin-setup.php:245
 #: inc/admin/settings/options-commission.php:58
 msgid "Tax Settings"
 msgstr ""
@@ -8289,11 +8754,11 @@ msgstr ""
 msgid "Terms and Conditions Notice"
 msgstr ""
 
-#: inc/admin/settings/options-design.php:95
-#: inc/admin/settings/options-design.php:108
-#: inc/admin/settings/options-design.php:205
-#: inc/admin/settings/options-design.php:218
-#: inc/admin/settings/options-design.php:231
+#: inc/admin/settings/options-design.php:111
+#: inc/admin/settings/options-design.php:130
+#: inc/admin/settings/options-design.php:227
+#: inc/admin/settings/options-design.php:240
+#: inc/admin/settings/options-design.php:253
 #: inc/admin/settings/options-invoices__premium_only.php:233
 #: inc/admin/settings/options-invoices__premium_only.php:239
 #: inc/admin/settings/options-invoices__premium_only.php:245
@@ -8320,16 +8785,22 @@ msgstr ""
 msgid "Text:"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:929
+#: inc/admin-reports/admin-reports.php:823
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:164
 msgid "than"
 msgstr ""
 
-#: inc/registration/registration-form.php:896
+#: inc/registration/registration-form.php:900
 #, php-format
 msgid ""
 "The \"%s\" coupon already exists. Please try again with a different coupon "
 "code."
+msgstr ""
+
+#: inc/admin/settings/options-general.php:920
+msgid ""
+"The \"Affiliate Portal\" is an alternative to the normal \"affiliate "
+"dashboard\" page."
 msgstr ""
 
 #: premium-files/pro-addons/rewards/functions-rewards-types.php:278
@@ -8374,7 +8845,7 @@ msgid ""
 "coupon(s) they are assigned to."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:61
+#: inc/admin/settings/options-general.php:46
 msgid ""
 "The affiliate user can then visit the \"affiliate dashboard page\" to view "
 "their affiliate statistics, commissions, referral URLs, etc, for the coupons "
@@ -8404,17 +8875,28 @@ msgid ""
 "can be found throughout the settings page."
 msgstr ""
 
-#: premium-files/pro-addons/payouts/class-payoutcreate-list-table.php:326
+#: premium-files/pro-addons/payouts/class-payoutcreate-list-table.php:329
 msgid ""
 "The below table will show all affiliate coupons where the \"unpaid "
 "commission\" amount is more than"
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:161
+#: inc/admin/settings/options-mla__premium_only.php:360
 msgid ""
-"The commission for multi-level tiers is calculated based on a percentage of "
-"the <strong>amount earned by the main affiliate</strong>. This is NOT "
-"deducted from the main affiliates earnings."
+"The commission for is calculated based on a fixed amount earned by each tier "
+"per order referred by a sub-affiliate."
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:352
+msgid ""
+"The commission for is calculated based on a percentage of the total order "
+"amount."
+msgstr ""
+
+#: inc/admin/settings/options-mla__premium_only.php:344
+msgid ""
+"The commission is calculated based on a percentage of the amount earned by "
+"the main affiliate."
 msgstr ""
 
 #: inc/admin/admin-orders-box.php:269
@@ -8483,7 +8965,7 @@ msgstr ""
 msgid "The last name of the affiliate."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:154
+#: inc/admin/settings/options-mla__premium_only.php:370
 msgid ""
 "The maximum amount of extra tiers in your MLA system (not including the main "
 "affiliate)."
@@ -8528,7 +9010,7 @@ msgid ""
 "orders, once it has been paid and delivered."
 msgstr ""
 
-#: inc/registration/registration-form.php:1038
+#: inc/registration/registration-form.php:1042
 msgid "The passwords do not match. Please try again."
 msgstr ""
 
@@ -8536,13 +9018,13 @@ msgstr ""
 msgid "The stats/content isn’t loading on my dashboard. How can I fix this?"
 msgstr ""
 
-#: inc/admin/settings/options-tabs.php:125
+#: inc/admin/settings/options-tabs.php:142
 msgid ""
 "The tab will only be visible to affiliates with any of the selected user "
 "roles."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:534
+#: inc/admin/settings/options-general.php:539
 msgid ""
 "The table shows up to 20 products per page by default, with pagination, and "
 "a search field."
@@ -8562,7 +9044,7 @@ msgstr ""
 msgid "The unpaid commission amount is below the payout threshold."
 msgstr ""
 
-#: premium-files/pro-addons/groups/functions-add-groups.php:58
+#: premium-files/pro-addons/groups/functions-add-groups.php:60
 msgid ""
 "The user role will be generated automatically as: "
 "coupon_affiliate_[display_name]"
@@ -8641,7 +9123,7 @@ msgid ""
 "affiliates can generate on their affiliate dashboard."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:226
+#: inc/admin/settings/options-commission.php:228
 msgid "These values be overridden on a per coupon and/or per product basis."
 msgstr ""
 
@@ -8664,13 +9146,14 @@ msgid ""
 "automatically applied again, or future orders to be awarded to the affiliate."
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:354
+#: premium-files/pro-addons/multi-level/functions-mla.php:367
+#, php-format
 msgid ""
-"This affiliate is a part of your MLA network. You are viewing their "
+"This affiliate (%s) is a part of your MLA network. You are viewing their "
 "statistics and commission earnings."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:303
+#: inc/admin/settings/options-commission.php:305
 msgid ""
 "This allows you to set the maximum commission amount that is calculated and "
 "can be earned per order referred by affiliates."
@@ -8696,7 +9179,7 @@ msgstr ""
 msgid "This can not be edited when the order is completed."
 msgstr ""
 
-#: inc/registration/registration-form.php:1024
+#: inc/registration/registration-form.php:1028
 msgid "This email already exists. Please try again, or login first."
 msgstr ""
 
@@ -8766,6 +9249,12 @@ msgstr ""
 msgid ""
 "This is shown at the bottom of the PDF statements, just before the Footer "
 "Text. Recommended size is no larger than 340 x 70"
+msgstr ""
+
+#: inc/admin/settings/options-general.php:1029
+msgid ""
+"This is shown at the very top left of the affiliate portal. Recommended size "
+"is 200px width."
 msgstr ""
 
 #: inc/admin/settings/options-reports.php:143
@@ -8911,11 +9400,11 @@ msgid ""
 "This allows admins to easily view stats for all your affiliates coupons."
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:501
+#: inc/admin-reports/admin-reports.php:380
 msgid "This may take a few seconds..."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:986
+#: inc/admin/settings/options-general.php:1249
 msgid ""
 "This may therefore disregard some of the order statuses that are checked "
 "above."
@@ -8968,29 +9457,29 @@ msgid ""
 "both a coupon level, and product level."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:533
+#: inc/admin/settings/options-general.php:538
 msgid ""
 "This tab will show a table listing all your products, along with commission "
 "rates they will earn from each individual product."
 msgstr ""
 
-#: inc/registration/registration-form.php:1032
+#: inc/registration/registration-form.php:1036
 msgid ""
 "This user does not exist, please enter a valid user, or enter an email "
 "address to create a new account."
 msgstr ""
 
-#: inc/registration/registration-form.php:1016
+#: inc/registration/registration-form.php:1020
 msgid "This username already exists. Please try again, or login first."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:927
+#: inc/admin/settings/options-general.php:1190
 msgid ""
 "This will affect the coupon usage stats, orders list, commission, and "
 "monthly summary."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:649
+#: inc/admin/settings/options-general.php:710
 msgid ""
 "This will allow affiliate users to login to the dashboard if they visit the "
 "base dashboard URL."
@@ -9038,13 +9527,13 @@ msgid ""
 "visitor, until the cookie expires."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:642
+#: inc/admin/settings/options-general.php:703
 msgid ""
 "This will be shown before the coupon code shown in the header of the "
 "affiliate dashboard page, for example you could set it to \"Coupon code:\"."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:980
+#: inc/admin/settings/options-general.php:1243
 msgid ""
 "This will determine how the orders are sorted on the affiliate dashboard, "
 "either by the day they were paid for, or the day it was set to completed."
@@ -9056,12 +9545,12 @@ msgid ""
 "Settings\" button, and you will save all settings at once."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:532
+#: inc/admin/settings/options-general.php:537
 msgid "This will display a new \"Rates\" tab on the affiliate dashboard."
 msgstr ""
 
 #: inc/admin/settings/options-creatives__premium_only.php:43
-#: inc/admin/settings/options-general.php:504
+#: inc/admin/settings/options-general.php:509
 msgid ""
 "This will enable \"Creatives\" in the admin menu, where you can upload your "
 "own banners (creatives) for affiliates to use."
@@ -9079,7 +9568,7 @@ msgid ""
 "for each coupon, whenever new orders are created using that coupon."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:163
+#: inc/admin/settings/admin-setup.php:167
 msgid ""
 "This will enable the coupon affiliate registration features on your website."
 msgstr ""
@@ -9184,6 +9673,12 @@ msgid ""
 "for the affiliate coupons referral URL (or selected campaign)."
 msgstr ""
 
+#: inc/admin/settings/options-general.php:1041
+msgid ""
+"This will show a toggle switch at the top right of the portal to switch "
+"between light and dark mode."
+msgstr ""
+
 #: inc/admin/settings/options-registrations.php:115
 msgid ""
 "This will show the affiliate application/registration form automatically on "
@@ -9196,7 +9691,7 @@ msgid ""
 "Users\" admin page."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:439
+#: inc/admin/settings/options-general.php:444
 msgid ""
 "This will show the WooCommerce \"Account Details\" fields directly in the "
 "\"settings\" tab on the affiliate dashboard, along with a logout link."
@@ -9248,16 +9743,16 @@ msgstr ""
 msgid "Tier"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:198
-#: inc/dashboard/tab-latest-orders.php:276
+#: inc/dashboard/tab-latest-orders.php:200
+#: inc/dashboard/tab-latest-orders.php:283
 msgid "Time"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:905
+#: inc/admin-reports/admin-reports.php:804
 msgid "to"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:45
+#: inc/admin/settings/options-general.php:30
 msgid ""
 "To add new affiliates and assign them to a specific coupon, you can do any "
 "of the following 3 options:"
@@ -9275,20 +9770,20 @@ msgid ""
 "(The first page load for each dashboard may take slightly longer.)"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:513
+#: inc/admin/settings/options-general.php:518
 msgid ""
 "To customise the \"Creatives\" tab, please go to the creatives settings:"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:626
+#: inc/admin/settings/options-general.php:687
 msgid ""
 "To customise the \"Performance Bonuses\", please go to the \"Bonuses\" "
 "settings:"
 msgstr ""
 
-#: inc/admin/settings/options-general.php:421
+#: inc/admin/settings/options-general.php:426
 msgid ""
-"To customise the \"Referral URLs\" tab, please go to the referral URL "
+"To customise the \"Referral Links\" tab, please go to the referral URL "
 "settings:"
 msgstr ""
 
@@ -9524,8 +10019,8 @@ msgstr ""
 msgid "To view all features available with PRO, visit our website:"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:218
-#: inc/dashboard/tab-latest-orders.php:287
+#: inc/dashboard/tab-latest-orders.php:220
+#: inc/dashboard/tab-latest-orders.php:294
 #: inc/functions/functions-dashboard.php:544
 #: premium-files/dashboard/tab-monthly-summary.php:174
 #: premium-files/dashboard/tab-monthly-summary.php:198
@@ -9537,7 +10032,7 @@ msgstr ""
 msgid "Total Affiliates"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:614 inc/functions/functions-urls.php:722
+#: inc/admin-reports/admin-reports.php:494 inc/functions/functions-urls.php:722
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:158
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:367
 #: premium-files/pro-addons/pdf-reports/template.php:205
@@ -9545,8 +10040,8 @@ msgid "Total Clicks"
 msgstr ""
 
 #: inc/admin/class-coupon-users-table.php:41
-#: inc/admin/class-coupons-table.php:37 inc/admin-reports/admin-reports.php:574
-#: inc/dashboard/tab-statistics.php:559
+#: inc/admin/class-coupons-table.php:37 inc/admin-reports/admin-reports.php:454
+#: inc/dashboard/tab-statistics.php:545
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:350
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:392
 msgid "Total Commission"
@@ -9561,7 +10056,7 @@ msgstr ""
 msgid "Total commission earned this month"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:623 inc/functions/functions-urls.php:727
+#: inc/admin-reports/admin-reports.php:503 inc/functions/functions-urls.php:727
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:162
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:368
 #: premium-files/pro-addons/pdf-reports/template.php:206
@@ -9572,7 +10067,7 @@ msgstr ""
 msgid "Total Coupon Usage"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:552 inc/dashboard/tab-statistics.php:548
+#: inc/admin-reports/admin-reports.php:432 inc/dashboard/tab-statistics.php:534
 msgid "Total Discounts"
 msgstr ""
 
@@ -9601,12 +10096,12 @@ msgid "Total Referrals"
 msgstr ""
 
 #: inc/admin/class-coupon-users-table.php:39
-#: inc/admin/class-coupons-table.php:35 inc/admin-reports/admin-reports.php:543
-#: inc/dashboard/tab-statistics.php:542
+#: inc/admin/class-coupons-table.php:35 inc/admin-reports/admin-reports.php:423
+#: inc/dashboard/tab-statistics.php:528
 msgid "Total Sales"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:919
+#: inc/admin-reports/admin-reports.php:815
 msgid "total sales"
 msgstr ""
 
@@ -9627,19 +10122,27 @@ msgid "Total sales referred this year"
 msgstr ""
 
 #: inc/admin/class-coupons-table.php:30 inc/dashboard/tab-statistics.php:221
-#: inc/functions/functions-user-coupons.php:933
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:124
+#: inc/functions/functions-user-coupons.php:941
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:125
 msgid "Total Usage"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:918
+#: inc/admin-reports/admin-reports.php:814
 msgid "total usage"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:738
+#: inc/dashboard/tab-latest-orders.php:763
 #: premium-files/dashboard/tab-monthly-summary.php:494
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:564
 msgid "Totals"
+msgstr ""
+
+#: inc/admin/settings/options-urls.php:279
+msgid "Track all new referral URL clicks from the same visitor/user."
+msgstr ""
+
+#: inc/admin/settings/options-urls.php:213
+msgid "Track conversions via referral URL even if coupon was not used."
 msgstr ""
 
 #: inc/admin/settings/options-commission.php:131
@@ -9696,18 +10199,19 @@ msgstr ""
 msgid "Unlimited"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:83
+#: inc/admin-reports/admin-reports.php:85
 msgid "Unlimited date range selection is available with the"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:695
+#: inc/admin-reports/admin-reports.php:575
 msgid "Unpaid"
 msgstr ""
 
 #: inc/admin/admin-affiliate-users.php:161 inc/admin/class-coupons-table.php:42
-#: inc/admin-reports/admin-reports.php:583
-#: inc/admin-reports/admin-reports.php:1291
-#: inc/admin-reports/admin-reports.php:1366
+#: inc/admin-reports/admin-reports.php:463
+#: inc/admin-reports/admin-reports.php:1200
+#: inc/admin-reports/admin-reports.php:1235
+#: inc/functions/functions-user-coupons.php:304
 #: premium-files/dashboard/tab-payout.php:93
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:144
 #: premium-files/pro-addons/pdf-reports/functions-pdf-reports.php:339
@@ -9715,7 +10219,7 @@ msgstr ""
 msgid "Unpaid Commission"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:921
+#: inc/admin-reports/admin-reports.php:817
 msgid "unpaid commission"
 msgstr ""
 
@@ -9742,7 +10246,7 @@ msgid ""
 "threshold, and payout details."
 msgstr ""
 
-#: inc/dashboard/tab-statistics.php:419
+#: inc/dashboard/tab-statistics.php:405
 msgid "Unpaid Commission:"
 msgstr ""
 
@@ -9762,7 +10266,7 @@ msgstr ""
 msgid "Upgrade Now"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:484
+#: inc/admin/settings/admin-setup.php:488
 msgid "Upgrade to Pro"
 msgstr ""
 
@@ -9790,7 +10294,7 @@ msgstr ""
 msgid "Uppercase"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:922
+#: inc/admin-reports/admin-reports.php:818
 msgid "URL conversion rate"
 msgstr ""
 
@@ -9802,9 +10306,9 @@ msgstr ""
 msgid "URL Settings"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:688
-#: inc/admin-reports/admin-reports.php:1283
-#: inc/admin-reports/admin-reports.php:1316
+#: inc/admin-reports/admin-reports.php:568
+#: inc/admin-reports/admin-reports.php:1193
+#: inc/admin-reports/admin-reports.php:1211
 msgid "Usage"
 msgstr ""
 
@@ -9912,7 +10416,7 @@ msgstr ""
 msgid "User role required for plugin admin capabilities:"
 msgstr ""
 
-#: inc/admin/settings/admin-options.php:1012
+#: inc/admin/settings/admin-options.php:1034
 msgid "User role:"
 msgstr ""
 
@@ -9959,14 +10463,15 @@ msgstr ""
 
 #: inc/admin/admin-affiliate-users.php:201
 #: inc/admin/class-clicks-list-table.php:40
-#: inc/admin-reports/admin-reports.php:1272
+#: inc/admin-reports/admin-reports.php:1184
+#: inc/functions/functions-user-coupons.php:1031
 #: inc/registration/class-registrations-list-table.php:82
 #: premium-files/pro-addons/direct-link/class-direct-link-list-table.php:45
 #: premium-files/pro-addons/payouts/class-payouts-list-table.php:158
 msgid "View Affiliate Dashboard"
 msgstr ""
 
-#: inc/registration/registration-form.php:501
+#: inc/registration/registration-form.php:505
 msgid "View affiliate dashboard"
 msgstr ""
 
@@ -9982,7 +10487,7 @@ msgstr ""
 msgid "View all visits for this referrer."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:295
+#: inc/admin/settings/admin-setup.php:299
 #, php-format
 msgid ""
 "View all your coupons, and links to each of their dashboards on the <a "
@@ -10018,8 +10523,8 @@ msgid "View Creatives"
 msgstr ""
 
 #: inc/admin/admin-list.php:127 inc/admin/admin-orders-box.php:217
-#: inc/admin/class-coupons-table.php:246 inc/emails/new-order-email.php:142
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:136
+#: inc/admin/class-coupons-table.php:246 inc/emails/new-order-email.php:146
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:137
 #: premium-files/pro-addons/payouts/stripe/CreateAccount.php:167
 msgid "View Dashboard"
 msgstr ""
@@ -10044,15 +10549,15 @@ msgstr ""
 msgid "View Landing Page"
 msgstr ""
 
-#: inc/dashboard/tab-statistics.php:352 inc/dashboard/tab-statistics.php:407
+#: inc/dashboard/tab-statistics.php:352 inc/dashboard/tab-statistics.php:393
 msgid "View More"
 msgstr ""
 
-#: inc/dashboard/tab-latest-orders.php:517
+#: inc/dashboard/tab-latest-orders.php:528
 msgid "View Order in Backend (Admin Only)"
 msgstr ""
 
-#: inc/functions/functions-dashboard.php:627
+#: inc/functions/functions-dashboard.php:644
 msgid "View Product"
 msgstr ""
 
@@ -10076,7 +10581,15 @@ msgstr ""
 msgid "View transaction in Stripe."
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:23
+#: inc/portal/template.php:425
+msgid "Viewing as"
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:180
+msgid "Viewing as:"
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/functions-mla.php:29
 msgid "Viewing MLA dashboard for user:"
 msgstr ""
 
@@ -10088,7 +10601,7 @@ msgstr ""
 msgid "Visit Date"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:293
+#: inc/admin/settings/admin-setup.php:297
 #, php-format
 msgid ""
 "Visit the <a href=\"%s\" target=\"_blank\">settings page</a> to edit more "
@@ -10124,7 +10637,7 @@ msgstr ""
 msgid "Want more advanced coupon usage restrictions? Check out the %s plugin."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:480
+#: inc/admin/settings/admin-setup.php:484
 msgid "Want more advanced features?"
 msgstr ""
 
@@ -10156,7 +10669,7 @@ msgid ""
 "Coupon Affiliates plugin, to help you get everything setup!"
 msgstr ""
 
-#: inc/registration/registration-form.php:517
+#: inc/registration/registration-form.php:521
 msgid "We are reviewing your application and will be in touch soon!"
 msgstr ""
 
@@ -10170,7 +10683,7 @@ msgstr ""
 msgid "Website"
 msgstr ""
 
-#: inc/dashboard/tab-settings.php:84 inc/admin/settings/options-reports.php:68
+#: inc/dashboard/tab-settings.php:109 inc/admin/settings/options-reports.php:68
 msgid "Weekly"
 msgstr ""
 
@@ -10182,7 +10695,7 @@ msgstr ""
 msgid "What happens when an order is refunded or partially refunded?"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:377
+#: inc/admin/settings/admin-setup.php:381
 msgid "What is a \"coupon-based\" affiliate program?"
 msgstr ""
 
@@ -10203,7 +10716,7 @@ msgid "What toggles should be shown for statistics and line graphs?"
 msgstr ""
 
 #: inc/registration/registration-admin.php:543
-#: inc/registration/registration-form.php:205
+#: inc/registration/registration-form.php:207
 msgid "What type of coupon would you like?"
 msgstr ""
 
@@ -10286,33 +10799,33 @@ msgid ""
 "coupon code (coupons they are assigned to) at cart or checkout."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:297
+#: inc/admin/settings/options-commission.php:299
 msgid ""
 "When enabled, % commission will be calculated based on the order "
 "subtotal/total including \"fees\". It will also be added to the "
 "subtotal/total shown in statistics."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:279
+#: inc/admin/settings/options-commission.php:281
 msgid ""
 "When enabled, % commission will be calculated based on the order "
 "subtotal/total including \"shipping costs\"."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:290
+#: inc/admin/settings/options-commission.php:292
 msgid ""
 "When enabled, % commission will be calculated before any custom discounts "
 "are deducted from the subtotal/total. It will also be added to the "
 "subtotal/total shown in statistics."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:273
+#: inc/admin/settings/options-commission.php:275
 msgid ""
 "When enabled, % commission will be calculated on the order subtotal (instead "
 "of total), before the coupon discount is deducted from it."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:137
+#: inc/admin/settings/options-mla__premium_only.php:243
 msgid ""
 "When enabled, a \"MLA Dashboard\" link will be shown on the normal coupon "
 "affiliate dashboard, at the top right, next to the \"Logout\" link."
@@ -10346,13 +10859,20 @@ msgid ""
 "completed payouts."
 msgstr ""
 
+#: inc/admin/settings/options-mla__premium_only.php:333
+msgid ""
+"When enabled, ALL the parent affiliates calculated commissions (from every "
+"tier) will be deducted from the main sub-affiliates earned commission amount "
+"for each order."
+msgstr ""
+
 #: inc/admin/settings/options-debug.php:219
 msgid ""
 "When enabled, all unique affiliate dashboard URLs will ALWAYS be private, "
 "and only be visible to the assigned user (and admins)."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:194
+#: inc/admin/settings/options-commission.php:196
 msgid ""
 "When enabled, commission statistics are disabled/hidden for coupons that are "
 "not assigned to an affiliate user."
@@ -10364,14 +10884,14 @@ msgid ""
 "dashboard."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:329
+#: inc/admin/settings/options-mla__premium_only.php:544
 msgid ""
 "When enabled, if a customer uses an MLA users affiliate coupon code in an "
 "order, that customer will also automatically be assigned as a sub-affiliate "
 "in their MLA network (if not already assigned to one)."
 msgstr ""
 
-#: inc/admin/settings/options-mla__premium_only.php:227
+#: inc/admin/settings/options-mla__premium_only.php:442
 msgid ""
 "When enabled, if an MLA invite link is visited, the link will also work like "
 "a normal affiliate referral link, to apply the coupon to cart and track "
@@ -10410,13 +10930,13 @@ msgid ""
 "The only time it WILL be updated is if an order is refunded."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:202
+#: inc/admin/settings/options-commission.php:204
 msgid ""
 "When enabled, the unpaid commission will also not be added to non-affiliate "
 "coupons."
 msgstr ""
 
-#: inc/admin/settings/options-commission.php:372
+#: inc/admin/settings/options-commission.php:374
 msgid ""
 "When enabled, this will also show the adjusted \"total\" and \"subtotal\" "
 "(with deducted percentage) on affiliate dashboard. When disabled, only the "
@@ -10443,7 +10963,7 @@ msgid ""
 "orders for each status. The \"Status\" column needs to be enabled."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:403
+#: inc/admin/settings/options-general.php:408
 msgid ""
 "When selected, the totals for all orders within the selected date range will "
 "be shown in a new row at the bottom of the recent orders and monthly summary "
@@ -10476,7 +10996,7 @@ msgid ""
 " and is automatically assigned to user."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:399
+#: inc/admin/settings/admin-setup.php:403
 msgid ""
 "When you create an affiliate user, or accept an affiliate registration, "
 "their coupon code is automatically created and assigned to them. They will "
@@ -10484,7 +11004,7 @@ msgid ""
 "can customize this email in the plugin settings."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:406
+#: inc/admin/settings/admin-setup.php:410
 msgid "Where can I get plugin support?"
 msgstr ""
 
@@ -10500,7 +11020,7 @@ msgstr ""
 msgid "Who can apply affiliate coupons to their cart?"
 msgstr ""
 
-#: inc/admin-reports/admin-reports.php:32
+#: inc/admin-reports/admin-reports.php:34
 msgid ""
 "With admin reports, you can view statistics and analytics for all your "
 "coupons and affiliates."
@@ -10521,7 +11041,7 @@ msgid ""
 "automatically if the affiliate user is only assigned to one coupon."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:387
+#: inc/admin/settings/admin-setup.php:391
 #, php-format
 msgid ""
 "With the free version, you will need to manually handle payouts and payment "
@@ -10579,7 +11099,7 @@ msgid ""
 "help prevent spam."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:685
+#: inc/admin/settings/options-general.php:746
 msgid ""
 "With this enabled, a new \"Affiliate\" link will appear on the users \"My "
 "Account\" page menu. This will take them to the affiliate dashboard page "
@@ -10683,7 +11203,7 @@ msgid ""
 "form."
 msgstr ""
 
-#: inc/admin/settings/options-design.php:136
+#: inc/admin/settings/options-design.php:158
 msgid ""
 "With this enabled, some of the fields on the form will be displayed in 2 "
 "columns, such as first and last name."
@@ -10707,7 +11227,7 @@ msgid ""
 "With this enabled, the first name and last name fields will be required."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:693
+#: inc/admin/settings/options-general.php:754
 msgid ""
 "With this enabled, the link will be hidden for users that are not assigned "
 "to a coupon."
@@ -10739,7 +11259,7 @@ msgid ""
 "select a \"campaign\" to assign that domains referrals to."
 msgstr ""
 
-#: inc/admin/settings/options-general.php:698
+#: inc/admin/settings/options-general.php:759
 msgid ""
 "With this enabled, when the \"Affiliate\" tab is clicked, instead of "
 "redirecting to the normal affiliate dashboard page, it will show the "
@@ -10760,8 +11280,8 @@ msgid ""
 "the approved domain that is assigned to that coupon."
 msgstr ""
 
-#: inc/admin/admin-getting-started.php:114
-#: inc/admin/admin-getting-started.php:153
+#: inc/admin/admin-getting-started.php:121
+#: inc/admin/admin-getting-started.php:162
 msgid "WooCommerce coupons list"
 msgstr ""
 
@@ -10782,7 +11302,7 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:403
+#: inc/admin/settings/admin-setup.php:407
 #, php-format
 msgid ""
 "Yes, you can view the dashboard for each of your affiliates' coupons by "
@@ -10790,7 +11310,7 @@ msgid ""
 "\"Dashboard\" link."
 msgstr ""
 
-#: inc/registration/registration-form.php:515
+#: inc/registration/registration-form.php:519
 msgid "You already have a pending affiliate application."
 msgstr ""
 
@@ -10808,7 +11328,7 @@ msgid ""
 "cart/checkout."
 msgstr ""
 
-#: inc/registration/registration-form.php:497
+#: inc/registration/registration-form.php:501
 msgid "You are already registered as an affiliate."
 msgstr ""
 
@@ -10818,7 +11338,7 @@ msgid ""
 "temporarily timed out."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:309
+#: inc/admin/settings/admin-setup.php:313
 #, php-format
 msgid ""
 "You can <a href=\"%s\" target=\"_blank\">edit your template coupon</a> if "
@@ -10849,13 +11369,20 @@ msgid ""
 "You can apply additional strict fraud prevention with direct link tracking."
 msgstr ""
 
-#: premium-files/pro-addons/groups/functions-affiliate-groups.php:28
+#: premium-files/pro-addons/groups/functions-affiliate-groups.php:30
 msgid ""
 "You can assign a group to an affiliate when adding or editing an affiliate."
 msgstr ""
 
 #: inc/admin/settings/options-registrations.php:849
 msgid "You can create groups here:"
+msgstr ""
+
+#: inc/admin/settings/options-general.php:1048
+#, php-format
+msgid ""
+"You can customise the colors of the affiliate portal in the <a %s>design "
+"settings tab</a>."
 msgstr ""
 
 #: inc/admin/settings/options-registrations.php:62
@@ -10872,7 +11399,7 @@ msgstr ""
 msgid "You can download MailPoet here:"
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:388
+#: inc/admin/settings/admin-setup.php:392
 #, php-format
 msgid ""
 "You can easily pay your affiliates via a variety of different payout methods "
@@ -10892,7 +11419,7 @@ msgstr ""
 #: inc/admin/admin-page.php:330
 msgid ""
 "You can enable referral URLs, and customise the settings for these, in the "
-"\"Referral URLs\" tab on the settings tab."
+"\"Referral Links\" tab on the settings tab."
 msgstr ""
 
 #: premium-files/pro-addons/payouts/class-payoutcreate-list-table.php:316
@@ -10947,6 +11474,10 @@ msgstr ""
 msgid "You can get your site key and secret key from here:"
 msgstr ""
 
+#: inc/admin/settings/options-commission.php:269
+msgid "You can however customise this below if required:"
+msgstr ""
+
 #: premium-files/pro-addons/groups/functions-edit-groups.php:275
 msgid ""
 "You can manage the user roles/groups that are assigned to the template "
@@ -10954,7 +11485,7 @@ msgid ""
 "settings."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:382
+#: inc/admin/settings/admin-setup.php:386
 #, php-format
 msgid ""
 "You can manually create an affiliate by <a href=\"%s\" target=\"_blank\">"
@@ -10967,11 +11498,24 @@ msgid ""
 "affiliate registration.</a>"
 msgstr ""
 
+#: inc/admin/settings/options-mla__premium_only.php:257
+msgid ""
+"You can now give access to the MLA Dashboard for specific affiliate users. "
+"To do this, edit the user and enable \"MLA Dashboard Access\"."
+msgstr ""
+
 #: inc/admin/admin-page.php:318
 msgid ""
 "You can set fixed commission amounts (either per order, or per product), "
 "alongside percentage of the total order. You can set all 3 of these for a "
 "combined total if required."
+msgstr ""
+
+#: inc/functions/functions-user-coupons.php:350
+#, php-format
+msgid ""
+"You can set the global commission rates for all coupons in the <a "
+"href=\"%s\">plugin settings</a> page."
 msgstr ""
 
 #: inc/admin/admin-page.php:316
@@ -11007,17 +11551,17 @@ msgid ""
 "payout requests for all affiliates with more than"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:151
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:242
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:152
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:243
 #: premium-files/pro-addons/multi-level/functions-mla-summary.php:75
 msgid "You don't currently have any sub-affiliates."
 msgstr ""
 
-#: premium-files/dashboard/tab-payout.php:358
+#: premium-files/dashboard/tab-payout.php:357
 msgid "You don't have any completed commission payments yet."
 msgstr ""
 
-#: premium-files/dashboard/tab-payout.php:285
+#: premium-files/dashboard/tab-payout.php:286
 msgid "You don't have any pending commission payments."
 msgstr ""
 
@@ -11036,7 +11580,7 @@ msgstr ""
 msgid "You have made a new referral sale!"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla.php:217
+#: premium-files/pro-addons/multi-level/functions-mla.php:228
 msgid "You must be logged in to view the MLA dashboard."
 msgstr ""
 
@@ -11046,7 +11590,7 @@ msgid ""
 "through customers manually applying the affiliates coupon at checkout."
 msgstr ""
 
-#: premium-files/pro-addons/groups/functions-add-groups.php:64
+#: premium-files/pro-addons/groups/functions-add-groups.php:66
 msgid ""
 "You will be able to customise more group settings once it has been added."
 msgstr ""
@@ -11068,7 +11612,7 @@ msgid ""
 "approving."
 msgstr ""
 
-#: inc/admin/settings/admin-setup.php:289
+#: inc/admin/settings/admin-setup.php:293
 msgid ""
 "You're almost ready to launch your affiliate program, and start growing your "
 "revenue!"
@@ -11078,11 +11622,11 @@ msgstr ""
 msgid "Your Account"
 msgstr ""
 
-#: inc/registration/registration-form.php:861
+#: inc/registration/registration-form.php:865
 msgid "Your affiliate application has been submitted."
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla-network.php:213
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:214
 msgid "Your affiliate network:"
 msgstr ""
 
@@ -11097,7 +11641,7 @@ msgstr ""
 msgid "Your Commission"
 msgstr ""
 
-#: premium-files/pro-addons/multi-level/functions-mla-invite.php:223
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:227
 msgid "Your latest invites:"
 msgstr ""
 
@@ -11122,7 +11666,7 @@ msgid ""
 "referrals."
 msgstr ""
 
-#: inc/registration/registration-form.php:192
+#: inc/registration/registration-form.php:194
 msgid "Your Website"
 msgstr ""
 

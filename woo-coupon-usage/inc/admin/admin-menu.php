@@ -139,14 +139,17 @@ function wcusage_options_page() {
                 'wcusage_admin_clicks_page_html'
             );
         }
-        add_submenu_page(
-            'wcusage',
-            esc_html__( 'Admin Reports & Analytics', 'woo-coupon-usage' ),
-            esc_html__( 'Admin Reports', 'woo-coupon-usage' ),
-            $admin_perms,
-            'wcusage_admin_reports',
-            'wcusage_admin_reports_page_html'
-        );
+        // If wcusage_admin_reports_page_html function exists
+        if ( function_exists( 'wcusage_admin_reports_page_html' ) ) {
+            add_submenu_page(
+                'wcusage',
+                esc_html__( 'Admin Reports & Analytics', 'woo-coupon-usage' ),
+                esc_html__( 'Admin Reports', 'woo-coupon-usage' ),
+                $admin_perms,
+                'wcusage_admin_reports',
+                'wcusage_admin_reports_page_html'
+            );
+        }
         $enable_activity_log = wcusage_get_setting_value( 'wcusage_enable_activity_log', '1' );
         if ( $enable_activity_log ) {
             // Make this hidden

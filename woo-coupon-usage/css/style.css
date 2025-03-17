@@ -208,6 +208,10 @@ form#product_search_form input {
 
 	.wcutabcontent {
 		padding: 10px;
+		box-sizing: border-box;
+	}
+	div.wcutabcontent div {
+		box-sizing: border-box;
 	}
 
 	#wcu5.wcutabcontent.active {
@@ -575,10 +579,6 @@ form#product_search_form input {
 	width: 100%;
 }
 
-.wcu-settings-header {
-	margin-top: 50px !important;
-}
-
 /* Monthly Summary */
 
 .listtheproducts {
@@ -710,6 +710,7 @@ form#product_search_form input {
 	display: inline-block !important;
 	border: 1px solid #333;
 	border-radius: 5px;
+	cursor: pointer;	
 }
 
 .wcusage_settings_form input[type="date"],
@@ -1562,9 +1563,9 @@ form#product_search_form input {
 
 .wcu-mla-network-amount {
 	cursor: default !important;
-	font-size: 17px !important;
+	font-size: 18px !important;
 	line-height: 17px !important;
-	margin: 2px 0 5px 0 !important;
+	margin: 8px 0 10px 0 !important;
 }
 
 .wcu-mla-network-email {

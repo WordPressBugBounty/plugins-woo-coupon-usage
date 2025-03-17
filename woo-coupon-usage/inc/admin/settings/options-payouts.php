@@ -90,18 +90,18 @@ function wcusage_field_cb_payouts( $args )
 
       <h3 id ="wcu-setting-header-payouts-general"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Payouts Settings:</h3>
 
-      <?php echo wcusage_setting_toggle_option('wcusage_field_payout_request_button', 1, 'Show "Request Payout" button on affiliate dashboard.', '0px'); ?>
+      <?php echo wcusage_setting_toggle_option('wcusage_field_payout_request_button', 1, esc_html__( 'Show "Request Payout" button on affiliate dashboard.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'When enabled, the "Request Payout" button will be shown on the affiliate dashboard, allowing affiliates to manually request payouts.', 'woo-coupon-usage' ); ?></i><br/>
       <i><?php echo esc_html__( 'Turn this off if you want to show all their payout details on the payouts tab, but payouts requests themselves will all be handled by admins (or scheduled).', 'woo-coupon-usage' ); ?></i><br/>
       
       <br/>
 
-      <?php echo wcusage_setting_toggle_option('wcusage_field_payout_details_required', 1, 'Require payment details to request payout.', '0px'); ?>
+      <?php echo wcusage_setting_toggle_option('wcusage_field_payout_details_required', 1, esc_html__( 'Require payment details to request payout.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'When enabled, the affiliate will be required to enter their payment details before they can request a payout.', 'woo-coupon-usage' ); ?></i><br/>
 
       <br/>
 
-      <?php echo wcusage_setting_toggle_option('wcusage_field_payout_custom_amount', 1, 'Allow affiliates to enter a custom payout amount.', '0px'); ?>
+      <?php echo wcusage_setting_toggle_option('wcusage_field_payout_custom_amount', 1, esc_html__( 'Allow affiliates to enter a custom payout amount.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'When enabled, the affiliate can enter a custom amount for their payout request. The minimum amount will still be the payment threshold, and maximum amount is their total available unpaid commission.', 'woo-coupon-usage' ); ?></i><br/>
 
       <br/>

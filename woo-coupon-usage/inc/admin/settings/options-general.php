@@ -14,22 +14,7 @@ function wcusage_field_cb( $args ) {
 
 	<h1><?php echo esc_html__( "General Settings", "woo-coupon-usage" ); ?></h1>
 
-  <?php
-  if ( function_exists('wc_coupons_enabled') ) {
-    if ( !wc_coupons_enabled() ) {
-      echo "Notice: Coupons have been automatically enabled in your WooCommerce settings.";
-      update_option( 'woocommerce_enable_coupons', 'yes' );
-    }
-  }
-  ?>
-
-  <hr/>
-
-  <!-- Dashboard Page -->
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Dashboard:</h3>
-  <?php echo do_action( 'wcusage_hook_setting_section_dashboard_page' ); ?>
-
-  <br/><br/>
+  <br/>
 
   <!-- FAQ: How to create new affiliates & coupons? -->
   <div class="wcu-admin-faq">
@@ -63,7 +48,22 @@ function wcusage_field_cb( $args ) {
     </div>
 
   </div>
-  
+
+  <?php
+  if ( function_exists('wc_coupons_enabled') ) {
+    if ( !wc_coupons_enabled() ) {
+      echo "Notice: Coupons have been automatically enabled in your WooCommerce settings.";
+      update_option( 'woocommerce_enable_coupons', 'yes' );
+    }
+  }
+  ?>
+
+  <hr/>
+
+  <!-- Dashboard Page -->
+  <h3 class="affiliate-dashboard-page-settings"><span class="dashicons dashicons-admin-generic " style="margin-top: 2px;"></span> <?php echo esc_html__( 'Dashboard Page', 'woo-coupon-usage' ); ?>:</h3>
+  <?php echo do_action( 'wcusage_hook_setting_section_dashboard_page' ); ?>
+
   <br/><hr/>
 
   <!-- Order/Sales Tracking -->
@@ -577,6 +577,47 @@ function wcusage_field_cb( $args ) {
 
       <br/>
 
+      <!-- Product category -->
+      <p style="margin-left: 40px;">
+        <strong><label for="wcusage_field_rates_category"><?php echo esc_html__( 'Product Category', 'woo-coupon-usage' ); ?>:</label></strong>
+        <br/>
+        <?php
+        // Fetch product categories with error handling
+        $args = array(
+          'taxonomy'   => 'product_cat',
+          'hide_empty' => false,
+        );
+        $product_categories = get_terms($args);
+        ?>
+        <select id="wcusage_field_rates_category" name="wcusage_options[wcusage_field_rates_category]">
+          <option value=""><?php echo esc_html__( 'All Categories', 'woo-coupon-usage' ); ?></option>
+          <?php
+          // Check if categories were retrieved successfully
+          if (!is_wp_error($product_categories) && !empty($product_categories)) {
+            foreach ($product_categories as $category) {
+              // Safely retrieve the saved setting value, defaulting to empty string if undefined
+              $selected_category = function_exists('wcusage_get_setting_value') ? wcusage_get_setting_value('wcusage_field_rates_category', '') : '';
+              ?>
+              <option value="<?php echo esc_attr($category->term_id); ?>" 
+                      <?php selected($selected_category, $category->term_id, true); ?>>
+                <?php echo esc_html($category->name); ?>
+              </option>
+              <?php
+            }
+          } else {
+            // Fallback if no categories are found or an error occurs
+            ?>
+            <option value=""><?php echo esc_html__( 'No categories found', 'woo-coupon-usage' ); ?></option>
+            <?php
+          }
+          ?>
+        </select>
+        <br/>
+        <i><?php echo esc_html__( 'Select a product category to filter the products shown in the table.', 'woo-coupon-usage' ); ?></i>
+      </p>
+
+      <br/>
+
       <p>
         <?php echo wcusage_setting_toggle_option('wcusage_field_rates_show_search', 1, esc_html__( 'Show Search Field', 'woo-coupon-usage' ), '40px'); ?>
       </p>
@@ -585,6 +626,12 @@ function wcusage_field_cb( $args ) {
 
       <p>
         <?php echo wcusage_setting_toggle_option('wcusage_field_rates_show_id', 1, esc_html__( 'Show "ID" Column', 'woo-coupon-usage' ), '40px'); ?>
+      </p>
+
+      <br/>
+
+      <p>
+        <?php echo wcusage_setting_toggle_option('wcusage_field_rates_show_image', 1, esc_html__( 'Show "Image" Column', 'woo-coupon-usage' ), '40px'); ?>
       </p>
 
       <br/>
@@ -733,6 +780,8 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
     $options = get_option( 'wcusage_options' );
     ?>
 
+    <div class="affiliate-dashboard-page-settings">
+
     <?php if (!class_exists('SitePress')) { ?>
 
       <!-- Dashboard Page Dropdown -->
@@ -787,13 +836,16 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
 
       if(!$dashboardpage) {
       ?>
+      <div class="setup-hide">
       <br/>
       <!-- Link to GET create_new_dashboard as 1 -->
-      <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_settings&create_new_dashboard=1')); ?>" style="margin: 5px 0; display: inline-block;">
+      <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_settings&create_new_dashboard=1')); ?>"
+      style="margin: 5px 0; display: inline-block;"
         <button type="button" name="submitnewpage" class="button button-secondary">
           <strong><?php echo esc_html__( "Generate Dashboard Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-circle-arrow-right"></span></strong>
         </button>
       </a>
+      </div>
       <?php } ?>
       
       <?php
@@ -842,6 +894,165 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
       <?php echo wcusage_setting_number_option('wcusage_dashboard_page', '', esc_html__( 'Affiliate Dashboard Page (ID):', 'woo-coupon-usage' ), '0px'); ?>
 
     <?php } ?>
+
+    <br/>
+
+    </div>
+    <script>
+    // If affiliate portal is enabled, hide the dashboard page settings
+    jQuery(document).ready(function($) {
+      if ( $('.wcusage_field_portal_enable').is(':checked') ) {
+        $('.affiliate-dashboard-page-settings').hide();
+      }
+      $('.wcusage_field_portal_enable').change(function() {
+        if ( $(this).is(':checked') ) {
+          $('.affiliate-dashboard-page-settings').hide();
+        } else {
+          $('.affiliate-dashboard-page-settings').show();
+        }
+      });
+    });
+    </script>
+
+    <h3 style="margin-top: 20px;"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Affiliate Portal', 'woo-coupon-usage' ); ?>:</h3>
+
+    <p>
+      <span style="color: green;">(NEW)</span> <?php echo esc_html__( 'The "Affiliate Portal" is an alternative to the normal "affiliate dashboard" page.', 'woo-coupon-usage' ); ?>
+    </p>
+    <p>
+      <?php echo esc_html__( 'Instead of being a shortcode displayed on a page within your theme, the affiliate portal is its own standalone full-screen page with a modern unique design.', 'woo-coupon-usage' ); ?>
+    </p>
+    <p>
+      <?php echo esc_html__( 'If the portal is enabled, all affiliate dashboard links will direct the affiliate to the portal page, instead of the regular dashboard page.', 'woo-coupon-usage' ); ?>
+    </p>
+
+    <br class="setup-hide"/>
+
+    <!-- Enable Affiliate Portal -->
+    <?php echo wcusage_setting_toggle_option('wcusage_field_portal_enable', 0, esc_html__( 'Enable Affiliate Portal', 'woo-coupon-usage' ), '0px'); ?>
+
+    <?php echo wcusage_setting_toggle('.wcusage_field_portal_enable', '.wcu-field-section-portal'); // Show or Hide ?>
+    <span class="wcu-field-section-portal">
+
+    <br class="setup-hide"/>
+
+    <?php $portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal'); ?>
+
+    <p>
+      <?php echo esc_html__( 'Affiliate Portal URL: ', 'woo-coupon-usage' ); ?>
+      <a href="<?php echo esc_url(get_home_url()).'/'.$portal_slug.'/' ?>" target="_blank" class="affiliate-portal-url"><?php echo esc_url(get_home_url()).'/'.$portal_slug.'/' ?></a>
+    </p>
+
+    <div class="setup-hide">
+
+    <br/>
+
+    <p><strong><?php echo esc_html__( 'Customise the Affiliate Portal:', 'woo-coupon-usage' ); ?></strong>
+    <button type="button" class="wcu-showhide-button" id="wcu_show_section_portal_settings"><?php echo esc_html__('Show', 'woo-coupon-usage'); ?> <span class='fa-solid fa-arrow-down'></span></button>
+
+    <?php echo wcu_admin_settings_showhide_toggle("wcu_show_section_portal_settings", "wcu_section_portal_settings", "Show", "Hide"); ?>
+    </p>
+    <div class="wcu_section_settings" id="wcu_section_portal_settings" style="display: none; margin-top: 10px;">
+
+    <!-- Portal Page Title -->
+    <?php echo wcusage_setting_text_option("wcusage_portal_title", "Affiliate Portal", esc_html__( 'Portal Page Title', 'woo-coupon-usage' ), "0px"); ?>
+
+    <br/>
+
+    <!-- Portal Page URL Slug -->
+    <?php echo wcusage_setting_text_option("wcusage_portal_slug", "affiliate-portal", esc_html__( 'Portal Page Slug', 'woo-coupon-usage' ), "0px"); ?>
+    <script>
+      // Update the affiliate portal URL when the slug is changed
+      jQuery(document).ready(function($) {
+        $('#wcusage_portal_slug').on('change', function(){
+          var slug = $(this).val();
+          $('.affiliate-portal-url').text('<?php echo esc_url(get_home_url()); ?>/' + slug + '/');
+          $('.affiliate-portal-url').attr('href', '<?php echo esc_url(get_home_url()); ?>/' + slug + '/');
+        });
+      });
+      // When affiliate portal enabled, set the portal slug to the slug of the old affiliate dashboard page if exists found in #dashboard_link
+      jQuery(document).ready(function($) {
+        $('.wcusage_field_portal_enable').on('change', function() {
+          var portal_slug = $('#dashboard_link').text();
+          portal_slug = portal_slug.replace('<?php echo esc_url(get_home_url()); ?>/', '');
+          if (portal_slug.substr(-1) == '/') {
+            portal_slug = portal_slug.substr(0, portal_slug.length - 1);
+          }
+          // If not empty, set the portal slug to the dashboard page slug
+          if (portal_slug) {
+            $('#wcusage_portal_slug').val(portal_slug);
+            $('.affiliate-portal-url').text('<?php echo esc_url(get_home_url()); ?>/' + portal_slug + '/');
+          } else {
+            $('#wcusage_portal_slug').val('affiliate-portal');
+            $('.affiliate-portal-url').text('<?php echo esc_url(get_home_url()); ?>/affiliate-portal/');
+          }
+          // Delay
+          setTimeout(function() {
+            $('#wcusage_portal_slug').trigger('change');
+          }, 1000);
+        });
+      });
+    </script>
+    
+    <br/>
+
+    <!-- IMAGE - Affiliate Portal Logo -->
+    <script>
+        jQuery(document).ready(function($) {
+            $('.wcusage_portal_logo_upload').click(function(e) {
+                e.preventDefault();
+                var custom_uploader = wp.media({
+                    title: 'Custom Image',
+                    button: {
+                        text: 'Upload Image'
+                    },
+                    multiple: false  // Set this to true to allow multiple files to be selected
+                })
+                .on('select', function() {
+                    var attachment = custom_uploader.state().get('selection').first().toJSON();
+                    $('.wcusage_portal_logo').attr('src', attachment.url);
+                    $('.wcusage_portal_logo').val(attachment.url);
+                    $('.wcusage_portal_logo').change();
+                })
+                .open();
+            });
+        });
+    </script>
+    <p>
+      <?php $wcusage_portal_logo = wcusage_get_setting_value('wcusage_portal_logo', ''); ?>
+      <strong><?php echo esc_html__( 'Affiliate Portal Logo', 'woo-coupon-usage' ); ?>:</strong><br/>
+      <input class="wcusage_portal_logo" type="text"
+      id="wcusage_portal_logo"
+      name="wcusage_options['wcusage_portal_logo']"
+      size="60" value="<?php echo esc_html($wcusage_portal_logo); ?>">
+      <a href="#" class="wcusage_portal_logo_upload">Upload</a>
+      <br/><i><?php echo esc_html__( 'This is shown at the very top left of the affiliate portal. Recommended size is 200px width.', 'woo-coupon-usage' ); ?></i><br/>
+    </p>
+
+    <br/>
+
+    <!-- Footer Text -->
+    <?php echo wcusage_setting_tinymce_option("wcusage_portal_footer_text", "", esc_html__( 'Footer Text', 'woo-coupon-usage' ), "0px"); ?>
+
+    <br/>
+
+    <!-- Show Dark Mode Toggle -->
+    <?php echo wcusage_setting_toggle_option('wcusage_portal_dark_mode', 1, esc_html__( 'Show Dark Mode Toggle', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( 'This will show a toggle switch at the top right of the portal to switch between light and dark mode.', 'woo-coupon-usage' ); ?></i>
+
+    <br/><br/><br/>
+
+    <strong><?php echo esc_html__( 'Portal Colors', 'woo-coupon-usage' ); ?></strong>
+
+    <p>
+        <?php echo sprintf( __( 'You can customise the colors of the affiliate portal in the <a %s>design settings tab</a>.', 'woo-coupon-usage' ), 'href="#" onclick="wcusage_go_to_settings(\'#tab-design\', \'#affiliate-dashboard-colors\');"'); ?>
+    </p>
+
+    </div>
+
+    </div>
+
+    </span>
 
   <?php
   }

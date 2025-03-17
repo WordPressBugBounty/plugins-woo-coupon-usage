@@ -181,6 +181,8 @@ function wcusage_field_cb_commission( $args )
     }
     ?>
 
+    <div style="clear: both;"></div>
+
     </span>
 
     <div style="clear: both;"></div>
@@ -236,7 +238,7 @@ if( !function_exists( 'wcusage_setting_section_commission_amounts' ) ) {
 
   <!-- Fixed Amount Per Order -->
   <?php 
-  $fixed_order_label = sprintf(esc_html_x('Fixed Commission (%s - Amount Per Order)', 'woo-coupon-usage'), wcusage_get_currency_symbol());
+  $fixed_order_label = wp_kses_post(sprintf(__('Fixed Commission (%s - Amount Per Order)', 'woo-coupon-usage'), wcusage_get_currency_symbol()));
   echo wcusage_setting_number_option('wcusage_field_affiliate_fixed_order', '0', $fixed_order_label, '0px', '0.01'); 
   ?>
 
@@ -244,7 +246,7 @@ if( !function_exists( 'wcusage_setting_section_commission_amounts' ) ) {
 
   <!-- Fixed Amount Per Product -->
   <?php 
-  $fixed_product_label = sprintf(esc_html_x('Fixed Commission (%s - Amount Per Product)', 'woo-coupon-usage'), wcusage_get_currency_symbol());
+  $fixed_product_label = wp_kses_post(sprintf(__('Fixed Commission (%s - Amount Per Product)', 'woo-coupon-usage'), wcusage_get_currency_symbol()));
   echo wcusage_setting_number_option('wcusage_field_affiliate_fixed_product', '0', $fixed_product_label, '0px', '0.01'); 
   ?>
 
@@ -263,8 +265,8 @@ if( !function_exists( 'wcusage_setting_section_calculations' ) ) {
   $options = get_option( 'wcusage_options' );
   ?>
 
-  <p>By default the order totals displayed on the dashboard, and used for % commission calculations exclude shipping costs, fees, taxes, and discounts (recommended).</p>
-  <p>You can however customise this below if required:</p>
+  <p><?php echo esc_html__( 'By default the order totals displayed on the dashboard, and used for % commission calculations exclude shipping costs, fees, taxes, and discounts (recommended).', 'woo-coupon-usage' ); ?></p>
+  <p><?php echo esc_html__( 'You can however customise this below if required:', 'woo-coupon-usage' ); ?></p>
 
   <br/>
 

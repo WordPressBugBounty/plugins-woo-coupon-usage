@@ -140,10 +140,10 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
             // Show the field to enter username
             woocommerce_wp_text_input( array(
                 'id'          => 'wcu_select_coupon_user_visual',
-                'label'       => esc_html__( 'Affiliate User', 'woocommerce' ),
+                'label'       => esc_html__( 'Affiliate User', 'woo-coupon-usage' ),
                 'description' => esc_html__( '(Start typing username, then select from the options.)', 'woo-coupon-usage' ),
                 'value'       => $currentselecteduserlogin,
-                'placeholder' => 'Start typing username here...',
+                'placeholder' => esc_html__( 'Start typing username here...', 'woo-coupon-usage' ),
             ) );
             ?>
 
@@ -177,7 +177,7 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
         } else {
             woocommerce_wp_text_input( array(
                 'id'          => 'wcu_select_coupon_user',
-                'label'       => esc_html__( 'Affiliate User', 'woocommerce' ),
+                'label'       => esc_html__( 'Affiliate User', 'woo-coupon-usage' ),
                 'description' => esc_html__( 'Enter the user ID for the affiliate user.', 'woo-coupon-usage' ),
                 'value'       => $getcurrentcouponuserid,
             ) );
@@ -185,23 +185,23 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
         woocommerce_wp_text_input( array(
             'type'        => 'date',
             'id'          => 'wcu_text_coupon_start_date',
-            'label'       => esc_html__( 'Coupon History Start Date', 'woocommerce' ),
-            'description' => wp_kses_post( __( '<i>Custom date to begin displaying past coupon data. Leave empty to show full history.</i>', 'woo-coupon-usage' ) ),
+            'label'       => esc_html__( 'Coupon History Start Date', 'woo-coupon-usage' ),
+            'description' => '<i>' . wp_kses_post( esc_html__( 'Custom date to begin displaying past coupon data. Leave empty to show full history.', 'woo-coupon-usage' ) ) . '</i>',
             'desc_tip'    => false,
         ) );
-        echo "<br/><hr/><br/>&nbsp;&nbsp;&nbsp;Email Notifications:<br/>";
+        echo "<br/><hr/><br/>&nbsp;&nbsp;&nbsp;" . esc_html__( 'Email Notifications:', 'woo-coupon-usage' ) . "<br/>";
         $wcu_enable_notifications = get_post_meta( $coupon_get_id, 'wcu_enable_notifications', true );
         woocommerce_wp_select( array(
             'id'      => 'wcu_enable_notifications',
-            'label'   => esc_html__( 'Enable affiliate email notifications.', 'woocommerce' ),
+            'label'   => esc_html__( 'Enable affiliate email notifications.', 'woo-coupon-usage' ),
             'options' => array(
-                '1' => esc_html__( 'Enabled', 'woocommerce' ),
-                '0' => esc_html__( 'Disabled', 'woocommerce' ),
+                '1' => esc_html__( 'Enabled', 'woo-coupon-usage' ),
+                '0' => esc_html__( 'Disabled', 'woo-coupon-usage' ),
             ),
         ) );
         echo "<br/><hr/><br/>";
-        echo "<p>You can set the global commission rates for all coupons in the <a href='" . esc_url( admin_url( "admin.php?page=wcusage_settings" ) ) . "'>plugin settings</a> page.<p>";
-        echo "<p>Extra features are available with PRO version including custom commission amounts per coupon, email notifications, and more. <a href='" . esc_url( admin_url( "admin.php?page=wcusage-pricing&trial=true" ) ) . "'>UPGRADE</a><p>";
+        echo "<p>" . sprintf( esc_html__( 'You can set the global commission rates for all coupons in the <a href="%s">plugin settings</a> page.', 'woo-coupon-usage' ), esc_url( admin_url( "admin.php?page=wcusage_settings" ) ) ) . "<p>";
+        echo "<p>" . sprintf( esc_html__( 'Extra features are available with PRO version including custom commission amounts per coupon, email notifications, and more. <a href="%s">UPGRADE</a>', 'woo-coupon-usage' ), esc_url( admin_url( "admin.php?page=wcusage-pricing&trial=true" ) ) ) . "<p>";
         echo "<img src='" . esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . "images/coupon-settings-pro.png' style='max-width: 100%;'>";
         ?>
 
@@ -210,7 +210,9 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
             ?>
       <br/><hr/>
       <p>
-      Extra Restrictions:<br/>
+      <?php 
+            echo esc_html__( 'Extra Restrictions', 'woo-coupon-usage' );
+            ?>:<br/>
       <?php 
             echo sprintf( wp_kses_post( __( 'Want more advanced coupon usage restrictions? Check out our %s plugin!', 'woo-coupon-usage' ) ), '<a href="https://relywp.com/plugins/better-coupon-restrictions-woocommerce/?utm_source=caffs-settings" target="_blank">Better Coupon Restrictions</a>' );
             ?>
@@ -258,7 +260,9 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields_limits' ) ) {
         }
         ?>
 
-    <br/>&nbsp;&nbsp;&nbsp;Coupon Affiliates - Extra Limits:<br/>
+    <br/>&nbsp;&nbsp;&nbsp;<?php 
+        echo esc_html__( 'Coupon Affiliates - Extra Limits:', 'woo-coupon-usage' );
+        ?><br/>
 
     <span class="wcusage-coupon-extra-limits">
 
@@ -269,7 +273,7 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields_limits' ) ) {
             'name'        => 'wcu_enable_first_order_only',
             'class'       => 'wcu_enable_first_order_only',
             'value'       => $wcu_enable_first_order_only,
-            'label'       => esc_html__( 'New customers only?', 'woocommerce' ),
+            'label'       => esc_html__( 'New customers only?', 'woo-coupon-usage' ),
             'description' => esc_html__( 'When checked, this coupon can only be used by new customers on their first order.', 'woo-coupon-usage' ),
         ) );
         ?>
@@ -291,8 +295,12 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields_limits' ) ) {
     <span class="wcusage-coupon-extra-limits-default-enabled" style="display: none;">
 
     <p class="form-field wcu_enable_first_order_only_field ">
-    	<label for="wcu_enable_first_order_only">New customers only?</label>
-      (Global Setting) This affiliate coupon can only be used by new customers on their first order.
+    	<label for="wcu_enable_first_order_only"><?php 
+        echo esc_html__( 'New customers only?', 'woo-coupon-usage' );
+        ?></label>
+      <?php 
+        echo esc_html__( '(Global Setting) This affiliate coupon can only be used by new customers on their first order.', 'woo-coupon-usage' );
+        ?>
     </p>
 
     </span>
@@ -572,7 +580,7 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                 if ( !$numcoupons ) {
                     echo "<p>" . esc_html__( "Sorry, you don't currently have any active affiliate coupons.", "woo-coupon-usage" ) . "</p>";
                     $wcusage_field_registration_enable_register_loggedin = wcusage_get_setting_value( 'wcusage_field_registration_enable_register_loggedin', '1' );
-                    if ( $wcusage_field_registration_enable_register_loggedin ) {
+                    if ( $wcusage_field_registration_enable_register_loggedin || isset( $_POST['submitaffiliateapplication'] ) ) {
                         echo "<br/>";
                         if ( shortcode_exists( 'couponaffiliates-register' ) ) {
                             echo do_shortcode( '[couponaffiliates-register]' );
@@ -586,8 +594,15 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                     $obituary_query->the_post();
                     $postid = get_the_ID();
                     $coupon = get_the_title();
-                    $secretid = $coupon . "-" . $postid;
-                    $uniqueurl = wcusage_get_coupon_shortcode_page( 1 ) . 'couponid=' . $secretid;
+                    if ( $_SERVER['REQUEST_URI'] && strpos( $_SERVER['REQUEST_URI'], '/affiliate-portal' ) !== false ) {
+                        $page_url = home_url() . '/affiliate-portal?';
+                        $secretid = $coupon;
+                        $uniqueurl = $page_url . 'couponid=' . $secretid;
+                    } else {
+                        $page_url = wcusage_get_coupon_shortcode_page( 1 );
+                        $secretid = $coupon . "-" . $postid;
+                        $uniqueurl = $page_url . 'couponid=' . $secretid;
+                    }
                     if ( $numcoupons <= 1 && $wcusage_show_coupon_if_single ) {
                         if ( wcusage_iscouponusers( $coupon, $current_user_id ) && $lastcoupon != $coupon ) {
                             $coupon = str_replace( ' ', '%20', $coupon );
@@ -640,7 +655,8 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                             }
                             echo '<p>' . esc_html__( "Total Usage", "woo-coupon-usage" ) . ': ' . esc_html( $usage ) . '</p>';
                             echo '<p>' . esc_html__( "Commission", "woo-coupon-usage" ) . ': ' . wp_kses_post( $combined_commission ) . '</p>';
-                            echo '<p style="margin: 0 0 10px 0;"><a class="wcu-coupon-list-button" href="' . esc_url( $uniqueurl ) . '">' . esc_html__( 'Dashboard', 'woo-coupon-usage' ) . ' <i class="far fa-arrow-alt-circle-right"></i></a></p>';
+                            echo '<p style="margin: 0 0 10px 0;"><a class="wcu-coupon-list-button"
+                    href="' . esc_url( $uniqueurl ) . '">' . esc_html__( 'Dashboard', 'woo-coupon-usage' ) . ' <i class="far fa-arrow-alt-circle-right"></i></a></p>';
                             echo "</div>";
                             if ( $countcouponsloop == 3 ) {
                                 echo "</div>";
@@ -722,15 +738,24 @@ if ( !function_exists( 'wcusage_coupon_meta_box_markup' ) ) {
 
       <p style="margin-top: 14px;"><a href="<?php 
             echo esc_url( $uniqueurl );
-            ?>" target="_blank" class="wcusage-settings-button" style="margin: 0;">View Dashboard <span class="dashicons dashicons-external"></span></a></p>
+            ?>" target="_blank" class="wcusage-settings-button" style="margin: 0;">
+        <?php 
+            echo esc_html__( 'View Affiliate Dashboard', 'woo-coupon-usage' );
+            ?>
+        <span class="dashicons dashicons-external"></span></a></p>
 
-      <p>Affiliate User: <?php 
+      <p><?php 
+            echo esc_html__( 'Affiliate User', 'woo-coupon-usage' );
+            ?>: <?php 
             echo esc_html( $coupon_user );
             ?></p>
 
-			<a href="#" class=""
-			onclick="if (confirm('Are you sure you want to refresh all this coupons affiliate dashboard data? The next time you visit the affiliate dashboard, it may take significantly longer to load (first visit).')){location+='&refreshstats=true'}else{event.stopPropagation(); event.preventDefault();};">
-			REFRESH ALL DATA <i class="fas fa-sync" style="background: transparent; margin: 0;"></i>
+			<a href="#" class="" onclick="if (confirm('<?php 
+            echo esc_html__( 'Are you sure you want to refresh all this coupons affiliate dashboard data? The next time you visit the affiliate dashboard, it may take significantly longer to load (first visit).', 'woo-coupon-usage' );
+            ?>')){location+='&refreshstats=true'}else{event.stopPropagation(); event.preventDefault();};">
+			<?php 
+            echo esc_html__( 'REFRESH ALL DATA', 'woo-coupon-usage' );
+            ?> <i class="fas fa-sync" style="background: transparent; margin: 0;"></i>
 			</a>
 
     <?php 

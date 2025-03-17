@@ -14,7 +14,7 @@ if ( !function_exists( 'wcusage_load_page_orders' ) ) {
         ?>
     <script src="<?php 
         echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL );
-        ?>/js/woo-coupon-usage.js" async></script>
+        ?>js/woo-coupon-usage.js" async></script>
     <?php 
         if ( $_POST["startdate"] == "" ) {
             $isordersstartset = false;
@@ -52,7 +52,7 @@ if ( !function_exists( 'wcusage_load_referral_url_stats' ) ) {
         ?>
     <script src="<?php 
         echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL );
-        ?>/js/woo-coupon-usage.js"></script>
+        ?>js/woo-coupon-usage.js"></script>
     <?php 
         if ( isset( $_POST["campaign"] ) ) {
             $campaign = sanitize_text_field( $_POST["campaign"] );
@@ -85,7 +85,7 @@ if ( !function_exists( 'wcusage_load_page_statistics' ) ) {
 
     <script src="<?php 
         echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL );
-        ?>/js/woo-coupon-usage.js"></script>
+        ?>js/woo-coupon-usage.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
     google.charts.load('current', {packages: ['corechart', 'line']});

@@ -25,30 +25,39 @@ jQuery(document).ready(function() {
 	jQuery('#wcusage-last-days7').click(function(){
 		jQuery('.wcusage-show-last-7').show();
 		jQuery('#wcusage-last-days7').css("color", "#333");
+		jQuery('#wcusage-last-days7').addClass('wcutab-active');
 		jQuery('.wcusage-show-last-30').hide();
 		jQuery('#wcusage-last-days30').css("color", "#a6a6a6");
+		jQuery('#wcusage-last-days30').removeClass('wcutab-active');
 		jQuery('.wcusage-show-last-all').hide();
 		jQuery('#wcusage-last-days-all').css("color", "#a6a6a6");
+		jQuery('#wcusage-last-days-all').removeClass('wcutab-active');
 		jQuery('.wcusage-show-last-all-30').hide();
 	});
 
 	jQuery('#wcusage-last-days30').click(function(){
 		jQuery('.wcusage-show-last-7').hide();
 		jQuery('#wcusage-last-days7').css("color", "#a6a6a6");
+		jQuery('#wcusage-last-days7').removeClass('wcutab-active');
 		jQuery('.wcusage-show-last-30').show();
 		jQuery('#wcusage-last-days30').css("color", "#333");
+		jQuery('#wcusage-last-days30').addClass('wcutab-active');
 		jQuery('.wcusage-show-last-all').hide();
 		jQuery('#wcusage-last-days-all').css("color", "#a6a6a6");
+		jQuery('#wcusage-last-days-all').removeClass('wcutab-active');
 		jQuery('.wcusage-show-last-all-30').show();
 	});
 
 	jQuery('#wcusage-last-days-all').click(function(){
 		jQuery('.wcusage-show-last-7').hide();
 		jQuery('#wcusage-last-days7').css("color", "#a6a6a6");
+		jQuery('#wcusage-last-days7').removeClass('wcutab-active');
 		jQuery('.wcusage-show-last-30').hide();
 		jQuery('#wcusage-last-days30').css("color", "#a6a6a6");
+		jQuery('#wcusage-last-days30').removeClass('wcutab-active');
 		jQuery('.wcusage-show-last-all').show();
 		jQuery('#wcusage-last-days-all').css("color", "#333");
+		jQuery('#wcusage-last-days-all').addClass('wcutab-active');
 		jQuery('.wcusage-show-last-all-30').show();
 	});
 

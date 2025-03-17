@@ -149,7 +149,13 @@ function wcusage_output_affiliate_info_orders(  $coupon_code, $order_id, $thetyp
                         $parent_user_name = $parent_user_info->user_login;
                         $parent_user_id = $parent_user_info->ID;
                     }
-                    $parent_commission = wcusage_mla_get_commission_from_tier( $getinfo['thecommissionnum'], $key );
+                    $parent_commission = wcusage_mla_get_commission_from_tier(
+                        $getinfo['thecommissionnum'],
+                        $key,
+                        1,
+                        $order_id,
+                        $coupon_code
+                    );
                     $mla_text .= "<br/>(" . $key . ") " . $parent_user_name . ": " . wcusage_format_price( $parent_commission );
                 }
                 $mla_text .= "</p>";
@@ -242,7 +248,7 @@ function wcusage_get_the_order_coupon_info(
         }
         // Coupon Code & Link
         $thepageurl = wcusage_get_coupon_shortcode_page( 1, 0 );
-        $wcusage_justcoupon = wcusage_get_setting_value( 'wcusage_field_justcoupon', '1' );
+        $wcusage_justoupon = wcusage_get_setting_value( 'wcusage_field_justcoupon', '1' );
         if ( $wcusage_justcoupon ) {
             $secretid = $coupon_code;
         } else {

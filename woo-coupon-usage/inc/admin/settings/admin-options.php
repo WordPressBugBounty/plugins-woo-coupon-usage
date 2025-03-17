@@ -858,7 +858,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         echo wcusage_setting_toggle_option(
             'wcusage_field_settings_legacy',
             0,
-            'Enable legacy (bulk) saving for settings page.',
+            esc_html__( 'Enable legacy (bulk) saving for settings page.', 'woo-coupon-usage' ),
             '0px'
         );
         ?>
@@ -886,15 +886,15 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         <span class="wcu-field-section-save">
           
           <?php 
-        submit_button( 'Save Settings' );
+        submit_button( esc_html__( 'Save Settings', 'woo-coupon-usage' ) );
         ?>
 
           <?php 
         if ( ini_get( 'max_input_vars' ) < 1000 ) {
             ?>
-          <br/><p style="font-size: 12px;"><strong>Settings not saving? Try disabling "legacy" saving, or increasing your PHP "max_input_vars" in your hosting configuration to 3000 or higher (currently <?php 
-            echo esc_html( ini_get( 'max_input_vars' ) );
-            ?>). <a href="https://couponaffiliates.com/docs/increase-max-input-vars-limit" target="_blank"><?php 
+          <br/><p style="font-size: 12px;"><strong><?php 
+            sprintf( esc_html__( 'Settings not saving? Try disabling "legacy" saving, or increasing your PHP "max_input_vars" in your hosting configuration to 3000 or higher (currently %s).', 'woo-coupon-usage' ), ini_get( 'max_input_vars' ) );
+            ?>. <a href="https://couponaffiliates.com/docs/increase-max-input-vars-limit" target="_blank"><?php 
             echo esc_html__( 'Learn More.', 'woo-coupon-usage' );
             ?></a></strong><br/></p>
           <?php 
@@ -905,7 +905,10 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
       </span>
 
-      <br/><p style="display: block; font-size: 15px; margin-bottom: 10px;"><strong>Have a feature suggestion? Found a bug? Need help? <?php 
+      <br/><p style="display: block; font-size: 15px; margin-bottom: 10px;"><strong>
+      <?php 
+        echo esc_html__( 'Need help? Have a suggestion? Found a bug?', 'woo-coupon-usage' );
+        ?> <?php 
         if ( wcu_fs()->can_use_premium_code() ) {
             ?><a href="<?php 
             echo esc_url( admin_url( 'admin.php?page=wcusage-contact' ) );
@@ -913,7 +916,8 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         } else {
             ?><a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank"><?php 
         }
-        ?>Get in touch.</a></strong></p>
+        echo esc_html__( 'Create a support ticket.', 'woo-coupon-usage' );
+        ?></a>
 
   	</form>
 
@@ -1110,16 +1114,19 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
    <div style="clear: both;"></div>
 
-   <br/>
+   <br/><br/>
 
-    <span style="display: inline-block; background: #fff; padding: 10px; border-radius: 5px; margin-top: 20px; font-size: 15px;">
+    <span>
     <?php 
         $pluginname = "woo-coupon-usage";
         $plugin = get_plugin_data( WP_PLUGIN_DIR . '/' . $pluginname . '/' . $pluginname . '.php', false, false );
         $pluginversion = $plugin['Version'];
         ?>
-    Coupon Affiliates Version <?php 
-        echo esc_html( $pluginversion );
+    Thank you for using Coupon Affiliates<?php 
+        if ( $pluginversion ) {
+            ?> Version <?php 
+            echo esc_html( $pluginversion );
+        }
         ?>. <a href="https://roadmap.couponaffiliates.com/updates" target="_blank">View Changelog</a>.
     <br/><br/>
     Developed and supported by <a href="https://relywp.com">RelyWP Ltd</a>.

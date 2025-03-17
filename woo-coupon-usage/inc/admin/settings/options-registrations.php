@@ -1281,7 +1281,9 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
                   }
                   ?>
                   <?php if($role != 'administrator' && $role != 'editor' && $role != 'author' && $role != 'shop_manager' && !array_key_exists( 'manage_options', $details['capabilities'] ) ) { ?>
-                    <option value="<?php echo esc_html($role); ?>"><?php echo esc_html($role_name); ?></option>
+                    <option value="<?php echo esc_html($role); ?>"
+                    <?php if(isset($options['wcusage_field_registration_coupon_template_role' . esc_html($template_num)]) && $options['wcusage_field_registration_coupon_template_role' . esc_html($template_num)] == $role) { ?>selected<?php } ?>
+                    ><?php echo esc_html($role_name);?></option>
                   <?php } ?>
                 <?php } ?>
               </select>

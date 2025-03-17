@@ -409,19 +409,6 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                                 true,
                                 false
                             );
-                            // Update Data
-                            if ( isset( $wcusage_monthly_summary_data_orders ) ) {
-                                update_post_meta( $postid, 'wcusage_monthly_summary_data_orders', $wcusage_monthly_summary_data_orders );
-                            }
-                            /*
-                            if ($force_refresh_stats) {
-                                $wcusage_refresh_date = strtotime("now");
-                                if (isset($options['wcusage_refresh_date'])) {
-                                    $wcusage_refresh_date = $options['wcusage_refresh_date'];
-                                }
-                                update_post_meta($postid, 'wcu_last_refreshed', $wcusage_refresh_date);
-                            }
-                            */
                             echo '</div>';
                         }
                         break;
@@ -737,6 +724,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
         <script>
         /* Get & display data */
         jQuery(document).ready(function(){
+
           setTimeout(function(){
              jQuery('.stuck-loading-message').show();
           }, 45000);
@@ -751,7 +739,6 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
           <?php 
                 }
                 ?>
-        });
 
         /* Load Page Statistics data & content */
         function wcusage_run_tab_page_stats() {
@@ -800,6 +787,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
                 <?php 
                 }
                 ?>
+                jQuery('.wcu-loading-stats-main').hide();
               },
               error: function(data){
                 var errorMessage = 'AJAX error.';
@@ -813,6 +801,8 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
           });
 
         }
+
+        });
         </script>
 
         <div class="show_statistics"></div>
@@ -843,8 +833,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
             if ( $wcusage_field_load_ajax ) {
                 ?>
 
-
-        <div class="wcu-loading-image wcu-loading-stats">
+        <div class="wcu-loading-image wcu-loading-stats wcu-loading-stats-main">
           <?php 
                 if ( $force_refresh_stats ) {
                     ?>
@@ -864,7 +853,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
                 if ( current_user_can( 'administrator' ) ) {
                     ?>
           <p class="stuck-loading-message" style="display:none;font-size:12px;color:#B2B2B2;font-weight: bold; margin-top: 20px;">
-          <i class="fas fa-exclamation-circle"></i> <?php 
+          <br/><i class="fas fa-exclamation-circle"></i> <?php 
                     echo esc_html__( "Notice (admin only): Page constantly loading? Try refreshing the page.", "woo-coupon-usage" );
                     ?> <a href='https://couponaffiliates.com/docs/affiliate-dashboard-is-not-showing' style='color:#B2B2B2;' target='_blank'><?php 
                     echo esc_html__( "Or click here", "woo-coupon-usage" );
@@ -877,6 +866,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
                 ?>
           </p>
         </div>
+
         <?php 
             }
             ?>

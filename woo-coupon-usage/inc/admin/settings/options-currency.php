@@ -267,7 +267,7 @@ function wcusage_field_cb_currency(  $args  ) {
       <br/>
 
       <p style="font-weight: bold;"><?php 
-    echo esc_html__( 'Currently the APILayer free plan supports all base currencies and 1000 requests/month which is all that is required.', 'woo-coupon-usage' );
+    echo esc_html__( 'Currently the APILayer free plan supports all base currencies and 100 requests/month which is all that is required.', 'woo-coupon-usage' );
     ?></p>
       
       <br/>

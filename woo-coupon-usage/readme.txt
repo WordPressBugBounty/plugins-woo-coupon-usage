@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.7.2
-Stable tag: 5.19.1
+Stable tag: 6.0.0
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -239,6 +239,25 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 6.0.0 - 17th March 2025 =
+- New: Added new "Affiliate Portal" feature.
+- New: (PRO) Added new MLA option to deduct parent affiliate commission from sub-affiliate commission.
+- New: (PRO) Added new MLA option to set tier commission rates as a "percentage of order total".
+- New: (PRO) Added new MLA option when "invite only" is enabled to select certain user roles/groups that automatically have access.
+- New: (PRO) Added new option to the "rates" tab settings to only show products within a specific category.
+- New: (PRO) Added new option to the "rates" tab to show an "image" column for each of the products, displaying their featured image.
+- Improvement: Rebuilt part of the code for generating admin reports. This is now much faster and reliable for sites with lots of coupons and orders.
+- Improvement: (PRO) Significantly improved the performance on the commission line graphs on the affiliate dashboard.
+- Fix: (PRO) Fixed an issue with some shortcodes not working in the affiliate dashboard custom tabs.
+- Fix: (PRO) Fixed a HTML markup issue when hovering over a payout method tooltip on the affiliate dashboard.
+- Fix: (PRO) Fixed an issue with the "Assign to role" option for "multiple templates" not showing the currently selected option in the settings.
+- Fix: Fixed an issue with the affiliate registration form not working on the affiliate dashboard page with this option disabled: Show registration form on affiliate dashboard page (logged in users).
+- Other: Tested with WooCommerce 9.7.1
+
+= Version 5.19.2 - 12th February 2025 =
+- Fix: Fixed the multi-currency option causing issues with calculations on the "monthly summary" tab in some cases.
+- Fix: Fixed a possible "Attempt to read property 'X' on false" PHP error in some cases on the settings tab of the affiliate dashboard.
 
 = Version 5.19.1 - 12th February 2025 =
 - Improvement: Modified the admin reports to generate in batches to help prevent timeouts on large sites.

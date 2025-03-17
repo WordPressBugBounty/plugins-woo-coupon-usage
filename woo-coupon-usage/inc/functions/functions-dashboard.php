@@ -373,7 +373,7 @@ function wcusage_requests_session_check(  $postid  ) {
             $wcu_requests_last_session_count = get_post_meta( $postid, 'wcu_requests_last_session_count', true );
             update_post_meta( $postid, 'wcu_requests_last_session_count', $wcu_requests_last_session_count + 1 );
             $wcu_requests_last_session_count = get_post_meta( $postid, 'wcu_requests_last_session_count', true );
-            if ( $wcu_requests_last_session_count > 15 ) {
+            if ( $wcu_requests_last_session_count > 25 ) {
                 $blocked = 1;
             }
         } else {

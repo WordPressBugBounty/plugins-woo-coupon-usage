@@ -113,6 +113,8 @@ function wcusage_setup_page_html() {
 
           <hr style="margin: 20px 0;" />
 
+          <div class="affiliate-dashboard-page-settings">
+
           <h3><span class="dashicons dashicons-admin-generic"></span> Dashboard:</h3>
 
           <p>
@@ -137,6 +139,8 @@ function wcusage_setup_page_html() {
             }
           }
           ?>
+
+          </div>
 
           <form action="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_setup&step=2" method="post">
 
