@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: Easily create an affiliate program for WooCommerce, based on coupons. Track affiliate commission, coupon usage statistics, referral URLs, and more.
-* Version: 6.0.0
+* Version: 6.0.1
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -49,7 +49,7 @@ if ( function_exists( 'wcu_fs' ) ) {
                     ),
                     'menu'           => array(
                         'slug'       => 'wcusage',
-                        'first-path' => 'admin.php?page=wcusage_settings',
+                        'first-path' => 'admin.php?page=wcusage_setup',
                         'support'    => true,
                         'contact'    => true,
                         'pricing'    => true,
@@ -372,6 +372,31 @@ if ( function_exists( 'wcu_fs' ) ) {
     );
     // END MAIN LOGIC
 }
+/**
+ * Hook the activation function
+ */
+register_activation_hook( __FILE__, 'wcusage_plugin_activation_redirect' );
+function wcusage_plugin_activation_redirect() {
+    // Set a transient to trigger the redirect
+    set_transient( 'wcusage_activation_redirect', true, 30 );
+}
+
+/**
+ * Hook into admin_init to perform the redirect
+ */
+add_action( 'admin_init', 'wcusage_do_activation_redirect' );
+function wcusage_do_activation_redirect() {
+    $wcusage_setup_complete = get_option( 'wcusage_setup_complete' );
+    // Check if the transient exists
+    if ( get_transient( 'wcusage_activation_redirect' ) && !$wcusage_setup_complete ) {
+        // Delete the transient so the redirect only happens once
+        delete_transient( 'wcusage_activation_redirect' );
+        // Perform the redirect
+        wp_safe_redirect( admin_url( 'admin.php?page=wcusage_setup' ) );
+        exit;
+    }
+}
+
 /**
  * Compatible with WooCommerce HP
  *

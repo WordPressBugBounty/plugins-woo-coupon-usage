@@ -379,10 +379,15 @@ body.dark-mode .login-registration-container button {
 
 .login-registration-container {
     display: flex;
-    width: 100%;
+    width: calc(100% - 140px) !important;
     justify-content: center;
     align-items: flex-start;
     padding: 40px 70px 100px 70px; /* Match content-body padding */
+}
+
+#wcu-register-button {
+    margin-top: 0px !important;
+    margin-bottom: -10px !important;
 }
 
 .login-form,
@@ -436,6 +441,8 @@ body.dark-mode .login-registration-container button {
     font-size: 14px;
     color: var(--text-color); /* Use variable */
     background: var(--input-bg); /* Use variable for input background */
+    max-width: 100% !important;
+    width: 100%;
 }
 
 .login-form input[type="submit"],
@@ -675,7 +682,7 @@ body,
 }
 
 /* Hamburger Menu Styles */
-.hamburger-menu {
+.content-header .hamburger-menu {
     display: none; /* Hidden by default for desktop */
     font-size: 24px;
     cursor: pointer;
@@ -710,7 +717,7 @@ body,
         position: relative;
     }
 
-    .hamburger-menu {
+    .content-header .hamburger-menu {
         display: block; /* Show hamburger icon on mobile */
         margin-left: 15px;
         order: -1; /* Place before welcome-header */

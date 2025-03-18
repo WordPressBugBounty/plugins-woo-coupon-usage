@@ -46,12 +46,12 @@ if ( isset( $_GET['couponid'] ) ) {
         'meta_value'  => $current_user_id,
         'numberposts' => 1,
     ) );
+    $user_no_coupons = 0;
     if ( !empty( $coupons ) ) {
         $coupon_post = $coupons[0];
         $postid = $coupon_post->ID;
     } else {
-        echo '<p>' . esc_html__( 'No affiliate coupons assigned to your account.', 'woo-coupon-usage' ) . '</p>';
-        exit;
+        $user_no_coupons = 1;
     }
     $coupon_code = $coupon_post->post_title;
 }
@@ -205,6 +205,8 @@ $wcusage_portal_title = wcusage_get_setting_value( 'wcusage_portal_title', __( '
 $portal_footer_text = wcusage_get_setting_value( 'wcusage_portal_footer_text', '' );
 // Convert to html entities
 $portal_footer_text = htmlspecialchars_decode( $portal_footer_text );
+// Show login and registration forms
+$register_loggedin = wcusage_get_setting_value( 'wcusage_field_registration_enable_register_loggedin', '1' );
 ?>
 
 <!DOCTYPE html>
@@ -264,7 +266,7 @@ do_action( 'wcusage_portal_hook_before_body' );
     <div class="affiliate-portal-container">
         <!-- Left Sidebar with Tabs -->
         <div class="sidebar<?php 
-echo ( !$current_user_id ? ' logged-out' : '' );
+echo ( !$current_user_id || $user_no_coupons ? ' logged-out' : '' );
 ?>" style="background: <?php 
 echo esc_attr( $tab_color );
 ?>;">
@@ -353,6 +355,54 @@ if ( !$current_user_id ) {
     ?>
                         <?php 
     do_action( 'wcusage_portal_hook_after_registration_form' );
+    ?>
+                    </div>
+                </div>
+                <?php 
+    if ( $portal_footer_text ) {
+        ?>
+                <div class="content-footer">
+                    <p><?php 
+        echo wp_kses_post( $portal_footer_text );
+        ?></p>
+                </div>
+                <?php 
+    }
+    ?>
+            <?php 
+} elseif ( $user_no_coupons ) {
+    ?>
+                <!-- Logged-out User: Login and Registration Forms -->
+                <div class="content-header">
+                    <i class="fas fa-bars hamburger-menu"></i>
+                    <div class="welcome-header">
+                        <h1 style="font-size: 24px; margin: 0; color: #2c3e50; font-weight: bold;">
+                            <?php 
+    echo esc_html( $wcusage_portal_title );
+    ?>
+                        </h1>
+                    </div>
+                    <?php 
+    $wcusage_portal_dark_mode = wcusage_get_setting_value( 'wcusage_portal_dark_mode', '1' );
+    if ( $wcusage_portal_dark_mode ) {
+        ?>
+                    <i class="fas fa-sun dark-mode-toggle" id="dark-mode-toggle" title="Toggle Dark Mode"></i>
+                    <?php 
+    }
+    ?>
+                </div>
+                <?php 
+    do_action( 'wcusage_portal_hook_after_header' );
+    ?>
+                <div class="login-registration-container">
+                    <div class="registration-form">
+                        <?php 
+    if ( $register_loggedin ) {
+        echo do_shortcode( '[couponaffiliates-register]' );
+        do_action( 'wcusage_portal_hook_after_registration_form' );
+    } else {
+        echo '<p>' . esc_html__( 'No affiliate coupons assigned to your account.', 'woo-coupon-usage' ) . '</p>';
+    }
     ?>
                     </div>
                 </div>

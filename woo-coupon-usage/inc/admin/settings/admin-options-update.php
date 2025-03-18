@@ -328,9 +328,22 @@ function wcu_update_toggle() {
 function wcusage_check_if_option_refresh_stats($option) {
   $options_to_refresh = wcusage_options_refresh_stats();
   if(in_array($option, $options_to_refresh)) {
-    $option_group = get_option('wcusage_options');
     $option_group['wcusage_refresh_date'] = time();
     update_option( 'wcusage_options', $option_group );
+  }
+  do_action('wcusage_check_if_option_refresh_stats', $option);
+}
+
+// Hook into the refresh stats
+add_action('wcusage_check_if_option_refresh_stats', 'wcusage_check_portal_option_update', 10, 2);
+function wcusage_check_portal_option_update($option) {
+  if($option == "wcusage_field_portal_enable") {
+    $option_group = get_option('wcusage_options');
+    if($option_group['wcusage_field_portal_enable'] == "1") {
+      $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+      add_rewrite_rule('^' . $wcusage_portal_slug . '/?$', 'index.php?affiliate_portal=1', 'top');
+    }
+    flush_rewrite_rules();
   }
 }
 

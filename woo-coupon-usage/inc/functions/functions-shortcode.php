@@ -255,14 +255,16 @@ function wcusage_couponusage(  $atts  ) {
                             // This checks to see if commission amount updated, if so then refresh stats
                             if ( $combined_commission != $current_commission_message ) {
                                 update_post_meta( $postid, 'wcu_commission_message', $combined_commission );
-                                update_post_meta( $postid, 'wcu_last_refreshed', '' );
                                 $force_refresh_stats = 1;
                             }
                             // Force refresh stats if coupon usage is more than 0, but stats are
                             if ( isset( $the_coupon_usage ) && $the_coupon_usage > 0 ) {
                                 $wcu_alltime_stats = get_post_meta( $postid, 'wcu_alltime_stats', true );
-                                if ( !$wcu_alltime_stats || empty( $wcu_alltime_stats['total_count'] || $wcu_alltime_stats['total_count'] == 0 ) ) {
-                                    $force_refresh_stats = 1;
+                                if ( !$wcu_alltime_stats || empty( $wcu_alltime_stats['total_count'] ) ) {
+                                    $wcusage_field_enable_coupon_all_stats_meta = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_meta', '1' );
+                                    if ( $wcusage_field_enable_coupon_all_stats_meta ) {
+                                        $force_refresh_stats = 1;
+                                    }
                                 }
                             }
                             // Check if force refresh not done

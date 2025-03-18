@@ -782,7 +782,7 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
 
     <div class="affiliate-dashboard-page-settings">
 
-    <?php if (!class_exists('SitePress')) { ?>
+    <?php if (!class_exists('SitePress') || isset($options['wcusage_dashboard_page'])) { ?>
 
       <!-- Dashboard Page Dropdown -->
       <p><strong><?php echo esc_html__( 'Affiliate Dashboard Page:', 'woo-coupon-usage' ); ?><?php if ( !$options['wcusage_dashboard_page'] ) { ?> <span class="dashicons dashicons-warning" title="Important" style="color: red;"></span><?php } ?></strong></p>
@@ -809,14 +809,6 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
           $options_update['wcusage_dashboard_page'] = $dashboardpage;
           update_option('wcusage_options', $options_update);
         }
-      }
-      // Show warning if the page does not contain the shortcode
-      if ( isset($options['wcusage_dashboard_page']) && $options['wcusage_dashboard_page'] && !$dashboardpage ) {
-        $page = get_post($dashboardpage);
-        if ( !has_shortcode($page->post_content, 'couponaffiliates') ) {
-            echo "<p style='color: red; margin: 5px 0;'><strong>".esc_html__( 'Fix required: The selected page you have selected previously did not contain the [couponaffiliates] shortcode.', 'woo-coupon-usage' )."</strong></p>";
-            echo "<p style='color: red; margin: 5px 0;'><strong>".esc_html__( 'Please select a page that contains the [couponaffiliates] shortcode.', 'woo-coupon-usage' )."</strong></p>";
-          }
       }
       // Show the dropdown
       $dropdown_args = array(
@@ -884,16 +876,27 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
           });
       </script>
       
-      <br/>
-      <i><?php echo esc_html__( '(The page that has the [couponaffiliates] shortcode on.)', 'woo-coupon-usage' ); ?></i>
-      <br/>    
-
     <?php } else { ?>
 
       <!-- Showing number input if WPML installed -->
       <?php echo wcusage_setting_number_option('wcusage_dashboard_page', '', esc_html__( 'Affiliate Dashboard Page (ID):', 'woo-coupon-usage' ), '0px'); ?>
 
     <?php } ?>
+
+    <br/>
+      <i><?php echo esc_html__( '(The page that has the [couponaffiliates] shortcode on.)', 'woo-coupon-usage' ); ?></i>
+    <br/>  
+
+    <?php
+    // Show warning if the page does not contain the shortcode
+    if ( isset($options['wcusage_dashboard_page']) && $options['wcusage_dashboard_page'] && !$dashboardpage ) {
+      $page = get_post($dashboardpage);
+      if ( !has_shortcode($page->post_content, 'couponaffiliates') ) {
+          echo "<p style='color: red; margin: 5px 0;'><strong>".esc_html__( 'Fix required: The selected page you have selected previously did not contain the [couponaffiliates] shortcode.', 'woo-coupon-usage' )."</strong></p>";
+          echo "<p style='color: red; margin: 5px 0;'><strong>".esc_html__( 'Please select a page that contains the [couponaffiliates] shortcode.', 'woo-coupon-usage' )."</strong></p>";
+        }
+    }
+    ?>
 
     <br/>
 

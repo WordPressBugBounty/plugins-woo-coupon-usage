@@ -966,12 +966,12 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
     }
   }
   .wcu-settings-sidebar-pro-upgrade-button {
-    font-size: 20px;
+    font-size: 18px;
     line-height: 30px;
     margin: 15px auto 0 auto;
     background: linear-gradient(-45deg,#1a9612,#0c5a07,#1a9612,#0c5a07);
     background-size: 250% 250% !important;
-    padding: 2px 5px 5px 5px;
+    padding: 5px;
     color: #fff;
     border-radius: 20px;
     display: block;
@@ -1018,9 +1018,9 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         <a href="<?php 
                 echo wcu_fs()->get_upgrade_url();
                 ?>&trial=true" style="text-decoration: none;" target="_blank">
-        <p class="wcu-settings-sidebar-pro-upgrade-button">FREE 7 DAY TRIAL <span class="fas fa-arrow-right"></span></p>
+        <p class="wcu-settings-sidebar-pro-upgrade-button">7 DAY TRIAL <span class="fas fa-arrow-right"></span></p>
         </a>
-        <p style="font-size: 12px; line-height: 20px; margin-top: 15px;">After your trial, just $12.99 per month.</p>
+        <p style="font-size: 10px; line-height: 20px; margin-top: 15px;">After your trial, just $12.99 per month.</p>
 
         <?php 
                 // Black Friday Deal
