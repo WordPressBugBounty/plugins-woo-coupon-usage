@@ -6,7 +6,7 @@ jQuery(document).ready(function($) {
     const savedTheme = localStorage.getItem('theme');
     const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-    if (savedTheme === 'dark' || (!savedTheme && prefersDarkScheme)) {
+    if (savedTheme === 'dark') {
         body.addClass('dark-mode');
         toggleButton.removeClass('fa-sun').addClass('fa-moon');
     } else {

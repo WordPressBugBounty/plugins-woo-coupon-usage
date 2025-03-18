@@ -549,6 +549,15 @@ function wcusage_setup_page_update() {
       $option_group['wcusage_dashboard_page'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_dashboard_page'] );
     }
 
+    if( isset( $_POST['wcusage_options']['wcusage_field_portal_enable'] ) ) {
+      $option_group['wcusage_field_portal_enable'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_portal_enable'] );
+      if( $option_group['wcusage_field_portal_enable'] == 1 ) {
+        $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+        add_rewrite_rule('^' . $wcusage_portal_slug . '/?$', 'index.php?affiliate_portal=1', 'top');
+      }
+      flush_rewrite_rules();
+    }
+
   }
 
   // 2

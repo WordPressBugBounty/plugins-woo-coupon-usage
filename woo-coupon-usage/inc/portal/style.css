@@ -115,6 +115,7 @@ textarea {
     border-left: 4px solid transparent; /* For active tab indicator */
     outline: none;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    text-decoration: none;
 }
 
 .portal-tablink i {
@@ -386,7 +387,7 @@ body.dark-mode .login-registration-container button {
 }
 
 #wcu-register-button {
-    margin-top: 0px !important;
+    margin-top: 5px !important;
     margin-bottom: -10px !important;
 }
 

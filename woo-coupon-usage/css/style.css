@@ -1065,6 +1065,7 @@ form#product_search_form input {
 	.wcusage-info-box {
 		width: 32.3%;
 		float: left;
+		box-sizing: border-box;
 	}
 }
 
