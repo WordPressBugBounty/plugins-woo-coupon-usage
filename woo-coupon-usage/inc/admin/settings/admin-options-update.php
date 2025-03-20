@@ -334,18 +334,25 @@ function wcusage_check_if_option_refresh_stats($option) {
   do_action('wcusage_check_if_option_refresh_stats', $option);
 }
 
-// Hook into the refresh stats
-add_action('wcusage_check_if_option_refresh_stats', 'wcusage_check_portal_option_update', 10, 2);
+// Hook into options update
 function wcusage_check_portal_option_update($option) {
   if($option == "wcusage_field_portal_enable") {
     $option_group = get_option('wcusage_options');
+    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
     if($option_group['wcusage_field_portal_enable'] == "1") {
-      $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
       add_rewrite_rule('^' . $wcusage_portal_slug . '/?$', 'index.php?affiliate_portal=1', 'top');
+    } else {
+      // Remove the rewrite rule
+      $rules = get_option('rewrite_rules');
+      if(isset($rules['^' . $wcusage_portal_slug . '/?$'])) {
+        unset($rules['^' . $wcusage_portal_slug . '/?$']);
+        update_option('rewrite_rules', $rules);
+      }
     }
     flush_rewrite_rules();
   }
 }
+add_action('wcusage_check_if_option_refresh_stats', 'wcusage_check_portal_option_update', 10, 2);
 
 // Post: Refresh Stats for certain updates updating
 add_action('updated_option', 'wcusage_check_if_option_refresh_stats_post', 10, 3);

@@ -270,7 +270,7 @@ function wcusage_field_cb_payouts( $args )
 
         <?php } ?>
 
-        </div>
+        
 
        <br/><hr/>
 
@@ -1082,6 +1082,8 @@ function wcusage_field_cb_payouts( $args )
       <p>- Statements will automatically generate a PDF payment statement for affiliates to download, when a payout is requested.</p>
 
     </span>
+
+    </div>
 
 	</div>
 

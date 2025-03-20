@@ -67,9 +67,38 @@ textarea {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
+.wcu-settings-tab-content input[type="text"],
+.wcu-settings-tab-content input[type="url"],
+.wcu-settings-tab-content input[type="password"],
+.wcu-settings-tab-content input[type="email"],
+.wcu-settings-tab-content input[type="submit"],
+.wcu-settings-tab-content select,
+.wcu-settings-tab-content textarea {
+    padding: 5px 10px;
+    min-height: 40px;
+    border-radius: 2px;
+    border: 1px solid #dbdada;
+}
+
+.wcu-settings-tab-nav li {
+    font-size: 15px;
+}
+
+.wcusage_custom_ref_url {
+    margin-top: 5px;
+}
+
+#wcu-add-campaign-name {
+    min-height: 40px;
+}
+
 .affiliate-portal-container {
     display: flex;
     min-height: 100vh;
+}
+
+.wcu-tab-title {
+    margin-top: 10px;
 }
 
 .sidebar {
@@ -341,6 +370,11 @@ textarea {
     font-weight: bold;
 }
 
+#wcu-orders-status {
+    padding: 0px 10px;
+    min-height: 40px;
+}
+
 .login-registration-container input[type="submit"],
 .login-registration-container input[type="button"],
 .login-registration-container button {
@@ -350,6 +384,31 @@ textarea {
     border-radius: 4px !important;
     box-sizing: border-box;
     background: #1e1e1e; /* Keep hardcoded as it's a specific button style */
+}
+
+.woocommerce-form-login__submit, #wcu-register-button {
+    padding: 12px;
+    font-size: 18px;
+    line-height: 18px;
+}
+.registration-form .wcu_form_affiliate_register input, .woocommerce-form-login input {
+    margin-bottom: 10px !important;
+}
+.woocommerce-form-login p.form-row {
+    margin-top: 0px;
+}
+
+.form-row .woocommerce-form__input.woocommerce-form__input-checkbox {
+    margin-top: 20px;
+}
+
+.login-form h2, .wcusage-register-form-title {
+    margin-top: 20px !important;
+    margin-bottom: 25px !important;
+}
+
+.wcu_form_affiliate_register input {
+    margin-bottom: 10px;
 }
 
 body.dark-mode .login-registration-container input[type="submit"],
@@ -387,7 +446,7 @@ body.dark-mode .login-registration-container button {
 }
 
 #wcu-register-button {
-    margin-top: 5px !important;
+    margin-top: 15px !important;
     margin-bottom: -10px !important;
 }
 
@@ -814,8 +873,10 @@ body,
 
 /* MLA */
 
-#ml-wcu3 {
-    max-width: calc(100vw - 368px);
+@media (min-width: 768px) {
+    #ml-wcu3 {
+        max-width: calc(100vw - 368px);
+    }
 }
 
 #wcu-add-mlainvite {

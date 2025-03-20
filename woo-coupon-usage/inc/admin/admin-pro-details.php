@@ -36,7 +36,7 @@ function wcusage_field_cb_pro_details( $args )
 
     <div class="wcu-pro-col-inner">
 
-  	<h2 style="margin-bottom: 5px;">Upgrade to PRO today!</h2>
+  	<h2 style="margin-bottom: 15px;">Upgrade to PRO today!</h2>
 
     PRO is a paid upgrade which provides a whole bunch of exciting addons and extra features to take your coupon affiliate system to the next level.
 
@@ -65,7 +65,7 @@ function wcusage_field_cb_pro_details( $args )
     <?php } ?>
     </p>
 
-    <br/><br/><br/>
+    <br/><br/>
 
     </div>
 
@@ -89,9 +89,9 @@ function wcusage_field_cb_pro_details( $args )
 
   <?php } ?>
 
-<h1 style="margin-bottom: 5px;">PRO <?php echo esc_html__( 'Modules & Features', 'woo-coupon-usage' ); ?>:</h1>
+  <hr/>
 
-<hr/>
+<h1 style="margin-bottom: 15px;">PRO <?php echo esc_html__( 'Modules & Features', 'woo-coupon-usage' ); ?>:</h1>
 
 <p><?php echo esc_html__( 'The below section includes a list of most of the modules and features included in the Pro plan. However other smaller features and customisations can be found throughout the settings page.', 'woo-coupon-usage' ); ?></p>
 <br/>

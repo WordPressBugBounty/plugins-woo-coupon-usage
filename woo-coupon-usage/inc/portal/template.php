@@ -240,20 +240,7 @@ foreach ( $styles as $style ) {
     $style_handle = $style_obj->handle;
     $style_src = $style_obj->src;
     $style_src = strtolower( $style_src );
-    // If theme name is in the style src, dequeue it
-    if ( strpos( $style_src, $theme_name ) !== false ) {
-        wp_dequeue_style( $style_handle );
-    }
-    // If woocommerce is in the style src, dequeue it
-    if ( strpos( $style_src, 'woocommerce' ) !== false ) {
-        wp_dequeue_style( $style_handle );
-    }
-    // If wc- is in the style src, dequeue it
-    if ( strpos( $style_src, 'wc-' ) !== false ) {
-        wp_dequeue_style( $style_handle );
-    }
-    // If global-styles is in the style src, dequeue it
-    if ( strpos( $style_src, 'global-styles' ) !== false ) {
+    if ( strpos( $style_src, $theme_name ) !== false || strpos( $style_src, 'woocommerce' ) !== false || strpos( $style_src, 'wc-' ) !== false || strpos( $style_src, 'global-styles' ) !== false || strpos( $style_src, 'global' ) !== false ) {
         wp_dequeue_style( $style_handle );
     }
 }
@@ -333,7 +320,7 @@ if ( !$current_user_id ) {
     ?>
                 <div class="login-registration-container">
                     <div class="login-form">
-                        <h2><?php 
+                        <h2 class="wcusage-login-form-title"><?php 
     esc_html_e( 'Login', 'woo-coupon-usage' );
     ?></h2>
                         <?php 

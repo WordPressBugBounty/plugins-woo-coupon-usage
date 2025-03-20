@@ -168,7 +168,7 @@ function wcusage_couponusage(  $atts  ) {
                             if ( $wcusage_before_title ) {
                                 $dashboard_title = $wcusage_before_title . " " . $dashboard_title;
                             }
-                            echo '<h2 class="coupon-title">' . wp_kses_post( $dashboard_title );
+                            echo '<h2 class="coupon-title"><i class="fas fa-tag"></i> ' . wp_kses_post( $dashboard_title );
                             if ( $wcusage_field_load_ajax ) {
                                 ?><a class="wcusage-refresh-data" href="javascript:void(0);" style="visibility: hidden;">
 						<i class="fas fa-sync" style="font-size: 16px;" title="<?php 

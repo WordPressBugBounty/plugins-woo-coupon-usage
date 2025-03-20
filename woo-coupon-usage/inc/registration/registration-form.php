@@ -210,8 +210,6 @@ if ( $wcusage_field_registration_enable ) {
                             }
                             ?>
 
-              <div style="clear: both;"></div>
-
               <p class="wcu-register-field-col-email <?php 
                             if ( !$wcusage_field_registration_emailusername ) {
                                 ?>wcu-register-field-col-2<?php 
@@ -221,6 +219,8 @@ if ( $wcusage_field_registration_enable ) {
                             ?>:*</label>
                 <input type="email" id="wcu-input-email" name="wcu-input-email" class="input-text form-control" value="" style="max-width: 300px;" required>
               </p>
+
+              <div style="clear: both;"></div>
 
               <p class="wcu-register-field-col-password<?php 
                             if ( $field_password_confirm ) {
@@ -655,6 +655,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
                         if ( $wcusage_field_mla_enable ) {
                             if ( !$adminpost ) {
                                 $cookie = wcusage_get_cookie_value( "wcusage_referral_mla" );
+                                $cookie = str_replace( "%20", " ", $cookie );
                                 $mla = wcusage_get_mla_referral_value();
                             }
                         }

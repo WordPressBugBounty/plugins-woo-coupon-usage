@@ -1182,10 +1182,15 @@ add_action(
     'wcusage_hook_tab_latest_orders_filters',
     'wcusage_tab_latest_orders_filters',
     10,
-    3
+    4
 );
 if ( !function_exists( 'wcusage_tab_latest_orders_filters' ) ) {
-    function wcusage_tab_latest_orders_filters(  $wcu_orders_start, $wcu_orders_end, $coupon_code  ) {
+    function wcusage_tab_latest_orders_filters(
+        $wcu_orders_start,
+        $wcu_orders_end,
+        $coupon_code,
+        $mla = 0
+    ) {
         $options = get_option( 'wcusage_options' );
         $wcusage_field_load_ajax = wcusage_get_setting_value( 'wcusage_field_load_ajax', '1' );
         ?>
@@ -1274,7 +1279,11 @@ if ( !function_exists( 'wcusage_tab_latest_orders_filters' ) ) {
         ?> id="wcu-orders-button" name="submitordersfilter"
             value="<?php 
         echo esc_html__( "Filter", "woo-coupon-usage" );
-        ?>" style="padding: 1px 10px;" onclick="wcusage_run_tab_page_orders()">
+        ?>" style="padding: 1px 10px;" onclick="wcusage_run_tab_page_orders<?php 
+        if ( $mla ) {
+            ?>_mla<?php 
+        }
+        ?>();">
 					</form>
 
 			</div>
@@ -1338,6 +1347,70 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
         // *** DISPLAY CONTENT *** //
         ?>
 
+  <script>
+  function wcusage_run_tab_page_orders() {
+    /* 3 second disable on click button */
+    jQuery("#wcu-orders-button").css("opacity", "0.5");
+    jQuery("#wcu-orders-button").css("pointer-events", "none");
+    setTimeout(function() {
+      jQuery("#wcu-orders-button").css("opacity", "1");
+      jQuery("#wcu-orders-button").css("pointer-events", "auto");
+    }, 3 * 1000);
+
+    /* Set content to empty */
+    jQuery('.show_orders').html('');
+    jQuery('.wcu-loading-orders').show();
+
+    /* Ajax request */
+    var data = {
+      action: 'wcusage_load_page_orders',
+      _ajax_nonce: '<?php 
+        echo esc_html( wp_create_nonce( 'wcusage_dashboard_ajax_nonce' ) );
+        ?>',
+      postid: '<?php 
+        echo esc_html( $postid );
+        ?>',
+      couponcode: '<?php 
+        echo esc_html( $coupon_code );
+        ?>',
+      startdate: jQuery('input[name=wcu_orders_start]').val(),
+      enddate: jQuery('input[name=wcu_orders_end]').val(),
+      status: jQuery('#wcu-orders-status option').filter(":selected").val(),
+      language: '<?php 
+        echo esc_html( $language );
+        ?>',
+    };
+    jQuery.ajax({
+      type: 'POST',
+      url: '<?php 
+        echo esc_url( admin_url( 'admin-ajax.php' ) );
+        ?>',
+      data: data,
+      success: function(data) {
+      jQuery('#wcu3 .wcuTable').remove();
+      jQuery('.show_orders').html(data);
+      jQuery('.wcu-loading-orders').hide();
+      },
+      error: function(data) {
+      jQuery('.show_orders').html('<?php 
+        echo wp_kses_post( $ajaxerrormessage );
+        ?>');
+      }
+    });
+  }
+
+  jQuery(document).ready(function() {
+    <?php 
+        if ( $wcusage_field_load_ajax_per_page ) {
+            ?>
+    jQuery("#tab-page-orders").one('click', wcusage_run_tab_page_orders);
+    <?php 
+        }
+        ?>
+    jQuery(".wcusage-refresh-data").on('click', wcusage_run_tab_page_orders);
+  });
+  </script>
+
   <?php 
         if ( isset( $_POST['page-orders'] ) || $wcusage_page_load == false ) {
             ?>
@@ -1378,70 +1451,6 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
                 ?>class="wcutabcontent"<?php 
             }
             ?>>
-
-      <script>
-      function wcusage_run_tab_page_orders() {
-        /* 3 second disable on click button */
-        jQuery("#wcu-orders-button").css("opacity", "0.5");
-        jQuery("#wcu-orders-button").css("pointer-events", "none");
-        setTimeout(function() {
-          jQuery("#wcu-orders-button").css("opacity", "1");
-          jQuery("#wcu-orders-button").css("pointer-events", "auto");
-        }, 3 * 1000);
-
-        /* Set content to empty */
-        jQuery('.show_orders').html('');
-        jQuery('.wcu-loading-orders').show();
-
-        /* Ajax request */
-        var data = {
-          action: 'wcusage_load_page_orders',
-          _ajax_nonce: '<?php 
-            echo esc_html( wp_create_nonce( 'wcusage_dashboard_ajax_nonce' ) );
-            ?>',
-          postid: '<?php 
-            echo esc_html( $postid );
-            ?>',
-          couponcode: '<?php 
-            echo esc_html( $coupon_code );
-            ?>',
-          startdate: jQuery('input[name=wcu_orders_start]').val(),
-          enddate: jQuery('input[name=wcu_orders_end]').val(),
-          status: jQuery('#wcu-orders-status option').filter(":selected").val(),
-          language: '<?php 
-            echo esc_html( $language );
-            ?>',
-        };
-        jQuery.ajax({
-          type: 'POST',
-          url: '<?php 
-            echo esc_url( admin_url( 'admin-ajax.php' ) );
-            ?>',
-          data: data,
-          success: function(data) {
-          jQuery('#wcu3 .wcuTable').remove();
-          jQuery('.show_orders').html(data);
-          jQuery('.wcu-loading-orders').hide();
-          },
-          error: function(data) {
-          jQuery('.show_orders').html('<?php 
-            echo wp_kses_post( $ajaxerrormessage );
-            ?>');
-          }
-        });
-      }
-
-      jQuery(document).ready(function() {
-        <?php 
-            if ( $wcusage_field_load_ajax_per_page ) {
-                ?>
-        jQuery("#tab-page-orders").one('click', wcusage_run_tab_page_orders);
-        <?php 
-            }
-            ?>
-        jQuery(".wcusage-refresh-data").on('click', wcusage_run_tab_page_orders);
-      });
-      </script>
 
       <?php 
             echo "<p class='wcu-tab-title coupon-orders-list-title' style='font-size: 22px; margin-bottom: 0;'>" . esc_html__( "Recent Orders", "woo-coupon-usage" ) . ":</p>";

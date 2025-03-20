@@ -32,7 +32,7 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
   				background: <?php echo esc_html($wcusage_color_table); ?> !important;
   				color: <?php echo esc_html($wcusage_color_table_font); ?> !important;
   			}
-        .wcuTableHead span, .wcuTableFoot span {
+        	.wcuTableHead span, .wcuTableFoot span {
   				color: <?php echo esc_html($wcusage_color_table_font); ?> !important;
   			}
   		<?php } ?>

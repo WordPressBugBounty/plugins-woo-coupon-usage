@@ -330,18 +330,6 @@ if( !function_exists( 'wcusage_setting_section_tax' ) ) {
   <br/>
 
   <!-- Include tax on fixed commission amounts. -->
-  <script>
-  jQuery( document ).ready(wcusage_check_show_tax_fixed);
-  jQuery('#wcusage_field_affiliate_fixed_order').change(wcusage_check_show_tax_fixed);
-  jQuery('#wcusage_field_affiliate_fixed_product').change(wcusage_check_show_tax_fixed);
-  function wcusage_check_show_tax_fixed() {
-    if(jQuery('#wcusage_field_affiliate_fixed_order').val() <= 0 && jQuery('#wcusage_field_affiliate_fixed_product').val() <= 0) {
-      jQuery('.wcu-field-section-tax-fixed').hide();
-    } else {
-      jQuery('.wcu-field-section-tax-fixed').show();
-    }
-  }
-  </script>
   <span class="wcu-field-section-tax-fixed">
     <?php echo wcusage_setting_toggle_option('wcusage_field_show_tax_fixed', 0, esc_html__( 'Include "taxes" in "fixed" commission calculations.', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'If enabled, order tax will be added to the fixed commission calculations.', 'woo-coupon-usage' ); ?></i><br/>

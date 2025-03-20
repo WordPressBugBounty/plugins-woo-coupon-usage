@@ -371,6 +371,20 @@ function wcusage_coupon_users_page() {
         }
     }
 
+    // If GET success = 1, show success message
+    if(isset($_GET['success']) && $_GET['success'] == 1) {
+        if(isset($_GET['user'])) {
+            $username = sanitize_text_field($_GET['user']);
+            echo '<div class="notice notice-success is-dismissible"><p>'
+            . sprintf(esc_html__('The affiliate user %s has been successfully added.', 'woo-coupon-usage'), $username)
+            . '</p></div>';
+        } else {
+            echo '<div class="notice notice-success is-dismissible"><p>'
+            . esc_html__('The affiliate user has been successfully added.', 'woo-coupon-usage')
+            . '</p></div>';
+        }
+    }
+
     $coupon_users_table = new WC_Coupon_Users_Table();
     $coupon_users_table->process_bulk_action();
 	$coupon_users_table->prepare_items();

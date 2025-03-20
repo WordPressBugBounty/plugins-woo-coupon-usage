@@ -85,7 +85,7 @@ if ( !function_exists( 'wcusage_tab_referral_url' ) ) {
   		<div class="referral-url-box">
 
   			<!-- Ref Link -->
-  			<p style="margin-bottom: 10px;">
+  			<p style="margin-top: 8px; margin-bottom: 10px;">
   				<strong><?php 
             echo esc_html__( "Referral Link", "woo-coupon-usage" );
             ?>:</strong> <button id="wcusage_copylink"

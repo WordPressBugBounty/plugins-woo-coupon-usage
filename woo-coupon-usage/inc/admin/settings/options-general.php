@@ -941,14 +941,14 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
 
     <?php $portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal'); ?>
 
-    <p>
+    <p class="setup-hide">
       <?php echo esc_html__( 'Affiliate Portal URL: ', 'woo-coupon-usage' ); ?>
       <a href="<?php echo esc_url(get_home_url()).'/'.$portal_slug.'/' ?>" target="_blank" class="affiliate-portal-url"><?php echo esc_url(get_home_url()).'/'.$portal_slug.'/' ?></a>
     </p>
 
-    <div class="setup-hide">
+    <div>
 
-    <br/>
+    <br class="setup-hide"/>
 
     <p><strong><?php echo esc_html__( 'Customise the Affiliate Portal:', 'woo-coupon-usage' ); ?></strong>
     <button type="button" class="wcu-showhide-button" id="wcu_show_section_portal_settings"><?php echo esc_html__('Show', 'woo-coupon-usage'); ?> <span class='fa-solid fa-arrow-down'></span></button>
@@ -963,7 +963,8 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
     <br/>
 
     <!-- Portal Page URL Slug -->
-    <?php echo wcusage_setting_text_option("wcusage_portal_slug", "affiliate-portal", esc_html__( 'Portal Page Slug', 'woo-coupon-usage' ), "0px"); ?>
+    <?php echo wcusage_setting_text_option("wcusage_portal_slug", "affiliate-portal", esc_html__( 'Portal Page URL Slug', 'woo-coupon-usage' ), "0px"); ?>
+    <span class="affiliate-portal-url"><?php echo esc_url(get_home_url()).'/'.$portal_slug.'/' ?></span><br/>
     <script>
       // Update the affiliate portal URL when the slug is changed
       jQuery(document).ready(function($) {
@@ -1023,7 +1024,7 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
     </script>
     <p>
       <?php $wcusage_portal_logo = wcusage_get_setting_value('wcusage_portal_logo', ''); ?>
-      <strong><?php echo esc_html__( 'Affiliate Portal Logo', 'woo-coupon-usage' ); ?>:</strong><br/>
+      <strong><?php echo esc_html__( 'Affiliate Portal Logo', 'woo-coupon-usage' ); ?></strong><br/>
       <input class="wcusage_portal_logo" type="text"
       id="wcusage_portal_logo"
       name="wcusage_options['wcusage_portal_logo']"
@@ -1032,7 +1033,7 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
       <br/><i><?php echo esc_html__( 'This is shown at the very top left of the affiliate portal. Recommended size is 200px width.', 'woo-coupon-usage' ); ?></i><br/>
     </p>
 
-    <br/>
+    <br/><br/>
 
     <!-- Footer Text -->
     <?php echo wcusage_setting_tinymce_option("wcusage_portal_footer_text", "", esc_html__( 'Footer Text', 'woo-coupon-usage' ), "0px"); ?>
@@ -1043,13 +1044,27 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
     <?php echo wcusage_setting_toggle_option('wcusage_portal_dark_mode', 1, esc_html__( 'Show Dark Mode Toggle', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'This will show a toggle switch at the top right of the portal to switch between light and dark mode.', 'woo-coupon-usage' ); ?></i>
 
-    <br/><br/><br/>
+    <br/><br/>
+    
+      <span class="setup-hide">
 
-    <strong><?php echo esc_html__( 'Portal Colors', 'woo-coupon-usage' ); ?></strong>
+        <br/>
 
-    <p>
-        <?php echo sprintf( __( 'You can customise the colors of the affiliate portal in the <a %s>design settings tab</a>.', 'woo-coupon-usage' ), 'href="#" onclick="wcusage_go_to_settings(\'#tab-design\', \'#affiliate-dashboard-colors\');"'); ?>
-    </p>
+        <strong><?php echo esc_html__( 'Portal Colors', 'woo-coupon-usage' ); ?></strong>
+
+        <p>
+            <?php echo sprintf( wp_kses_post( __( 'You can customise the colors of the affiliate portal in the <a %s>design settings tab</a>.', 'woo-coupon-usage' ) ), 'href="#" onclick="wcusage_go_to_settings(\'#tab-design\', \'#affiliate-dashboard-colors\');"'); ?>
+        </p>
+
+      </span>
+
+      <?php if ( isset($_GET['page']) && $_GET['page'] == 'wcusage_setup' ) { ?>
+
+        <p>
+            <?php echo esc_html__( 'You can customise the affiliate portal more, including layout and colors, later on the settings page.', 'woo-coupon-usage' ); ?>
+        </p>
+
+      <?php } ?>
 
     </div>
 

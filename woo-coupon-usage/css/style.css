@@ -413,7 +413,8 @@ form#product_search_form input {
 .wcu-paypal-button,
 #wcu-email-settings-update-button,
 #wcu-billing-update-button,
-#wcu-register-button {
+#wcu-register-button,
+.wcu-settings-tab-content .button {
 	margin-top: 12px;
 	font-size: 15px;
 	min-height: 40px;
@@ -750,7 +751,15 @@ form#product_search_form input {
 	}
 }
 
+.ordersfilterbutton,
+.summaryfilterbutton {
+	display: block;
+	margin: 4px auto;
+	max-width: 150px !important;
+}
+
 @media only screen and (max-width: 939px) {
+
 	.wcu-filters-col1 {
 		margin: 20px 0;
 		width: 100vw;
@@ -763,13 +772,6 @@ form#product_search_form input {
 		text-align: center;
 	}
 
-	.ordersfilterbutton,
-	.summaryfilterbutton {
-		display: block;
-		margin: 4px auto;
-		max-width: 150px !important;
-	}
-
 	.wcu-order-filters-field {
 		width: calc(100% - 20px);
 		display: block;
@@ -779,6 +781,7 @@ form#product_search_form input {
 	.wcu-order-filters-space {
 		display: none;
 	}
+	
 }
 
 .wcu-order-filters-field input {

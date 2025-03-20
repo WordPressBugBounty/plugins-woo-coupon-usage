@@ -545,10 +545,12 @@ function wcusage_setup_page_update() {
   // 1
   if( isset( $_POST['submit_step1'] ) ) {
 
+    // wcusage_dashboard_page
     if( isset( $_POST['wcusage_options']['wcusage_dashboard_page'] ) ) {
       $option_group['wcusage_dashboard_page'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_dashboard_page'] );
     }
 
+    // wcusage_field_portal_enable
     if( isset( $_POST['wcusage_options']['wcusage_field_portal_enable'] ) ) {
       $option_group['wcusage_field_portal_enable'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_portal_enable'] );
       if( $option_group['wcusage_field_portal_enable'] == 1 ) {
@@ -556,6 +558,32 @@ function wcusage_setup_page_update() {
         add_rewrite_rule('^' . $wcusage_portal_slug . '/?$', 'index.php?affiliate_portal=1', 'top');
       }
       flush_rewrite_rules();
+    }
+
+    // wcusage_portal_title
+    if( isset( $_POST['wcusage_options']['wcusage_portal_title'] ) ) {
+      $option_group['wcusage_portal_title'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_portal_title'] );
+    }
+
+    // wcusage_portal_slug
+    if( isset( $_POST['wcusage_options']['wcusage_portal_slug'] ) ) {
+      $option_group['wcusage_portal_slug'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_portal_slug'] );
+    }
+
+    // wcusage_portal_logo
+    if( isset( $_POST['wcusage_options']['wcusage_portal_logo'] ) ) {
+      $option_group['wcusage_portal_logo'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_portal_logo'] );
+    }
+
+    // wcusage_portal_footer_text
+    if( isset( $_POST['wcusage_options']['wcusage_portal_footer_text'] ) ) {
+      // Save tinyMCE content
+      $option_group['wcusage_portal_footer_text'] = wp_kses_post( $_POST['wcusage_options']['wcusage_portal_footer_text'] );
+    }
+
+    // wcusage_portal_dark_mode
+    if( isset( $_POST['wcusage_options']['wcusage_portal_dark_mode'] ) ) {
+      $option_group['wcusage_portal_dark_mode'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_portal_dark_mode'] );
     }
 
   }

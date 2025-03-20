@@ -16,6 +16,11 @@ function wcusage_admin_registrations_page_html() {
         $nonce = sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) );
         if ( wp_verify_nonce( $nonce, 'admin_add_registration_form' ) && wcusage_check_admin_access() ) {
             echo wp_kses_post( wcusage_post_submit_application( 1 ) );
+            // Redirect to admin.php?page=wcusage_affiliates
+            $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . $_POST['wcu-input-username'] );
+            // Redirect via PHP
+            wp_redirect( $redirect_url );
+            exit;
         }
     }
     // Get POST requests
@@ -575,11 +580,12 @@ function wcusage_admin_new_registration_page() {
     <!-- Modify the form action to post to the desired URL -->
     <?php 
     $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
-    $admin_url = admin_url( 'admin.php?page=wcusage_affiliates' );
+    $admin_url = admin_url( 'admin.php?page=wcusage_registrations' );
     ?>
     <form method="post" action="<?php 
     echo esc_url( $admin_url );
     ?>" class="wcu_form_affiliate_register" enctype="multipart/form-data">
+      
       <?php 
     wp_nonce_field( 'admin_add_registration_form' );
     ?>

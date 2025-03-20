@@ -826,7 +826,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         $wcu_text_coupon_commission_fixed_product = get_post_meta( $getcoupon[2], 'wcu_text_coupon_commission_fixed_product', true );
                         // Get Coupon Fixed Per Product
                         $product_percent = "";
-                        $fixed_product_commission = "";
+                        $fixed_product_commission = 0;
                         // Get Product Categories
                         $product_cats = get_the_terms( $parent_id, 'product_cat' );
                         // Check product categories for "wcu_product_cat_commission_percent" meta
@@ -863,6 +863,10 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         // Check if $product_per_user_rates is array
                         if ( is_array( $product_per_user_rates ) ) {
                             foreach ( $product_per_user_rates as $product_per_user_rate ) {
+                                // If $product_per_user_rate['affiliate'] empty, skip
+                                if ( $product_per_user_rate['affiliate'] == "" ) {
+                                    continue;
+                                }
                                 if ( isset( $product_per_user_rate['type'] ) ) {
                                     $product_per_user_rates_type = $product_per_user_rate['type'];
                                 } else {
@@ -1036,6 +1040,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         }
                     }
                 }
+                // End of Order Items Loop
                 // ***** Deduct Custom Discounts Commission ***** //
                 $total_fees = wcusage_get_total_fees( $orderid );
                 if ( is_numeric( $option_affiliate ) ) {

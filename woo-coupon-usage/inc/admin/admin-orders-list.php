@@ -248,7 +248,7 @@ function wcusage_get_the_order_coupon_info(
         }
         // Coupon Code & Link
         $thepageurl = wcusage_get_coupon_shortcode_page( 1, 0 );
-        $wcusage_justoupon = wcusage_get_setting_value( 'wcusage_field_justcoupon', '1' );
+        $wcusage_justcoupon = wcusage_get_setting_value( 'wcusage_field_justcoupon', '1' );
         if ( $wcusage_justcoupon ) {
             $secretid = $coupon_code;
         } else {

@@ -1018,15 +1018,15 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         <a href="<?php 
                 echo wcu_fs()->get_upgrade_url();
                 ?>&trial=true" style="text-decoration: none;" target="_blank">
-        <p class="wcu-settings-sidebar-pro-upgrade-button">7 DAY TRIAL <span class="fas fa-arrow-right"></span></p>
+        <p class="wcu-settings-sidebar-pro-upgrade-button">FREE 7 DAY TRIAL <span class="fas fa-arrow-right"></span></p>
         </a>
         <p style="font-size: 10px; line-height: 20px; margin-top: 15px;">After your trial, just $12.99 per month.</p>
 
         <?php 
                 // Black Friday Deal
                 $todayDate = strtotime( 'now' );
-                $dealDateBegin = strtotime( '15-11-2023' );
-                $dealDateEnd = strtotime( '30-11-2023' );
+                $dealDateBegin = strtotime( '15-11-2025' );
+                $dealDateEnd = strtotime( '30-11-2025' );
                 if ( $todayDate >= $dealDateBegin && $todayDate <= $dealDateEnd ) {
                     $specialsale = true;
                 } else {
@@ -1040,7 +1040,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
       <?php 
                 } else {
                     ?>
-        <p style="font-size: 14px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;">Black Friday - 30% discount!<br/>Use code: BF2024</p>
+        <p style="font-size: 14px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;">Black Friday - 30% discount!<br/>Use code: BF2025</p>
       <?php 
                 }
                 ?>

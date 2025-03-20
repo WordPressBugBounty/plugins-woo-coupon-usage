@@ -424,7 +424,7 @@ function wcusage_field_cb_registration( $args )
 
       <br/><hr/>
 
-      <div id="pro-settings" class="settings-area" <?php
+      <div id="pro-registration-settings" class="settings-area premium-only-settings" <?php
         if ( !wcu_fs()->can_use_premium_code() ) {
             ?>title="Available with Pro version." style="pointer-events:none; opacity: 0.4;"<?php
         }
