@@ -56,7 +56,7 @@ function wcusage_field_cb_fraud( $args )
 
     <?php if(!is_plugin_active('better-coupon-restrictions/coupon-restrictions.php') && !is_plugin_active('better-coupon-restrictions-pro/coupon-restrictions-pro.php')) { ?>
     <br/><br/>
-    <p class="wcu-admin-faq">
+    <p class="wcu-admin-faq" style="padding-top: 9px;">
     <?php echo sprintf( wp_kses_post( __( 'Want more advanced coupon usage restrictions? Check out our %s plugin!',
     'woo-coupon-usage' ) ), '<a href="https://relywp.com/plugins/better-coupon-restrictions-woocommerce/?utm_source=caffs-settings" target="_blank">Better Coupon Restrictions</a>' ); ?>
     </p>

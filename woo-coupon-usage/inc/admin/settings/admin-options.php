@@ -935,6 +935,11 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
     </a>
 
   <style>
+  .premium-only-settings .switch,
+  .premium-only-settings select,
+  .premium-only-settings input {
+      pointer-events: none !important;
+  }
   #wcu-settings-sidebar-pro-upgrade {
     --borderWidth: 5px;
     background: #1D1F20;

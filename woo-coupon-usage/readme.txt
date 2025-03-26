@@ -3,8 +3,8 @@ Contributors: ElliotVS, freemius, couponaffiliates, RelyWP
 Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliates woocommerce
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
-Tested up to: 6.7.2
-Stable tag: 6.0.3
+Tested up to: 6.8
+Stable tag: 6.0.4
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -143,6 +143,7 @@ Coupon Affiliates PRO is a paid upgrade which provides a whole bunch of exciting
 * <a href="https://couponaffiliates.com/docs/admin-reports-analytics">Admin Reports & Analytics (Advanced Filters)</a> - Access to the advanced filter options (unlimited date range & comparisons) for the Admin Reports & Analytics.
 * <a href="https://couponaffiliates.com/docs/pro-affiliate-reports">Affiliate Email Reports</a> - Automatically send an email report (and PDF) to affiliates every week/month with a summary of their recent commission and referral stats.
 * <a href="https://couponaffiliates.com/docs/affiliate-registration">Advanced Registration Features</a> - Enable some more advanced affiliate registration features such as custom form fields, dynamic code generator, auto accept, auto registration, and more.
+* <a href="https://couponaffiliates.com/docs/affiliate-groups">Affiliate Groups</a> - ASsign affiliates to groups, and customise several options for that group such as their unique commission rates, or access to certain features.
 * <a href="https://couponaffiliates.com/docs/pro-creatives">Creatives</a> - Display a creatives section with downloadable banners. Includes preview, download, and copy code buttons.
 * <a href="https://couponaffiliates.com/docs/pro-bonuses">Performance Bonuses</a> - Give your affiliates bonuses when they reach certain goals, such as some bonus commission once they reach a certain amount of sales.
 * <a href="https://couponaffiliates.com/docs/commission-tracking-and-payouts">Commission Payout Tracking</a> - Affiliates can keep track of total UNPAID commission. Admins can view requested commission payouts from affiliates, and track/manage pending, complete and cancelled payouts.
@@ -156,6 +157,7 @@ Coupon Affiliates PRO is a paid upgrade which provides a whole bunch of exciting
 * <a href="https://couponaffiliates.com/docs/flexible-commission-settings">Custom Coupon Commission</a> - Set custom flexible commission amounts for individual coupons.
 * <a href="https://couponaffiliates.com/docs/flexible-commission-settings">Custom Product Commission</a> - Set custom flexible commission amounts for individual products.
 * <a href="https://couponaffiliates.com/docs/flexible-commission-settings">Custom User Role Commission</a> - Set custom flexible commission amounts for individual user roles.
+* <a href="https://couponaffiliates.com/docs/pro-product-rates-table">Product Rates Table</a> - Show a table with all the products and their commission rates, so affiliates can see which products earn them the most commission.
 * <a href="https://couponaffiliates.com/docs/pro-campaigns">Campaigns (Referral URL)</a> - Allow your affiliates to create referral "campaigns" and then create custom URLs to track clicks/conversions per campaign.
 * <a href="https://couponaffiliates.com/docs/pro-direct-link-tracking">Direct Link Tracking (Referral URL)</a> - Affiliates can link directly to your website via their website without needing an affiliate link.
 * <a href="https://couponaffiliates.com/docs/pro-social-sharing">Social Sharing (Referral URL)</a> - Add social sharing buttons to the referral URL tab, so affiliates can instantly share their generated referral link.
@@ -170,6 +172,8 @@ Coupon Affiliates PRO is a paid upgrade which provides a whole bunch of exciting
 * and <a href="https://couponaffiliates.com/roadmap">more great features</a> coming soon...
 
 Learn more about Pro and upgrade at <a href="https://couponaffiliates.com">www.couponaffiliates.com</a>
+
+[youtube https://www.youtube.com/watch?v=REzNmqjvg2E]
 
 <a href="https://couponaffiliates.com">UPGRADE TO PRO</a>
 
@@ -239,6 +243,14 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 6.0.4 - 25th March 2025 =
+- Tweak: The admin add new affiliate form is now hidden if the template coupon has not been created and set in the settings.
+- Tweak: On the "recent orders" tab made the "time" column display on one line with a larger minimum width.
+- Fix: Fixed a small styling issue with the footer of the "recent orders" table on the affiliate dashboard.
+- Fix: (PRO) Fixed an issue with not being able to configure some of the settings in the PRO version since a recent update.
+- Fix: (PRO) Fixed an issue with the "Show All Product Variations" option not working for the "Product Rates" tab.
+- Other: Tested with WordPress 6.8
 
 = Version 6.0.3 - 20th March 2025 =
 - Tweak: Made a few small styling improvements to the affiliate portal.

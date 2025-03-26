@@ -528,7 +528,7 @@ function wcusage_field_cb( $args ) {
   <div <?php if ( !wcu_fs()->can_use_premium_code() ) {?>class="pro-settings-hidden" title="Available with Pro version."<?php } ?>>
 
     <?php echo wcu_admin_settings_showhide_toggle("wcu_show_section_rates_tab", "wcu_section_rates_tab", "Show", "Hide"); ?>
-    <h3><?php echo esc_html__( '"Rates" Tab', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?>: <button style="font-size: 14px; font-weight: normal;" class="wcu-showhide-button" type="button" id="wcu_show_section_rates_tab"><?php echo esc_html__('Show', 'woo-coupon-usage'); ?> <span class='fa-solid fa-arrow-down'></span></button></h3>
+    <h3 id="wcu-section-product-rates"><?php echo esc_html__( '"Rates" Tab', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?>: <button style="font-size: 14px; font-weight: normal;" class="wcu-showhide-button" type="button" id="wcu_show_section_rates_tab"><?php echo esc_html__('Show', 'woo-coupon-usage'); ?> <span class='fa-solid fa-arrow-down'></span></button></h3>
 
     <div class="wcu_section_settings" id="wcu_section_rates_tab" style="display: none;">
 
@@ -1053,7 +1053,7 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
         <strong><?php echo esc_html__( 'Portal Colors', 'woo-coupon-usage' ); ?></strong>
 
         <p>
-            <?php echo sprintf( wp_kses_post( __( 'You can customise the colors of the affiliate portal in the <a %s>design settings tab</a>.', 'woo-coupon-usage' ) ), 'href="#" onclick="wcusage_go_to_settings(\'#tab-design\', \'#affiliate-dashboard-colors\');"'); ?>
+            <?php echo sprintf( wp_kses_post( __( 'You can customise the colors of the affiliate portal in the <a %s>design settings tab</a>.', 'woo-coupon-usage' ) ), '<a href="#" onclick="wcusage_go_to_settings(\'#tab-design\', \'#affiliate-dashboard-colors\');"'); ?>
         </p>
 
       </span>

@@ -212,6 +212,11 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
       .listtheproducts td:before { content: "" !important; }
       .listtheproducts { margin-top: -20px !important; margin-bottom: 20px !important; }
       .wcuTableFoot:nth-of-type(1):before { content: "" !important; }
+      .wcuTableFoot:nth-of-type(2):before { content: "" !important; }
+      .wcuTableFoot:nth-of-type(9):before { content: "" !important; }
+      .wcuTableFoot:nth-of-type(10):before { content: "" !important; }
+      .wcuTableFoot:nth-of-type(11):before { content: "" !important; }
+      .wcuTableFoot:nth-of-type(12):before { content: "" !important; }
 
       <?php 
         if ( $option_show_orderid ) {
@@ -834,7 +839,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         }
                         // Time
                         if ( $option_show_time ) {
-                            echo "<td class='wcuTableCell'>";
+                            echo "<td class='wcuTableCell wcuTableCell-time'>";
                             echo "<span>" . esc_html( $showtime ) . "</span>";
                             echo "</td>";
                             $coltime = true;

@@ -712,7 +712,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
                                 if ( isset( $options['wcusage_field_registration_accept_message'] ) ) {
                                     $acceptmessage = $options['wcusage_field_registration_accept_message'];
                                 } else {
-                                    $acceptmessage = 'Your affiliate application for the coupon code "{coupon}" has been submitted. Please check your email.';
+                                    $acceptmessage = esc_html__( 'Your affiliate application for the coupon code "{coupon}" has been submitted. Please check your email.', 'woo-coupon-usage' );
                                 }
                             } else {
                                 $acceptmessage = esc_html__( 'Your affiliate application has been submitted.', 'woo-coupon-usage' );

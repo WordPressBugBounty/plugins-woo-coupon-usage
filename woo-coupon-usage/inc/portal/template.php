@@ -261,6 +261,7 @@ echo esc_attr( $tab_color );
                 <?php 
 $portal_slug = wcusage_get_setting_value( 'wcusage_portal_slug', 'affiliate-portal' );
 $portal_logo = wcusage_get_setting_value( 'wcusage_portal_logo', '' );
+$portal_logo = apply_filters( 'wcusage_hook_portal_logo', $portal_logo );
 if ( $portal_logo ) {
     echo '<a href="' . esc_url( home_url( $portal_slug ) ) . '">';
     echo '<img src="' . esc_url( $portal_logo ) . '" alt="Portal Logo">';
@@ -470,6 +471,7 @@ if ( !$current_user_id ) {
             echo '<input type="hidden" id="wcu-coupon-title" value="' . esc_attr( $dashboard_title ) . '">';
             // Filter to customize title
             $dashboard_title = apply_filters( 'wcusage_hook_dashboard_title', $dashboard_title, $postid );
+            echo '<i class="fas fa-tag" style="font-size: 0.8em;"></i> ';
             $dashboard_title = "<span class='wcu-coupon-title'>" . $dashboard_title . "</span>";
             $wcusage_before_title = wcusage_get_setting_value( 'wcusage_before_title', '' );
             $wcusage_before_title = "<span class='wcu-coupon-title-prefix'>" . $wcusage_before_title . "</span>";

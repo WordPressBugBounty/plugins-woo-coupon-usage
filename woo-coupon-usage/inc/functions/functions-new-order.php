@@ -288,7 +288,7 @@ function wcusage_on_new_order_set_coupon_referrer(  $order_id  ) {
         }
     }
     // URL Referrals
-    if ( $url_applied && $cookie && $wcusage_field_url_referrals ) {
+    if ( $cookie && $url_applied && $wcusage_field_url_referrals ) {
         $meta_data = [];
         $coupon = new WC_Coupon($cookie);
         $wcusage_field_allow_assigned_user = wcusage_get_setting_value( 'wcusage_field_allow_assigned_user', 1 );

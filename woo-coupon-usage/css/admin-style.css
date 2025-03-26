@@ -838,12 +838,6 @@ Label the data
     height: 0;
 }
 
-.premium-only-settings .switch,
-.premium-only-settings select,
-.premium-only-settings input {
-    pointer-events: none !important;
-}
-
 .wcusage_row .slider, .wcusage_row_setting .slider {
     position: absolute;
     cursor: pointer;

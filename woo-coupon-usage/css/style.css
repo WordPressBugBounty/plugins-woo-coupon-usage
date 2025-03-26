@@ -101,6 +101,12 @@ form#product_search_form input {
 	/*color: #000;*/
 }
 
+@media screen and (min-width: 720px) {
+	.wcuTableCell-time {
+		min-width: 100px;
+	}
+}
+
 .wcuTableHead {
 	display: table-cell;
 	padding: 7px 10px;

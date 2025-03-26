@@ -549,133 +549,141 @@ function wcusage_admin_new_registration_page() {
     <?php 
     if ( !$template_coupon_code ) {
         ?>
+
     <p style="color: red;">
       <span class="dashicons dashicons-warning"></span> <?php 
-        echo esc_html__( 'For affiliate registrations to work properly, you will need to create a "template coupon" and assign it in the settings.', 'woo-coupon-usage' );
+        echo esc_html__( 'For affiliate registrations to work properly, you will need to create a "template coupon" and assign it in the "registration" settings tab.', 'woo-coupon-usage' );
         ?> <a href="https://couponaffiliates.com/docs/template-coupon-code" target="_blank"><?php 
         echo esc_html__( 'Learn More', 'woo-coupon-usage' );
         ?>.</a><br/>
     </p>
+
+    <a href="<?php 
+        echo esc_url( admin_url( 'admin.php?page=wcusage_settings&section=tab-registration' ) );
+        ?>" class="button button-primary"><?php 
+        echo esc_html__( 'Go to Settings', 'woo-coupon-usage' );
+        ?></a>
+
     <?php 
-    }
-    ?>
+    } else {
+        ?>
     
     <?php 
-    $get_template_coupon = wcusage_get_coupon_info( $template_coupon_code );
-    ?>
-      <?php 
-    if ( $template_coupon_code && !$get_template_coupon[2] ) {
+        $get_template_coupon = wcusage_get_coupon_info( $template_coupon_code );
         ?>
+      <?php 
+        if ( $template_coupon_code && !$get_template_coupon[2] ) {
+            ?>
         <p style="color: red;">
           <span class="dashicons dashicons-warning"></span> <?php 
-        echo esc_html__( 'The "template coupon" you have set does not exist. Please make sure you have created it, and entered the exact name in the settings.', 'woo-coupon-usage' );
-        ?><br/><a href="https://couponaffiliates.com/docs/template-coupon-code" target="_blank"><?php 
-        echo esc_html__( 'Learn More', 'woo-coupon-usage' );
-        ?>.</a><br/>
+            echo esc_html__( 'The "template coupon" you have set does not exist. Please make sure you have created it, and entered the exact name in the settings.', 'woo-coupon-usage' );
+            ?><br/><a href="https://couponaffiliates.com/docs/template-coupon-code" target="_blank"><?php 
+            echo esc_html__( 'Learn More', 'woo-coupon-usage' );
+            ?>.</a><br/>
         </p>
     <?php 
-    }
-    ?>
+        }
+        ?>
 
     <!-- Modify the form action to post to the desired URL -->
     <?php 
-    $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
-    $admin_url = admin_url( 'admin.php?page=wcusage_registrations' );
-    ?>
+        $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
+        $admin_url = admin_url( 'admin.php?page=wcusage_registrations' );
+        ?>
     <form method="post" action="<?php 
-    echo esc_url( $admin_url );
-    ?>" class="wcu_form_affiliate_register" enctype="multipart/form-data">
+        echo esc_url( $admin_url );
+        ?>" class="wcu_form_affiliate_register" enctype="multipart/form-data">
       
       <?php 
-    wp_nonce_field( 'admin_add_registration_form' );
-    ?>
+        wp_nonce_field( 'admin_add_registration_form' );
+        ?>
 
       <table class="form-table" role="presentation">
         <tr>
           <th scope="row"><label for="wcu-input-username"><?php 
-    echo esc_html__( 'Username', 'woo-coupon-usage' );
-    ?></label></th>
+        echo esc_html__( 'Username', 'woo-coupon-usage' );
+        ?></label></th>
           <td><input name="wcu-input-username" type="text" id="wcu-input-username" class="regular-text" value="" required>
           <br/><i style="font-size: 10px;">Enter either an existing user, or a new user to create a new account.</i></td>
         </tr>
         <tr>
           <th scope="row"><label for="wcu-input-email"><?php 
-    echo esc_html__( 'Email Address', 'woo-coupon-usage' );
-    ?></label></th>
+        echo esc_html__( 'Email Address', 'woo-coupon-usage' );
+        ?></label></th>
           <td><input name="wcu-input-email" type="email" id="wcu-input-email" class="regular-text ltr" value="">
           <br/><i style="font-size: 10px;">Only required if username doesn't already exist, to create a new account.</i></td>
         </tr>
         <tr>
           <th scope="row"><label for="wcu-input-first-name"><?php 
-    echo esc_html__( 'First Name', 'woo-coupon-usage' );
-    ?></label></th>
+        echo esc_html__( 'First Name', 'woo-coupon-usage' );
+        ?></label></th>
           <td><input name="wcu-input-first-name" type="text" id="wcu-input-first-name" class="regular-text" value="">
           <br/><i style="font-size: 10px;">Only required if username doesn't already exist.</i></td>
         </tr>
         <?php 
-    if ( !$wcusage_field_registration_auto_coupon ) {
-        ?>
+        if ( !$wcusage_field_registration_auto_coupon ) {
+            ?>
         <tr>
           <th scope="row"><label for="wcu-input-coupon"><?php 
-        echo esc_html__( 'Coupon Code', 'woo-coupon-usage' );
-        ?></label></th>
+            echo esc_html__( 'Coupon Code', 'woo-coupon-usage' );
+            ?></label></th>
           <td><input name="wcu-input-coupon" type="text" id="wcu-input-coupon" class="regular-text" value="" required>
           <br/><i style="font-size: 10px;">Enter the name of the coupon code that will be created.</i></td>
         </tr>
         <?php 
-    }
-    ?>
+        }
+        ?>
 
         <!-- Coupon Type -->
         <?php 
-    $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '0' );
-    ?>
+        $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '0' );
+        ?>
 
         <!-- Affiliate Group -->
         <?php 
-    // Loop through user roles that start with "coupon_affiliate"
-    $affiliate_roles = array();
-    $all_roles = wp_roles()->roles;
-    foreach ( $all_roles as $key => $role ) {
-        if ( strpos( $key, 'coupon_affiliate' ) === 0 ) {
-            $affiliate_roles[] = $key;
+        // Loop through user roles that start with "coupon_affiliate"
+        $affiliate_roles = array();
+        $all_roles = wp_roles()->roles;
+        foreach ( $all_roles as $key => $role ) {
+            if ( strpos( $key, 'coupon_affiliate' ) === 0 ) {
+                $affiliate_roles[] = $key;
+            }
         }
-    }
-    if ( $affiliate_roles && count( $affiliate_roles ) > 1 ) {
-        ?>
+        if ( $affiliate_roles && count( $affiliate_roles ) > 1 ) {
+            ?>
           <tr>
             <th scope="row"><label for="wcu-input-role"><?php 
-        echo esc_html__( 'Affiliate Group', 'woo-coupon-usage' );
-        ?></label></th>
+            echo esc_html__( 'Affiliate Group', 'woo-coupon-usage' );
+            ?></label></th>
             <td>
                 <select id="wcu-input-role" name="wcu-input-role">
                 <option value=""><?php 
-        echo esc_html__( '- Default -', 'woo-coupon-usage' );
-        ?></option>
-                <?php 
-        foreach ( $affiliate_roles as $key => $role ) {
-            $role_name = $all_roles[$role]['name'];
-            ?>
-                  <option value="<?php 
-            echo $role;
-            ?>"><?php 
-            echo $role_name;
+            echo esc_html__( '- Default -', 'woo-coupon-usage' );
             ?></option>
+                <?php 
+            foreach ( $affiliate_roles as $key => $role ) {
+                $role_name = $all_roles[$role]['name'];
+                ?>
+                  <option value="<?php 
+                echo $role;
+                ?>"><?php 
+                echo $role_name;
+                ?></option>
                   <?php 
-        }
-        ?>
+            }
+            ?>
                 </select>
                 <br/><i style="font-size: 10px;">Select a custom group to assign the user to. Keep as default to use the normal settings.</i>
               </td>
               </tr>
           <?php 
-    }
-    ?>
+        }
+        ?>
 
         <tr>
           <th scope="row"><label for="wcu-message"><?php 
-    echo esc_html__( 'Custom Message', 'woo-coupon-usage' );
-    ?></label></th>
+        echo esc_html__( 'Custom Message', 'woo-coupon-usage' );
+        ?></label></th>
           <td><input name="wcu-message" type="text" id="wcu-message" class="regular-text" value="">
           <br/><i style="font-size: 10px;">A custom message sent to the affiliate in the welcome/accepted email.</i></td>
         </tr>
@@ -684,14 +692,18 @@ function wcusage_admin_new_registration_page() {
 
       <p class="submit">
         <input type="submit" name="submitaffiliateapplication" id="wcu-register-button" class="button button-primary" value="<?php 
-    echo esc_html__( 'Add New Affiliate', 'woo-coupon-usage' );
-    ?>">
+        echo esc_html__( 'Add New Affiliate', 'woo-coupon-usage' );
+        ?>">
       </p>
     </form>
 
     <br/><br/><strong><?php 
-    echo sprintf( wp_kses_post( __( 'Note: Your users can also register themselves as affiliates using the <a href="%s" target="_blank">affiliate registration form</a>.', 'woo-coupon-usage' ) ), esc_url( $registrationpage_url ) );
-    ?></strong>
+        echo sprintf( wp_kses_post( __( 'Note: Your users can also register themselves as affiliates using the <a href="%s" target="_blank">affiliate registration form</a>.', 'woo-coupon-usage' ) ), esc_url( $registrationpage_url ) );
+        ?></strong>
+
+    <?php 
+    }
+    ?>
 
   </div>
 

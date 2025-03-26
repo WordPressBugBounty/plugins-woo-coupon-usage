@@ -185,20 +185,6 @@ __( 'Display a creatives section with downloadable banners, videos, PDFs, and co
 ?>
 
 <?php echo wcusage_output_addon_box(
-__( 'Performance Bonuses', 'woo-coupon-usage' ),
-"wcusage_field_bonuses_enable",
-__( 'Give your affiliates bonuses when they reach certain goals, such as some bonus commission once they reach a certain amount of sales.', 'woo-coupon-usage' ),
-"https://couponaffiliates.com/docs/pro-bonuses",
-"fas fa-gift",
-0,
-0,
-0,
-'tab-bonuses',
-'bonuses-settings'
-);
-?>
-
-<?php echo wcusage_output_addon_box(
 __( 'Dynamic Creatives', 'woo-coupon-usage' ),
 "wcusage_field_creatives_enable",
 __( 'Build "dynamic" creatives, which automatically generate unique and personalised image/banner for each of your affiliates based on certain merge tags.', 'woo-coupon-usage' ),
@@ -209,6 +195,20 @@ __( 'Build "dynamic" creatives, which automatically generate unique and personal
 0,
 'tab-creatives',
 'creatives-settings'
+);
+?>
+
+<?php echo wcusage_output_addon_box(
+__( 'Performance Bonuses', 'woo-coupon-usage' ),
+"wcusage_field_bonuses_enable",
+__( 'Give your affiliates bonuses when they reach certain goals, such as some bonus commission once they reach a certain amount of sales.', 'woo-coupon-usage' ),
+"https://couponaffiliates.com/docs/pro-bonuses",
+"fas fa-gift",
+0,
+0,
+0,
+'tab-bonuses',
+'bonuses-settings'
 );
 ?>
 
@@ -227,9 +227,23 @@ __( 'Create and display leaderboards on your posts or pages with rankings for yo
 ?>
 
 <?php echo wcusage_output_addon_box(
-__( 'Custom Commission Per Coupon, Product, or User Role', 'woo-coupon-usage' ),
+__( 'Product Rates Table', 'woo-coupon-usage' ),
+"wcusage_field_rates_enable",
+__( 'Show a table of the commission rates earned for that specific affiliate/coupon, on each individual product.', 'woo-coupon-usage' ),
+"https://couponaffiliates.com/docs/pro-product-rates-table",
+"fas fa-table",
+0,
+0,
+0,
+'tab-general',
+'wcu-section-product-rates'
+);
+?>
+
+<?php echo wcusage_output_addon_box(
+__( 'Custom Commission Per Coupon, Product, Category, or User Role/Group', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
-__( 'Set custom "flexible commission" amounts for each individual coupon, product or user role.', 'woo-coupon-usage' ),
+__( 'Set custom "flexible commission" amounts for each individual coupon, product, category, or user group/role.', 'woo-coupon-usage' ),
 "https://couponaffiliates.com/docs/flexible-commission-settings",
 "fas fa-cogs",
 1,
@@ -313,7 +327,7 @@ __( 'Affiliates can link directly to your website via their website without need
 <?php echo wcusage_output_addon_box(
 __( 'Affiliate Landing Pages (Referrals)', 'woo-coupon-usage' ),
 "wcusage_field_landing_pages",
-__( 'Ability to link a landing page to an affiliate coupon, which will then work the same as a referral URL.', 'woo-coupon-usage' ),
+__( 'Ability to link a landing page to an affiliate coupon, which will then work the same as a referral URL. It is also possible to automatically generate pages.', 'woo-coupon-usage' ),
 "https://couponaffiliates.com/docs/pro-affiliate-landing-pages",
 "fas fa-laptop-code",
 0,
