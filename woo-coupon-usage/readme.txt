@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.8
-Stable tag: 6.0.4
+Stable tag: 6.0.5
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -243,6 +243,9 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 6.0.5 - 1st April 2025 =
+- Fix: Fixed the affiliate portal redirect not working properly for some sites (overridden by another plugin or theme).
 
 = Version 6.0.4 - 25th March 2025 =
 - Tweak: The admin add new affiliate form is now hidden if the template coupon has not been created and set in the settings.
