@@ -158,7 +158,29 @@ function wcusage_field_cb_registration( $args )
 
       <br/><hr/>
 
-      <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Terms and Conditions Notice', 'woo-coupon-usage' ); ?></h3>
+      <?php if( wcu_fs()->can_use_premium_code() ) { ?>
+
+      <div style="display: none;">
+
+        <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Terms and Conditions Page', 'woo-coupon-usage' ); ?> (Coming Soon)</h3>
+
+        <p>
+          <?php echo esc_html__( 'You can use the terms and conditions manager and generation tool to help you easily create your terms and conditions page.', 'woo-coupon-usage' ); ?>
+          <a href="https://couponaffiliates.com/docs/terms-generator" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>
+        </p>
+
+        <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage-terms-generator' ) ); ?>" target="_blank"
+        class="button button-primary" style="margin-top: 10px;">
+          <?php echo esc_html__( 'Generate & Edit Terms and Conditions', 'woo-coupon-usage' ); ?> <span class="fas fa-external-link-alt"></span>
+        </a>
+
+        <br/><br/><hr/>
+
+      </div>
+
+      <?php } ?>
+
+      <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Terms and Conditions Acceptance Checkbox', 'woo-coupon-usage' ); ?></h3>
 
       <!-- Enable terms acceptance checkbox on affiliate registration form. -->
       <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_terms', 0, esc_html__( 'Enable terms and conditions checkbox on registration form.', 'woo-coupon-usage' ), '0px'); ?>
@@ -168,7 +190,7 @@ function wcusage_field_cb_registration( $args )
       </style>
       <?php echo wcusage_setting_toggle('.wcusage_field_registration_enable_terms', '.wcu-field-section-registration-terms-message'); // Show or Hide ?>
       <div class="wcu-field-section-registration-terms-message">
-        <br/
+        <br/>
         <!-- Terms and Conditions Message -->
         <?php
         $terms1message = wcusage_get_setting_value('wcusage_field_registration_terms_message', 'I have read and agree to the Affiliate Terms and Privacy Policy.');
@@ -176,6 +198,21 @@ function wcusage_field_cb_registration( $args )
         ?>
         <i><?php echo esc_html__( 'Enter your terms acceptance message. Make sure you edit the message to include links to your terms and privacy policy!', 'woo-coupon-usage' ); ?></i><br/>
       </div>
+
+      <?php if( !wcu_fs()->can_use_premium_code() ) { ?>
+      <br/><br/>
+
+      <strong><?php echo esc_html__( 'Terms and Conditions Page Generator', 'woo-coupon-usage' ); ?>:</strong>
+      <p>
+        <?php echo esc_html__( 'The PRO version of this plugin includes a terms and conditions page generator, which allows you to easily create your own terms and conditions page.', 'woo-coupon-usage' ); ?>
+        <a href="https://couponaffiliates.com/docs/terms-generator" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>
+      </p>
+
+      <p>
+        <?php echo sprintf(wp_kses_post(__( 'This may be made available in the free version soon. For now, if you need help with creating your terms and conditions page in the free version, you can view <a href="%s" target="_blank">this article</a>.', 'woo-coupon-usage' )), 'https://couponaffiliates.com/how-to-create-affiliate-terms'); ?>
+      </p>
+
+      <?php } ?>
 
       <br/><hr style="margin-top: 15px;" />
 
@@ -994,6 +1031,17 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
       <?php echo wcusage_setting_number_option('wcusage_registration_page', '', esc_html__( 'Registration Form Page (ID):', 'woo-coupon-usage' ), '0px'); ?>
 
     <?php } ?>
+
+    <br/>
+
+    <div>
+
+    <p style="margin-bottom: 0px; font-size: 12px;">
+      <?php echo esc_html__( 'Create a more effective signup promo page design with the generator tool:', 'woo-coupon-usage' ); ?>
+      <a href="<?php echo esc_url(admin_url('admin.php?page=signup-page-generator')); ?>" target="_blank" style="font-weight: bold; text-decoration: none;"><?php echo esc_html__( 'Generate Promo Page', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-up-right-from-square"></span></a>
+    </p>
+
+    </div>
 
   <?php
   }

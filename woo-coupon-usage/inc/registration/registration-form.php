@@ -139,6 +139,12 @@ if ( $wcusage_field_registration_enable ) {
                     $name_required = wcusage_get_setting_value( 'wcusage_field_registration_name_required', '0' );
                     $field_password_confirm = wcusage_get_setting_value( 'wcusage_field_registration_password_confirm', '0' );
                     $get_template_coupon = wcusage_get_coupon_info( $registration_coupon_template );
+                    $wcusage_registration_page = wcusage_get_setting_value( 'wcusage_registration_page', '' );
+                    $registration_page_url = get_permalink( $wcusage_registration_page );
+                    // If registration page is not set, use home page URL
+                    if ( !$registration_page_url ) {
+                        $registration_page_url = home_url();
+                    }
                     ?>
 
         <?php 
@@ -152,7 +158,7 @@ if ( $wcusage_field_registration_enable ) {
                             ?> wcu_form_style_columns<?php 
                         }
                         ?>">
-          <form method="post" class="wcu_form_affiliate_register" enctype="multipart/form-data">
+          <form method="post" id="wcu_form_affiliate_register" class="wcu_form_affiliate_register" enctype="multipart/form-data">
 
             <?php 
                         if ( is_user_logged_in() && (!$wcusage_registration_enable_admincan && wcusage_check_admin_access() || !wcusage_check_admin_access()) ) {
@@ -351,6 +357,8 @@ if ( $wcusage_field_registration_enable ) {
                         wp_nonce_field( 'wcusage_verify_submit_registration_form2', 'wcusage_submit_registration_form2' );
                         ?>
 
+            <input type="hidden" name="action" value="wcusage_submit_registration">
+
             <p><input type="submit" class="woocommerce-button button"  id="wcu-register-button" name="submitaffiliateapplication" value="<?php 
                         echo esc_attr( $submit_button_text );
                         ?>"></p>
@@ -386,11 +394,11 @@ if ( $wcusage_field_registration_enable ) {
                     if ( !isset( $_POST['submitaffiliateapplication'] ) ) {
                         ?>
 
-          <p><?php 
-                        echo esc_html__( 'You already have a pending affiliate application.', 'woo-coupon-usage' );
+          <p class="registration-message"><?php 
+                        echo esc_html__( 'You have a pending affiliate application.', 'woo-coupon-usage' );
                         ?></p>
 
-          <p><?php 
+          <p class="registration-message"><?php 
                         echo esc_html__( 'We are reviewing your application and will be in touch soon!', 'woo-coupon-usage' );
                         ?></p>
 
@@ -400,8 +408,6 @@ if ( $wcusage_field_registration_enable ) {
                 ?>
 
       </div>
-
-      <br/>
 
     <?php 
             } else {

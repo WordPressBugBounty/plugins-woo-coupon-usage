@@ -281,8 +281,11 @@ textarea {
 
 .wcu-loading-image {
     text-align: center;
-    padding: 20px;
+    padding-bottom: 20px;
     color: var(--secondary-text-color); /* Use variable */
+}
+#updated_total {
+    text-align: left;
 }
 
 .dashboard-card {
@@ -394,6 +397,10 @@ textarea {
 .registration-form .wcu_form_affiliate_register input, .woocommerce-form-login input {
     margin-bottom: 10px !important;
 }
+.registration-message {
+    text-align: center;
+}
+
 .woocommerce-form-login p.form-row {
     margin-top: 0px;
 }
@@ -439,7 +446,7 @@ body.dark-mode .login-registration-container button {
 
 .login-registration-container {
     display: flex;
-    width: calc(100% - 140px) !important;
+    width: 100% !important;
     justify-content: center;
     align-items: flex-start;
     padding: 40px 70px 100px 70px; /* Match content-body padding */

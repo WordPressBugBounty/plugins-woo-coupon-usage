@@ -47,7 +47,7 @@ if( !function_exists( 'wcusage_get_coupon_shortcode_page' ) ) {
 
 	$wcusage_field_portal_enable = wcusage_get_setting_value('wcusage_field_portal_enable', '0');
 	$portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
-	if($wcusage_field_portal_enable && $portal_slug) {
+	if($wcusage_field_portal_enable && $portal_slug && wcusage_check_affiliate_portal_rewrite_rule() ) {
 		$thepageurl = get_site_url() . '/' . $portal_slug . '/';
 		if($seperate) {
 			$seperatepermalink = "?";

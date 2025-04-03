@@ -304,6 +304,8 @@ function wcusage_on_new_order_set_coupon_referrer(  $order_id  ) {
             }
             if ( !in_array( $cookie, $coupons_array ) ) {
                 $meta_data['wcusage_referrer_coupon'] = $cookie;
+                $coupon_user_id = $coupon_info[1];
+                $meta_data['wcusage_affiliate_user'] = $coupon_user_id;
             }
             if ( !empty( $meta_data ) ) {
                 wcusage_update_order_meta_bulk( $order_id, $meta_data );

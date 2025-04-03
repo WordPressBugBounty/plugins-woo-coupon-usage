@@ -3,10 +3,27 @@ if(!defined('ABSPATH')) {
     exit;
 }
 
+add_action('wp', 'wcusage_affiliate_portal_redirect_registration');
+function wcusage_affiliate_portal_redirect_registration() {
+    $wcusage_registration_page = wcusage_get_setting_value('wcusage_registration_page', '0');
+    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliates');
+    if(!$wcusage_registration_page) {
+        if(isset( $_POST['submitaffiliateapplication'])) {
+            if( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wcusage_submit_registration_form1'] ) ), 'wcusage_verify_submit_registration_form1' ) || is_user_logged_in() ) {
+                $submit_form = wcusage_post_submit_application(0);
+                $status = $submit_form['status'];
+                // Redirect to the affiliate portal page
+                wp_redirect(home_url('/' . $wcusage_portal_slug . '/?status=' . $status));
+                exit;
+            }
+        }
+    }
+}
+
 // Register rewrite rule for affiliate portal
 add_action('init', 'wcusage_add_affiliate_portal_rewrite_rule');
 function wcusage_add_affiliate_portal_rewrite_rule() {
-    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliates');
     add_rewrite_rule('^' . $wcusage_portal_slug . '/?$', 'index.php?affiliate_portal=1', 'top');
 }
 
@@ -29,9 +46,6 @@ function wcusage_handle_affiliate_portal_query($query) {
         $query->set('pagename', ''); // Prevent page lookup
         $query->is_home = false;
         $query->is_archive = false;
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log("Main query suppressed for affiliate portal");
-        }
     }
 }
 
@@ -55,17 +69,12 @@ function wcusage_load_affiliate_portal_template($template) {
     if (get_query_var('affiliate_portal')) {
         $custom_template = plugin_dir_path(__FILE__) . 'template.php';
         if (file_exists($custom_template)) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log("Initial template set to: $custom_template");
-            }
             // Force HTTP 200 and page state
             status_header(200);
             global $wp_query;
             $wp_query->is_404 = false;
             $wp_query->is_page = true;
             return $custom_template;
-        } else {
-            error_log("Template not found: $custom_template");
         }
     }
     return $template;

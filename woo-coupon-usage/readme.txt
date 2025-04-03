@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.8
-Stable tag: 6.0.5
+Stable tag: 6.1.0
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -244,10 +244,20 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= Version 6.1.0 - 3rd April 2025 =
+- New: Added a new "Signup Promo Page Generator" tool to the plugin, that will help you generate a simple landing page for you to promo your affiliate program that has some details about the program, and a signup form for users to apply as an affiliate.
+- Tweak: The affiliate registration form on the affiliate portal now submits via ajax, so the page will not refresh when submitting the form. This should help prevent certain issues.
+- Tweak: The settings on the affiliate portal and dashboard are now saved via ajax, so the page will not refresh when saving the settings.
+- Tweak: The "Account Details" settings tab on the affiliate portal and dashboard has been changed to a custom form (instead of the WooCommerce account form) with a consistent design and some extra fields.
+- Tweak: Permalinks are now automatically flushed when changing the affiliate portal URL slug.
+- Fix: Fixed an issue with not being able to update/save some of the settings since a recent update.
+- Fix: (PRO) Fixed an issue with the "Lifetime Affiliate: Expire Date" on new registrations being set even when expiry days is 0.
+- Fix: (PRO) Fixed an issue in some cases where unpaid commission was not being granted to all affiliates/coupons if multiple coupons were used in the same order (and if this is allowed in the fraud settings).
+
 = Version 6.0.5 - 1st April 2025 =
 - Fix: Fixed the affiliate portal redirect not working properly for some sites (overridden by another plugin or theme).
 
-= Version 6.0.4 - 25th March 2025 =
+= Version 6.0.4 - 26th March 2025 =
 - Tweak: The admin add new affiliate form is now hidden if the template coupon has not been created and set in the settings.
 - Tweak: On the "recent orders" tab made the "time" column display on one line with a larger minimum width.
 - Fix: Fixed a small styling issue with the footer of the "recent orders" table on the affiliate dashboard.

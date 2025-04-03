@@ -6,11 +6,15 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 // Initialize variables as in the shortcode
 $urlid = "";
+$postid = "";
 $coupon_code = "";
 $couponvisible = 0;
 $wcusage_show_tabs = 1;
 $wcusage_page_load = 0;
 $singlecoupon = "";
+$force_refresh_stats = 0;
+$wcusage_field_load_ajax = 0;
+$combined_commission = 0;
 $options = get_option( 'wcusage_options' );
 $wcusage_urlprivate = wcusage_get_setting_value( 'wcusage_field_urlprivate', '1' );
 // Check if user is logged in
@@ -74,37 +78,42 @@ if ( isset( $_GET['couponid'] ) ) {
 }
 $userlogin = ( $user_info ? $user_info->user_login : '' );
 $username = ( $user_info ? $user_info->display_name : '' );
-// Prepare variables for dashboard, including force_refresh_stats
-$combined_commission = wcusage_commission_message( $postid );
-$current_commission_message = get_post_meta( $postid, 'wcu_commission_message', true );
-$wcusage_field_page_load = wcusage_get_setting_value( 'wcusage_field_page_load', '0' );
-/*** REFRESH STATS? ***/
-$force_refresh_stats = 0;
-// This checks to see if commission amount updated, if so then refresh stats
-if ( $combined_commission != $current_commission_message ) {
-    update_post_meta( $postid, 'wcu_commission_message', $combined_commission );
-    update_post_meta( $postid, 'wcu_last_refreshed', '' );
-    $force_refresh_stats = 1;
-}
-// Force refresh stats if coupon usage is more than 0, but stats are
-if ( isset( $the_coupon_usage ) && $the_coupon_usage > 0 ) {
-    $wcu_alltime_stats = get_post_meta( $postid, 'wcu_alltime_stats', true );
-    if ( !$wcu_alltime_stats || empty( $wcu_alltime_stats['total_count'] || $wcu_alltime_stats['total_count'] == 0 ) ) {
+if ( $postid ) {
+    // Prepare variables for dashboard, including force_refresh_stats
+    $combined_commission = wcusage_commission_message( $postid );
+    $current_commission_message = get_post_meta( $postid, 'wcu_commission_message', true );
+    $wcusage_field_page_load = wcusage_get_setting_value( 'wcusage_field_page_load', '0' );
+    /*** REFRESH STATS? ***/
+    $force_refresh_stats = 0;
+    // This checks to see if commission amount updated, if so then refresh stats
+    if ( $combined_commission != $current_commission_message ) {
+        update_post_meta( $postid, 'wcu_commission_message', $combined_commission );
+        update_post_meta( $postid, 'wcu_last_refreshed', '' );
         $force_refresh_stats = 1;
     }
+    // Force refresh stats if coupon usage is more than 0, but stats are
+    if ( isset( $the_coupon_usage ) && $the_coupon_usage > 0 ) {
+        $wcu_alltime_stats = get_post_meta( $postid, 'wcu_alltime_stats', true );
+        if ( !$wcu_alltime_stats || empty( $wcu_alltime_stats['total_count'] || $wcu_alltime_stats['total_count'] == 0 ) ) {
+            $force_refresh_stats = 1;
+        }
+    }
+    // Check if force refresh not done
+    $wcu_last_refreshed = get_post_meta( $postid, 'wcu_last_refreshed', true );
+    if ( !$wcu_last_refreshed ) {
+        $force_refresh_stats = 1;
+    }
+    $wcusage_field_load_ajax = wcusage_get_setting_value( 'wcusage_field_load_ajax', 1 );
+    $wcusage_field_load_ajax_per_page = wcusage_get_setting_value( 'wcusage_field_load_ajax_per_page', 1 );
+    if ( !$wcusage_field_load_ajax ) {
+        $wcusage_field_load_ajax_per_page = 0;
+    }
+    $c = new WC_Coupon($postid);
+    $the_coupon_usage = $c->get_usage_count();
+} else {
+    $postid = 0;
+    $the_coupon_usage = 0;
 }
-// Check if force refresh not done
-$wcu_last_refreshed = get_post_meta( $postid, 'wcu_last_refreshed', true );
-if ( !$wcu_last_refreshed ) {
-    $force_refresh_stats = 1;
-}
-$wcusage_field_load_ajax = wcusage_get_setting_value( 'wcusage_field_load_ajax', 1 );
-$wcusage_field_load_ajax_per_page = wcusage_get_setting_value( 'wcusage_field_load_ajax_per_page', 1 );
-if ( !$wcusage_field_load_ajax ) {
-    $wcusage_field_load_ajax_per_page = 0;
-}
-$c = new WC_Coupon($postid);
-$the_coupon_usage = $c->get_usage_count();
 if ( !$wcusage_field_load_ajax ) {
     $wcusage_page_load = wcusage_get_setting_value( 'wcusage_field_page_load', '0' );
     if ( $the_coupon_usage > 5000 ) {
@@ -113,27 +122,29 @@ if ( !$wcusage_field_load_ajax ) {
 } else {
     $wcusage_page_load = "0";
 }
-// Check if user is a parent affiliate (for MLA)
-$is_mla_parent = '';
-if ( function_exists( 'wcusage_network_check_sub_affiliate' ) ) {
-    $is_mla_parent = wcusage_network_check_sub_affiliate( $current_user_id, get_post_meta( $postid, 'wcu_select_coupon_user', true ) );
-}
-// If GET set and not user's coupon, or not MLA parent, or not admin, show error message
-$couponinfo = wcusage_get_coupon_info_by_id( $postid );
-$couponuser = $couponinfo[1];
-// Check if user is parent affiliate
-if ( function_exists( 'wcusage_network_check_sub_affiliate' ) ) {
-    $is_mla_parent = wcusage_network_check_sub_affiliate( $current_user_id, $couponuser );
-    if ( $is_mla_parent ) {
-        echo "<style>#tab-page-payouts, #tab-page-settings { display: none; }</style>";
+if ( $postid ) {
+    // Check if user is a parent affiliate (for MLA)
+    $is_mla_parent = '';
+    if ( function_exists( 'wcusage_network_check_sub_affiliate' ) ) {
+        $is_mla_parent = wcusage_network_check_sub_affiliate( $current_user_id, get_post_meta( $postid, 'wcu_select_coupon_user', true ) );
     }
-}
-// If not user's coupon, or not MLA parent, or not admin, redirect to affiliate registration page
-if ( $current_user_id != get_post_meta( $postid, 'wcu_select_coupon_user', true ) && !$is_mla_parent && !wcusage_check_admin_access( $couponuser ) ) {
-    $registration_page = ( isset( $options['wcusage_registration_page'] ) ? $options['wcusage_registration_page'] : '' );
-    if ( $registration_page ) {
-        wp_redirect( get_permalink( $registration_page ) );
-        exit;
+    // If GET set and not user's coupon, or not MLA parent, or not admin, show error message
+    $couponinfo = wcusage_get_coupon_info_by_id( $postid );
+    $couponuser = $couponinfo[1];
+    // Check if user is parent affiliate
+    if ( function_exists( 'wcusage_network_check_sub_affiliate' ) ) {
+        $is_mla_parent = wcusage_network_check_sub_affiliate( $current_user_id, $couponuser );
+        if ( $is_mla_parent ) {
+            echo "<style>#tab-page-payouts, #tab-page-settings { display: none; }</style>";
+        }
+    }
+    // If not user's coupon, or not MLA parent, or not admin, redirect to affiliate registration page
+    if ( $current_user_id != get_post_meta( $postid, 'wcu_select_coupon_user', true ) && !$is_mla_parent && !wcusage_check_admin_access( $couponuser ) ) {
+        $registration_page = ( isset( $options['wcusage_registration_page'] ) ? $options['wcusage_registration_page'] : '' );
+        if ( $registration_page ) {
+            wp_redirect( get_permalink( $registration_page ) );
+            exit;
+        }
     }
 }
 // Enqueue necessary styles and scripts
@@ -167,6 +178,18 @@ if ( $wcusage_field_show_graphs ) {
     );
 }
 do_action( 'wcusage_hook_custom_styles' );
+// Enqueue
+wp_enqueue_script(
+    'wcusage-register-ajax',
+    WCUSAGE_UNIQUE_PLUGIN_URL . 'js/register-ajax.js',
+    array('jquery'),
+    '1.0',
+    true
+);
+wp_localize_script( 'wcusage-register-ajax', 'wcusage_ajax_object', array(
+    'ajax_url' => admin_url( 'admin-ajax.php' ),
+    'nonce'    => wp_create_nonce( 'wcusage_verify_submit_registration_form1' ),
+) );
 // Get force refresh date
 $wcusage_refresh_date = "";
 if ( isset( $options['wcusage_refresh_date'] ) ) {
@@ -378,6 +401,51 @@ if ( !$current_user_id ) {
                     <?php 
     }
     ?>
+                    <div class="profile-dropdown">
+                        <?php 
+    $wcusage_field_show_username = wcusage_get_setting_value( 'wcusage_field_show_username', '1' );
+    if ( is_user_logged_in() && $wcusage_field_show_username ) {
+        $user_email = $user_info->user_email;
+        $avatar_url = get_avatar_url( $user_email, array(
+            'size' => 40,
+        ) );
+        ?>
+                            <div class="profile-trigger">
+                                <span class="username-in-header"><?php 
+        if ( $other_view ) {
+            esc_html_e( 'Viewing as', 'woo-coupon-usage' );
+            ?>: <?php 
+        }
+        echo esc_html( $username );
+        ?></span><img src="<?php 
+        echo esc_url( $avatar_url );
+        ?>" alt="<?php 
+        echo esc_attr( $username );
+        ?>" class="profile-image">
+                                <i class="fas fa-caret-down dropdown-arrow"></i>
+                            </div>
+                            <div class="dropdown-content">
+                                <?php 
+        $currentuserid = get_current_user_id();
+        if ( $currentuserid == $couponuser ) {
+            echo '<a href="javascript:void(0);" onclick="wcusage_portal_open_tab(event, \'tab-page-settings\', \'wcu6\', \'' . esc_js( $postid ) . '\', \'' . esc_js( $coupon_code ) . '\', \'' . esc_js( $force_refresh_stats ) . '\');">' . esc_html__( 'Settings', 'woo-coupon-usage' ) . '</a>';
+        }
+        $logoutredirectpage = get_page_link( wcusage_get_coupon_shortcode_page_id() );
+        $wcusage_field_portal_enable = wcusage_get_setting_value( 'wcusage_field_portal_enable', '0' );
+        $portal_slug = wcusage_get_setting_value( 'wcusage_portal_slug', 'affiliate-portal' );
+        if ( $wcusage_field_portal_enable && $portal_slug ) {
+            $logoutredirectpage = home_url( $portal_slug );
+        }
+        echo '<a href="' . esc_url( wp_logout_url( $logoutredirectpage ) ) . '">' . esc_html__( 'Logout', 'woo-coupon-usage' ) . '</a>';
+        ?>
+                            </div>
+                            <?php 
+    }
+    ?>
+                    </div>
+                    <?php 
+    do_action( 'wcusage_portal_hook_after_profile_dropdown' );
+    ?>
                 </div>
                 <?php 
     do_action( 'wcusage_portal_hook_after_header' );
@@ -432,12 +500,15 @@ if ( !$current_user_id ) {
                 }
                 echo '</select>';
                 // Open selected coupon dashboard
+                $wcusage_portal_slug = wcusage_get_setting_value( 'wcusage_portal_slug', 'affiliate-portal' );
                 ?>
                                     <script>
                                     jQuery(document).ready(function() {
                                         jQuery('#wcu-coupon-select').on('change', function() {
                                             var couponid = jQuery(this).val();
-                                            var current_page_url = 'affiliate-portal';
+                                            var current_page_url = '<?php 
+                echo esc_js( $wcusage_portal_slug );
+                ?>';
                                             window.location.href = '<?php 
                 echo esc_url( home_url() );
                 ?>/' + current_page_url + '?couponid=' + couponid;

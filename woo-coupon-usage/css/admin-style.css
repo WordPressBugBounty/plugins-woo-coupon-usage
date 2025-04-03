@@ -972,9 +972,9 @@ Label the data
 }
 
 .wcu-showhide-button {
-    background: RoyalBlue;
+    background: #456aa5;
     color: white;
-    padding: 4px 10px;
+    padding: 5px 10px;
     border-radius: 20px;
     cursor: pointer;
 }
@@ -2376,4 +2376,136 @@ p label {
     font-size: 14px;
     font-weight: normal;
     margin-left: 5px;
+}
+
+/* Signup Page */
+
+.affiliate-page-generator-wrap {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.affiliate-page-generator-wrap h1 {
+    color: #1d2327;
+    font-size: 24px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.affiliate-page-generator-wrap h2 {
+    color: #2271b1;
+    font-size: 20px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.affiliate-page-generator-wrap p {
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.affiliate-page-generator-wrap a {
+    color: #2271b1;
+    text-decoration: none;
+}
+
+.affiliate-page-generator-wrap a:hover {
+    text-decoration: underline;
+}
+
+.affiliate-page-generator-wrap .updated,
+.affiliate-page-generator-wrap .error {
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.affiliate-page-generator-wrap .updated {
+    background: #d4f7d4;
+    border-left: 4px solid #46b450;
+}
+
+.affiliate-page-generator-wrap .error {
+    background: #ffe6e6;
+    border-left: 4px solid #dc3232;
+}
+
+.affiliate-page-generator-wrap .form-table {
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.affiliate-page-generator-wrap .form-table th {
+    width: 200px;
+    padding: 15px 10px;
+    color: #1d2327;
+    font-weight: 600;
+    vertical-align: top;
+}
+
+.affiliate-page-generator-wrap .form-table td {
+    padding: 15px 10px;
+}
+
+.affiliate-page-generator-wrap .form-table input[type="text"],
+.affiliate-page-generator-wrap .form-table input[type="number"],
+.affiliate-page-generator-wrap .form-table textarea {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+.affiliate-page-generator-wrap .form-table input[type="text"]:focus,
+.affiliate-page-generator-wrap .form-table input[type="number"]:focus,
+.affiliate-page-generator-wrap .form-table textarea:focus {
+    border-color: #2271b1;
+    outline: none;
+    box-shadow: 0 0 5px rgba(34, 113, 177, 0.3);
+}
+
+.affiliate-page-generator-wrap .form-table .description {
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.affiliate-page-generator-wrap .button {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.affiliate-page-generator-wrap .button-primary {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+}
+
+.affiliate-page-generator-wrap .button-primary:hover {
+    background: #135e96;
+    border-color: #135e96;
+}
+
+.affiliate-page-generator-wrap .button:not(.button-primary) {
+    background: #f0f0f1;
+    border-color: #8c8f94;
+    color: #1d2327;
+}
+
+.affiliate-page-generator-wrap .button:not(.button-primary):hover {
+    background: #e0e0e0;
+    border-color: #6b6e73;
 }

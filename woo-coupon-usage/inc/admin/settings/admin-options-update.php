@@ -328,6 +328,7 @@ function wcu_update_toggle() {
 function wcusage_check_if_option_refresh_stats($option) {
   $options_to_refresh = wcusage_options_refresh_stats();
   if(in_array($option, $options_to_refresh)) {
+    $option_group = get_option('wcusage_options');
     $option_group['wcusage_refresh_date'] = time();
     update_option( 'wcusage_options', $option_group );
   }
@@ -350,6 +351,22 @@ function wcusage_check_portal_option_update($option) {
       }
     }
     flush_rewrite_rules();
+  }
+  // If wcusage_portal_slug is updated and wcusage_field_portal_enable is enabled
+  if($option == "wcusage_portal_slug") {
+    $option_group = get_option('wcusage_options');
+    if($option_group['wcusage_field_portal_enable'] == "1") {
+      add_rewrite_rule('^' . $option_group['wcusage_portal_slug'] . '/?$', 'index.php?affiliate_portal=1', 'top');
+      flush_rewrite_rules();
+    }
+  }
+  // If wcusage_mla_portal_slug is updated and wcusage_field_portal_enable is enabled
+  if($option == "wcusage_mla_portal_slug") {
+    $option_group = get_option('wcusage_options');
+    if($option_group['wcusage_field_portal_enable'] == "1") {
+      add_rewrite_rule('^' . $option_group['wcusage_mla_portal_slug'] . '/?$', 'index.php?mla_affiliate_portal=1', 'top');
+      flush_rewrite_rules();
+    }
   }
 }
 add_action('wcusage_check_if_option_refresh_stats', 'wcusage_check_portal_option_update', 10, 2);

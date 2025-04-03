@@ -443,6 +443,12 @@ function wcusage_field_cb( $args ) {
   <?php echo wcusage_setting_toggle_option('wcusage_field_show_settings_tab_account', 1, esc_html__( 'Show "Account Details" section in the "Settings" tab.', 'woo-coupon-usage' ), '0px'); ?>
   <i><?php echo esc_html__( 'This will show the WooCommerce "Account Details" fields directly in the "settings" tab on the affiliate dashboard, along with a logout link.', 'woo-coupon-usage' ); ?></i>
 
+  <br/><br/>
+  
+  <!-- Show Gravatar -->
+  <?php echo wcusage_setting_toggle_option('wcusage_field_show_settings_tab_gravatar', 1, esc_html__( 'Show Gravatar in the "Settings" tab.', 'woo-coupon-usage' ), '0px'); ?>
+  <i><?php echo esc_html__( 'This will show the Gravatar image and link to edit their gravatar in the "Settings" tab on the affiliate dashboard.', 'woo-coupon-usage' ); ?></i>
+
   </div>
 
   <br/>
@@ -574,6 +580,20 @@ function wcusage_field_cb( $args ) {
         <br/>
         <i style="margin-left: 40px;"><?php echo esc_html__( 'If disabled, only the parent product will be shown - and variations that have per-variation commission rates set different to the parent.', 'woo-coupon-usage' ); ?></i>
       </p>
+
+      <?php echo wcusage_setting_toggle('.wcusage_field_rates_show_all_variations', '.wcu-field-rates-show-all-variations'); // Show or Hide ?>
+      <span class="wcu-field-rates-show-all-variations" style="padding-left: 40px; display: block;">
+
+        <br/>
+
+        <p>
+          <?php echo wcusage_setting_toggle_option('wcusage_field_rates_hide_variations_parent', 0, esc_html__( 'Hide Parent Product', 'woo-coupon-usage' ), '40px'); ?>
+          <i style="margin-left: 40px;"><?php echo esc_html__( 'If enabled, the parent product will be hidden from the table if at-least 1 variation.', 'woo-coupon-usage' ); ?></i>
+          <br/>
+          <i style="margin-left: 40px;"><?php echo esc_html__( 'If disabled, the parent product will be shown in the table.', 'woo-coupon-usage' ); ?></i>
+        </p>
+
+      </span>
 
       <br/>
 
@@ -933,6 +953,17 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
 
     <!-- Enable Affiliate Portal -->
     <?php echo wcusage_setting_toggle_option('wcusage_field_portal_enable', 0, esc_html__( 'Enable Affiliate Portal', 'woo-coupon-usage' ), '0px'); ?>
+
+    <?php if( function_exists('wcusage_check_affiliate_portal_rewrite_rule') && !wcusage_check_affiliate_portal_rewrite_rule() ) { ?>
+      <p style="color: red; margin: 20px 0 5px 0;"><strong><?php echo esc_html__( 'The affiliate portal is enabled, but the URL rewrite rules are not work correctly.', 'woo-coupon-usage' ); ?></strong></p>
+      <p style="color: red; margin: 5px 0;"><strong><?php echo sprintf(esc_html__( 'Please go to Settings > Permalinks and click "Save Changes" to refresh the rewrite rules, or %sclick here%s for more information.', 'woo-coupon-usage' ), '<a href="https://woocouponusage.com/docs/affiliate-portal-not-working/" target="_blank">', '</a>'); ?></strong></p>
+      <p style="color: red; margin: 5px 0;"><strong><?php echo esc_html__( 'The plugin will default to the normal dashboard page until the rewrite rule exists.', 'woo-coupon-usage' ); ?></strong></p>
+      <script>
+        jQuery(document).ready(function($) {
+          $('.affiliate-dashboard-page-settings').show();
+        });
+      </script>
+    <?php } ?>
 
     <?php echo wcusage_setting_toggle('.wcusage_field_portal_enable', '.wcu-field-section-portal'); // Show or Hide ?>
     <span class="wcu-field-section-portal">

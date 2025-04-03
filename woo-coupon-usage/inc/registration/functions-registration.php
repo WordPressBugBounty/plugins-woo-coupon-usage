@@ -3,8 +3,6 @@
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
-global $wcusage_register_db_version;
-$wcusage_register_db_version = "2.7";
 /**
  * Create registration table
  *

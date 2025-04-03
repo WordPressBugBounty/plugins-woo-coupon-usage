@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: Easily create an affiliate program for WooCommerce, based on coupons. Track affiliate commission, coupon usage statistics, referral URLs, and more.
-* Version: 6.0.5
+* Version: 6.1.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -296,7 +296,7 @@ if ( function_exists( 'wcu_fs' ) ) {
     include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-user-coupons.php';
     include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-activity.php';
     // Portal
-    $wcusage_field_portal_enable = wcusage_get_setting_value( 'wcusage_field_portal_enable', '1' );
+    $wcusage_field_portal_enable = wcusage_get_setting_value( 'wcusage_field_portal_enable', '0' );
     if ( $wcusage_field_portal_enable ) {
         include plugin_dir_path( __FILE__ ) . 'inc/portal/affiliate-portal.php';
     }
@@ -330,6 +330,8 @@ if ( function_exists( 'wcu_fs' ) ) {
     include plugin_dir_path( __FILE__ ) . 'inc/registration/registration-admin.php';
     include plugin_dir_path( __FILE__ ) . 'inc/registration/registration-form.php';
     include plugin_dir_path( __FILE__ ) . 'inc/registration/functions-registration.php';
+    include plugin_dir_path( __FILE__ ) . 'inc/registration/registration-landing-page.php';
+    include plugin_dir_path( __FILE__ ) . 'inc/registration/registration-ajax.php';
     $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '0' );
     if ( $wcusage_field_registration_enable ) {
         // Classes

@@ -892,9 +892,9 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
           <?php 
         if ( ini_get( 'max_input_vars' ) < 1000 ) {
             ?>
-          <br/><p style="font-size: 12px;"><strong><?php 
-            sprintf( esc_html__( 'Settings not saving? Try disabling "legacy" saving, or increasing your PHP "max_input_vars" in your hosting configuration to 3000 or higher (currently %s).', 'woo-coupon-usage' ), ini_get( 'max_input_vars' ) );
-            ?>. <a href="https://couponaffiliates.com/docs/increase-max-input-vars-limit" target="_blank"><?php 
+          <p style="font-size: 14px; color: red;"><strong><?php 
+            echo sprintf( esc_html__( 'Settings not saving? Try disabling "legacy" saving, or increasing your PHP "max_input_vars" in your hosting configuration to 1000 or higher (currently %s).', 'woo-coupon-usage' ), ini_get( 'max_input_vars' ) );
+            ?> <a href="https://couponaffiliates.com/docs/increase-max-input-vars-limit" target="_blank"><?php 
             echo esc_html__( 'Learn More.', 'woo-coupon-usage' );
             ?></a></strong><br/></p>
           <?php 
@@ -905,7 +905,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
       </span>
 
-      <br/><p style="display: block; font-size: 15px; margin-bottom: 10px;"><strong>
+      <br/><p style="display: block; font-size: 15px; margin-bottom: 10px; font-weight: bold;">
       <?php 
         echo esc_html__( 'Need help? Have a suggestion? Found a bug?', 'woo-coupon-usage' );
         ?> <?php 
@@ -917,7 +917,8 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
             ?><a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank"><?php 
         }
         echo esc_html__( 'Create a support ticket.', 'woo-coupon-usage' );
-        ?></a>
+        ?>
+      </a>
 
   	</form>
 
@@ -1077,13 +1078,13 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
           <br><span class="dashicons dashicons-yes-alt"></span> Export to Excel Buttons
           <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per Coupon
           <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per Product
-          <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per User Role
-          <br><span class="dashicons dashicons-yes-alt"></span> Campaigns (Referral URL)
-          <br><span class="dashicons dashicons-yes-alt"></span> Direct Link Tracking (Referral URL)
-          <br><span class="dashicons dashicons-yes-alt"></span> Social Sharing (Referral URL)
-          <br><span class="dashicons dashicons-yes-alt"></span> Short URL Generator (Referral URL)
-          <br><span class="dashicons dashicons-yes-alt"></span> QR Code Generator (Referral URL)
-          <br><span class="dashicons dashicons-yes-alt"></span> Custom Affiliate Dashboard Tabs
+          <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per Role
+          <br><span class="dashicons dashicons-yes-alt"></span> Campaigns
+          <br><span class="dashicons dashicons-yes-alt"></span> Direct Link Tracking
+          <br><span class="dashicons dashicons-yes-alt"></span> Social Sharing
+          <br><span class="dashicons dashicons-yes-alt"></span> Short URL Generator
+          <br><span class="dashicons dashicons-yes-alt"></span> QR Code Generator
+          <br><span class="dashicons dashicons-yes-alt"></span> Custom Dashboard Tabs
           <br><span class="dashicons dashicons-yes-alt"></span> and more great features!
           <br>
           <br><span class="dashicons dashicons-yes-alt"></span> All Future PRO Features
@@ -1839,4 +1840,83 @@ if ( !function_exists( 'wcusage_admin_tooltip' ) ) {
         return "<span class='wcusage-users-affiliate-column' style='margin-left: 5px; display: inline-block;'>\r\n    <span class='custom-tooltip'><span class='dashicons dashicons-editor-help' style='color: green;'></span>\r\n        <span class='tooltip-content' style='white-space: normal;'>\r\n        <span style='font-size: 12px;'>" . $text . "</span>\r\n        </span>\r\n    </span>\r\n    </span>";
     }
 
+}
+// Add settings page to the admin menu
+add_action( 'admin_menu', 'couponaffiliates_add_settings_page' );
+function couponaffiliates_add_settings_page() {
+    add_options_page(
+        'Coupon Affiliates Settings',
+        'Coupon Affiliates',
+        'manage_options',
+        'couponaffiliates-settings',
+        'couponaffiliates_settings_page_callback'
+    );
+}
+
+// Render the settings page with the support docs widget
+function couponaffiliates_settings_page_callback() {
+    ?>
+    <div class="wrap">
+        <h1>Coupon Affiliates Settings</h1>
+        <div id="couponaffiliates-support-widget" style="margin-top: 20px; padding: 20px; background: #fff; border: 1px solid #ddd;">
+            <h2>Support Docs</h2>
+            <p>Search and explore documentation from CouponAffiliates.com.</p>
+            <form id="couponaffiliates-docs-search-form" autocomplete="off">
+                <input type="text" id="docs-search-input" placeholder="Search docs..." style="width: 100%; max-width: 400px; padding: 8px;">
+            </form>
+            <div id="docs-search-results" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+    <?php 
+}
+
+// Enqueue scripts and localize AJAX data
+add_action( 'admin_enqueue_scripts', 'couponaffiliates_enqueue_admin_scripts' );
+function couponaffiliates_enqueue_admin_scripts(  $hook  ) {
+    if ( $hook !== 'settings_page_couponaffiliates-settings' ) {
+        return;
+    }
+    // Enqueue jQuery (already included in WP admin)
+    wp_enqueue_script( 'jquery' );
+    // Inline JavaScript for AJAX search
+    $nonce = wp_create_nonce( 'couponaffiliates_docs_search' );
+    $ajax_url = admin_url( 'admin-ajax.php' );
+    $script = "\r\n        jQuery(document).ready(function(\$) {\r\n            var searchTimeout;\r\n            \$('#docs-search-input').on('keyup', function() {\r\n                clearTimeout(searchTimeout);\r\n                var query = \$(this).val();\r\n                \$('#docs-search-results').html('<p>Loading...</p>');\r\n                searchTimeout = setTimeout(function() {\r\n                    if (query.length < 2) {\r\n                        \$('#docs-search-results').html('');\r\n                        return;\r\n                    }\r\n                    \$.ajax({\r\n                        url: '{$ajax_url}',\r\n                        type: 'POST',\r\n                        data: {\r\n                            action: 'couponaffiliates_search_docs',\r\n                            nonce: '{$nonce}',\r\n                            query: query\r\n                        },\r\n                        success: function(response) {\r\n                            if (response.success) {\r\n                                \$('#docs-search-results').html(response.data.html);\r\n                            } else {\r\n                                \$('#docs-search-results').html('<p>No results found.</p>');\r\n                            }\r\n                        },\r\n                        error: function() {\r\n                            \$('#docs-search-results').html('<p>Error fetching docs. Please try again.</p>');\r\n                        }\r\n                    });\r\n                }, 300);\r\n            });\r\n        });\r\n    ";
+    wp_add_inline_script( 'jquery', $script );
+}
+
+// AJAX handler to fetch and return docs
+add_action( 'wp_ajax_couponaffiliates_search_docs', 'couponaffiliates_search_docs_callback' );
+function couponaffiliates_search_docs_callback() {
+    check_ajax_referer( 'couponaffiliates_docs_search', 'nonce' );
+    $query = ( isset( $_POST['query'] ) ? sanitize_text_field( $_POST['query'] ) : '' );
+    // Fetch docs from couponaffiliates.com REST API
+    $response = wp_remote_get( add_query_arg( [
+        'search'   => $query,
+        'per_page' => 10,
+    ], 'https://couponaffiliates.com/wp-json/wp/v2/docs' ), [
+        'timeout' => 15,
+    ] );
+    if ( is_wp_error( $response ) ) {
+        wp_send_json_error( [
+            'message' => 'Failed to fetch docs.',
+        ] );
+    }
+    $docs = json_decode( wp_remote_retrieve_body( $response ), true );
+    if ( empty( $docs ) ) {
+        wp_send_json_success( [
+            'html' => '<p>No results found.</p>',
+        ] );
+    }
+    // Build the HTML output
+    $html = '<ul>';
+    foreach ( $docs as $doc ) {
+        $title = esc_html( $doc['title']['rendered'] );
+        $link = esc_url( $doc['link'] );
+        $html .= "<li><a href='{$link}' target='_blank'>{$title}</a></li>";
+    }
+    $html .= '</ul>';
+    wp_send_json_success( [
+        'html' => $html,
+    ] );
 }

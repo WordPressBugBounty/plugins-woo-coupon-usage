@@ -74,6 +74,7 @@ function wcusage_custom_box_html(  $post  ) {
                                     $order,
                                     0
                                 );
+                                $coupon_codes[] = $coupon_code;
                             }
                         }
                     }
@@ -112,6 +113,9 @@ function wcusage_custom_box_html(  $post  ) {
     ?>" style="width: 100%;"
       <?php 
     if ( !$wcusage_referrer_coupon && $coupon_code ) {
+        if ( count( $coupon_codes ) > 1 ) {
+            $coupon_code = "";
+        }
         ?>placeholder="<?php 
         echo esc_html( $coupon_code );
         ?>"<?php 
@@ -144,8 +148,42 @@ function wcusage_custom_box_html_content(
     $type
 ) {
     $order_id = $order->get_id();
+    $order = wc_get_order( $order_id );
+    $paidcommission = wcusage_order_meta( $order_id, 'wcu_commission_paid', true );
     if ( !empty( $_GET['update_unpaid_commission'] ) && $_GET['update_unpaid_commission'] ) {
-        wcusage_do_action_order_update_commission( $order, $order_id, $coupon_code );
+        $paidcommission = wcusage_order_meta( $order_id, 'wcu_commission_paid', true );
+        // Check lifetime affiliate
+        $lifetimeaffiliate = wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer' );
+        if ( $lifetimeaffiliate && !$lifetimeaffiliatedone ) {
+            wcusage_do_action_order_update_commission(
+                $order,
+                $order_id,
+                $lifetimeaffiliate,
+                $paidcommission
+            );
+            $lifetimeaffiliatedone = true;
+        }
+        if ( !$lifetimeaffiliate ) {
+            // Check affiliate referrer
+            $affiliatereferrer = wcusage_order_meta( $order_id, 'wcusage_referrer_coupon' );
+            if ( $affiliatereferrer ) {
+                wcusage_do_action_order_update_commission(
+                    $order,
+                    $order_id,
+                    $affiliatereferrer,
+                    $paidcommission
+                );
+            } else {
+                foreach ( $order->get_coupon_codes() as $coupon_code ) {
+                    wcusage_do_action_order_update_commission(
+                        $order,
+                        $order_id,
+                        $coupon_code,
+                        $paidcommission
+                    );
+                }
+            }
+        }
     }
     $getinfo = wcusage_get_the_order_coupon_info( $coupon_code, "", $order_id );
     $coupon_info = wcusage_get_coupon_info( $coupon_code );

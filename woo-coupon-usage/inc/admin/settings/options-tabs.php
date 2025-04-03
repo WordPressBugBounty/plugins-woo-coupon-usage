@@ -178,9 +178,11 @@ function wcusage_field_cb_custom_tabs( $args )
       }
       echo '</select>';
       ?>
+      <?php if(isset($options[$thisid])) { ?>
       <span class="icon-example">
         <i class="fas fa-<?php echo esc_html($options[$thisid]); ?>" style="font-size: 20px; background: none; color: #333;"></i>
       </span>
+      <?php } ?>
       <script>
       jQuery(document).ready(function(){
         jQuery('#wcusage_field_custom_tabs_icon_<?php echo esc_html($i); ?>').change(function(){

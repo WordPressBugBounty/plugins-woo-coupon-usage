@@ -612,6 +612,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
         $combined_ordertotaldiscounted = 0;
         $combined_totalcommission = 0;
         $colstatus = 0;
+        $coltime = 0;
         $i = 0;
         $count = 0;
         $cols = 0;

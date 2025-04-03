@@ -594,15 +594,9 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                     $obituary_query->the_post();
                     $postid = get_the_ID();
                     $coupon = get_the_title();
-                    if ( $_SERVER['REQUEST_URI'] && strpos( $_SERVER['REQUEST_URI'], '/affiliate-portal' ) !== false ) {
-                        $page_url = home_url() . '/affiliate-portal?';
-                        $secretid = $coupon;
-                        $uniqueurl = $page_url . 'couponid=' . $secretid;
-                    } else {
-                        $page_url = wcusage_get_coupon_shortcode_page( 1 );
-                        $secretid = $coupon . "-" . $postid;
-                        $uniqueurl = $page_url . 'couponid=' . $secretid;
-                    }
+                    $page_url = wcusage_get_coupon_shortcode_page( 1 );
+                    $secretid = $coupon . "-" . $postid;
+                    $uniqueurl = $page_url . 'couponid=' . $secretid;
                     if ( $numcoupons <= 1 && $wcusage_show_coupon_if_single ) {
                         if ( wcusage_iscouponusers( $coupon, $current_user_id ) && $lastcoupon != $coupon ) {
                             $coupon = str_replace( ' ', '%20', $coupon );
