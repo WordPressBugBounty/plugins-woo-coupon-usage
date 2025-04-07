@@ -263,7 +263,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         $coupons = wcusage_get_users_coupons_ids( $user_id );
 		switch ( $column_name ) {
 			case 'ID':
-                return '<a href="' . esc_url(admin_url( 'user-edit.php?user_id=' . $user_id )) . '"><span class="dashicons dashicons-edit" style="font-size: 15px; margin-top: 4px;"></span> ' . $item[ $column_name ] . '</a>';
+                return '<a href="' . esc_url(admin_url( 'user-edit.php?user_id=' . $user_id )) . '">#' . $item[ $column_name ] . '</a>';
             case 'Username':
                 return wcusage_output_affiliate_tooltip_user_info($user_id);
             case 'roles':

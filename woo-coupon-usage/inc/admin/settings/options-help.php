@@ -53,6 +53,28 @@ function wcusage_field_cb_help( $args )
 
   <hr/>
 
+  <div id="couponaffiliates-support-widget" style="margin-top: 20px; padding: 20px; background: #fff; border: 1px solid #ddd; border-radius: 5px;">
+      <h2>Support Documentation</h2>
+      <p style="font-size: 16px; margin-bottom: 10px;"><?php echo esc_html__( 'Search our documentation for help with common questions and issues.', 'woo-coupon-usage' ); ?></p>
+      <form id="couponaffiliates-docs-search-form" autocomplete="off" style="margin-bottom: 20px;">
+          <input class="docs-search-input"
+          placeholder="Search documentation..."
+          style="width: 100%; max-width: 400px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+      </form>
+      <br/>
+      <a href="https://couponaffiliates.com/docs/?utm_campaign=plugin&utm_source=dashboard-link&utm_medium=documentation"
+      target="_blank" style="text-decoration: none; color: #0073aa; margin-top: 10px; display: inline-block;">
+          <strong style="font-size: 12px !important;"><?php echo esc_html__( 'View All Documentation', 'woo-coupon-usage' ); ?></strong> <span class="dashicons dashicons-external"
+          style="font-size: 12px; margin-top: 3px; height: 12px; width: 12px;"></span>
+      </a>
+      
+      <div id="docs-search-results" style="margin-top: 20px;"></div>
+
+      <br/>
+      
+      <!-- Default Categories Display -->
+      <div id="docs-categories">
+
   <?php
   $sections = array(
       array(
@@ -228,7 +250,7 @@ function wcusage_field_cb_help( $args )
   </style>
 
   <?php foreach ($sections as $index => $section) { ?>
-    <div class="helpaccordion<?php echo $index === 0 ? ' active' : ''; ?>">
+    <div class="helpaccordion">
       <div class="helpaccordion-header"><?php echo esc_html($section['title']); ?></div>
       <div class="helpaccordion-content">
         <ul>
@@ -263,6 +285,9 @@ function wcusage_field_cb_help( $args )
 
 	</div>
 
+  </div>
+  </div>
+
   <div id="help-area-videos" class="help-area-videos">
 
     <h1>Videos</h1>
@@ -294,4 +319,129 @@ function wcusage_field_cb_help( $args )
   </div>
 
  <?php
+}
+
+// Enqueue scripts and localize AJAX data
+add_action('admin_enqueue_scripts', 'couponaffiliates_enqueue_admin_scripts');
+function couponaffiliates_enqueue_admin_scripts($hook) {
+
+  wp_enqueue_script('jquery');
+  
+  // Add custom CSS
+  $css = "
+      .docs-result-box {
+          background: #f9f9f9;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          padding: 15px;
+          margin-bottom: 15px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          transition: transform 0.2s;
+      }
+      .docs-result-box:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+      }
+      .docs-result-box h4 {
+          margin: 0 0 10px 0;
+          color: #0073aa;
+      }
+      .docs-result-box p {
+          margin: 0;
+          color: #555;
+          font-size: 14px;
+      }
+      .docs-result-box a {
+          text-decoration: none;
+      }
+  ";
+  wp_add_inline_style('wp-admin', $css);
+
+  // Inline JavaScript
+  $nonce = wp_create_nonce('couponaffiliates_docs_search');
+  $ajax_url = admin_url('admin-ajax.php');
+  $script = "
+      jQuery(document).ready(function($) {
+          var searchTimeout;
+          $('.docs-search-input').on('keyup', function() {
+              clearTimeout(searchTimeout);
+              var query = $(this).val();
+              if (query.length < 2) {
+                  $('#docs-search-results').html('');
+                  $('#docs-categories').show();
+                  return;
+              }
+              $('#docs-search-results').html('<p>Loading...</p>');
+              $('#docs-categories').hide();
+              searchTimeout = setTimeout(function() {
+                  $.ajax({
+                      url: '{$ajax_url}',
+                      type: 'POST',
+                      data: {
+                          action: 'couponaffiliates_search_docs',
+                          nonce: '{$nonce}',
+                          query: query
+                      },
+                      success: function(response) {
+                          if (response.success) {
+                              $('#docs-search-results').html(response.data.html);
+                          } else {
+                              $('#docs-search-results').html('<p>No results found.</p>');
+                          }
+                      },
+                      error: function() {
+                          $('#docs-search-results').html('<p>Error fetching docs. Please try again.</p>');
+                      }
+                  });
+              }, 300);
+          });
+      });
+  ";
+  wp_add_inline_script('jquery', $script);
+}
+
+// AJAX handler to fetch and return docs
+add_action('wp_ajax_couponaffiliates_search_docs', 'couponaffiliates_search_docs_callback');
+function couponaffiliates_search_docs_callback() {
+  check_ajax_referer('couponaffiliates_docs_search', 'nonce');
+
+  $query = isset($_POST['query']) ? sanitize_text_field($_POST['query']) : '';
+
+  $response = wp_remote_get(
+      add_query_arg(
+          [
+              'search' => $query,
+              'per_page' => 10,
+          ],
+          'https://couponaffiliates.com/wp-json/wp/v2/docs'
+      ),
+      ['timeout' => 15]
+  );
+
+  if (is_wp_error($response)) {
+      wp_send_json_error(['message' => 'Failed to fetch docs.']);
+  }
+
+  $docs = json_decode(wp_remote_retrieve_body($response), true);
+  if (empty($docs)) {
+      wp_send_json_success(['html' => '<p>No results found.</p>']);
+  }
+
+  // Build fancy boxed HTML output
+  $html = '';
+  foreach ($docs as $doc) {
+      $title = esc_html($doc['title']['rendered']);
+      $link = esc_url($doc['link']);
+      $excerpt = wp_trim_words(wp_strip_all_tags($doc['excerpt']['rendered']), 20, '...');
+      $html .= "
+          <div class='docs-result-box'>
+              <a href='$link' target='_blank'>
+                  <h4>$title</h4>
+                  <p>$excerpt</p>
+              </a>
+          </div>
+      ";
+  }
+
+  wp_send_json_success(['html' => $html]);
 }

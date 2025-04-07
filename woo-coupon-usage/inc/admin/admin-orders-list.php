@@ -60,12 +60,13 @@ function wcusage_add_order_column_content(  $column, $order_id  ) {
                     $getcoupon = wcusage_get_coupon_info( $coupon_code );
                     if ( !$lifetimeaffiliate && $wcusage_field_lifetime || $coupon_code == $lifetimeaffiliate || !$wcusage_field_lifetime && !$lifetimeaffiliate ) {
                         if ( $coupon_code ) {
+                            $affiliate_id = $getcoupon[1];
                             if ( $coupon_code != $lifetimeaffiliate ) {
                                 $coupon_code_linked = wcusage_output_affiliate_info_orders( $coupon_code, $order_id, "" );
                             } else {
                                 $coupon_code_linked = wcusage_output_affiliate_info_orders( $coupon_code, $order_id, "returncoupon" );
                             }
-                            array_push( $affiliate, "" );
+                            array_push( $affiliate, $affiliate_id );
                             array_push( $coupon_codes, $coupon_code_linked );
                         }
                         $nocoupon = false;

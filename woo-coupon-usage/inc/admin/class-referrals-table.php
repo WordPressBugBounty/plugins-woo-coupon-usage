@@ -144,6 +144,53 @@ class wcusage_Referrals_Table extends WP_List_Table {
     }
 
     function column_default($item, $column_name) {
+        $order_id = $item['order_id'];
+        $order = wc_get_order($order_id);
+        $lifetimeaffiliate = wcusage_order_meta($order_id, 'lifetime_affiliate_coupon_referrer');
+        $affiliatereferrer = wcusage_order_meta($order_id, 'wcusage_referrer_coupon');
+        $coupons = '';
+        $affiliate_ids = '';
+        if ($lifetimeaffiliate) {
+            $getinfo = wcusage_get_the_order_coupon_info($lifetimeaffiliate, "", $order_id);
+            $getcoupon = wcusage_get_coupon_info($lifetimeaffiliate);
+            $url = $getinfo['uniqueurl'];
+            $url = sanitize_text_field( $url );
+            $typeicon = "<span title='Lifetime Commission' style='font-size: 12px;'><i class='fa-solid fa-star'></i></span> ";
+            $coupons .= '<a href="' . esc_url($url) . '" target="_blank">' . esc_html($lifetimeaffiliate) . '</a><br/>';
+            if(isset($getcoupon[1])) {
+                $affiliate_id = $getcoupon[1];
+                $affiliate_username = get_userdata($affiliate_id)->user_login;
+                $affiliate_ids .= '<a href="' . esc_url(admin_url('user-edit.php?user_id=' . $affiliate_id)) . '">' . esc_html($affiliate_username) . '</a><br/>';
+            }
+        } elseif ($affiliatereferrer) {
+            $getinfo = wcusage_get_the_order_coupon_info($affiliatereferrer, "", $order_id);
+            $getcoupon = wcusage_get_coupon_info($affiliatereferrer);
+            $url = $getinfo['uniqueurl'];
+            $typeicon = "<span title='Custom / URL Referral' style='font-size: 12px;'><i class='fa-solid fa-link'></i></span> ";
+            $coupons .= '<a href="' . esc_url($url) . '" target="_blank">' . esc_html($affiliatereferrer) . '</a><br/>';
+            if(isset($getcoupon[1])) {
+                $affiliate_id = $getcoupon[1];
+                $affiliate_username = get_userdata($affiliate_id)->user_login;
+                $affiliate_ids .= '<a href="' . esc_url(admin_url('user-edit.php?user_id=' . $affiliate_id)) . '">' . esc_html($affiliate_username) . '</a><br/>';
+            }
+        } elseif (!$lifetimeaffiliate && !$affiliatereferrer && class_exists('WooCommerce')) {
+            if (version_compare(WC_VERSION, 3.7, ">=")) {
+                if(!is_array($affiliate_id))
+                foreach ($order->get_coupon_codes() as $coupon_code) {
+                    $getinfo = wcusage_get_the_order_coupon_info($coupon_code, "", $order_id);
+                    $getcoupon = wcusage_get_coupon_info($coupon_code);
+                    $url = sanitize_text_field( $getinfo['uniqueurl'] );
+                    $coupons .= '<a href="' . esc_url($url) . '" target="_blank">' . esc_html($coupon_code) . '</a><br/>';
+                    if(isset($getcoupon[1]) && $getcoupon[1] != '') {
+                        $affiliate_id = $getcoupon[1];
+                        $affiliate_username = get_userdata($affiliate_id)->user_login;
+                        $affiliate_ids .= '<a href="' . esc_url(admin_url('user-edit.php?user_id=' . $affiliate_id)) . '">' . esc_html($affiliate_username) . '</a><br/>';
+                    } else {
+                        $affiliate_ids .= '-<br/>';
+                    }
+                }
+            }
+        }
         switch ($column_name) {
             case 'order_id':
                 return '<a href="' . esc_url(admin_url('post.php?post=' . $item[$column_name] . '&action=edit')) . '"><span class="dashicons dashicons-edit" style="font-size: 15px; margin-top: 4px;"></span> #' . $item[$column_name] . '</a>';
@@ -173,31 +220,6 @@ class wcusage_Referrals_Table extends WP_List_Table {
             case 'date':
                 return date('M j, Y (g:ia)', strtotime($item[$column_name]));
             case 'coupon':
-                $order_id = $item['order_id'];
-                $order = wc_get_order($order_id);
-                $lifetimeaffiliate = wcusage_order_meta($order_id, 'lifetime_affiliate_coupon_referrer');
-                $affiliatereferrer = wcusage_order_meta($order_id, 'wcusage_referrer_coupon');
-                $coupons = '';
-                if ($lifetimeaffiliate) {
-                    $getinfo = wcusage_get_the_order_coupon_info($lifetimeaffiliate, "", $order_id);
-                    $url = $getinfo['uniqueurl'];
-                    $url = sanitize_text_field( $url );
-                    $typeicon = "<span title='Lifetime Commission' style='font-size: 12px;'><i class='fa-solid fa-star'></i></span> ";
-                    return $typeicon . '<a href="' . $url . '" target="_blank">' . $lifetimeaffiliate . '</a>';
-                } elseif ($affiliatereferrer) {
-                    $getinfo = wcusage_get_the_order_coupon_info($affiliatereferrer, "", $order_id);
-                    $url = $getinfo['uniqueurl'];
-                    $typeicon = "<span title='Custom / URL Referral' style='font-size: 12px;'><i class='fa-solid fa-link'></i></span> ";
-                    return $typeicon . '<a href="' . $url . '" target="_blank">' . $affiliatereferrer . '</a>';
-                } elseif (!$lifetimeaffiliate && !$affiliatereferrer && class_exists('WooCommerce')) {
-                    if (version_compare(WC_VERSION, 3.7, ">=")) {
-                        foreach ($order->get_coupon_codes() as $coupon_code) {
-                            $getinfo = wcusage_get_the_order_coupon_info($coupon_code, "", $order_id);
-                            $url = $getinfo['uniqueurl'];
-                            $coupons .= '<a href="' . $url . '" target="_blank">' . $coupon_code . '</a><br/>';
-                        }
-                    }
-                }
                 return $coupons;
             case 'commission':
                 $order_id = $item['order_id'];
@@ -213,15 +235,7 @@ class wcusage_Referrals_Table extends WP_List_Table {
                     return "";
                 }
             case 'affiliate':
-                $order_id = $item['order_id'];
-                $order = wc_get_order($order_id);
-                $user_id = wcusage_order_meta($order_id, 'wcusage_affiliate_user');
-                $user_info = get_userdata($user_id);
-                if(!$user_info) {
-                    return "";
-                }
-                $user_login = $user_info->user_login;
-                return '<a href="' . esc_url(admin_url('user-edit.php?user_id=' . $user_id)) . '" target="_blank">' . esc_html($user_login) . '</a>';
+                return $affiliate_ids;
             default:
                 return $item[$column_name];
         }

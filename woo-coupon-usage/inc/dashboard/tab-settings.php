@@ -3,12 +3,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Enqueue jQuery
-add_action('wp_enqueue_scripts', 'wcusage_enqueue_settings_scripts');
-function wcusage_enqueue_settings_scripts() {
-    wp_enqueue_script('jquery');
-}
-
 // AJAX Handler
 add_action('wp_ajax_wcusage_update_settings', 'wcusage_ajax_update_settings');
 function wcusage_ajax_update_settings() {
@@ -92,12 +86,12 @@ function wcusage_ajax_update_settings() {
         'wcu_last_name' => 'last_name',
         'wcu_display_name' => 'display_name',
         'wcu_email' => 'user_email',
-        'wcu_phone' => 'wcu_phone', // Custom field
-        'wcu_website' => 'wcu_website' // Custom field
+        'wcu_phone' => 'wcu_phone',
+        'wcu_website' => 'wcu_website'
     ];
 
     $updated_account_fields = [];
-    $user_data = ['ID' => $couponuserid]; // Prepare user data array for wp_update_user
+    $user_data = ['ID' => $couponuserid];
 
     foreach($account_fields as $post_key => $meta_key) {
         if(isset($_POST[$post_key])) {
@@ -111,8 +105,7 @@ function wcusage_ajax_update_settings() {
         }
     }
 
-    // Update user data if there are changes
-    if (count($user_data) > 1) { // More than just 'ID'
+    if (count($user_data) > 1) {
         $result = wp_update_user($user_data);
         if (is_wp_error($result)) {
             wp_send_json_error('Failed to update user: ' . $result->get_error_message());
@@ -131,10 +124,6 @@ function wcusage_ajax_update_settings() {
 
 /**
  * Displays the settings tab content on affiliate dashboard
- *
- * @param int $postid
- * @param int $couponuserid
- * @return mixed
  */
 if (!function_exists('wcusage_tab_settings')) {
     function wcusage_tab_settings($postid, $couponuserid) {
@@ -175,8 +164,6 @@ if (!function_exists('wcusage_tab_settings')) {
         <p class="wcu-tab-title settings-title" style="font-size: 22px; margin-bottom: 25px;"><?php echo esc_html__("Settings", "woo-coupon-usage"); ?>:</p>
 
         <?php if ($couponuserid == $currentuserid || wcusage_check_admin_access()) { ?>
-
-            <div id="wcu-settings-ajax-message"></div>
 
             <form method="post" class="wcusage_settings_form" id="wcusage-settings-form" data-post-id="<?php echo esc_attr($postid); ?>">
                 <?php wp_nonce_field('wcusage_settings_update', 'wcusage_settings_nonce'); ?>
@@ -263,15 +250,8 @@ if (!function_exists('wcusage_tab_settings')) {
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
                                         <label><?php echo esc_html__('Profile Picture', 'woo-coupon-usage'); ?></label>
                                         <div style="margin-bottom: 10px;" class="profile-picture">
-                                            <?php echo get_avatar($couponuserid, 96); // Display Gravatar with 96px size ?>
+                                            <?php echo get_avatar($couponuserid, 96); ?>
                                         </div>
-                                        <style>
-                                        .wcu-settings-tab-content .profile-picture img {
-                                            border-radius: 50%;
-                                            width: 96px;
-                                            height: 96px;
-                                        }
-                                        </style>
                                         <p style="margin-top: 0px;font-size:12px;"><?php echo esc_html__('Your profile picture is managed via Gravatar. To set or change it, visit '); ?><a href="https://gravatar.com/profile/avatars" target="_blank"><?php echo esc_html__('Gravatar.com'); ?></a>.</p>
                                     </p>
                                     <?php } ?>
@@ -344,14 +324,13 @@ if (!function_exists('wcusage_tab_settings')) {
                                                 <label><?php echo esc_html__('Website', 'woo-coupon-usage'); ?>: <?php echo esc_html($website); ?></label>
                                             </p>
                                         </span>
-                                        <style>
-                                            .admin-edit-account { opacity: 0.5; }
-                                        </style>
                                     <?php } ?>
                                 <?php } ?>
                             </div>
                         <?php } ?>
                     </div>
+
+                    <div id="wcu-settings-ajax-message"></div>
 
                     <p>
                         <button type="submit" id="wcu-settings-update-button" class="wcu-save-settings-button woocommerce-Button button" name="submitsettingsupdate">
@@ -360,137 +339,6 @@ if (!function_exists('wcusage_tab_settings')) {
                     </p>
                 </div>
             </form>
-
-            <style>
-                .wcu-settings-tabs { margin-bottom: 20px; }
-                .wcu-settings-tab-nav { list-style: none; padding: 0; margin: 0; border-bottom: 1px solid #ddd; display: flex; }
-                .wcu-settings-tab-nav li { margin: 0; }
-                .wcu-settings-tab-nav a { display: block; padding: 10px 20px; text-decoration: none; color: #0073aa; border-bottom: 2px solid transparent; }
-                .wcu-settings-tab-nav li.active a { color: #000; border-bottom: 2px solid #0073aa; }
-                .wcu-settings-tab-content { padding: 20px; border: 1px solid #ddd; border-top: none; background: #fff; }
-                .wcu-settings-tab-pane { display: none; }
-                .wcu-settings-tab-pane.active { display: block; }
-            </style>
-
-            <script>
-            (function($) {
-                $(document).ready(function() {
-                    // Tab switching
-                    const tabs = $('.wcu-settings-tab-nav a');
-                    const panes = $('.wcu-settings-tab-pane');
-
-                    tabs.on('click', function(e) {
-                        e.preventDefault();
-                        tabs.parent().removeClass('active');
-                        panes.removeClass('active');
-                        $(this).parent().addClass('active');
-                        $($(this).attr('href')).addClass('active');
-                    });
-
-                    // Payout type checker
-                    wcusage_check_payout_type();
-                    $('#wcu-payout-type').on('change', function() {
-                        wcusage_check_payout_type();
-                    });
-
-                    function wcusage_check_payout_type() {
-                        var currentpayout = $('#wcu-payout-type').val();
-                        $('.wcu-payout-type-custom1, .wcu-payout-type-custom2, .wcu-payout-type-banktransfer, .wcu-payout-type-paypalapi, .wcu-payout-type-stripeapi, .wcu-payout-type-credit').hide();
-                        
-                        if(currentpayout === "custom1") $('.wcu-payout-type-custom1').show();
-                        if(currentpayout === "custom2") $('.wcu-payout-type-custom2').show();
-                        if(currentpayout === "banktransfer") $('.wcu-payout-type-banktransfer').show();
-                        if(currentpayout === "paypalapi") $('.wcu-payout-type-paypalapi').show();
-                        if(currentpayout === "stripeapi") $('.wcu-payout-type-stripeapi').show();
-                        if(currentpayout === "credit") $('.wcu-payout-type-credit').show();
-                    }
-
-                    // AJAX Form Submission
-                    $('#wcusage-settings-form').on('submit', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        var $form = $(this);
-                        var formData = {
-                            action: 'wcusage_update_settings',
-                            nonce: $('#wcusage_settings_nonce').val(),
-                            post_id: $form.data('post-id'),
-                            wcu_enable_notifications: $('#wcu_enable_notifications').is(':checked') ? '1' : '0',
-                            wcu_enable_reports: $('#wcu_enable_reports').is(':checked') ? '1' : '0',
-                            wcu_notifications_extra: $('#wcu_notifications_extra').val() || '',
-                            payouttype: $('#wcu-payout-type').val() || '',
-                            paypalemail: $('#wcu-paypal-input').val() || '',
-                            paypalemail2: $('#wcu-paypal-input2').val() || '',
-                            bankname: $('#wcu-bank-input1').val() || '',
-                            banksort: $('#wcu-bank-input2').val() || '',
-                            bankaccount: $('#wcu-bank-input3').val() || '',
-                            bankother: $('#wcu-bank-input4').val() || '',
-                            bankother2: $('#wcu-bank-input5').val() || '',
-                            bankother3: $('#wcu-bank-input6').val() || '',
-                            bankother4: $('#wcu-bank-input7').val() || '',
-                            paypalemailapi: $('#wcu-paypalapi-input').val() || '',
-                            'wcu-company': $('#wcu-company').val() || '',
-                            'wcu-billing1': $('#wcu-billing1').val() || '',
-                            'wcu-billing2': $('#wcu-billing2').val() || '',
-                            'wcu-billing3': $('#wcu-billing3').val() || '',
-                            'wcu-taxid': $('#wcu-taxid').val() || '',
-                            wcu_first_name: $('#wcu_first_name').val() || '',
-                            wcu_last_name: $('#wcu_last_name').val() || '',
-                            wcu_display_name: $('#wcu_display_name').val() || '',
-                            wcu_email: $('#wcu_email').val() || '',
-                            wcu_phone: $('#wcu_phone').val() || '',
-                            wcu_website: $('#wcu_website').val() || ''
-                        };
-
-                        $.ajax({
-                            url: '<?php echo admin_url('admin-ajax.php'); ?>',
-                            type: 'POST',
-                            data: formData,
-                            beforeSend: function() {
-                                $('#wcu-settings-update-button')
-                                    .prop('disabled', true)
-                                    .text('<?php echo esc_html__('Saving...', 'woo-coupon-usage'); ?>');
-                                $('#wcu-settings-ajax-message').empty();
-                            },
-                            success: function(response) {
-                                if (response.success) {
-                                    // Show success message for 2 seconds
-                                    $('#wcu-settings-ajax-message').html(
-                                        '<p style="color: green;">' + response.data.message + '</p>'
-                                    ).fadeIn().delay(4000).fadeOut();
-                                    if(response.data.updated_payout_fields.payouttype) {
-                                        $('#wcu-payout-type')
-                                            .val(response.data.updated_payout_fields.payouttype)
-                                            .trigger('change');
-                                    }
-                                    // Change button back to "Save changes"
-                                    $('#wcu-settings-update-button')
-                                        .prop('disabled', false)
-                                        .text('<?php echo esc_html__('Save changes', 'woo-coupon-usage'); ?>');
-                                    $("#tab-page-settings").trigger('click');
-                                } else {
-                                    $('#wcu-settings-ajax-message').html(
-                                        '<p style="color: red;">Error: ' + (response.data || 'Unknown error') + '</p>'
-                                    );
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                $('#wcu-settings-ajax-message').html(
-                                    '<p style="color: red;">AJAX Error: ' + error + '</p>'
-                                );
-                            },
-                            complete: function() {
-                                $('#wcu-settings-update-button')
-                                    .prop('disabled', false)
-                                    .text('<?php echo esc_html__('Save changes', 'woo-coupon-usage'); ?>');
-                            }
-                        });
-
-                        return false;
-                    });
-                });
-            })(jQuery);
-            </script>
 
         <?php } else { ?>
             <br/><p><?php echo esc_html__("Sorry, this coupon is not assigned to you.", "woo-coupon-usage"); ?></p>

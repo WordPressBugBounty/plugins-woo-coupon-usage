@@ -178,7 +178,7 @@ if ( $wcusage_field_show_graphs ) {
     );
 }
 do_action( 'wcusage_hook_custom_styles' );
-// Enqueue
+// Enqueue custom scripts and styles for the registration form
 wp_enqueue_script(
     'wcusage-register-ajax',
     WCUSAGE_UNIQUE_PLUGIN_URL . 'js/register-ajax.js',
@@ -189,6 +189,27 @@ wp_enqueue_script(
 wp_localize_script( 'wcusage-register-ajax', 'wcusage_ajax_object', array(
     'ajax_url' => admin_url( 'admin-ajax.php' ),
     'nonce'    => wp_create_nonce( 'wcusage_verify_submit_registration_form1' ),
+) );
+// Enqueue custom settings script
+wp_enqueue_script(
+    'wcusage-tab-settings',
+    WCUSAGE_UNIQUE_PLUGIN_URL . 'js/tab-settings.js',
+    array('jquery'),
+    '1.0.0',
+    true
+);
+// Enqueue custom settings styles
+wp_enqueue_style(
+    'wcusage-tab-settings',
+    WCUSAGE_UNIQUE_PLUGIN_URL . 'css/tab-settings.css',
+    array(),
+    '1.0.0'
+);
+// Localize custom settingsscript with necessary data
+wp_localize_script( 'wcusage-tab-settings', 'wcusage_ajax', array(
+    'ajax_url'    => admin_url( 'admin-ajax.php' ),
+    'saving_text' => __( 'Saving...', 'woo-coupon-usage' ),
+    'save_text'   => __( 'Save changes', 'woo-coupon-usage' ),
 ) );
 // Get force refresh date
 $wcusage_refresh_date = "";

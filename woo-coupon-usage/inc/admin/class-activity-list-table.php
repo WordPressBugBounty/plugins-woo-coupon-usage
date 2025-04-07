@@ -95,7 +95,7 @@ class wcusage_activity_List_Table extends WP_List_Table {
 
         global $wpdb; //This is used only if making any database queries
 
-        $per_page = 20;
+        $per_page = 100;
 
         $columns = $this->get_columns();
         $hidden = array();

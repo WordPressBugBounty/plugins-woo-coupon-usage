@@ -320,8 +320,16 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
     ) {
         if ( isset( $coupon_code ) ) {
             $getcoupon = wcusage_get_coupon_info( $coupon_code );
-            $couponuser = $getcoupon[1];
-            $couponid = $getcoupon[2];
+            if ( isset( $getcoupon[1] ) ) {
+                $couponuser = $getcoupon[1];
+            } else {
+                $couponuser = "";
+            }
+            if ( isset( $getcoupon[2] ) ) {
+                $couponid = $getcoupon[2];
+            } else {
+                $couponid = "";
+            }
         } else {
             $couponuser = "";
             $couponid = "";

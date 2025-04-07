@@ -1299,7 +1299,15 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
               <?php echo wcusage_setting_text_option('wcusage_field_registration_coupon_template_label' . esc_html($template_num), $template_default, esc_html__( 'Option name:', 'woo-coupon-usage' ), '0px'); ?>
             </div>
             <div style="width: auto; float: left; display: block; margin-left: 10px;">
-              <?php echo wcusage_setting_text_option('wcusage_field_registration_coupon_template' . esc_html($template_num), '', esc_html__( 'Template coupon code:', 'woo-coupon-usage' ), '0px'); ?>
+              <?php
+              echo wcusage_setting_text_option('wcusage_field_registration_coupon_template' . esc_html($template_num), '', esc_html__( 'Template coupon code:', 'woo-coupon-usage' ), '0px');
+              $get_code = $options['wcusage_field_registration_coupon_template' . esc_html($template_num)];
+              // Check if coupon exists, if not, show error message
+              $coupon_id = wc_get_coupon_id_by_code($get_code);
+              if(!$coupon_id && $get_code) {
+                echo '<p style="color: red; font-size: 12px;">' . esc_html__( 'This coupon does not exist!', 'woo-coupon-usage' ) . '</p>';
+              }
+              ?>
             </div>
             <!-- User Role -->
             <div style="width: auto; float: left; display: block; margin-left: 10px;" class="wcu-field-section-registration-roles">

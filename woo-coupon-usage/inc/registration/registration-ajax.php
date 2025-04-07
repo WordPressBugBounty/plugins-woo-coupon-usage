@@ -59,6 +59,21 @@ function wcusage_ajax_submit_registration() {
             wp_send_json_error(array('message' => 'The passwords do not match. Please try again.'));
         }
 
+    } else {
+
+        if (username_exists($username) && $username !== wp_get_current_user()->user_login) {
+            wp_send_json_error(array('message' => 'This username already exists. Please try again or login.'));
+        }
+
+        // If the user is logged in, we can skip some validations
+        if (empty($email) || !is_email($email)) {
+            wp_send_json_error(array('message' => 'A valid email is required.'));
+        }
+
+        if (email_exists($email)) {
+            wp_send_json_error(array('message' => 'This email already exists. Please try again or login.'));
+        }
+
     }
 
     // Create a new user if the user is not logged in

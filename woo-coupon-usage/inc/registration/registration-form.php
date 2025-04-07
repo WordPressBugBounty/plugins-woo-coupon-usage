@@ -357,8 +357,6 @@ if ( $wcusage_field_registration_enable ) {
                         wp_nonce_field( 'wcusage_verify_submit_registration_form2', 'wcusage_submit_registration_form2' );
                         ?>
 
-            <input type="hidden" name="action" value="wcusage_submit_registration">
-
             <p><input type="submit" class="woocommerce-button button"  id="wcu-register-button" name="submitaffiliateapplication" value="<?php 
                         echo esc_attr( $submit_button_text );
                         ?>"></p>

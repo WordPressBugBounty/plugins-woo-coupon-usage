@@ -106,6 +106,11 @@ function wcusage_add_activity($event_id, $event, $info) {
  */
 function wcusage_activity_message($event, $event_id = "", $info = "") {
 
+  $event_message = '';
+  $event_id = sanitize_text_field($event_id);
+  $event = sanitize_text_field($event);
+  $info = sanitize_text_field($info);
+
   if($event == 'reward_earned' || $event == 'reward_earned_bonus_amount' || $event == 'reward_earned_commission_increase' || $event == 'reward_earned_email_sent' || $event == 'reward_earned_role_assigned') {
     $reward_meta = get_post_meta($event_id);
     $trigger_type = isset($reward_meta['trigger_type'][0]) ? $reward_meta['trigger_type'][0] : '';
@@ -173,12 +178,49 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
     case 'commission_added':
       $coupon_info = wcusage_get_coupon_info_by_id($event_id);
       $coupon_name = $coupon_info[3];
+      // If $info has a number with # at start, link it to the order
+      if (preg_match('/#(\d+)/', $info, $matches)) {
+        $order_id = $matches[1];
+        $order_link = '<a href="'.esc_url(get_edit_post_link($order_id)).'" target="_blank">#'.$order_id.'</a>';
+        $info = str_replace('#'.$order_id, $order_link, $info);
+      }
       $event_message = "Unpaid commission added to '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
       break;
     case 'commission_removed':
       $coupon_info = wcusage_get_coupon_info_by_id($event_id);
       $coupon_name = $coupon_info[3];
+      // If $info has a number with # at start, link it to the order
+      if (preg_match('/#(\d+)/', $info, $matches)) {
+        $order_id = $matches[1];
+        $order_link = '<a href="'.esc_url(get_edit_post_link($order_id)).'" target="_blank">#'.$order_id.'</a>';
+        $info = str_replace('#'.$order_id, $order_link, $info);
+      }
       $event_message = "Unpaid commission removed from '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
+      break;
+    case 'manual_unpaid_commission_edit':
+      $coupon_info = wcusage_get_coupon_info_by_id($event_id);
+      $coupon_name = $coupon_info[3];
+      $event_message = "Unpaid commission edited for coupon '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
+      break;
+    case 'manual_pending_commission_edit':
+      $coupon_info = wcusage_get_coupon_info_by_id($event_id);
+      $coupon_name = $coupon_info[3];
+      $event_message = "Pending commission edited for coupon '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
+      break;
+    case 'manual_coupon_commission_edit':
+      $coupon_info = wcusage_get_coupon_info_by_id($event_id);
+      $coupon_name = $coupon_info[3];
+      $event_message = "Coupon commission (percentage) edited for coupon '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
+      break;
+    case 'manual_coupon_commission_fixed_order_edit':
+      $coupon_info = wcusage_get_coupon_info_by_id($event_id);
+      $coupon_name = $coupon_info[3];
+      $event_message = "Coupon commission (fixed per order) edited for coupon '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
+      break;
+    case 'manual_coupon_commission_fixed_product_edit':
+      $coupon_info = wcusage_get_coupon_info_by_id($event_id);
+      $coupon_name = $coupon_info[3];
+      $event_message = "Coupon commission (fixed per product) edited for coupon '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
       break;
     case 'reward_earned':
       $coupon_info = wcusage_get_coupon_info_by_id($info);
@@ -225,4 +267,73 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
 
   return $event_message;
 
+}
+
+// Store the previous value before the update
+add_filter('update_postmeta', function($check, $object_id, $meta_key, $meta_value) {
+  $meta_configs = [
+      'wcu_text_unpaid_commission' => 'manual_unpaid_commission_edit',
+      'wcu_text_pending_commission' => 'manual_pending_commission_edit',
+      'wcu_text_coupon_commission' => 'manual_coupon_commission_edit',
+      'wcu_text_coupon_commission_fixed_order' => 'manual_coupon_commission_fixed_order_edit',
+      'wcu_text_coupon_commission_fixed_product' => 'manual_coupon_commission_fixed_product_edit',
+  ];
+
+  if (array_key_exists($meta_key, $meta_configs)) {
+      // Store the previous value in a transient
+      $previous_value = get_post_meta($object_id, $meta_key, true);
+      set_transient("wcusage_prev_{$object_id}_{$meta_key}", $previous_value, 60); // Expires in 60 seconds
+  }
+  return $check;
+}, 10, 4);
+
+// Log the update with the previous value
+add_action('updated_post_meta', 'wcusage_after_update_function', 10, 4);
+function wcusage_after_update_function($meta_id, $post_id, $meta_key, $meta_value) {
+  $meta_configs = [
+      'wcu_text_unpaid_commission' => 'manual_unpaid_commission_edit',
+      'wcu_text_pending_commission' => 'manual_pending_commission_edit',
+      'wcu_text_coupon_commission' => 'manual_coupon_commission_edit',
+      'wcu_text_coupon_commission_fixed_order' => 'manual_coupon_commission_fixed_order_edit',
+      'wcu_text_coupon_commission_fixed_product' => 'manual_coupon_commission_fixed_product_edit',
+  ];
+
+  foreach ($meta_configs as $target_meta_key => $activity_type) {
+      if ($meta_key === $target_meta_key) {
+          // Retrieve the previous value from the transient
+          $previous_value = get_transient("wcusage_prev_{$post_id}_{$meta_key}");
+          if ($previous_value === false) {
+              $previous_value = "0"; // Fallback if transient expired or wasn't set
+          }
+          $new_value = $meta_value;
+
+          // Check if the value changed
+          if ($previous_value !== $new_value) {
+
+              if($meta_key == 'wcu_text_unpaid_commission'
+              || $meta_key == 'wcu_text_pending_commission'
+              || $meta_key == 'wcu_text_coupon_commission_fixed_order'
+              || $meta_key == 'wcu_text_coupon_commission_fixed_product')
+              {
+                $formatted_new_value = strip_tags(wc_price($new_value));
+                $formatted_previous_value = strip_tags(wc_price($previous_value));
+              }
+              if($meta_key == 'wcu_text_coupon_commission') {
+                $formatted_new_value = strip_tags($new_value) . "%";
+                $formatted_previous_value = strip_tags($previous_value) . "%";
+              }
+
+              // Log the activity
+              wcusage_add_activity(
+                  $post_id,
+                  $activity_type,
+                  "From '{$formatted_previous_value}' to '{$formatted_new_value}'"
+              );
+          }
+
+          // Clean up the transient
+          delete_transient("wcusage_prev_{$post_id}_{$meta_key}");
+          break;
+      }
+  }
 }

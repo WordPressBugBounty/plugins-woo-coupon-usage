@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.8
-Stable tag: 6.1.0
+Stable tag: 6.2.0
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -243,6 +243,20 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 6.2.0 - 7th April 2025 =
+- New: On the "Coupon Affiliates > Coupons" page, added a new "Quick Edit" button that will allow you to quickly edit some of the coupon codes, and the assigned affiliate user, without needing to open the full edit page.
+- New: Added a new "Add a tracking coupon to this order" link to processing and completed orders that lets you add an affiliate coupon to the order for tracking, but it will not apply the discount.
+- New: Added a "X" remove button next to each affiliate coupon in the "Coupon Affiliate" meta box for individual orders, when the order is processing or completed, to unlink that coupon from the order in affiliate statistics.
+- Improvement: On the plugins main admin dashboard page, updated the statistics to have toggles for last 7 days, this month, and last month. Previously it only showed the last 7 days.
+- Improvement: Added an activity tracking event for editing any of the 3 commission rates, as well as "unpaid commission" and "pending commission" amounts for affiliate coupons.
+- Tweak: The affiliate orders page will now show all the affiliates for the order if there are more than one affiliate coupons assigned to the order.
+- Tweak: Added a search documentation feature to the plugins "help" settings tab, that searches the documentation from our website and displays the results.
+- Tweak: Moved the "Settings updated successfully" message on the settings tab of the affiliate dashboard above the "Save changes" button.
+- Tweak: Made a few styling tweaks and improvements to some of the admin pages in the plugin.
+- Tweak: (PRO) For the "Multiple Template Coupons" options, added a error message if the current entered coupon code does not exist.
+- Fix: Fixed an issue with the "Settings" tab on the affiliate dashboard page.
+- Fix: (PRO) Fixed an issue with the "copy" button not working on the "rates" table on some browsers.
 
 = Version 6.1.0 - 3rd April 2025 =
 - New: Added a new "Signup Promo Page Generator" tool to the plugin, that will help you generate a simple landing page for you to promo your affiliate program that has some details about the program, and a signup form for users to apply as an affiliate.

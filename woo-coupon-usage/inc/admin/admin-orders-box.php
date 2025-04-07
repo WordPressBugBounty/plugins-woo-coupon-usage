@@ -3,6 +3,9 @@
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
+/**
+ * Add a custom meta box to the WooCommerce order edit page
+ */
 function wcusage_add_custom_box() {
     if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
         $screen = wc_get_page_screen_id( 'shop-order' );
@@ -11,20 +14,20 @@ function wcusage_add_custom_box() {
     }
     add_meta_box(
         'wcusage_affiliate_info',
-        // Unique ID
         'Coupon Affiliate',
-        // Box title
         'wcusage_custom_box_html',
-        // Content callback, must be of type callable
         $screen,
-        // Post type
         'side',
         'high'
     );
 }
 
 add_action( 'add_meta_boxes', 'wcusage_add_custom_box' );
-// Display the metabox content
+/**
+ * Custom box HTML
+ *
+ * @param object $post The post object.
+ */
 function wcusage_custom_box_html(  $post  ) {
     $options = get_option( 'wcusage_options' );
     $wcusage_show_column_code = wcusage_get_setting_value( 'wcusage_field_show_orders_aff_info', '1' );
@@ -62,11 +65,9 @@ function wcusage_custom_box_html(  $post  ) {
                     2
                 );
             } else {
-                // if $order is array
                 if ( class_exists( 'WooCommerce' ) ) {
                     if ( version_compare( WC_VERSION, 3.7, ">=" ) ) {
                         foreach ( $order->get_coupon_codes() as $coupon_code ) {
-                            // Get the WC_Coupon object
                             if ( $coupon_code ) {
                                 wcusage_custom_box_html_content(
                                     $coupon_code,
@@ -94,7 +95,6 @@ function wcusage_custom_box_html(  $post  ) {
     } else {
         echo "<p>" . esc_html__( "Affiiliate Info not available.", "woo-coupon-usage" ) . "</p>";
     }
-    // Get order status
     if ( $order ) {
         $order_status = $order->get_status();
     } else {
@@ -102,45 +102,82 @@ function wcusage_custom_box_html(  $post  ) {
     }
     ?>
 
-  <p>
-      <label for="wcusage_referrer_coupon">Affiliate Referrer Coupon:
-      <?php 
-    echo wc_help_tip( esc_html__( 'Set the primary referral coupon for this order. This will override all other settings, as the default and only coupon that will earn commission from this order.', 'woo-coupon-usage' ), false );
+    <?php 
+    do_action(
+        'wcusage_hook_order_box_before_custom_referrer',
+        $post_id,
+        $order,
+        $coupon_code,
+        $lifetimeaffiliate,
+        $affiliatereferrer
+    );
     ?>
-      </label>
-      <input type="text" id="wcusage_referrer_coupon" name="wcusage_referrer_coupon" value="<?php 
-    echo esc_attr( $wcusage_referrer_coupon );
-    ?>" style="width: 100%;"
-      <?php 
-    if ( !$wcusage_referrer_coupon && $coupon_code ) {
-        if ( count( $coupon_codes ) > 1 ) {
-            $coupon_code = "";
-        }
-        ?>placeholder="<?php 
-        echo esc_html( $coupon_code );
-        ?>"<?php 
-    }
-    ?>
-      <?php 
-    if ( $lifetimeaffiliate ) {
-        ?>title="<?php 
-        echo esc_html__( 'This can not be edited for a lifetime affiliate referral.', 'woo-coupon-usage' );
-        ?>" readonly<?php 
-    }
-    ?>
-      <?php 
-    if ( !$lifetimeaffiliate && $order_status == 'completed' ) {
-        ?>title="<?php 
-        echo esc_html__( 'This can not be edited when the order is completed.', 'woo-coupon-usage' );
-        ?>" readonly<?php 
-    }
-    ?>>
-      <br/>
-  </p>
 
-  <?php 
+    <?php 
+    if ( $order_status != 'completed' || $wcusage_referrer_coupon ) {
+        ?>
+    <p>
+        <label for="wcusage_referrer_coupon"><?php 
+        echo esc_html__( 'Affiliate Referrer Coupon', 'woo-coupon-usage' );
+        ?>: <?php 
+        echo wc_help_tip( esc_html__( 'Set the primary referral coupon for this order. This will override all other settings, as the default and only coupon that will earn commission from this order.', 'woo-coupon-usage' ), false );
+        ?>
+        </label>
+        <input type="text" id="wcusage_referrer_coupon" name="wcusage_referrer_coupon" value="<?php 
+        echo esc_attr( $wcusage_referrer_coupon );
+        ?>" style="width: 100%;"
+        <?php 
+        if ( !$wcusage_referrer_coupon && $coupon_code ) {
+            if ( count( $coupon_codes ) > 1 ) {
+                $coupon_code = "";
+            }
+            ?>placeholder="<?php 
+            echo esc_html( $coupon_code );
+            ?>"<?php 
+        }
+        ?>
+        <?php 
+        if ( $lifetimeaffiliate ) {
+            ?>title="<?php 
+            echo esc_html__( 'This can not be edited for a lifetime affiliate referral.', 'woo-coupon-usage' );
+            ?>" readonly<?php 
+        }
+        ?>
+        <?php 
+        if ( !$lifetimeaffiliate && $order_status == 'completed' ) {
+            ?>title="<?php 
+            echo esc_html__( 'This can not be edited when the order is completed.', 'woo-coupon-usage' );
+            ?>" readonly<?php 
+        }
+        ?>>
+        <br/>
+    </p>
+    <?php 
+    }
+    ?>
+
+    <?php 
+    do_action(
+        'wcusage_hook_order_box_after_custom_referrer',
+        $post_id,
+        $order,
+        $coupon_code,
+        $lifetimeaffiliate,
+        $affiliatereferrer
+    );
+    ?>
+
+    <?php 
 }
 
+/**
+ * Custom box HTML content
+ *
+ * @param string $coupon_code The coupon code.
+ * @param object $post The post object.
+ * @param object $order The order object.
+ * @param int $type The type of referral (1 for lifetime, 2 for custom).
+ */
 function wcusage_custom_box_html_content(
     $coupon_code,
     $post,
@@ -152,7 +189,6 @@ function wcusage_custom_box_html_content(
     $paidcommission = wcusage_order_meta( $order_id, 'wcu_commission_paid', true );
     if ( !empty( $_GET['update_unpaid_commission'] ) && $_GET['update_unpaid_commission'] ) {
         $paidcommission = wcusage_order_meta( $order_id, 'wcu_commission_paid', true );
-        // Check lifetime affiliate
         $lifetimeaffiliate = wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer' );
         if ( $lifetimeaffiliate && !$lifetimeaffiliatedone ) {
             wcusage_do_action_order_update_commission(
@@ -164,7 +200,6 @@ function wcusage_custom_box_html_content(
             $lifetimeaffiliatedone = true;
         }
         if ( !$lifetimeaffiliate ) {
-            // Check affiliate referrer
             $affiliatereferrer = wcusage_order_meta( $order_id, 'wcusage_referrer_coupon' );
             if ( $affiliatereferrer ) {
                 wcusage_do_action_order_update_commission(
@@ -188,14 +223,12 @@ function wcusage_custom_box_html_content(
     $getinfo = wcusage_get_the_order_coupon_info( $coupon_code, "", $order_id );
     $coupon_info = wcusage_get_coupon_info( $coupon_code );
     $coupon_id = $coupon_info[2];
-    // Refresh Stats Link
     echo "<p style='position: absolute; right: 10px; top: -2px; margin: 0; padding: 0;'>";
-    echo "<a href='" . esc_url( admin_url( 'post.php?post=' . esc_attr( $order_id ) . '&action=edit&refresh_stats=1' ) ) . "' style='text-decoration: none;'\r\n  onClick='return confirm(\"" . esc_html__( 'Are you sure you want to refresh the affiliate stats for this order? This will delete the current referral stats/commission and recalculate them.', 'woo-coupon-usage' ) . "\");'\r\n  title='" . esc_html__( 'Recalculate the affiliate stats for this order.', 'woo-coupon-usage' ) . "'\r\n  ><span class='dashicons dashicons-update' style='font-size: 14px; height: 14px; display: inline-block; margin-top: 4px;'></span></a>";
+    echo "<a href='" . esc_url( admin_url( 'post.php?post=' . esc_attr( $order_id ) . '&action=edit&refresh_stats=1' ) ) . "' style='text-decoration: none;'\r\n    onClick='return confirm(\"" . esc_html__( 'Are you sure you want to refresh the affiliate stats for this order? This will delete the current referral stats/commission and recalculate them.', 'woo-coupon-usage' ) . "\");'\r\n    title='" . esc_html__( 'Recalculate the affiliate stats for this order.', 'woo-coupon-usage' ) . "'\r\n    ><span class='dashicons dashicons-update' style='font-size: 14px; height: 14px; display: inline-block; margin-top: 4px;'></span></a>";
     if ( isset( $_GET['refresh_stats'] ) && $_GET['refresh_stats'] ) {
         delete_post_meta( $order_id, 'wcusage_commission_summary' );
         delete_post_meta( $order_id, 'wcusage_stats' );
         delete_post_meta( $order_id, 'wcusage_total_commission' );
-        // Remove params from URL
         $url = remove_query_arg( 'refresh_stats' );
         wp_redirect( $url );
     }
@@ -208,11 +241,14 @@ function wcusage_custom_box_html_content(
         echo '<strong>(' . esc_html__( 'Custom / URL Referral', 'woo-coupon-usage' ) . ')</strong><br/>';
     }
     $ispaid = "";
-    // Show the coupon code
     if ( isset( $coupon_id ) && $coupon_id ) {
-        echo 'Referral Code: <a href="' . esc_url( admin_url( 'post.php?post=' . esc_attr( $coupon_id ) . '&action=edit' ) ) . '" target="_blank" style="color: #07bbe3;">' . esc_html( $coupon_code ) . '</a><br/>';
+        echo 'Referral Code: <a href="' . esc_url( admin_url( 'post.php?post=' . esc_attr( $coupon_id ) . '&action=edit' ) ) . '" target="_blank" style="color: #07bbe3;">' . esc_html( $coupon_code ) . '</a>';
+        $order_status = $order->get_status();
+        if ( $order_status == 'processing' || $order_status == 'completed' ) {
+            echo ' <span class="delete-coupon dashicons dashicons-no" style="color:rgb(92, 7, 7); cursor: pointer; font-size: 10px; height: 10px; width: 10px; vertical-align: middle;" data-order-id="' . esc_attr( $order_id ) . '" data-coupon-code="' . esc_attr( $coupon_code ) . '" title="Remove this coupon from order"></span>';
+        }
+        echo '<br/>';
     }
-    // Show the affiliate user
     $wcusage_affiliate_user = $coupon_info[1];
     if ( $wcusage_affiliate_user ) {
         $affiliate = get_user_by( 'ID', $wcusage_affiliate_user );
@@ -222,7 +258,22 @@ function wcusage_custom_box_html_content(
     if ( $order->get_status() != "refunded" && !wcusage_coupon_disable_commission( $coupon_id ) ) {
         echo esc_html__( 'Commission', 'woo-coupon-usage' ) . ": " . wp_kses_post( $getinfo['thecommission'] ) . wp_kses_post( $ispaid ) . "<br/>";
     }
-    // Show the affiliate dashboard link
+    // Get discount amount
+    $applied_coupons = $order->get_coupon_codes();
+    if ( in_array( $coupon_code, $applied_coupons ) ) {
+        $discount_amount = 0;
+        foreach ( $order->get_items( 'coupon' ) as $item_id => $item ) {
+            if ( $item->get_code() === $coupon_code ) {
+                $discount_amount = $item->get_discount();
+                break;
+            }
+        }
+        if ( $discount_amount > 0 ) {
+            echo esc_html__( 'Discount', 'woo-coupon-usage' ) . ": " . wp_kses_post( wcusage_format_price( $discount_amount ) ) . "<br/>";
+        } else {
+            echo esc_html__( 'No Discount (Tracking Only)', 'woo-coupon-usage' ) . "<br/>";
+        }
+    }
     echo "<a href='" . esc_url( $getinfo['uniqueurl'] ) . "' target='_blank' style='color: #07bbe3;' title='" . esc_html__( 'View the affiliate dashboard for this affiliate coupon.', 'woo-coupon-usage' ) . "'>" . esc_html__( 'View Dashboard', 'woo-coupon-usage' ) . "</a>";
     echo "</p>";
     $wcusage_field_mla_enable = wcusage_get_setting_value( 'wcusage_field_mla_enable', '0' );
@@ -250,6 +301,11 @@ function wcusage_custom_box_html_content(
     }
 }
 
+/**
+ * Save the custom meta box data
+ *
+ * @param int $post_id The ID of the post being saved.
+ */
 function wcusage_save_postdata(  $post_id  ) {
     if ( array_key_exists( 'wcusage_field', $_POST ) ) {
         update_post_meta( $post_id, '_wcusage_meta_key', sanitize_text_field( $_POST['wcusage_field'] ) );
@@ -257,62 +313,52 @@ function wcusage_save_postdata(  $post_id  ) {
 }
 
 add_action( 'save_post', 'wcusage_save_postdata' );
-// Save the "wcusage_referrer_coupon" data
+/**
+ * Save the custom meta box data
+ *
+ * @param int $post_id The ID of the post being saved.
+ */
 function wcusage_wcusage_referrer_coupon_meta_box_save(  $post_id  ) {
-    // Check if our nonce is set.
     if ( !isset( $_POST['wcusage_referrer_coupon_nonce'] ) || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wcusage_referrer_coupon_nonce'] ) ), basename( __FILE__ ) ) ) {
         return;
     }
     if ( !current_user_can( 'edit_post', $post_id ) ) {
         return;
     }
-    // check if $_POST['wcusage_referrer_coupon'] exists as a woocommerce coupon, if not then return
     $coupon_code = '';
     if ( isset( $_POST['wcusage_referrer_coupon'] ) ) {
         $coupon_code = $_POST['wcusage_referrer_coupon'];
     }
     $coupon_id = wc_get_coupon_id_by_code( $coupon_code );
-    // Get the posted data
     $wcusage_referrer_coupon = ( isset( $_POST['wcusage_referrer_coupon'] ) ? sanitize_text_field( $_POST['wcusage_referrer_coupon'] ) : '' );
-    // Get the old data
     $wcusage_referrer_coupon_old = wcusage_order_meta( $post_id, 'wcusage_referrer_coupon', true );
-    // show an error popup in wordpress
     if ( $coupon_code && !$coupon_id ) {
         echo '<div class="error"><p>' . esc_html__( 'The coupon code you entered does not exist.', 'woo-coupon-usage' ) . '</p></div>';
         return;
     }
-    // Meta data array
     $meta_data = [];
-    // Update wcusage_referrer_coupon meta
     $meta_data['wcusage_referrer_coupon'] = $wcusage_referrer_coupon;
-    // If was not set and updated to new value, set wcusage_referrer_refresh
     if ( !$wcusage_referrer_coupon_old && $wcusage_referrer_coupon ) {
         $meta_data['wcusage_referrer_refresh'] = 1;
     }
-    // If was set and updated to empty value, set wcusage_referrer_refresh
     if ( $wcusage_referrer_coupon_old && !$wcusage_referrer_coupon ) {
         $meta_data['wcusage_referrer_refresh'] = 1;
         $meta_data['wcusage_referrer_refresh_prev'] = $wcusage_referrer_coupon_old;
     }
-    // If was set and updated to new value, set wcusage_referrer_refresh
     if ( $wcusage_referrer_coupon_old && $wcusage_referrer_coupon && $wcusage_referrer_coupon_old != $wcusage_referrer_coupon ) {
         $meta_data['wcusage_referrer_refresh'] = 1;
         $meta_data['wcusage_referrer_refresh_prev'] = $wcusage_referrer_coupon_old;
     }
     $wcusage_field_enable_coupon_all_stats_meta = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_meta', '1' );
     if ( $wcusage_field_enable_coupon_all_stats_meta ) {
-        // Get the order
         $order = wc_get_order( $post_id );
         if ( version_compare( WC_VERSION, 3.7, ">=" ) ) {
             $coupons_array = $order->get_coupon_codes();
         } else {
             $coupons_array = $order->get_used_coupons();
         }
-        // Update all time stats
         if ( $wcusage_referrer_coupon_old != $wcusage_referrer_coupon ) {
-            // Add
             if ( $wcusage_referrer_coupon ) {
-                // Add to new coupon
                 do_action(
                     'wcusage_hook_update_all_stats_single',
                     $wcusage_referrer_coupon,
@@ -320,9 +366,7 @@ function wcusage_wcusage_referrer_coupon_meta_box_save(  $post_id  ) {
                     1,
                     1
                 );
-                // Add
             } else {
-                // Add to all other coupons
                 foreach ( $coupons_array as $this_coupon_code ) {
                     do_action(
                         'wcusage_hook_update_all_stats_single',
@@ -331,12 +375,9 @@ function wcusage_wcusage_referrer_coupon_meta_box_save(  $post_id  ) {
                         1,
                         1
                     );
-                    // Add
                 }
             }
-            // Remove
             if ( $wcusage_referrer_coupon_old ) {
-                // Remove from previous coupon
                 do_action(
                     'wcusage_hook_update_all_stats_single',
                     $wcusage_referrer_coupon_old,
@@ -344,9 +385,7 @@ function wcusage_wcusage_referrer_coupon_meta_box_save(  $post_id  ) {
                     0,
                     1
                 );
-                // Remove
             } else {
-                // Remove to all other coupons
                 foreach ( $coupons_array as $this_coupon_code ) {
                     do_action(
                         'wcusage_hook_update_all_stats_single',
@@ -355,15 +394,237 @@ function wcusage_wcusage_referrer_coupon_meta_box_save(  $post_id  ) {
                         0,
                         1
                     );
-                    // Remove
                 }
             }
         }
     }
-    // Update meta data
     if ( !empty( $meta_data ) ) {
         wcusage_update_order_meta_bulk( $post_id, $meta_data );
     }
 }
 
 add_action( 'woocommerce_process_shop_order_meta', 'wcusage_wcusage_referrer_coupon_meta_box_save' );
+/*
+ * Add a link to add a coupon below the coupons in the order edit page
+ */
+add_action(
+    'wcusage_hook_order_box_after_custom_referrer',
+    'add_coupon_link_below_coupons',
+    10,
+    1
+);
+function add_coupon_link_below_coupons(  $order_id  ) {
+    $order = wc_get_order( $order_id );
+    $order_status = $order->get_status();
+    $wcusage_referrer_coupon = wcusage_order_meta( $order_id, 'wcusage_referrer_coupon', true );
+    ?>
+
+    <?php 
+    if ( ($order_status == 'completed' || $order_status == 'processing') && !$wcusage_referrer_coupon ) {
+        ?>
+    <div>
+        <a href="#" class="add-coupon-link" style="font-size: 10px; text-decoration: none;"><?php 
+        echo esc_html__( 'Add a referrer coupon to this order', 'woo-coupon-usage' );
+        ?> <i class="fa fa-plus" style="font-size: 10px;"></i></a>
+        <div class="add-coupon-form" style="display: none; margin-top: 10px; border: 1px solid #ccc; padding: 10px 10px 12px 10px; background-color: #f9f9f9;">
+            <p style="font-size: 10px; margin: 0 0 7px 0;"><?php 
+        echo sprintf( esc_html__( 'Add a coupon to this order for tracking. Since the order is already %s, the coupon will be added with a zero discount.', 'woo-coupon-usage' ), esc_html( $order_status ) );
+        ?>
+            <?php 
+        if ( $order_status == 'completed' ) {
+            echo esc_html__( 'Unpaid commission will also NOT be automatically granted to this affiliate coupon and should be done manually.', 'woo-coupon-usage' );
+        }
+        ?></p>
+            <input type="text" id="add_coupon_code" name="add_coupon_code" placeholder="Coupon code" style="width: 150px;" />
+            <button type="button" class="button add-coupon-to-order" style="margin-left: 10px;"><?php 
+        echo esc_html__( 'Add', 'woo-coupon-usage' );
+        ?></button>
+        </div>
+    </div>
+    <script>
+        jQuery(document).ready(function($) {
+            $('.add-coupon-link').on('click', function(e) {
+                e.preventDefault();
+                $('.add-coupon-form').toggle();
+            });
+
+            $('.add-coupon-to-order').on('click', function() {
+
+                // Change button to spinner
+                $(this).html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
+
+                var couponCode = $('#add_coupon_code').val();
+                if (!couponCode) {
+                    alert('Please enter a coupon code.');
+                    return;
+                }
+
+                $.ajax({
+                    url: '<?php 
+        echo admin_url( 'admin-ajax.php' );
+        ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'add_coupon_to_order',
+                        order_id: '<?php 
+        echo $order->get_id();
+        ?>',
+                        coupon_code: couponCode,
+                        security: '<?php 
+        echo wp_create_nonce( 'add_coupon_nonce' );
+        ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.data.message);
+                        }
+                    }
+                });
+            });
+
+            $('.delete-coupon').on('click', function() {
+                var couponCode = $(this).data('coupon-code');
+                var orderId = $(this).data('order-id');
+                
+                if (confirm('<?php 
+        echo esc_js( esc_html__( 'Are you sure you want to remove this coupon from the order?', 'woo-coupon-usage' ) );
+        ?> <?php 
+        echo esc_js( esc_html__( ' - This will NOT affect the discount that has already been applied unless you recalculate the order.', 'woo-coupon-usage' ) );
+        if ( $order_status == 'completed' ) {
+            ?> <?php 
+            echo esc_js( esc_html__( 'This will only affect the affiliate dashboard statistics. Any unpaid commission granted will NOT be deducted.', 'woo-coupon-usage' ) );
+        }
+        ?>')) {
+                    $.ajax({
+                        url: '<?php 
+        echo admin_url( 'admin-ajax.php' );
+        ?>',
+                        type: 'POST',
+                        data: {
+                            action: 'remove_coupon_from_order',
+                            order_id: orderId,
+                            coupon_code: couponCode,
+                            security: '<?php 
+        echo wp_create_nonce( 'remove_coupon_nonce' );
+        ?>'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                alert('Error: ' + response.data.message);
+                            }
+                        },
+                        error: function() {
+                            alert('Error removing coupon.');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+    <?php 
+    }
+    ?>
+    <?php 
+}
+
+add_action( 'wp_ajax_add_coupon_to_order', 'handle_add_coupon_to_order' );
+function handle_add_coupon_to_order() {
+    check_ajax_referer( 'add_coupon_nonce', 'security' );
+    $order_id = ( isset( $_POST['order_id'] ) ? intval( $_POST['order_id'] ) : 0 );
+    $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( $_POST['coupon_code'] ) : '' );
+    if ( !$order_id || !$coupon_code ) {
+        wp_send_json_error( [
+            'message' => 'Invalid order ID or coupon code.',
+        ] );
+    }
+    $order = wc_get_order( $order_id );
+    if ( !$order ) {
+        wp_send_json_error( [
+            'message' => 'Order not found.',
+        ] );
+    }
+    $coupon = new WC_Coupon($coupon_code);
+    if ( !$coupon->get_id() ) {
+        wp_send_json_error( [
+            'message' => 'Coupon code does not exist.',
+        ] );
+    }
+    $existing_coupons = $order->get_coupon_codes();
+    if ( in_array( $coupon_code, $existing_coupons ) ) {
+        wp_send_json_error( [
+            'message' => 'Coupon already added to this order.',
+        ] );
+    }
+    $coupon_item = new WC_Order_Item_Coupon();
+    $coupon_item->set_props( [
+        'code'         => $coupon_code,
+        'discount'     => 0,
+        'discount_tax' => 0,
+    ] );
+    $order->add_item( $coupon_item );
+    $order->save();
+    do_action(
+        'wcusage_hook_update_all_stats_single',
+        $coupon_code,
+        $order_id,
+        1,
+        1
+    );
+    $coupon->increase_usage_count();
+    wp_send_json_success( [
+        'message' => 'Coupon added to order.',
+    ] );
+}
+
+add_action( 'wp_ajax_remove_coupon_from_order', 'handle_remove_coupon_from_order' );
+function handle_remove_coupon_from_order() {
+    check_ajax_referer( 'remove_coupon_nonce', 'security' );
+    $order_id = ( isset( $_POST['order_id'] ) ? intval( $_POST['order_id'] ) : 0 );
+    $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( $_POST['coupon_code'] ) : '' );
+    if ( !$order_id || !$coupon_code ) {
+        wp_send_json_error( [
+            'message' => 'Invalid order ID or coupon code.',
+        ] );
+    }
+    $order = wc_get_order( $order_id );
+    if ( !$order ) {
+        wp_send_json_error( [
+            'message' => 'Order not found.',
+        ] );
+    }
+    $order_status = $order->get_status();
+    if ( $order_status != 'processing' && $order_status != 'completed' ) {
+        wp_send_json_error( [
+            'message' => 'Coupon can only be removed from processing or completed orders.',
+        ] );
+    }
+    $existing_coupons = $order->get_items( 'coupon' );
+    $coupon_found = false;
+    foreach ( $existing_coupons as $item_id => $item ) {
+        if ( strtolower( $item->get_code() ) === strtolower( $coupon_code ) ) {
+            do_action(
+                'wcusage_hook_update_all_stats_single',
+                $coupon_code,
+                $order_id,
+                0,
+                1
+            );
+            $order->remove_item( $item_id );
+            $coupon_found = true;
+            break;
+        }
+    }
+    if ( !$coupon_found ) {
+        wp_send_json_error( [
+            'message' => 'Coupon not found in order.',
+        ] );
+    }
+    $order->save();
+    wp_send_json_success( [
+        'message' => 'Coupon removed from order.',
+    ] );
+}

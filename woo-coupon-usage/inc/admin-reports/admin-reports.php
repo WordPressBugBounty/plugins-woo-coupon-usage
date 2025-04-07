@@ -22,11 +22,11 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
         echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
         ?>" crossorigin="anonymous">
 
-  <div class="wrap admin-reports" style="margin: 0;">
-
   <?php 
         echo do_action( 'wcusage_hook_dashboard_page_header', '' );
         ?>
+
+  <div class="wrap admin-reports" style="margin: 0;">
 
   <h1><?php 
         echo esc_html__( "Admin Reports & Analytics", "woo-coupon-usage" );

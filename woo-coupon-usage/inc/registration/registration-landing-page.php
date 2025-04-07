@@ -387,7 +387,10 @@ $page_content = '<!-- wp:group {"layout":{"type":"constrained","contentSize":"12
     <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
 
     <div class="wrap affiliate-page-generator-wrap">
+        
         <h1><?php esc_html_e('Affiliate Program - Signup Promo Page Generator', 'woo-coupon-usage'); ?></h1>
+
+        <p style="font-size:10px; color:rgb(150, 150, 150);">(Currently only available in English.)</p>
 
         <p>
             <?php esc_html_e('This tool help you create a simple but effective custom signup promo page for your affiliate program.', 'woo-coupon-usage'); ?> <a href="https://www.couponaffiliates.com/signup-promo-page/" target="_blank"><?php esc_html_e('Learn more.', 'woo-coupon-usage'); ?></a>
@@ -420,7 +423,7 @@ $page_content = '<!-- wp:group {"layout":{"type":"constrained","contentSize":"12
             $edit_url = get_edit_post_link($page_id, '');
             ?>
             <div class="updated">
-                <p>Affiliate Program page has been created successfully at: <a href="<?php echo esc_url($view_url); ?>" target="_blank"><?php echo esc_url($view_url); ?></a></p>
+                <p>Affiliate program promo page has been created successfully at: <a href="<?php echo esc_url($view_url); ?>" target="_blank"><?php echo esc_url($view_url); ?></a></p>
                 <p>
                     <a href="<?php echo esc_url($view_url); ?>" class="button" target="_blank"><?php esc_html_e('View Page', 'woo-coupon-usage'); ?></a>
                     <a href="<?php echo esc_url($edit_url); ?>" class="button" target="_blank"><?php esc_html_e('Edit Page', 'woo-coupon-usage'); ?></a>

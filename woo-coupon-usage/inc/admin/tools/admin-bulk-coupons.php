@@ -50,7 +50,7 @@ function wcusage_bulk_coupon_creator_page() {
     echo do_action( 'wcusage_hook_dashboard_page_header', '' );
     ?>
 
-    <div class="wrap wcusage-tools">
+    <div class="wrap wcusage-tools wcusage-page">
         <h2><?php 
     echo esc_html__( 'Bulk Create: Affiliate Coupons', 'woo-coupon-usage' );
     ?></h2>

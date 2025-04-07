@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: Easily create an affiliate program for WooCommerce, based on coupons. Track affiliate commission, coupon usage statistics, referral URLs, and more.
-* Version: 6.1.0
+* Version: 6.2.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -138,6 +138,27 @@ if ( function_exists( 'wcu_fs' ) ) {
                 if ( !wp_script_is( 'jquery', 'enqueued' ) ) {
                     wp_enqueue_script( 'jquery' );
                 }
+                // Enqueue custom settings script
+                wp_enqueue_script(
+                    'wcusage-tab-settings',
+                    plugin_dir_url( __FILE__ ) . 'js/tab-settings.js',
+                    array('jquery'),
+                    '1.0.0',
+                    true
+                );
+                // Enqueue custom settings styles
+                wp_enqueue_style(
+                    'wcusage-tab-settings',
+                    plugin_dir_url( __FILE__ ) . 'css/tab-settings.css',
+                    array(),
+                    '1.0.0'
+                );
+                // Localize script with necessary data
+                wp_localize_script( 'wcusage-tab-settings', 'wcusage_ajax', array(
+                    'ajax_url'    => admin_url( 'admin-ajax.php' ),
+                    'saving_text' => __( 'Saving...', 'woo-coupon-usage' ),
+                    'save_text'   => __( 'Save changes', 'woo-coupon-usage' ),
+                ) );
             }
             // Custom JS Only Loads on Page
             wp_register_script(
