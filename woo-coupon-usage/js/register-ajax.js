@@ -2,7 +2,8 @@ jQuery(document).ready(function($) {
     $('#wcu_form_affiliate_register').on('submit', function(e) {
 
         // Set wcu-register-button to disabled
-        $('#wcu-register-button').prop('disabled', true); // Disable button and change text
+        $('#wcu-register-button').hide(); // Hide button and change text
+        $('.register-spinner').css('display', 'block'); // Show spinner
 
         e.preventDefault(); // Stop the form from submitting normally
 
@@ -24,11 +25,14 @@ jQuery(document).ready(function($) {
                 } else {
                     alert('Error: ' + response.data.message); // Show error message
                 }
+                // Set wcu-register-button to enabled
+                $('#wcu-register-button').show();
+                $('.register-spinner').css('display', 'none'); // Hide spinner
             },
             error: function() {
-                alert('An error occurred. Please try again: ' + response.statusText); // Show error message
-                // Set wcu-register-button to enabled
-                $('#wcu-register-button').prop('disabled', false); // Enable button and change text
+                $('#wcu-register-button').show();
+                $('.register-spinner').css('display', 'none');
+                alert('An error occurred. Please try again: ' + response.statusText);
             }
         });
     });

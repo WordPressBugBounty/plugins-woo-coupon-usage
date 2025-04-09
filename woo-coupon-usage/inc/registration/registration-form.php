@@ -357,9 +357,11 @@ if ( $wcusage_field_registration_enable ) {
                         wp_nonce_field( 'wcusage_verify_submit_registration_form2', 'wcusage_submit_registration_form2' );
                         ?>
 
-            <p><input type="submit" class="woocommerce-button button"  id="wcu-register-button" name="submitaffiliateapplication" value="<?php 
+            <p class="wcu-register-form-button"><input type="submit" class="woocommerce-button button"  id="wcu-register-button" name="submitaffiliateapplication" value="<?php 
                         echo esc_attr( $submit_button_text );
                         ?>"></p>
+
+            <i class="register-spinner fa fa-spinner fa-spin" style="display: none; text-align: center; margin: 10px auto; font-size: 20px; width: 40px;"></i>
 
           </form>
           </div>
@@ -852,6 +854,10 @@ function wcusage_register_verify(  $post_field_values  ) {
 *
 */
 function wcusage_login_after_registration() {
+    // If ajax request, return
+    if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+        return;
+    }
     // if wordpress user not logged in
     if ( !is_user_logged_in() ) {
         $captchaverify = wcusage_registration_form_verify_captcha( 0 );
@@ -949,6 +955,7 @@ function wcusage_add_new_affiliate_user(
     if ( username_exists( $username ) ) {
         return;
     }
+    $new_password = "";
     if ( !$password ) {
         $new_password = wp_generate_password( 15, false );
         $password = $new_password;
@@ -1119,7 +1126,7 @@ function wcusage_registration_form_verify_captcha(  $adminpost  ) {
     }
     // Check honeypot
     $wcusage_registration_enable_honeypot = wcusage_get_setting_value( 'wcusage_registration_enable_honeypot', 1 );
-    if ( isset( $_POST['wcu-input-hp'] ) && $_POST['wcu-input-hp'] != "" && $wcusage_registration_enable_honeypot ) {
+    if ( $wcusage_registration_enable_honeypot && isset( $_POST['wcu-input-hp'] ) && $_POST['wcu-input-hp'] != "" ) {
         return false;
     }
     // Check captcha

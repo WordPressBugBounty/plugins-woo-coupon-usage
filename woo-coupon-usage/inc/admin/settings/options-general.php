@@ -1024,7 +1024,29 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
           // Delay
           setTimeout(function() {
             $('#wcusage_portal_slug').trigger('change');
-          }, 1000);
+          }, 2500);
+          // Flush permalinks via AJAX
+          setTimeout(function() {
+            $.ajax({
+                url: '<?php echo esc_url(admin_url("admin-ajax.php")); ?>',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'wcusage_flush_permalinks',
+                    nonce: '<?php echo wp_create_nonce("flush_permalinks_nonce"); ?>' // Add nonce here
+                },
+                success: function(response) {
+                    if (response.success) {
+                        console.log('Permalinks flushed successfully!');
+                    } else {
+                        console.log('Error flushing permalinks: ' + response.data);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('AJAX error: ' + error);
+                }
+            });
+          }, 5000);
         });
       });
     </script>
@@ -1310,4 +1332,20 @@ if( !function_exists( 'wcusage_setting_section_ordersalestracking' ) ) {
 
   <?php
   }
+}
+
+add_action('wp_ajax_wcusage_flush_permalinks', 'wcusage_flush_permalinks_callback');
+function wcusage_flush_permalinks_callback() {
+    // Check nonce for security
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'flush_permalinks_nonce')) {
+        wp_send_json_error('Invalid nonce.');
+        wp_die();
+    }
+
+    // Flush permalinks
+    flush_rewrite_rules();
+
+    // Send success response
+    wp_send_json_success('Permalinks flushed successfully.');
+    wp_die();
 }

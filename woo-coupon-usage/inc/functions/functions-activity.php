@@ -178,6 +178,8 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
     case 'commission_added':
       $coupon_info = wcusage_get_coupon_info_by_id($event_id);
       $coupon_name = $coupon_info[3];
+      // Convert HTML entities to their corresponding characters
+      $info = html_entity_decode($info, ENT_QUOTES, 'UTF-8');
       // If $info has a number with # at start, link it to the order
       if (preg_match('/#(\d+)/', $info, $matches)) {
         $order_id = $matches[1];
@@ -189,6 +191,8 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
     case 'commission_removed':
       $coupon_info = wcusage_get_coupon_info_by_id($event_id);
       $coupon_name = $coupon_info[3];
+      // Convert HTML entities to their corresponding characters
+      $info = html_entity_decode($info, ENT_QUOTES, 'UTF-8');
       // If $info has a number with # at start, link it to the order
       if (preg_match('/#(\d+)/', $info, $matches)) {
         $order_id = $matches[1];

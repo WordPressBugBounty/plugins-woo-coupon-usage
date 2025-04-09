@@ -35,10 +35,26 @@ function wcusage_portal_open_tab(evt, tabName, contentId, postid, coupon_code, f
         tabcontent[i].className = tabcontent[i].className.replace(" active", "");
         tabcontent[i].style.display = "none";
     }
+
+    // Remove .active class from all .portal-tablink buttons
     var tablinks = document.getElementsByClassName("portal-tablink");
     for (var i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
+        tablinks[i].classList.remove("active");
     }
+
+    // Set .wcutabcontent to display block
+    var wcutabcontent = document.getElementsByClassName("wcutabcontent");
+    for (var i = 0; i < wcutabcontent.length; i++) {
+        wcutabcontent[i].style.display = "block";
+    }
+
+    // Remove .active class from all .portal-tabcontent divs
+    var wcutabcontent = document.getElementsByClassName("portal-tabcontent");
+    for (var i = 0; i < wcutabcontent.length; i++) {
+        wcutabcontent[i].style.display = "none";
+        wcutabcontent[i].classList.remove("active");
+    }
+
     document.getElementById(tabName).style.display = "block";
     document.getElementById(tabName).className += " active";
     document.getElementById(contentId).style.display = "block";
@@ -49,12 +65,6 @@ function wcusage_portal_open_tab(evt, tabName, contentId, postid, coupon_code, f
     if (window.innerWidth <= 768) {
         jQuery('.sidebar').removeClass('active');
         jQuery('.hamburger-menu').removeClass('active');
-    }
-
-    // Set .wcutabcontent to display block
-    var wcutabcontent = document.getElementsByClassName("wcutabcontent");
-    for (var i = 0; i < wcutabcontent.length; i++) {
-        wcutabcontent[i].style.display = "block";
     }
 
     // Open first tab by default

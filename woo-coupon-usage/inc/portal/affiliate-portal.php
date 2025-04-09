@@ -6,7 +6,7 @@ if(!defined('ABSPATH')) {
 add_action('wp', 'wcusage_affiliate_portal_redirect_registration');
 function wcusage_affiliate_portal_redirect_registration() {
     $wcusage_registration_page = wcusage_get_setting_value('wcusage_registration_page', '0');
-    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliates');
+    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
     if(!$wcusage_registration_page) {
         if(isset( $_POST['submitaffiliateapplication'])) {
             if( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wcusage_submit_registration_form1'] ) ), 'wcusage_verify_submit_registration_form1' ) || is_user_logged_in() ) {
@@ -23,7 +23,7 @@ function wcusage_affiliate_portal_redirect_registration() {
 // Register rewrite rule for affiliate portal
 add_action('init', 'wcusage_add_affiliate_portal_rewrite_rule');
 function wcusage_add_affiliate_portal_rewrite_rule() {
-    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliates');
+    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
     add_rewrite_rule('^' . $wcusage_portal_slug . '/?$', 'index.php?affiliate_portal=1', 'top');
 }
 
@@ -31,7 +31,7 @@ function wcusage_add_affiliate_portal_rewrite_rule() {
 function wcusage_check_affiliate_portal_rewrite_rule() {
     global $wp_rewrite;
     $rules = $wp_rewrite->wp_rewrite_rules();
-    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliates');
+    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-porta;');
     $rule = '^' . $wcusage_portal_slug . '/?$';
     return isset($rules[$rule]);
 }

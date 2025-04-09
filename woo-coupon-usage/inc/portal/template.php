@@ -74,7 +74,11 @@ if ( isset( $_GET['couponid'] ) ) {
     $user_info = get_userdata( $couponuser );
 } else {
     $couponinfo = wcusage_get_coupon_info( $coupon_code );
-    $couponuser = $couponinfo[1];
+    if ( isset( $couponinfo[1] ) ) {
+        $couponuser = $couponinfo[1];
+    } else {
+        $couponuser = '';
+    }
 }
 $userlogin = ( $user_info ? $user_info->user_login : '' );
 $username = ( $user_info ? $user_info->display_name : '' );
@@ -122,9 +126,9 @@ if ( !$wcusage_field_load_ajax ) {
 } else {
     $wcusage_page_load = "0";
 }
+$is_mla_parent = '';
 if ( $postid ) {
     // Check if user is a parent affiliate (for MLA)
-    $is_mla_parent = '';
     if ( function_exists( 'wcusage_network_check_sub_affiliate' ) ) {
         $is_mla_parent = wcusage_network_check_sub_affiliate( $current_user_id, get_post_meta( $postid, 'wcu_select_coupon_user', true ) );
     }
@@ -219,6 +223,7 @@ if ( isset( $options['wcusage_refresh_date'] ) ) {
 // Check if batch refresh enabled
 $wcusage_field_enable_coupon_all_stats_batch = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_batch', '1' );
 // Check if force refresh needed
+$wcu_last_refreshed = get_post_meta( $postid, 'wcu_last_refreshed', true );
 if ( $force_refresh_stats || $wcusage_refresh_date && $wcusage_refresh_date > $wcu_last_refreshed ) {
     $force_refresh_stats = 1;
     if ( !$wcusage_field_enable_coupon_all_stats_batch ) {
@@ -1121,31 +1126,12 @@ function wcusage_portal_tab_content(
     ?>
     </div>
     <?php 
-    // Custom Tabs (Premium Only)
-    $options = get_option( 'wcusage_options' );
-    if ( wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() ) {
-        $tabsnumber = wcusage_get_setting_value( 'wcusage_field_custom_tabs_number', '2' );
-        for ($i = 1; $i <= $tabsnumber; $i++) {
-            if ( isset( $options['wcusage_field_custom_tabs'][$i]['name'] ) && !empty( $options['wcusage_field_custom_tabs'][$i]['name'] ) ) {
-                ?>
-                <div id="wcu0<?php 
-                echo $i;
-                ?>" class="portal-tabcontent">
-                    <?php 
-                do_action(
-                    'wcusage_hook_dashboard_tab_content_custom',
-                    $postid,
-                    $coupon_code,
-                    $combined_commission,
-                    $wcusage_page_load,
-                    $force_refresh_stats
-                );
-                ?>
-                </div>
-                <?php 
-            }
-        }
-    }
-    ?>
-    <?php 
+    do_action(
+        'wcusage_hook_dashboard_tab_content_custom',
+        $postid,
+        $coupon_code,
+        $combined_commission,
+        $wcusage_page_load,
+        1
+    );
 }

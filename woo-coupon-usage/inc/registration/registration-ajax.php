@@ -16,18 +16,32 @@ function wcusage_ajax_submit_registration() {
     check_ajax_referer('wcusage_verify_submit_registration_form1', 'wcusage_submit_registration_form1');
 
     // Retrieve and sanitize form data from $_POST
-    $username = sanitize_user($_POST['wcu-input-username']);
-    $email = sanitize_email($_POST['wcu-input-email']);
-    $firstname = sanitize_text_field($_POST['wcu-input-first-name']);
-    $lastname = sanitize_text_field($_POST['wcu-input-last-name']);
-    $couponcode = wc_sanitize_coupon_code($_POST['wcu-input-coupon']);
-    $website = sanitize_text_field($_POST['wcu-input-website']);
-    $type = sanitize_text_field($_POST['wcu-input-type']);
-    $promote = sanitize_text_field($_POST['wcu-input-promote']);
-    $referrer = sanitize_text_field($_POST['wcu-input-referrer']);
-    $password = sanitize_text_field($_POST['wcu-input-password']);
-    $password_confirm = sanitize_text_field($_POST['wcu-input-password-confirm']);
-    $info = ''; // Placeholder for additional info if needed
+    $username = isset($_POST['wcu-input-username']) ? sanitize_user($_POST['wcu-input-username']) : '';
+    $email = isset($_POST['wcu-input-email']) ? sanitize_email($_POST['wcu-input-email']) : '';
+    $firstname = isset($_POST['wcu-input-first-name']) ? sanitize_text_field($_POST['wcu-input-first-name']) : '';
+    $lastname = isset($_POST['wcu-input-last-name']) ? sanitize_text_field($_POST['wcu-input-last-name']) : '';
+    $couponcode = isset($_POST['wcu-input-coupon']) ? wc_sanitize_coupon_code($_POST['wcu-input-coupon']) : '';
+    $website = isset($_POST['wcu-input-website']) ? sanitize_text_field($_POST['wcu-input-website']) : '';
+    $type = isset($_POST['wcu-input-type']) ? sanitize_text_field($_POST['wcu-input-type']) : '';
+    $promote = isset($_POST['wcu-input-promote']) ? sanitize_text_field($_POST['wcu-input-promote']) : '';
+    $referrer = isset($_POST['wcu-input-referrer']) ? sanitize_text_field($_POST['wcu-input-referrer']) : '';
+    $password = isset($_POST['wcu-input-password']) ? sanitize_text_field($_POST['wcu-input-password']) : '';
+    $password_confirm = isset($_POST['wcu-input-password-confirm']) ? sanitize_text_field($_POST['wcu-input-password-confirm']) : '';
+    
+    $tiersnumber = wcusage_get_setting_value('wcusage_field_registration_custom_fields', '2');
+    $info = array();
+    for ($x = 1; $x <= $tiersnumber; $x++) {
+      if(isset($_POST['wcu-input-custom-' . $x])) {
+        $label = sanitize_text_field( htmlentities( wcusage_get_setting_value('wcusage_field_registration_custom_label_' . $x, '') ) );
+        if(is_array($_POST['wcu-input-custom-' . $x])) {
+          $info_array = $_POST['wcu-input-custom-' . $x];
+          $info[$label] = sanitize_text_field( implode(', ', $info_array) );
+        } else {
+          $info[$label] = sanitize_text_field( htmlentities( $_POST['wcu-input-custom-' . $x] ) );
+        }
+      }
+    }
+    $info = json_encode($info);
 
     // Assume password confirmation is optional based on a setting (adjust as needed)
     $field_password_confirm = wcusage_get_setting_value('wcusage_field_registration_password_confirm', '0');
@@ -76,17 +90,15 @@ function wcusage_ajax_submit_registration() {
 
     }
 
+    // Captcha validation (if applicable)
+    $captchaverify = wcusage_registration_form_verify_captcha(0);
+    if (!$captchaverify) {
+        wp_send_json_error(array('message' => 'Captcha verification failed. Please try again.'));
+    }
+
     // Create a new user if the user is not logged in
     if (!is_user_logged_in()) {
-        $new_affiliate_user = wcusage_add_new_affiliate_user(
-            $username,
-            $password,
-            $email,
-            $firstname,
-            $lastname,
-            $couponcode,
-            $website
-        );
+        $new_affiliate_user = wcusage_add_new_affiliate_user($username, $password, $email, $firstname, $lastname, $couponcode, $website);
 
         if (is_wp_error($new_affiliate_user)) {
             wp_send_json_error(array('message' => 'Failed to create user: ' . $new_affiliate_user->get_error_message()));
@@ -99,23 +111,8 @@ function wcusage_ajax_submit_registration() {
         $userid = $current_user->ID;
     }
 
-    // Auto-login process if the user is newly created
-    if (!is_user_logged_in() && isset($new_affiliate_user)) {
-        wp_set_current_user($userid);
-        wp_set_auth_cookie($userid);
-        do_action('wp_login', $username, $current_user);
-    }
-
     // Store the registration data in a custom table
-    $getregisterid = wcusage_install_register_data(
-        $couponcode,
-        $userid,
-        $referrer,
-        $promote,
-        $website,
-        $type,
-        $info
-    );
+    $getregisterid = wcusage_install_register_data( $couponcode, $userid, $referrer, $promote, $website, $type, $info);
 
     if (!$getregisterid) {
         wp_send_json_error(array('message' => 'Failed to store registration data. Please try again.'));
@@ -125,14 +122,7 @@ function wcusage_ajax_submit_registration() {
     $auto_accept = wcusage_get_setting_value('wcusage_field_registration_auto_accept', '0');
     if ($auto_accept) {
         $message = ''; // Define any message needed for status update
-        $setstatus = wcusage_set_registration_status(
-            'accepted',
-            $getregisterid,
-            $userid,
-            $couponcode,
-            $message,
-            $type
-        );
+        $setstatus = wcusage_set_registration_status('accepted', $getregisterid, $userid, $couponcode, $message, $type);
 
         if (!$setstatus) {
             wp_send_json_error(array('message' => 'Failed to auto-accept registration.'));
@@ -141,18 +131,25 @@ function wcusage_ajax_submit_registration() {
 
     // Send notification emails
     wcusage_email_affiliate_register($email, $couponcode, $firstname);
-    wcusage_email_admin_affiliate_register(
-        $username,
-        $couponcode,
-        $referrer,
-        $promote,
-        $website,
-        $type,
-        $info
-    );
+    wcusage_email_admin_affiliate_register($username, $couponcode, $referrer, $promote, $website, $type, $info);
+
+    // Auto-login process if the user is newly created
+    if (!is_user_logged_in() && isset($new_affiliate_user)) {
+        wp_set_current_user($userid);
+        wp_set_auth_cookie($userid);
+        do_action('wp_login', $username, $current_user);
+    }
 
     // Return a success response
     wp_send_json_success(array('message' => '<p class="registration-message">Your affiliate application has been submitted successfully.</p>
     <p class="registration-message">Please check your email for further instructions.</p>'));
+
+    // Auto-login process if the user is newly created
+    if (!is_user_logged_in() && isset($new_affiliate_user)) {
+        wp_set_current_user($userid);
+        wp_set_auth_cookie($userid);
+        do_action('wp_login', $username, $current_user);
+    }
+
     exit; // Always exit after handling AJAX requests
 }

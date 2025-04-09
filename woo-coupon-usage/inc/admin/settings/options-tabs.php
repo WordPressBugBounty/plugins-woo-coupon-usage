@@ -162,7 +162,7 @@ function wcusage_field_cb_custom_tabs( $args )
       }
       // Get 20 good icons that could be used for tabs, books, news etc
       $icons = array('cog', 'user', 'chart-line', 'chart-bar', 'chart-pie',
-      'money-bill', 'dollar-sign', 'credit-card', 'gift', 'trophy', 'email',
+      'money-bill', 'dollar-sign', 'credit-card', 'gift', 'trophy',
       'envelope', 'envelope-open', 'comment', 'comments',
       'star', 'newspaper', 'book', 'file-alt', 'file-invoice-dollar');
       // Display a select dropdown with these icons and an example of the icon inside the select

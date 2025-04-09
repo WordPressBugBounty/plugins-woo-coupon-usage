@@ -490,11 +490,11 @@ function add_coupon_link_below_coupons(  $order_id  ) {
                 
                 if (confirm('<?php 
         echo esc_js( esc_html__( 'Are you sure you want to remove this coupon from the order?', 'woo-coupon-usage' ) );
-        ?> <?php 
-        echo esc_js( esc_html__( ' - This will NOT affect the discount that has already been applied unless you recalculate the order.', 'woo-coupon-usage' ) );
-        if ( $order_status == 'completed' ) {
+        ?> - <?php 
+        echo esc_js( esc_html__( 'This will NOT affect the discount that has already been applied unless you recalculate the order.', 'woo-coupon-usage' ) );
+        if ( $order_status == 'completed' && wcu_fs()->can_use_premium_code() ) {
             ?> <?php 
-            echo esc_js( esc_html__( 'This will only affect the affiliate dashboard statistics. Any unpaid commission granted will NOT be deducted.', 'woo-coupon-usage' ) );
+            echo esc_js( esc_html__( 'This will only affect the affiliate dashboard statistics. Any unpaid commission already granted will NOT be deducted.', 'woo-coupon-usage' ) );
         }
         ?>')) {
                     $.ajax({

@@ -145,6 +145,9 @@ textarea {
     outline: none;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     text-decoration: none;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .portal-tablink i {
@@ -412,6 +415,7 @@ textarea {
 .login-form h2, .wcusage-register-form-title {
     margin-top: 20px !important;
     margin-bottom: 25px !important;
+    text-align: center;
 }
 
 .wcu_form_affiliate_register input {
@@ -446,10 +450,9 @@ body.dark-mode .login-registration-container button {
 
 .login-registration-container {
     display: flex;
-    width: 100% !important;
     justify-content: center;
     align-items: flex-start;
-    padding: 40px 70px 100px 70px; /* Match content-body padding */
+    padding: 40px 25px 100px 25px; /* Match content-body padding */
 }
 
 #wcu-register-button {
@@ -467,19 +470,27 @@ body.dark-mode .login-registration-container button {
     margin: 0 20px;
 }
 
-.login-form h2,
-.registration-form h2,
-.wcusage-register-form-title {
+.content .login-registration-container .login-form h2,
+.content .login-registration-container .registration-form h2,
+.content .login-registration-container .wcusage-register-form-title {
     font-size: 24px !important;
+    line-height: 24px;
     color: var(--text-color); /* Use variable */
     font-weight: bold;
     margin-top: 0px !important;
-    margin-bottom: 20px;
-    text-align: center;
+    margin-bottom: 25px !important;
 }
 
-.wcu-form-section .wcusage-register-form-title,
-.wcu-form-section .wcusage-login-form-title {
+.login-form label,
+.registration-form label {
+    margin-top: 10px;
+    font-size: 16px;
+    line-height: 16px;
+    display: inline-block !important;
+}
+
+.content .wcu-form-section .wcusage-register-form-title,
+.content .wcu-form-section .wcusage-login-form-title {
     margin-top: 0px !important;
 }
 
@@ -513,15 +524,22 @@ body.dark-mode .login-registration-container button {
 }
 
 .login-form input[type="submit"],
+.login-form button[type="submit"],
 .registration-form input[type="submit"] {
+    margin-top: 20px !important;
     padding: 12px;
     background: var(--button-bg); /* Use variable */
     color: var(--button-text); /* Use variable */
     border: none;
     border-radius: 4px;
     font-size: 16px;
+    line-height: 16px;
     cursor: pointer;
     transition: background 0.3s;
+}
+
+.woocommerce-form-login {
+    margin-bottom: 0px;
 }
 
 .login-form input[type="submit"]:hover,

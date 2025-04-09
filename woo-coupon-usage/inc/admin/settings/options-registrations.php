@@ -1032,9 +1032,9 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
 
     <?php } ?>
 
-    <br/>
+    <div class="setup-hide">
 
-    <div>
+    <br/>
 
     <p style="margin-bottom: 0px; font-size: 12px;">
       <?php echo esc_html__( 'Create a more effective signup promo page design with the generator tool:', 'woo-coupon-usage' ); ?>
@@ -1187,7 +1187,7 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
                       return;
                     }
                     if (couponId == 0) {
-                      jQuery('#edit_link').html('Invalid coupon!');
+                      jQuery('#edit_link').html('<p style="color: red;">Invalid coupon! This should be the exact name of an existing coupon code.</p>');
                       return;
                     }
                     var editLink = "<?php echo esc_url(admin_url()); ?>post.php?post=" + couponId + "&action=edit";

@@ -561,7 +561,7 @@ function wcusage_dashboard_page_section_registrations() {
         </tbody>
     </table>
     <?php } else { ?>
-    <p><?php echo esc_html__('No recent registrations found.', 'woo-coupon-usage'); ?></p>
+    <p><?php echo esc_html__('you have no pending affiliate registrations.', 'woo-coupon-usage'); ?></p>
     <?php } ?>
 </div>
 
@@ -613,7 +613,7 @@ function wcusage_dashboard_page_section_payouts() {
         </tbody>
     </table>
     <?php } else { ?>
-    <p><?php echo esc_html__('No recent payouts found.', 'woo-coupon-usage'); ?></p>
+    <p><?php echo esc_html__('You have no pending payout requests.', 'woo-coupon-usage'); ?></p>
     <?php } ?>
 </div>
 
