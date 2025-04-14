@@ -18,6 +18,7 @@ function wcusage_email_affiliate_register($user_email, $coupon_code, $firstname)
       $from = wcusage_get_from_email();
 
       $subject = $options['wcusage_field_email_registration_subject'];
+      if(!$subject) { $subject = ""; }
       $body = html_entity_decode( $options['wcusage_field_email_registration_message'] );
 
       if(isset($subject)) {
@@ -71,6 +72,7 @@ function wcusage_email_affiliate_register_new($user_email, $coupon_code, $firstn
       $from = wcusage_get_from_email();
 
       $subject = $options['wcusage_field_email_registration_new_subject'];
+      if(!$subject) { $subject = ""; }
       $body = html_entity_decode( $options['wcusage_field_email_registration_new_message'] );
 
       if(isset($subject)) {
@@ -250,6 +252,7 @@ function wcusage_email_affiliate_register_accepted($user_email, $coupon_code, $m
       $from = wcusage_get_from_email();
 
       $subject = $options['wcusage_field_email_registration_accept_subject'];
+      if(!$subject) { $subject = ""; }
       $body = html_entity_decode( $options['wcusage_field_email_registration_accept_message'] );
 
       if(isset($subject)) {
@@ -305,6 +308,7 @@ function wcusage_email_affiliate_register_declined($user_email, $coupon_code, $m
       $from = wcusage_get_from_email();
 
       $subject = $options['wcusage_field_email_registration_decline_subject'];
+      if(!$subject) { $subject = ""; }
       $body = html_entity_decode( $options['wcusage_field_email_registration_decline_message'] );
 
       if(isset($subject)) {

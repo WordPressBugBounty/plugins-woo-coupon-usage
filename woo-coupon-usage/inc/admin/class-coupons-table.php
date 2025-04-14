@@ -500,13 +500,29 @@ function wcusage_save_coupon_data() {
         'exclude_sale_items'                    => sanitize_text_field( wp_unslash( $_POST['exclude_sale_items'] ) ),
         'usage_limit_per_user'                  => ! empty( $_POST['usage_limit_per_user'] ) ? intval( wp_unslash( $_POST['usage_limit_per_user'] ) ) : '',
         'wcu_enable_first_order_only'           => sanitize_text_field( wp_unslash( $_POST['wcu_enable_first_order_only'] ) ),
-        'wcu_select_coupon_user'                => $user_id, // Save the user ID, not the username
+        'wcu_select_coupon_user'                => $user_id,
         'wcu_text_coupon_commission'            => floatval( wp_unslash( $_POST['wcu_text_coupon_commission'] ) ),
         'wcu_text_coupon_commission_fixed_order' => floatval( wp_unslash( $_POST['wcu_text_coupon_commission_fixed_order'] ) ),
         'wcu_text_coupon_commission_fixed_product' => floatval( wp_unslash( $_POST['wcu_text_coupon_commission_fixed_product'] ) ),
         'wcu_text_unpaid_commission'            => floatval( wp_unslash( $_POST['wcu_text_unpaid_commission'] ) ),
         'wcu_text_pending_payment_commission'   => floatval( wp_unslash( $_POST['wcu_text_pending_payment_commission'] ) ),
     );
+
+    if(!isset($_POST['wcu_text_coupon_commission']) || $_POST['wcu_text_coupon_commission'] == '') {
+        $meta['wcu_text_coupon_commission'] = "";
+    }
+    if(!isset($_POST['wcu_text_coupon_commission_fixed_order']) || $_POST['wcu_text_coupon_commission_fixed_order'] == '') {
+        $meta['wcu_text_coupon_commission_fixed_order'] = "";
+    }
+    if(!isset($_POST['wcu_text_coupon_commission_fixed_product']) || $_POST['wcu_text_coupon_commission_fixed_product'] == '') {
+        $meta['wcu_text_coupon_commission_fixed_product'] = "";
+    }
+    if(!isset($_POST['wcu_text_unpaid_commission']) || $_POST['wcu_text_unpaid_commission'] == '') {
+        $meta['wcu_text_unpaid_commission'] = "0";
+    }
+    if(!isset($_POST['wcu_text_pending_payment_commission']) || $_POST['wcu_text_pending_payment_commission'] == '') {
+        $meta['wcu_text_pending_payment_commission'] = "0";
+    }
 
     // Remove PRO fields if not using PRO
     if ( ! wcu_fs()->can_use_premium_code() ) {
@@ -517,7 +533,7 @@ function wcusage_save_coupon_data() {
     }
     
     foreach ( $meta as $key => $value ) {
-        
+
         update_post_meta( $coupon_id, $key, $value );
         
     }
@@ -536,19 +552,31 @@ function wcusage_coupons_list_search_users() {
     check_ajax_referer( 'wcusage_coupon_nonce', 'nonce' );
     
     $search = sanitize_text_field( $_POST['search'] );
+    $label = sanitize_text_field( $_POST['label'] );
     $users = get_users( array(
-        'search' => "*{$search}*",
+        // contain exactly the search term anywhere in the username, full phrase anywhere inside
+        'search' => '*' . $search . '*',
+        'search_columns' => array( 'user_login' ),
+        'orderby' => 'login',
         'fields' => array( 'ID', 'user_login' ),
         'number' => 10, // Limit results for performance
     ));
     
     $results = array();
     foreach ( $users as $user ) {
-        $results[] = array(
-            'id' => $user->ID,
-            'label' => "({$user->ID}) {$user->user_login}",
-            'value' => $user->user_login
-        );
+        if($label == 'username') {
+            $results[] = array(
+                'id' => $user->ID,
+                'label' => "{$user->user_login}",
+                'value' => $user->user_login
+            );
+        } else {
+            $results[] = array(
+                'id' => $user->ID,
+                'label' => "({$user->ID}) {$user->user_login}",
+                'value' => $user->user_login
+            );
+        }
     }
     
     wp_send_json_success( $results );

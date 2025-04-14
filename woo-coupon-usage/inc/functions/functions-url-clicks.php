@@ -15,9 +15,9 @@ if ( !function_exists( 'wcusage_install_clicks_tables' ) ) {
         global $wcusage_clicks_db_version;
         $installed_ver = get_option( "wcusage_clicks_db_version" );
         if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wcusage_clicks'" ) != $wpdb->prefix . 'wcusage_clicks' ) {
-            $installed_ver = null;
+            $installed_ver = 0;
         }
-        if ( $installed_ver != $wcusage_clicks_db_version ) {
+        if ( !$installed_ver || $installed_ver != $wcusage_clicks_db_version ) {
             $table_name = $wpdb->prefix . 'wcusage_clicks';
             $sql = "CREATE TABLE {$table_name} (\r\n\t\t\tid bigint NOT NULL AUTO_INCREMENT,\r\n\t\t\tcouponid text(9) NOT NULL,\r\n\t\t\tcampaign text(9) NOT NULL,\r\n\t\t\tpage text(9) NOT NULL,\r\n\t\t\treferrer text(9) NOT NULL,\r\n\t\t\tipaddress text(9) NOT NULL,\r\n\t\t\torderid text(9) NOT NULL,\r\n\t\t\tconverted boolean DEFAULT false,\r\n\t\t\tdate datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\r\n\t\t\tPRIMARY KEY  (id)\r\n\t\t\t);";
             require_once ABSPATH . 'wp-admin/includes/upgrade.php';

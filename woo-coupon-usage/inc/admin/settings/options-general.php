@@ -845,22 +845,7 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
         }
       }
       wp_dropdown_pages( $dropdown_args );
-
-      if(!$dashboardpage) {
-      ?>
-      <div class="setup-hide">
-      <br/>
-      <!-- Link to GET create_new_dashboard as 1 -->
-      <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_settings&create_new_dashboard=1')); ?>"
-      style="margin: 5px 0; display: inline-block;"
-        <button type="button" name="submitnewpage" class="button button-secondary">
-          <strong><?php echo esc_html__( "Generate Dashboard Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-circle-arrow-right"></span></strong>
-        </button>
-      </a>
-      </div>
-      <?php } ?>
       
-      <?php
       if($dashboardpage) {
         // Show the link
         echo "<br/><a style='margin-top: 5px; display: inline-block;' id='dashboard_link' href='".esc_url(get_permalink($dashboardpage))."' target='_blank'>".esc_url(get_permalink($dashboardpage))."</a>";
@@ -868,32 +853,32 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
       ?>
 
       <script type="text/javascript">
-          // jQuery is assumed to be loaded in WordPress by default
-          jQuery(document).ready(function($){
-              $('#wcusage_dashboard_page').on('change', function(){
-                  var pageID = $(this).val();
-                  // Get the URL of the selected page using WordPress AJAX (Assuming you have an AJAX handler that returns the permalink of a page given its ID)
-                  jQuery.post(
-                      '<?php echo esc_url(admin_url("admin-ajax.php")); ?>', 
-                      {
-                          'action': 'wcusage_get_permalink',
-                          'page_id': pageID
-                      }
-                  )
-                  .done(function(response){
-                      if(!response) {
-                        $('#dashboard_link').hide();
-                      } else {
-                        $('#dashboard_link').show();
-                      }
-                      $('#dashboard_link').attr('href', response);
-                      $('#dashboard_link').text(response); 
-                  })
-                  .fail(function() {
-                      alert('AJAX request failed');  // debugging line
-                  });
+      // jQuery is assumed to be loaded in WordPress by default
+      jQuery(document).ready(function($){
+          $('#wcusage_dashboard_page').on('change', function(){
+              var pageID = $(this).val();
+              // Get the URL of the selected page using WordPress AJAX (Assuming you have an AJAX handler that returns the permalink of a page given its ID)
+              jQuery.post(
+                  '<?php echo esc_url(admin_url("admin-ajax.php")); ?>', 
+                  {
+                      'action': 'wcusage_get_permalink',
+                      'page_id': pageID
+                  }
+              )
+              .done(function(response){
+                  if(!response) {
+                    $('#dashboard_link').hide();
+                  } else {
+                    $('#dashboard_link').show();
+                  }
+                  $('#dashboard_link').attr('href', response);
+                  $('#dashboard_link').text(response); 
+              })
+              .fail(function() {
+                  alert('AJAX request failed');  // debugging line
               });
           });
+      });
       </script>
       
     <?php } else { ?>
@@ -905,18 +890,36 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
 
     <br/>
       <i><?php echo esc_html__( '(The page that has the [couponaffiliates] shortcode on.)', 'woo-coupon-usage' ); ?></i>
-    <br/>  
+    <br/>
 
-    <?php
-    // Show warning if the page does not contain the shortcode
-    if ( isset($options['wcusage_dashboard_page']) && $options['wcusage_dashboard_page'] && !$dashboardpage ) {
-      $page = get_post($dashboardpage);
-      if ( !has_shortcode($page->post_content, 'couponaffiliates') ) {
-          echo "<p style='color: red; margin: 5px 0;'><strong>".esc_html__( 'Fix required: The selected page you have selected previously did not contain the [couponaffiliates] shortcode.', 'woo-coupon-usage' )."</strong></p>";
-          echo "<p style='color: red; margin: 5px 0;'><strong>".esc_html__( 'Please select a page that contains the [couponaffiliates] shortcode.', 'woo-coupon-usage' )."</strong></p>";
-        }
-    }
-    ?>
+    <div class="dashboard_shortcode_check setup-hide" style="margin-bottom: 0px; font-size: 12px; margin-top: 20px; color: red; display: none;">
+
+      <?php
+      $dashboardpage = wcusage_get_setting_value('wcusage_dashboard_page', '');
+      if($dashboardpage) {
+      ?>
+
+      <?php echo esc_html__( '(ERROR) This page does not contain the shortcode:', 'woo-coupon-usage' ); ?> <strong>[couponaffiliates]</strong><br/>
+      <?php echo esc_html__( 'Please add the shortcode to a new page, and select it from the dropdown above.', 'woo-coupon-usage' ); ?><br/>
+
+      <?php echo esc_html__('Or you can click the button below to automatically generate the page for you:', 'woo-coupon-usage'); ?>
+
+      <?php } ?>
+
+      <br/>
+
+      <div class="setup-hide">
+      <br/>        
+      <!-- Link to GET create_new_dashboard as 1 -->
+      <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_settings&create_new_dashboard=1')); ?>"
+      style="margin: 5px 0; display: inline-block;"
+        <button type="button" name="submitnewpage" class="button button-secondary">
+          <strong><?php echo esc_html__( "Generate Dashboard Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-circle-arrow-right"></span></strong>
+        </button>
+      </a>
+      </div>
+
+      </div>
 
     <br/>
 
@@ -934,8 +937,72 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
           $('.affiliate-dashboard-page-settings').show();
         }
       });
-    });
-    </script>
+      // Check if the selected page contains the shortcode
+      function check_dashboard_page_shortcode() {
+          var pageID = $('#wcusage_dashboard_page').val();
+          if (!pageID) {
+              $('.dashboard_shortcode_check').show();
+              return;
+          }
+          $.post(
+              '<?php echo esc_url(admin_url("admin-ajax.php")); ?>',
+              {
+                  'action': 'wcusage_check_dashboard_shortcode',
+                  'page_id': pageID
+              },
+              function(response) {
+                  if (response == 1) {
+                      $('.dashboard_shortcode_check').hide();
+                  } else {
+                      $('.dashboard_shortcode_check').show();
+                  }
+              }
+          );
+      }
+      // On change of the dropdown, check if the page contains the shortcode
+      $('#wcusage_dashboard_page').on('change', function() {
+          check_dashboard_page_shortcode();
+      });
+      // Generate a new dashboard page on button click
+      $('#wcu-generate-dashboard-page').on('click', function() {
+          // Disable button and change to spinner
+          $(this).prop('disabled', true).html('<span class="spinner"></span> <?php echo esc_html__( 'Generating...', 'woo-coupon-usage' ); ?>');
+          // Make the AJAX request to generate the page
+          $.post(
+              '<?php echo esc_url(admin_url("admin-ajax.php")); ?>',
+              {
+                  'action': 'wcusage_generate_dashboard_page'
+              },
+              function(response) {
+                  if (response.success) {
+                      // Add the new page to the dropdown
+                      var newOption = $('<option></option>')
+                          .val(response.data.page_id)
+                          .text(response.data.page_title)
+                          .prop('selected', true);
+                      $('#wcusage_dashboard_page').append(newOption);
+                      
+                      // Update the link
+                      $('#dashboard_link')
+                          .attr('href', response.data.permalink)
+                          .text(response.data.permalink);
+                      
+                      // Hide the error message since the new page has the shortcode
+                      $('.dashboard_shortcode_check').hide();
+                  } else {
+                      alert('Error: ' + response.data.message);
+                  }
+                  // Re-enable the button and reset its text
+                  $('#wcu-generate-dashboard-page').prop('disabled', false).html('<?php echo esc_html__( 'Generate Dashboard Page', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-right"></span>');
+              }
+          );
+      });
+
+      // Initial check for shortcode
+      $('.dashboard_shortcode_check').hide();
+      check_dashboard_page_shortcode();
+  });
+  </script>
 
     <h3 style="margin-top: 20px;"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Affiliate Portal', 'woo-coupon-usage' ); ?>:</h3>
 
@@ -1348,4 +1415,24 @@ function wcusage_flush_permalinks_callback() {
     // Send success response
     wp_send_json_success('Permalinks flushed successfully.');
     wp_die();
+}
+
+/*
+* Function to check wcusage_check_dashboard_shortcode
+*/
+add_action( 'wp_ajax_wcusage_check_dashboard_shortcode', 'wcusage_check_dashboard_shortcode' );
+function wcusage_check_dashboard_shortcode() {
+  $page_id = intval($_POST['page_id']);
+  $page = get_post($page_id);
+  if ($page) {
+    $content = $page->post_content;
+    if (strpos($content, '[couponaffiliates]') !== false) {
+      echo 1; // Shortcode found
+    } else {
+      echo 0; // Shortcode not found
+    }
+  } else {
+    echo 0; // Page not found
+  }
+  wp_die();
 }

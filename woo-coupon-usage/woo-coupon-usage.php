@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: Easily create an affiliate program for WooCommerce, based on coupons. Track affiliate commission, coupon usage statistics, referral URLs, and more.
-* Version: 6.2.1
+* Version: 6.3.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -106,11 +106,11 @@ if ( function_exists( 'wcu_fs' ) ) {
         // determine whether this page contains a shortcode
         $shortcode_found = false;
         if ( $post ) {
-            if ( has_shortcode( $post->post_content, 'couponusage' ) || has_shortcode( $post->post_content, 'couponaffiliates' ) || has_shortcode( $post->post_content, 'couponaffiliates-creatives' ) || has_shortcode( $post->post_content, 'couponaffiliates-leaderboard' ) ) {
+            if ( has_shortcode( $post->post_content, 'couponusage' ) || has_shortcode( $post->post_content, 'couponaffiliates' ) || has_shortcode( $post->post_content, 'couponaffiliates-creatives' ) || has_shortcode( $post->post_content, 'couponaffiliates-leaderboard' ) || has_shortcode( $post->post_content, 'couponaffiliates-mla' ) ) {
                 $shortcode_found = true;
             } else {
                 if ( isset( $post->ID ) ) {
-                    $result = $wpdb->get_var( $wpdb->prepare( "SELECT count(*) FROM {$wpdb->postmeta} " . "WHERE post_id = %d and meta_value LIKE ('%%couponusage%%' OR '%%couponaffiliates%%' OR '%%couponaffiliates-creatives%%' OR '%%couponaffiliates-leaderboard%%')", $post->ID ) );
+                    $result = $wpdb->get_var( $wpdb->prepare( "SELECT count(*) FROM {$wpdb->postmeta} " . "WHERE post_id = %d and meta_value LIKE ('%%couponusage%%' OR '%%couponaffiliates%%' OR '%%couponaffiliates-creatives%%' OR '%%couponaffiliates-leaderboard%%' OR '%%couponaffiliates-mla%%')", $post->ID ) );
                     $shortcode_found = !empty( $result );
                 }
             }

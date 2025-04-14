@@ -2,6 +2,8 @@ jQuery(document).ready(function($) {
     // Tab switching
     const tabs = $('.wcu-settings-tab-nav a');
     const panes = $('.wcu-settings-tab-pane');
+    
+    var current_payout_type = $('#wcu-payout-type').val();
 
     tabs.on('click', function(e) {
         e.preventDefault();
@@ -86,6 +88,10 @@ jQuery(document).ready(function($) {
                         $('#wcu-payout-type')
                             .val(response.data.updated_payout_fields.payouttype)
                             .trigger('change');
+                        // Reload page if payout type is different to old
+                        if (current_payout_type !== response.data.updated_payout_fields.payouttype) {
+                            location.reload();
+                        }
                     }
                     
                     $('#wcu-settings-update-button')

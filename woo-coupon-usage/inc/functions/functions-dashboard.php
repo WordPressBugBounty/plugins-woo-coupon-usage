@@ -60,6 +60,7 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
 
   <!-- ############## Monthly Summary Tab ############## -->
   <?php 
+    $wcusage_show_months_table = wcusage_get_setting_value( 'wcusage_field_show_months_table', '1' );
     ?>
 
   <!-- ############## Recent Orders Tab############## -->
@@ -272,9 +273,13 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
         }
         ?>
   <?php 
-        if ( $wcusage_field_creatives_enable == '1' ) {
+        if ( $wcusage_field_creatives_enable == '1' && wcu_fs()->can_use_premium_code() ) {
             $total_creatives = wp_count_posts( $post_type = 'wcu-creatives' );
-            $published_creatives = $total_creatives->publish;
+            if ( $total_creatives ) {
+                $published_creatives = $total_creatives->publish;
+            } else {
+                $published_creatives = 0;
+            }
             if ( $published_creatives > 0 ) {
                 ?>
     <option value="page-creatives" <?php 

@@ -18,6 +18,15 @@ function wcusage_ajax_submit_registration() {
     // Retrieve and sanitize form data from $_POST
     $username = isset($_POST['wcu-input-username']) ? sanitize_user($_POST['wcu-input-username']) : '';
     $email = isset($_POST['wcu-input-email']) ? sanitize_email($_POST['wcu-input-email']) : '';
+    if (is_user_logged_in()) {
+        $current_user = wp_get_current_user();
+        $username = $current_user->user_login;
+        $email = $current_user->user_email;
+    } else {
+        $username = sanitize_user($username);
+        $email = sanitize_email($email);
+    }
+    
     $firstname = isset($_POST['wcu-input-first-name']) ? sanitize_text_field($_POST['wcu-input-first-name']) : '';
     $lastname = isset($_POST['wcu-input-last-name']) ? sanitize_text_field($_POST['wcu-input-last-name']) : '';
     $couponcode = isset($_POST['wcu-input-coupon']) ? wc_sanitize_coupon_code($_POST['wcu-input-coupon']) : '';
@@ -46,23 +55,16 @@ function wcusage_ajax_submit_registration() {
     // Assume password confirmation is optional based on a setting (adjust as needed)
     $field_password_confirm = wcusage_get_setting_value('wcusage_field_registration_password_confirm', '0');
 
-    if (!is_user_logged_in()) {
+    // Perform validations
 
-        // Perform validations
+    if (!is_user_logged_in() && !wp_get_current_user()) {
+
         if (empty($username)) {
-            wp_send_json_error(array('message' => 'Username is required.'));
-        }
-
-        if (username_exists($username)) {
-            wp_send_json_error(array('message' => 'This username already exists. Please try again or login.'));
+            wp_send_json_error(array('message' => 'Username is required: ' . $username));
         }
 
         if (empty($email) || !is_email($email)) {
             wp_send_json_error(array('message' => 'A valid email is required.'));
-        }
-
-        if (email_exists($email)) {
-            wp_send_json_error(array('message' => 'This email already exists. Please try again or login.'));
         }
 
         if (empty($password)) {
@@ -73,21 +75,14 @@ function wcusage_ajax_submit_registration() {
             wp_send_json_error(array('message' => 'The passwords do not match. Please try again.'));
         }
 
-    } else {
+    }
 
-        if (username_exists($username) && $username !== wp_get_current_user()->user_login) {
-            wp_send_json_error(array('message' => 'This username already exists. Please try again or login.'));
-        }
+    if(username_exists($username) && $username !== wp_get_current_user()->user_login) {
+        wp_send_json_error(array('message' => 'This username already exists. Please try again or login.'));
+    }
 
-        // If the user is logged in, we can skip some validations
-        if (empty($email) || !is_email($email)) {
-            wp_send_json_error(array('message' => 'A valid email is required.'));
-        }
-
-        if (email_exists($email)) {
-            wp_send_json_error(array('message' => 'This email already exists. Please try again or login.'));
-        }
-
+    if($email && email_exists($email) && $email !== wp_get_current_user()->user_email) {
+        wp_send_json_error(array('message' => 'This email address is already registered. Please try again or login.'));
     }
 
     // Captcha validation (if applicable)

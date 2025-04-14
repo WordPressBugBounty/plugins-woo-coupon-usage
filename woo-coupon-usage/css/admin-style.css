@@ -494,9 +494,9 @@
     border-bottom: 2px solid #e3e3e3;
 }
 .wrap .wcusage-admin-page-col3 {
-    width: calc(100% - 37px);
-    margin-left: -27px;
-    margin-top: -10px;
+    width: calc(100% - 58px);
+    margin-left: -26px;
+    margin-top: 0px;
 }
 
 .wcusage-admin-dash-button {

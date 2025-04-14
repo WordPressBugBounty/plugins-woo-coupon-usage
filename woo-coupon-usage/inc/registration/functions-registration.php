@@ -11,10 +11,11 @@ function wcusage_install_register_tables() {
     global $wpdb;
     global $wcusage_register_db_version;
     $installed_ver = get_option( "wcusage_register_db_version" );
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wcusage_register'" ) != $wpdb->prefix . 'wcusage_register' ) {
-        $installed_ver = null;
+    // Check if wcusage_register table does not exist
+    if ( $wpdb->get_var( "SHOW TABLES LIKE '" . $wpdb->prefix . 'wcusage_register' . "'" ) != $wpdb->prefix . 'wcusage_register' ) {
+        $installed_ver = 0;
     }
-    if ( $installed_ver != $wcusage_register_db_version ) {
+    if ( !$installed_ver || $installed_ver != $wcusage_register_db_version ) {
         $table_name = $wpdb->prefix . 'wcusage_register';
         $sql = "CREATE TABLE {$table_name} (\r\n\t\t\tid bigint NOT NULL AUTO_INCREMENT,\r\n\t\t\tuserid bigint NOT NULL,\r\n      couponcode text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      promote text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      referrer text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      website text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      status text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      type text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      info text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n\t\t\tdate datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\r\n\t\t\tdateaccepted datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\r\n\t\t\tPRIMARY KEY  (id)\r\n\t\t);";
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';

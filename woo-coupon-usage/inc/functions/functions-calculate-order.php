@@ -229,7 +229,8 @@ if ( !function_exists( 'wcusage_get_order_totals' ) ) {
             $line_total_tax = $item->get_total_tax();
             $line_discount = $line_total - $line_subtotal;
             // (Negative number)
-            $line_discount_per_item = $line_discount / $item->get_quantity();
+            $quantity = $item->get_quantity();
+            $line_discount_per_item = ( $quantity > 0 ? $line_discount / $quantity : 0 );
             $line_discount_tax = $line_total_tax - $line_subtotal_tax;
             // (Negative number)
             // Get Refunded Quantity

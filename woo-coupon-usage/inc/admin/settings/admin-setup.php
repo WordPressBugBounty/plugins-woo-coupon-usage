@@ -156,7 +156,16 @@ function wcusage_setup_page_html() {
         <?php } // End Step 1 ?>
 
         <!-- Step 2 -->
-        <?php if($step == "2") { ?>
+        <?php if($step == "2") {
+          
+          // wcusage_field_portal_enable
+          $wcusage_field_portal_enable = wcusage_get_setting_value('wcusage_field_portal_enable', '0');
+          if($wcusage_field_portal_enable) {
+              $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+              add_rewrite_rule('^' . $wcusage_portal_slug . '/?$', 'index.php?affiliate_portal=1', 'top');
+          }
+          flush_rewrite_rules();
+          ?>
 
           <h3><span class="dashicons dashicons-admin-generic"></span> Registration System:</h3>
 
@@ -219,7 +228,10 @@ function wcusage_setup_page_html() {
         <?php } // End Step 2 ?>
 
         <!-- Step 3 -->
-        <?php if($step == "3") { ?>
+        <?php if($step == "3") {
+          
+          flush_rewrite_rules();
+          ?>
 
           <form action="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_setup&step=<?php if ( 'yes' === get_option( 'woocommerce_calc_taxes' ) ) { ?>4<?php } else { ?>5<?php } ?>" method="post">
 

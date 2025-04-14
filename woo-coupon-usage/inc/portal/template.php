@@ -15,6 +15,7 @@ $singlecoupon = "";
 $force_refresh_stats = 0;
 $wcusage_field_load_ajax = 0;
 $combined_commission = 0;
+$user_no_coupons = 0;
 $options = get_option( 'wcusage_options' );
 $wcusage_urlprivate = wcusage_get_setting_value( 'wcusage_field_urlprivate', '1' );
 // Check if user is logged in
@@ -50,14 +51,17 @@ if ( isset( $_GET['couponid'] ) ) {
         'meta_value'  => $current_user_id,
         'numberposts' => 1,
     ) );
-    $user_no_coupons = 0;
     if ( !empty( $coupons ) ) {
         $coupon_post = $coupons[0];
         $postid = $coupon_post->ID;
     } else {
         $user_no_coupons = 1;
     }
-    $coupon_code = $coupon_post->post_title;
+    if ( !empty( $coupons ) ) {
+        $coupon_code = $coupon_post->post_title;
+    } else {
+        $coupon_code = '';
+    }
 }
 $coupons_total = get_posts( array(
     'post_type'  => 'shop_coupon',
@@ -438,7 +442,7 @@ if ( !$current_user_id ) {
         ?>
                             <div class="profile-trigger">
                                 <span class="username-in-header"><?php 
-        if ( $other_view ) {
+        if ( $other_view && $username ) {
             esc_html_e( 'Viewing as', 'woo-coupon-usage' );
             ?>: <?php 
         }
@@ -595,6 +599,9 @@ if ( !$current_user_id ) {
                         <?php 
     $wcusage_field_show_username = wcusage_get_setting_value( 'wcusage_field_show_username', '1' );
     if ( is_user_logged_in() && $wcusage_field_show_username ) {
+        if ( !$user_info ) {
+            $user_info = get_userdata( $current_user_id );
+        }
         $user_email = $user_info->user_email;
         $avatar_url = get_avatar_url( $user_email, array(
             'size' => 40,
@@ -602,7 +609,7 @@ if ( !$current_user_id ) {
         ?>
                             <div class="profile-trigger">
                                 <span class="username-in-header"><?php 
-        if ( $other_view ) {
+        if ( $other_view && $username ) {
             esc_html_e( 'Viewing as', 'woo-coupon-usage' );
             ?>: <?php 
         }

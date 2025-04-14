@@ -160,9 +160,9 @@ function wcusage_field_cb_registration( $args )
 
       <?php if( wcu_fs()->can_use_premium_code() ) { ?>
 
-      <div style="display: none;">
+      <div>
 
-        <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Terms and Conditions Page', 'woo-coupon-usage' ); ?> (Coming Soon)</h3>
+        <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Terms and Conditions Page', 'woo-coupon-usage' ); ?> (Beta)</h3>
 
         <p>
           <?php echo esc_html__( 'You can use the terms and conditions manager and generation tool to help you easily create your terms and conditions page.', 'woo-coupon-usage' ); ?>
@@ -994,7 +994,7 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
       ?>
 
       <br/><i><?php echo esc_html__( '(The page that has the [couponaffiliates-register] shortcode on.)', 'woo-coupon-usage' ); ?></i>
-
+      
       <br/>
 
       <?php
@@ -1005,24 +1005,87 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
       <br/>
       <?php } ?>
       <script type="text/javascript">
-          // jQuery is assumed to be loaded in WordPress by default
-          jQuery(document).ready(function($){
-              $('#wcusage_registration_page').on('change', function(){
-                  var pageID = $(this).val();
-                  // Get the URL of the selected page using WordPress AJAX (Assuming you have an AJAX handler that returns the permalink of a page given its ID)
+      jQuery(document).ready(function($) {
+          // Update the link when the dropdown changes
+          $('#wcusage_registration_page').on('change', function() {
+              var pageID = $(this).val();
+              if (pageID) {
                   $.post(
-                      '<?php echo esc_url(admin_url("admin-ajax.php")); ?>', 
+                      '<?php echo esc_url(admin_url("admin-ajax.php")); ?>',
                       {
                           'action': 'wcusage_get_permalink',
                           'page_id': pageID
-                      }, 
-                      function(response){
-                          $('#registration_link').attr('href', response);
-                          $('#registration_link').text(response); // Update the link text with the URL
+                      },
+                      function(response) {
+                          $('#registration_link').attr('href', response).text(response);
                       }
                   );
-              });
+              } else {
+                  $('#registration_link').attr('href', '#').text('');
+              }
+              check_registration_page_shortcode();
           });
+          // Check if the selected page contains the shortcode
+          function check_registration_page_shortcode() {
+              var pageID = $('#wcusage_registration_page').val();
+              if (!pageID) {
+                  $('.registration_shortcode_check').show();
+                  return;
+              }
+              $.post(
+                  '<?php echo esc_url(admin_url("admin-ajax.php")); ?>',
+                  {
+                      'action': 'wcusage_check_registration_shortcode',
+                      'page_id': pageID
+                  },
+                  function(response) {
+                      if (response == 1) {
+                          $('.registration_shortcode_check').hide();
+                      } else {
+                          $('.registration_shortcode_check').show();
+                      }
+                  }
+              );
+          }
+          // Generate a new registration page on button click
+          $('#wcu-generate-registration-page').on('click', function() {
+              // Disable button and change to spinner
+              $(this).prop('disabled', true).html('<span class="spinner"></span> <?php echo esc_html__( 'Generating...', 'woo-coupon-usage' ); ?>');
+              // Make the AJAX request to generate the page
+              $.post(
+                  '<?php echo esc_url(admin_url("admin-ajax.php")); ?>',
+                  {
+                      'action': 'wcusage_generate_registration_page'
+                  },
+                  function(response) {
+                      if (response.success) {
+                          // Add the new page to the dropdown
+                          var newOption = $('<option></option>')
+                              .val(response.data.page_id)
+                              .text(response.data.page_title)
+                              .prop('selected', true);
+                          $('#wcusage_registration_page').append(newOption);
+                          
+                          // Update the link
+                          $('#registration_link')
+                              .attr('href', response.data.permalink)
+                              .text(response.data.permalink);
+                          
+                          // Hide the error message since the new page has the shortcode
+                          $('.registration_shortcode_check').hide();
+                      } else {
+                          alert('Error: ' + response.data.message);
+                      }
+                      // Re-enable the button and reset its text
+                      $('#wcu-generate-registration-page').prop('disabled', false).html('<?php echo esc_html__( 'Generate Registration Page', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-right"></span>');
+                  }
+              );
+          });
+
+          // Initial check for shortcode
+          $('.registration_shortcode_check').hide();
+          check_registration_page_shortcode();
+      });
       </script>
 
     <?php } else { ?>
@@ -1031,6 +1094,23 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
       <?php echo wcusage_setting_number_option('wcusage_registration_page', '', esc_html__( 'Registration Form Page (ID):', 'woo-coupon-usage' ), '0px'); ?>
 
     <?php } ?>
+
+    <p class="registration_shortcode_check" style="margin-bottom: 0px; font-size: 12px; margin-top: 20px; color: red;">
+
+      <?php echo esc_html__( '(ERROR) This page does not contain the shortcode:', 'woo-coupon-usage' ); ?> <strong>[couponaffiliates-register]</strong><br/>
+      <?php echo esc_html__( 'Please add the shortcode to a new page, and select it from the dropdown above.', 'woo-coupon-usage' ); ?><br/>
+
+      <?php echo esc_html__('Or you can click the button below to automatically generate the page for you:', 'woo-coupon-usage'); ?>
+
+      <br/><br/>
+
+      <button type="button" id="wcu-generate-registration-page" class="button">
+        <?php echo esc_html__('Generate Registration Page', 'woo-coupon-usage'); ?> <span class="fa-solid fa-arrow-right"></span>
+      </button>
+      
+      <br/>
+
+    </p>
 
     <div class="setup-hide">
 
@@ -1413,3 +1493,68 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
 
 }
 add_action( 'wp_ajax_wcusage_update_custom_fields', 'wcusage_update_custom_fields' );
+
+// Function to check wcusage_check_registration_shortcode
+add_action( 'wp_ajax_wcusage_check_registration_shortcode', 'wcusage_check_registration_shortcode' );
+function wcusage_check_registration_shortcode() {
+  $page_id = intval($_POST['page_id']);
+  $page = get_post($page_id);
+  if ($page) {
+    $content = $page->post_content;
+    if (strpos($content, '[couponaffiliates-register]') !== false) {
+      echo 1; // Shortcode found
+    } else {
+      echo 0; // Shortcode not found
+    }
+  } else {
+    echo 0; // Page not found
+  }
+  wp_die();
+}
+
+/*
+* Function to handle the AJAX request for generating the registration page
+*/
+add_action('wp_ajax_wcusage_generate_registration_page', 'wcusage_generate_registration_page');
+function wcusage_generate_registration_page() {
+
+    $current_user_id = get_current_user_id();
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'posts';
+    $wpdb->insert(
+      $table_name,
+      array(
+        'post_title'     => 'Affiliate Registration',
+        'post_type'      => 'page',
+        'post_name'      => 'affiliate-registration',
+        'comment_status' => 'closed',
+        'ping_status'    => 'closed',
+        'post_content'   => '[couponaffiliates-register]',
+        'post_status'    => 'publish',
+        'post_author'    => $current_user_id,
+      )
+    );
+    $page_id = $wpdb->insert_id;
+
+    $option_group = get_option('wcusage_options');
+    $option_group['wcusage_registration_page'] = $page_id;
+    update_option( 'wcusage_options', $option_group );
+    
+    if (!is_wp_error($page_id)) {
+        // Get the page permalink
+        $permalink = get_permalink($page_id);
+        // Return the page ID, title, and permalink as JSON
+        wp_send_json_success(array(
+            'page_id'    => $page_id,
+            'page_title' => 'Affiliate Registration',
+            'permalink'  => $permalink,
+        ));
+    } else {
+        wp_send_json_error(array(
+            'message' => __('Failed to create the page.', 'woo-coupon-usage'),
+        ));
+    }
+    
+    wp_die();
+}

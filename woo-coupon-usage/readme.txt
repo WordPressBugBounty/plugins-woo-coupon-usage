@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.8
-Stable tag: 6.2.1
+Stable tag: 6.3.0
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -243,6 +243,23 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 11. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 6.3.0 - 14th April 2025 =
+- New: (PRO) Added new "Terms and Conditions" generator tool to the plugin, that will help you generate a simple terms and conditions page for your affiliate program.
+- Improvement: Updated the "Affiliate User" field on the edit coupon page to be more user friendly, and added a field to change it in the meta box too.
+- Tweak: Added buttons to generate the affiliate dashboard and affiliate registration pages automatically if they do not exist, or the current select page does not contain the shortcode.
+- Tweak: (PRO) When saving settings in the payout settings tab on the affiliate dashboard, it will now reload the page if the payout method was changed.
+- Tweak: (PRO) Made a few small styling tweaks to the MLA portal page.
+- Fix: Fixed a potential timezone issue with the scheduled payouts feature.
+- Fix: Fixed a PHP error with the MLA total earnings calculator when the user has no parents.
+- Fix: Fixed the new quick edit feature for coupons setting the commission rates to 0 if the rates were left blank.
+
+= Version 6.2.2 - 9th April 2025 =
+- Tweak: Permalinks are now automatically flushed when enabling the "affiliate portal" in the setup wizard.
+- Fix: Fixed some PHP errors on the affiliate portal page.
+- Fix: Fixed an issue with the "wcusage_register" registrations table not being created properly on some sites.
+- Other: Updated "Russian" translations.
+- Other: Added "Dutch" translations.
 
 = Version 6.2.1 - 8th April 2025 =
 - Tweak: Made a few styling tweaks and improvements to some of the admin pages in the plugin.

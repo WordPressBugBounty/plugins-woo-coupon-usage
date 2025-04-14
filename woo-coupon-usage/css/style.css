@@ -1559,6 +1559,9 @@ form#product_search_form input {
 }
 
 .wcu-mla-network-avatar {
+	text-align: center;
+	display: inline-block !important;
+	margin: 0 auto !important;
 	max-width: 50px;
 	border-radius: 50px;
 	border: 2px solid #f3f3f3;
