@@ -373,10 +373,6 @@ if ( !function_exists( 'wcusage_iscouponusers' ) ) {
             $wcu_select_coupon_user = get_post_meta( $postid, 'wcu_select_coupon_user', true );
             // This is a user ID
             $thiscoupon = get_the_title();
-            // Debug: Log the comparison
-            if ( current_user_can( 'administrator' ) ) {
-                error_log( 'Woo Coupon Usage Debug: Comparing coupon user ID (' . $wcu_select_coupon_user . ') with current user ID (' . $current_user_id . ') for coupon ' . $thiscoupon );
-            }
             // Compare the stored user ID with the current user ID
             if ( $current_user_id && $wcu_select_coupon_user == $current_user_id ) {
                 if ( strtolower( $coupon ) == strtolower( $thiscoupon ) ) {

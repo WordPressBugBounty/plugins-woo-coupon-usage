@@ -845,10 +845,12 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
         }
       }
       wp_dropdown_pages( $dropdown_args );
+
+      echo "<br/>";
       
       if($dashboardpage) {
         // Show the link
-        echo "<br/><a style='margin-top: 5px; display: inline-block;' id='dashboard_link' href='".esc_url(get_permalink($dashboardpage))."' target='_blank'>".esc_url(get_permalink($dashboardpage))."</a>";
+        echo "<a style='margin-top: 5px; display: inline-block;' id='dashboard_link' href='".esc_url(get_permalink($dashboardpage))."' target='_blank'>".esc_url(get_permalink($dashboardpage))."</a><br/>";
       }
       ?>
 
@@ -888,27 +890,26 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
 
     <?php } ?>
 
-    <br/>
-      <i><?php echo esc_html__( '(The page that has the [couponaffiliates] shortcode on.)', 'woo-coupon-usage' ); ?></i>
+    <i><?php echo esc_html__( '(The page that has the [couponaffiliates] shortcode on.)', 'woo-coupon-usage' ); ?></i>
+
     <br/>
 
-    <div class="dashboard_shortcode_check setup-hide" style="margin-bottom: 0px; font-size: 12px; margin-top: 20px; color: red; display: none;">
+    <div class="setup-hide">
+
+      <div class="dashboard_shortcode_check" style="margin-bottom: 0px; font-size: 12px; margin-top: 20px; color: red; display: none;">
 
       <?php
       $dashboardpage = wcusage_get_setting_value('wcusage_dashboard_page', '');
       if($dashboardpage) {
       ?>
-
       <?php echo esc_html__( '(ERROR) This page does not contain the shortcode:', 'woo-coupon-usage' ); ?> <strong>[couponaffiliates]</strong><br/>
       <?php echo esc_html__( 'Please add the shortcode to a new page, and select it from the dropdown above.', 'woo-coupon-usage' ); ?><br/>
 
       <?php echo esc_html__('Or you can click the button below to automatically generate the page for you:', 'woo-coupon-usage'); ?>
-
       <?php } ?>
 
       <br/>
 
-      <div class="setup-hide">
       <br/>        
       <!-- Link to GET create_new_dashboard as 1 -->
       <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_settings&create_new_dashboard=1')); ?>"
@@ -917,9 +918,10 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
           <strong><?php echo esc_html__( "Generate Dashboard Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-circle-arrow-right"></span></strong>
         </button>
       </a>
-      </div>
 
       </div>
+
+    </div>
 
     <br/>
 

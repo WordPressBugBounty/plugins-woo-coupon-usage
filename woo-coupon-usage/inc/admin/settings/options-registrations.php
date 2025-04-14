@@ -1095,33 +1095,31 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
 
     <?php } ?>
 
-    <p class="registration_shortcode_check" style="margin-bottom: 0px; font-size: 12px; margin-top: 20px; color: red;">
-
-      <?php echo esc_html__( '(ERROR) This page does not contain the shortcode:', 'woo-coupon-usage' ); ?> <strong>[couponaffiliates-register]</strong><br/>
-      <?php echo esc_html__( 'Please add the shortcode to a new page, and select it from the dropdown above.', 'woo-coupon-usage' ); ?><br/>
-
-      <?php echo esc_html__('Or you can click the button below to automatically generate the page for you:', 'woo-coupon-usage'); ?>
-
-      <br/><br/>
-
-      <button type="button" id="wcu-generate-registration-page" class="button">
-        <?php echo esc_html__('Generate Registration Page', 'woo-coupon-usage'); ?> <span class="fa-solid fa-arrow-right"></span>
-      </button>
-      
-      <br/>
-
-    </p>
-
     <div class="setup-hide">
 
-    <br/>
+      <div class="registration_shortcode_check" style="margin-bottom: 0px; font-size: 12px; margin-top: 10px; color: red;">
 
-    <p style="margin-bottom: 0px; font-size: 12px;">
-      <?php echo esc_html__( 'Create a more effective signup promo page design with the generator tool:', 'woo-coupon-usage' ); ?>
-      <a href="<?php echo esc_url(admin_url('admin.php?page=signup-page-generator')); ?>" target="_blank" style="font-weight: bold; text-decoration: none;"><?php echo esc_html__( 'Generate Promo Page', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-up-right-from-square"></span></a>
-    </p>
+        <?php echo esc_html__( '(ERROR) This page does not contain the shortcode:', 'woo-coupon-usage' ); ?> <strong>[couponaffiliates-register]</strong><br/>
+        <?php echo esc_html__( 'Please add the shortcode to a new page, and select it from the dropdown above.', 'woo-coupon-usage' ); ?><br/>
 
-    </div>
+        <?php echo esc_html__('Or you can click the button below to automatically generate the page for you:', 'woo-coupon-usage'); ?>
+
+        <br/><br/>
+
+        <button type="button" id="wcu-generate-registration-page" class="button" style="margin-top: 10px;">
+          <?php echo esc_html__('Generate Registration Page', 'woo-coupon-usage'); ?> <span class="fa-solid fa-arrow-right"></span>
+        </button>
+        
+      </div>
+
+      <br/>
+
+      <p style="margin-bottom: 0px; font-size: 12px;">
+        <?php echo esc_html__( 'Create a more effective signup promo page design with the generator tool:', 'woo-coupon-usage' ); ?>
+        <a href="<?php echo esc_url(admin_url('admin.php?page=signup-page-generator')); ?>" target="_blank" style="font-weight: bold; text-decoration: none;"><?php echo esc_html__( 'Generate Promo Page', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-up-right-from-square"></span></a>
+      </p>
+
+  </div>
 
   <?php
   }

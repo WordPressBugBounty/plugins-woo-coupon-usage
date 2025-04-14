@@ -170,12 +170,13 @@ class wcusage_Referrals_Table extends WP_List_Table {
             $coupons .= '<a href="' . esc_url($url) . '" target="_blank">' . esc_html($affiliatereferrer) . '</a><br/>';
             if(isset($getcoupon[1])) {
                 $affiliate_id = $getcoupon[1];
-                $affiliate_username = get_userdata($affiliate_id)->user_login;
-                $affiliate_ids .= '<a href="' . esc_url(admin_url('user-edit.php?user_id=' . $affiliate_id)) . '">' . esc_html($affiliate_username) . '</a><br/>';
+                if($affiliate_id) {
+                    $affiliate_username = get_userdata($affiliate_id)->user_login;
+                    $affiliate_ids .= '<a href="' . esc_url(admin_url('user-edit.php?user_id=' . $affiliate_id)) . '">' . esc_html($affiliate_username) . '</a><br/>';    
+                }
             }
         } elseif (!$lifetimeaffiliate && !$affiliatereferrer && class_exists('WooCommerce')) {
             if (version_compare(WC_VERSION, 3.7, ">=")) {
-                if(!is_array($affiliate_id))
                 foreach ($order->get_coupon_codes() as $coupon_code) {
                     $getinfo = wcusage_get_the_order_coupon_info($coupon_code, "", $order_id);
                     $getcoupon = wcusage_get_coupon_info($coupon_code);

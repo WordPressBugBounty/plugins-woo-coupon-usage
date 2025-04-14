@@ -242,7 +242,22 @@ function wcusage_update_all_stats_data() {
   $allstats['total_commission'] = isset($stats['total_commission']) ? floatval($stats['total_commission']) : 0;
   $allstats['total_shipping'] = isset($stats['total_shipping']) ? floatval($stats['total_shipping']) : 0;
   $allstats['total_count'] = isset($stats['total_count']) ? floatval($stats['total_count']) : 0;
-  $allstats['commission_summary'] = isset($stats['commission_summary']) ? $stats['commission_summary'] : '';
+  
+  if (isset($stats['commission_summary']) && is_array($stats['commission_summary'])) {
+      foreach ($stats['commission_summary'] as $key => $value) {
+          $sanitized_key = sanitize_text_field($key);
+          if (is_array($value) || is_object($value)) {
+              $value = (array) $value;
+              $allstats['commission_summary'][$sanitized_key] = array(
+                  'total' => isset($value['total']) ? floatval($value['total']) : 0,
+                  'commission' => isset($value['commission']) ? floatval($value['commission']) : 0,
+                  'number' => isset($value['number']) ? intval($value['number']) : 0,
+              );
+          }
+      }
+  } else {
+      $allstats['commission_summary'] = array();
+  }
   
   update_post_meta( $coupon_id, 'wcu_alltime_stats', $allstats );
 
