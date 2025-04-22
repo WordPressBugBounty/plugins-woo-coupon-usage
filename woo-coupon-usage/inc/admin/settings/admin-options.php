@@ -731,10 +731,8 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
   	<!-- Generate Getting Started Message -->
   	<?php 
-        if ( !$coupon_shortcode_page ) {
-            do_action( 'wcusage_hook_getting_started_create' );
-            do_action( 'wcusage_hook_getting_started' );
-        }
+        do_action( 'wcusage_hook_getting_started_create' );
+        do_action( 'wcusage_hook_checklist' );
         ?>
 
     <?php 
@@ -922,6 +920,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
   	</form>
 
+</div>
 
 <?php 
         if ( !wcu_fs()->can_use_premium_code() ) {
@@ -1115,8 +1114,6 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
     <?php 
         }
         ?>
-
-   </div>
 
    <div style="clear: both;"></div>
 

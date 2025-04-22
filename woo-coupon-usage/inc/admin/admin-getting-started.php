@@ -202,3 +202,82 @@ function wcusage_getting_started_registration_post() {
   <br/>
 <?php
 }
+
+add_action( 'wcusage_hook_checklist', 'wcusage_hook_checklist_function' );
+function wcusage_hook_checklist_function() {
+?>
+  <div class="wcusage-checklist" style="display: none; border: 1px solid #ccc;
+  min-width: 400px; padding: 5px 20px 10px 20px; background: #f9f9f9; border-radius: 5px; margin: 0 0 20px 0;">
+      <h2 style="font-size: 20px; margin-top: 15px;"><?php echo esc_html__( "Setup Checklist", "woo-coupon-usage" ); ?></h2>
+      <?php
+      $show = false;
+
+      // 1 - Create a dashboard page
+      $wcusage_dashboard_page = wcusage_get_setting_value('wcusage_dashboard_page', '');
+      $wcusage_dashboard_page = get_post($wcusage_dashboard_page);
+      if($wcusage_dashboard_page && $wcusage_dashboard_page->post_status == 'publish') {
+        $wcusage_dashboard_page = $wcusage_dashboard_page->ID;
+      } else {
+        $wcusage_dashboard_page = false;
+        $options_group = get_option('wcusage_options');
+        if(isset($options_group['wcusage_dashboard_page'])) {
+          $options_group['wcusage_dashboard_page'] = '';
+          update_option( 'wcusage_options', $options_group );
+        }
+      }
+      $wcusage_field_portal_enable = wcusage_get_setting_value('wcusage_field_portal_enable', '0');
+      if(!$wcusage_dashboard_page && !$wcusage_field_portal_enable) {
+        echo "<p style='margin-top: 20px;'>";
+        echo "<span class='fa-solid fa-exclamation-circle' style='color: red;'></span> ";
+        echo "<strong>" . esc_html__( "Create the affiliate dashboard page:", "woo-coupon-usage" ) . "</strong>";
+        echo sprintf( " <a href='%s'>%s</a>", esc_url(admin_url('admin.php?page=wcusage_setup&step=1')), esc_html__( "Click here", "woo-coupon-usage" ) );
+        echo "</p>";
+        $show = true;
+      } else {
+        echo "<p style='margin-top: 20px;'>";
+        echo "<span class='fa-solid fa-check-circle' style='color: green;'></span> ";
+        echo "<strong>" . esc_html__( "Affiliate dashboard page created.", "woo-coupon-usage" ) . "</strong>";
+        echo "</p>";
+      }
+
+      // 2 - Create a registration page
+      $wcusage_registration_page = wcusage_get_setting_value('wcusage_registration_page', '');
+      if(!$wcusage_registration_page) {
+        echo "<p style='margin-top: 20px;' class='wcusage-checklist-registration'>";
+        echo "<span class='fa-solid fa-exclamation-circle' style='color: red;'></span> ";
+        echo "<strong>" . esc_html__( "Create the affiliate registration page:", "woo-coupon-usage" ) . "</strong>";
+        echo sprintf( " <a href='%s'>%s</a>", esc_url(admin_url('admin.php?page=wcusage_setup&step=2')), esc_html__( "Click here", "woo-coupon-usage" ) );
+        echo "</p>";
+        $show = true;
+      } else {
+        echo "<p style='margin-top: 20px;' class='wcusage-checklist-registration'>";
+        echo "<span class='fa-solid fa-check-circle' style='color: green;'></span> ";
+        echo "<strong>" . esc_html__( "Affiliate registration page created.", "woo-coupon-usage" ) . "</strong>";
+        echo "</p>";
+      }
+
+      // 3 - Create template coupon
+      $coupon_template = wcusage_get_setting_value('wcusage_field_registration_coupon_template', '0');
+      $couponid = wcusage_get_coupon_id($coupon_template);
+      if(!$couponid) {
+        echo "<p style='margin-top: 20px;'>";
+        echo "<span class='fa-solid fa-exclamation-circle' style='color: red;'></span> ";
+        echo "<strong>" . esc_html__( "Create the template coupon:", "woo-coupon-usage" ) . "</strong>";
+        echo sprintf( " <a href='%s'>%s</a>", esc_url(admin_url('admin.php?page=wcusage_setup&step=2')), esc_html__( "Click here", "woo-coupon-usage" ) );
+        echo "</p>";
+        $show = true;
+      } else {
+        echo "<p style='margin-top: 20px;'>";
+        echo "<span class='fa-solid fa-check-circle' style='color: green;'></span> ";
+        echo "<strong>" . esc_html__( "Template coupon created.", "woo-coupon-usage" ) . "</strong>";
+        echo "</p>";
+      }
+
+      // Show?
+      if($show) {
+        echo "<style>.wcusage-checklist { display: inline-block !important; }</style>";
+      }
+      ?>
+  </div>
+<?php
+}

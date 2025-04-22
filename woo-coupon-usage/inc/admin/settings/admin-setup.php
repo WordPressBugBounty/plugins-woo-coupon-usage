@@ -167,7 +167,7 @@ function wcusage_setup_page_html() {
           flush_rewrite_rules();
           ?>
 
-          <h3><span class="dashicons dashicons-admin-generic"></span> Registration System:</h3>
+          <h3 style="margin-bottom: 10px;"><span class="dashicons dashicons-admin-generic"></span> Registration System:</h3>
 
           <form action="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_setup&step=3" method="post">
 
@@ -202,6 +202,12 @@ function wcusage_setup_page_html() {
                 }
               }
               ?>
+
+              <script>
+              jQuery(document).ready(function($) {
+                $('#wcusage_field_registration_coupon_template').prop('required', true);
+              });
+              </script>
 
               <br/>
 
@@ -301,49 +307,117 @@ function wcusage_setup_page_html() {
           ?>
 
           <h1><?php echo esc_html__('Setup Wizard Complete!', 'woo-coupon-usage'); ?></h1>
-          
+
           <p style="font-weight: bold;"><?php echo wp_kses_post( __('You\'re almost ready to launch your affiliate program, and start growing your revenue!', 'woo-coupon-usage') ); ?></p>
-          
+
           <p><?php echo wp_kses_post( __('Here\'s some of the next steps you can take:', 'woo-coupon-usage') ); ?></p>
 
-          <p>1) <?php echo sprintf( wp_kses_post( __('Visit the <a href="%s" target="_blank">settings page</a> to edit more options, and customise your affiliate program to work exactly how you want!', 'woo-coupon-usage') ), esc_url(get_admin_url()) . 'admin.php?page=wcusage_settings'); ?></p>
+          <style>
+            .steps-container {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 20px;
+              margin: 20px 0;
+            }
+            .step-box {
+              flex: 1 1 calc(33.333% - 14px);
+              background: #f8f9fa;
+              border: 1px solid #e0e0e0;
+              border-radius: 8px;
+              padding: 20px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              transition: transform 0.2s;
+              min-width: 250px;
+            }
+            .step-box:hover {
+              transform: translateY(-5px);
+              box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
+            .step-box h3 {
+              margin: 0 0 10px;
+              font-size: 16px;
+              color: #333;
+            }
+            .step-box p {
+              margin: 0;
+              font-size: 14px;
+              line-height: 1.5;
+            }
+            .step-number {
+              font-weight: bold;
+              color: #0073aa;
+            }
+          </style>
 
-          <p>2) <?php echo sprintf( wp_kses_post( __('View all your coupons, and links to each of their dashboards on the <a href="%s" target="_blank">coupons list</a> page.', 'woo-coupon-usage') ), admin_url("admin.php?page=wcusage_coupons")); ?></p>
-          
-          <?php
-          $template = $options['wcusage_field_registration_coupon_template'];
-          $get_template = wcusage_get_coupon_info($template);
-          $template_id = $get_template[2];
-          $registrationpage = "";
-          if ( isset($options['wcusage_registration_page']) && $options['wcusage_registration_page'] ) {
-              $registrationpage = $options['wcusage_registration_page'];
-          } else {
-              $registrationpage = wcusage_get_registration_shortcode_page_id();
-          }
-          ?>
-          <?php if($template_id) { ?>
-            <p>3) <?php echo sprintf( wp_kses_post( __('You can <a href="%s" target="_blank">edit your template coupon</a> if you want to change the default affiliate coupon settings.', 'woo-coupon-usage') ), admin_url("post.php?post=" . $template_id . "&action=edit")); ?></p>
-          <?php } else { ?>
-            <p>3) <?php echo sprintf( wp_kses_post( __('Don\'t forget to <a href="%s" target="_blank">create your template coupon</a> and set this in the plugin settings! <a href="%s" target="_blank">Learn More</a>.', 'woo-coupon-usage') ), admin_url("post-new.php?post_type=shop_coupon"), 'https://couponaffiliates.com/docs/template-coupon-code/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step'); ?></p>
-          <?php } ?>
-          
-          <p>4) <?php echo sprintf( wp_kses_post( __('Ready to get started? Create your first affiliate user on the <a href="%s" target="_blank">affiliates page</a> or share your <a href="%s">affiliate registration form</a> with people to signup. Any new affiliate registrations will also auto-create their new coupon code.', 'woo-coupon-usage') ), admin_url("admin.php?page=wcusage_affiliates"), esc_url(get_permalink($registrationpage)) ); ?></p>
+          <div class="steps-container">
+            <div class="step-box">
+              <h3><span class="step-number">1)</span> Customize Your Program</h3>
+              <p><?php echo sprintf( wp_kses_post( __('Visit the <a href="%s" target="_blank">settings page</a> to edit more options, enable more features, and customise your affiliate program to work exactly how you want!', 'woo-coupon-usage') ), esc_url(get_admin_url()) . 'admin.php?page=wcusage_settings'); ?></p>
+            </div>
 
-          <p>5) <?php echo sprintf( wp_kses_post( __('For advanced features like automated payouts, multi-level affiliates, creatives, email reports, and more, visit the <a href="%s" target="_blank">PRO modules section</a>.', 'woo-coupon-usage') ), admin_url('admin.php?page=wcusage_settings&section=tab-pro-details')); ?></p>
+            <div class="step-box">
+              <h3><span class="step-number">2)</span> Manage Coupons</h3>
+              <p><?php echo sprintf( wp_kses_post( __('View and manage all of your affiliate coupons, and access links to each of their affiliate dashboards on the <a href="%s" target="_blank">coupons list</a> page.', 'woo-coupon-usage') ), admin_url("admin.php?page=wcusage_coupons")); ?></p>
+            </div>
+
+            <?php
+            $template = $options['wcusage_field_registration_coupon_template'];
+            $get_template = wcusage_get_coupon_info($template);
+            $template_id = $get_template[2];
+            $registrationpage = "";
+            if ( isset($options['wcusage_registration_page']) && $options['wcusage_registration_page'] ) {
+                $registrationpage = $options['wcusage_registration_page'];
+            } else {
+                $registrationpage = wcusage_get_registration_shortcode_page_id();
+            }
+            ?>
+            <div class="step-box">
+              <h3><span class="step-number">3)</span> Template Coupon</h3>
+              <?php if($template_id) { ?>
+                <p>
+                  <?php echo sprintf( wp_kses_post( __('You can <a href="%s" target="_blank">edit your template coupon</a> if you want to change the default affiliate coupon settings.', 'woo-coupon-usage') ), admin_url("post.php?post=" . $template_id . "&action=edit")); ?>
+                  <?php echo sprintf( wp_kses_post( __('This is the template coupon used when generating new affiliate coupons when a new affiliate is created.', 'woo-coupon-usage') ), admin_url("admin.php?page=wcusage_coupon_stats&coupon_id=" . $template_id)); ?>
+                </p>
+              <?php } else { ?>
+                <p><?php echo sprintf( wp_kses_post( __('Don\'t forget to <a href="%s" target="_blank">create your template coupon</a> and set this in the plugin settings! <a href="%s" target="_blank">Learn More</a>.', 'woo-coupon-usage') ), admin_url("post-new.php?post_type=shop_coupon"), 'https://couponaffiliates.com/docs/template-coupon-code/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step'); ?></p>
+              <?php } ?>
+            </div>
+
+            <div class="step-box">
+              <h3><span class="step-number">4)</span> Add New Affiliates</h3>
+              <p><?php echo sprintf( wp_kses_post( __('Ready to get started? Create your first affiliate user on the <a href="%s" target="_blank">affiliates page</a> or share your <a href="%s" target="_blank">affiliate registration form</a> with people to signup. Any new affiliate registrations will auto-create their new coupon code.', 'woo-coupon-usage') ), admin_url("admin.php?page=wcusage_affiliates"), esc_url(get_permalink($registrationpage)) ); ?></p>
+            </div>
+
+            <div class="step-box">
+              <h3><span class="step-number">5)</span> Explore PRO Features</h3>
+              <p><?php echo sprintf( wp_kses_post( __('For advanced features like automated payouts, multi-level affiliates, dynamic creatives, performance bonuses, affiliate groups, email reports, and more, visit the <a href="%s" target="_blank">PRO modules section</a>.', 'woo-coupon-usage') ), admin_url('admin.php?page=wcusage_settings&section=tab-pro-details')); ?></p>
+            </div>
+
+            <?php if( wcu_fs()->can_use_premium_code() ) { ?>
+            <!-- Payouts -->
+            <div class="step-box">
+              <h3><span class="step-number">6)</span> Commission Payouts Settings</h3>
+              <p>
+                <?php echo sprintf( wp_kses_post( __('Setup your commission payout methods and settings on the <a href="%s" target="_blank">payouts settings page</a>. You can pay your affiliates via PayPal, Stripe, or Store Credit, and even automate payouts to be paid automatically on a scheduled basis.', 'woo-coupon-usage') ), admin_url('admin.php?page=wcusage_settings&section=tab-payouts')); ?>
+                <a href="https://couponaffiliates.com/docs/commission-tracking-and-payouts/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step" target="_blank"><?php echo esc_html__('Learn more about payouts.', 'woo-coupon-usage'); ?></a>
+              </p>
+            </div>
+            <?php } ?>
+
+          </div>
 
           <p><strong><?php echo sprintf( wp_kses_post( __('Be sure to watch the setup guide video below, for a detailed walkthrough.', 'woo-coupon-usage') ), admin_url('admin.php?page=wcusage_contact')); ?>
-          
           <?php echo wp_kses_post(__('Need help?', 'woo-coupon-usage')); ?> <?php if ( wcu_fs()->can_use_premium_code() ) { ?><a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage-contact" target="_blank"><?php } else { ?><a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank" style="text-decoration: none;"><?php } ?><?php echo esc_html__('Create a new support ticket', 'woo-coupon-usage'); ?></a>.</strong><br/></p>
 
-            <br/>
+          <br/>
 
           <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_settings">
             <button type="submit" class="button button-primary" style="padding: 7px 20px;">
               <?php echo esc_html__('Continue to Settings Page', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
             </button></a>
           &nbsp;
-          <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_add_affiliate"
-          <button type="submit" class="button button-secondary" style="padding: 7px 20px;">
+          <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_add_affiliate">
+            <button type="submit" class="button button-secondary" style="padding: 7px 20px;">
               <?php echo esc_html__('Create Your First Affiliate', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
             </button></a>
 

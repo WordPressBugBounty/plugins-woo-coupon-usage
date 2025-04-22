@@ -471,6 +471,11 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
         $args = array(
             'post_type'      => 'shop_coupon',
             'posts_per_page' => -1,
+            'meta_query'     => array(array(
+                'key'     => 'wcu_select_coupon_user',
+                'value'   => $current_user_id,
+                'compare' => '=',
+            )),
         );
         $obituary_query = new WP_Query($args);
         $numcoupons = $obituary_query->post_count;

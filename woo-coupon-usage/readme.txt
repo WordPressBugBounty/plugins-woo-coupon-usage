@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.8
-Stable tag: 6.3.1
+Stable tag: 6.3.4
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -244,8 +244,21 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= Version 6.3.4 - 18th April 2025 =
+- New: Added a new option to the "registration" settings to choose whether or not to automatically log the user in after registration.
+- Tweak: Made a few small changes to the setup wizard to improve the user experience.
+- Tweak: Made a few small "quality of life" tweaks and improvements to some admin pages in the plugin.
+- Fix: Potential fix for the MLA option "Deduct parent affiliate commission from sub-affiliate commission".
+- Other: Updated "Spanish" translations with reviewed and modified version.
+
+= Version 6.3.3 - 15th April 2025 =
+- Fix: Fixed a potential PHP fatal error in the PRO version.
+
+= Version 6.3.2 - 14th April 2025 =
+- Fix: Fixed a potential PHP fatal error if both the free and pro versions are activated at the same time.
+
 = Version 6.3.1 - 14th April 2025 =
-- Security Fix: Fixed a small XSS vulnerability bug (reported by WordFence).
+- Security Fix: Fixed a small XSS vulnerability bug (reported by "wesley" via WordFence).
 - Fix: Fixed some potential PHP warnings.
 
 = Version 6.3.0 - 14th April 2025 =

@@ -639,7 +639,7 @@ function wcusage_field_cb_payouts( $args )
 
         <p style="margin-left: 40px; font-size: 16px; font-weight: bold;">API Credentials*</p>
 
-        <p style="margin-left: 40px;">Instructions: <a href="https://couponaffiliates.com/docs/pro-paypal-payouts-setup" target="_blank">https://couponaffiliates.com/docs/pro-paypal-payouts-setup</a></p>
+        <p style="margin-left: 40px;">Instructions: <a href="https://couponaffiliates.com/docs/pro-paypal-payouts-setup/" target="_blank">https://couponaffiliates.com/docs/pro-paypal-payouts-setup</a></p>
 
         <br/>
 
@@ -740,9 +740,9 @@ function wcusage_field_cb_payouts( $args )
 
         <p style="margin-left: 40px; font-size: 16px; font-weight: bold;">API Credentials*</p>
 
-        <p style="margin-left: 40px;">Get API keys here: <a href="https://dashboard.stripe.com/apikeys" target="_blank">https://dashboard.stripe.com/apikeys</a></p>
+        <p style="margin-left: 40px;">Get API keys here: <a href="https://dashboard.stripe.com/apikeys/" target="_blank">https://dashboard.stripe.com/apikeys/</a></p>
 
-        <p style="margin-left: 40px;">Instructions: <a href="https://couponaffiliates.com/docs/pro-stripe-payouts-setup" target="_blank">https://couponaffiliates.com/docs/pro-stripe-payouts-setup</a></p>
+        <p style="margin-left: 40px;">Instructions: <a href="https://couponaffiliates.com/docs/pro-stripe-payouts-setup/" target="_blank">https://couponaffiliates.com/docs/pro-stripe-payouts-setup/</a></p>
 
         <br/>
 

@@ -386,6 +386,10 @@ function wcusage_field_cb( $args ) {
       <!-- Show customer "last name". -->
       <?php echo wcusage_setting_toggle_option('wcusage_field_ordernamelast', 0, esc_html__( 'Show customer "last name".', 'woo-coupon-usage' ), '0px'); ?>
 
+      <i>
+      <?php echo esc_html__( 'Beware of privacy issues when showing customer names. This is not recommended.', 'woo-coupon-usage' ); ?>
+      </i><br/>
+
       <br/>
 
       <!-- Show shipping costs. -->
@@ -906,11 +910,10 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
       <?php echo esc_html__( 'Please add the shortcode to a new page, and select it from the dropdown above.', 'woo-coupon-usage' ); ?><br/>
 
       <?php echo esc_html__('Or you can click the button below to automatically generate the page for you:', 'woo-coupon-usage'); ?>
+
+      <br/><br/>
       <?php } ?>
 
-      <br/>
-
-      <br/>        
       <!-- Link to GET create_new_dashboard as 1 -->
       <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_settings&create_new_dashboard=1')); ?>"
       style="margin: 5px 0; display: inline-block;"
@@ -1064,7 +1067,10 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
 
     <!-- Portal Page URL Slug -->
     <?php echo wcusage_setting_text_option("wcusage_portal_slug", "affiliate-portal", esc_html__( 'Portal Page URL Slug', 'woo-coupon-usage' ), "0px"); ?>
-    <span class="affiliate-portal-url"><?php echo esc_url(get_home_url()).'/'.$portal_slug.'/' ?></span><br/>
+    <span class="affiliate-portal-url">
+    <i><?php echo esc_html__( 'Your affiliate portal will be located at:', 'woo-coupon-usage' ); ?><br/><?php echo esc_url(get_home_url()).'/'.$portal_slug.'/' ?></span></i>
+    
+    <br/>
     <script>
       // Update the affiliate portal URL when the slug is changed
       jQuery(document).ready(function($) {
@@ -1189,6 +1195,18 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
       <?php } ?>
 
     </div>
+
+    <?php if( isset($_GET['page']) && $_GET['page'] == 'wcusage_setup' ) { ?>
+
+      <div style="margin-top: 20px; font-size: 12px;">
+
+        <i>
+            <?php echo esc_html__( 'Please changes to generate the portal page.', 'woo-coupon-usage' ); ?>
+        </i>
+
+      </div>
+
+    <?php } ?>
 
     </div>
 

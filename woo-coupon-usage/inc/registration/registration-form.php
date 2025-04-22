@@ -893,7 +893,8 @@ function wcusage_login_after_registration() {
                         $password = $new_password;
                     }
                     // Login
-                    if ( $userid && !get_current_user_id() && !wcusage_check_admin_access() ) {
+                    $auto_login = wcusage_get_setting_value( 'wcusage_field_registration_auto_login', '1' );
+                    if ( $userid && !get_current_user_id() && !wcusage_check_admin_access() && $auto_login ) {
                         $creds = array(
                             'user_login'    => $username,
                             'user_password' => $password,
@@ -906,7 +907,7 @@ function wcusage_login_after_registration() {
                             $nonce = wp_create_nonce( 'wcu_login_success' );
                             $_SESSION['wcu_login_success'] = $nonce;
                             $_SESSION['wcu_login_username'] = $username;
-                            remove_filter( 'wordfence_ls_require_captcha', '__return_false' );
+                            remove_filter( 'wordfence_ls_require_captcha', '__return_true' );
                             // check if user exists
                             if ( !is_wp_error( $user ) ) {
                                 wp_set_current_user( $user->ID );

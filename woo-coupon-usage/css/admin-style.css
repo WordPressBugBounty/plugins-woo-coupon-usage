@@ -209,10 +209,6 @@
     border-radius: 4px;
     font-size: 11px;
     color: #848484;
-    opacity: 0.85;
-}
-
-.wcusage-settings i:hover {
     opacity: 1;
 }
 
@@ -416,6 +412,9 @@
     color: #000;
     text-decoration: none;
     letter-spacing: 0.5px;
+}
+.plugin-setup-settings .progressbar a:hover {
+    text-decoration: underline;
 }
 
 .plugin-setup-settings label {

@@ -65,7 +65,7 @@ function wcusage_field_cb_help( $args )
       <a href="https://couponaffiliates.com/docs/?utm_campaign=plugin&utm_source=dashboard-link&utm_medium=documentation"
       target="_blank" style="text-decoration: none; color: #0073aa; margin-top: 10px; display: inline-block;">
           <strong style="font-size: 12px !important;"><?php echo esc_html__( 'View All Documentation', 'woo-coupon-usage' ); ?></strong> <span class="dashicons dashicons-external"
-          style="font-size: 12px; margin-top: 3px; height: 12px; width: 12px;"></span>
+          style="font-size: 12px; margin-top: 4px; height: 12px; width: 12px;"></span>
       </a>
       
       <div id="docs-search-results" style="margin-top: 20px;"></div>

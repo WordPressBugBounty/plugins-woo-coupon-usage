@@ -434,39 +434,48 @@ if ( !$current_user_id ) {
                     <div class="profile-dropdown">
                         <?php 
     $wcusage_field_show_username = wcusage_get_setting_value( 'wcusage_field_show_username', '1' );
-    if ( is_user_logged_in() && $wcusage_field_show_username ) {
+    if ( is_user_logged_in() ) {
         $user_email = $user_info->user_email;
         $avatar_url = get_avatar_url( $user_email, array(
             'size' => 40,
         ) );
         ?>
+                            <?php 
+        if ( $wcusage_field_show_username ) {
+            ?>
                             <div class="profile-trigger">
                                 <span class="username-in-header"><?php 
-        if ( $other_view && $username ) {
-            esc_html_e( 'Viewing as', 'woo-coupon-usage' );
-            ?>: <?php 
-        }
-        echo esc_html( $username );
-        ?></span><img src="<?php 
-        echo esc_url( $avatar_url );
-        ?>" alt="<?php 
-        echo esc_attr( $username );
-        ?>" class="profile-image">
+            if ( $other_view && $username ) {
+                esc_html_e( 'Viewing as', 'woo-coupon-usage' );
+                ?>: <?php 
+            }
+            echo esc_html( $username );
+            ?></span><img src="<?php 
+            echo esc_url( $avatar_url );
+            ?>" alt="<?php 
+            echo esc_attr( $username );
+            ?>" class="profile-image">
                                 <i class="fas fa-caret-down dropdown-arrow"></i>
                             </div>
+                            <?php 
+        }
+        ?>
                             <div class="dropdown-content">
                                 <?php 
         $currentuserid = get_current_user_id();
         if ( $currentuserid == $couponuser ) {
             echo '<a href="javascript:void(0);" onclick="wcusage_portal_open_tab(event, \'tab-page-settings\', \'wcu6\', \'' . esc_js( $postid ) . '\', \'' . esc_js( $coupon_code ) . '\', \'' . esc_js( $force_refresh_stats ) . '\');">' . esc_html__( 'Settings', 'woo-coupon-usage' ) . '</a>';
         }
-        $logoutredirectpage = get_page_link( wcusage_get_coupon_shortcode_page_id() );
-        $wcusage_field_portal_enable = wcusage_get_setting_value( 'wcusage_field_portal_enable', '0' );
-        $portal_slug = wcusage_get_setting_value( 'wcusage_portal_slug', 'affiliate-portal' );
-        if ( $wcusage_field_portal_enable && $portal_slug ) {
-            $logoutredirectpage = home_url( $portal_slug );
+        $wcusage_field_show_logout_link = wcusage_get_setting_value( 'wcusage_field_show_logout_link', '1' );
+        if ( $wcusage_field_show_logout_link ) {
+            $logoutredirectpage = get_page_link( wcusage_get_coupon_shortcode_page_id() );
+            $wcusage_field_portal_enable = wcusage_get_setting_value( 'wcusage_field_portal_enable', '0' );
+            $portal_slug = wcusage_get_setting_value( 'wcusage_portal_slug', 'affiliate-portal' );
+            if ( $wcusage_field_portal_enable && $portal_slug ) {
+                $logoutredirectpage = home_url( $portal_slug );
+            }
+            echo '<a href="' . esc_url( wp_logout_url( $logoutredirectpage ) ) . '">' . esc_html__( 'Logout', 'woo-coupon-usage' ) . '</a>';
         }
-        echo '<a href="' . esc_url( wp_logout_url( $logoutredirectpage ) ) . '">' . esc_html__( 'Logout', 'woo-coupon-usage' ) . '</a>';
         ?>
                             </div>
                             <?php 

@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: Easily create an affiliate program for WooCommerce, based on coupons. Track affiliate commission, coupon usage statistics, referral URLs, and more.
-* Version: 6.3.1
+* Version: 6.3.4
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -13,7 +13,7 @@
 * Requires Plugins: woocommerce
 *
 * WC requires at least: 3.7
-* WC tested up to: 9.8.1
+* WC tested up to: 9.8.2
 *
 */
 if ( !defined( 'ABSPATH' ) ) {
@@ -74,7 +74,7 @@ if ( function_exists( 'wcu_fs' ) ) {
             if ( !$wcusage_setup_complete ) {
                 return admin_url( 'admin.php?page=wcusage_setup' );
             } else {
-                return admin_url( 'admin.php?page=wcusage_setup&step=8' );
+                return admin_url( 'admin.php?page=wcusage_setup&step=6' );
             }
         }
 
@@ -393,33 +393,34 @@ if ( function_exists( 'wcu_fs' ) ) {
         10,
         2
     );
-    // END MAIN LOGIC
-}
-/**
- * Hook the activation function
- */
-register_activation_hook( __FILE__, 'wcusage_plugin_activation_redirect' );
-function wcusage_plugin_activation_redirect() {
-    // Set a transient to trigger the redirect
-    set_transient( 'wcusage_activation_redirect', true, 30 );
-}
+    /**
+     * Hook the activation function
+     */
+    if ( !function_exists( 'wcusage_plugin_activation_redirect' ) ) {
+        register_activation_hook( __FILE__, 'wcusage_plugin_activation_redirect' );
+        function wcusage_plugin_activation_redirect() {
+            // Set a transient to trigger the redirect
+            set_transient( 'wcusage_activation_redirect', true, 30 );
+        }
 
-/**
- * Hook into admin_init to perform the redirect
- */
-add_action( 'admin_init', 'wcusage_do_activation_redirect' );
-function wcusage_do_activation_redirect() {
-    $wcusage_setup_complete = get_option( 'wcusage_setup_complete' );
-    // Check if the transient exists
-    if ( get_transient( 'wcusage_activation_redirect' ) && !$wcusage_setup_complete ) {
-        // Delete the transient so the redirect only happens once
-        delete_transient( 'wcusage_activation_redirect' );
-        // Perform the redirect
-        wp_safe_redirect( admin_url( 'admin.php?page=wcusage_setup' ) );
-        exit;
     }
-}
+    /**
+     * Hook into admin_init to perform the redirect
+     */
+    add_action( 'admin_init', 'wcusage_do_activation_redirect' );
+    function wcusage_do_activation_redirect() {
+        $wcusage_setup_complete = get_option( 'wcusage_setup_complete' );
+        // Check if the transient exists
+        if ( get_transient( 'wcusage_activation_redirect' ) && !$wcusage_setup_complete ) {
+            // Delete the transient so the redirect only happens once
+            delete_transient( 'wcusage_activation_redirect' );
+            // Perform the redirect
+            wp_safe_redirect( admin_url( 'admin.php?page=wcusage_setup' ) );
+            exit;
+        }
+    }
 
+}
 /**
  * Compatible with WooCommerce HP
  *

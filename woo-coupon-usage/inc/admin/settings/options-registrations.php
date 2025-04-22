@@ -166,7 +166,7 @@ function wcusage_field_cb_registration( $args )
 
         <p>
           <?php echo esc_html__( 'You can use the terms and conditions manager and generation tool to help you easily create your terms and conditions page.', 'woo-coupon-usage' ); ?>
-          <a href="https://couponaffiliates.com/docs/terms-generator" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>
+          <a href="https://couponaffiliates.com/docs/terms-generator/" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>
         </p>
 
         <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage-terms-generator' ) ); ?>" target="_blank"
@@ -205,11 +205,11 @@ function wcusage_field_cb_registration( $args )
       <strong><?php echo esc_html__( 'Terms and Conditions Page Generator', 'woo-coupon-usage' ); ?>:</strong>
       <p>
         <?php echo esc_html__( 'The PRO version of this plugin includes a terms and conditions page generator, which allows you to easily create your own terms and conditions page.', 'woo-coupon-usage' ); ?>
-        <a href="https://couponaffiliates.com/docs/terms-generator" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>
+        <a href="https://couponaffiliates.com/docs/terms-generator/" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>
       </p>
 
       <p>
-        <?php echo sprintf(wp_kses_post(__( 'This may be made available in the free version soon. For now, if you need help with creating your terms and conditions page in the free version, you can view <a href="%s" target="_blank">this article</a>.', 'woo-coupon-usage' )), 'https://couponaffiliates.com/how-to-create-affiliate-terms'); ?>
+        <?php echo sprintf(wp_kses_post(__( 'This may be made available in the free version soon. For now, if you need help with creating your terms and conditions page in the free version, you can view <a href="%s" target="_blank">this article</a>.', 'woo-coupon-usage' )), 'https://couponaffiliates.com/how-to-create-affiliate-terms/'); ?>
       </p>
 
       <?php } ?>
@@ -291,6 +291,11 @@ function wcusage_field_cb_registration( $args )
           <br/>
         </p>
       </div>
+
+      <br/>
+      
+      <!-- Automatically log the user in after registration. -->
+      <?php echo wcusage_setting_toggle_option('wcusage_field_registration_auto_login', 1, esc_html__( 'Automatically log the user in after registration.', 'woo-coupon-usage' ), '0px'); ?>
 
       <br/><hr/>
 
@@ -819,9 +824,6 @@ function wcusage_field_cb_registration( $args )
                   jQuery('.wcu-list-' + selectedList).show();
                   jQuery('.wcu-field-section-lists').show();
               });
-
-              // Trigger the change function to apply the correct display on load
-              jQuery('.wcusage_mailing_list').change();
           });
           </script>
 
@@ -1073,6 +1075,9 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
                           
                           // Hide the error message since the new page has the shortcode
                           $('.registration_shortcode_check').hide();
+
+                          // Remove .wcusage-checklist-registration
+                          $('.wcusage-checklist-registration').remove();
                       } else {
                           alert('Error: ' + response.data.message);
                       }
@@ -1262,14 +1267,17 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
                   function(couponId) {
                     if (!couponId || !couponName) {
                       jQuery('#edit_link').html('');
+                      jQuery('#submit_step2').prop('disabled', true);
                       return;
                     }
                     if (couponId == 0) {
                       jQuery('#edit_link').html('<p style="color: red;">Invalid coupon! This should be the exact name of an existing coupon code.</p>');
+                      jQuery('#submit_step2').prop('disabled', true);
                       return;
                     }
                     var editLink = "<?php echo esc_url(admin_url()); ?>post.php?post=" + couponId + "&action=edit";
-                    jQuery('#edit_link').html('<a href="' + editLink + '" target="_blank" style="font-weight: bold; text-decoration: none;">Edit Coupon <span class="fa-solid fa-arrow-up-right-from-square"></span></a>');
+                    jQuery('#edit_link').html('<span class="fa-solid fa-circle-check" style="color: green; margin-right: 5px;"></span> <a href="' + editLink + '" target="_blank" style="font-weight: bold; text-decoration: none;">Edit Coupon <span class="fa-solid fa-arrow-up-right-from-square"></span></a>');
+                    jQuery('#submit_step2').prop('disabled', false);
                   }
               );
           }); 

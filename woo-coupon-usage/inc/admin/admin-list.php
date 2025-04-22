@@ -120,8 +120,9 @@ function wcusage_woo_display_customer_order_coupon_in_column_for_orders( $column
     if( $column  == 'coupon_dash_link' ) {
 
       $dashboardpage = wcusage_get_setting_value('wcusage_dashboard_page', '');
+      $wcusage_field_portal_enable = wcusage_get_setting_value('wcusage_field_portal_enable', '0');
 
-      if( $dashboardpage ) {
+      if( $dashboardpage || $wcusage_field_portal_enable ) {
 
     		if($uniqueurl) {
     			echo '<strong><a href="' . esc_url($uniqueurl) . '" target="_blank" title="'.esc_html__( "View Dashboard", "woo-coupon-usage" ).'">'.esc_html__( "DASHBOARD", "woo-coupon-usage" ).' <span class="dashicons dashicons-external"></span></a></strong>';
@@ -132,8 +133,6 @@ function wcusage_woo_display_customer_order_coupon_in_column_for_orders( $column
             <span class="dashicons dashicons-admin-page" style="font-size: 14px; height: auto; width: auto;"></span>
           </button>
     			<?php
-    		} else {
-    			//echo var_dump($coupon_info);
     		}
 
       } else {
