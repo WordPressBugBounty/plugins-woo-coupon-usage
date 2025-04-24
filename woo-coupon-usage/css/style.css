@@ -1200,28 +1200,27 @@ form#product_search_form input {
 
 /* Loading */
 
+.wcu-loading-loader {
+    width: 80px;
+    height: 40px;
+    margin: 20px 0 0 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .wcu-loading-loader .loader,
 .wcu-loading-loader .loader:before,
 .wcu-loading-loader .loader:after {
     border-radius: 50%;
-    width: 2.5em;
-    height: 2.5em;
-    -webkit-animation-fill-mode: both;
-    animation-fill-mode: both;
-    -webkit-animation: load7 1.8s infinite ease-in-out;
-    animation: load7 1.8s infinite ease-in-out;
+    width: 12px;
+    height: 12px;
+    background: #333;
+    animation: load7 1.4s infinite ease-in-out;
 }
 
 .wcu-loading-loader .loader {
-    color: #000;
-    font-size: 10px;
-    margin: 0px auto 0 auto;
     position: relative;
-    text-indent: -9999em;
-    -webkit-transform: translateZ(0);
-    -ms-transform: translateZ(0);
-    transform: translateZ(0);
-    -webkit-animation-delay: -0.16s;
     animation-delay: -0.16s;
 }
 
@@ -1229,50 +1228,47 @@ form#product_search_form input {
 .wcu-loading-loader .loader:after {
     content: '';
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%); /* Centers vertically */
+    top: 0;
 }
 
 .wcu-loading-loader .loader:before {
-    left: -3.5em;
-    -webkit-animation-delay: -0.32s;
+    left: -20px;
     animation-delay: -0.32s;
 }
 
 .wcu-loading-loader .loader:after {
-    left: 3.5em;
-}
-
-@-webkit-keyframes load7 {
-
-	0%,
-	80%,
-	100% {
-		box-shadow: 0 2.5em 0 -1.3em;
-	}
-
-	40% {
-		box-shadow: 0 2.5em 0 0;
-	}
+    left: 20px;
 }
 
 @keyframes load7 {
-
-	0%,
-	80%,
-	100% {
-		box-shadow: 0 2.5em 0 -1.3em;
-	}
-
-	40% {
-		box-shadow: 0 2.5em 0 0;
-	}
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.4;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
-.wcu-loading-loader {
-	width: 100px;
-	margin-top: 15px;
-	margin-left: 10px;
+@-webkit-keyframes load7 {
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.4;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.wcu-loading-loader-text {
+    margin: 0;
+    font-weight: bold;
+	font-size: 15px;
+    margin-top: -5px;
+	text-align: center;
+	width: 80px;
 }
 
 /* Coupon List */

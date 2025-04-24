@@ -240,37 +240,43 @@ function wcusage_hook_checklist_function() {
         echo "</p>";
       }
 
-      // 2 - Create a registration page
-      $wcusage_registration_page = wcusage_get_setting_value('wcusage_registration_page', '');
-      if(!$wcusage_registration_page) {
-        echo "<p style='margin-top: 20px;' class='wcusage-checklist-registration'>";
-        echo "<span class='fa-solid fa-exclamation-circle' style='color: red;'></span> ";
-        echo "<strong>" . esc_html__( "Create the affiliate registration page:", "woo-coupon-usage" ) . "</strong>";
-        echo sprintf( " <a href='%s'>%s</a>", esc_url(admin_url('admin.php?page=wcusage_setup&step=2')), esc_html__( "Click here", "woo-coupon-usage" ) );
-        echo "</p>";
-        $show = true;
-      } else {
-        echo "<p style='margin-top: 20px;' class='wcusage-checklist-registration'>";
-        echo "<span class='fa-solid fa-check-circle' style='color: green;'></span> ";
-        echo "<strong>" . esc_html__( "Affiliate registration page created.", "woo-coupon-usage" ) . "</strong>";
-        echo "</p>";
-      }
+      $wcusage_field_registration_enable = wcusage_get_setting_value('wcusage_field_registration_enable', '1');
 
-      // 3 - Create template coupon
-      $coupon_template = wcusage_get_setting_value('wcusage_field_registration_coupon_template', '0');
-      $couponid = wcusage_get_coupon_id($coupon_template);
-      if(!$couponid) {
-        echo "<p style='margin-top: 20px;'>";
-        echo "<span class='fa-solid fa-exclamation-circle' style='color: red;'></span> ";
-        echo "<strong>" . esc_html__( "Create the template coupon:", "woo-coupon-usage" ) . "</strong>";
-        echo sprintf( " <a href='%s'>%s</a>", esc_url(admin_url('admin.php?page=wcusage_setup&step=2')), esc_html__( "Click here", "woo-coupon-usage" ) );
-        echo "</p>";
-        $show = true;
-      } else {
-        echo "<p style='margin-top: 20px;'>";
-        echo "<span class='fa-solid fa-check-circle' style='color: green;'></span> ";
-        echo "<strong>" . esc_html__( "Template coupon created.", "woo-coupon-usage" ) . "</strong>";
-        echo "</p>";
+      if($wcusage_field_registration_enable) {
+
+        // 2 - Create a registration page
+        $wcusage_registration_page = wcusage_get_setting_value('wcusage_registration_page', '');
+        if(!$wcusage_registration_page) {
+          echo "<p style='margin-top: 20px;' class='wcusage-checklist-registration'>";
+          echo "<span class='fa-solid fa-exclamation-circle' style='color: red;'></span> ";
+          echo "<strong>" . esc_html__( "Create the affiliate registration page:", "woo-coupon-usage" ) . "</strong>";
+          echo sprintf( " <a href='%s'>%s</a>", esc_url(admin_url('admin.php?page=wcusage_setup&step=2')), esc_html__( "Click here", "woo-coupon-usage" ) );
+          echo "</p>";
+          $show = true;
+        } else {
+          echo "<p style='margin-top: 20px;' class='wcusage-checklist-registration'>";
+          echo "<span class='fa-solid fa-check-circle' style='color: green;'></span> ";
+          echo "<strong>" . esc_html__( "Affiliate registration page created.", "woo-coupon-usage" ) . "</strong>";
+          echo "</p>";
+        }
+
+        // 3 - Create template coupon
+        $coupon_template = wcusage_get_setting_value('wcusage_field_registration_coupon_template', '0');
+        $couponid = wcusage_get_coupon_id($coupon_template);
+        if(!$couponid) {
+          echo "<p style='margin-top: 20px;'>";
+          echo "<span class='fa-solid fa-exclamation-circle' style='color: red;'></span> ";
+          echo "<strong>" . esc_html__( "Create the template coupon:", "woo-coupon-usage" ) . "</strong>";
+          echo sprintf( " <a href='%s'>%s</a>", esc_url(admin_url('admin.php?page=wcusage_setup&step=2')), esc_html__( "Click here", "woo-coupon-usage" ) );
+          echo "</p>";
+          $show = true;
+        } else {
+          echo "<p style='margin-top: 20px;'>";
+          echo "<span class='fa-solid fa-check-circle' style='color: green;'></span> ";
+          echo "<strong>" . esc_html__( "Template coupon created.", "woo-coupon-usage" ) . "</strong>";
+          echo "</p>";
+        }
+
       }
 
       // Show?

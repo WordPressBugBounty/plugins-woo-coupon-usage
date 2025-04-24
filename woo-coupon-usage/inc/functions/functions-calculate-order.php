@@ -680,9 +680,9 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         $affiliatedone2 = false;
         $meta_data = [];
         $getcoupon = wcusage_get_coupon_info( $coupon_code );
-        $couponuser = $getcoupon[1];
-        $user = get_userdata( $getcoupon[1] );
-        $couponid = $getcoupon[2];
+        $couponuser = ( isset( $getcoupon[1] ) ? sanitize_text_field( $getcoupon[1] ) : "" );
+        $user = get_userdata( $couponuser );
+        $couponid = ( isset( $getcoupon[2] ) ? sanitize_text_field( $getcoupon[2] ) : "" );
         $wcusage_show_commission_before_discount = wcusage_get_setting_value( 'wcusage_field_commission_before_discount', '0' );
         $wcusage_field_commission_before_discount_custom = wcusage_get_setting_value( 'wcusage_field_commission_before_discount_custom', '0' );
         $wcusage_field_commission_include_fees = wcusage_get_setting_value( 'wcusage_field_commission_include_fees', '0' );
@@ -704,13 +704,13 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         // ***** Get Affiliate Fixed Per Order Amount ***** //
         $fixed_order_commission = wcusage_get_setting_value( 'wcusage_field_affiliate_fixed_order', '0' );
         // Overwrite with custom coupon amount
-        $wcu_text_coupon_commission_fixed_order = get_post_meta( $getcoupon[2], 'wcu_text_coupon_commission_fixed_order', true );
+        $wcu_text_coupon_commission_fixed_order = get_post_meta( $couponid, 'wcu_text_coupon_commission_fixed_order', true );
         if ( $wcu_text_coupon_commission_fixed_order != "" && $wcu_text_coupon_commission_fixed_order >= 0 ) {
             $fixed_order_commission = $wcu_text_coupon_commission_fixed_order;
         }
         // Get Default Commission %
         $option_affiliate = wcusage_get_setting_value( 'wcusage_field_affiliate', '0' );
-        $wcu_text_coupon_commission = get_post_meta( $getcoupon[2], 'wcu_text_coupon_commission', true );
+        $wcu_text_coupon_commission = get_post_meta( $couponid, 'wcu_text_coupon_commission', true );
         if ( $wcu_text_coupon_commission != "" && $wcu_text_coupon_commission >= 0 ) {
             $option_affiliate = $wcu_text_coupon_commission;
         }
@@ -832,7 +832,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         } else {
                             $this_line_total_tax = 0;
                         }
-                        $wcu_text_coupon_commission_fixed_product = get_post_meta( $getcoupon[2], 'wcu_text_coupon_commission_fixed_product', true );
+                        $wcu_text_coupon_commission_fixed_product = get_post_meta( $couponid, 'wcu_text_coupon_commission_fixed_product', true );
                         // Get Coupon Fixed Per Product
                         $product_percent = "";
                         $fixed_product_commission = 0;
@@ -1187,7 +1187,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
             }
             if ( $orderid ) {
                 $wcusage_affiliate_user = wcusage_order_meta( $orderid, 'wcusage_affiliate_user', true );
-                if ( $getcoupon[1] ) {
+                if ( isset( $getcoupon[1] ) && $getcoupon[1] != "" ) {
                     if ( $wcusage_affiliate_user != $getcoupon[1] ) {
                         $meta_data['wcusage_affiliate_user'] = $getcoupon[1];
                     }

@@ -389,15 +389,22 @@ if ( !$current_user_id ) {
     do_action( 'wcusage_portal_hook_after_login_form' );
     ?>
                     </div>
+                    <?php 
+    $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
+    if ( $wcusage_field_registration_enable ) {
+        ?>
                     <div class="registration-form">
                         <?php 
-    // Display couponaffiliates-register shortcode
-    echo do_shortcode( '[couponaffiliates-register]' );
-    ?>
+        // Display couponaffiliates-register shortcode
+        echo do_shortcode( '[couponaffiliates-register]' );
+        ?>
                         <?php 
-    do_action( 'wcusage_portal_hook_after_registration_form' );
-    ?>
+        do_action( 'wcusage_portal_hook_after_registration_form' );
+        ?>
                     </div>
+                    <?php 
+    }
+    ?>
                 </div>
                 <?php 
     if ( $portal_footer_text ) {

@@ -482,20 +482,16 @@
 }
 
 .wcusage-admin-page-col3 {
-    width: calc(100% - 59px);
+    width: calc(100% - 42px);
     margin: 0;
     padding: 15px 42px 15px 42px;
     background: #FFF;
     float: left;
-    margin-left: -25px;
     margin-top: 0;
+    margin-left: -22px;
     margin-bottom: 15px;
     border-bottom: 2px solid #e3e3e3;
-}
-.wrap .wcusage-admin-page-col3 {
-    width: calc(100% - 58px);
-    margin-left: -26px;
-    margin-top: 0px;
+    overflow: hidden;
 }
 
 .wcusage-admin-dash-button {

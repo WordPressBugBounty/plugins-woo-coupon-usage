@@ -155,7 +155,6 @@ class WC_Coupon_Users_Table extends WP_List_Table {
 		
 		$per_page = 25;
 		$current_page = $this->get_pagenum();
-		$total_items = count( $this->get_coupon_users() );
 
         $search_query = isset($_POST['s']) ? trim($_POST['s']) : '';
         $search_query = sanitize_text_field($search_query);
@@ -459,4 +458,72 @@ function wcusage_coupon_users_page() {
     });
     </script>
 	<?php
+}
+
+/**
+ * Get array of user IDs that have been assigned to coupons
+ */
+if( !function_exists( 'wcusage_get_coupon_users' ) ) {
+    function wcusage_get_coupon_users($search_query = '', $role = '') {
+        $args = array(
+            'post_type'      => 'shop_coupon',
+            'posts_per_page' => -1,
+        );
+
+        $coupons = get_posts($args);
+        $user_ids = array();
+
+        foreach ($coupons as $coupon) {
+            $user_id = get_post_meta($coupon->ID, 'wcu_select_coupon_user', true);
+            if ($user_id) {
+                if (!is_numeric($user_id)) {
+                    // If it's a username (legacy data), convert to ID
+                    $user = get_user_by('login', $user_id);
+                    if ($user) {
+                        $user_id = $user->ID;
+                        update_post_meta($coupon->ID, 'wcu_select_coupon_user', $user_id);
+                    } else {
+                        $user_id = '';
+                    }
+                }
+                if ($user_id) {
+                    $user_ids[] = $user_id;
+                }
+            }
+        }
+
+        if (empty($user_ids) || !is_array($user_ids)) {
+            return array();
+        }
+
+        $filtered_user_ids = array_filter($user_ids, function($item) {
+            return !empty($item);
+        });
+
+        $users_array = array_unique($filtered_user_ids);
+        $users = array();
+
+        foreach ($users_array as $user_id) {
+            $user = get_userdata($user_id);
+            if ($user) {
+                $user_roles = implode(', ', $user->roles);
+                if ($search_query && stripos($user->user_login, $search_query) === false && stripos($user->display_name, $search_query) === false) {
+                    continue;
+                }
+                if ($role && !in_array($role, $user->roles)) {
+                    continue;
+                }
+                $users[] = array(
+                    'ID'       => $user->ID,
+                    'Username' => $user->user_login,
+                    'roles'    => implode(', ', $user->roles),
+                    'name'     => $user->display_name,
+                    'email'    => $user->user_email,
+                    'action'   => ''
+                );
+            }
+        }
+
+        return $users;
+    }
 }

@@ -418,6 +418,11 @@ if ( !function_exists( 'wcusage_get_users_coupons_ids' ) ) {
         $args = array(
             'post_type'      => 'shop_coupon',
             'posts_per_page' => -1,
+            'meta_query'     => array(array(
+                'key'     => 'wcu_select_coupon_user',
+                'value'   => $user_id,
+                'compare' => '=',
+            )),
         );
         $obituary_query = new WP_Query($args);
         $post_ids = array();
@@ -843,76 +848,3 @@ add_filter(
     10,
     1
 );
-/**
- * Get array of user IDs that have been assigned to coupons
- */
-if ( !function_exists( 'wcusage_get_coupon_users' ) ) {
-    function wcusage_get_coupon_users(  $search_query = '', $role = ''  ) {
-        $args = array(
-            'post_type'      => 'shop_coupon',
-            'posts_per_page' => -1,
-        );
-        $coupons = get_posts( $args );
-        $user_ids = array();
-        foreach ( $coupons as $coupon ) {
-            $user_id = get_post_meta( $coupon->ID, 'wcu_select_coupon_user', true );
-            if ( $user_id ) {
-                if ( !is_numeric( $user_id ) ) {
-                    // If it's a username (legacy data), convert to ID
-                    $user = get_user_by( 'login', $user_id );
-                    if ( $user ) {
-                        $user_id = $user->ID;
-                        update_post_meta( $coupon->ID, 'wcu_select_coupon_user', $user_id );
-                    } else {
-                        $user_id = '';
-                    }
-                }
-                if ( $user_id ) {
-                    $user_ids[] = $user_id;
-                }
-            }
-        }
-        if ( empty( $user_ids ) || !is_array( $user_ids ) ) {
-            return array();
-        }
-        $filtered_user_ids = array_filter( $user_ids, function ( $item ) {
-            return !empty( $item );
-        } );
-        $users = array();
-        if ( $search_query ) {
-            $user_query_args = array(
-                'search'         => '*' . esc_attr( $search_query ) . '*',
-                'search_columns' => array('user_login', 'user_nicename', 'user_email'),
-                'orderby'        => 'ID',
-                'order'          => 'DESC',
-            );
-        } else {
-            $user_query_args = array(
-                'orderby' => 'ID',
-                'order'   => 'DESC',
-            );
-        }
-        $user_query = new WP_User_Query($user_query_args);
-        $users_found = $user_query->get_results();
-        foreach ( $users_found as $user_info ) {
-            if ( !in_array( $user_info->ID, $filtered_user_ids ) ) {
-                continue;
-            }
-            if ( $role ) {
-                if ( !in_array( $role, $user_info->roles ) ) {
-                    continue;
-                }
-            }
-            $users[] = array(
-                'ID'       => $user_info->ID,
-                'Username' => $user_info->user_login,
-                'roles'    => implode( ', ', $user_info->roles ),
-                'name'     => $user_info->display_name,
-                'email'    => $user_info->user_email,
-                'action'   => '',
-            );
-        }
-        return $users;
-    }
-
-}

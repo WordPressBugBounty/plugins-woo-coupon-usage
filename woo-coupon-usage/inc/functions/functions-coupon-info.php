@@ -26,11 +26,16 @@ if( !function_exists( 'wcusage_get_coupon_info' ) ) {
 				$coupon_user_id = get_post_meta( $couponid, 'wcu_select_coupon_user', true );
 
 				return array($coupon_commission_percent, $coupon_user_id, $couponid);
+
+			} else {
+
+				return array('', '', '');
+			
 			}
 
 		} catch (Exception $e) {
 
-			return "";
+			return array();
 
 		}
 

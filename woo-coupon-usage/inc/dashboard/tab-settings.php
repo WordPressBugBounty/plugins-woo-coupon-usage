@@ -153,12 +153,21 @@ if (!function_exists('wcusage_tab_settings')) {
 
         // Account details
         $user = get_userdata($couponuserid);
-        $first_name = get_user_meta($couponuserid, 'first_name', true);
-        $last_name = get_user_meta($couponuserid, 'last_name', true);
-        $display_name = $user->display_name;
-        $email = $user->user_email;
-        $phone = get_user_meta($couponuserid, 'wcu_phone', true);
-        $website = get_user_meta($couponuserid, 'wcu_website', true);
+        if($couponuserid) {
+            $first_name = get_user_meta($couponuserid, 'first_name', true);
+            $last_name = get_user_meta($couponuserid, 'last_name', true);
+            $display_name = $user->display_name;
+            $email = $user->user_email;
+            $phone = get_user_meta($couponuserid, 'wcu_phone', true);
+            $website = get_user_meta($couponuserid, 'wcu_website', true);
+        } else {
+            $first_name = '';
+            $last_name = '';
+            $display_name = '';
+            $email = '';
+            $phone = '';
+            $website = '';
+        }
         ?>
 
         <p class="wcu-tab-title settings-title" style="font-size: 22px; margin-bottom: 25px;"><?php echo esc_html__("Settings", "woo-coupon-usage"); ?>:</p>

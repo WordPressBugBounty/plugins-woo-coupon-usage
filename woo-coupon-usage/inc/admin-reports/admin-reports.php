@@ -568,7 +568,7 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
     <div class="wcu-loading-loader">
       <div class="wcu-loader"></div>
     </div>
-    <p style="margin: 0;font-size:;font-weight: bold; margin-top: 20px; width: 200px;"><br/><?php 
+    <p style="margin: 0;font-size:;font-weight: bold; margin-top: 40px; width: 200px;"><br/><?php 
         echo esc_html__( "Generating Report", "woo-coupon-usage" );
         ?>...</p>
     <br/>

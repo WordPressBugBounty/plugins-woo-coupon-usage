@@ -1483,7 +1483,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
           <div class="wcu-loading-loader">
             <div class="loader"></div>
           </div>
-          <p style="margin: 0;font-size:;font-weight: bold; margin-top: 30px; width: 120px; text-align: center;"><br/><?php 
+          <p class="wcu-loading-loader-text"><br/><?php 
                 echo esc_html__( "Loading", "woo-coupon-usage" );
                 ?>...</p>
         </div>

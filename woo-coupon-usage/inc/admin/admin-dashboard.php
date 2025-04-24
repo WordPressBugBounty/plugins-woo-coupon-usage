@@ -149,7 +149,7 @@ jQuery(document).ready(function($) {
     <?php if( wcu_fs()->is_free_plan() ) { ?>
       <a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-circle-question"></span> <?php echo esc_html__('Support Ticket', 'woo-coupon-usage'); ?></div></a>
     <?php } else { ?>
-      <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage-contact" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-star"></span> <?php echo esc_html__('Support Ticket', 'woo-coupon-usage'); ?></div></a>
+      <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage-contact" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-circle-question"></span> <?php echo esc_html__('Support Ticket', 'woo-coupon-usage'); ?></div></a>
     <?php } ?>
     <a href="https://couponaffiliates.com/docs?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-book"></span> <?php echo esc_html__('Documentation', 'woo-coupon-usage'); ?></div></a>
     <a href="#" id="show-changelog"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-sync"></span> Updates <span class="changelog-new" style="display: none; background: green; padding: 2px; font-size: 10px; line-height: 10px; border-radius: 2px; color: #fff;">New</span></div></a>
@@ -643,7 +643,6 @@ function wcusage_dashboard_page_html() {
         }
         strong { color: green; font-size: 16px; }
         h2 { font-size: 22px; }
-        .wcusage-admin-page-col3 { margin-left: 0px; width: calc(100% - 84px); }
         </style>
 
         <div class="wcusage-admin-page-col-section">
