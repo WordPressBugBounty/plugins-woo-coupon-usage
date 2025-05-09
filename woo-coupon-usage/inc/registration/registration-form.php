@@ -371,9 +371,15 @@ if ( $wcusage_field_registration_enable ) {
                         $coupon_shortcode_page = wcusage_get_coupon_shortcode_page( '0' );
                         ?>
 
+          <?php 
+                        if ( !isset( $_POST['submitaffiliateapplication'] ) ) {
+                            ?>
           <p><?php 
-                        echo esc_html__( 'You are already registered as an affiliate.', 'woo-coupon-usage' );
-                        ?></p>
+                            echo esc_html__( 'You are already registered as an affiliate.', 'woo-coupon-usage' );
+                            ?></p>
+          <?php 
+                        }
+                        ?>
 
           <p style="font-weight: bold;">
             <a href="<?php 
@@ -614,7 +620,11 @@ function wcusage_post_submit_application(  $adminpost  ) {
                 global $wpdb;
                 $table_name = $wpdb->prefix . 'wcusage_register';
                 $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE couponcode = %s", $couponcode ) );
-                $thiscoupon = new WC_Coupon($couponcode);
+                try {
+                    $thiscoupon = new WC_Coupon($couponcode);
+                } catch ( Exception $e ) {
+                    $thiscoupon = false;
+                }
                 if ( $count <= 0 && !$thiscoupon->is_valid() ) {
                     if ( !isset( $_SESSION['wcu_registration_token'] ) || is_admin() ) {
                         // Add User If Admin Post

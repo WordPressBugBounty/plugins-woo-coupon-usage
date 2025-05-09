@@ -4,7 +4,7 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Tested up to: 6.8
-Stable tag: 6.3.5
+Stable tag: 6.3.6
 License: GPLv3 or later.
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
@@ -244,6 +244,14 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= Version 6.3.6 - 9th May 2025 =
+- Tweak: When generating a new coupon code, it will now remove the all-time stats copied from the template coupon if it had any saved.
+- Tweak: Made some small tweaks to the affiliate registration form and submission message.
+- Tweak: Improved the loading animation on the affiliate dashboard page.
+- Fix: Fixed an issue with the affiliate registration form not working properly on the affiliate portal when the "user the email address as username" option is enabled.
+- Fix: Fixed a PHP warning on the MLA dashboard page.
+- Dev: Added a "wcusage_url_include_slash" filter to hide the trailing slash from the referral URL.
+
 = Version 6.3.5 - 24th April 2025 =
 - Improvement: Performance improvement for the "Affiliate Users" admin page when there are a lot of users.
 - Tweak: Small change to the loading animation on the affiliate dashboard.
@@ -473,108 +481,5 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 - Dev: (PRO) Added a filter to allow the referral URL for dynamic creative QR codes to be modified.
 - Other: Updated translations.
 - Other: Tested with WooCommerce 9.4.3
-
-= Version 5.16.7 - 23rd November 2024 =
-- Fix: Fixed a critical erroring in the free version in some cases with WordPress 6.7.1.
-
-= Version 5.16.6 - 22nd November 2024 =
-- Tweak: (PRO) The "welcome bonus" performance bonus can now be displayed on the affiliate dashboard.
-- Fix: Fixed an issue with the "Mobile Menu Style" option when "Tabs" is selected.
-- Fix: Fixed an issue with displaying the affiliate dashboard for coupons with a "-" in the coupon name.
-- Fix: Fixed an issue with the "Lifetime Commission Expiry" option.
-- Fix: Fixed an "Passing null to parameter" PHP warning showing in the admin area.
-- Other: Tested with WordPress 6.7.1
-
-= Version 5.16.5 - 15th November 2024 =
-- Fix: (PRO) Fixed an issue with the "Limit to certain user roles & groups?" option for Payout methods not working in some cases.
-- Fix: (PRO) Fixed an issue with the Klaviyo integration.
-- Fix: (PRO) Fixed an issue with permissions for the "Affiliate Groups" page in the admin area.
-- Fix: (PRO) Fixed an issue with the currency values in the "Bonuses" affiliate dashboard tab not showing in the base currency if multi-currency is enabled.
-- Other: Tested with WordPress 6.7.0
-- Other: Tested with WooCommerce 9.4.1
-
-= Version 5.16.4 - 29th October 2024 =
-- Tweak: Some small tweaks to the admin settings page.
-- Tweak: Some small tweaks to the setup wizard.
-- Tweak: (PRO) The "Custom Creatives Text" now supports paragraphs when displayed on the affiliate dashboard.
-- Fix: (PRO) Fixed a PHP error with the performance bonuses reward check, when using user role restrictions.
-- Fix: (PRO) Fixed an issue with using SVG images for the PDF statements logo.
-- Fix: Potential fix for issue with the "New Customers Only" option showing the message on cart even after reloading the page.
-- Fix: Fixed an occasional issue where the affiliate dashboard would show "No affiliate dashboard found" when viewing the dashboard for a coupon via the unique dashboard link.
-- Fix: (PRO) Fixed an issue with the "Limit to certain user roles & groups?" option for Payout methods not working in some cases.
-- Fix: (PRO) Fixed an issue with the Klaviyo integration.
-- Fix: Fixed an issue with affiliate orders reports when filtered by date and not using GMT timezone in WordPress settings.
-- Other: Updated to Freemius SDK 2.9.0
-
-= Version 5.16.3 - 12th October 2024 =
-- New: Added a new "HoneyPot Spam Prevention" option to the affiliate registration form settings. This adds a basic honeypot spam prevention method by default for all sites, but the advanced CAPTCHA options are recommended.
-- Tweak: The "new customer only" option for coupons will now work with guest checkouts if the customer has entered their email address and that email address has already placed an order.
-- Tweak: Added a check to prevent the template coupon code from being applied to the cart.
-- Fix: (PRO) Fixed an issue with deleting affiliate groups in the admin area.
-- Fix: (PRO) Fixed an issue with removing affiliates from a group when editing the user in the admin area.
-- Fix: Fixed fully refunded items showing in the commission summary meta data for orders.
-- Fix: Fixed an issue in some cases with the calculations for the "discount" shown on the affiliate dashboard when an order is partially refunded.
-
-= Version 5.16.2 - 3rd October 2024 =
-- Fix (PRO): Fixed a potential issue with some user role/group permissions since the last update.
-
-= Version 5.16.1 - 2nd October 2024 =
-- Improvement: Added an option to edit the affiliate groups a user is assigned to by editing the user in the admin area.
-- Tweak: Edited the default title for the "Recent Orders" tab to "Recent Orders" instead of "Latest orders for coupon".
-- Tweak: On the "Affiliate Users" admin page, changed the "Role" column title to "Group / Role".
-- Fix: Fixed an issue with unassigning users from coupons in the admin area.
-- Fix: Fixed an issue with the affiliate dashboard in some cases not showing when the coupon code contained certain special characters or spaces.
-
-= Version 5.16.0 - 30th September 2024 =
-- New: (PRO) Added a new "Affiliate Groups" page to the admin area, to easily manage and add new affiliate groups.
-- Improvement: (PRO) When adding new affiliate users in the admin area, added a field to select an "Affiliate Group" to assign them to, if more than 1 affiliate group exists.
-- Improvement: (PRO) Changed the option to limit payout methods to certain user roles/groups to a multi-select option, so you can select more than one.
-- Improvement: (PRO) Changed the option to limit creatives to certain user roles/groups to a multi-select option, so you can select more than one.
-- Improvement: (PRO) Changed the option to limit bonuses to certain user roles/groups to a multi-select option, so you can select more than one.
-- Improvement: (PRO) Added an option to limit the custom affiliate dashboard tabs to certain user roles/groups.
-- Improvement: On the "Affiliate Users" admin page, added the option to filter by affiliate group and user role.
-- Improvement: (PRO) Added an option to duplicate creatives.
-- Improvement: Added options to choose if cookies should be stored for the referral link and MLA referral links.
-- Tweak: (PRO) Changed the per-coupon commission fields to number fields to ensure only numbers can be entered.
-- Tweak: (PRO) Increased the maximum file size for the payouts PDF upload field to 500KB.
-- Tweak: (PRO) Updated FPDF class to version 1.86.
-- Tweak: Removed the unnecessary space after the coupon in the affiliate dashboard title.
-- Tweak: Added a warning message when editing a coupon that is linked to an affiliate user.
-- Tweak: Updated the Twitter social share buttons to the new X logo.
-- Tweak: Added an option to make the order ID clickable on the recent orders tab of the affiliate dashboard for admin users.
-- Tweak: On the admin settings page, added some "FAQ" tooltips/toggles to some sections to provide more information.
-- Fix: Fixed an issue in some cases with the calculations for the "discount" shown on the affiliate dashboard when an order is partially refunded.
-- Fix: (PRO) Fixed an issue with the payouts PDF statements not being viewable in some PDF viewers.
-- Fix: (PRO) Fix to prevent duplicate empty payout requests from being made.
-- Fix: Fixed a potential issue with the registration form showing a captcha error even if the captcha is not enabled.
-- Other: Updated to Font Awesome 6.6.0
-- Other: Updated to Freemius SDK 2.8.1
-- Other: Tested with WordPress 6.6.2
-- Other: Tested with WooCommerce 9.3.3
-
-= Version 5.15.3 - 9th September 2024 =
-- Tweak: Added a "Delete" option to "Pending" affiliate registrations in the admin area.
-- Fix: Fixed an issue in some cases where the apply coupon would not work the first time on the cart/checkout page, and would require a page refresh, or clicking the button twice.
-- Fix: Fixed an issue with removing the coupon from checkout not working in some cases.
-- Fix: Fixed an issue with affiliate orders reports when filtered by date, using HPOS, and not using GMT timezone in WordPress settings.
-- Fix: Fixed an issue with the monthly summary and recent orders filters not working in some cases.
-
-= Version 5.15.2 - 4th September 2024 =
-- Fix: Fixed a possible issue in some cases where the affiliate registration or referral link click database tables were not being created.
-- Fix: Fixed some PHP warnings appearing in certain cases.
-- Other: Tested with WooCommerce 9.2.3
-
-= Version 5.15.1 - 29th August 2024 =
-- Tweak: Improved the performance of the admin WooCommerce orders page which was being affected in some cases by the plugin.
-- Tweak: Changed the names and titles for the "Coupons" and "Orders" pages under the "Coupon Affiliates" admin menu.
-- Tweak: Only show "If you are having issues" message on admin reports if a potential issue is detected.
-- Fix: A speculative fix to the affiliate registration form not working in some cases where security plugins were stopping user registrations and forcing strong passwords.
-- Fix: Fixed an issue on the free version, in some cases displaying the following error message on the affiliate dashboard: "wcusage_run_tab_page_stats_graph_update is not defined"
-- Fix: (PRO) Fixed a possible PHP error with the performance bonuses when the "User Restrictions" user role option was enabled.
-- Other: Updated translations.
-
-= Version 5.15.0 - 20th August 2024 =
-- New: (PRO) Added a leaderboards feature that lets you display a leaderboard of your top affiliates using a shortcode: [couponaffiliates-leaderboard]. You can set the number of affiliates to display, and the time period to show the stats for (all, month, or year).
-- Tweak: Removed the "Orders" section from the setup wizard.
 
 <a href="https://roadmap.couponaffiliates.com/updates/">View the full changelog</a>

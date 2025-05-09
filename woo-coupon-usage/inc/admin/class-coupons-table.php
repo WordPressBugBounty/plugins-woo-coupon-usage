@@ -206,11 +206,15 @@ class wcusage_Coupons_Table extends WP_List_Table {
 
     /**
      * Display table rows
-     */
+     */ 
     public function display_rows() {
         foreach ( $this->items as $item ) {
             $coupon_id = $item->ID;
-            $coupon = new WC_Coupon( $item->post_title );
+            try {
+                $coupon = new WC_Coupon( $item->post_title );
+            } catch ( Exception $e ) {
+                continue;
+            }
             $users = get_users( array( 'fields' => array( 'ID', 'user_login' ), 'orderby' => 'login' ) );
             $currency_symbol = get_woocommerce_currency_symbol();
             $coupon_user_id = wcusage_get_coupon_info_by_id( $item->ID )[1];

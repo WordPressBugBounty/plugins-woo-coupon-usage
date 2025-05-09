@@ -17,6 +17,11 @@ function wcusage_ajax_submit_registration() {
 
     // Retrieve and sanitize form data from $_POST
     $username = isset($_POST['wcu-input-username']) ? sanitize_user($_POST['wcu-input-username']) : '';
+    $wcusage_field_registration_emailusername = wcusage_get_setting_value('wcusage_field_registration_emailusername', '0');
+    if ($wcusage_field_registration_emailusername) {
+        $username = isset($_POST['wcu-input-email']) ? sanitize_email($_POST['wcu-input-email']) : '';
+    }
+    
     $email = isset($_POST['wcu-input-email']) ? sanitize_email($_POST['wcu-input-email']) : '';
     if (is_user_logged_in()) {
         $current_user = wp_get_current_user();
@@ -94,11 +99,9 @@ function wcusage_ajax_submit_registration() {
     // Create a new user if the user is not logged in
     if (!is_user_logged_in()) {
         $new_affiliate_user = wcusage_add_new_affiliate_user($username, $password, $email, $firstname, $lastname, $couponcode, $website);
-
         if (is_wp_error($new_affiliate_user)) {
             wp_send_json_error(array('message' => 'Failed to create user: ' . $new_affiliate_user->get_error_message()));
         }
-
         $userid = $new_affiliate_user['userid'];
     } else {
         // Use the current user's ID if already logged in
@@ -111,6 +114,7 @@ function wcusage_ajax_submit_registration() {
 
     if (!$getregisterid) {
         wp_send_json_error(array('message' => 'Failed to store registration data. Please try again.'));
+        error_log('CA: Failed to store registration data for user ID: ' . $userid);
     }    
 
     // Handle auto-accept logic based on a setting
@@ -136,8 +140,24 @@ function wcusage_ajax_submit_registration() {
     }
 
     // Return a success response
-    wp_send_json_success(array('message' => '<p class="registration-message">Your affiliate application has been submitted successfully.</p>
-    <p class="registration-message">Please check your email for further instructions.</p>'));
+    $wcusage_field_registration_auto_accept = wcusage_get_setting_value('wcusage_field_registration_auto_accept', '0');
+    $coupon_shortcode_page = wcusage_get_coupon_shortcode_page('0');
+    if (!$wcusage_field_registration_auto_accept) {
+        wp_send_json_success(array('message' => '<p class="registration-message">'. esc_html__('Your application has been submitted successfully.', 'woo-coupon-usage') .'</p>
+        <p class="registration-message">'
+        . esc_html__('Please check your email for further instructions.', 'woo-coupon-usage')
+        .'</p>'));
+    } else {
+        wp_send_json_success(array('message' => '<p class="registration-message">'
+        . esc_html__('Your application has been submitted successfully.', 'woo-coupon-usage') .'</p>
+        <p style="font-weight: bold;">
+            <a href="' . esc_url($coupon_shortcode_page) . '">
+              <button class="wcu-save-settings-button woocommerce-Button button" style="margin-top: 10px !important;">'
+              . esc_html__( 'View affiliate dashboard', 'woo-coupon-usage') . ' <span class="fa fa-arrow-right"></span>'
+              . '</button>
+            </a>
+        </p>'));
+    }
 
     // Auto-login process if the user is newly created
     if (!is_user_logged_in() && isset($new_affiliate_user)) {

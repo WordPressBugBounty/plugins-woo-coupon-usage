@@ -253,7 +253,7 @@ if (!function_exists('wcusage_tab_settings')) {
                         <?php if (wcusage_get_setting_value('wcusage_field_show_settings_tab_account', '1')) { ?>
                             <div id="tab-account-details" class="wcu-settings-tab-pane">
                                 <p class="wcu-settings-header"><strong><?php echo esc_html__("Account Details", "woo-coupon-usage"); ?></strong></p>
-                                <?php if ($currentuserid == $couponuserid) { ?>
+                                <?php if ($couponuserid && $currentuserid == $couponuserid) { ?>
                                     <?php $wcusage_field_show_settings_tab_gravatar = wcusage_get_setting_value('wcusage_field_show_settings_tab_gravatar', '1'); ?>
                                     <?php if($wcusage_field_show_settings_tab_gravatar) { ?>
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">

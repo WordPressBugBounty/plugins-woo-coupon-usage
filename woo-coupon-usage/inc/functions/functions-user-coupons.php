@@ -35,7 +35,7 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
         if ( is_numeric( $getcurrentcouponuser ) && $getcurrentcouponuser ) {
             $user = get_user_by( 'id', $getcurrentcouponuser );
             $currentselecteduserlogin = ( $user ? $user->user_login : '' );
-        } elseif ( $getcurrentcouponuser ) {
+        } elseif ( $getcurrentcouponuser && is_string( $getcurrentcouponuser ) ) {
             // If it's a username (legacy data), use it directly but update to ID
             $currentselecteduserlogin = $getcurrentcouponuser;
             $user = get_user_by( 'login', $getcurrentcouponuser );
@@ -713,12 +713,16 @@ if ( !function_exists( 'wcusage_coupon_meta_box_markup' ) ) {
             if ( is_numeric( $coupon_user ) && $coupon_user ) {
                 $user = get_user_by( 'id', $coupon_user );
                 $coupon_user = ( $user ? $user->user_login : '' );
-            } elseif ( $coupon_user ) {
+            } elseif ( $coupon_user && is_string( $coupon_user ) ) {
                 // If it's a username (legacy data), update to ID
                 $user = get_user_by( 'login', $coupon_user );
                 if ( $user ) {
                     update_post_meta( $post_id, 'wcu_select_coupon_user', $user->ID );
                 }
+                $coupon_user = ( $user ? $user->user_login : '' );
+            }
+            if ( !is_string( $coupon_user ) && !is_numeric( $coupon_user ) ) {
+                $coupon_user = '';
             }
             if ( isset( $_GET['refreshstats'] ) ) {
                 if ( $_GET['refreshstats'] ) {

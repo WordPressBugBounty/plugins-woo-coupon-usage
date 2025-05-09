@@ -16,17 +16,17 @@ if ( !function_exists( 'wcusage_order_meta' ) ) {
     function wcusage_order_meta(  $order_id, $item = '', $single = false  ) {
         if ( $order_id && $item ) {
             $order = wc_get_order( $order_id );
-            // if order exists
+            // If order exists
             if ( $order && is_a( $order, 'WC_Order' ) ) {
                 $meta_data = $order->get_meta( $item );
-                // if $meta_data is a string and a valid JSON
+                // If $meta_data is a string and a valid JSON
                 if ( is_string( $meta_data ) ) {
                     $json_decoded_data = json_decode( sanitize_text_field( $meta_data ), true );
                     if ( json_last_error() === JSON_ERROR_NONE ) {
                         return $json_decoded_data;
                     }
                 }
-                // return $meta_data if it's not a valid JSON string
+                // Return $meta_data if it's not a valid JSON string
                 return sanitize_text_field( $meta_data );
             } else {
                 return "";

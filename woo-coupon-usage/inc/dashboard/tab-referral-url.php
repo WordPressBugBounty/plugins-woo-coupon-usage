@@ -263,9 +263,16 @@ if ( !function_exists( 'wcusage_scripts_tab_referral_url_stats' ) ) {
           <?php 
         if ( get_option( 'permalink_structure' ) ) {
             ?>
-          if (url.length > 0 && !url.endsWith('/')) {
+          <?php 
+            $include_slash = apply_filters( 'wcusage_url_include_slash', true );
+            if ( $include_slash ) {
+                ?>
+            if (url.length > 0 && !url.endsWith('/')) {
               url += '/';
-          }
+            }
+          <?php 
+            }
+            ?>
           <?php 
         } else {
             ?>

@@ -489,7 +489,7 @@ function wcusage_field_cb_registration( $args )
           <br/>
 
           <!-- Automatically generate coupon code? -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_registration_auto_coupon', 0, esc_html__( 'Generate a unique coupon automatically.', 'woo-coupon-usage' ), '0px'); ?>
+          <?php echo wcusage_setting_toggle_option('wcusage_field_registration_auto_coupon', 0, esc_html__( 'Generate a dynamic coupon name automatically.', 'woo-coupon-usage' ), '0px'); ?>
           <i><?php echo esc_html__( 'With this enabled, instead of the user entering their "preferred coupon code", a code will be generated for them automatically.', 'woo-coupon-usage' ); ?></i><br/>
           <i><?php echo esc_html__( 'You will still be able to review and edit the generated code before approving.', 'woo-coupon-usage' ); ?></i>
 
@@ -1102,7 +1102,7 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
 
     <div class="setup-hide">
 
-      <div class="registration_shortcode_check" style="margin-bottom: 0px; font-size: 12px; margin-top: 10px; color: red;">
+      <div class="registration_shortcode_check" style="margin-bottom: 0px; font-size: 12px; margin-top: 10px; color: red; display: none;">
 
         <?php echo esc_html__( '(ERROR) This page does not contain the shortcode:', 'woo-coupon-usage' ); ?> <strong>[couponaffiliates-register]</strong><br/>
         <?php echo esc_html__( 'Please add the shortcode to a new page, and select it from the dropdown above.', 'woo-coupon-usage' ); ?><br/>

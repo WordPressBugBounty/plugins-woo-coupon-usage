@@ -436,10 +436,16 @@ function wcusage_set_registration_status(
             }
         }
         // Update defaults
-        update_post_meta( $new_post_id, 'wcu_select_coupon_user', $userid );
+        if ( is_numeric( $userid ) ) {
+            update_post_meta( $new_post_id, 'wcu_select_coupon_user', $userid );
+        } else {
+            error_log( "User ID is not numeric: " . $userid );
+        }
         update_post_meta( $new_post_id, 'wcu_text_unpaid_commission', '0' );
         update_post_meta( $new_post_id, 'wcu_text_pending_payment_commission', '0' );
         update_post_meta( $new_post_id, 'usage_count', '0' );
+        delete_post_meta( $new_post_id, 'wcu_alltime_stats' );
+        delete_post_meta( $new_post_id, 'wcu_last_refreshed' );
         if ( wcu_fs()->is_free_plan() ) {
             update_post_meta( $new_post_id, 'wcu_text_coupon_commission', '' );
             update_post_meta( $new_post_id, 'wcu_text_coupon_commission_fixed_order', '' );

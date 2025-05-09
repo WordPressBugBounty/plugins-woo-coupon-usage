@@ -356,6 +356,11 @@ global $wpdb;
     $batch_amount = wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_batch_amount', '20');
     $batch_amount = intval($batch_amount);
     $batch_amount2 = $batch_amount + 1;
+
+    $coupon_info = wcusage_get_coupon_info($coupon_code);
+    $post_id = $coupon_info[2];
+    delete_post_meta($post_id, 'wcu_alltime_stats' );
+    delete_post_meta($post_id, 'wcu_last_refreshed' );
     ?>
 
     <script>
@@ -491,12 +496,12 @@ global $wpdb;
     <div class="wcu-loading-loader">
       <div class="loader"></div>
     </div>
-    <p style="margin: 0;font-weight: bold; margin-top: 30px; width: 250px;">
+    <div style="margin: 0;font-weight: bold; margin-top: 0px; width: 250px;">
       <br/>
       <div id="updated_total">
         <?php echo esc_html__( "Calculating statistics", "woo-coupon-usage" ); ?>...
       </div>
-    </p>
+    </div>
     <?php if(current_user_can('administrator')) { ?>
     <p class="stuck-loading-message" style="display:none;font-size:12px;color:#B2B2B2;font-weight: bold; margin-top: 20px;">
       <i class="fas fa-exclamation-circle"></i> <?php echo esc_html__( "Notice (admin only): Page constantly loading? Try refreshing the page.", "woo-coupon-usage" ); ?> <a href='https://couponaffiliates.com/docs/affiliate-dashboard-is-not-showing' style='color:#B2B2B2;' target='_blank'><?php echo esc_html__( "Or click here", "woo-coupon-usage" ); ?></a>.

@@ -476,7 +476,7 @@ if( !function_exists( 'wcusage_get_coupon_users' ) ) {
         foreach ($coupons as $coupon) {
             $user_id = get_post_meta($coupon->ID, 'wcu_select_coupon_user', true);
             if ($user_id) {
-                if (!is_numeric($user_id)) {
+                if (!is_numeric($user_id) && is_string($user_id)) {
                     // If it's a username (legacy data), convert to ID
                     $user = get_user_by('login', $user_id);
                     if ($user) {
@@ -486,11 +486,15 @@ if( !function_exists( 'wcusage_get_coupon_users' ) ) {
                         $user_id = '';
                     }
                 }
+                if(!is_numeric($user_id)) {
+                    $user_id = '';
+                }
                 if ($user_id) {
                     $user_ids[] = $user_id;
                 }
             }
         }
+
 
         if (empty($user_ids) || !is_array($user_ids)) {
             return array();

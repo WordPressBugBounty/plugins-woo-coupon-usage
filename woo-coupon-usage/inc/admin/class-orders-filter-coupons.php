@@ -66,15 +66,19 @@ add_action( 'plugins_loaded', 'wcusage_class_orders_filters_coupons' );
 	 */
 	public function add_order_items_join( $join ) {
 		global $typenow, $wpdb;
-
+	
+		// Check if we're dealing with shop orders and the wcu_coupons query parameter is set
 		if ( 'shop_order' === $typenow && isset( $_GET['wcu_coupons'] ) && ! empty( $_GET['wcu_coupons'] ) ) {
-
-			$join .= "LEFT JOIN {$wpdb->prefix}woocommerce_order_items woi ON {$wpdb->posts}.ID = woi.order_id";
+			// Check if HPOS is enabled
+			if ( class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' ) && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				$join .= " LEFT JOIN {$wpdb->prefix}woocommerce_order_items woi ON {$wpdb->prefix}wc_orders.id = woi.order_id";
+			} else {
+				$join .= " LEFT JOIN {$wpdb->prefix}woocommerce_order_items woi ON {$wpdb->posts}.ID = woi.order_id";
+			}
 		}
-
+	
 		return $join;
 	}
-
 
 	/**
 	 * Modify SQL WHERE for filtering the orders by any coupons used

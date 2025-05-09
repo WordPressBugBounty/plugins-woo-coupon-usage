@@ -512,6 +512,7 @@ body.dark-mode .login-registration-container button {
 .registration-form input[type="text"],
 .registration-form input[type="email"],
 .registration-form input[type="password"] {
+    margin-top: 10px;
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid var(--border-color); /* Use variable */
@@ -564,6 +565,10 @@ body.dark-mode .login-registration-container button {
 .login-form .lost_password a:hover,
 .login-form .register a:hover {
     text-decoration: underline;
+}
+
+body .content .wcu_form_affiliate_register p {
+	margin-bottom: 0px;
 }
 
 .sidebar.logged-out .portal-tablink {

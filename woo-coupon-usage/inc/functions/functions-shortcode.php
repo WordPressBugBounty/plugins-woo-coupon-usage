@@ -258,12 +258,16 @@ function wcusage_couponusage(  $atts  ) {
                                 $force_refresh_stats = 1;
                             }
                             // Force refresh stats if coupon usage is more than 0, but stats are
-                            if ( isset( $the_coupon_usage ) && $the_coupon_usage > 0 ) {
-                                $wcu_alltime_stats = get_post_meta( $postid, 'wcu_alltime_stats', true );
-                                if ( !$wcu_alltime_stats || empty( $wcu_alltime_stats['total_count'] ) ) {
-                                    $wcusage_field_enable_coupon_all_stats_meta = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_meta', '1' );
-                                    if ( $wcusage_field_enable_coupon_all_stats_meta ) {
-                                        $force_refresh_stats = 1;
+                            $wcusage_field_enable_coupon_all_stats_meta = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_meta', '1' );
+                            $wcusage_field_hide_all_time = wcusage_get_setting_value( 'wcusage_field_hide_all_time', '0' );
+                            if ( $wcusage_field_enable_coupon_all_stats_meta && !$wcusage_field_hide_all_time ) {
+                                if ( isset( $the_coupon_usage ) && $the_coupon_usage > 0 ) {
+                                    $wcu_alltime_stats = get_post_meta( $postid, 'wcu_alltime_stats', true );
+                                    if ( !$wcu_alltime_stats || empty( $wcu_alltime_stats['total_count'] ) ) {
+                                        $wcusage_field_enable_coupon_all_stats_meta = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_meta', '1' );
+                                        if ( $wcusage_field_enable_coupon_all_stats_meta ) {
+                                            $force_refresh_stats = 1;
+                                        }
                                     }
                                 }
                             }
