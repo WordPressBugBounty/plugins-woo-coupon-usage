@@ -835,7 +835,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         $wcu_text_coupon_commission_fixed_product = get_post_meta( $couponid, 'wcu_text_coupon_commission_fixed_product', true );
                         // Get Coupon Fixed Per Product
                         $product_percent = "";
-                        $fixed_product_commission = 0;
+                        $fixed_product_commission = "";
                         // Get Product Categories
                         $product_cats = get_the_terms( $parent_id, 'product_cat' );
                         // Check product categories for "wcu_product_cat_commission_percent" meta

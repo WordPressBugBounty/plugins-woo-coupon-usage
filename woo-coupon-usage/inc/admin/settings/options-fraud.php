@@ -37,9 +37,17 @@ function wcusage_field_cb_fraud( $args )
     <?php echo wcusage_setting_toggle_option('wcusage_field_allow_multiple_coupons', 0, esc_html__( 'Allow multiple affiliate coupons to be used in the same order.', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'When disabled, it will only allow 1 affiliate coupon to be used per order. (This is any coupons that have an affiliate user assigned to them.)', 'woo-coupon-usage' ); ?></i>
     <br/>
-    <i><?php echo esc_html__( 'We highly recommend that you keep this option DISABLED, as it may cause some issues or paying too much commission.', 'woo-coupon-usage' ); ?></i>
-    
-    <br/><br/>
+    <i><?php echo esc_html__( 'We highly recommend that you keep this option DISABLED, as it may cause some issues, or paying too much commission.', 'woo-coupon-usage' ); ?></i>
+    <br/>
+    <i><?php echo esc_html__( '- Currently with this option enabled, if multiple affiliate coupons are applied with different custom commission rates, it will apply the commission rate for the first coupon to all affiliate coupons.', 'woo-coupon-usage' ); ?></i>
+    <br/>
+    <?php
+    $wcusage_field_mla_enable = wcusage_get_setting_value('wcusage_field_mla_enable', '0');
+    if($wcusage_field_mla_enable) { ?>
+    <i><?php echo esc_html__( '- MLA commission will also only apply to the first affiliate coupon.', 'woo-coupon-usage' ); ?></i>
+    <br/>
+    <?php } ?>
+    <br/>
 
     <!-- Allow affiliate coupons to be used by existing and new customers. -->
     <p>

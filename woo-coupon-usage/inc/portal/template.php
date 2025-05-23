@@ -99,13 +99,13 @@ if ( $postid ) {
         update_post_meta( $postid, 'wcu_last_refreshed', '' );
         $force_refresh_stats = 1;
     }
-    // Force refresh stats if coupon usage is more than 0, but stats are 0
+    // Force refresh stats if coupon usage is more than 10, but stats are not set
     $wcusage_field_enable_coupon_all_stats_meta = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_meta', '1' );
     $wcusage_field_hide_all_time = wcusage_get_setting_value( 'wcusage_field_hide_all_time', '0' );
     if ( $wcusage_field_enable_coupon_all_stats_meta && !$wcusage_field_hide_all_time ) {
-        if ( isset( $the_coupon_usage ) && $the_coupon_usage > 0 ) {
+        if ( isset( $the_coupon_usage ) && $the_coupon_usage > 10 ) {
             $wcu_alltime_stats = get_post_meta( $postid, 'wcu_alltime_stats', true );
-            if ( !$wcu_alltime_stats || empty( $wcu_alltime_stats['total_count'] || $wcu_alltime_stats['total_count'] == 0 ) ) {
+            if ( !$wcu_alltime_stats || empty( $wcu_alltime_stats['total_count'] ) || $wcu_alltime_stats['total_count'] == 0 ) {
                 $force_refresh_stats = 1;
             }
         }
@@ -164,7 +164,7 @@ wp_enqueue_script(
     'woo-coupon-usage',
     WCUSAGE_UNIQUE_PLUGIN_URL . 'js/portal.js',
     array('jquery'),
-    '6.0.0',
+    '6.3.7',
     false
 );
 wp_enqueue_style(
@@ -177,7 +177,7 @@ wp_enqueue_style(
     'wcusage-portal-css',
     WCUSAGE_UNIQUE_PLUGIN_URL . 'inc/portal/style.css',
     array(),
-    '1.0.0'
+    '6.3.7'
 );
 $wcusage_field_show_graphs = wcusage_get_setting_value( 'wcusage_field_show_graphs', 1 );
 if ( $wcusage_field_show_graphs ) {
@@ -505,6 +505,9 @@ if ( !$current_user_id ) {
                 <div class="login-registration-container">
                     <div class="registration-form">
                         <?php 
+    $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
+    $wcusage_field_registration_enable_logout = wcusage_get_setting_value( 'wcusage_field_registration_enable_logout', '1' );
+    $wcusage_field_registration_enable_login = wcusage_get_setting_value( 'wcusage_field_registration_enable_login', '1' );
     if ( $register_loggedin && $wcusage_field_registration_enable && $wcusage_field_registration_enable_logout && $wcusage_field_registration_enable_login ) {
         echo do_shortcode( '[couponaffiliates-register]' );
         do_action( 'wcusage_portal_hook_after_registration_form' );
@@ -908,6 +911,11 @@ function wcusage_portal_tabs(
         'condition'  => true,
     ]] );
     foreach ( $tabs as $tab ) {
+        $wcusage_field_tracking_enable = wcusage_get_setting_value( 'wcusage_field_tracking_enable', '1' );
+        $wcusage_field_payouts_enable = wcusage_get_setting_value( 'wcusage_field_payouts_enable', '1' );
+        if ( $tab['tab-id'] == 'tab-page-payouts' && (!$wcusage_field_tracking_enable || !$wcusage_field_payouts_enable) ) {
+            continue;
+        }
         if ( $tab['tab-id'] == 'tab-page-back' ) {
             ?>
             <a href="<?php 

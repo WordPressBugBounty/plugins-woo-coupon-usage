@@ -376,7 +376,7 @@ function wcusage_setup_page_html() {
               <?php if($template_id) { ?>
                 <p>
                   <?php echo sprintf( wp_kses_post( __('You can <a href="%s" target="_blank">edit your template coupon</a> if you want to change the default affiliate coupon settings.', 'woo-coupon-usage') ), admin_url("post.php?post=" . $template_id . "&action=edit")); ?>
-                  <?php echo sprintf( wp_kses_post( __('This is the template coupon used when generating new affiliate coupons when a new affiliate is created.', 'woo-coupon-usage') ), admin_url("admin.php?page=wcusage_coupon_stats&coupon_id=" . $template_id)); ?>
+                  <?php echo sprintf( wp_kses_post( __('This is the template coupon used for generating new affiliate coupons when a new affiliate is created.', 'woo-coupon-usage') ), admin_url("admin.php?page=wcusage_coupon_stats&coupon_id=" . $template_id)); ?>
                 </p>
               <?php } else { ?>
                 <p><?php echo sprintf( wp_kses_post( __('Don\'t forget to <a href="%s" target="_blank">create your template coupon</a> and set this in the plugin settings! <a href="%s" target="_blank">Learn More</a>.', 'woo-coupon-usage') ), admin_url("post-new.php?post_type=shop_coupon"), 'https://couponaffiliates.com/docs/template-coupon-code/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step'); ?></p>

@@ -3,9 +3,11 @@ Contributors: ElliotVS, freemius, couponaffiliates, RelyWP
 Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliates woocommerce
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
+Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.3.6
-License: GPLv3 or later.
+Stable tag: 6.3.7
+License: GPLv3
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
 
@@ -32,6 +34,16 @@ With this plugin you can give your affiliates access to a user-friendly affiliat
 **-- Affiliate Dashboard --**
 
 * On the affiliate dashboard, you and your affiliates can view detailed statistics for their referral coupon, including total usage, recent order details, referral URL generator, conversions statistics, and lots more.
+
+**-- Modern Affiliate Portal --**
+
+* The affiliate portal is a modern alternative to the normal affiliate dashboard. It offers a sleek, standalone, full-screen interface that seamlessly aligns with your brand.
+
+* The affiliate portal offers a better user-experience for your affiliates and can be easily customised with your own custom brand colors and logo.
+
+* It includes all the same features as the normal affiliate dashboard page, but within its own more modern interface.
+
+[youtube https://www.youtube.com/watch?v=hruamY_mEpo]
 
 **-- Accurate Commission Tracking --**
 
@@ -173,8 +185,6 @@ Coupon Affiliates PRO is a paid upgrade which provides a whole bunch of exciting
 
 Learn more about Pro and upgrade at <a href="https://couponaffiliates.com">www.couponaffiliates.com</a>
 
-[youtube https://www.youtube.com/watch?v=REzNmqjvg2E]
-
 <a href="https://couponaffiliates.com">UPGRADE TO PRO</a>
 
 ## ⚙️ Integrations
@@ -230,19 +240,31 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Screenshots ==
 
-1. Example of "Statistics" tab on affiliate dashboard.
-2. Example of "Recent Orders" (Referrals) tab on affiliate dashboard.
-3. Example "Referral URL" tab on affiliate coupon dashboard page.
-4. Example admin list of WooCommerce coupons and their unique links.
-5. Example of admin reports & analytics.
-6. Example of plugin settings page in WordPress admin.
-7. Pro Feature: Example of 'Monthly Summary' section.
-8. Pro Feature: Example of the extra PRO features in the 'Referral URL' tab (campaigns, social sharing, short URLs, QR codes).
-9. Pro Feature: Example of Affiliate commission payouts requests and logs.
-10. Pro Feature: Example of 'Creatives' tab on affiliate dashboard.
-11. Pro Feature: Example of Admin commission payouts management area.
+1. Example of "Statistics" tab on "affiliate dashboard".
+2. Example of "Statistics" tab on "affiliate portal".
+3. Example of "Recent Orders" (Referrals) tab on "affiliate portal".
+4. Example of "Referral URL" tab on "affiliate portal". (PRO: Campaigns, Short URL, QR Code)
+5. Example admin list of WooCommerce coupons and their unique links.
+6. Example of "Affiliate Registration" form.
+7. Example of "Affiliate Registration" admin management page.
+8. Example of admin reports & analytics.
+9. Example of plugin settings page in WordPress admin.
+10. Pro Feature: Example of "Monthly Summary" section on the affiliate portal.
+11. Pro Feature: Example of "Creatives" tab on affiliate dashboard.
+12. Pro Feature: Example of "MLA" tab on affiliate dashboard.
+13. Pro Feature: Example of "Bonuses" tab on affiliate dashboard.
+14. Pro Feature: Example of "Payouts" tab on affiliate dashboard.
+15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 6.3.7 - 20th May 2025 =
+- Tweak: Made a few small styling improvements to the mobile version of the affiliate dashboard.
+- Tweak: Made a few small styling tweaks to the affiliate portal and performance bonuses tab.
+- Fix: Fixed an issue with the affiliate dashboard constantly reloading for some coupons in certain cases.
+- Fix: Fixed an issue with the affiliate registration form not showing for logged in users on the affiliate portal page even when enabled in the settings.
+- Fix: Fixed an issue with the fixed commission per product rates setting in some cases.
+- Fix: (PRO) Fixed the "Payouts" tab still being visible on the affiliate portal even if payouts are disabled.
 
 = Version 6.3.6 - 9th May 2025 =
 - Tweak: When generating a new coupon code, it will now remove the all-time stats copied from the template coupon if it had any saved.
@@ -250,7 +272,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 - Tweak: Improved the loading animation on the affiliate dashboard page.
 - Fix: Fixed an issue with the affiliate registration form not working properly on the affiliate portal when the "user the email address as username" option is enabled.
 - Fix: Fixed a PHP warning on the MLA dashboard page.
-- Dev: Added a "wcusage_url_include_slash" filter to hide the trailing slash from the referral URL.
+- Dev: Added a "wcusage_url_include_slash" filter to remove the trailing slash from the referral URL.
 
 = Version 6.3.5 - 24th April 2025 =
 - Improvement: Performance improvement for the "Affiliate Users" admin page when there are a lot of users.

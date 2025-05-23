@@ -729,7 +729,7 @@ if ( !function_exists( 'wcusage_coupon_meta_box_markup' ) ) {
                     ?>
                     <div class="notice notice-success is-dismissible">
                         <p><?php 
-                    echo sprintf( esc_html__( 'Done! The affiliate statistics for this coupon will be refreshed the next time the <a href="%s">affiliate dashboard</a> is loaded.', 'woo-coupon-usage' ), esc_url( $uniqueurl ) );
+                    echo sprintf( wp_kses_post( __( 'Done! The affiliate statistics for this coupon will be refreshed the next time the <a href="%s">affiliate dashboard</a> is loaded.', 'woo-coupon-usage' ) ), esc_url( $uniqueurl ) );
                     ?></p>
                     </div>
                     <?php 

@@ -1309,10 +1309,8 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
     $probrackets = ( $ispro ? "" : " (PRO)" );
     ?>
 
-    <div id="pro-settings" class="settings-area setup-hide<?php
-      if ( !wcu_fs()->can_use_premium_code() ) {
-          ?> premium-only-settings" title="Available with Pro version." style="pointer-events:none; opacity: 0.4;"<?php
-      } else { ?>"<?php } ?>>
+    <div id="pro-settings" <?php if ( !wcu_fs()->can_use_premium_code() ) { ?>class="settings-area setup-hide premium-only-settings"
+    title="Available with Pro version." style="pointer-events:none; opacity: 0.4;"<?php } else { ?>class="settings-area setup-hide"<?php } ?>>
 
       <br/>
 

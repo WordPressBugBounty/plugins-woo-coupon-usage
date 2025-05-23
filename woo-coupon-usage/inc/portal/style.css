@@ -136,10 +136,11 @@ textarea {
     background: var(--sidebar-bg); /* Use variable */
     color: var(--sidebar-text); /* Use variable */
     border: none;
-    padding: 11px 20px;
+    padding: 12px 20px;
     text-align: left;
     cursor: pointer;
     font-size: 16px;
+    line-height: 25px;
     transition: background 0.3s, color 0.3s;
     border-left: 4px solid transparent; /* For active tab indicator */
     outline: none;
