@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.3.7
+Stable tag: 6.3.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -187,6 +187,8 @@ Learn more about Pro and upgrade at <a href="https://couponaffiliates.com">www.c
 
 <a href="https://couponaffiliates.com">UPGRADE TO PRO</a>
 
+[youtube https://www.youtube.com/watch?v=REzNmqjvg2E]
+
 ## ⚙️ Integrations
 
 Coupon Affiliates was built exclusively as a WooCommerce Affiliate Plugin, however it can also be integrated with other popular eCommerce plugins such as LifterLMS, LearnDash, TutorLMS, MemberPress, and Paid Memberships Pro. <a href="https://couponaffiliates.com/docs-category/integrations">Click here</a> to learn more. It also integrates well with other coupon plugins such as Smart Coupons, and Advanced Coupons.
@@ -242,23 +244,26 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 1. Example of "Statistics" tab on "affiliate dashboard".
 2. Example of "Statistics" tab on "affiliate portal".
-3. Example of "Recent Orders" (Referrals) tab on "affiliate portal".
-4. Example of "Referral URL" tab on "affiliate portal". (PRO: Campaigns, Short URL, QR Code)
+3. Example of "Recent Orders" (Referrals) tab on the affiliate portal.
+4. Example of "Referral URL" tab on the affiliate portal. (PRO: Campaigns, Short URL, QR Code)
 5. Example admin list of WooCommerce coupons and their unique links.
 6. Example of "Affiliate Registration" form.
 7. Example of "Affiliate Registration" admin management page.
 8. Example of admin reports & analytics.
 9. Example of plugin settings page in WordPress admin.
 10. Pro Feature: Example of "Monthly Summary" section on the affiliate portal.
-11. Pro Feature: Example of "Creatives" tab on affiliate dashboard.
-12. Pro Feature: Example of "MLA" tab on affiliate dashboard.
-13. Pro Feature: Example of "Bonuses" tab on affiliate dashboard.
-14. Pro Feature: Example of "Payouts" tab on affiliate dashboard.
+11. Pro Feature: Example of "Creatives" tab on the affiliate portal.
+12. Pro Feature: Example of the "MLA" affiliate portal.
+13. Pro Feature: Example of "Bonuses" tab on the affiliate portal.
+14. Pro Feature: Example of "Payouts" tab on the affiliate portal.
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
 
-= Version 6.3.7 - 20th May 2025 =
+= Version 6.3.8 - 28th May 2025 =
+- Security Fix: Fixed a potential vulnerability bug (reported by "lucky_buddy" via Patchstack).
+
+= Version 6.3.7 - 23rd May 2025 =
 - Tweak: Made a few small styling improvements to the mobile version of the affiliate dashboard.
 - Tweak: Made a few small styling tweaks to the affiliate portal and performance bonuses tab.
 - Fix: Fixed an issue with the affiliate dashboard constantly reloading for some coupons in certain cases.

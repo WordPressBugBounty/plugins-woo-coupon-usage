@@ -183,6 +183,12 @@ class WC_Coupon_Users_Table extends WP_List_Table {
 	}
 
     function process_bulk_action() {
+        
+        // Check nonce for security
+        if ( ! isset( $_POST['_wcusage_bulk_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wcusage_bulk_nonce'] ) ), 'wcusage_coupon_users_bulk_action' ) ) {
+            return;
+        }
+
         if ( 'bulk-delete-users' === $this->current_action() ) {
             $delete_ids = esc_sql( $_POST['bulk-delete'] );
             foreach ( $delete_ids as $id ) {
@@ -405,6 +411,7 @@ function wcusage_coupon_users_page() {
         </span>
         </h2>
         <form method="post">
+            <?php wp_nonce_field( 'wcusage_coupon_users_bulk_action', '_wcusage_bulk_nonce' ); ?>
             <input type="hidden" name="page" value="<?php echo esc_html($_REQUEST['page']); ?>" />
             <?php $coupon_users_table->search_box('Search Users', 'user_search'); ?>
             <?php $coupon_users_table->display(); ?>
