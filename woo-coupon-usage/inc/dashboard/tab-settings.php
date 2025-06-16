@@ -17,7 +17,13 @@ function wcusage_ajax_update_settings() {
     $couponuserid = get_post_meta($postid, 'wcu_select_coupon_user', true);
 
     if (!$postid || ($couponuserid != $currentuserid && !wcusage_check_admin_access())) {
-        wp_send_json_error('Permission denied');
+        if(!$postid) {
+            wp_send_json_error('Permission denied: Invalid post ID');
+        } elseif ($couponuserid != $currentuserid) {
+            wp_send_json_error('Permission denied: You are not assigned to this coupon.');
+        } else {
+            wp_send_json_error('Permission denied.');
+        }
         wp_die();
     }
 

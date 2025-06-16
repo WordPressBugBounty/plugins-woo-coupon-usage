@@ -189,6 +189,11 @@ class WC_Coupon_Users_Table extends WP_List_Table {
             return;
         }
 
+        // Check if the user has permission to perform the action
+        if ( ! wcusage_check_admin_access() ) {
+            return;
+        }
+
         if ( 'bulk-delete-users' === $this->current_action() ) {
             $delete_ids = esc_sql( $_POST['bulk-delete'] );
             foreach ( $delete_ids as $id ) {
@@ -197,6 +202,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
                 }
             }
         }
+
         if ( 'bulk-delete-all' === $this->current_action() ) {
             $delete_ids = esc_sql( $_POST['bulk-delete'] );
             foreach ( $delete_ids as $id ) {
@@ -209,6 +215,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
                 }
             }
         }
+
         if ( 'bulk-unassign' === $this->current_action() ) {
             $delete_ids = esc_sql( $_POST['bulk-delete'] );
             foreach ( $delete_ids as $id ) {
@@ -221,6 +228,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
                 }
             }
         }
+
         if ( 'bulk-delete-coupons' === $this->current_action() ) {
             $delete_ids = esc_sql( $_POST['bulk-delete'] );
             foreach ( $delete_ids as $id ) {
@@ -232,6 +240,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
                 }
             }
         }
+
     }
 
     function get_coupon_users($search_query = '', $role = '') {

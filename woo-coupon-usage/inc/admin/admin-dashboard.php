@@ -546,7 +546,12 @@ function wcusage_dashboard_page_section_registrations() {
             foreach ($get_visits as $result) {
                 $user = get_userdata($result->userid);
                 $date = date_i18n('F jS (H:i)', strtotime($result->date));
-                $name = trim($user->first_name . ' ' . $user->last_name) ?: $user->user_login;
+                // If user is not found, skip this row
+                if (isset($user->ID)) {
+                    $name = trim($user->first_name . ' ' . $user->last_name) ?: $user->user_login;
+                } else {
+                    $name = '-';
+                }
             ?>
             <tr class="wcusage-admin-table-col-row">
                 <td><a href="<?php echo esc_url(get_edit_user_link($result->userid)); ?>" title="<?php echo esc_html($name); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>

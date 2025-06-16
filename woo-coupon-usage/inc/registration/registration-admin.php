@@ -610,21 +610,21 @@ function wcusage_admin_new_registration_page() {
         echo esc_html__( 'Username', 'woo-coupon-usage' );
         ?></label></th>
           <td><input name="wcu-input-username" type="text" id="wcu-input-username" class="regular-text" value="" required>
-          <br/><i style="font-size: 10px;">Enter either an existing user, or a new user to create a new account.</i></td>
+          <br class="wcu-input-username-text"/><i style="font-size: 10px;" class="wcu-input-username-text">Enter either an existing user, or a new user to create a new account.</i></td>
         </tr>
-        <tr>
+        <tr class="wcu-add-affiliate-email">
           <th scope="row"><label for="wcu-input-email"><?php 
         echo esc_html__( 'Email Address', 'woo-coupon-usage' );
         ?></label></th>
           <td><input name="wcu-input-email" type="email" id="wcu-input-email" class="regular-text ltr" value="">
-          <br/><i style="font-size: 10px;">Only required if username doesn't already exist, to create a new account.</i></td>
+          <br/><i style="font-size: 10px;">The email address for creating the new user account.</i></td>
         </tr>
-        <tr>
+        <tr class="wcu-add-affiliate-first-name">
           <th scope="row"><label for="wcu-input-first-name"><?php 
         echo esc_html__( 'First Name', 'woo-coupon-usage' );
         ?></label></th>
           <td><input name="wcu-input-first-name" type="text" id="wcu-input-first-name" class="regular-text" value="">
-          <br/><i style="font-size: 10px;">Only required if username doesn't already exist.</i></td>
+          <br/><i style="font-size: 10px;">The first name of the new user account.</i></td>
         </tr>
         <?php 
         if ( !$wcusage_field_registration_auto_coupon ) {
@@ -713,5 +713,169 @@ function wcusage_admin_new_registration_page() {
 
   </div>
 
+  <script type="text/javascript">
+  // Check username existence and show/hide email and first name fields
+  jQuery(document).ready(function($) {
+      var usernameField = $('#wcu-input-username');
+      var emailRow = $('.wcu-add-affiliate-email');
+      var firstNameRow = $('.wcu-add-affiliate-first-name');
+
+      function checkUsername() {
+          var username = usernameField.val().trim();
+
+          if (username.length === 0) {
+              emailRow.show();
+              firstNameRow.show();
+              return;
+          }
+
+          $.ajax({
+              url: ajaxurl,
+              method: 'POST',
+              data: {
+                  action: 'wcusage_check_username_exists',
+                  username: username
+              },
+              success: function(response) {
+                  if (response.success && response.data.exists) {
+                      emailRow.hide();
+                      firstNameRow.hide();
+                      // Show a message saying the username exists
+                      $('.username-exists-message').remove(); // Remove any existing message
+                      usernameField.after('<p class="username-exists-message" style="color: green; font-size: 12px; margin: 0;"><span class="fa fa-check-circle" style="color: green;"></span> ' + '<?php 
+    echo esc_js( __( 'This is an existing user.', 'woo-coupon-usage' ) );
+    ?>' + '</p>');
+                      // Hide .wcu-input-username-text
+                      $('.wcu-input-username-text').hide();
+                      // Make email and first name not required
+                      emailRow.find('input').removeAttr('required');
+                      firstNameRow.find('input').removeAttr('required');
+                      // Set to empty fields
+                      $('#wcu-input-email').val('');
+                      $('#wcu-input-first-name').val('');
+                    } else {
+                      emailRow.show();
+                      firstNameRow.show();
+                      // Show a message saying the username does not exist
+                      $('.username-exists-message').remove(); // Remove any existing message
+                      usernameField.after('<p class="username-exists-message" style="color: orange; font-size: 12px; margin: 0;"><span class="fa fa-exclamation-circle" style="color: orange;"></span> ' + '<?php 
+    echo esc_js( __( 'This username does not exist. A new user will be created.', 'woo-coupon-usage' ) );
+    ?>' + '</p>');
+                      // Show .wcu-input-username-text
+                      $('.wcu-input-username-text').hide();
+                      // Make email and first name required
+                      emailRow.find('input').attr('required', true);
+                      firstNameRow.find('input').attr('required', true);
+                    }
+                    // If field is empty, show email and first name rows
+                  if( username.length === 0) {
+                      // Handle error
+                      emailRow.show();
+                      firstNameRow.show();
+                      $('.username-exists-message').remove(); // Remove any existing message
+                      usernameField.after('<p class="username-exists-message" style="color: red; font-size: 12px; margin: 0;"><span class="fa fa-times-circle" style="color: red;"></span> ' + '<?php 
+    echo esc_js( __( 'Error checking username.', 'woo-coupon-usage' ) );
+    ?>' + '</p>');
+                      // Show .wcu-input-username-text
+                      $('.wcu-input-username-text').show();
+                  }
+              }
+          });
+      }
+
+      usernameField.on('change', function() {
+          emailRow.show();
+          firstNameRow.show();
+          checkUsername();
+      });
+
+      // Run on page load (in case browser auto-fills)
+      checkUsername();
+  });
+
+  // Check coupon code existence
+  jQuery(document).ready(function($) {
+      var couponField = $('#wcu-input-coupon');
+
+      function checkCoupon() {
+          var couponCode = couponField.val().trim();
+
+          if (couponCode.length === 0) {
+              return;
+          }
+
+          $.ajax({
+              url: ajaxurl,
+              method: 'POST',
+              data: {
+                  action: 'wcusage_check_coupon_exists',
+                  coupon_code: couponCode
+              },
+              success: function(response) {
+                  if (response.success && response.data.exists) {
+                      // Show a message saying the coupon code exists
+                      $('.coupon-exists-message').remove(); // Remove any existing message
+                      couponField.after('<p class="coupon-exists-message" style="color: red; font-size: 12px; margin: 0;"><span class="fa fa-times-circle" style="color: red;"></span> ' + '<?php 
+    echo esc_js( __( 'This coupon code already exists.', 'woo-coupon-usage' ) );
+    ?>' + '</p>');
+                      // Disable the submit button
+                      $('#wcu-register-button').prop('disabled', true);
+                    } else {
+                      // Show a message saying the coupon code does not exist
+                      $('.coupon-exists-message').remove(); // Remove any existing message
+                      // Enable the submit button
+                      $('#wcu-register-button').prop('disabled', false);
+                    }
+              }
+          });
+      }
+
+      couponField.on('change', function() {
+          checkCoupon();
+      });
+
+      // Run on page load (in case browser auto-fills)
+      checkCoupon();
+  });
+  </script>
+
   <?php 
+}
+
+// Check if username exists via AJAX
+add_action( 'wp_ajax_wcusage_check_username_exists', 'wcusage_check_username_exists' );
+function wcusage_check_username_exists() {
+    if ( !current_user_can( 'manage_options' ) ) {
+        wp_send_json_error();
+    }
+    $username = ( isset( $_POST['username'] ) ? sanitize_user( wp_unslash( $_POST['username'] ) ) : '' );
+    if ( username_exists( $username ) ) {
+        wp_send_json_success( [
+            'exists' => true,
+        ] );
+    } else {
+        wp_send_json_success( [
+            'exists' => false,
+        ] );
+    }
+    wp_die();
+}
+
+// Check if coupon code exists via AJAX
+add_action( 'wp_ajax_wcusage_check_coupon_exists', 'wcusage_check_coupon_exists' );
+function wcusage_check_coupon_exists() {
+    if ( !current_user_can( 'manage_options' ) ) {
+        wp_send_json_error();
+    }
+    $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( wp_unslash( $_POST['coupon_code'] ) ) : '' );
+    if ( function_exists( 'wc_get_coupon_id_by_code' ) && wc_get_coupon_id_by_code( $coupon_code ) ) {
+        wp_send_json_success( [
+            'exists' => true,
+        ] );
+    } else {
+        wp_send_json_success( [
+            'exists' => false,
+        ] );
+    }
+    wp_die();
 }

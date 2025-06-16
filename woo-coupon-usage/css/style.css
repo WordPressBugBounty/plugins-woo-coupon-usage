@@ -12,6 +12,7 @@
 	width: 100%;
 	text-align: center;
 	border: 1px solid #E8E8E8;
+	margin: 0 auto;
 }
 
 @media screen and (min-width: 900px) {
@@ -98,7 +99,7 @@ form#product_search_form input {
 	display: table-cell;
 	vertical-align: middle;
 	padding: 9px 10px !important;
-	border: 1px solid #e6e6e6;
+	border: 1px solid #e7e7e7;
 	width: auto;
 	max-width: 200px;
 	white-space: nowrap;
@@ -120,6 +121,7 @@ form#product_search_form input {
 	background-color: #333 !important;
 	color: #fff !important;
 	text-align: center;
+	border: 1px solid #e7e7e7;
 }
 
 .wcuTableHead-summary {
@@ -140,6 +142,7 @@ form#product_search_form input {
 	background: #333;
 	color: #fff;
 	text-align: center;
+	border: 1px solid #e7e7e7;
 }
 
 .wcuTableBody {
@@ -734,7 +737,7 @@ form.wcu_payout_button {
 .submitpayoutyes {
 	height: 40px !important;
 	font-size: 15px !important;
-	padding: 0 10px !important;
+	padding: 0 20px !important;
 	display: inline-block !important;
 	border: 1px solid #333;
 	border-radius: 5px;

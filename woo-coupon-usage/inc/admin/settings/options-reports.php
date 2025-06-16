@@ -54,7 +54,7 @@ function wcusage_field_cb_reports( $args )
 
             <span class="wcu-field-section-reports-freq">
 
-              <i><?php echo esc_html__( 'Requires cron jobs to be enabled. We recommend using "Real Cron Job" instead of "WP-Cron". This may offer better performance, and will give more accurate delivery (at the specific day & time). <a href="https://couponaffiliates.com/docs/real-cron-job" target="_blank">Click here to learn more</a>.', 'woo-coupon-usage' ); ?></i><br/>
+              <?php echo sprintf( '<i>%s</i><br/>', wp_kses_post( sprintf( esc_html__( 'Requires cron jobs to be enabled. We recommend using "Real Cron Job" instead of "WP-Cron". This may offer better performance, and will give more accurate delivery (at the specific day & time). %s.', 'woo-coupon-usage' ), '<a href="https://couponaffiliates.com/docs/real-cron-job" target="_blank">' . esc_html__( 'Click here to learn more', 'woo-coupon-usage' ) . '</a>' ) ) ); ?>
 
               <br/>
 

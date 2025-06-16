@@ -72,9 +72,14 @@ if(!$wcusage_field_account_tab_create) {
 
 	/**
 	 * Flush rewrite rules on plugin activation.
+	 * Only once, to avoid performance issues.
 	 */
 	function wcusage_flush_rewrite_rules() {
-		flush_rewrite_rules();
+		// Check if the endpoint is already registered to avoid unnecessary flush.
+		if ( ! get_option( 'wcusage_affiliate_endpoint_registered' ) ) {
+			flush_rewrite_rules();
+			update_option( 'wcusage_affiliate_endpoint_registered', true );
+		}
 	}
 	add_action( 'wp_loaded', 'wcusage_flush_rewrite_rules' );
 

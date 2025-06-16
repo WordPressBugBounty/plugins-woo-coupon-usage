@@ -226,12 +226,14 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
         } else {
             if ( $page == 0 ) {
                 ?>
-					<p><?php 
+				<p><?php 
                 echo esc_html__( 'There have been no clicks for this campaign yet.', 'woo-coupon-usage' );
                 ?></p>
 				<script>
 				jQuery(document).ready(function(){
-				jQuery( ".wcu-clicks-pagination" ).hide();
+					jQuery( ".wcu-clicks-pagination" ).css({
+						"display": "none !important"
+					});
 				});
 				</script>
 				<?php 

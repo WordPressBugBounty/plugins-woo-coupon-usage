@@ -151,6 +151,10 @@ textarea {
     overflow-wrap: break-word;
 }
 
+.portal-tablink:hover, .portal-tabcontent.active {
+    border: none;
+}
+
 .portal-tablink i {
     width: 10px;
     margin-right: 10px;
@@ -448,6 +452,25 @@ body.dark-mode .login-registration-container button {
     background: var(--input-bg); /* Use variable for input background */
     color: var(--text-color); /* Use variable */
 }
+
+.wcusage_settings_form input[type="submit"], .wcusage_settings_form input[type="button"], .wcusage_settings_form input[type="date"], .wcusage_settings_form input[type="month"], .wcu-monthly-orders-button, .wcu-button-export, .submitpayoutno, .submitpayoutyes 
+{
+    border: 1px solid var(--border-color) !important; /* Use variable */
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="url"],
+input[type="number"],
+input[type="tel"],
+input[type="search"],
+input[type="date"] {
+    border-radius: 4px;
+    padding: 10px;
+    border: 1px solid var(--border-color); /* Use variable */
+}
+
 
 .login-registration-container {
     display: flex;

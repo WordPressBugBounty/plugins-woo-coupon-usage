@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.3.8
+Stable tag: 6.3.9
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -260,8 +260,14 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= Version 6.3.9 - 16th June 2025 =
+- Improvement: Improved the admin "Add New Affiliate" page form with conditional checks for the username and coupon code fields, improving the user experience.
+- Fix: Fixed a few potential PHP warnings.
+- Fix: Fixed an issue with flush_rewrite_rules() being called when it does not need to be in some cases.
+- Fix: (PRO) Fixed an issue with the copy button on the "Rates" table not working in some cases.
+
 = Version 6.3.8 - 28th May 2025 =
-- Security Fix: Fixed a potential vulnerability bug (reported by "lucky_buddy" via Patchstack).
+- Security Fix: Fixed a potential CSRF vulnerability bug (reported by "lucky_buddy" via Patchstack).
 
 = Version 6.3.7 - 23rd May 2025 =
 - Tweak: Made a few small styling improvements to the mobile version of the affiliate dashboard.

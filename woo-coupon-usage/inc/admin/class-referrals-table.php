@@ -94,7 +94,7 @@ class wcusage_Referrals_Table extends WP_List_Table {
         $sortable = array();
         $this->_column_headers = array($columns, $hidden, $sortable, $this->get_default_primary_column_name());
 
-        $per_page = 20;
+        $per_page = apply_filters('wcusage_admin_referrals_per_page', 20);
         $current_page = $this->get_pagenum();
     
         // Fetch orders and count total
