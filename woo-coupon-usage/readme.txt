@@ -5,19 +5,19 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.3.9
+Stable tag: 6.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Easily build a coupon based affiliate program for WooCommerce, track commission, and display coupon statistics on a user-friendly affiliate dashboard.
+The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
 
 == Description ==
 
-Coupon Affiliates allows you to easily create an advanced coupon-based affiliate program for WooCommerce, to grow traffic and increase sales.
+**Why is Coupon Affiliates the best affiliate plugin for WooCommerce?**
+
+Coupon Affiliates is a powerful coupon-based affiliate plugin for WooCommerce, that is designed to help you grow traffic and increase sales.
 
 With this plugin you can give your affiliates access to a user-friendly affiliate dashboard for their coupons, to view coupon usage statistics, recent orders, commission earned, referral URLs and more.
-
-**Why is Coupon Affiliates the best WooCommerce affiliate plugin?**
 
 * **Unique** - The only plugin that is built specifically for creating a "coupon based" affiliate program for WooCommerce.
 * **Quick & Easy to Use** - Get your affiliate program setup quickly and easily! The plugin is easy to use for you and your affiliates.
@@ -25,7 +25,7 @@ With this plugin you can give your affiliates access to a user-friendly affiliat
 * **Transparency** - Build trust with your affiliates, by giving them transparent access to the important statistics they want to see, in real-time, directly on their WooCommerce affiliate dashboard.
 * **Lots of Customisations** - The plugin comes with plenty of useful settings to make the affiliate program work exactly how you want.
 * **Friendly Support** - UK-based support is available to both our free and paid users, regarding setup, customisations and more.
-* **Built for WooCommerce** - This affiliate plugin is developed exclusively for WooCommerce, the best eCommerce platform.
+* **Built for WooCommerce** - The plugin is developed exclusively for WooCommerce, the best eCommerce platform.
 * **Easy Migration** - Migration from other affiliates plugins is super simple, since the plugin will display the full order history for each affiliate coupon (even orders created before installing the plugin).
 * **Frequent Updates** - We are always working on adding new awesome features to Coupon Affiliates. Got a suggestion? Let us know!
 
@@ -89,7 +89,7 @@ With this plugin you can give your affiliates access to a user-friendly affiliat
 
 **-- WooCommerce Subscriptions --**
 
-* Coupon Affiliates includes free integration with the official "WooCommerce Subscriptions" plugin. This means you can offer affiliates referring commission for subscription renewals, or optionally toggle this off to only reward commission for the first order.
+* The Coupon Affiliates plugin for WooCommerce includes free integration with the official "WooCommerce Subscriptions" plugin. This means you can offer affiliates referring commission for subscription renewals, or optionally toggle this off to only reward commission for the first order.
 
 **-- Multi-Currency Support --**
 
@@ -99,7 +99,7 @@ With this plugin you can give your affiliates access to a user-friendly affiliat
 
 ## 🎨 Admin Management & Customisation
 
-Coupon Affiliates makes it easy to manage and customise your affiliate program, with a large variety of useful features and tools.
+Coupon Affiliates for WooCommerce makes it easy to manage and customise your affiliate program, with a large variety of useful features and tools.
 
 **-- Admin Dashboard --**
 
@@ -145,7 +145,7 @@ Upon installation, a small setup wizard will help you get started and automatica
 
 Migration of affiliate data to Coupon Affiliates is super simple, since for the most part it uses the existing data that's stored by WooCommerce.
 
-Once you install the plugin, it will look back at the full order history for each coupon, even those created before the installation, and display the stats & commission for these on the coupon affiliate dashboard. All you'll need to do is assign your affiliate users to coupon codes, configure the settings, then you're good to go!
+Once you install the affiliate plugin on your website, it will look back at the full order history for each coupon, even those created before the installation, and display the stats & commission for these on the coupon affiliate dashboard. All you'll need to do is assign your affiliate users to coupon codes, configure the settings, then you're good to go!
 
 ## ⚡ Want more advanced features?
 
@@ -204,17 +204,20 @@ If you have any suggestions for additional functionality, need any help, or have
 == Installation ==
 1. Upload the 'woo-coupon-usage' plugin to the '/wp-content/plugins/' directory.
 2. Activate the affiliate plugin through the 'Plugins' menu in WordPress.
-3. Insert shortcode [couponaffiliates] into a page, to create the affiliate dashboard.
-4. Modify additional plugin settings found in WordPress admin under menu item "Coupon Affiliates". View the "How To Use" tab for more instructions.
+3. Follow the setup wizard to generate the affiliate dashboard page, affiliate registration page, and configure the basic settings including your commission rates.
+4. Modify additional plugin settings further if needed, found in WordPress admin under menu item "Coupon Affiliates". View the "How To Use" tab for more instructions.
 5. Optional: Upgrade to the Pro version via "Coupon Affiliates" > "Upgrade" on the admin menu for more advanced features.
 
 == Frequently Asked Questions ==
 
-= What is a "coupon-based" affiliate program? =
-Coupon Affiliates enhances affiliate marketing by integrating coupons as a core feature. Unlike traditional affiliate systems that rely primarily on referral links, this plugin allows affiliates to share their unique coupon codes. These codes not only track sales for commission purposes but also offer customers immediate discounts or special offers, enriching the purchasing experience. However, the Coupon Affiliates system still maintains the flexibility of referral links; affiliates can share URLs that automatically apply their coupon at checkout, and even if a coupon isnt used, you can still make the link alone track referrals, ensuring affiliates receive credit for every sale referred​​.
+= What is a "coupon-based" affiliate plugin for WooCommerce? =
+Coupon Affiliates enhances affiliate marketing by integrating coupons as a core feature. Unlike traditional affiliate plugins that rely primarily on referral links, this plugin allows affiliates to share their unique coupon codes. These codes not only track sales for commission purposes but also offer customers immediate discounts or special offers, enriching the purchasing experience. However, the Coupon Affiliates system still maintains the flexibility of referral links; affiliates can share URLs that automatically apply their coupon at checkout, and even if a coupon isnt used, you can still make the link alone track referrals, ensuring affiliates receive credit for every sale referred​​.
 
-= Will there be more features added in the future? =
-Yes! New features are added frequently, most of which are based on feedback. So if you have any suggestions to help improve the coupon affiliates plugin, please get in touch!
+= What is the difference between the free and pro versions? =
+The free version of Coupon Affiliates includes all the basic features you need to create a coupon-based affiliate program for WooCommerce, including an affiliate dashboard, referral URLs, commission tracking, and more. The Pro version adds many advanced features such as multi-level affiliates (MLM), advanced reports and analytics, performance bonuses, commission payouts, custom tabs, and more. You can view the full list of features on our <a href="https://couponaffiliates.com">website</a>.
+
+= What is the difference between the "Affiliate Dashboard" and "Affiliate Portal"? =
+The "Affiliate Dashboard" is the original dashboard page that is generated by the plugin, which includes all the features and statistics for affiliates. The "Affiliate Portal" is a new, modern alternative to the affiliate dashboard, which offers a full-screen interface that aligns with your brand. It includes all the same features as the affiliate dashboard, but with a more user-friendly design and layout.
 
 = Will this work with my existing coupons and orders? =
 Yes, once you install the plugin it will look back at the full order history for each coupon, even those created before the installation, and display the stats for these on the coupon affiliate dashboard too.
@@ -230,6 +233,9 @@ On the coupon affiliate dashboard, you (and your affiliates) will be able to see
 
 = GDPR & Privacy =
 All data used and created by the Coupon Affiliates plugin is stored on your own website. We don't track or collect ANY of your affiliate program data ourselves. You can **optionally** opt-in to share some basic usage data which helps us with providing support, fixing bugs, and improving the plugin, and can also opt-out at any time.
+
+= Will there be more features added in the future? =
+Yes! New features are added frequently, most of which are based on feedback. So if you have any suggestions to help improve the coupon affiliates plugin, please get in touch!
 
 = Do you provide support? =
 Yes. If you need any help setting up the affiliate plugin, please free to <a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0">get in touch</a> and we'll be happy to help!
@@ -259,6 +265,14 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 6.4.0 - 2nd July 2025 =
+= New: Added a new "Floating Affiliate Widget" feature to the plugin.
+- Improvement: Improved the bulk edit coupons feature to only loop through coupons that have actually been edited.
+- Tweak: Made a few tweaks to the design of some admin pages.
+- Fix: (PRO) Fixed an issue with the admin "payouts" page where the buttons were not showing properly in some cases.
+- Fix: (PRO) Fixed an issue with the "Request Payout" button for manual payout methods when the payout details field is disabled.
+- Fix: (PRO) Fixed an issue with some of the payouts settings not displaying properly in certain cases.
 
 = Version 6.3.9 - 16th June 2025 =
 - Improvement: Improved the admin "Add New Affiliate" page form with conditional checks for the username and coupon code fields, improving the user experience.

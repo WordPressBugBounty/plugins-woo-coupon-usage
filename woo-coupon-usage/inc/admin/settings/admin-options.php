@@ -150,6 +150,17 @@ function wcusage_settings_init() {
             'class' => 'wcusage_row wcusage_row_design',
         ]
     );
+    // register floating widget
+    add_settings_field(
+        'wcusage_field_widget',
+        esc_html__( 'Floating Widget', 'woo-coupon-usage' ),
+        'wcusage_field_cb_widget',
+        'wcusage',
+        'wcusage_section_developers',
+        [
+            'class' => 'wcusage_row wcusage_row_widget',
+        ]
+    );
     // register debug
     add_settings_field(
         'wcusage_field_debug',
@@ -367,6 +378,10 @@ jQuery( document ).ready(function() {
 
   <?php 
     echo wcusage_admin_settings_tab_click( "#tab-design", ".wcusage_row_design", 1 );
+    ?>
+
+  <?php 
+    echo wcusage_admin_settings_tab_click( "#tab-widget", ".wcusage_row_widget", 1 );
     ?>
 
   <?php 
@@ -638,6 +653,17 @@ jQuery( document ).ready(function() {
     );
     ?>
 
+  <!--- FLOATING WIDGET --->
+  <?php 
+    echo wcusage_admin_settings_tab_button(
+        "tab-widget",
+        esc_html__( "Widget", "woo-coupon-usage" ),
+        "fas fa-square-caret-right",
+        0,
+        ''
+    );
+    ?>
+
   <!--- DEBUGS --->
   <?php 
     echo wcusage_admin_settings_tab_button(
@@ -830,16 +856,14 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         ?>
 
   	<!-- Generate Settings Page Area -->
-  	<form class="wcusage_row_setting wcusage-settings-form" action="options.php" method="post" style="margin-top: 10px; <?php 
+  	<form class="wcusage_row_setting wcusage-settings-form" action="options.php" method="post"
+    style="margin-top: 10px; <?php 
         if ( wcu_fs()->can_use_premium_code() ) {
-            ?>width: 97.5%;<?php 
+            ?>float: none; width: 100%; max-width: none; margin: 0 auto; overflow: hidden; box-sizing: border-box;<?php 
         }
         ?>">
   	<?php 
-        // output security fields for the registered setting "wcusage"
         settings_fields( 'wcusage' );
-        // output setting sections and their fields
-        // (sections are registered for "wcusage", each field is registered to a specific section)
         do_settings_sections( 'wcusage' );
         ?>
 
@@ -919,8 +943,6 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
       </a>
 
   	</form>
-
-</div>
 
 <?php 
         if ( !wcu_fs()->can_use_premium_code() ) {
@@ -1135,6 +1157,8 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
     Developed and supported by <a href="https://relywp.com">RelyWP Ltd</a>.
     </span>
 
+    </div> <!-- .wrap -->
+
    <?php 
     }
 
@@ -1241,6 +1265,52 @@ if ( !function_exists( 'wcusage_setting_textarea_option' ) ) {
         ?>]"><?php 
         echo esc_html( $setting );
         ?></textarea><br/>
+    </p>
+  <?php 
+    }
+
+}
+/**
+ * Function for select settings option
+ *
+ */
+if ( !function_exists( 'wcusage_setting_select_option' ) ) {
+    function wcusage_setting_select_option(
+        $name,
+        $default,
+        $label,
+        $margin,
+        $items
+    ) {
+        $options = get_option( 'wcusage_options' );
+        wcusage_setting_option_set_default( $options, $name, $default );
+        ?>
+    <p id="<?php 
+        echo esc_attr( $name );
+        ?>_p" style="margin-left: <?php 
+        echo esc_attr( $margin );
+        ?>">
+      <?php 
+        $setting = wcusage_get_setting_value( $name, $default );
+        ?>
+      <?php 
+        if ( $label ) {
+            ?><strong><?php 
+            echo wp_kses_post( $label );
+            ?>:</strong><br/><?php 
+        }
+        ?>
+      <select id="<?php 
+        echo esc_attr( $name );
+        ?>" name="wcusage_options[<?php 
+        echo esc_attr( $name );
+        ?>]">
+        <?php 
+        foreach ( $items as $option_value => $option_name ) {
+            echo '<option value="' . $option_value . '" ' . selected( $setting, $option_value, false ) . '>' . $option_name . '</option>';
+        }
+        ?>
+      </select>
     </p>
   <?php 
     }

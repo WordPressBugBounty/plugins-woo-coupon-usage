@@ -441,7 +441,7 @@ function wcusage_coupons_page() {
     $affiliate_only = isset( $_GET['affiliate_only'] ) && 'true' === $_GET['affiliate_only'];
     $page_url = admin_url( 'admin.php?page=wcusage-coupons' );
     ?>
-    <div class="wrap">
+    <div class="wrap wcusage-admin-page">
         <?php do_action( 'wcusage_hook_dashboard_page_header', '' ); ?>
         <form method="get">
             <h1 class="wp-heading-inline wcusage-admin-title wcusage-admin-title-coupons">

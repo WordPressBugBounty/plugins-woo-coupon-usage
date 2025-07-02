@@ -394,6 +394,11 @@ if ( !function_exists( 'wcusage_is_user_affiliate' ) ) {
         $args = array(
             'post_type'      => 'shop_coupon',
             'posts_per_page' => -1,
+            'meta_query'     => array(array(
+                'key'     => 'wcu_select_coupon_user',
+                'value'   => $user_id,
+                'compare' => '=',
+            )),
         );
         $query = new WP_Query($args);
         while ( $query->have_posts() ) {

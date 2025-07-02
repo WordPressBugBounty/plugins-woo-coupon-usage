@@ -41,8 +41,13 @@ function wcusage_bulk_assign_rates_page() {
     // Nonce field for security
     $nonce = wp_create_nonce('bulk_assign_rates');
     ?>
-    <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
+
+    <div class="wrap wcusage-admin-page">
+        <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
+    </div>
+
     <div class="wrap wcusage-tools">
+
         <h2><?php echo esc_html__('Bulk Assign: Per-Affiliate Product Rates', 'woo-coupon-usage'); ?></h2>
         <p></p>
         <p><?php echo esc_html__('Bulk assign per-product commission rates, on a per-affiliate basis. Any existing rates will also be updated.', 'woo-coupon-usage'); ?></p>

@@ -8,7 +8,7 @@ function wcusage_tools_page() {
 
     <div class="wrap admin-tools" style="margin: 0;">
 
-        <div class="wrap">
+        <div class="wrap wcusage-admin-page">
 
             <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
 
@@ -74,7 +74,7 @@ function wcusage_tools_page() {
                 </div>
 
                 <div class="wcusage-tools-box" <?php if( !wcu_fs()->can_use_premium_code() ) { ?>style="opacity: 0.5; pointer-events: none;"<?php } ?>>
-                    <h2><?php esc_html_e('Terms & Conditions Generator', 'woo-coupon-usage'); ?><br/>(COMING SOON)</h2>
+                    <h2><?php esc_html_e('Terms & Conditions Generator', 'woo-coupon-usage'); ?><br/></h2>
                     <p><?php esc_html_e('Generate and edit the Terms & Conditions page for your affiliate program.', 'woo-coupon-usage'); ?></p>
                     <a href="<?php echo esc_url(admin_url("admin.php?page=wcusage-terms-generator")); ?>" class="button"><?php esc_html_e('Go to Page', 'woo-coupon-usage'); ?></a>
                 </div>

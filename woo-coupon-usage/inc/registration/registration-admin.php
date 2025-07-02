@@ -159,11 +159,11 @@ function wcusage_admin_registrations_page_html() {
     echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
     ?>" crossorigin="anonymous">
 
-<?php 
+<div id="wcu-create-new-registration" class="wrap plugin-settings">
+
+  <?php 
     echo do_action( 'wcusage_hook_dashboard_page_header', '' );
     ?>
-
-<div id="wcu-create-new-registration" class="wrap plugin-settings">
 
   <h1 class="wp-heading-inline"><?php 
     echo esc_html( get_admin_page_title() );
@@ -276,7 +276,7 @@ function wcusage_admin_registrations_page_html() {
     $testListTable = new wcusage_registrations_List_Table();
     $testListTable->prepare_items();
     ?>
-	<div class="wrap">
+	<div>
 		<div id="icon-users" class="icon32"><br/></div>
 		<input type="hidden" name="page" value="<?php 
     echo esc_html( $_GET['page'] );
@@ -526,12 +526,15 @@ function wcusage_admin_new_registration_page() {
   <link rel="stylesheet" href="<?php 
     echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
     ?>" crossorigin="anonymous">
+  
+  <div class="wrap">
 
   <?php 
     echo do_action( 'wcusage_hook_dashboard_page_header', '' );
     ?>
 
-  <div class="wrap wcusage-page">
+  <div class="wcusage-page">
+
     <h1 id="wcu-add-new-affiliate"><?php 
     echo esc_html__( 'Add New Affiliate:', 'woo-coupon-usage' );
     ?></h1>
@@ -637,9 +640,20 @@ function wcusage_admin_new_registration_page() {
           <br/><i style="font-size: 10px;">Enter the name of the coupon code that will be created.</i></td>
         </tr>
         <?php 
+        } else {
+            ?>
+        <tr>
+          <th scope="row"><label for="wcu-input-coupon"><?php 
+            echo esc_html__( 'Coupon Code', 'woo-coupon-usage' );
+            ?></label></th>
+          <td><i style="font-size: 10px;">The coupon code will be automatically generated based on the format: <?php 
+            echo esc_html( $auto_coupon_format );
+            ?></i></td>
+        </tr>
+        <?php 
         }
         ?>
-
+        
         <!-- Coupon Type -->
         <?php 
         $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '0' );
@@ -710,6 +724,8 @@ function wcusage_admin_new_registration_page() {
     <?php 
     }
     ?>
+
+  </div>
 
   </div>
 

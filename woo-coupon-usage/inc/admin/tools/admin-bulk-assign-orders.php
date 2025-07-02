@@ -30,7 +30,11 @@ function wcusage_bulk_assign_coupons_page() {
     // Nonce field for security
     $nonce = wp_create_nonce('bulk_assign_coupons');
     ?>
-    <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
+
+    <div class="wrap wcusage-admin-page">
+        <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
+    </div>
+
     <div class="wrap wcusage-tools">
         <h2><?php echo esc_html__('Bulk Assign: Coupons to Orders', 'woo-coupon-usage'); ?></h2>
         <p></p>
@@ -55,7 +59,7 @@ function wcusage_bulk_assign_coupons_page() {
             </div>
             <br /><br />
             <input type="submit" value="Assign Coupons" id="wcusage-submit" class="button button-primary">
-            <br/><br/><br/><br/>
+            <br/><br/>
             <p><a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_tools')); ?>">Go back to tools ></a></p>
         </form>
         <div id="wcusage-messages"></div>

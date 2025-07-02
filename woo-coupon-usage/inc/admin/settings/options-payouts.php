@@ -58,7 +58,6 @@ function wcusage_field_cb_payouts( $args )
         ?>
 
         <div class="wcu-admin-faq-content wcu_qna_manage_payouts" id="wcu_qna_manage_payouts" style="display: none;">
-        <?php } ?>
 
           <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'If an order is created using an affiliates coupon, then marked as completed, the commission will be added to the affiliate account as "unpaid commission".', 'woo-coupon-usage' ); ?><br/>
           
@@ -74,7 +73,6 @@ function wcusage_field_cb_payouts( $args )
 
           <br/><br/>
           
-          <?php if ( wcu_fs()->can_use_premium_code() ) { ?>
           <strong><?php echo esc_html__( 'For more information, please watch the video below:', 'woo-coupon-usage' ); ?></strong>
           <br/>
           <div style="max-width: 720px;">
@@ -264,13 +262,13 @@ function wcusage_field_cb_payouts( $args )
 
           <br/>
 
+          </span>
+
         <?php } else { ?>
 
           <i><?php echo esc_html__( '*You can select multiple statuses if you create more additional custom order statuses. Currently one 1 is available.', 'woo-coupon-usage' ); ?></i>
 
         <?php } ?>
-
-        
 
        <br/><hr/>
 

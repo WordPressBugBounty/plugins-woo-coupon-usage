@@ -71,10 +71,11 @@ if(isset($_POST['_wpnonce'])) {
 <?php } ?>
 </style>
 
-<?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
-
 <!-- Output Page -->
 <div class="wrap plugin-settings">
+
+  <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
+
 	<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
   <?php
@@ -106,7 +107,7 @@ if(isset($_POST['_wpnonce'])) {
   $ListTable = new WCUsage_Clicks_List_Table();
   $ListTable->prepare_items();
 	?>
-	<div class="wrap" style="margin-top: -30px;">
+	<div style="margin-top: -30px;">
 		<input type="hidden" name="page" value="<?php echo esc_html( $_GET['page'] ) ?>" />
 		<?php $ListTable->display() ?>
 	</div>

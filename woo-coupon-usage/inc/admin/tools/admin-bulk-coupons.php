@@ -46,11 +46,14 @@ function wcusage_bulk_coupon_creator_page() {
     $wcusage_coupon_multiple = wcusage_get_setting_value( 'wcusage_field_registration_multiple_template', '0' );
     ?>
 
-    <?php 
+    <div class="wrap wcusage-admin-page">
+        <?php 
     echo do_action( 'wcusage_hook_dashboard_page_header', '' );
     ?>
+    </div>
 
     <div class="wrap wcusage-tools wcusage-page">
+
         <h2><?php 
     echo esc_html__( 'Bulk Create: Affiliate Coupons', 'woo-coupon-usage' );
     ?></h2>
@@ -97,7 +100,7 @@ function wcusage_bulk_coupon_creator_page() {
             </div>
             <br /><br />
             <input type="submit" value="Create Coupons" id="wcusage-submit" class="button button-primary">
-            <br/><br/><br/><br/>
+            <br/><br/>
             <p><a href="<?php 
     echo esc_url( admin_url( 'admin.php?page=wcusage_tools' ) );
     ?>">Go back to tools ></a></p>

@@ -22,11 +22,11 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
         echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
         ?>" crossorigin="anonymous">
 
+  <div class="wrap admin-reports wcusage-admin-page">
+
   <?php 
         echo do_action( 'wcusage_hook_dashboard_page_header', '' );
         ?>
-
-  <div class="wrap admin-reports" style="margin: 0;">
 
   <h1><?php 
         echo esc_html__( "Admin Reports & Analytics", "woo-coupon-usage" );
@@ -57,7 +57,7 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
         ?>
   <div>
       <form method="post" class="wcusage_settings_form wcu-admin-reports-form"
-      onsubmit="return false;" style="background: linear-gradient(#fefefe, #f6f6f6); border: 1px solid #f3f3f3; box-shadow: 0px 0px 4px #dbdada;">
+      onsubmit="return false;" style="background: linear-gradient(#fefefe, #f6f6f6); border: 1px solid #f3f3f3; border: 1px solid #f1f1f1;">
 
       <h2 style="margin: 0 auto 20px auto; display: block; font-size: 25px; text-align: center;"><?php 
         echo esc_html__( "Generate a new admin report", "woo-coupon-usage" );

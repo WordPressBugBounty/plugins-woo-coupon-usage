@@ -236,14 +236,6 @@
     color: green !important;
 }
 
-.wrap.plugin-settings {
-    margin: 0;
-}
-
-.toplevel_page_wcusage #wpcontent {
-    padding: 0;
-}
-
 /* Pro Details */
 @media only screen and (min-width: 1387px) {
     .wcu-pro-details-col-1 {
@@ -469,29 +461,51 @@
     display: none;
 }
 
+.submit-generate-page {
+    background-color: #537b50;
+    background-image: linear-gradient(135deg, #537b50 0%, #4a6f46 100%);
+    color: #fff;
+    padding: 12px 20px !important;
+    border-radius: 4px !important;
+    font-size: 14px;
+
+}
+.submit-generate-page:hover {
+    background-color: #597f55;
+    background-image: linear-gradient(135deg, #4a6f46 0%, #537b50 100%);
+    color: #fff;
+}
+
 /* Dashboard Page */
 
+.wcusage-admin-page, .plugin-settings, .wcusage-settings, .wcusage-tools {
+    margin: 10px 20px 0 12px;
+}
+
 .wcusage-admin-page-col {
-    width: calc(50% - 85px);
-    margin: 10px 0px 10px 0px;
+    width: calc(50% - 20px);
+    margin: 10px;
     padding: 15px 30px 30px 30px;
     background: #fff;
     float: left;
     border: 2px solid #e3e3e3;
     border-radius: 10px;
+    box-sizing: border-box;
 }
 
 .wcusage-admin-page-col3 {
-    width: calc(100% - 42px);
-    margin: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
     padding: 15px 42px 15px 42px;
     background: #FFF;
-    float: left;
-    margin-top: 0;
-    margin-left: -22px;
-    margin-bottom: 15px;
+    margin-top: 20px;
+    margin-bottom: 25px;
     border-bottom: 2px solid #e3e3e3;
     overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0px 0px 4px #e3e3e3;
+    box-sizing: border-box;
 }
 
 .wcusage-admin-dash-button {
@@ -522,9 +536,9 @@
 .wcusage-admin-table-col-head th,
 .wcusage-admin-table-col-row td,
 .wcusage-admin-table-col-footer td {
-    padding: 12px 5px;
+    padding: 14px 5px;
     border: 1px solid #f3f3f3;
-    font-size: 15px;
+    font-size: 1.2em;
 }
 
 /* Account Page */
@@ -1927,9 +1941,21 @@ p label {
     display: block;
     border-radius: 5px;
     margin: 0.5%;
-    box-shadow: 0px 0px 4px #dbdada;
+    border: 2px solid #eee;
     width: 99%;
     position: relative;
+}
+
+.wcusage-admin-page-col .button {
+    background: #f7f7f7;
+    border: 1px solid #c3c4c7;
+    color: #000000;
+    border-radius: 10px;
+    margin: 10px 0;
+    padding: 5px 0;
+    display: block;
+    text-align: center;
+    text-decoration: none;
 }
 
 .wcusage-info-box:before,
@@ -1999,52 +2025,53 @@ p label {
     content: "\f058";
 }
 
-@media only screen and (min-width: 1260px) {
-    .wcusage-info-box {
-        width: calc(33.20% - 129px);
-        float: left;
-    }
+.wcusage-info-box-title { margin-top: 5px; margin-bottom: 0px !important; }
+.stats-range-toggle { margin: 10px 0; font-size: 1.2em; }
+.stats-range-toggle a { margin-right: 10px; text-decoration: none; color: #0073aa; cursor: pointer; }
+.stats-range-toggle a.active { color: #000; font-weight: bold; }
+.wcusage-stats-boxes-container { max-width: 100%; overflow: hidden; }
+
+/* Container for info-box2 elements */
+.wcusage-stats-boxes-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-@media only screen and (min-width: 920px) and (max-width: 1260px) {
-    .wcusage-info-box {
-        width: calc(49.5% - 128px);
-        float: left;
-    }
-}
-
-@media only screen and (max-width: 919px) {
-    .wcusage-info-box {
-        width: calc(100% - 128px);
-        float: left;
-    }
+.wcusage-info-box2 {
+    margin: 0;
+    float: none;
+    box-sizing: border-box;
 }
 
 @media only screen and (min-width: 1680px) {
     .wcusage-info-box2 {
-        width: calc(19% - 118px);
-        float: left;
+        flex: 0 0 calc(20% - 9.6px);
+        max-width: calc(20% - 9.6px);
     }
 }
 
 @media only screen and (min-width: 1080px) and (max-width: 1679px) {
     .wcusage-info-box2 {
-        width: calc(32% - 118px);
-        float: left;
+        flex: 0 0 calc(33.33% - 8px);
+        max-width: calc(33.33% - 8px);
     }
 }
 
 @media only screen and (min-width: 920px) and (max-width: 1079px) {
     .wcusage-info-box2 {
-        width: calc(49% - 118px);
-        float: left;
+        flex: 0 0 calc(50% - 6px);
+        max-width: calc(50% - 6px);
     }
 }
 
 @media only screen and (max-width: 919px) {
     .wcusage-info-box2 {
-        width: calc(99% - 118px);
-        float: left;
+        flex: 0 0 100%;
+        max-width: 100%;
     }
 }
 
@@ -2055,11 +2082,6 @@ p label {
 
     .wcusage-info-box2:before {
         left: 15px;
-    }
-
-    .wcusage-info-box2 {
-        width: calc(19% - 98px);
-        float: left;
     }
 }
 
@@ -2310,12 +2332,19 @@ p label {
 }
 
 .wcu-scrollable-table {
+    width: 100%;
     max-height: 50vh;
     overflow-y: auto;
     border: 1px solid #ddd;
     margin-bottom: 20px;
     display: inline-block;
     padding: 5px;
+}
+
+#wcusage-tools-rows {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
 }
 
 /* Bulk Edit Products */
@@ -2529,6 +2558,63 @@ p label {
 }
 
 /* Leaderboard */
+
+.wcusage-leaderboard {
+    background: #fff;
+    box-shadow: 0px 0px 4px #dbdada;
+}
+.affiliate-page-generator-wrap .form-table textarea {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+.affiliate-page-generator-wrap .form-table input[type="text"]:focus,
+.affiliate-page-generator-wrap .form-table input[type="number"]:focus,
+.affiliate-page-generator-wrap .form-table textarea:focus {
+    border-color: #2271b1;
+    outline: none;
+    box-shadow: 0 0 5px rgba(34, 113, 177, 0.3);
+}
+
+.affiliate-page-generator-wrap .form-table .description {
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.affiliate-page-generator-wrap .button {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 4px;    
+    transition: background-color 0.2s ease;
+}
+
+.affiliate-page-generator-wrap .button-primary {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+}
+
+.affiliate-page-generator-wrap .button-primary:hover {
+    background: #135e96;
+    border-color: #135e96;
+}
+
+.affiliate-page-generator-wrap .button:not(.button-primary) {
+    background: #f0f0f1;
+    border-color: #8c8f94;
+    color: #1d2327;
+}
+
+.affiliate-page-generator-wrap .button:not(.button-primary):hover {
+    background: #e0e0e0;
+    border-color: #6b6e73;
+}
 
 .wcusage-leaderboard {
     background: #fff;

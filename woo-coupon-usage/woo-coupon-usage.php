@@ -3,8 +3,8 @@
 /**
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
-* Description: Easily create an affiliate program for WooCommerce, based on coupons. Track affiliate commission, coupon usage statistics, referral URLs, and more.
-* Version: 6.3.9
+* Description: The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
+* Version: 6.4.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -260,6 +260,7 @@ if ( function_exists( 'wcu_fs' ) ) {
     include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/options-subscriptions.php';
     include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/options-tabs.php';
     include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/options-urls.php';
+    include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/options-widget.php';
     include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/options-payouts.php';
     include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/options-registrations.php';
     // Admin Files
@@ -316,6 +317,17 @@ if ( function_exists( 'wcu_fs' ) ) {
     include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-new-order.php';
     include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-user-coupons.php';
     include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-activity.php';
+    // Widget - New organized structure
+    $wcusage_field_floating_widget_enable = wcusage_get_setting_value( 'wcusage_field_floating_widget_enable', '0' );
+    include plugin_dir_path( __FILE__ ) . 'inc/widget/widget-settings.php';
+    if ( $wcusage_field_floating_widget_enable ) {
+        include plugin_dir_path( __FILE__ ) . 'inc/widget/widget-core.php';
+        include plugin_dir_path( __FILE__ ) . 'inc/widget/widget-conditions.php';
+        include plugin_dir_path( __FILE__ ) . 'inc/widget/widget-ajax.php';
+        include plugin_dir_path( __FILE__ ) . 'inc/widget/widget-tabs.php';
+        include plugin_dir_path( __FILE__ ) . 'inc/widget/widget-helpers.php';
+        include plugin_dir_path( __FILE__ ) . 'inc/widget/widget-content.php';
+    }
     // Portal
     $wcusage_field_portal_enable = wcusage_get_setting_value( 'wcusage_field_portal_enable', '0' );
     if ( $wcusage_field_portal_enable ) {

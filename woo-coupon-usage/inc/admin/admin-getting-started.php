@@ -187,8 +187,8 @@ function wcusage_getting_started2() {
 add_action( 'wcusage_hook_getting_started3', 'wcusage_getting_started3' );
 function wcusage_getting_started3() {
 ?>
-	<form method="post" action="" style="margin-bottom: 20px;">
-		<button type="submit" name="submitnewpage2"><?php echo esc_html__( "Generate Dashboard Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-arrow-right"></span></button>
+	<form method="post" action="" style="margin-bottom: 10px;">
+		<button type="submit" name="submitnewpage2" class="submit-generate-page"><?php echo esc_html__( "Generate Dashboard Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-arrow-right"></span></button>
 	</form>
 <?php
 }
@@ -197,7 +197,7 @@ add_action( 'wcusage_hook_getting_started_registration', 'wcusage_getting_starte
 function wcusage_getting_started_registration_post() {
 ?>
   <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_setup&step=2&action=generate')); ?>">
-      <button type="button"><?php echo esc_html__( "Generate Registration Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-arrow-right"></span></button>
+      <button type="button" class="submit-generate-page"><?php echo esc_html__( "Generate Registration Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-arrow-right"></span></button>
   </a>
   <br/>
 <?php

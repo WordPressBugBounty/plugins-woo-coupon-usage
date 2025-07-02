@@ -417,7 +417,19 @@ function wcusage_field_cb_registration( $args )
 
       <script>
       jQuery(document).ready(function() {
-        jQuery('.wcusage_registration_enable_captcha').change();
+          jQuery('.wcu-turnstile-help').hide();
+          jQuery('.wcu-recaptcha-help').hide();
+          jQuery('.wcu-field-section-registration-captcha').hide();
+          if (jQuery('.wcusage_registration_enable_captcha').val() == '1') {
+            jQuery('.wcu-recaptcha-help').show();
+            jQuery('.wcu-turnstile-help').hide();
+            jQuery('.wcu-field-section-registration-captcha').show();
+          }
+          if (jQuery('.wcusage_registration_enable_captcha').val() == '2') {
+            jQuery('.wcu-turnstile-help').show();
+            jQuery('.wcu-recaptcha-help').hide();
+            jQuery('.wcu-field-section-registration-captcha').show();
+          }
       });
       jQuery('.wcusage_registration_enable_captcha').change(function() {
           jQuery('.wcu-turnstile-help').hide();
@@ -1256,8 +1268,8 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
       <!-- Edit Link -->
       <script>
       jQuery(document).ready(function() {
-        jQuery('#wcusage_field_registration_coupon_template').on('change', function() {
-              var couponName = jQuery(this).val();
+          function validateCouponTemplate() {
+              var couponName = jQuery('#wcusage_field_registration_coupon_template').val();
               jQuery.post(
                   ajaxurl, 
                   {
@@ -1265,23 +1277,25 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
                       coupon_name: couponName
                   },
                   function(couponId) {
-                    if (!couponId || !couponName) {
-                      jQuery('#edit_link').html('');
-                      jQuery('#submit_step2').prop('disabled', true);
-                      return;
-                    }
-                    if (couponId == 0) {
-                      jQuery('#edit_link').html('<p style="color: red;">Invalid coupon! This should be the exact name of an existing coupon code.</p>');
-                      jQuery('#submit_step2').prop('disabled', true);
-                      return;
-                    }
-                    var editLink = "<?php echo esc_url(admin_url()); ?>post.php?post=" + couponId + "&action=edit";
-                    jQuery('#edit_link').html('<span class="fa-solid fa-circle-check" style="color: green; margin-right: 5px;"></span> <a href="' + editLink + '" target="_blank" style="font-weight: bold; text-decoration: none;">Edit Coupon <span class="fa-solid fa-arrow-up-right-from-square"></span></a>');
-                    jQuery('#submit_step2').prop('disabled', false);
+                      if (!couponId || !couponName) {
+                          jQuery('#edit_link').html('');
+                          jQuery('#submit_step2').prop('disabled', true);
+                          return;
+                      }
+                      if (couponId == 0) {
+                          jQuery('#edit_link').html('<p style="color: red;">Invalid coupon! This should be the exact name of an existing coupon code.</p>');
+                          jQuery('#submit_step2').prop('disabled', true);
+                          return;
+                      }
+                      var editLink = "<?php echo esc_url(admin_url()); ?>post.php?post=" + couponId + "&action=edit";
+                      jQuery('#edit_link').html('<span class="fa-solid fa-circle-check" style="color: green; margin-right: 5px;"></span> <a href="' + editLink + '" target="_blank" style="font-weight: bold; text-decoration: none;">Edit Coupon <span class="fa-solid fa-arrow-up-right-from-square"></span></a>');
+                      jQuery('#submit_step2').prop('disabled', false);
                   }
               );
-          }); 
-          jQuery('#wcusage_field_registration_coupon_template').trigger('change');
+          }
+
+          jQuery('#wcusage_field_registration_coupon_template').on('change', validateCouponTemplate);
+          validateCouponTemplate();
       });
       </script>
 

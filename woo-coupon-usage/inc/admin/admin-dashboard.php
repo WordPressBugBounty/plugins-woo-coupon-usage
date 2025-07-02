@@ -180,11 +180,16 @@ window.onclick = function(event) {
 
 function wcusage_custom_page_header() {
     $screen = get_current_screen();
-    if ( $screen->post_type == 'wcu-statements' || $screen->post_type == 'wcu-creatives' || $screen->post_type == 'wcu-short-url'
+    if ( $screen->post_type == 'wcu-statements'
+    || $screen->post_type == 'wcu-creatives'
+    || $screen->post_type == 'wcu-short-url'
+    || $screen->post_type == 'wcu-bonuses'
     || isset($_GET['page']) && $_GET['page'] == 'wcusage-account' ) {
+        echo '<div class="wrap wcusage-admin-page">';
         echo do_action( 'wcusage_hook_dashboard_page_header', '');
+        echo '</div>';        
         echo '<style type="text/css">
-        #screen-meta-links { position: absolute; float: right; right: 0; top: 94px; }
+        #screen-meta-links { position: absolute; float: right; right: 0; top: -5px; transform: scale(0.75); }
         </style>';
     }
 }
@@ -235,13 +240,6 @@ function wcusage_dashboard_page_section_statistics() {
     );
 ?>
 
-<style>
-.wcusage-info-box-title { margin-top: 5px; margin-bottom: 0px !important; }
-.stats-range-toggle { margin: 10px 0; }
-.stats-range-toggle a { margin-right: 10px; text-decoration: none; color: #0073aa; cursor: pointer; }
-.stats-range-toggle a.active { color: #000; font-weight: bold; }
-</style>
-
 <div>
     <div class="stats-range-toggle">
         <?php foreach ($date_ranges as $key => $label): ?>
@@ -251,25 +249,30 @@ function wcusage_dashboard_page_section_statistics() {
         <?php endforeach; ?>
     </div>
 
-    <div class="wcusage-info-box2 wcusage-info-box-usage">
-        <p><span class="wcusage-info-box-title">Referrals:</span><span class="total-usage">0</span></p>
+    <div class="wcusage-stats-boxes-container">
+
+        <div class="wcusage-info-box2 wcusage-info-box-usage">
+            <p><span class="wcusage-info-box-title">Referrals:</span><span class="total-usage">0</span></p>
+        </div>
+
+        <div class="wcusage-info-box2 wcusage-info-box-sales">
+            <p><span class="wcusage-info-box-title">Sales:</span><span class="total-sales">0</span></p>
+        </div>
+
+        <div class="wcusage-info-box2 wcusage-info-box-discounts">
+            <p><span class="wcusage-info-box-title">Discounts:</span><span class="total-discounts">0</span></p>
+        </div>
+
+        <div class="wcusage-info-box2 wcusage-info-box-dollar">
+            <p><span class="wcusage-info-box-title">Commission:</span><span class="total-commission">0</span></p>
+        </div>
+
+        <div class="wcusage-info-box2 wcusage-info-box-clicks">
+            <p><span class="wcusage-info-box-title">Clicks:</span><span class="total-clicks">0</span></p>
+        </div>
+
     </div>
 
-    <div class="wcusage-info-box2 wcusage-info-box-sales">
-        <p><span class="wcusage-info-box-title">Sales:</span><span class="total-sales">0</span></p>
-    </div>
-
-    <div class="wcusage-info-box2 wcusage-info-box-discounts">
-        <p><span class="wcusage-info-box-title">Discounts:</span><span class="total-discounts">0</span></p>
-    </div>
-
-    <div class="wcusage-info-box2 wcusage-info-box-dollar">
-        <p><span class="wcusage-info-box-title">Commission:</span><span class="total-commission">0</span></p>
-    </div>
-
-    <div class="wcusage-info-box2 wcusage-info-box-clicks">
-        <p><span class="wcusage-info-box-title">Clicks:</span><span class="total-clicks">0</span></p>
-    </div>
 </div>
 
 <?php
@@ -636,22 +639,22 @@ function wcusage_dashboard_page_html() {
 
 <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
 
-<?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
+<div class="wrap wcusage-admin-page">
 
-<div class="wrap plugin-settings">
+    <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
 
     <?php if (class_exists('WooCommerce')) { ?>
         <style>
         @media screen and (max-width: 1040px) { .wcusage-admin-page-col { width: calc(100% - 85px) !important; } }
         .wcusage-admin-page-col-section {
-            padding: 10px 25px; margin: 0; list-style: none; display: -webkit-box; display: -moz-box; display: -ms-flexbox; display: -webkit-flex; display: flex; -webkit-flex-flow: row wrap; justify-content: space-around;
+            padding: 10px 0px; margin: 0; list-style: none; display: -webkit-box; display: -moz-box; display: -ms-flexbox; display: -webkit-flex; display: flex; -webkit-flex-flow: row wrap; justify-content: space-around;
         }
         strong { color: green; font-size: 16px; }
         h2 { font-size: 22px; }
         </style>
 
-        <div class="wcusage-admin-page-col-section">
-            <div class="wcusage-admin-page-col" style="width: calc(100% - 85px);">
+        <div class="wcusage-admin-page-col-section" style="margin-top: -20px;">
+            <div class="wcusage-admin-page-col" style="width: calc(100% - 20px);">
                 <h2><?php echo esc_html__('Affiliate Program Statistics', 'woo-coupon-usage'); ?>
                 <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_admin_reports')); ?>" style="text-decoration: none; float: right; margin-top: -5px; font-size: 14px;"
                 class="button button-secondary button-large">

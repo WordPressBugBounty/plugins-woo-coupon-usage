@@ -29,13 +29,13 @@ function wcusage_bulk_coupon_fields() {
         $commission_product = get_post_meta($coupon_id, 'wcu_text_coupon_commission_fixed_product', true);
         $coupon_amount = get_post_meta($coupon_id, 'coupon_amount', true);
         ?>
-        <tr data-coupon-id="<?php echo esc_attr($coupon_id); ?>">
+        <tr data-coupon-id="<?php echo esc_attr($coupon_id); ?>" data-changed="false">
             <td><?php echo esc_html($coupon_id); ?></td>
             <td>
-                <input type="text" name="coupon_name[<?php echo esc_attr($coupon_id); ?>]" value="<?php echo esc_attr($coupon_name); ?>">
+                <input type="text" name="coupon_name[<?php echo esc_attr($coupon_id); ?>]" value="<?php echo esc_attr($coupon_name); ?>" data-original="<?php echo esc_attr($coupon_name); ?>">
             </td>
             <td>
-                <select name="discount_type[<?php echo esc_attr($coupon_id); ?>]">
+                <select name="discount_type[<?php echo esc_attr($coupon_id); ?>]" data-original="<?php echo esc_attr(get_post_meta($coupon_id, 'discount_type', true)); ?>">
                     <?php foreach (wc_get_coupon_types() as $key => $type) { ?>
                         <option value="<?php echo esc_attr($key); ?>" <?php selected(get_post_meta($coupon_id, 'discount_type', true), $key); ?>>
                             <?php echo esc_html($type); ?>
@@ -43,12 +43,12 @@ function wcusage_bulk_coupon_fields() {
                     <?php } ?>
                 </select>
             </td>
-            <td><input type="text" name="coupon_amount[<?php echo esc_attr($coupon_id); ?>]" value="<?php echo esc_attr($coupon_amount); ?>"></td>
-            <td><input type="text" name="username[<?php echo esc_attr($coupon_id); ?>]" value="<?php echo esc_attr($username); ?>"></td>
+            <td><input type="text" name="coupon_amount[<?php echo esc_attr($coupon_id); ?>]" value="<?php echo esc_attr($coupon_amount); ?>" data-original="<?php echo esc_attr($coupon_amount); ?>"></td>
+            <td><input type="text" name="username[<?php echo esc_attr($coupon_id); ?>]" value="<?php echo esc_attr($username); ?>" data-original="<?php echo esc_attr($username); ?>"></td>
             <?php if (wcu_fs()->can_use_premium_code()) { ?>
-            <td><input type="text" name="commission_percent[<?php echo esc_attr($coupon_id); ?>]" value="<?php echo esc_attr($commission_percent); ?>"></td>
-            <td><input type="text" name="commission_order[<?php echo esc_attr($coupon_id); ?>]" value="<?php echo esc_attr($commission_order); ?>"></td>
-            <td><input type="text" name="commission_product[<?php echo esc_attr($coupon_id); ?>]" value="<?php echo esc_attr($commission_product); ?>"></td>
+            <td><input type="text" name="commission_percent[<?php echo esc_attr($coupon_id); ?>]" value="<?php echo esc_attr($commission_percent); ?>" data-original="<?php echo esc_attr($commission_percent); ?>"></td>
+            <td><input type="text" name="commission_order[<?php echo esc_attr($coupon_id); ?>]" value="<?php echo esc_attr($commission_order); ?>" data-original="<?php echo esc_attr($commission_order); ?>"></td>
+            <td><input type="text" name="commission_product[<?php echo esc_attr($coupon_id); ?>]" value="<?php echo esc_attr($commission_product); ?>" data-original="<?php echo esc_attr($commission_product); ?>"></td>
             <?php } ?>
         </tr>
         <?php
@@ -71,9 +71,12 @@ function wcusage_bulk_coupon_page() {
 
     <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
 
-    <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
+    <div class="wrap wcusage-admin-page">
+        <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
+    </div>
 
     <div class="wrap wcusage-bulk-edit-coupons wcusage-tools">
+
         <h2><?php echo esc_html__('Bulk Edit: Coupon Settings', 'woo-coupon-usage'); ?></h2>
         <p><?php echo esc_html__('Use this tool to bulk edit your coupon settings.', 'woo-coupon-usage'); ?></p>
         <br/>
@@ -104,13 +107,44 @@ function wcusage_bulk_coupon_page() {
             <p><span id="spinner" style="display: none; font-size: 20px; color: green;"><i class="fas fa-spinner fa-spin"></i> Updating... <span id="progress">0/0</span></span></p>
             <span id="update-progress"></span></p>
             <p><input type="button" value="Update Coupons" id="update-coupons-button" class="button button-primary" style="margin-bottom: 20px;"></p>
-            <br/><br/><br/><br/>
+            <br/><br/>
             <p><a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_tools')); ?>">Go back to tools ></a></p>
         </form>
     </div>
 
     <script type="text/javascript">
         jQuery(document).ready(function($) {
+            // Track changes to form fields
+            $('#wcusage-tools-rows').on('input change', 'input, select', function() {
+                var $this = $(this);
+                var currentValue = $this.val();
+                var originalValue = $this.data('original') || '';
+                var $row = $this.closest('tr');
+                
+                // Check if this field has changed
+                var isChanged = (currentValue != originalValue);
+                
+                // Check if any field in this row has changed
+                var rowHasChanges = false;
+                $row.find('input, select').each(function() {
+                    var fieldCurrentValue = $(this).val();
+                    var fieldOriginalValue = $(this).data('original') || '';
+                    if (fieldCurrentValue != fieldOriginalValue) {
+                        rowHasChanges = true;
+                        return false; // break out of loop
+                    }
+                });
+                
+                $row.attr('data-changed', rowHasChanges ? 'true' : 'false');
+                
+                // Visual indicator for changed rows
+                if (rowHasChanges) {
+                    $row.addClass('row-changed');
+                } else {
+                    $row.removeClass('row-changed');
+                }
+            });
+
             // Import CSV button click event
             $('#import-csv').on('click', function() {
                 var csvFileInput = $('<input type="file" accept=".csv" style="display:none">');
@@ -134,15 +168,15 @@ function wcusage_bulk_coupon_page() {
                                 var commissionPercent = data[5].trim();
                                 var commissionOrder = data[6].trim();
                                 var commissionProduct = data[7].trim();
-                                // Update fields
-                                $('input[name="coupon_name[' + couponId + ']"]').val(couponName);
-                                $('select[name="discount_type[' + couponId + ']"]').val(discountType);
-                                $('input[name="coupon_amount[' + couponId + ']"]').val(couponAmount);
-                                $('input[name="username[' + couponId + ']"]').val(username);
+                                // Update fields and trigger change event
+                                $('input[name="coupon_name[' + couponId + ']"]').val(couponName).trigger('input');
+                                $('select[name="discount_type[' + couponId + ']"]').val(discountType).trigger('change');
+                                $('input[name="coupon_amount[' + couponId + ']"]').val(couponAmount).trigger('input');
+                                $('input[name="username[' + couponId + ']"]').val(username).trigger('input');
                                 <?php if (wcu_fs()->can_use_premium_code()) { ?>
-                                $('input[name="commission_percent[' + couponId + ']"]').val(commissionPercent);
-                                $('input[name="commission_order[' + couponId + ']"]').val(commissionOrder);
-                                $('input[name="commission_product[' + couponId + ']"]').val(commissionProduct);
+                                $('input[name="commission_percent[' + couponId + ']"]').val(commissionPercent).trigger('input');
+                                $('input[name="commission_order[' + couponId + ']"]').val(commissionOrder).trigger('input');
+                                $('input[name="commission_product[' + couponId + ']"]').val(commissionProduct).trigger('input');
                                 <?php } ?>
                             }
                         }
@@ -205,13 +239,31 @@ function wcusage_bulk_coupon_page() {
                 e.preventDefault();
                 $('.wcusage-message').remove();
                 $(this).prop('disabled', true); // Disable the button
+                
+                // Get only changed rows
+                var changedRows = $('#wcusage-tools-rows tr[data-changed="true"]');
+                var totalChangedCoupons = changedRows.length;
+                
+                if (totalChangedCoupons === 0) {
+                    $('<div class="wcusage-message updated"><p>No changes detected. Nothing to update.</p></div>').insertAfter('#update-coupons-button');
+                    $(this).prop('disabled', false);
+                    return;
+                }
+                
                 $('#spinner').show(); // Show the spinner icon
-                $('#progress').text('0/' + $('#total-coupons').val()); // Initialize progress
-                updateCoupon(0);
+                $('#progress').text('0/' + totalChangedCoupons); // Initialize progress with changed count
+                updateChangedCoupons(changedRows, 0);
             });
 
-            function updateCoupon(index) {
-                var couponRow = $('#wcusage-tools-rows tr').eq(index + 1);
+            function updateChangedCoupons(changedRows, index) {
+                if (index >= changedRows.length) {
+                    $('<div class="wcusage-message updated"><p>All ' + changedRows.length + ' changed coupons updated successfully!</p></div>').insertAfter('#update-coupons-button');
+                    $('.button-primary').prop('disabled', false);
+                    $('#spinner').hide(); // Hide the spinner icon
+                    return;
+                }
+                
+                var couponRow = changedRows.eq(index);
                 var couponId = couponRow.data('coupon-id');
                 var couponName = $('input[name="coupon_name[' + couponId + ']"]').val();
                 var username = $('input[name="username[' + couponId + ']"]').val();
@@ -227,7 +279,7 @@ function wcusage_bulk_coupon_page() {
                 var commissionProduct = '';
                 <?php } ?>
                 var nextIndex = index + 1;
-                $('#progress').text(nextIndex + '/' + $('#total-coupons').val()); // Update progress
+                $('#progress').text(nextIndex + '/' + changedRows.length); // Update progress
 
                 $.ajax({
                     type: 'POST',
@@ -250,10 +302,14 @@ function wcusage_bulk_coupon_page() {
                     },
                     success: function(response) {
                         if (response.success) {
-                            if (response.success !== 'pass') {
-                                couponRow.addClass('updated');
-                                $('<div class="wcusage-message updated"><p>Coupon ' + couponId + ' updated successfully!</p></div>').insertAfter('#update-coupons-button');
-                            }
+                            couponRow.addClass('updated');
+                            couponRow.removeClass('row-changed');
+                            couponRow.attr('data-changed', 'false');
+                            // Update original values to new values
+                            couponRow.find('input, select').each(function() {
+                                $(this).attr('data-original', $(this).val());
+                            });
+                            $('<div class="wcusage-message updated"><p>Coupon ' + couponId + ' updated successfully!</p></div>').insertAfter('#update-coupons-button');
                         } else {
                             couponRow.addClass('error');
                             var errorMessage = '<p style="font-weight: bold;">Error updating coupon: <span style="color: red;">' + response.error_message + '</span></p>';
@@ -266,19 +322,21 @@ function wcusage_bulk_coupon_page() {
                         couponRow.after('<tr class="wcusage-message error"><td colspan="8"><p>An error occurred. Please try again.</p></td></tr>');
                     },
                     complete: function() {
-                        var nextIndex = index + 1;
-                        if (nextIndex < $('#wcusage-tools-rows tr').length - 1) {
-                            updateCoupon(nextIndex);
-                        } else {
-                            $('<div class="wcusage-message updated"><p>All coupons updated successfully!</p></div>').insertAfter('#update-coupons-button');
-                            $('.button-primary').prop('disabled', false);
-                            $('#spinner').hide(); // Hide the spinner icon
-                        }
+                        updateChangedCoupons(changedRows, index + 1);
                     }
                 });
             }
+
+            // Remove the old updateCoupon function as it's replaced by updateChangedCoupons
         });
     </script>
+    
+    <style>
+        .row-changed {
+            background-color: #fff3cd !important;
+            border-left: 4px solid #ffc107 !important;
+        }
+    </style>
     <?php
 }
 

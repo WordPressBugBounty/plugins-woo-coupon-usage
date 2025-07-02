@@ -121,16 +121,12 @@ function wcusage_setup_page_html() {
             <?php echo esc_html__('Firstly, we need to create the main affiliate dashboard page on your website.', 'woo-coupon-usage'); ?>
           </p>
 
-          <p>
-            <?php echo sprintf( esc_html__('Simply add the %s shortcode to a new page, then select the page from the dropdown below.', 'woo-coupon-usage'), '[couponaffiliates]'); ?>
-          </p>
-
           <?php
           $coupon_shortcode_page = wcusage_get_coupon_shortcode_page('0');
           if(!$coupon_shortcode_page) {
             ?>
             <p>
-                <?php echo esc_html__('Or you can click the button below to automatically generate the page for you:', 'woo-coupon-usage'); ?>
+                <?php echo esc_html__('Click the button below to automatically generate the page:', 'woo-coupon-usage'); ?>
             </p>
             <?php
             do_action('wcusage_hook_getting_started_create');
@@ -139,6 +135,10 @@ function wcusage_setup_page_html() {
             }
           }
           ?>
+
+          <p style="margin: 0;">
+            <?php echo sprintf( esc_html__('Alternatively, you can add the %s shortcode to a new page, then select the page from the dropdown below.', 'woo-coupon-usage'), '[couponaffiliates]'); ?>
+          </p>
 
           </div>
 

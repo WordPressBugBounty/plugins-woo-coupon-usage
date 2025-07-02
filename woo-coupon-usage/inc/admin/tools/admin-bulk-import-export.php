@@ -64,7 +64,8 @@ function wcusage_data_import_export_page() {
     echo '</div>'; // .wrap
     ?>
 
-    <br/><br/><br/><br/>
+    <br/><br/>
+    
     <p><a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_tools')); ?>">Go back to tools ></a></p>
 
     <?php

@@ -524,10 +524,16 @@ if( !function_exists( 'wcusage_setting_sectio_email_free' ) ) {
     <?php echo wcusage_setting_text_option('wcusage_field_registration_admin_email', get_bloginfo( 'admin_email' ), esc_html__( 'Email address for recieving admin notifications:', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'This is the email address that will recieve admin notifications such as new affiliate registrations, and payout notifications.', 'woo-coupon-usage' ); ?></i>
 
-    <br/><br/>
+    <br/>
+
+    <span class="setup-hide">
+
+    <br/>
 
     <!-- Enable New Order Info -->
     <?php echo wcusage_setting_toggle_option('wcusage_field_new_order_info', 1, esc_html__( 'Enable "Affiliate Information" section in the admin "New Order" email.', 'woo-coupon-usage' ), '0px'); ?>
+
+    </span>
 
     <br/>
     <hr style="margin-bottom: 35px;"/>

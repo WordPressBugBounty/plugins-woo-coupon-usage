@@ -6,6 +6,30 @@ if ( !defined( 'ABSPATH' ) ) {
 $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '0' );
 if ( $wcusage_field_registration_enable ) {
     /*
+     * WP Head Check Registration Form
+     *
+     */
+    add_action( 'wp_head', 'wcusage_registration_form_wp_head' );
+    function wcusage_registration_form_wp_head() {
+        if ( isset( $_POST['wcusage_submit_registration_form1'] ) && isset( $_POST['submitaffiliateapplication'] ) ) {
+            // Skip wp_head processing for widget submissions
+            if ( isset( $_POST['wcu-form-type'] ) && $_POST['wcu-form-type'] == 'widget' ) {
+                $wcusage_registration_page = wcusage_get_setting_value( 'wcusage_registration_page', '' );
+                if ( $wcusage_registration_page ) {
+                    return;
+                }
+            }
+            if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wcusage_submit_registration_form1'] ) ), 'wcusage_verify_submit_registration_form1' ) || is_user_logged_in() ) {
+                $submit_form = wcusage_post_submit_application( 0 );
+                if ( $submit_form ) {
+                    // Display $submit_form before the content
+                    echo '<div class="wcu-registration-message">' . wp_kses_post( $submit_form ) . '</div>';
+                }
+            }
+        }
+    }
+
+    /*
      * Shortcode to display registration form
      *
      */
@@ -13,6 +37,7 @@ if ( $wcusage_field_registration_enable ) {
         // Get the attributes
         $atts = shortcode_atts( array(
             'template' => '',
+            'type'     => '',
         ), $atts );
         ob_start();
         $options = get_option( 'wcusage_options' );
@@ -45,14 +70,6 @@ if ( $wcusage_field_registration_enable ) {
         ?>
 
     <?php 
-        if ( isset( $_POST['wcusage_submit_registration_form1'] ) && isset( $_POST['submitaffiliateapplication'] ) ) {
-            if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wcusage_submit_registration_form1'] ) ), 'wcusage_verify_submit_registration_form1' ) || is_user_logged_in() ) {
-                $submit_form = wcusage_post_submit_application( 0 );
-                if ( $submit_form ) {
-                    echo $submit_form;
-                }
-            }
-        }
         if ( isset( $_SESSION["wcu_registration_token"] ) ) {
             unset($_SESSION["wcu_registration_token"]);
         }
@@ -92,6 +109,13 @@ if ( $wcusage_field_registration_enable ) {
                 ?>">
 
       <?php 
+                // Handle widget form submissions
+                $widget_submission_message = '';
+                if ( isset( $_POST['wcusage_submit_registration_form1'] ) && isset( $_POST['submitaffiliateapplication'] ) && isset( $_POST['wcu-form-type'] ) && $_POST['wcu-form-type'] == 'widget' ) {
+                    if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wcusage_submit_registration_form1'] ) ), 'wcusage_verify_submit_registration_form1' ) || is_user_logged_in() ) {
+                        $widget_submission_message = wcusage_post_submit_application( 0 );
+                    }
+                }
                 // Form Title
                 $wcusage_field_registration_form_title = wcusage_get_setting_value( 'wcusage_field_registration_form_title', '' );
                 if ( $wcusage_field_registration_form_title ) {
@@ -158,7 +182,16 @@ if ( $wcusage_field_registration_enable ) {
                             ?> wcu_form_style_columns<?php 
                         }
                         ?>">
-          <form method="post" id="wcu_form_affiliate_register" class="wcu_form_affiliate_register" enctype="multipart/form-data">
+          <form method="post" id="wcu_form_affiliate_register" class="wcu_form_affiliate_register" enctype="multipart/form-data"
+          <?php 
+                        if ( isset( $atts['type'] ) && $atts['type'] == "widget" ) {
+                            ?>
+          action="<?php 
+                            echo esc_url( $registration_page_url );
+                            ?>"
+          <?php 
+                        }
+                        ?>>
 
             <?php 
                         if ( is_user_logged_in() && (!$wcusage_registration_enable_admincan && wcusage_check_admin_access() || !wcusage_check_admin_access()) ) {
@@ -362,6 +395,15 @@ if ( $wcusage_field_registration_enable ) {
                         ?>"></p>
 
             <i class="register-spinner fa fa-spinner fa-spin" style="display: none; text-align: center; margin: 10px auto; font-size: 20px; width: 40px;"></i>
+
+            <?php 
+                        // If atts type is set to "widget" add an extra hidden field
+                        if ( isset( $atts['type'] ) && $atts['type'] == "widget" ) {
+                            ?>
+              <input type="hidden" name="wcu-form-type" value="widget">
+              <?php 
+                        }
+                        ?>
 
           </form>
           </div>

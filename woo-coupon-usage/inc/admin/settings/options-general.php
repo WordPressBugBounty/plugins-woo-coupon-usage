@@ -1196,18 +1196,6 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
 
     </div>
 
-    <?php if( isset($_GET['page']) && $_GET['page'] == 'wcusage_setup' ) { ?>
-
-      <div style="margin-top: 20px; font-size: 12px;">
-
-        <i>
-            <?php echo esc_html__( 'Please changes to generate the portal page.', 'woo-coupon-usage' ); ?>
-        </i>
-
-      </div>
-
-    <?php } ?>
-
     </div>
 
     </span>

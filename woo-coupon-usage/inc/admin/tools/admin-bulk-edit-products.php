@@ -46,9 +46,12 @@ function wcusage_bulk_product_page() {
 
     <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
 
-    <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
+    <div class="wrap wcusage-admin-page">
+        <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
+    </div>
 
     <div class="wrap wcusage-bulk-edit-products wcusage-tools">
+
         <h2><?php echo esc_html__('Bulk Edit: Product Settings', 'woo-coupon-usage'); ?></h2>
         <p><?php echo esc_html__('Use this tool to bulk edit your per-product commission settings. The username must exist or it will not be updated.', 'woo-coupon-usage'); ?></p>
         <p><?php echo esc_html__('Currently "Per-Affiliate Product Commission Rates" can only be edited by viewing/editing the individual product.', 'woo-coupon-usage'); ?></p>
@@ -73,7 +76,7 @@ function wcusage_bulk_product_page() {
             <br/>
             <p><span id="spinner" style="display: none; font-size: 20px; color: green;"><i class="fas fa-spinner fa-spin"></i> Updating... <span id="progress">0/0</span></span></p>
             <p><input type="button" value="Update Products" id="update-products-button" class="button button-primary" style="margin-bottom: 20px;"></p>
-            <br/><br/><br/><br/>
+            <br/><br/>
             <p><a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_tools')); ?>">Go back to tools ></a></p>
         </form>
     </div>

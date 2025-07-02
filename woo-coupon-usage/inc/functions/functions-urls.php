@@ -745,6 +745,20 @@ if( !function_exists( 'wcusage_get_referral_url_stats' ) ) {
 add_action('wcusage_hook_get_referral_url_stats', 'wcusage_get_referral_url_stats', 10, 3);
 
 /**
+ * Generate Referral URL for Coupon
+ *
+ * @param string $page_url
+ * @param string $coupon_code
+ *
+ * @return string
+ */
+function wcusage_generate_referral_url($page_url, $coupon_code) {
+    $wcusage_urls_prefix = wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon');
+    $separator = strpos($page_url, '?') !== false ? '&' : '?';
+    return $page_url . $separator . $wcusage_urls_prefix . '=' . urlencode($coupon_code);
+}
+
+/**
  * Generate Random Short URL Slug
  *
  * @param int $length
