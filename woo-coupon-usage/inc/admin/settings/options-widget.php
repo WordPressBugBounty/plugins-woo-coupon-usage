@@ -39,6 +39,8 @@ function wcusage_field_cb_widget( $args )
 
                 <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'The widget is built with performance in mind, only loading most of the resources needed when the button is clicked.', 'woo-coupon-usage' ); ?><br/>
 
+                <span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'If affiliate statistics need to be recalculated, users will be directed to visit the full dashboard to complete the calculations first.', 'woo-coupon-usage' ); ?><br/>
+
                 <br/><br/>
                 
                 <strong><?php echo esc_html__( 'For more information, please watch the video below:', 'woo-coupon-usage' ); ?></strong>
@@ -153,7 +155,7 @@ function wcusage_field_cb_widget( $args )
             <h4><?php echo esc_html__( 'Button Visibility', 'woo-coupon-usage' ); ?></h4>
 
             <?php echo wcusage_setting_toggle_option('wcusage_field_floating_widget_show_payout_button', 1, esc_html__( 'Show "Request Payout" button', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Display the payout request button on the payouts tab.', 'woo-coupon-usage' ); ?></i><br/>
+            <i><?php echo esc_html__( 'Display the payout request button on the payouts tab (PRO).', 'woo-coupon-usage' ); ?></i><br/>
 
             <br/>
 

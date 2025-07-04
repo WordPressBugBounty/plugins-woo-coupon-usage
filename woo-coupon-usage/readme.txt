@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.4.0
+Stable tag: 6.4.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -45,9 +45,17 @@ With this plugin you can give your affiliates access to a user-friendly affiliat
 
 [youtube https://www.youtube.com/watch?v=hruamY_mEpo]
 
+**-- Floating Affiliate Widget --**
+
+* The floating affiliate widget is allows you to display a floating affiliate dashboard widget on your website. <a href="https://couponaffiliates.com/docs/floating-affiliate-widget">Learn More.</a>
+
+* For existing affiliates, when they click the button, it provides instant access to a compact version of their affiliate dashboard. It will display some of the most important dashboard statistics and features, including their referral coupon and links, referral statistics, recently referred orders, payout details, and creatives.
+
+* For potential affiliates, it’s an invitation to join your program. When they click the button, it gives them quick access to the registration form. You can also display a customisable “benefits” section on the widget explaining what your affiliate program has to offer.
+
 **-- Accurate Commission Tracking --**
 
-* Affiliates can see the total commission earned via their coupon, and for each individual order in the recent orders list.
+* Affiliates can see the total commission earned via their coupon, and for each individual order they referred.
 
 * There are 3 types of commission amounts, including fixed commission “per product”, “per order”, and a "percentage" of the total order. You can even set all 3 for more flexible commission calculations!
 
@@ -266,10 +274,25 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= Version 6.4.1 - 4th July 2025 =
+- New: Added a new "Export Affiliate Users" button to the "Affiliate Users" admin page, to export a CSV file with all affiliate users and their details.
+- New: Added a bulk action on the "Affiliate Orders (Referrals)" admin page, to bulk "Update Unpaid Commission" for all selected orders. This will trigger the granting of unpaid commission for completed orders that have not already been granted commission.
+- Improvement: On the floating affiliate widget, if statistics need to be refreshed for the affiliate coupon, it will show a message and button for this.
+- Improvement: When adding a new affiliate, either by approving an application, or adding an affiliate manually, it will no longer show the "calculating stats" loading bar the first time the dashboard is loaded for that affiliate coupon.
+- Tweak: Implemented some image file size limits for the creatives to prevent performance issues with large images.
+- Tweak: The floating affiliate widget is now hidden from the affiliate portal pages if the "hide on affiliate pages" option is enabled.
+- Fix: Fixed an issue with the search on the "Coupons" admin page.
+- Fix: Fixed an issue with the message displayed after submitting the affiliate registration form in some cases being showed in the wrong place.
+- Fix: Fixed an issue with the affiliate portal registration form sometimes generating 2 coupons for the affiliate if auto accept was enabled.
+- Fix: Added a nonce check for bulk actions on the "Affiliate Orders (Referrals)" admin page as a security precaution.
+- Fix: Added a nonce check for the wcusage_update_all_stats_data endpoint to prevent unauthorized access.
+- Other: Updated translations.
+
 = Version 6.4.0 - 2nd July 2025 =
 = New: Added a new "Floating Affiliate Widget" feature to the plugin.
 - Improvement: Improved the bulk edit coupons feature to only loop through coupons that have actually been edited.
 - Tweak: Made a few tweaks to the design of some admin pages.
+- Tweak: Made a few tweaks to the setup wizard.
 - Fix: (PRO) Fixed an issue with the admin "payouts" page where the buttons were not showing properly in some cases.
 - Fix: (PRO) Fixed an issue with the "Request Payout" button for manual payout methods when the payout details field is disabled.
 - Fix: (PRO) Fixed an issue with some of the payouts settings not displaying properly in certain cases.
@@ -486,47 +509,5 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 - Tweak: Added a warning and confirmation message when trying to delete a coupon on the admin affiliate coupons page.
 - Fix: (PRO) Fixed an issue with generating QR codes for landing page URLs.
 - Other: Tested with WooCommerce 9.5.1
-
-= Version 5.17.3 - 18th December 2024 =
-- Tweak: Moved the "Hide commission statistics for non-affiliate coupons" option and added another "Stop unpaid commission from being earned for non-affiliate coupons" option to make things more clear on what it does.
-- Tweak: Added some additional sanitisation to various areas of the code for extra precaution.
-- Tweak: Orders with the "Refunded" status will now no longer show any values for the order totals or commission earned, if refunded orders are shown on the affiliate dashboard.
-- Tweak: Added nocache_headers() to the affiliate dashboard page to help prevent caching issues.
-- Fix: Fixed an issue with the "Welcome Bonus" performance bonus.
-- Fix: Fixed an issue with "Lifetime Commission" not working for some websites in some cases.
-- Fix: Fixed an issue with the "Completed Date" option for sorting orders on the affiliate dashboard with HPOS enabled.
-- Fix: Fixed an issue with the new "Time" column on the recent orders tab not showing properly when they are sorted by "Completed Date".
-- Fix: When using the "legacy" save settings button for the admin settings page, it will now allow decimal values for the commission rates.
-- Fix: (PRO) Fixed the "Generate" button for QR codes not being localised for translations.
-- Other: Updated translations.
-
-= Version 5.17.2 - 12th December 2024 =
-- Security Fix: Fixed a small XSS vulnerability bug (reported by WordFence via Arkadiusz Hydzik).
-- Tweak: Added a link to the individual admin order edit page to refresh the affiliate stats for that specific order.
-- Other: Updated to Freemius SDK 2.10.1
-
-= Version 5.17.1 - 11th December 2024 =
-- Fix: Fixed an issue with the {discount} merge tag on dynamic creatives.
-
-= Version 5.17.0 - 11th December 2024 =
-- New: (PRO) Added an option to allow affiliate to enter custom payout amounts, instead of being always set to the full amount available to them as "unpaid commission".
-- New: (PRO) Added an option to choose multiple different "completed" order statuses allowed for "unpaid commission" to be earned, instead of only being able to select one completed status.
-- New: (PRO) Added an option to choose if the "Request Payout" button should be shown on the affiliate dashboard.
-- New: (PRO) Added an option to only enable the "Scheduled Payout Requests" feature for specific payout methods.
-- Tweak: (PRO) Tweak to the styling of the "Payouts" tab on the affiliate dashboard.
-- Tweak: (PRO) Now shows the total for "Completed Payments" on the "Payouts" tab on the affiliate dashboard.
-- Tweak: Added an option in the "Design" settings tab to customise the "Tabs Font Size" on the affiliate dashboard.
-- Tweak: Added an option in the "Debug" tab, to hide 0.00 values on checkout summary, for referral coupons if there is no discount.
-- Tweak: Added an option in the "Debug" tab, to customise the "Coupon" text label shown on the checkout for referral coupons.
-- Tweak: Added options in the "General" tab, to show/hide the order date and time on the "Recent Orders" tab of the affiliate dashboard.
-- Tweak: Improved the order date filtering on the affiliate dashboard "recent orders" when the site is set to a timezone other than GMT.
-- Tweak: Added some extra error handling to the affiliate coupons list in the admin area to prevent potential PHP errors.
-- Fix: (PRO) Fixed an issue on some sites with the "Leaderboards" admin page not loading correctly.
-- Fix: Fixed "Payouts" tab link showing the new dropdown mobile menu on the affiliate dashboard for the free version.
-- Fix: Fixed a potential issue with the "new customers only" option for coupons being bypassed in some cases by existing customers when checking out as a guest with an existing email address.
-- Fix: (PRO) Fixed a potential issue with partial refunds giving a PHP error.
-- Dev: (PRO) Added a filter to allow the referral URL for dynamic creative QR codes to be modified.
-- Other: Updated translations.
-- Other: Tested with WooCommerce 9.4.3
 
 <a href="https://roadmap.couponaffiliates.com/updates/">View the full changelog</a>

@@ -53,7 +53,28 @@ function wcusage_is_affiliate_page_quick() {
             wcusage_get_setting_value('wcusage_mla_dashboard_page', ''),
         ));
     }
-    
+
+    // Get current URL slug from URL headers without parameters
+    $page_slug = '';
+    if (isset($_SERVER['REQUEST_URI'])) {
+        $request_uri = $_SERVER['REQUEST_URI'];
+        $parsed_url = parse_url($request_uri);
+        $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
+        $page_slug = trim($path, '/');
+    }
+
+    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+    // If page URL slug matches portal slug
+    if ($page_slug === $wcusage_portal_slug) {
+        return true;
+    }
+
+    $wcusage_mla_portal_slug = wcusage_get_setting_value('wcusage_mla_portal_slug', 'mla-affiliate-portal');
+    // If page URL slug matches MLA portal slug
+    if ($page_slug === $wcusage_mla_portal_slug) {
+        return true;
+    }
+
     $current_page_id = get_queried_object_id();
     if ($current_page_id && in_array($current_page_id, $affiliate_page_ids)) {
         return true;

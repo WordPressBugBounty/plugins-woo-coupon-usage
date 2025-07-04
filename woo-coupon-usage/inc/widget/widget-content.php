@@ -13,6 +13,52 @@ function wcusage_generate_affiliate_dashboard(  $user_coupons, $settings  ) {
     $discount_text = '';
     $commission_message = '';
     if ( $first_coupon_id ) {
+        // Check if stats refresh is needed for any of the user's coupons
+        $needs_refresh = false;
+        $dashboard_url = '';
+        foreach ( $user_coupons as $coupon_id ) {
+            $force_refresh_stats = wcusage_check_if_refresh_needed( $coupon_id );
+            if ( $force_refresh_stats ) {
+                $needs_refresh = true;
+                $coupon_info = wcusage_get_coupon_info_by_id( $coupon_id );
+                if ( isset( $coupon_info[4] ) ) {
+                    $dashboard_url = $coupon_info[4];
+                }
+                break;
+            }
+        }
+        // If refresh is needed, show message instead of normal dashboard
+        if ( $needs_refresh ) {
+            ?>
+            <div class="wcusage-widget-refresh-notice">
+                <div class="wcusage-widget-notice-icon">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <div class="wcusage-widget-notice-content">
+                    <h3><?php 
+            echo esc_html__( 'Statistics Update Required', 'woo-coupon-usage' );
+            ?></h3>
+                    <p><?php 
+            echo esc_html__( 'Your affiliate statistics need to be refreshed and recalculated. Please visit your full affiliate dashboard to complete this process.', 'woo-coupon-usage' );
+            ?></p>
+                    <?php 
+            if ( $dashboard_url ) {
+                ?>
+                        <a href="<?php 
+                echo esc_url( $dashboard_url );
+                ?>" class="wcusage-widget-dashboard-button" target="_blank">
+                            <?php 
+                echo esc_html__( 'Visit Full Dashboard', 'woo-coupon-usage' );
+                ?> <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    <?php 
+            }
+            ?>
+                </div>
+            </div>
+            <?php 
+            return ob_get_clean();
+        }
         // Get discount information
         $discount_type = get_post_meta( $first_coupon_id, 'discount_type', true );
         $amount = get_post_meta( $first_coupon_id, 'coupon_amount', true );

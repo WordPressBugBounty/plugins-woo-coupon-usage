@@ -229,6 +229,11 @@ add_action('wp_ajax_nopriv_wcusage_get_orders_by_coupon_ajax', 'wcusage_get_orde
  */
 function wcusage_update_all_stats_data() {
 
+  // Verify nonce for security
+  if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'wcusage_update_stats_nonce')) {
+    wp_die('Security check failed');
+  }
+
   $options = get_option( 'wcusage_options' );
 
   $stats = $_POST['stats'];
@@ -379,6 +384,7 @@ global $wpdb;
     };
     var first_order_date = new Date('<?php echo esc_html($first_order_date); ?>');
     var last_order_date = new Date('<?php echo esc_html($last_order_date); ?>');
+    var updateStatsNonce = '<?php echo wp_create_nonce('wcusage_update_stats_nonce'); ?>';
 
     function getOrders() {
     jQuery.ajax({
@@ -439,7 +445,8 @@ global $wpdb;
       data: {
       'action': 'wcusage_update_all_stats_data',
       'stats': allstats,
-      'coupon_code': '<?php echo esc_html($coupon_code); ?>'
+      'coupon_code': '<?php echo esc_html($coupon_code); ?>',
+      'nonce': updateStatsNonce
       },
       success: function(response) {
         updateProgressBar(100);

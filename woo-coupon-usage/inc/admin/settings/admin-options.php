@@ -871,7 +871,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
       <p style="font-size: 20px; color: green; display: none;" id="wcu-number-settings-saved-message"><i class="fas fa-check-square" style="font-size: 20px; color: green; background: transparent; padding: 0;"></i>&nbsp; <span id="wcu-number-settings-saved">0</span> settings were updated (this session).</p>
 
-      <span style="transform: scale(0.8); -webkit-transform-origin-x: 0;">
+      <div style="transform: scale(0.8); transform-origin: 0 0;">
 
         <strong><?php 
         echo esc_html__( 'Settings not saving automatically?', 'woo-coupon-usage' );
@@ -887,7 +887,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         <i style="margin-top: -5px;"><?php 
         echo esc_html__( 'This will disable automatic ajax saving, and instead will enable the "Save Settings" button, and you will save all settings at once.', 'woo-coupon-usage' );
         ?></i>
-        <br/><br/>
+        <br/>
 
         <script>
         jQuery( document ).ready(function() {
@@ -925,7 +925,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
         </span>
 
-      </span>
+      </div>
 
       <br/><p style="display: block; font-size: 15px; margin-bottom: 10px; font-weight: bold;">
       <?php 

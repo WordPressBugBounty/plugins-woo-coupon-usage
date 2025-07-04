@@ -185,7 +185,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
     function process_bulk_action() {
         
         // Check nonce for security
-        if ( ! isset( $_POST['_wcusage_bulk_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wcusage_bulk_nonce'] ) ), 'wcusage_coupon_users_bulk_action' ) ) {
+        if ( ! isset( $_POST['_wcusage_bulk_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wcusage_bulk_nonce'] ) ), 'wcusage_affiliates_bulk_action' ) ) {
             return;
         }
 
@@ -257,7 +257,8 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         foreach ($coupons as $coupon) {
             $all_stats = wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_meta', '1');
             $wcusage_hide_all_time = wcusage_get_setting_value('wcusage_field_hide_all_time', '0');
-            if($all_stats && isset($wcu_alltime_stats) && !$wcusage_hide_all_time) {
+            $wcu_alltime_stats = get_post_meta($coupon, 'wcu_alltime_stats', true);
+            if($all_stats && !$wcusage_hide_all_time && isset($wcu_alltime_stats) && isset($wcu_alltime_stats['total_count'])) {
                 $usage = $wcu_alltime_stats['total_count'];
             }
             if(!$usage) {
@@ -416,6 +417,9 @@ function wcusage_coupon_users_page() {
         <span class="wcusage-admin-title-buttons">
             <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New Affiliate</a>
             <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-bulk-coupon-creator')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Bulk Create Affiliates</a>
+            <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wcusage_affiliates&action=export_csv'), 'wcusage_export_users_csv')); ?>" class="wcusage-settings-button" id="wcu-admin-export-csv" style="float: right;">
+                <?php echo esc_html__('Export Affiliate Users', 'woo-coupon-usage'); ?> <span class="fa-solid fa-download"></span>
+            </a>
             <p style="display: block;" class="wcusage_users_page_desc"><?php echo esc_html__('This page displays all the users that are assigned to an affiliate coupon.', 'woo-coupon-usage'); ?></p>
             <br/>
         </span>
@@ -475,6 +479,165 @@ function wcusage_coupon_users_page() {
     });
     </script>
 	<?php
+}
+
+/**
+ * Handle CSV export request
+ */
+add_action('admin_init', 'wcusage_handle_export_csv');
+function wcusage_handle_export_csv() {
+    // Check if we're on the correct page and action
+    if (isset($_GET['page']) && 
+        (($_GET['page'] === 'wcusage_coupon_users') || ($_GET['page'] === 'wcusage_affiliates')) && 
+        isset($_GET['action']) && $_GET['action'] === 'export_csv' && 
+        isset($_GET['_wpnonce'])) {
+        
+        // Verify nonce and permissions
+        if (wp_verify_nonce($_GET['_wpnonce'], 'wcusage_export_users_csv')) {
+            // Double-check admin access
+            if (!current_user_can('manage_options') && !current_user_can('administrator')) {
+                wp_die(__('Sorry, you are not allowed to access this page.', 'woo-coupon-usage'));
+            }
+            
+            wcusage_export_coupon_users_csv();
+            exit;
+        }
+    }
+}
+
+/**
+ * Export coupon users to CSV
+ */
+function wcusage_export_coupon_users_csv() {
+    // Get all users without pagination
+    $users = wcusage_get_coupon_users();
+    
+    // Set headers for CSV download
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="coupon-affiliate-users-' . date('Y-m-d-H-i-s') . '.csv"');
+    
+    // Create output stream
+    $output = fopen('php://output', 'w');
+    
+    // Add BOM for Excel UTF-8 compatibility
+    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+    
+    // Prepare column headers
+    $headers = array(
+        'User ID',
+        'Username',
+        'Display Name',
+        'Email',
+        'Group / Role',
+        'Total Referrals',
+        'Total Sales',
+        'Total Commission',
+        'Unpaid Commission',
+        'Affiliate Coupons'
+    );
+    
+    // Add conditional headers
+    if (wcu_fs()->can_use_premium_code()) {
+        $credit_enable = wcusage_get_setting_value('wcusage_field_storecredit_enable', 0);
+        $system = wcusage_get_setting_value('wcusage_field_storecredit_system', 'default');
+        $storecredit_users_col = wcusage_get_setting_value('wcusage_field_tr_payouts_storecredit_users_col', 1);
+        if ($credit_enable && $storecredit_users_col && $system == "default") {
+            $credit_label = wcusage_get_setting_value('wcusage_field_tr_payouts_storecredit_only', 'Store Credit');
+            $headers[] = $credit_label;
+        }
+        
+        $wcusage_field_mla_enable = wcusage_get_setting_value('wcusage_field_mla_enable', '0');
+        if ($wcusage_field_mla_enable) {
+            $headers[] = 'Total MLA Commission';
+        }
+    }
+    
+    // Write headers
+    fputcsv($output, $headers);
+    
+    // Process each user
+    foreach ($users as $user) {
+        $user_id = $user['ID'];
+        $user_data = get_userdata($user_id);
+        
+        // Get coupons for this user
+        $coupons = wcusage_get_users_coupons_ids($user_id);
+        
+        // Calculate totals
+        $total_referrals = 0;
+        $total_sales = 0;
+        $total_commission = 0;
+        $unpaid_commission = 0;
+        $coupon_codes = array();
+        
+        foreach ($coupons as $coupon) {
+            $coupon_code = get_the_title($coupon);
+            $coupon_codes[] = $coupon_code;
+            
+            // Get usage count
+            $wcu_alltime_stats = get_post_meta($coupon, 'wcu_alltime_stats', true);
+            $all_stats = wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_meta', '1');
+            $wcusage_hide_all_time = wcusage_get_setting_value('wcusage_field_hide_all_time', '0');
+            
+            if ($all_stats && $wcu_alltime_stats && !$wcusage_hide_all_time) {
+                if (isset($wcu_alltime_stats['total_count'])) {
+                    $total_referrals += $wcu_alltime_stats['total_count'];
+                }
+                if (isset($wcu_alltime_stats['total_orders'])) {
+                    $sales = $wcu_alltime_stats['total_orders'];
+                    if (isset($wcu_alltime_stats['full_discount'])) {
+                        $sales -= $wcu_alltime_stats['full_discount'];
+                    }
+                    $total_sales += $sales;
+                }
+                if (isset($wcu_alltime_stats['total_commission'])) {
+                    $total_commission += $wcu_alltime_stats['total_commission'];
+                }
+            } else {
+                $c = new WC_Coupon($coupon_code);
+                $usage = $c->get_usage_count();
+                $total_referrals += $usage;
+            }
+            
+            // Get unpaid commission
+            $unpaid_commission += (float)get_post_meta($coupon, 'wcu_text_unpaid_commission', true);
+        }
+        
+        // Prepare row data
+        $row = array(
+            $user_id,
+            $user_data->user_login,
+            $user_data->display_name,
+            $user_data->user_email,
+            ucwords(str_replace('_', ' ', implode(', ', $user_data->roles))),
+            $total_referrals,
+            number_format($total_sales, 2, '.', ''),
+            number_format($total_commission, 2, '.', ''),
+            number_format($unpaid_commission, 2, '.', ''),
+            implode(', ', $coupon_codes)
+        );
+        
+        // Add conditional data
+        if (wcu_fs()->can_use_premium_code()) {
+            $credit_enable = wcusage_get_setting_value('wcusage_field_storecredit_enable', 0);
+            $system = wcusage_get_setting_value('wcusage_field_storecredit_system', 'default');
+            $storecredit_users_col = wcusage_get_setting_value('wcusage_field_tr_payouts_storecredit_users_col', 1);
+            if ($credit_enable && $storecredit_users_col && $system == "default" && function_exists('wcusage_get_credit_users_balance')) {
+                $row[] = number_format(wcusage_get_credit_users_balance($user_id), 2, '.', '');
+            }
+            
+            $wcusage_field_mla_enable = wcusage_get_setting_value('wcusage_field_mla_enable', '0');
+            if ($wcusage_field_mla_enable) {
+                $mla_commission = wcusage_mla_total_earnings($user_id);
+                $row[] = number_format($mla_commission, 2, '.', '');
+            }
+        }
+        
+        // Write row
+        fputcsv($output, $row);
+    }
+    
+    fclose($output);
 }
 
 /**

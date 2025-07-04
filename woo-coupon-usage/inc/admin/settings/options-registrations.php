@@ -822,10 +822,21 @@ function wcusage_field_cb_registration( $args )
 
           <script>
           jQuery(document).ready(function() {
-              jQuery('.wcusage_mailing_list').change(function() {
-                  // Define a list of all possible mailing list types
-                  var allMailingLists = ['mailpoet', 'mailchimp', 'convertkit', 'mailerlite', 'activecampaign', 'sendinblue', 'klaviyo', 'getresponse'];
 
+              // Define a list of all possible mailing list types
+              var allMailingLists = ['mailpoet', 'mailchimp', 'convertkit', 'mailerlite', 'activecampaign', 'sendinblue', 'klaviyo', 'getresponse'];
+
+              // Hide all sections initially
+              allMailingLists.forEach(function(list) {
+                  jQuery('.wcu-list-' + list).hide();
+              });
+
+              // Show only the selected mailing list section
+              var selectedList = jQuery('.wcusage_mailing_list').val();
+              jQuery('.wcu-list-' + selectedList).show();
+              jQuery('.wcu-field-section-lists').show();
+
+              jQuery('.wcusage_mailing_list').change(function() {
                   // Hide all sections initially
                   allMailingLists.forEach(function(list) {
                       jQuery('.wcu-list-' + list).hide();
@@ -836,6 +847,7 @@ function wcusage_field_cb_registration( $args )
                   jQuery('.wcu-list-' + selectedList).show();
                   jQuery('.wcu-field-section-lists').show();
               });
+
           });
           </script>
 

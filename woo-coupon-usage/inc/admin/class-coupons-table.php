@@ -233,7 +233,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
                                 <div class="form-row">
                                     <div class="form-field">
                                         <label for="coupon_code_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Coupon Code', 'woo-coupon-usage' ); ?></label>
-                                        <input type="text" id="coupon_code_<?php echo esc_attr( $coupon_id ); ?>" value="<?php echo esc_attr( $coupon->get_code() ); ?>" required>
+                                        <input type="text" id="coupon_code_<?php echo esc_attr( $coupon_id ); ?>" value="<?php echo esc_attr( $coupon->get_code() ); ?>">
                                     </div>
                                     <div class="form-field">
                                         <label for="coupon_description_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Description', 'woo-coupon-usage' ); ?></label>
@@ -443,23 +443,26 @@ function wcusage_coupons_page() {
     ?>
     <div class="wrap wcusage-admin-page">
         <?php do_action( 'wcusage_hook_dashboard_page_header', '' ); ?>
-        <form method="get">
-            <h1 class="wp-heading-inline wcusage-admin-title wcusage-admin-title-coupons">
-                <?php esc_html_e( 'Coupons', 'woo-coupon-usage' ); ?>
-                <span class="wcusage-admin-title-buttons">
-                    <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=shop_coupon' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Add Coupon', 'woo-coupon-usage' ); ?></a>
-                    <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage_add_affiliate' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Add Affiliate Coupon', 'woo-coupon-usage' ); ?></a>
-                    <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage-bulk-coupon-creator' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Bulk Create Coupons', 'woo-coupon-usage' ); ?></a>
-                    <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage-bulk-edit-coupon' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Bulk Edit Coupons', 'woo-coupon-usage' ); ?></a>
-                </span>
-                <br/>
-                <span class="wcusage-admin-title-filters" style="margin-bottom: 10px;">
+        <h1 class="wp-heading-inline wcusage-admin-title wcusage-admin-title-coupons">
+            <?php esc_html_e( 'Coupons', 'woo-coupon-usage' ); ?>
+            <span class="wcusage-admin-title-buttons">
+                <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=shop_coupon' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Add Coupon', 'woo-coupon-usage' ); ?></a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage_add_affiliate' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Add Affiliate Coupon', 'woo-coupon-usage' ); ?></a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage-bulk-coupon-creator' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Bulk Create Coupons', 'woo-coupon-usage' ); ?></a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage-bulk-edit-coupon' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Bulk Edit Coupons', 'woo-coupon-usage' ); ?></a>
+            </span>
+            <br/>
+            <span class="wcusage-admin-title-filters" style="margin-bottom: 10px;">
+                <form method="get" style="display: inline;">
                     <input type="hidden" name="page" value="<?php echo esc_attr( isset( $_REQUEST['page'] ) ? esc_html( wp_unslash( $_REQUEST['page'] ) ) : '' ); ?>" />
                     <input type="checkbox" name="affiliate_only" value="true" <?php checked( $affiliate_only ); ?> onchange="this.form.submit();">
                     <?php esc_html_e( 'Show Affiliate Coupons Only', 'woo-coupon-usage' ); ?>
-                </span>
-            </h1>
+                </form>
+            </span>
+        </h1>
+        <form method="get" id="wcusage-coupons-filter">
             <input type="hidden" name="page" value="<?php echo esc_attr( isset( $_REQUEST['page'] ) ? esc_html( wp_unslash( $_REQUEST['page'] ) ) : '' ); ?>" />
+            <input type="hidden" name="affiliate_only" value="<?php echo $affiliate_only ? 'true' : ''; ?>" />
             <?php
             $table->prepare_items();
             $table->search_box( 'Search Coupons', 'search_id' );

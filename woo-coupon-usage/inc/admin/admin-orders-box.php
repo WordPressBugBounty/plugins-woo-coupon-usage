@@ -187,6 +187,7 @@ function wcusage_custom_box_html_content(
     $order_id = $order->get_id();
     $order = wc_get_order( $order_id );
     $paidcommission = wcusage_order_meta( $order_id, 'wcu_commission_paid', true );
+    $lifetimeaffiliatedone = false;
     if ( !empty( $_GET['update_unpaid_commission'] ) && $_GET['update_unpaid_commission'] ) {
         $paidcommission = wcusage_order_meta( $order_id, 'wcu_commission_paid', true );
         $lifetimeaffiliate = wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer' );

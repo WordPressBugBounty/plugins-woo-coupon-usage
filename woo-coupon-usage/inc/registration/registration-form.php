@@ -11,20 +11,41 @@ if ( $wcusage_field_registration_enable ) {
      */
     add_action( 'wp_head', 'wcusage_registration_form_wp_head' );
     function wcusage_registration_form_wp_head() {
+        // Only run if current page is not the registration page
+        $wcusage_registration_page = wcusage_get_setting_value( 'wcusage_registration_page', '' );
+        if ( $wcusage_registration_page && is_page( $wcusage_registration_page ) ) {
+            return;
+        }
         if ( isset( $_POST['wcusage_submit_registration_form1'] ) && isset( $_POST['submitaffiliateapplication'] ) ) {
             // Skip wp_head processing for widget submissions
             if ( isset( $_POST['wcu-form-type'] ) && $_POST['wcu-form-type'] == 'widget' ) {
-                $wcusage_registration_page = wcusage_get_setting_value( 'wcusage_registration_page', '' );
                 if ( $wcusage_registration_page ) {
                     return;
                 }
             }
             if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wcusage_submit_registration_form1'] ) ), 'wcusage_verify_submit_registration_form1' ) || is_user_logged_in() ) {
                 $submit_form = wcusage_post_submit_application( 0 );
-                if ( $submit_form ) {
-                    // Display $submit_form before the content
-                    echo '<div class="wcu-registration-message">' . wp_kses_post( $submit_form ) . '</div>';
-                }
+                ?>
+        <script>
+        jQuery(document).ready(function($) {
+          // Get .wcu-registration-response as response
+          var response = $('.wcu-registration-response');
+          var pageTitle = $('.page-title');
+          if(pageTitle.length) {
+            response.insertAfter(pageTitle);
+          }
+          // If no .page-title insert before .entry-content
+          if( !pageTitle.length ) {
+            var entryContent = $('.entry-content');
+            if(entryContent.length) {
+              response.insertBefore(entryContent);
+            } else {
+              $('.wrap').prepend(response);
+            }
+          }
+        });
+        </script>
+        <?php 
             }
         }
     }
@@ -56,6 +77,18 @@ if ( $wcusage_field_registration_enable ) {
         $wcusage_registration_enable_admincan = wcusage_get_setting_value( 'wcusage_field_registration_enable_admincan', '0' );
         $auto_coupon = "";
         $auto_coupon_format = "";
+        // Handle form submission
+        $form_response = '';
+        if ( isset( $_POST['wcusage_submit_registration_form1'] ) && isset( $_POST['submitaffiliateapplication'] ) ) {
+            // Skip widget submissions that should redirect
+            if ( !(isset( $_POST['wcu-form-type'] ) && $_POST['wcu-form-type'] == 'widget') ) {
+                if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wcusage_submit_registration_form1'] ) ), 'wcusage_verify_submit_registration_form1' ) || is_user_logged_in() ) {
+                    ob_start();
+                    wcusage_post_submit_application( 0 );
+                    $form_response = ob_get_clean();
+                }
+            }
+        }
         ?>
 
     <?php 
@@ -113,8 +146,18 @@ if ( $wcusage_field_registration_enable ) {
                 $widget_submission_message = '';
                 if ( isset( $_POST['wcusage_submit_registration_form1'] ) && isset( $_POST['submitaffiliateapplication'] ) && isset( $_POST['wcu-form-type'] ) && $_POST['wcu-form-type'] == 'widget' ) {
                     if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wcusage_submit_registration_form1'] ) ), 'wcusage_verify_submit_registration_form1' ) || is_user_logged_in() ) {
-                        $widget_submission_message = wcusage_post_submit_application( 0 );
+                        ob_start();
+                        wcusage_post_submit_application( 0 );
+                        $widget_submission_message = ob_get_clean();
                     }
+                }
+                // Display form response if available
+                if ( !empty( $form_response ) ) {
+                    echo '<div class="wcu-registration-response">' . $form_response . '</div>';
+                }
+                // Display widget submission message if available
+                if ( !empty( $widget_submission_message ) ) {
+                    echo '<div class="wcu-registration-response">' . $widget_submission_message . '</div>';
                 }
                 // Form Title
                 $wcusage_field_registration_form_title = wcusage_get_setting_value( 'wcusage_field_registration_form_title', '' );
@@ -633,6 +676,8 @@ function wcusage_post_submit_application(  $adminpost  ) {
     $role = sanitize_text_field( $post_field_values['role'] );
     // Refills the fields if it failed to submit.
     $refillfields = "\r\n  <script>\r\n  jQuery( document ).ready(function() {\r\n    jQuery('#wcu-input-username').val('" . esc_html( $username ) . "');\r\n    jQuery('#wcu-input-email').val('" . esc_html( $email ) . "');\r\n    jQuery('#wcu-input-first-name').val('" . esc_html( $firstname ) . "');\r\n    jQuery('#wcu-input-last-name').val('" . esc_html( $lastname ) . "');\r\n    jQuery('#wcu-input-coupon').val('" . esc_html( $couponcode ) . "');\r\n    jQuery('#wcu-input-website').val('" . esc_html( $website ) . "');\r\n    jQuery('#wcu-input-type').val('" . esc_html( $type ) . "');\r\n    jQuery('#wcu-input-promote').val('" . esc_html( $promote ) . "');\r\n    jQuery('#wcu-input-referrer').val('" . esc_html( $referrer ) . "');\r\n  });\r\n  </script>\r\n  ";
+    // Remove the wrapping div since it's now handled in the shortcode
+    // echo "<div class='wcu-registration-response'>";
     $captcha_checked = false;
     if ( isset( $_SESSION['wcu_captcha_verified'] ) ) {
         $hash_username = wp_hash( $username );
@@ -817,6 +862,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
         echo "<p style='color: red; font-weight: bold;'>" . esc_html__( 'Please complete the captcha.', 'woo-coupon-usage' ) . "</p>";
         echo $refillfields;
     }
+    // echo "</div>";
 }
 
 /*

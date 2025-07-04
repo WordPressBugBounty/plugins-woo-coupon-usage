@@ -91,30 +91,6 @@ if ( $postid ) {
     $combined_commission = wcusage_commission_message( $postid );
     $current_commission_message = get_post_meta( $postid, 'wcu_commission_message', true );
     $wcusage_field_page_load = wcusage_get_setting_value( 'wcusage_field_page_load', '0' );
-    /*** REFRESH STATS? ***/
-    $force_refresh_stats = 0;
-    // This checks to see if commission amount updated, if so then refresh stats
-    if ( $combined_commission != $current_commission_message ) {
-        update_post_meta( $postid, 'wcu_commission_message', $combined_commission );
-        update_post_meta( $postid, 'wcu_last_refreshed', '' );
-        $force_refresh_stats = 1;
-    }
-    // Force refresh stats if coupon usage is more than 10, but stats are not set
-    $wcusage_field_enable_coupon_all_stats_meta = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_meta', '1' );
-    $wcusage_field_hide_all_time = wcusage_get_setting_value( 'wcusage_field_hide_all_time', '0' );
-    if ( $wcusage_field_enable_coupon_all_stats_meta && !$wcusage_field_hide_all_time ) {
-        if ( isset( $the_coupon_usage ) && $the_coupon_usage > 10 ) {
-            $wcu_alltime_stats = get_post_meta( $postid, 'wcu_alltime_stats', true );
-            if ( !$wcu_alltime_stats || empty( $wcu_alltime_stats['total_count'] ) || $wcu_alltime_stats['total_count'] == 0 ) {
-                $force_refresh_stats = 1;
-            }
-        }
-    }
-    // Check if force refresh not done
-    $wcu_last_refreshed = get_post_meta( $postid, 'wcu_last_refreshed', true );
-    if ( !$wcu_last_refreshed ) {
-        $force_refresh_stats = 1;
-    }
     $wcusage_field_load_ajax = wcusage_get_setting_value( 'wcusage_field_load_ajax', 1 );
     $wcusage_field_load_ajax_per_page = wcusage_get_setting_value( 'wcusage_field_load_ajax_per_page', 1 );
     if ( !$wcusage_field_load_ajax ) {
@@ -223,20 +199,10 @@ wp_localize_script( 'wcusage-tab-settings', 'wcusage_ajax', array(
     'saving_text' => __( 'Saving...', 'woo-coupon-usage' ),
     'save_text'   => __( 'Save changes', 'woo-coupon-usage' ),
 ) );
-// Get force refresh date
-$wcusage_refresh_date = "";
-if ( isset( $options['wcusage_refresh_date'] ) ) {
-    $wcusage_refresh_date = $options['wcusage_refresh_date'];
-}
-// Check if batch refresh enabled
-$wcusage_field_enable_coupon_all_stats_batch = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_batch', '1' );
+/*** REFRESH STATS? ***/
+$force_refresh_stats = wcusage_check_if_refresh_needed( $postid );
 // Check if force refresh needed
-$wcu_last_refreshed = get_post_meta( $postid, 'wcu_last_refreshed', true );
-if ( $force_refresh_stats || $wcusage_refresh_date && $wcusage_refresh_date > $wcu_last_refreshed ) {
-    $force_refresh_stats = 1;
-    if ( !$wcusage_field_enable_coupon_all_stats_batch ) {
-        update_post_meta( $postid, 'wcu_last_refreshed', $wcusage_refresh_date );
-    }
+if ( $force_refresh_stats ) {
     ?>
     <?php 
     if ( $wcusage_field_load_ajax ) {
@@ -252,6 +218,8 @@ if ( $force_refresh_stats || $wcusage_refresh_date && $wcusage_refresh_date > $w
     ?>
     <?php 
 }
+// Check if batch refresh enabled
+$wcusage_field_enable_coupon_all_stats_batch = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_batch', '1' );
 // Get tab colors
 $tab_color = wcusage_get_setting_value( 'wcusage_field_color_tab', '#2c3e50' );
 $tab_font_color = wcusage_get_setting_value( 'wcusage_field_color_tab_font', 'white' );

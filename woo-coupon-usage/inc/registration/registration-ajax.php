@@ -12,6 +12,7 @@ add_action('wp_ajax_nopriv_wcusage_submit_registration', 'wcusage_ajax_submit_re
  * Validates input, creates a user if necessary, stores registration data, and sends emails.
  */
 function wcusage_ajax_submit_registration() {
+
     // Verify the AJAX request using the nonce
     check_ajax_referer('wcusage_verify_submit_registration_form1', 'wcusage_submit_registration_form1');
 
@@ -115,17 +116,6 @@ function wcusage_ajax_submit_registration() {
     if (!$getregisterid) {
         wp_send_json_error(array('message' => 'Failed to store registration data. Please try again.'));
         error_log('CA: Failed to store registration data for user ID: ' . $userid);
-    }    
-
-    // Handle auto-accept logic based on a setting
-    $auto_accept = wcusage_get_setting_value('wcusage_field_registration_auto_accept', '0');
-    if ($auto_accept) {
-        $message = ''; // Define any message needed for status update
-        $setstatus = wcusage_set_registration_status('accepted', $getregisterid, $userid, $couponcode, $message, $type);
-
-        if (!$setstatus) {
-            wp_send_json_error(array('message' => 'Failed to auto-accept registration.'));
-        }
     }
 
     // Send notification emails

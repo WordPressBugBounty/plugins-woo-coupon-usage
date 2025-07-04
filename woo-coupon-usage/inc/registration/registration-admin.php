@@ -340,6 +340,9 @@ function wcusage_set_registration_status(
     $message = "",
     $type = ""
 ) {
+    if ( !$coupon_code ) {
+        return;
+    }
     $options = get_option( 'wcusage_options' );
     global $wpdb;
     $table_name = $wpdb->prefix . 'wcusage_register';
@@ -451,6 +454,17 @@ function wcusage_set_registration_status(
             update_post_meta( $new_post_id, 'wcu_text_coupon_commission_fixed_order', '' );
             update_post_meta( $new_post_id, 'wcu_text_coupon_commission_fixed_product', '' );
         }
+        update_post_meta( $new_post_id, 'wcu_last_refreshed', time() );
+        $wcu_alltime_stats = array();
+        $wcu_alltime_stats['total_orders'] = 0;
+        $wcu_alltime_stats['full_discount'] = 0;
+        $wcu_alltime_stats['total_commission'] = 0;
+        $wcu_alltime_stats['total_shipping'] = 0;
+        $wcu_alltime_stats['total_count'] = 0;
+        $wcu_alltime_stats['commission_summary'] = array();
+        update_post_meta( $new_post_id, 'wcu_alltime_stats', $wcu_alltime_stats );
+        $combined_commission = wcusage_commission_message( $new_post_id );
+        update_post_meta( $new_post_id, 'wcu_commission_message', $combined_commission );
         do_action(
             'wcusage_hook_affiliate_register_added',
             $id,

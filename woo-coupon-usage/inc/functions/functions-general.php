@@ -532,3 +532,84 @@ function wcusage_get_username_by_id($user_id) {
   return $user_name;
 
 }
+
+/**
+ * Check if a coupon needs stats refresh
+ */
+if (!function_exists('wcusage_check_if_refresh_needed')) {
+    function wcusage_check_if_refresh_needed($postid) {
+
+        // Get options
+        $options = get_option('wcusage_options');
+
+				/*** REFRESH STATS? ***/
+				$force_refresh_stats = 0;
+
+				$wcu_last_refreshed = get_post_meta( $postid, 'wcu_last_refreshed', true );
+				$wcu_alltime_stats = get_post_meta( $postid, 'wcu_alltime_stats', true );
+        
+				$combined_commission = wcusage_commission_message($postid);
+				$current_commission_message = get_post_meta( $postid, 'wcu_commission_message', true );
+
+				// This checks to see if commission amount updated, if so then refresh stats
+				if($combined_commission != $current_commission_message) {
+					update_post_meta( $postid, 'wcu_commission_message', $combined_commission );
+					$force_refresh_stats = 1;
+				}
+
+				// Force refresh stats if coupon usage is more than 10, but stats are not set
+				$wcusage_field_enable_coupon_all_stats_meta = wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_meta', '1');
+				$wcusage_field_hide_all_time = wcusage_get_setting_value('wcusage_field_hide_all_time', '0');
+				if($wcusage_field_enable_coupon_all_stats_meta && !$wcusage_field_hide_all_time) {
+					if(isset($the_coupon_usage) && $the_coupon_usage > 10) {
+						$wcu_alltime_stats = get_post_meta($postid, 'wcu_alltime_stats', true);
+						if(!$wcu_alltime_stats || empty($wcu_alltime_stats['total_count']) || $wcu_alltime_stats['total_count'] == 0) {
+							$force_refresh_stats = 1;
+						}
+					}
+				}
+				
+				// Get force refresh date
+				$wcusage_refresh_date = "";
+				if(isset($options['wcusage_refresh_date'])) {
+					$wcusage_refresh_date = $options['wcusage_refresh_date'];
+				}
+
+				// Check if batch refresh enabled
+				$wcusage_field_enable_coupon_all_stats_batch = wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_batch', '1');
+
+				// Check if force refresh needed
+				if( $force_refresh_stats || ( $wcusage_refresh_date && ($wcusage_refresh_date > $wcu_last_refreshed) ) ) {
+					$force_refresh_stats = 1;
+					if(!$wcusage_field_enable_coupon_all_stats_batch) {
+						update_post_meta( $postid, 'wcu_last_refreshed', $wcusage_refresh_date );
+					}
+				}
+
+				// Check if force refresh not done
+				if(!$wcu_last_refreshed) {
+					// If coupon usage is 0 and coupon is newer than 20 minutes old, do not force refresh and set stats to 0
+					$c = new WC_Coupon($postid);
+					$the_coupon_usage = $c->get_usage_count();
+					if(empty($wcu_alltime_stats) && (!$the_coupon_usage || $the_coupon_usage == 0)) {
+						$wcu_last_refreshed = time();
+						update_post_meta( $postid, 'wcu_last_refreshed', $wcu_last_refreshed );
+						$wcu_alltime_stats = array();
+						$wcu_alltime_stats['total_orders'] = 0;
+						$wcu_alltime_stats['full_discount'] = 0;
+						$wcu_alltime_stats['total_commission'] = 0;
+						$wcu_alltime_stats['total_shipping'] = 0;
+						$wcu_alltime_stats['total_count'] = 0;
+						$wcu_alltime_stats['commission_summary'] = array();
+						update_post_meta( $postid, 'wcu_alltime_stats', $wcu_alltime_stats );
+						$force_refresh_stats = 0;
+					} else {
+						$force_refresh_stats = 1;
+					}
+				}
+
+        // Return force refresh status
+        return $force_refresh_stats;
+        
+    }
+}
