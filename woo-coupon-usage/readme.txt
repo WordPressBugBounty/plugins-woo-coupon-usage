@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.4.1
+Stable tag: 6.4.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -274,6 +274,16 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= Version 6.4.2 - 4th July 2025 =
+- New: Added a new "custom affiliate terminology" setting to the plugin "design" settings tab, that allows you to change the word "affiliate" to something else, such as "referrer", "partner", etc. This will change the terminology used throughout the plugin.
+- Tweak: Made some changes to the setup wizard.
+- Tweak: Improved the alignment of the terms and conditions checkbox on the affiliate registration form.
+- Tweak: Made some tweaks to some of the ajax nonce checks for the wcusage_update_all_stats_data endpoint.
+- Fix: Fixed an issue with the options to show or hide on mobile or tablet devices for the floating affiliate widget.
+- Fix: Fixed an issue with the option to show or hide on "Specific Pages (URLs)" for the floating affiliate widget.
+- Fix: Fixed an issue with the sidebar on the settings page for the free version of the plugin.
+- Fix: Fixed an issue with the admin "Add New Affiliate" page showing a "you do not have access" error when the affiliate registration system was disabled.
+
 = Version 6.4.1 - 4th July 2025 =
 - New: Added a new "Export Affiliate Users" button to the "Affiliate Users" admin page, to export a CSV file with all affiliate users and their details.
 - New: Added a bulk action on the "Affiliate Orders (Referrals)" admin page, to bulk "Update Unpaid Commission" for all selected orders. This will trigger the granting of unpaid commission for completed orders that have not already been granted commission.
@@ -289,7 +299,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 - Other: Updated translations.
 
 = Version 6.4.0 - 2nd July 2025 =
-= New: Added a new "Floating Affiliate Widget" feature to the plugin.
+- New: Added a new "Floating Affiliate Widget" feature to the plugin.
 - Improvement: Improved the bulk edit coupons feature to only loop through coupons that have actually been edited.
 - Tweak: Made a few tweaks to the design of some admin pages.
 - Tweak: Made a few tweaks to the setup wizard.

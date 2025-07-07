@@ -375,7 +375,7 @@ function wcusage_field_cb_widget( $args )
             <span class="wcu-field-section-floating-widget-specific-pages">
             <!-- Specific Pages Input -->
             <?php $wcusage_field_floating_widget_specific_pages = wcusage_get_setting_value('wcusage_field_floating_widget_specific_pages', ''); ?>
-            <?php echo wcusage_setting_textarea_option('wcusage_field_floating_widget_specific_pages', $wcusage_field_floating_widget_specific_pages, __( 'Specific Pages (URLs):', 'woo-coupon-usage' ), '0px'); ?>
+            <?php echo wcusage_setting_textarea_option('wcusage_field_floating_widget_specific_pages', $wcusage_field_floating_widget_specific_pages, __( 'Specific Pages (URLs)', 'woo-coupon-usage' ), '0px'); ?>
             <p><em><?php echo esc_html__( 'Enter URLs separated by commas. Use relative URLs (e.g., /shop, /about) or full URLs. Use * for wildcards (e.g., /shop/* for all shop pages).', 'woo-coupon-usage' ); ?></em></p>
             </span>
             <script>

@@ -164,7 +164,7 @@ if ( $wcusage_field_registration_enable ) {
                 if ( $wcusage_field_registration_form_title ) {
                     $form_title = $wcusage_field_registration_form_title;
                 } else {
-                    $form_title = esc_html__( 'Register New Affiliate Account', 'woo-coupon-usage' );
+                    $form_title = sprintf( esc_html__( 'Register New %s Account', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
                 }
                 ?>
 
@@ -376,7 +376,8 @@ if ( $wcusage_field_registration_enable ) {
                         if ( $wcusage_field_registration_enable_terms ) {
                             ?>
             <div class="wcu-reg-terms">
-              <span style="float: left; margin-top: 1px; margin-right: 7px;"><input type="checkbox" name="reg-checkbox" value="check" id="agree" required></span>
+              <span style="margin-top: 1px; margin-right: 7px;">
+                <input type="checkbox" name="reg-checkbox" value="check" id="agree" style="margin: 0;" required></span>
               <span style="line-height: 1.5em !important;"><?php 
                             echo html_entity_decode( $wcusage_field_registration_terms_message );
                             ?></span>
@@ -460,7 +461,7 @@ if ( $wcusage_field_registration_enable ) {
                         if ( !isset( $_POST['submitaffiliateapplication'] ) ) {
                             ?>
           <p><?php 
-                            echo esc_html__( 'You are already registered as an affiliate.', 'woo-coupon-usage' );
+                            echo sprintf( esc_html__( 'You are already registered as an %s.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                             ?></p>
           <?php 
                         }
@@ -471,7 +472,7 @@ if ( $wcusage_field_registration_enable ) {
                         echo esc_url( $coupon_shortcode_page );
                         ?>" style="text-decoration: none;">
               <button class="wcu-save-settings-button woocommerce-Button button"><?php 
-                        echo esc_html__( 'View affiliate dashboard', 'woo-coupon-usage' );
+                        echo sprintf( esc_html__( 'View %s dashboard', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                         ?> ></button>
             </a>
           </p>
@@ -486,7 +487,7 @@ if ( $wcusage_field_registration_enable ) {
                         ?>
 
           <p class="registration-message"><?php 
-                        echo esc_html__( 'You have a pending affiliate application.', 'woo-coupon-usage' );
+                        echo sprintf( esc_html__( 'You have a pending %s application.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                         ?></p>
 
           <p class="registration-message"><?php 
@@ -516,7 +517,7 @@ if ( $wcusage_field_registration_enable ) {
 
     <?php 
         } else {
-            echo "<p>" . esc_html__( 'Sorry, you are not currently allowed to apply as an affiliate.', 'woo-coupon-usage' ) . "</p>";
+            echo "<p>" . sprintf( esc_html__( 'Sorry, you are not currently allowed to apply as an %s.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) ) . "</p>";
         }
         $thecontent = ob_get_contents();
         ob_end_clean();
@@ -815,28 +816,28 @@ function wcusage_post_submit_application(  $adminpost  ) {
                                 if ( isset( $options['wcusage_field_registration_accept_message'] ) ) {
                                     $acceptmessage = $options['wcusage_field_registration_accept_message'];
                                 } else {
-                                    $acceptmessage = esc_html__( 'Your affiliate application for the coupon code "{coupon}" has been submitted. Please check your email.', 'woo-coupon-usage' );
+                                    $acceptmessage = sprintf( esc_html__( 'Your %s application for the coupon code "{coupon}" has been submitted. Please check your email.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                                 }
                             } else {
-                                $acceptmessage = esc_html__( 'Your affiliate application has been submitted.', 'woo-coupon-usage' );
+                                $acceptmessage = sprintf( esc_html__( 'Your %s application has been submitted.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                             }
                         } else {
                             $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '0' );
                             if ( $wcusage_field_registration_enable ) {
-                                $acceptmessage = '<div class="notice notice-success is-dismissible" style="margin-top: 20px;"><p>- An affiliate application has been submitted for user "{username}" for the coupon "{coupon}".</p>';
+                                $acceptmessage = sprintf( '<div class="notice notice-success is-dismissible" style="margin-top: 20px;"><p>- An %s application has been submitted for user "{username}" for the coupon "{coupon}".</p>', strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                                 if ( !$accept ) {
                                     $acceptmessage .= '<p>- You can view, edit and accept the application below.</p>';
                                 } else {
-                                    $acceptmessage .= '<p>- The affiliate application was automatically accepted.</p>';
+                                    $acceptmessage .= sprintf( '<p>- The %s application was automatically accepted.</p>', strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                                 }
                                 if ( $user_id ) {
-                                    $acceptmessage .= "<p>- The affiliate user did not exist, so a new user account has been created, and details sent to their email.</p>";
+                                    $acceptmessage .= sprintf( "<p>- The %s user did not exist, so a new user account has been created, and details sent to their email.</p>", strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                                 }
                                 $acceptmessage .= "</div>";
                             } else {
-                                $acceptmessage = '<div class="notice notice-success is-dismissible"><p>- Affiliate user "{username}" was assigned to the new affiliate coupon "{coupon}".</p>';
+                                $acceptmessage = sprintf( '<div class="notice notice-success is-dismissible"><p>- %s user "{username}" was assigned to the new %s coupon "{coupon}".</p>', ucfirst( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                                 if ( $user_id ) {
-                                    $acceptmessage .= "<p>- The affiliate user did not exist, so a new user account has been created, and details sent to their email.</p>";
+                                    $acceptmessage .= sprintf( "<p>- The %s user did not exist, so a new user account has been created, and details sent to their email.</p>", strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                                 }
                                 $acceptmessage .= "</div>";
                             }

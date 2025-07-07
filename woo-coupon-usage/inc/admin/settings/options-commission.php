@@ -225,7 +225,7 @@ if( !function_exists( 'wcusage_setting_section_commission_amounts' ) ) {
 
   <p>- <?php echo esc_html__( 'Enter your commission amounts below (0 to disable). If you enter multiple types, they will be combined. For example you could have: 10% of total order, plus an extra $2 per product.', 'woo-coupon-usage' ); ?></p>
 
-	<p>- (Pro Version) <?php echo esc_html__( 'These values be overridden on a per coupon and/or per product basis.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/flexible-commission-settings" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</p>
+	<p>- (Pro Version) <?php echo esc_html__( 'These values be assigned on a per affiliate coupon, per product, per category, or per group basis.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/flexible-commission-settings/" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</p>
 
   <br/>
 

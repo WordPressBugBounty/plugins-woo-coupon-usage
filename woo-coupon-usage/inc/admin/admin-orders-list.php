@@ -16,7 +16,7 @@ function wusage_add_order_column_header(  $columns  ) {
     foreach ( $columns as $column_name => $column_info ) {
         $new_columns[$column_name] = $column_info;
         if ( 'order_total' === $column_name ) {
-            $new_columns['wcu_order_affiliate_coupon'] = esc_html__( 'Coupon / Affiliate', 'woo-coupon-usage' );
+            $new_columns['wcu_order_affiliate_coupon'] = sprintf( esc_html__( 'Coupon / %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
         }
     }
     return $new_columns;
@@ -116,10 +116,10 @@ function wcusage_output_affiliate_info_orders(  $coupon_code, $order_id, $thetyp
         // Lifetime Text
         if ( $thetype == "return" ) {
             $typetext = "<p style='margin: 0;'>(Lifetime Referral Sale)</p>";
-            $typeicon = "<span class='wcu-tooltop-lifetime'>" . wc_help_tip( "(Lifetime Commission)<br/>This is a returning customer that didn't use the coupon code at checkout, but is a linked as a 'lifetime referral' for this affiliate coupon." ) . "</span> ";
+            $typeicon = "<span class='wcu-tooltop-lifetime'>" . wc_help_tip( "(Lifetime Commission)<br/>This is a returning customer that didn't use the coupon code at checkout, but is a linked as a 'lifetime referral' for this " . wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) . " coupon." ) . "</span> ";
         } elseif ( $thetype == "returncoupon" ) {
             $typetext = "<p style='margin: 0;'>(Lifetime Referral Sale)</p>";
-            $typeicon = "<span class='wcu-tooltop-lifetime2'>" . wc_help_tip( "(Lifetime Commission)<br/>This is a lifetime referral that used the affiliates coupon code at checkout." ) . "</span> ";
+            $typeicon = "<span class='wcu-tooltop-lifetime2'>" . wc_help_tip( "(Lifetime Commission)<br/>This is a lifetime referral that used the " . wcusage_get_affiliate_text( __( 'affiliates', 'woo-coupon-usage' ), true ) . " coupon code at checkout." ) . "</span> ";
         } elseif ( $thetype == "url" ) {
             $typetext = "<p style='margin: 0;'>(Custom / URL Referral)</p>";
             $typeicon = "<span class='wcu-tooltop-url1'>" . wc_help_tip( "(Custom / URL Referral)<br/>This referral was set manually by an admin, or it was made via the referral URL but the coupon was not used." ) . "</span> ";

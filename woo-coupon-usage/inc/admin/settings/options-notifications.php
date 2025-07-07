@@ -511,12 +511,13 @@ if( !function_exists( 'wcusage_setting_sectio_email_free' ) ) {
 
     <!-- From Email Address -->
     <?php echo wcusage_setting_text_option('wcusage_field_from_email', $admin_email, esc_html__( 'From Email Address:', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( '(If you are using a mail SMTP plugin, the from email may be overridden.)', 'woo-coupon-usage' ); ?></i><br/>
 
     <br/>
 
     <!-- From Name -->
     <?php echo wcusage_setting_text_option('wcusage_field_from_name', get_bloginfo( 'name' ), esc_html__( 'From Name:', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( '(If you are using a mail SMTP plugin, the from email and name may be overridden.)', 'woo-coupon-usage' ); ?></i><br/>
+    <i><?php echo esc_html__( '(If you are using a mail SMTP plugin, the from name may be overridden.)', 'woo-coupon-usage' ); ?></i><br/>
     
     <br/>
 

@@ -146,35 +146,50 @@ function wcusage_check_page_display_conditions($display_settings) {
         return true;
     }
     
-    if (empty($specific_pages)) {
-        return ($page_display === 'all');
+    if (empty($specific_pages) || $specific_pages === '') {
+        if($page_display === 'specific_show') {
+            return false; // No specific pages set, cannot show
+        }
+        if($page_display === 'specific_hide') {
+            return true; // No specific pages set, can hide
+        }
     }
     
-    // Get current page URL
+    // Get current page URL and path
     $current_url = (is_ssl() ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    $current_path = parse_url($current_url, PHP_URL_PATH);
-    $current_query = parse_url($current_url, PHP_URL_QUERY);
-    if ($current_query) {
-        $current_path .= '?' . $current_query;
-    }
+    $current_path = $_SERVER['REQUEST_URI'];
     
-    // Parse specific pages
-    $pages = array_map('trim', explode(',', $specific_pages));
+    // Parse specific pages - split by comma and remove empty entries
+    $pages = array_filter(array_map('trim', explode(',', $specific_pages)));
     $is_match = false;
     
     foreach ($pages as $page) {
         if (empty($page)) continue;
         
+        // Normalize the page URL for comparison
+        $page = trim($page);
+        
+        // If it's a relative URL (starts with /), compare with current path
+        if (strpos($page, '/') === 0) {
+            $compare_against = $current_path;
+        } else {
+            // If it's a full URL, compare with full current URL
+            $compare_against = $current_url;
+        }
+        
         // Handle wildcards
         if (strpos($page, '*') !== false) {
-            $pattern = str_replace('*', '.*', preg_quote($page, '/'));
-            if (preg_match('/^' . $pattern . '$/i', $current_path) || preg_match('/^' . $pattern . '$/i', $current_url)) {
+            $pattern = str_replace(['*', '/'], ['.*', '\/'], preg_quote($page, '/'));
+            if (preg_match('/^' . $pattern . '$/i', $compare_against)) {
                 $is_match = true;
                 break;
             }
         } else {
-            // Exact match or contains match
-            if (stripos($current_path, $page) !== false || stripos($current_url, $page) !== false) {
+            // Exact match - also try with trailing slash variations
+            if ($compare_against === $page || 
+                rtrim($compare_against, '/') === rtrim($page, '/') ||
+                $compare_against === rtrim($page, '/') . '/' ||
+                rtrim($compare_against, '/') === $page) {
                 $is_match = true;
                 break;
             }

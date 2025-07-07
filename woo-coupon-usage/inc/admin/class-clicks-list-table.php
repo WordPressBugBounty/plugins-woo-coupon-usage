@@ -37,7 +37,7 @@ class wcusage_clicks_List_Table extends WP_List_Table {
           if (isset($item[$column_name]) && $item[$column_name] != 0) {
               $coupon_info = wcusage_get_coupon_info_by_id($item[$column_name]);
               $uniqueurl = $coupon_info[4];
-              return "<a href='" . esc_url($uniqueurl) . "' target='_blank' title='" . __('View Affiliate Dashboard', 'woo-coupon-usage') . "'>"
+              return "<a href='" . esc_url($uniqueurl) . "' target='_blank' title='" . sprintf(__('View %s Dashboard', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))) . "'>"
                   . get_the_title($item[$column_name])
                   . "</a> <a href='" . esc_url(admin_url('post.php?post=' . $item[$column_name] . '&action=edit&classic-editor')) . "' target='_blank' title='" . __('Edit Coupon', 'woo-coupon-usage') . "'>"
                   . "<span class='dashicons dashicons-edit-page' style='font-size: 12px; margin-top: 5px; display: inline-block; width: 12px;'></span></a>"
@@ -173,7 +173,7 @@ class wcusage_clicks_List_Table extends WP_List_Table {
         $columns = array(
             //'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
             'id'     => esc_html__( 'ID', 'woo-coupon-usage' ),
-            'couponid'  => esc_html__( 'Affiliate Coupon', 'woo-coupon-usage' ),
+            'couponid'  => sprintf(esc_html__( '%s Coupon', 'woo-coupon-usage' ), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))),
 						'campaign'  => esc_html__( 'Campaign Name', 'woo-coupon-usage' ),
 						'page'  => esc_html__( 'Landing Page', 'woo-coupon-usage' ),
 						'referrer'  => esc_html__( 'Referrer URL', 'woo-coupon-usage' ),

@@ -55,7 +55,7 @@ function wcusage_handle_unlink_affiliate_via_url() {
 function wcusage_filter_users_custom_button($which) {
   ?>
     <script>
-    jQuery(jQuery(".wrap .wcusage-settings-button")[0]).after('<a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New Affiliate</a><a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_affiliates')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Manage Affiliates</a>');
+    jQuery(jQuery(".wrap .wcusage-settings-button")[0]).after('<a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New <?php echo wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )); ?></a><a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_affiliates')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Manage <?php echo wcusage_get_affiliate_text(__( 'Affiliates', 'woo-coupon-usage' ), true); ?></a>');
     </script>
   <?php
 }
@@ -82,7 +82,7 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
        $column['affiliatemla'] = 'MLA';
      }
 
-     $column['affiliateinfo'] = 'Affiliate Coupons';
+     $column['affiliateinfo'] = wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )) . ' Coupons';
 
      return $column;
  }
@@ -182,23 +182,23 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
         admin_url('users.php')
     );
 
-    $unlink_message = '<a href="' . esc_url($unlink_url) . '" onClick="return confirm(\'Unassign affiliate user &#8220;'
-        . esc_attr($user_info->user_login) . '&#8220; from the coupon code &#8220;'
-        . esc_html($coupon_code) . '&#8220;? This will not delete the coupon or user, it will simply remove them from the coupon, so they can no longer gain commission or view the affiliate dashboard for it.\');" 
-        style="text-decoration: underline;"
-        class="wcu-affiliate-tooltip-unlink-button">Unassign</a>';
+    $unlink_message = '<a href="' . esc_url($unlink_url) . '" onClick="return confirm(\'Unassign ' . wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )) . ' user &#8220;'
+          . esc_attr($user_info->user_login) . '&#8220; from the coupon code &#8220;'
+          . esc_html($coupon_code) . '&#8220;? This will not delete the coupon or user, it will simply remove them from the coupon, so they can no longer gain commission or view the ' . wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )) . ' dashboard for it.\');" 
+          style="text-decoration: underline;"
+          class="wcu-affiliate-tooltip-unlink-button">Unassign</a>';
   } else {
       $unlink_message = "";
   }
 
-  $coupon_code_linked = "<span class='wcusage-users-affiliate-column'>"
+$coupon_code_linked = "<span class='wcusage-users-affiliate-column'>"
   ."<div class='custom-tooltip'><a href='javascript:void(0);' style='pointer-events:visible;cursor:pointer;color:darkblue;'>".esc_html($coupon_code)."</a> <span class='dashicons dashicons-info'
   style='color: green;font-size: 15px;margin-top: 4px;margin-left: -4px;'></span>
       <div class='tooltip-content'>
       <span style='font-size: 12px;'>"
       . wp_kses_post($commission_message)
       . "<a href='".esc_url($dashboard_url)."' target='_blank' class='wcu-affiliate-tooltip-dashboard-button' style='text-decoration: underline;'>"
-      . esc_html__( 'View Affiliate Dashboard', 'woo-coupon-usage' ) . "<span class='dashicons dashicons-external' style='text-decoration: none;'></span>"
+      . sprintf(esc_html__( 'View %s Dashboard', 'woo-coupon-usage' ), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))) . "<span class='dashicons dashicons-external' style='text-decoration: none;'></span>"
       . "</a>";
       if($wcusage_field_urls_enable) {
         $coupon_code_linked .= '<div class="wcusage-copyable-link" style="margin: 10px 0;"><strong>' . esc_html__( 'Default Referral Link', 'woo-coupon-usage' ) . ':</strong><br/>'

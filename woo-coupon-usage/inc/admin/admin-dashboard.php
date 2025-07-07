@@ -10,6 +10,12 @@ add_action( 'wcusage_hook_dashboard_page_header', 'wcusage_dashboard_page_header
 function wcusage_dashboard_page_header() {
     $rss_items = wcusage_changelog_fetch_rss_feed('https://couponaffiliates.com/category/updates/feed/');
     $feed_html = wcusage_changelog_generate_feed_html($rss_items);
+    // If it contains "new-update" class, show the "New" badge
+    if (strpos($feed_html, 'new-update') !== false) {
+        echo '<style>.changelog-new { display: inline-block !important; }</style>';
+    } else {
+        echo '<style>.changelog-new { display: none !important; }</style>';
+    }
 
     echo '<div id="changelog-modal" style="display: none; position: fixed; z-index: 1; left: 0; top: 0;width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
         <div style="border-radius: 20px; background-color: #fefefe; margin: 15% auto; padding: 5px 20px; border: 1px solid #888; box-shadow: 0px 0px 10px #333; width: 500px; max-width: 100%;">
@@ -139,14 +145,28 @@ jQuery(document).ready(function($) {
 </script>
 
 <div class="wcusage-admin-page-col3">
-    <?php if( wcu_fs()->is_free_plan() ) { ?>
-    <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage-pricing" target="_blank"><div class="wcusage-admin-dash-button"
-      style="background: linear-gradient(-45deg,#1a9612,#0c5a07,#1a9612,#0c5a07); border-radius: 10px; padding: 10px;
-      background-size: 250% 250% !important; color: #fff;">
-      <span class="fa-solid fa-star"></span> Upgrade</div></a>
+    <?php if( !wcu_fs()->can_use_premium_code() ) { ?>
+        <?php
+        // If Between November 10th to November 30th, any year, show Black Friday button
+        $current_date = new DateTime();
+        $start_date = new DateTime('November 10');
+        $end_date = new DateTime('November 30');
+        if ($current_date >= $start_date && $current_date <= $end_date) {
+        ?>
+        <!-- Black Friday Button -->
+        <a href="https://couponaffiliates.com/pricing/?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button" target="_blank"><div class="wcusage-admin-dash-button" style="background: linear-gradient(-45deg,#ff0000,#ff7f00,#ff0000,#ff7f00); border-radius: 10px; padding: 10px; background-size: 250% 250% !important; color: #fff;"><span
+            class="fa-solid fa-gift"></span> <?php echo esc_html__('Black Friday: 30% Off PRO!', 'woo-coupon-usage'); ?></div></a>
+        <?php } else { ?>
+        <a href="https://couponaffiliates.com/pricing/?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button" target="_blank"><div class="wcusage-admin-dash-button"
+        style="background: linear-gradient(-45deg,#1a9612,#0c5a07,#1a9612,#0c5a07); border-radius: 10px; padding: 10px;
+        background-size: 250% 250% !important; color: #fff;">
+        <span class="fa-solid fa-star"></span> <?php echo esc_html__('Upgrade to PRO', 'woo-coupon-usage'); ?>
+        </div></a>
+        <?php } ?>
     <?php } ?>
+
     <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage" title="View Dashboard"><img src="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL); ?>images/coupon-affiliates-logo.png" style="display: inline-block; width: 100%; max-width: 290px; text-align: left; margin: 12px 0 10px 0;"></a>
-    <?php if( wcu_fs()->is_free_plan() ) { ?>
+    <?php if( !wcu_fs()->can_use_premium_code() ) { ?>
       <a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-circle-question"></span> <?php echo esc_html__('Support Ticket', 'woo-coupon-usage'); ?></div></a>
     <?php } else { ?>
       <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage-contact" target="_blank"><div class="wcusage-admin-dash-button"><span class="fa-solid fa-circle-question"></span> <?php echo esc_html__('Support Ticket', 'woo-coupon-usage'); ?></div></a>
@@ -217,8 +237,7 @@ function wcusage_changelog_generate_feed_html($rss_items) {
         $now = date_create();
         $diff = date_diff($the_date, $now);
         $days = $diff->format("%a");
-        $new = ($days <= 7) ? ' <span style="background: green; padding: 2px; font-size: 10px; line-height: 10px; border-radius: 2px; color: #fff;">New</span>' : '';
-
+        $new = ($days <= 7) ? ' <span style="background: green; padding: 2px; font-size: 10px; line-height: 10px; border-radius: 2px; color: #fff;" class="new-update">New</span>' : '';
         $output .= '<div class="rss-feed-item">';
         $output .= '<h4>'.$date.$new.'<br/><a href="' . esc_url($item->get_permalink()) . "?utm_campaign=plugin&utm_source=settings-changelog&utm_medium=textlink" . '">' . esc_html($title) . '</a></h4>';
         $output .= '</div>';
@@ -367,7 +386,7 @@ function wcusage_dashboard_page_section_referrals() {
     <table style="border: 2px solid #f3f3f3; width: 100%; text-align: center; border-collapse: collapse;">
         <thead>
             <tr class="wcusage-admin-table-col-head">
-                <th>Affiliate</th>
+                <th><?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?></th>
                 <th>Date</th>
                 <th>Order ID</th>
                 <th>Total</th>
@@ -469,6 +488,9 @@ function wcusage_dashboard_page_section_visits() {
  */
 add_action( 'wcusage_hook_dashboard_page_section_coupons', 'wcusage_dashboard_page_section_coupons' );
 function wcusage_dashboard_page_section_coupons() {
+    // Get custom terminology
+    $custom_affiliate_term = wcusage_get_setting_value('wcusage_field_affiliate_term', 'Affiliate');
+    
     $args = array(
         'post_type' => 'shop_coupon',
         'posts_per_page' => 5,
@@ -488,7 +510,7 @@ function wcusage_dashboard_page_section_coupons() {
     <table style="border: 2px solid #f3f3f3; width: 100%; text-align: center; border-collapse: collapse;">
         <thead>
             <tr class="wcusage-admin-table-col-head">
-                <th><?php echo esc_html__('Affiliate', 'woo-coupon-usage'); ?></th>
+                <th><?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?></th>
                 <th><?php echo esc_html__('Coupon', 'woo-coupon-usage'); ?></th>
                 <th><?php echo esc_html__('Created', 'woo-coupon-usage'); ?></th>
             </tr>
@@ -511,12 +533,12 @@ function wcusage_dashboard_page_section_coupons() {
             </tr>
             <?php } ?>
             <tr class="wcusage-admin-table-col-footer">
-                <td colspan="5"><a href="<?php echo esc_url(admin_url("admin.php?page=wcusage_coupons")) ?>" style="text-decoration: none;">View All Affiliate Coupons <i class="fa-solid fa-arrow-right"></i></a></td>
+                <td colspan="5"><a href="<?php echo esc_url(admin_url("admin.php?page=wcusage_coupons")) ?>" style="text-decoration: none;"><?php echo sprintf('View All %s Coupons', esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )))); ?> <i class="fa-solid fa-arrow-right"></i></a></td>
             </tr>
         </tbody>
     </table>
     <?php } else { ?>
-    <p><?php echo esc_html__('No new affiliate coupons found.', 'woo-coupon-usage'); ?></p>
+    <p><?php echo sprintf(esc_html__('No new %s coupons found.', 'woo-coupon-usage'), strtolower(wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )))); ?></p>
     <?php } ?>
 </div>
 
@@ -528,6 +550,9 @@ function wcusage_dashboard_page_section_coupons() {
  */
 add_action( 'wcusage_hook_dashboard_page_section_registrations', 'wcusage_dashboard_page_section_registrations' );
 function wcusage_dashboard_page_section_registrations() {
+    // Get custom terminology
+    $custom_affiliate_term = wcusage_get_setting_value('wcusage_field_affiliate_term', 'Affiliate');
+    
     global $wpdb;
     $table_name = $wpdb->prefix . 'wcusage_register';
     $get_visits = $wpdb->get_results($wpdb->prepare("SELECT * FROM `{$table_name}` WHERE status = %s ORDER BY id DESC LIMIT 5", 'pending'));
@@ -538,7 +563,7 @@ function wcusage_dashboard_page_section_registrations() {
     <table style="border: 2px solid #f3f3f3; width: 100%; text-align: center; border-collapse: collapse;">
         <thead>
             <tr class="wcusage-admin-table-col-head">
-                <th><?php echo esc_html__('Affiliate', 'woo-coupon-usage'); ?></th>
+                <th><?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?></th>
                 <th><?php echo esc_html__('Date', 'woo-coupon-usage'); ?></th>
                 <th><?php echo esc_html__('Coupon', 'woo-coupon-usage'); ?></th>
                 <th><?php echo esc_html__('Status', 'woo-coupon-usage'); ?></th>
@@ -569,7 +594,7 @@ function wcusage_dashboard_page_section_registrations() {
         </tbody>
     </table>
     <?php } else { ?>
-    <p><?php echo esc_html__('you have no pending affiliate registrations.', 'woo-coupon-usage'); ?></p>
+    <p><?php echo sprintf(esc_html__('you have no pending %s registrations.', 'woo-coupon-usage'), strtolower(wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )))); ?></p>
     <?php } ?>
 </div>
 
@@ -581,6 +606,9 @@ function wcusage_dashboard_page_section_registrations() {
  */
 add_action( 'wcusage_hook_dashboard_page_section_payouts', 'wcusage_dashboard_page_section_payouts' );
 function wcusage_dashboard_page_section_payouts() {
+    // Get custom terminology
+    $custom_affiliate_term = wcusage_get_setting_value('wcusage_field_affiliate_term', 'Affiliate');
+    
     global $wpdb;
     $table_name = $wpdb->prefix . 'wcusage_payouts';
     $query = $wpdb->prepare("SELECT * FROM {$table_name} WHERE status = %s ORDER BY id DESC LIMIT 5", 'pending');
@@ -592,7 +620,7 @@ function wcusage_dashboard_page_section_payouts() {
     <table style="border: 2px solid #f3f3f3; width: 100%; text-align: center; border-collapse: collapse;">
         <thead>
             <tr class="wcusage-admin-table-col-head">
-                <th><?php echo esc_html__('Affiliate', 'woo-coupon-usage'); ?></th>
+                <th><?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?></th>
                 <th><?php echo esc_html__('Date', 'woo-coupon-usage'); ?></th>
                 <th><?php echo esc_html__('Coupon', 'woo-coupon-usage'); ?></th>
                 <th><?php echo esc_html__('Amount', 'woo-coupon-usage'); ?></th>
@@ -655,7 +683,7 @@ function wcusage_dashboard_page_html() {
 
         <div class="wcusage-admin-page-col-section" style="margin-top: -20px;">
             <div class="wcusage-admin-page-col" style="width: calc(100% - 20px);">
-                <h2><?php echo esc_html__('Affiliate Program Statistics', 'woo-coupon-usage'); ?>
+                <h2><?php echo sprintf(esc_html__('%s Program Statistics', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?>
                 <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_admin_reports')); ?>" style="text-decoration: none; float: right; margin-top: -5px; font-size: 14px;"
                 class="button button-secondary button-large">
                     <?php echo esc_html__('View Full Report', 'woo-coupon-usage'); ?> <i class="fa-solid fa-arrow-right"></i>
@@ -683,13 +711,13 @@ function wcusage_dashboard_page_html() {
             <?php } ?>
 
             <div class="wcusage-admin-page-col">
-                <h2><?php echo esc_html__('Newest Affiliate Coupons', 'woo-coupon-usage'); ?></h2>
+                <h2><?php echo sprintf(esc_html__('Newest %s Coupons', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?></h2>
                 <?php echo do_action('wcusage_hook_dashboard_page_section_coupons', ''); ?>
             </div>
 
             <?php if(wcusage_get_setting_value('wcusage_field_registration_enable', '1')) { ?>
                 <div class="wcusage-admin-page-col">
-                    <h2><?php echo esc_html__('Pending Affiliate Registrations', 'woo-coupon-usage'); ?></h2>
+                    <h2><?php echo sprintf(esc_html__('Pending %s Registrations', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?></h2>
                     <?php echo do_action('wcusage_hook_dashboard_page_section_registrations', ''); ?>
                 </div>
             <?php } ?>

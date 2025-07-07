@@ -1028,7 +1028,9 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
 
     <?php if( function_exists('wcusage_check_affiliate_portal_rewrite_rule') && !wcusage_check_affiliate_portal_rewrite_rule() ) { ?>
       <p style="color: red; margin: 20px 0 5px 0;"><strong><?php echo esc_html__( 'The affiliate portal is enabled, but the URL rewrite rules are not work correctly.', 'woo-coupon-usage' ); ?></strong></p>
-      <p style="color: red; margin: 5px 0;"><strong><?php echo sprintf(esc_html__( 'Please go to Settings > Permalinks and click "Save Changes" to refresh the rewrite rules, or %sclick here%s for more information.', 'woo-coupon-usage' ), '<a href="https://woocouponusage.com/docs/affiliate-portal-not-working/" target="_blank">', '</a>'); ?></strong></p>
+      <p style="color: red; margin: 5px 0;"><strong><?php echo sprintf(esc_html__( 'Please go to %sSettings > Permalinks%s and click "Save Changes" to refresh the rewrite rules, or %sclick here%s for more information.', 'woo-coupon-usage' ),
+      '<a href="'.esc_url(admin_url('options-permalink.php')).'" target="_blank">', '</a>',
+      '<a href="https://couponaffiliates.com/docs/affiliate-portal-not-working/" target="_blank">', '</a>'); ?></strong></p>
       <p style="color: red; margin: 5px 0;"><strong><?php echo esc_html__( 'The plugin will default to the normal dashboard page until the rewrite rule exists.', 'woo-coupon-usage' ); ?></strong></p>
       <script>
         jQuery(document).ready(function($) {

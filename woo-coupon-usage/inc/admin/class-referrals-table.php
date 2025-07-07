@@ -296,15 +296,19 @@ function wcusage_orders_page() {
     ?>
     <h1 class="wcusage-admin-title" style="margin-bottom: -15px;">
     <?php 
-    echo esc_html__( 'Affiliate Orders (Referrals)', 'woo-coupon-usage' );
+    echo sprintf( esc_html__( '%s Orders', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
     ?>
     <span class="wcusage-admin-title-buttons">
         <a href="<?php 
     echo esc_url( 'post-new.php?post_type=shop_order' );
-    ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New Order</a>
+    ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link"><?php 
+    echo esc_html__( 'Add New Order', 'woo-coupon-usage' );
+    ?></a>
         <a href="<?php 
     echo esc_url( admin_url( 'admin.php?page=wcusage-bulk-assign-coupons' ) );
-    ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Assign Orders to Affiliates</a>
+    ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link"><?php 
+    echo sprintf( esc_html__( 'Assign Orders to %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliates', 'woo-coupon-usage' ), true ) );
+    ?></a>
     </span>
     </h1>
     <br/>

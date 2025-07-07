@@ -12,7 +12,7 @@ function wcusage_woo_customer_order_coupon_column_for_orders( $columns ) {
 		$new_columns[$column_key] = $column_label;
 
 		if ( 'expiry_date' === $column_key ) {
-			$new_columns['coupon_affiliate'] = esc_html__('Affiliate User', 'woocommerce');
+			$new_columns['coupon_affiliate'] = sprintf(esc_html__('%s User', 'woocommerce'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )));
 		}
 
     if ( wcu_fs()->can_use_premium_code() ) {
@@ -22,7 +22,7 @@ function wcusage_woo_customer_order_coupon_column_for_orders( $columns ) {
 		}
 
     if ( 'expiry_date' === $column_key ) {
-        $new_columns['coupon_dash_link'] = esc_html__('Affiliate Dashboard', 'woocommerce');
+        $new_columns['coupon_dash_link'] = sprintf(esc_html__('%s Dashboard', 'woocommerce'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )));
     }
 
     }
@@ -175,8 +175,9 @@ function wcusage_coupons_filter_cpt($views) {
   } else {
     $class = '';
   }
-  $views['missing_related'] = sprintf(__('<a href="%s"'. $class .'>Affiliate Coupons <span class="count">(%d)</span></a>', 'affiliate coupons'),
+  $views['missing_related'] = sprintf(__('<a href="%s"'. $class .'>%s Coupons <span class="count">(%d)</span></a>', 'affiliate coupons'),
   admin_url('edit.php?post_type=shop_coupon&affiliate=1'),
+  wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )),
   $result->found_posts);
 
   return $views;

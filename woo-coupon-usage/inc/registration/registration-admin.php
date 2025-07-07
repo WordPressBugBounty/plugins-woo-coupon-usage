@@ -172,13 +172,15 @@ function wcusage_admin_registrations_page_html() {
     echo esc_url( admin_url( 'admin.php?page=wcusage_add_affiliate' ) );
     ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">
       <?php 
-    echo esc_html__( 'Add New Affiliate', 'woo-coupon-usage' );
+    echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
     ?>
     </a>
     <a href="<?php 
     echo esc_url( admin_url( 'admin.php?page=wcusage_affiliates' ) );
     ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">
-        Manage Affiliates
+        <?php 
+    echo sprintf( esc_html__( 'Manage %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliates', 'woo-coupon-usage' ), true ) );
+    ?>
     </a>
   </h1>
 
@@ -535,6 +537,18 @@ function wcusage_admin_new_registration_page() {
     } else {
         $registrationpage_url = admin_url( 'admin.php?page=wcusage_registrations' );
     }
+    // Post Submit Add Registration Form
+    if ( isset( $_POST['_wpnonce'] ) ) {
+        $nonce = sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) );
+        if ( wp_verify_nonce( $nonce, 'admin_add_registration_form' ) && wcusage_check_admin_access() ) {
+            echo wp_kses_post( wcusage_post_submit_application( 1 ) );
+            // Redirect to admin.php?page=wcusage_affiliates
+            $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . $_POST['wcu-input-username'] );
+            // Redirect via PHP
+            wp_redirect( $redirect_url );
+            exit;
+        }
+    }
     ?>
 
   <link rel="stylesheet" href="<?php 
@@ -550,17 +564,17 @@ function wcusage_admin_new_registration_page() {
   <div class="wcusage-page">
 
     <h1 id="wcu-add-new-affiliate"><?php 
-    echo esc_html__( 'Add New Affiliate:', 'woo-coupon-usage' );
+    echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
     ?></h1>
 
     <p>
       <?php 
-    echo esc_html__( 'Use this page to manually add a new affiliate registration.', 'woo-coupon-usage' );
+    echo sprintf( esc_html__( 'Use this form to create a new %s registration.', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) );
     ?>
     </p>
 
     <p><?php 
-    echo esc_html__( 'When completing this form, it will automatically submit an approved affiliate registration for that user, automatically creating the coupon and assigning them to it.', 'woo-coupon-usage' );
+    echo sprintf( esc_html__( 'When completing this form, it will automatically submit an approved %s registration for that user, automatically creating the coupon and assigning them to it.', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) );
     ?></p>
     
     <p><?php 
@@ -607,15 +621,8 @@ function wcusage_admin_new_registration_page() {
     <?php 
         }
         ?>
-
-    <!-- Modify the form action to post to the desired URL -->
-    <?php 
-        $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
-        $admin_url = admin_url( 'admin.php?page=wcusage_registrations' );
-        ?>
-    <form method="post" action="<?php 
-        echo esc_url( $admin_url );
-        ?>" class="wcu_form_affiliate_register" enctype="multipart/form-data">
+    
+    <form method="post" class="wcu_form_affiliate_register" enctype="multipart/form-data">
       
       <?php 
         wp_nonce_field( 'admin_add_registration_form' );
@@ -726,7 +733,7 @@ function wcusage_admin_new_registration_page() {
 
       <p class="submit">
         <input type="submit" name="submitaffiliateapplication" id="wcu-register-button" class="button button-primary" value="<?php 
-        echo esc_html__( 'Add New Affiliate', 'woo-coupon-usage' );
+        echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
         ?>">
       </p>
     </form>

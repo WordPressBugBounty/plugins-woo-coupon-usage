@@ -886,6 +886,7 @@ form.wcu_payout_button {
 }
 
 .wcu-reg-terms {
+	padding: 5px 0;
 	font-weight: bold;
 }
 

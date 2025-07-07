@@ -68,7 +68,7 @@ function wcusage_options_page() {
         );
         add_submenu_page(
             'wcusage',
-            esc_html__( 'Affiliate Coupons', 'woo-coupon-usage' ),
+            sprintf( esc_html__( '%s Coupons', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
             esc_html__( 'Coupons', 'woo-coupon-usage' ),
             $admin_perms,
             'wcusage_coupons',
@@ -76,8 +76,8 @@ function wcusage_options_page() {
         );
         add_submenu_page(
             'wcusage',
-            esc_html__( 'Affiliate Orders', 'woo-coupon-usage' ),
-            esc_html__( 'Affiliate Orders', 'woo-coupon-usage' ),
+            sprintf( esc_html__( '%s Orders', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
+            sprintf( esc_html__( '%s Orders', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
             $admin_perms,
             'wcusage_referrals',
             'wcusage_orders_page'
@@ -95,16 +95,16 @@ function wcusage_options_page() {
         $wcusage_field_registration_accepted_role = wcusage_get_setting_value( 'wcusage_field_registration_accepted_role', 'coupon_affiliate' );
         add_submenu_page(
             'wcusage',
-            esc_html__( 'Affiliate Users', 'woo-coupon-usage' ),
-            esc_html__( 'Affiliate Users', 'woo-coupon-usage' ),
+            sprintf( esc_html__( '%s Users', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
+            sprintf( esc_html__( '%s Users', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
             $admin_perms,
             'wcusage_affiliates',
             'wcusage_coupon_users_page'
         );
         add_submenu_page(
             'wcusage',
-            esc_html__( 'Add New Affiliate', 'woo-coupon-usage' ),
-            esc_html__( 'Add New Affiliate', 'woo-coupon-usage' ),
+            sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
+            sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
             $admin_perms,
             'wcusage_add_affiliate',
             'wcusage_admin_new_registration_page'
@@ -112,7 +112,7 @@ function wcusage_options_page() {
         if ( $wcusage_field_registration_enable ) {
             add_submenu_page(
                 'wcusage',
-                esc_html__( 'Affiliate Registrations', 'woo-coupon-usage' ),
+                sprintf( esc_html__( '%s Registrations', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
                 esc_html__( 'Registrations', 'woo-coupon-usage' ),
                 $admin_perms,
                 'wcusage_registrations',
@@ -172,8 +172,8 @@ function wcusage_options_page() {
         );
         add_submenu_page(
             'wcusage_tools',
-            'Bulk Create: Affiliate Coupons',
-            'Bulk Create: Affiliate Coupons',
+            sprintf( 'Bulk Create: %s Coupons', wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
+            sprintf( 'Bulk Create: %s Coupons', wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
             $admin_perms,
             'wcusage-bulk-coupon-creator',
             'wcusage_bulk_coupon_creator_page'
@@ -188,8 +188,8 @@ function wcusage_options_page() {
         );
         add_submenu_page(
             'wcusage_tools',
-            'Bulk Assign: Per-Affiliate Product Rates',
-            'Bulk Assign: Per-Affiliate Product Rates',
+            sprintf( 'Bulk Assign: Per-%s Product Rates', wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
+            sprintf( 'Bulk Assign: Per-%s Product Rates', wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
             $admin_perms,
             'wcusage-bulk-product-rates',
             'wcusage_bulk_assign_rates_page'

@@ -134,10 +134,13 @@ class WC_Coupon_Users_Table extends WP_List_Table {
     }
 
     function get_bulk_actions() {
+        $affiliate_text = wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ));
+        $affiliates_text = wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ), true);
+        
         $actions = [
-            'bulk-delete-users' => 'Delete Affiliate Users',
-            'bulk-delete-all' => 'Delete Affiliate Users and Coupons',
-            'bulk-unassign' => 'Unassign Coupons from Affiliate Users',
+            'bulk-delete-users' => 'Delete ' . $affiliate_text . ' Users',
+            'bulk-delete-all' => 'Delete ' . $affiliate_text . ' Users and Coupons',
+            'bulk-unassign' => 'Unassign Coupons from ' . $affiliate_text . ' Users',
             'bulk-delete-coupons' => 'Delete Coupons',
         ];
 
@@ -391,11 +394,11 @@ function wcusage_coupon_users_page() {
         if(isset($_GET['user'])) {
             $username = sanitize_text_field($_GET['user']);
             echo '<div class="notice notice-success is-dismissible"><p>'
-            . sprintf(esc_html__('The affiliate user %s has been successfully added.', 'woo-coupon-usage'), $username)
+            . sprintf(esc_html__('The %s user %s has been successfully added.', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )), $username)
             . '</p></div>';
         } else {
             echo '<div class="notice notice-success is-dismissible"><p>'
-            . esc_html__('The affiliate user has been successfully added.', 'woo-coupon-usage')
+            . sprintf(esc_html__('The %s user has been successfully added.', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )))
             . '</p></div>';
         }
     }
@@ -413,14 +416,14 @@ function wcusage_coupon_users_page() {
         <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
 
 		<h2 class="wp-heading-inline wcusage-admin-title">
-        <?php echo esc_html__('Coupon Affiliate Users', 'woo-coupon-usage'); ?>
+        <?php echo sprintf(esc_html__('Coupon %s Users', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?>
         <span class="wcusage-admin-title-buttons">
-            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New Affiliate</a>
-            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-bulk-coupon-creator')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Bulk Create Affiliates</a>
+            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New <?php echo wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )); ?></a>
+            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-bulk-coupon-creator')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Bulk Create <?php echo wcusage_get_affiliate_text(__( 'Affiliates', 'woo-coupon-usage' ), true); ?></a>
             <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wcusage_affiliates&action=export_csv'), 'wcusage_export_users_csv')); ?>" class="wcusage-settings-button" id="wcu-admin-export-csv" style="float: right;">
-                <?php echo esc_html__('Export Affiliate Users', 'woo-coupon-usage'); ?> <span class="fa-solid fa-download"></span>
+                <?php echo sprintf(esc_html__('Export %s Users', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?> <span class="fa-solid fa-download"></span>
             </a>
-            <p style="display: block;" class="wcusage_users_page_desc"><?php echo esc_html__('This page displays all the users that are assigned to an affiliate coupon.', 'woo-coupon-usage'); ?></p>
+            <p style="display: block;" class="wcusage_users_page_desc"><?php echo sprintf(esc_html__('This page displays all the users that are assigned to an %s coupon.', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' ))); ?></p>
             <br/>
         </span>
         </h2>
@@ -456,13 +459,13 @@ function wcusage_coupon_users_page() {
             var actionText = '';
             switch (actionSelected) {
                 case 'bulk-delete-users':
-                    actionText = 'Are you sure you want to delete selected affiliate users?\n\nThis will NOT delete the coupons assigned to them.';
+                    actionText = 'Are you sure you want to delete selected <?php echo wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )); ?> users?\n\nThis will NOT delete the coupons assigned to them.';
                     break;
                 case 'bulk-delete-all':
-                    actionText = 'Are you sure you want to delete the selected affiliate users, and delete all the coupons they are assigned to?';
+                    actionText = 'Are you sure you want to delete the selected <?php echo wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )); ?> users, and delete all the coupons they are assigned to?';
                     break;
                 case 'bulk-unassign':
-                    actionText = 'Are you sure you want to unassign the selected users from their coupons?\n\nThis will essentially remove their access to the affiliate dashboard and commission earnings.\n\nThe users and coupons will NOT be deleted.';
+                    actionText = 'Are you sure you want to unassign the selected users from their coupons?\n\nThis will essentially remove their access to the <?php echo wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )); ?> dashboard and commission earnings.\n\nThe users and coupons will NOT be deleted.';
                     break;
                 case 'bulk-delete-coupons':
                     actionText = 'Are you sure you want to delete the coupons assigned to the selected users?\n\nThe users will NOT be deleted.';
@@ -533,7 +536,7 @@ function wcusage_export_coupon_users_csv() {
         'Total Sales',
         'Total Commission',
         'Unpaid Commission',
-        'Affiliate Coupons'
+        wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )) . ' Coupons'
     );
     
     // Add conditional headers

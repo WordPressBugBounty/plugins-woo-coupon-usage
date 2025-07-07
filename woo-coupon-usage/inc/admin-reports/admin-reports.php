@@ -220,7 +220,7 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
       <hr style="margin: 17px 0 15px 0;" />
 
       <p><input type="checkbox" id="wcu_report_users_only" name="wcu_report_users_only" value="true" style="margin-top: -2px;"> <strong><?php 
-        echo esc_html__( "Only show coupons assigned to an affiliate user.", "woo-coupon-usage" );
+        echo sprintf( esc_html__( "Only show coupons assigned to an %s user.", "woo-coupon-usage" ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
         ?></strong></p>
 
       <hr style="margin: 17px 0;" />
@@ -1127,7 +1127,7 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
             }
         }
         if ( $wcu_report_users_only == "true" ) {
-            $reportscripthtml .= "<br/><i class='fas fa-check-circle'></i> " . esc_html__( "Only showing coupons that are assigned to an affiliate user.", "woo-coupon-usage" );
+            $reportscripthtml .= "<br/><i class='fas fa-check-circle'></i> " . sprintf( esc_html__( "Only showing coupons that are assigned to an %s user.", "woo-coupon-usage" ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
         }
         $reportscripthtml .= "</p></div>";
         // Update report title
@@ -1526,7 +1526,7 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
                           <a href="<?php 
                 echo esc_html( $coupon_stats[$coupon_code]['uniqueurl'] );
                 ?>" target="_blank" style="text-decoration: none;" title="<?php 
-                echo esc_html__( "View Affiliate Dashboard", "woo-coupon-usage" );
+                echo sprintf( esc_html__( "View %s Dashboard", "woo-coupon-usage" ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
                 ?>"><?php 
                 echo esc_html( $coupon_code );
                 ?></a>
@@ -1581,7 +1581,7 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
                   <?php 
                 }
                 ?>
-              </tr>
+                           </tr>
               <tr class="coupon-data-row coupon-data-row-main" style="padding: 0 15px 0px 15px; margin: 0 0 20px 0;">
                   <td class="wcu-r-td wcu-r-td-120 wcu-r-td-id coupon-data-row-head-mobile excludeThisClassExport"><?php 
                 echo esc_html__( "Coupon ID", "woo-coupon-usage" );
@@ -1590,7 +1590,7 @@ if ( !function_exists( 'wcusage_get_admin_report_data' ) ) {
                 echo esc_html( $coupon_id );
                 ?></td>
                   <td class="wcu-r-td wcu-r-td-120 wcu-r-td-affiliate coupon-data-row-head-mobile excludeThisClassExport"><?php 
-                echo esc_html__( "Affiliate User", "woo-coupon-usage" );
+                echo sprintf( esc_html__( "%s User", "woo-coupon-usage" ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
                 ?></td>
                   <td class="wcu-r-td wcu-r-td-120 wcu-r-td-affiliate"><span title="<?php 
                 echo esc_html( $usernamefull );

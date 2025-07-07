@@ -14,6 +14,55 @@ function wcusage_field_cb_design( $args )
 
   <hr/>
 
+  <!-- Custom "Affiliate" terminology. -->
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Custom Terminology', 'woo-coupon-usage' ); ?></h3>
+
+  <p>
+    <div class="wcu-terminology">
+    <?php echo wcusage_setting_text_option('wcusage_field_custom_affiliate_text', '', esc_html__( 'Custom "Affiliate" terminology:', 'woo-coupon-usage' ), '0px'); ?>
+    </div>
+    <div class="wcu-terminology">
+    <?php echo wcusage_setting_text_option('wcusage_field_custom_affiliates_text', '', esc_html__( 'Custom "Affiliates" terminology:', 'woo-coupon-usage' ), '0px'); ?>
+    </div>
+    <script>
+    /* Only enable the "affiliates" text field if the "affiliate" text field is not empty */
+    jQuery(document).ready(function($) {
+      var affiliateText = $(this).val();
+      if (affiliateText !== '') {
+        $('#wcusage_field_custom_affiliates_text').prop('disabled', false);
+      } else {
+        $('#wcusage_field_custom_affiliates_text').prop('disabled', true);
+      }
+      $('#wcusage_field_custom_affiliate_text').on('input', function() {
+        var affiliateText = $(this).val();
+        if (affiliateText !== '') {
+          $('#wcusage_field_custom_affiliates_text').prop('disabled', false);
+        } else {
+          $('#wcusage_field_custom_affiliates_text').prop('disabled', true);
+        }
+      });
+    });
+    </script>
+    <div style="clear: both;"></div>
+    <i><?php echo esc_html__( 'If you want to change the word "Affiliate" to something else, enter it here. This will change it everywhere in the plugin except the settings page.', 'woo-coupon-usage' ); ?></i><br/>
+    <i><?php echo esc_html__( 'For example, if you want to change it to "Partner", you would enter "Partner" here. It will then change things like "Affiliate Dashboard" to "Partner Dashboard", "Affiliate Registration" to "Partner Registration", etc.', 'woo-coupon-usage' ); ?></i>
+  </p>
+  <script>
+  /* Set a placeholder if empty */
+  jQuery(document).ready(function($) {
+    var customAffiliateText = $('#wcusage_field_custom_affiliate_text').val();
+    if (customAffiliateText === '') {
+      $('#wcusage_field_custom_affiliate_text').attr('placeholder', '<?php echo esc_html__( 'Affiliate', 'woo-coupon-usage' ); ?>');
+    }
+    var customAffiliatesText = $('#wcusage_field_custom_affiliates_text').val();
+    if (customAffiliatesText === '') {
+      $('#wcusage_field_custom_affiliates_text').attr('placeholder', '<?php echo esc_html__( 'Affiliates', 'woo-coupon-usage' ); ?>');
+    }
+  });
+  </script>
+
+  <br/><hr/>
+
   <?php $wcusage_field_show_tabs = wcusage_get_setting_value('wcusage_field_show_tabs', '1');
   if(!$wcusage_field_show_tabs) { ?>
   <!-- Enable "tabbed" layout - Discontinued but option hidden if turned off -->

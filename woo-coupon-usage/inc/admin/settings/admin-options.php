@@ -641,24 +641,24 @@ jQuery( document ).ready(function() {
   <?php 
     }
     ?>
-
-  <!--- DESIGN --->
-  <?php 
-    echo wcusage_admin_settings_tab_button(
-        "tab-design",
-        esc_html__( "Design", "woo-coupon-usage" ),
-        "fas fa-palette",
-        0,
-        ''
-    );
-    ?>
-
+  
   <!--- FLOATING WIDGET --->
   <?php 
     echo wcusage_admin_settings_tab_button(
         "tab-widget",
         esc_html__( "Widget", "woo-coupon-usage" ),
         "fas fa-square-caret-right",
+        0,
+        ''
+    );
+    ?>
+  
+  <!--- DESIGN --->
+  <?php 
+    echo wcusage_admin_settings_tab_button(
+        "tab-design",
+        esc_html__( "Design", "woo-coupon-usage" ),
+        "fas fa-palette",
         0,
         ''
     );
@@ -747,7 +747,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
       <a href="<?php 
         echo esc_url( admin_url( 'admin.php?page=wcusage_add_affiliate' ) );
         ?>" class="wcusage-settings-button"><?php 
-        echo esc_html__( 'Add New Affiliate', 'woo-coupon-usage' );
+        echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
         ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
     </h2>
 
@@ -944,7 +944,9 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
   	</form>
 
-<?php 
+  </div>
+
+  <?php 
         if ( !wcu_fs()->can_use_premium_code() ) {
             ?>
     <div class="wcu-settings-sidebar" style="margin-top: -10px;">
@@ -1156,8 +1158,6 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
     <br/><br/>
     Developed and supported by <a href="https://relywp.com">RelyWP Ltd</a>.
     </span>
-
-    </div> <!-- .wrap -->
 
    <?php 
     }

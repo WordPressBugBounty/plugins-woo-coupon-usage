@@ -564,6 +564,20 @@ __( 'Assign affiliates to groups and then configure a variety of settings for th
 ?>
 
 <?php echo wcusage_output_addon_box(
+__( 'Terms & Conditions Generator Tool', 'woo-coupon-usage' ),
+"wcusage_field_addon_default",
+__( 'Easily generate a Terms & Conditions template for your affiliate program, which you can then link to in the registration form.', 'woo-coupon-usage' ),
+"https://couponaffiliates.com/docs/terms-generator",
+"fas fa-file-contract",
+0, // Default
+1, // Always
+0, // Soon
+'tab-registration',
+'wcu-setting-header-terms'
+);
+?>
+
+<?php echo wcusage_output_addon_box(
 __( 'Priority Support', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Get priority support, and your suggestions will have more priority for development.', 'woo-coupon-usage' ),

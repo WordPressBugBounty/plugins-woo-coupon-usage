@@ -405,6 +405,12 @@ textarea {
 .registration-form .wcu_form_affiliate_register input, .woocommerce-form-login input {
     margin-bottom: 10px !important;
 }
+/* Not on checkboxes */
+body .registration-form .wcu_form_affiliate_register input[type="checkbox"],
+body .woocommerce-form-login input[type="checkbox"] {
+    margin-bottom: 0px !important;
+}
+
 .registration-message {
     text-align: center;
 }

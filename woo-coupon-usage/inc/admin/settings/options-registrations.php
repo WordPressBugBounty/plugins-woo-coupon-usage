@@ -162,7 +162,7 @@ function wcusage_field_cb_registration( $args )
 
       <div>
 
-        <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Terms and Conditions Page', 'woo-coupon-usage' ); ?> (Beta)</h3>
+        <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Terms and Conditions Generator', 'woo-coupon-usage' ); ?></h3>
 
         <p>
           <?php echo esc_html__( 'You can use the terms and conditions manager and generation tool to help you easily create your terms and conditions page.', 'woo-coupon-usage' ); ?>
@@ -180,7 +180,7 @@ function wcusage_field_cb_registration( $args )
 
       <?php } ?>
 
-      <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Terms and Conditions Acceptance Checkbox', 'woo-coupon-usage' ); ?></h3>
+      <h3 id="wcu-setting-header-terms"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Terms and Conditions Acceptance Checkbox', 'woo-coupon-usage' ); ?></h3>
 
       <!-- Enable terms acceptance checkbox on affiliate registration form. -->
       <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_terms', 0, esc_html__( 'Enable terms and conditions checkbox on registration form.', 'woo-coupon-usage' ), '0px'); ?>
@@ -1187,7 +1187,8 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
     if( ( isset($_GET['page']) && $_GET['page'] == 'wcusage_setup' ) && empty($options['wcusage_field_registration_coupon_template'])) { ?>
     <span id="wcusage_generate_coupon" style="display: block; margin: 10px 0 15px 0;">
     
-    <button type="button" onclick="showCouponFields()"><?php echo esc_html__( "Generate Coupon", "woo-coupon-usage" ); ?> <span class="fa-solid fa-arrow-right"></span></button>
+    <button type="button" onclick="showCouponFields()" class="submit-generate-page" style="margin-top: 10px;">
+      <?php echo esc_html__( "Generate Coupon", "woo-coupon-usage" ); ?> <span class="fa-solid fa-arrow-right"></span></button>
 
     <div id="couponFields" style="display: none; padding: 5px 10px 20px 10px; margin-top: 10px; background: #f3f3f3; border-radius: 5px;">
 
@@ -1202,8 +1203,11 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
         }
         ?>
       </select>
-      <p><strong><label for="coupon_discount">Coupon Discount Amount:</label></strong></p>
+      <p><strong><label for="coupon_discount"><?php echo esc_html__( 'Coupon Discount Amount:', 'woo-coupon-usage' ); ?></label></strong></p>
+      <!-- Do not allow text input, only numbers -->
+       
       <input type="number" name="coupon_discount" id="coupon_discount" step="0.01" min="0">
+
       <p>
       <button type="button" onclick="generateCoupon()"><?php echo esc_html__( "Generate", "woo-coupon-usage" ); ?> <span class="fa-solid fa-arrow-right"></span></button>
       </p>

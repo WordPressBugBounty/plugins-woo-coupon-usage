@@ -1574,28 +1574,6 @@
     }
 }
 
-/* Device-specific hiding classes */
-.wcusage-floating-widget.wcusage-hide-mobile {
-    display: none !important;
-}
-
-.wcusage-floating-widget.wcusage-hide-tablet {
-    display: none !important;
-}
-
-/* Media queries for device detection fallback */
-@media (max-width: 767px) {
-    .wcusage-floating-widget.wcusage-hide-mobile {
-        display: none !important;
-    }
-}
-
-@media (min-width: 768px) and (max-width: 1024px) {
-    .wcusage-floating-widget.wcusage-hide-tablet {
-        display: none !important;
-    }
-}
-
 /* Ensure tabs are hidden when not visible */
 .wcusage-widget-tab:not(:visible) {
     display: none !important;

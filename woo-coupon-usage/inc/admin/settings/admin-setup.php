@@ -44,9 +44,10 @@ function wcusage_setup_page_html() {
 
     <center>
 
-      <a href="https://couponaffiliates.com?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=logo" target="_blank">
+      <a href="https://couponaffiliates.com?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=logo"
+      target="_blank" style="display: inline-block;">
         <img src="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL); ?>images/coupon-affiliates-logo.png"
-        style="display: inline-block; width: 100%; max-width: 295px; text-align: left; margin: 25px 0 10px 0;">
+        style="display: inline-block; width: 100%; max-width: 400px; text-align: left; margin: 25px 0 10px 0;">
       </a>
 
     </center>
@@ -115,7 +116,7 @@ function wcusage_setup_page_html() {
 
           <div class="affiliate-dashboard-page-settings">
 
-          <h3><span class="dashicons dashicons-admin-generic"></span> Dashboard:</h3>
+          <h3><span class="dashicons dashicons-admin-generic"></span> <?php echo esc_html__( 'Affiliate Dashboard Page', 'woo-coupon-usage' ); ?>:</h3>
 
           <p>
             <?php echo esc_html__('Firstly, we need to create the main affiliate dashboard page on your website.', 'woo-coupon-usage'); ?>
@@ -133,12 +134,13 @@ function wcusage_setup_page_html() {
             if(!isset( $_POST['submitnewpage2'] )) {
               do_action('wcusage_hook_getting_started3');
             }
+            ?>
+            <p style="margin: 0;">
+              <?php echo sprintf( esc_html__('Alternatively, you can add the %s shortcode to a new page, then select the page from the dropdown below.', 'woo-coupon-usage'), '[couponaffiliates]'); ?>
+            </p>
+            <?php
           }
           ?>
-
-          <p style="margin: 0;">
-            <?php echo sprintf( esc_html__('Alternatively, you can add the %s shortcode to a new page, then select the page from the dropdown below.', 'woo-coupon-usage'), '[couponaffiliates]'); ?>
-          </p>
 
           </div>
 
@@ -167,9 +169,16 @@ function wcusage_setup_page_html() {
           flush_rewrite_rules();
           ?>
 
-          <h3 style="margin-bottom: 10px;"><span class="dashicons dashicons-admin-generic"></span> Registration System:</h3>
-
           <form action="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_setup&step=3" method="post">
+
+            <h3><span class="dashicons dashicons-admin-generic"></span> <?php echo esc_html__( 'Affiliate Registration System', 'woo-coupon-usage' ); ?>:</h3>
+
+            <p>
+              <?php echo esc_html__('Next, we need to setup the affiliate registration system.', 'woo-coupon-usage'); ?>
+              <?php echo esc_html__('This will allow users to register as affiliates on your website. Once accepted, it will automatically generate their new account, create their affiliate coupon, and assign them to it, so they can access the dashboard.', 'woo-coupon-usage'); ?>
+            </p>
+
+            <hr style="margin: 20px 0;">
 
             <!-- Enable Affiliate Registration Features -->
             <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable', 1, esc_html__( 'Enable Affiliate Registration Features', 'woo-coupon-usage' ), '0px'); ?>
@@ -284,6 +293,8 @@ function wcusage_setup_page_html() {
 
             <h3><span class="dashicons dashicons-admin-generic"></span> <?php echo esc_html__('General Email Settings', 'woo-coupon-usage'); ?>:</h3>
             
+            <p style="margin-bottom: 20px;"><?php echo esc_html__('Finally, we need to setup the email notifications for your affiliate program.', 'woo-coupon-usage'); ?></p>
+
             <?php echo do_action('wcusage_hook_setting_section_email_free'); ?>
 
             <p>
