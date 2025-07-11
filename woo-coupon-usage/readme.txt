@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.4.2
+Stable tag: 6.4.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -273,6 +273,9 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 6.4.3 - 11th July 2025 =
+- Fix: Fixed an issue in the free version causing an error on the wcusage_referrals page.
 
 = Version 6.4.2 - 4th July 2025 =
 - New: Added a new "custom affiliate terminology" setting to the plugin "design" settings tab, that allows you to change the word "affiliate" to something else, such as "referrer", "partner", etc. This will change the terminology used throughout the plugin.
