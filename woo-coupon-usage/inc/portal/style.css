@@ -784,21 +784,33 @@ body,
 }
 
 .payouts-box p {
-    margin-bottom: 5px;
+	margin-bottom: 5px;
 }
 
-.wcusage_custom_ref_url {
-    width: 500px !important;
-    max-width: 100%;
+/* Bank Details Display in Portal */
+.wcu-bank-details-display {
+	font-size: 14px;
+	line-height: 1.4;
+	background: var(--input-bg) !important;
+	border: 1px solid var(--border-color) !important;
+	color: var(--text-color) !important;
 }
 
-.wcu-clicks-pagination {
-    font-size: 12px;
-    margin-top: 0px;
-    display: flow-root !important;
-    padding: 5px;
-    background: var(--input-bg); /* Use variable */
-    border: 1px solid var(--border-color); /* Use variable */
+.wcu-bank-details-display strong {
+	color: var(--text-color) !important;
+}
+
+.wcu-bank-details-display div {
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+@media only screen and (max-width: 720px) {
+	.wcu-bank-details-display {
+		padding: 8px !important;
+		margin-left: -5px !important;
+		margin-right: -5px !important;
+	}
 }
 
 /* Hamburger Menu Styles */
@@ -1035,11 +1047,11 @@ body.dark-mode .wcusage-sales-stats-toggles {
 }
 
 body.dark-mode .wcuTableRow,
-body.dark-mode .wcuTableRow tbody,
-body.dark-mode .wcuTableRow tr,
-body.dark-mode .wcuTableRow th,
-body.dark-mode .wcuTableRow td,
-body.dark-mode .wcuTableCell {
+body.dark_mode .wcuTableRow tbody,
+body.dark_mode .wcuTableRow tr,
+body.dark_mode .wcuTableRow th,
+body.dark_mode .wcuTableRow td,
+body.dark_mode .wcuTableCell {
     background: var(--content-bg2);
     color: var(--text-color) !important;
     border: 1px solid var(--border-color);
@@ -1074,7 +1086,7 @@ body.dark-mode .wcusage-tab-section .wcusage-last-days a.wcutab-active {
 body.dark-mode .wcusage-stats-title a {
     color: var(--accent-color) !important;
 }
-body.dark-mode .wcusage-stats-title a:hover {
+body.dark.mode .wcusage-stats-title a:hover {
     color: var(--button-bg-hover) !important;
 }
 
@@ -1089,14 +1101,14 @@ body.dark-mode button {
     border: 1px solid var(--border-color) !important;
 }
 
-body.dark-mode .wcu-campaigns-col1, body.dark-mode .wcu-campaigns-col2 {
+body.dark-mode .wcu-campaigns-col1, body.dark.mode .wcu-campaigns-col2 {
     color: var(--text-color) !important;
 }
 
 body.dark-mode .wcu-order-filters-field {
     color: var(--text-color);
 }
-body.dark-mode .wcu-order-filters-field input, body.dark-mode .wcu-order-filters-field select, body.dark-mode .wcu-order-filters-field textarea {
+body.dark.mode .wcu-order-filters-field input, body.dark.mode .wcu-order-filters-field select, body.dark.mode .wcu-order-filters-field textarea {
     background: var(--input-bg);
     border: 1px solid var(--border-color);
     color: var(--text-color);
@@ -1118,9 +1130,9 @@ body.dark-mode .creatives-box {
     color: var(--text-color) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
-body.dark-mode .payouts-box p, body.dark-mode .payouts-box span,
-body.dark-mode .referral-url-box p, body.dark-mode .referral-url-box span, body.dark-mode .referral-url-box strong, body.dark-mode .referral-url-box code,
-body.dark-mode .creatives-box p, body.dark-mode .creatives-box span {
+body.dark-mode .payouts-box p, body.dark.mode .payouts-box span,
+body.dark.mode .referral-url-box p, body.dark.mode .referral-url-box span, body.dark.mode .referral-url-box strong, body.dark.mode .referral-url-box code,
+body.dark.mode .creatives-box p, body.dark.mode .creatives-box span {
     color: var(--text-color) !important;
 }
 
@@ -1143,57 +1155,57 @@ body.dark-mode .sidebar {
     color: var(--sidebar-text);
     border-right: 1px solid var(--border-color);
 }
-body.dark-mode .sidebar-logo h2 {
+body.dark.mode .sidebar-logo h2 {
     color: var(--sidebar-text) !important;
 }
-body.dark-mode .portal-tablink {
+body.dark.mode .portal-tablink {
     background: var(--sidebar-bg) !important;
     color: var(--sidebar-text);
     border: none !important;
     border-left: 4px solid transparent !important;
 }
-body.dark-mode .portal-tablink.active {
+body.dark.mode .portal-tablink.active {
     background: var(--sidebar-bg-link) !important;
     border-left: 4px solid var(--sidebar-bg-link) !important;
 }
 
-body.dark-mode .wcusage-progress-bar-text {
+body.dark.mode .wcusage-progress-bar-text {
     color: #515151;
 }
 
-body.dark-mode .wcusage-reward-summary-item {
+body.dark.mode .wcusage-reward-summary-item {
     color: #111 !important;
 }
 
 /* Google chart dark mode styles */
 
-body.dark-mode .wcusagechart {
+body.dark.mode .wcusagechart {
     filter: invert(90%);
 }
-body.dark-mode .wcusagechart svg path {
+body.dark.mode .wcusagechart svg path {
     stroke: #000 !important;
 }
-body.dark-mode .wcusagechart svg circle {
+body.dark.mode .wcusagechart svg circle {
     fill: #000 !important;
 }
-body.dark-mode .wcusagechart svg {
+body.dark.mode .wcusagechart svg {
     fill: #000 !important;
     color: #000 !important;
 }
-body.dark-mode .wcusagechart text {
+body.dark.mode .wcusagechart text {
     fill: #000 !important;
 }
 
 /* Dark Mode: MLA */
 
-body.dark-mode .wcu-user-coupon-list {
+body.dark.mode .wcu-user-coupon-list {
     background: var(--content-bg2);
     border: 1px solid var(--border-color);
     color: var(--text-color) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-body.dark-mode #mla_chart_div td.google-visualization-orgchart-node {
+body.dark.mode #mla_chart_div td.google-visualization-orgchart-node {
     background: var(--content-bg2) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-color) !important;

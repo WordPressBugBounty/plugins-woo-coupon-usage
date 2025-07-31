@@ -1512,26 +1512,78 @@ form.wcu_payout_button {
 .wcu-tooltip {
 	position: relative;
 	display: inline-block;
+	z-index: 999999;
 }
 
 /* Tooltip text */
 .wcu-tooltip .wcu-tooltiptext {
 	visibility: hidden;
+	opacity: 0;
 	width: max-content;
 	min-width: 200px;
+	max-width: 300px;
 	background-color: black;
 	color: #fff;
 	text-align: left;
 	padding: 5px 10px;
 	border-radius: 6px;
 	position: absolute !important;
-	z-index: 1 !important;
-	margin-left: 5px;
+	z-index: 999999 !important;
+	top: calc(100% + 5px);
+	left: 0;
+	transition: opacity 0.3s;
+	word-wrap: break-word;
+	white-space: normal;
+	pointer-events: none;
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */
 .wcu-tooltip:hover .wcu-tooltiptext {
 	visibility: visible;
+	opacity: 1;
+}
+
+/* Special handling for tooltips in table cells */
+.wcuTableCell .wcu-tooltip {
+	position: relative;
+	z-index: 999999;
+}
+
+.wcuTableCell .wcu-tooltip .wcu-tooltiptext {
+	position: absolute !important;
+	z-index: 999999 !important;
+	top: calc(100% + 5px);
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+/* Ensure table cells don't clip tooltips */
+.wcuTableCell {
+	overflow: visible !important;
+}
+
+.wcuTable {
+	overflow: visible !important;
+}
+
+/* Adjust tooltip positioning for mobile */
+@media only screen and (max-width: 760px) {
+	.wcu-tooltip .wcu-tooltiptext {
+		position: fixed !important;
+		left: 10px !important;
+		right: 10px !important;
+		width: auto !important;
+		max-width: calc(100vw - 20px) !important;
+		top: 50% !important;
+		transform: translateY(-50%) !important;
+		z-index: 999999 !important;
+	}
+	
+	.wcuTableCell .wcu-tooltip .wcu-tooltiptext {
+		transform: translateY(-50%) !important;
+		left: 10px !important;
+		right: 10px !important;
+	}
 }
 
 /* MLA */
@@ -1857,4 +1909,38 @@ table.wcusage-leaderboard-table {
 .wcusage-leaderboard-table .wcusage-highlight {
 	background: #b8e4c7;
 	color: #333;
+}
+
+/* Bank Details Display */
+.wcu-bank-details-display {
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.wcu-bank-details-display strong {
+	color: #333 !important;
+}
+
+.wcu-bank-details-display div {
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+@media only screen and (max-width: 720px) {
+	.wcu-bank-details-display {
+		padding: 8px !important;
+		margin-left: -5px !important;
+		margin-right: -5px !important;
+	}
+}
+
+/* Dark mode support for bank details display */
+body.dark-mode .wcu-bank-details-display {
+	background: var(--content-bg2) !important;
+	border: 1px solid var(--border-color) !important;
+	color: var(--text-color) !important;
+}
+
+body.dark-mode .wcu-bank-details-display strong {
+	color: var(--text-color) !important;
 }

@@ -694,13 +694,21 @@ Label the data
     min-width: 148px;
 }
 
-.payout-action-paid,
 .payout-action-accepted {
     border: 2px solid #015F13;
 }
 
-.payout-action-paid:hover,
-.payout-action-accepted:hover {
+
+.payoutaction-accepted:hover {
+    background: #015F13;
+    border: 2px solid #333;
+}
+
+.payout-action-paid {
+    border: 2px solid #015F13;
+}
+
+.payout-action-paid:hover {
     background: #015F13;
     border: 2px solid #333;
 }
@@ -736,9 +744,30 @@ Label the data
     border: 2px solid #333;
 }
 
+.payout-action-created {
+    border: 2px solid #0073aa;
+}
+
+.payout-action-created:hover {
+    background: #0073aa;
+    border: 2px solid #333;
+}
+
 .payout-action-delete {
     width: 40px;
     min-width: 40px;
+}
+
+.payout-action-manual {
+    background-color: #c97925;
+    color: white;
+    border: 2px solid #c97925;
+}
+
+.payout-action-manual:hover {
+    background-color: #a66420;
+    color: white;
+    border: 2px solid #a66420;
 }
 
 #submitclick button:hover,
@@ -2280,25 +2309,47 @@ p label {
 
 /* Tooltip text */
 .wcu-tooltip .wcu-tooltiptext {
-    visibility: hidden;
-    top: 4px;
-    left: 90px;
-    margin: 0 auto;
-    width: 230px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    padding: 5px 0;
-    border-radius: 6px;
-
-    /* Position the tooltip text - see examples below! */
-    position: absolute;
-    z-index: 1;
+	visibility: hidden;
+	top: 4px;
+	left: 90px;
+	margin: 0 auto;
+	width: 230px;
+	background-color: black;
+	color: #fff;
+	text-align: center;
+	padding: 5px 0;
+	border-radius: 6px;
+	position: absolute;
+	z-index: 99999 !important;
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */
 .wcu-tooltip:hover .wcu-tooltiptext {
-    visibility: visible;
+	visibility: visible;
+}
+
+/* Special handling for tooltips in admin tables */
+.wp-list-table .wcu-tooltip .wcu-tooltiptext {
+	position: fixed !important;
+	top: auto !important;
+	left: auto !important;
+	right: 10px;
+	bottom: 10px;
+	width: auto;
+	max-width: 400px;
+	z-index: 999999 !important;
+	word-wrap: break-word;
+	white-space: normal;
+}
+
+/* Mobile adjustments for admin tooltips */
+@media only screen and (max-width: 782px) {
+	.wp-list-table .wcu-tooltip .wcu-tooltiptext {
+		left: 10px !important;
+		right: 10px !important;
+		bottom: 20px !important;
+		max-width: calc(100vw - 20px) !important;
+	}
 }
 
 /* Menu Divider */
@@ -2415,7 +2466,6 @@ p label {
 }
 .wcu-admin-faq p {
     font-size: 15px !important;
-    font-weight: bold;
     margin: 0;
 }
 .wcu-admin-faq-content {

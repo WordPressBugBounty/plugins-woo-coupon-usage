@@ -52,16 +52,78 @@ function wcusage_ajax_update_settings() {
         'bankother2' => 'wcu_bank_other2',
         'bankother3' => 'wcu_bank_other3',
         'bankother4' => 'wcu_bank_other4',
-        'paypalemailapi' => 'wcu_paypalapi'
+        'paypalemailapi' => 'wcu_paypalapi',
+        'wisebank_region' => 'wcu_wisebank_region',
+        'wisebank_account_name' => 'wcu_wisebank_account_name',
+        'wisebank_account_number' => 'wcu_wisebank_account_number',
+        'wisebank_routing_number' => 'wcu_wisebank_routing_number',
+        'wisebank_swift_code' => 'wcu_wisebank_swift_code',
+        'wisebank_iban' => 'wcu_wisebank_iban',
+        'wisebank_sort_code' => 'wcu_wisebank_sort_code',
+        'wisebank_bank_name' => 'wcu_wisebank_bank_name',
+        'wisebank_bank_address' => 'wcu_wisebank_bank_address',
+        'wisebank_country' => 'wcu_wisebank_country',
+        'wisebank_address' => 'wcu_wisebank_address',
+        'wisebank_city' => 'wcu_wisebank_city',
+        'wisebank_postcode' => 'wcu_wisebank_postcode',
+        'wisebank_state' => 'wcu_wisebank_state',
+        'wisebank_recipient_country' => 'wcu_wisebank_recipient_country'
+    ];
+
+    // Handle region-specific account number fields
+    $region_account_fields = [
+        'wisebank_account_number_us' => 'wcu_wisebank_account_number',
+        'wisebank_account_number_uk' => 'wcu_wisebank_account_number',
+        'wisebank_account_number_intl' => 'wcu_wisebank_account_number'
     ];
 
     $updated_payout_fields = [];
     foreach($payout_fields as $post_key => $meta_key) {
         if(isset($_POST[$post_key])) {
             $value = sanitize_text_field($_POST[$post_key]);
+            
+            // Check if this field should be encrypted
+            if (function_exists('wcusage_should_encrypt_field') && wcusage_should_encrypt_field($meta_key)) {
+                $value = wcusage_encrypt_bank_data($value);
+            }
+            
             update_user_meta($couponuserid, $meta_key, $value);
-            $updated_payout_fields[$post_key] = $value;
+            $updated_payout_fields[$post_key] = sanitize_text_field($_POST[$post_key]); // Return unencrypted for response
         }
+    }
+
+    // Handle region-specific account number fields - only update if they have a value
+    foreach($region_account_fields as $post_key => $meta_key) {
+        if(isset($_POST[$post_key]) && !empty($_POST[$post_key])) {
+            $value = sanitize_text_field($_POST[$post_key]);
+            
+            // Check if this field should be encrypted
+            if (function_exists('wcusage_should_encrypt_field') && wcusage_should_encrypt_field($meta_key)) {
+                $value = wcusage_encrypt_bank_data($value);
+            }
+            
+            update_user_meta($couponuserid, $meta_key, $value);
+            $updated_payout_fields['wisebank_account_number'] = sanitize_text_field($_POST[$post_key]); // Return unencrypted for response
+        }
+    }
+
+    // Special handling for Wise Bank Transfer - combine individual fields OR handle old textarea format
+    if (isset($_POST['wisebank_account_name']) || isset($_POST['wisebank_account_number']) || 
+        isset($_POST['wisebank_routing_number']) || isset($_POST['wisebank_swift_code']) || 
+        isset($_POST['wisebank_iban']) || isset($_POST['wisebank_sort_code']) || 
+        isset($_POST['wisebank_bank_name']) || isset($_POST['wisebank_bank_address']) || 
+        isset($_POST['wisebank_country']) || isset($_POST['wisebank_state'])) {
+        
+        $wisebank_combined = wcusage_combine_wisebank_fields($_POST);
+        update_user_meta($couponuserid, 'wcu_wisebank', $wisebank_combined);
+        $updated_payout_fields['wisebank'] = $wisebank_combined;
+    }
+    
+    // Handle old textarea format for backwards compatibility
+    if (isset($_POST['wisebankapi']) && !empty($_POST['wisebankapi'])) {
+        $wisebank_textarea = sanitize_textarea_field($_POST['wisebankapi']);
+        update_user_meta($couponuserid, 'wcu_wisebank', $wisebank_textarea);
+        $updated_payout_fields['wisebank'] = $wisebank_textarea;
     }
 
     if (!empty($updated_payout_fields)) {
@@ -109,6 +171,12 @@ function wcusage_ajax_update_settings() {
             }
             $updated_account_fields[$post_key] = $value;
         }
+    }
+
+    // Handle state field for US bank accounts
+    if (isset($_POST['wcu_wisebank_state'])) {
+        $state = sanitize_text_field($_POST['wcu_wisebank_state']);
+        update_user_meta($couponuserid, 'wcu_wisebank_state', $state);
     }
 
     if (count($user_data) > 1) {
@@ -392,5 +460,72 @@ if (!function_exists('wcusage_dashboard_tab_content_settings')) {
             <div style="width: 100%; clear: both; display: inline;"></div>
         <?php } ?>
         <?php
+    }
+}
+
+/**
+ * Combine Wisebank fields for backward compatibility
+ */
+if( !function_exists( 'wcusage_combine_wisebank_fields' ) ) {
+    function wcusage_combine_wisebank_fields($post_data) {
+        $combined = '';
+        
+        if (!empty($post_data['wisebank_region'])) {
+            $combined .= "Region: " . $post_data['wisebank_region'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_account_name'])) {
+            $combined .= "Account Name: " . $post_data['wisebank_account_name'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_account_number'])) {
+            $combined .= "Account Number: " . $post_data['wisebank_account_number'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_routing_number'])) {
+            $combined .= "Routing Number: " . $post_data['wisebank_routing_number'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_swift_code'])) {
+            $combined .= "SWIFT Code: " . $post_data['wisebank_swift_code'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_iban'])) {
+            $combined .= "IBAN: " . $post_data['wisebank_iban'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_sort_code'])) {
+            $combined .= "Sort Code: " . $post_data['wisebank_sort_code'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_bank_name'])) {
+            $combined .= "Bank Name: " . $post_data['wisebank_bank_name'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_bank_address'])) {
+            $combined .= "Bank Address: " . $post_data['wisebank_bank_address'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_country'])) {
+            $combined .= "Country: " . $post_data['wisebank_country'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_address'])) {
+            $combined .= "Recipient Address: " . $post_data['wisebank_address'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_city'])) {
+            $combined .= "Recipient City: " . $post_data['wisebank_city'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_postcode'])) {
+            $combined .= "Recipient Postcode: " . $post_data['wisebank_postcode'] . "\n";
+        }
+        
+        if (!empty($post_data['wisebank_recipient_country'])) {
+            $combined .= "Recipient Country: " . $post_data['wisebank_recipient_country'] . "\n";
+        }
+        
+        return trim($combined);
     }
 }

@@ -120,6 +120,11 @@ if( !function_exists( 'wcusage_get_coupon_info_by_id' ) ) {
 
 		$thepageurl = wcusage_get_coupon_shortcode_page(1, 0);
 
+		// If secretid contains a & make it a URL safe string
+		if (strpos($secretid, '&') !== false) {
+			$secretid = str_replace('&', '%26', $secretid);
+		}
+
 		$uniqueurl = $thepageurl . 'couponid=' . $secretid;
 
 		// Return

@@ -1,248 +1,234 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
+
+if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
-
-if (!class_exists('WP_List_Table')) {
-    require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
+if ( !class_exists( 'WP_List_Table' ) ) {
+    require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
-
 class wcusage_Referrals_Table extends WP_List_Table {
-
     public $orders = [];
 
     function __construct() {
-        parent::__construct(array(
+        parent::__construct( array(
             'singular' => 'Referral',
             'plural'   => 'Referrals',
-            'ajax'     => false
-        ));
+            'ajax'     => false,
+        ) );
     }
 
     function get_columns() {
         return array(
-            'cb'       => '<input type="checkbox" />',
-            'order_id' => 'ID',
-            'name'     => esc_html__('Customer', 'woo-coupon-usage'),
-            'status'   => esc_html__('Order Status', 'woo-coupon-usage'),
-            'total'    => esc_html__('Order Total', 'woo-coupon-usage'),
-            'date'     => esc_html__('Order Date', 'woo-coupon-usage'),
-            'coupon'   => esc_html__('Coupon Code', 'woo-coupon-usage'),
-            'affiliate' => esc_html__('Affiliate User', 'woo-coupon-usage'),
-            'commission' => esc_html__('Affiliate Commission', 'woo-coupon-usage'),
+            'cb'         => '<input type="checkbox" />',
+            'order_id'   => 'ID',
+            'name'       => esc_html__( 'Customer', 'woo-coupon-usage' ),
+            'status'     => esc_html__( 'Order Status', 'woo-coupon-usage' ),
+            'total'      => esc_html__( 'Order Total', 'woo-coupon-usage' ),
+            'date'       => esc_html__( 'Order Date', 'woo-coupon-usage' ),
+            'coupon'     => esc_html__( 'Coupon Code', 'woo-coupon-usage' ),
+            'affiliate'  => esc_html__( 'Affiliate User', 'woo-coupon-usage' ),
+            'commission' => esc_html__( 'Affiliate Commission', 'woo-coupon-usage' ),
         );
     }
 
     function prepare_items() {
-        
         // Verify nonce for bulk actions
-        if ($this->current_action() && isset($_GET['bulk-delete']) && is_array($_GET['bulk-delete'])) {
-            if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'bulk-referrals')) {
-                wp_die(esc_html__('Security check failed. Please try again.', 'woo-coupon-usage'));
+        if ( $this->current_action() && isset( $_GET['bulk-delete'] ) && is_array( $_GET['bulk-delete'] ) ) {
+            if ( !isset( $_GET['_wpnonce'] ) || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'bulk-referrals' ) ) {
+                wp_die( esc_html__( 'Security check failed. Please try again.', 'woo-coupon-usage' ) );
             }
         }
-
         // Detect when a bulk action is being triggered...
-        if ('trash' === $this->current_action()) {
+        if ( 'trash' === $this->current_action() ) {
             // Loop over the array of record IDs and trash them
-            foreach ($_GET['bulk-delete'] as $id) {
-                wp_trash_post($id);
+            foreach ( $_GET['bulk-delete'] as $id ) {
+                wp_trash_post( $id );
             }
         }
-    
-        if ('processing' === $this->current_action()) {
+        if ( 'processing' === $this->current_action() ) {
             // Loop over the array of record IDs and update their status
-            foreach ($_GET['bulk-delete'] as $id) {
-                $order = wc_get_order($id);
-                if ($order && $order instanceof WC_Order) {
-                    $order->update_status('processing');
+            foreach ( $_GET['bulk-delete'] as $id ) {
+                $order = wc_get_order( $id );
+                if ( $order && $order instanceof WC_Order ) {
+                    $order->update_status( 'processing' );
                 }
             }
         }
-    
-        if ('completed' === $this->current_action()) {
+        if ( 'completed' === $this->current_action() ) {
             // Loop over the array of record IDs and update their status
-            foreach ($_GET['bulk-delete'] as $id) {
-                $order = wc_get_order($id);
-                if ($order && $order instanceof WC_Order) {
-                    $order->update_status('completed');
+            foreach ( $_GET['bulk-delete'] as $id ) {
+                $order = wc_get_order( $id );
+                if ( $order && $order instanceof WC_Order ) {
+                    $order->update_status( 'completed' );
                 }
             }
         }
-
-        if ('on-hold' === $this->current_action()) {
+        if ( 'on-hold' === $this->current_action() ) {
             // Loop over the array of record IDs and update their status
-            foreach ($_GET['bulk-delete'] as $id) {
-                $order = wc_get_order($id);
-                if ($order && $order instanceof WC_Order) {
-                    $order->update_status('on-hold');
+            foreach ( $_GET['bulk-delete'] as $id ) {
+                $order = wc_get_order( $id );
+                if ( $order && $order instanceof WC_Order ) {
+                    $order->update_status( 'on-hold' );
                 }
             }
         }
-
-        if ('cancelled' === $this->current_action()) {
+        if ( 'cancelled' === $this->current_action() ) {
             // Loop over the array of record IDs and update their status
-            foreach ($_GET['bulk-delete'] as $id) {
-                $order = wc_get_order($id);
-                if ($order && $order instanceof WC_Order) {
-                    $order->update_status('cancelled');
+            foreach ( $_GET['bulk-delete'] as $id ) {
+                $order = wc_get_order( $id );
+                if ( $order && $order instanceof WC_Order ) {
+                    $order->update_status( 'cancelled' );
                 }
             }
         }
-
         // Success message status change
-        if ('trash' === $this->current_action() || 'processing' === $this->current_action() || 'completed' === $this->current_action() || 'on-hold' === $this->current_action() || 'cancelled' === $this->current_action()) {
-            $count = count($_GET['bulk-delete']);
-            echo '<div class="notice notice-success is-dismissible" style="margin-top: 25px;"><p>'.esc_html($count).' orders updated.</p></div>';
+        if ( 'trash' === $this->current_action() || 'processing' === $this->current_action() || 'completed' === $this->current_action() || 'on-hold' === $this->current_action() || 'cancelled' === $this->current_action() ) {
+            $count = count( $_GET['bulk-delete'] );
+            echo '<div class="notice notice-success is-dismissible" style="margin-top: 25px;"><p>' . esc_html( $count ) . ' orders updated.</p></div>';
         }
-        
         // Now prepare the items for the table
         $columns = $this->get_columns();
         $hidden = array();
         $sortable = array();
-        $this->_column_headers = array($columns, $hidden, $sortable, $this->get_default_primary_column_name());
-
-        $per_page = apply_filters('wcusage_admin_referrals_per_page', 20);
+        $this->_column_headers = array(
+            $columns,
+            $hidden,
+            $sortable,
+            $this->get_default_primary_column_name()
+        );
+        $per_page = apply_filters( 'wcusage_admin_referrals_per_page', 20 );
         $current_page = $this->get_pagenum();
-    
         // Fetch orders and count total
-        $this->orders = get_wcusage_admin_table_orders($current_page, $per_page);
-    
+        $this->orders = get_wcusage_admin_table_orders( $current_page, $per_page );
         // Set up table columns and headers
         $columns = $this->get_columns();
         $hidden = array();
         $sortable = array();
-        $this->_column_headers = array($columns, $hidden, $sortable, $this->get_default_primary_column_name());
-    
+        $this->_column_headers = array(
+            $columns,
+            $hidden,
+            $sortable,
+            $this->get_default_primary_column_name()
+        );
         // Set pagination args
         $total_count = 0;
         $order_statuses = array_keys( wc_get_order_statuses() );
         foreach ( $order_statuses as $status ) {
-            $status = str_replace('wc-', '', $status);
+            $status = str_replace( 'wc-', '', $status );
             $total_count += wc_orders_count( $status );
         }
-
-        $this->set_pagination_args(array(
+        $this->set_pagination_args( array(
             'total_items' => $total_count,
             'per_page'    => $per_page,
-            'total_pages' => ceil($total_count / $per_page),
-        ));
-    
+            'total_pages' => ceil( $total_count / $per_page ),
+        ) );
         // Set items for the table
         $this->items = $this->orders;
-        
     }
 
     function get_bulk_actions() {
-
-		$actions = array(
-			'trash' => 'Move to Trash',
-			'processing' => esc_html__( 'Change status to processing', 'woocommerce' ),
-			'on-hold' => esc_html__( 'Change status to on-hold', 'woocommerce' ),
-			'completed' => esc_html__( 'Change status to completed', 'woocommerce' ),
-			'cancelled' => esc_html__( 'Change status to cancelled', 'woocommerce' ),
-		);
-		return $actions;
-
-    }
-    
-    function column_cb($item) {
-
-		return sprintf(
-			'<input type="checkbox" name="bulk-delete[]" value="%s" />', 
-			$item['order_id']
-		);
-
+        $actions = array(
+            'trash'      => 'Move to Trash',
+            'processing' => esc_html__( 'Change status to processing', 'woocommerce' ),
+            'on-hold'    => esc_html__( 'Change status to on-hold', 'woocommerce' ),
+            'completed'  => esc_html__( 'Change status to completed', 'woocommerce' ),
+            'cancelled'  => esc_html__( 'Change status to cancelled', 'woocommerce' ),
+        );
+        return $actions;
     }
 
-    function column_default($item, $column_name) {
+    function column_cb( $item ) {
+        return sprintf( '<input type="checkbox" name="bulk-delete[]" value="%s" />', $item['order_id'] );
+    }
+
+    function column_default( $item, $column_name ) {
         $order_id = $item['order_id'];
-        $order = wc_get_order($order_id);
-        $lifetimeaffiliate = wcusage_order_meta($order_id, 'lifetime_affiliate_coupon_referrer');
-        $affiliatereferrer = wcusage_order_meta($order_id, 'wcusage_referrer_coupon');
+        $order = wc_get_order( $order_id );
+        $lifetimeaffiliate = wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer' );
+        $affiliatereferrer = wcusage_order_meta( $order_id, 'wcusage_referrer_coupon' );
         $coupons = '';
         $affiliate_ids = '';
-        if ($lifetimeaffiliate) {
-            $getinfo = wcusage_get_the_order_coupon_info($lifetimeaffiliate, "", $order_id);
-            $getcoupon = wcusage_get_coupon_info($lifetimeaffiliate);
+        if ( $lifetimeaffiliate ) {
+            $getinfo = wcusage_get_the_order_coupon_info( $lifetimeaffiliate, "", $order_id );
+            $getcoupon = wcusage_get_coupon_info( $lifetimeaffiliate );
             $url = $getinfo['uniqueurl'];
             $url = sanitize_text_field( $url );
             $typeicon = "<span title='Lifetime Commission' style='font-size: 12px;'><i class='fa-solid fa-star'></i></span> ";
-            $coupons .= '<a href="' . esc_url($url) . '" target="_blank">' . esc_html($lifetimeaffiliate) . '</a><br/>';
-            if(isset($getcoupon[1])) {
+            $coupons .= '<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $lifetimeaffiliate ) . '</a><br/>';
+            if ( isset( $getcoupon[1] ) ) {
                 $affiliate_id = $getcoupon[1];
-                $affiliate_username = get_userdata($affiliate_id)->user_login;
-                $affiliate_ids .= '<a href="' . esc_url(admin_url('user-edit.php?user_id=' . $affiliate_id)) . '">' . esc_html($affiliate_username) . '</a><br/>';
+                $affiliate_username = get_userdata( $affiliate_id )->user_login;
+                $affiliate_ids .= '<a href="' . esc_url( admin_url( 'user-edit.php?user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate_username ) . '</a><br/>';
             }
-        } elseif ($affiliatereferrer) {
-            $getinfo = wcusage_get_the_order_coupon_info($affiliatereferrer, "", $order_id);
-            $getcoupon = wcusage_get_coupon_info($affiliatereferrer);
+        } elseif ( $affiliatereferrer ) {
+            $getinfo = wcusage_get_the_order_coupon_info( $affiliatereferrer, "", $order_id );
+            $getcoupon = wcusage_get_coupon_info( $affiliatereferrer );
             $url = $getinfo['uniqueurl'];
             $typeicon = "<span title='Custom / URL Referral' style='font-size: 12px;'><i class='fa-solid fa-link'></i></span> ";
-            $coupons .= '<a href="' . esc_url($url) . '" target="_blank">' . esc_html($affiliatereferrer) . '</a><br/>';
-            if(isset($getcoupon[1])) {
+            $coupons .= '<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $affiliatereferrer ) . '</a><br/>';
+            if ( isset( $getcoupon[1] ) ) {
                 $affiliate_id = $getcoupon[1];
-                if($affiliate_id) {
-                    $affiliate_username = get_userdata($affiliate_id)->user_login;
-                    $affiliate_ids .= '<a href="' . esc_url(admin_url('user-edit.php?user_id=' . $affiliate_id)) . '">' . esc_html($affiliate_username) . '</a><br/>';    
+                if ( $affiliate_id ) {
+                    $affiliate_username = get_userdata( $affiliate_id )->user_login;
+                    $affiliate_ids .= '<a href="' . esc_url( admin_url( 'user-edit.php?user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate_username ) . '</a><br/>';
                 }
             }
-        } elseif (!$lifetimeaffiliate && !$affiliatereferrer && class_exists('WooCommerce')) {
-            if (version_compare(WC_VERSION, 3.7, ">=")) {
-                foreach ($order->get_coupon_codes() as $coupon_code) {
-                    $getinfo = wcusage_get_the_order_coupon_info($coupon_code, "", $order_id);
-                    $getcoupon = wcusage_get_coupon_info($coupon_code);
+        } elseif ( !$lifetimeaffiliate && !$affiliatereferrer && class_exists( 'WooCommerce' ) ) {
+            if ( version_compare( WC_VERSION, 3.7, ">=" ) ) {
+                foreach ( $order->get_coupon_codes() as $coupon_code ) {
+                    $getinfo = wcusage_get_the_order_coupon_info( $coupon_code, "", $order_id );
+                    $getcoupon = wcusage_get_coupon_info( $coupon_code );
                     $url = sanitize_text_field( $getinfo['uniqueurl'] );
-                    $coupons .= '<a href="' . esc_url($url) . '" target="_blank">' . esc_html($coupon_code) . '</a><br/>';
-                    if(isset($getcoupon[1]) && $getcoupon[1] != '') {
+                    $coupons .= '<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $coupon_code ) . '</a><br/>';
+                    if ( isset( $getcoupon[1] ) && $getcoupon[1] != '' ) {
                         $affiliate_id = $getcoupon[1];
-                        $affiliate_username = get_userdata($affiliate_id)->user_login;
-                        $affiliate_ids .= '<a href="' . esc_url(admin_url('user-edit.php?user_id=' . $affiliate_id)) . '">' . esc_html($affiliate_username) . '</a><br/>';
+                        $affiliate_username = get_userdata( $affiliate_id )->user_login;
+                        $affiliate_ids .= '<a href="' . esc_url( admin_url( 'user-edit.php?user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate_username ) . '</a><br/>';
                     } else {
                         $affiliate_ids .= '-<br/>';
                     }
                 }
             }
         }
-        switch ($column_name) {
+        switch ( $column_name ) {
             case 'order_id':
-                return '<a href="' . esc_url(admin_url('post.php?post=' . $item[$column_name] . '&action=edit')) . '"><span class="dashicons dashicons-edit" style="font-size: 15px; margin-top: 4px;"></span> #' . $item[$column_name] . '</a>';
+                return '<a href="' . esc_url( admin_url( 'post.php?post=' . $item[$column_name] . '&action=edit' ) ) . '"><span class="dashicons dashicons-edit" style="font-size: 15px; margin-top: 4px;"></span> #' . $item[$column_name] . '</a>';
             case 'status':
-                $item[$column_name] = ucfirst($item[$column_name]);
-                $statusname = strtolower($item[$column_name]);
+                $item[$column_name] = ucfirst( $item[$column_name] );
+                $statusname = strtolower( $item[$column_name] );
                 $status = '<mark class="order-status status-' . $statusname . ' tips"><span>' . $item[$column_name] . '</span></mark>';
                 return $status;
             case 'name':
                 $order_id = $item['order_id'];
-                $order = wc_get_order($order_id);
+                $order = wc_get_order( $order_id );
                 $name = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
                 return $name;
             case 'total':
                 $order_id = $item['order_id'];
-                $order = wc_get_order($order_id);
+                $order = wc_get_order( $order_id );
                 $order_total = $order->get_total();
-                $order_total = wcusage_convert_order_value_to_currency($order, $order_total);
-                $order_total = wc_price($order_total);
+                $order_total = wcusage_convert_order_value_to_currency( $order, $order_total );
+                $order_total = wc_price( $order_total );
                 // Check order refunded total
                 $order_refunded_total = $order->get_total_refunded();
-                if ($order_refunded_total > 0) {
-                    $order_total = '<del aria-hidden="true">' . wc_price($order_refunded_total) . '</del> ';
-                    $order_total .= wc_price($order->get_total() - $order_refunded_total);
+                if ( $order_refunded_total > 0 ) {
+                    $order_total = '<del aria-hidden="true">' . wc_price( $order_refunded_total ) . '</del> ';
+                    $order_total .= wc_price( $order->get_total() - $order_refunded_total );
                 }
                 return $order_total;
             case 'date':
-                return date('M j, Y (g:ia)', strtotime($item[$column_name]));
+                return date( 'M j, Y (g:ia)', strtotime( $item[$column_name] ) );
             case 'coupon':
                 return $coupons;
             case 'commission':
                 $order_id = $item['order_id'];
-                $order = wc_get_order($order_id);
-                $total_commission = wcusage_order_meta($order_id, 'wcusage_total_commission');
-                $ispaid = wcusage_order_ispaid($order_id);
-                $wcu_select_coupon_user = wcusage_order_meta($order_id, 'wcusage_affiliate_user');
-                if($wcu_select_coupon_user) {
-                    $total_commission = wcusage_convert_order_value_to_currency($order, $total_commission);
-                    $total_commission = wcusage_format_price($total_commission);
+                $order = wc_get_order( $order_id );
+                $total_commission = wcusage_order_meta( $order_id, 'wcusage_total_commission' );
+                $ispaid = wcusage_order_ispaid( $order_id );
+                $wcu_select_coupon_user = wcusage_order_meta( $order_id, 'wcusage_affiliate_user' );
+                if ( $wcu_select_coupon_user ) {
+                    $total_commission = wcusage_convert_order_value_to_currency( $order, $total_commission );
+                    $total_commission = wcusage_format_price( $total_commission );
                     return $total_commission . $ispaid;
                 } else {
                     return "";
@@ -253,13 +239,19 @@ class wcusage_Referrals_Table extends WP_List_Table {
                 return $item[$column_name];
         }
     }
+
 }
 
 /*
 * Show referral orders page
 */
 function wcusage_orders_page() {
-    wp_enqueue_style('woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION);
+    wp_enqueue_style(
+        'woocommerce_admin_styles',
+        WC()->plugin_url() . '/assets/css/admin.css',
+        array(),
+        WC_VERSION
+    );
     $table = new wcusage_Referrals_Table();
     ?>
     <style>
@@ -287,75 +279,86 @@ function wcusage_orders_page() {
         pointer-events: none;
     }
     </style>
-    <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
+    <link rel="stylesheet" href="<?php 
+    echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
+    ?>" crossorigin="anonymous">
     <div class="wrap wcusage-admin-page">
-    <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
+    <?php 
+    echo do_action( 'wcusage_hook_dashboard_page_header', '' );
+    ?>
     <h1 class="wcusage-admin-title" style="margin-bottom: -15px;">
-    <?php echo sprintf(esc_html__('%s Orders', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?>
+    <?php 
+    echo sprintf( esc_html__( '%s Orders', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
+    ?>
     <span class="wcusage-admin-title-buttons">
-        <a href="<?php echo esc_url(('post-new.php?post_type=shop_order')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link"><?php echo esc_html__('Add New Order', 'woo-coupon-usage'); ?></a>
-        <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-bulk-assign-coupons')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link"><?php echo sprintf(esc_html__('Assign Orders to %s', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliates', 'woo-coupon-usage' ), true)); ?></a>
+        <a href="<?php 
+    echo esc_url( 'post-new.php?post_type=shop_order' );
+    ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link"><?php 
+    echo esc_html__( 'Add New Order', 'woo-coupon-usage' );
+    ?></a>
+        <a href="<?php 
+    echo esc_url( admin_url( 'admin.php?page=wcusage-bulk-assign-coupons' ) );
+    ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link"><?php 
+    echo sprintf( esc_html__( 'Assign Orders to %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliates', 'woo-coupon-usage' ), true ) );
+    ?></a>
     </span>
     </h1>
     <br/>
-    <?php
+    <?php 
     echo '<form id="referrals-table" method="GET">';
-    echo '<input type="hidden" name="page" value="' . esc_html($_REQUEST['page']) . '" />';
-    wp_nonce_field('bulk-referrals', '_wpnonce', false);
+    echo '<input type="hidden" name="page" value="' . esc_html( $_REQUEST['page'] ) . '" />';
+    wp_nonce_field( 'bulk-referrals', '_wpnonce', false );
     $table->prepare_items();
     $table->display();
     echo '</form>';
     ?>
     
+    <?php 
+    ?>
+    
     </div>
-    <?php
+    <?php 
 }
 
 /*
 * Get all orders table data
 */
-function get_wcusage_admin_table_orders($current_page = 1, $per_page = "-1") {
+function get_wcusage_admin_table_orders(  $current_page = 1, $per_page = "-1"  ) {
     $orders = [];
-
-    if($current_page && $per_page) {
+    if ( $current_page && $per_page ) {
         $offset = ($current_page - 1) * $per_page;
     } else {
         $offset = 0;
     }
-
     // Modify the arguments to limit the orders to the current page where only meta key "wcusage_affiliate_user" exists
     $args = array(
-        'offset' => $offset,
-        'limit' => $per_page,
-        'meta_key' => 'wcusage_affiliate_user',
-        'meta_compare' => 'EXISTS',        
+        'offset'       => $offset,
+        'limit'        => $per_page,
+        'meta_key'     => 'wcusage_affiliate_user',
+        'meta_compare' => 'EXISTS',
     );
-    $wc_orders = wc_get_orders($args);
-
-    $affiliate_only = isset($_GET['affiliate_only']) ? $_GET['affiliate_only'] : false;
-
-    foreach ($wc_orders as $order) {
-
+    $wc_orders = wc_get_orders( $args );
+    $affiliate_only = ( isset( $_GET['affiliate_only'] ) ? $_GET['affiliate_only'] : false );
+    foreach ( $wc_orders as $order ) {
         $orders[] = array(
-            'order_id' => $order->get_id(),
-            'status'   => $order->get_status(), 'status'   => $order->get_status(),
-            'name'     => '',
-            'total'    => $order->get_id(),
-            'date'     => $order->get_date_created()->date('Y-m-d H:i:s'),
-            'coupon'   => '',
+            'order_id'   => $order->get_id(),
+            'status'     => $order->get_status(),
+            'status'     => $order->get_status(),
+            'name'       => '',
+            'total'      => $order->get_id(),
+            'date'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
+            'coupon'     => '',
             'commission' => '',
-            'affiliate' => '',
+            'affiliate'  => '',
         );
-
     }
-
     return $orders;
 }
 
 // Hide .displaying-num on the referral orders page
-add_action('admin_head', 'wcusage_hide_displaying_num');
+add_action( 'admin_head', 'wcusage_hide_displaying_num' );
 function wcusage_hide_displaying_num() {
-    if (isset($_GET['page']) && $_GET['page'] == 'wcusage_referrals') {
+    if ( isset( $_GET['page'] ) && $_GET['page'] == 'wcusage_referrals' ) {
         echo '<style>.displaying-num, .tablenav-paging-text, .last-page.button { display: none !important; }</style>';
     }
 }

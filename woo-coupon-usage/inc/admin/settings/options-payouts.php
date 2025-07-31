@@ -345,6 +345,7 @@ function wcusage_field_cb_payouts( $args )
           'banktransfer' => esc_html__( 'Bank Transfer', 'woo-coupon-usage' ),
           'stripeapi' => esc_html__( 'Stripe', 'woo-coupon-usage' ),
           'paypalapi' => esc_html__( 'PayPal', 'woo-coupon-usage' ),
+          'wisebank' => esc_html__( 'Wise Bank Transfer', 'woo-coupon-usage' ),
           'credit' => esc_html__( 'Store Credit', 'woo-coupon-usage' ),
         );
 
@@ -390,6 +391,7 @@ function wcusage_field_cb_payouts( $args )
 
         <?php echo wcusage_setting_toggle_option('wcusage_payouts_auto_accept', 0, 'Automatically and instantly pay affiliates commission into their account, after a payout request is made.', '0px'); ?>
         <i><?php echo esc_html__( 'With this enabled commission will be paid instantly into the affiliate account automatically, as soon as they request a payout. This will apply to Stripe, PayPal and Store Credit payout methods.', 'woo-coupon-usage' ); ?></i><br/>
+        <i><?php echo esc_html__( 'For Wise bank transfer payouts, it will automatically complete the first step of creating the unfunded payment in Wise ready to complete manually.', 'woo-coupon-usage' ); ?></i><br/>
         <i><?php echo esc_html__( 'Warning: If you use this option, you should be even more careful of fraudulent activity. We do recommend reviewing and accepting payouts manually instead, simply so you can make sure each payout is valid and non-fraudulent.', 'woo-coupon-usage' ); ?></i><br/>
 
         <?php echo wcusage_setting_toggle('.wcusage_payouts_auto_accept', '.wcu-field-section-auto-payout'); // Show or Hide ?>
@@ -407,6 +409,69 @@ function wcusage_field_cb_payouts( $args )
           <?php echo wcusage_setting_toggle_option('wcusage_payouts_auto_accept_first_manual', 0, 'Require manual approval for affiliates first payout request.', '40px'); ?>
           <i style="margin-left: 40px;"><?php echo esc_html__( 'With this enabled, the first ever payout request by an affiliate will require manual approval. After they have at-least 1 completed payout, all future payouts can be paid automatically.', 'woo-coupon-usage' ); ?></i><br/>
 
+          <br/>
+
+          <!-- Only enable for specific payout methods -->
+          <?php echo wcusage_setting_toggle_option('wcusage_payouts_auto_accept_specific_methods', 0, 'Only enable automatic payouts for specific payout methods.', '40px'); ?>
+          <i style="margin-left: 40px;"><?php echo esc_html__( 'If enabled, you can select which payout methods should be eligible for automatic payouts.', 'woo-coupon-usage' ); ?></i><br/>
+
+          <?php echo wcusage_setting_toggle('.wcusage_payouts_auto_accept_specific_methods', '.wcu-field-auto-payout-methods'); // Show or Hide ?>
+          <span class="wcu-field-auto-payout-methods">
+
+            <br/>
+
+            <strong style="margin-left: 40px;"><label for="scales"><?php echo esc_html__( 'Select Payout Methods for Automatic Payouts:', 'woo-coupon-usage' ); ?></label></strong><br/>
+
+            <i style="margin-left: 40px;"><?php echo esc_html__( 'Select the payout methods that should be eligible for automatic payouts. If an affiliate is using a different payout method, their payouts will require manual approval.', 'woo-coupon-usage' ); ?></i><br/>
+
+            <br/>
+
+            <div style="margin-left: 40px;">
+            <?php
+            $wcusage_payouts_auto_accept_methods = wcusage_get_setting_value('wcusage_payouts_auto_accept_methods', array());
+
+            $auto_payout_methods = array(
+              'paypalapi' => esc_html__( 'PayPal Payouts', 'woo-coupon-usage' ),
+              'stripeapi' => esc_html__( 'Stripe Payouts', 'woo-coupon-usage' ),
+              'wisebank' => esc_html__( 'Wise Bank Transfer', 'woo-coupon-usage' ),
+              'credit' => esc_html__( 'Store Credit / Wallet', 'woo-coupon-usage' ),
+            );
+
+            foreach( $auto_payout_methods as $key => $method ) {
+
+              $checkedx = "";
+
+              if($wcusage_payouts_auto_accept_methods) {
+                if( isset($options['wcusage_payouts_auto_accept_methods'][$key]) ) {
+                  // Get Current Input Value
+                  $current = $options['wcusage_payouts_auto_accept_methods'][$key];
+                  // See if Checked
+                  if( isset($current) ) {
+                    $checkedx = "checked";
+                  }
+                }
+              }
+
+              // ID
+              $thisid = "wcusage_payouts_auto_accept_methods";
+
+              // Output Checkbox
+              $name = 'wcusage_options[wcusage_payouts_auto_accept_methods]['.$key.']';
+              echo '<span style="margin-right: 20px; display: block; margin-bottom: 5px;" id="'.esc_attr($thisid).'">
+              <input type="checkbox"
+              checktype="multi"
+              class="auto-methods-checkbox-'.esc_attr($key).'"
+              checktypekey="'.esc_attr($key).'"
+              customid="'.esc_attr($thisid).'"
+              name="'.esc_attr($name).'"
+              '.esc_attr($checkedx).'> '.esc_attr($method).'</span>';
+
+            }
+            ?>
+            </div>
+
+          </span>
+
         </span>
 
   		<br/><hr/>
@@ -423,7 +488,7 @@ function wcusage_field_cb_payouts( $args )
       <div style="margin-bottom: 20px;"></div>
 
       <span class="wcu-admin-payouts-headers">
-        <?php echo wcusage_setting_toggle_option('wcusage_field_paypal_enable', 0, esc_html__( 'Custom Payment Method', 'woo-coupon-usage' ) . " #1", '0px'); ?>
+        <?php echo wcusage_setting_toggle_option('wcusage_field_paypal_enable', 0, esc_html__( 'Custom Payment Method', 'woo-coupon-usage' ) . " #1 (Manual)", '0px'); ?>
       </span>
       <i><?php echo esc_html__( 'A custom "manual" payment method of your choice.', 'woo-coupon-usage' ); ?></i><br/>
 
@@ -461,7 +526,7 @@ function wcusage_field_cb_payouts( $args )
       <div style="margin-bottom: 40px;"></div>
 
       <span class="wcu-admin-payouts-headers">
-        <?php echo wcusage_setting_toggle_option('wcusage_field_paypal2_enable', 0, esc_html__( 'Custom Payment Method', 'woo-coupon-usage' ) . " #2", '0px'); ?>
+        <?php echo wcusage_setting_toggle_option('wcusage_field_paypal2_enable', 0, esc_html__( 'Custom Payment Method', 'woo-coupon-usage' ) . " #2 (Manual)", '0px'); ?>
       </span>
       <i><?php echo esc_html__( 'A custom "manual" payment method of your choice.', 'woo-coupon-usage' ); ?></i><br/>
 
@@ -695,7 +760,7 @@ function wcusage_field_cb_payouts( $args )
       <div style="margin-bottom: 40px;" id="stripeapi-settings"></div>
 
       <span class="wcu-admin-payouts-headers">
-        <?php echo wcusage_setting_toggle_option('wcusage_field_stripeapi_enable', 0, esc_html__( 'Stripe Payouts ("Connect")', 'woo-coupon-usage' ), '0px'); ?>
+        <?php echo wcusage_setting_toggle_option('wcusage_field_stripeapi_enable', 0, esc_html__( 'Stripe Payouts', 'woo-coupon-usage' ), '0px'); ?>
       </span>
       <?php
       $usaicon = '<img src="'.WCUSAGE_UNIQUE_PLUGIN_URL.'images/us.png" style="height: 8px;"> US';
@@ -794,6 +859,329 @@ function wcusage_field_cb_payouts( $args )
 
       </span>
 
+      <!-- Enable Wise Payouts -->
+      <div style="margin-bottom: 40px;" id="wise-settings"></div>
+
+      <span class="wcu-admin-payouts-headers">
+        <?php echo wcusage_setting_toggle_option('wcusage_field_wise_enable', 0, esc_html__( 'Wise Bank Transfer Payouts', 'woo-coupon-usage' ), '0px'); ?>
+      </span>
+
+      <!-- Beta Message -->
+      <span style="color: orange; font-weight: bold; font-size: 12px; margin-left: 40px;">
+        <p>
+          (BETA) <?php echo esc_html__( 'This feature is currently in beta. Please consider testing your settings and payments. If you experience any issues, please contact plugin support.', 'woo-coupon-usage' ); ?>
+        </p>
+      </span>
+
+      <br/>
+
+      <i><?php echo esc_html__( 'Wise Bank Transfer Payouts allows you to one-click pay your affiliates directly to their bank account through Wise with low transfer fees.', 'woo-coupon-usage' ); ?></i><br/>
+      <i><?php echo esc_html__( 'Wise fees vary based on the currency and destination.', 'woo-coupon-usage' ); ?> <a href="https://wise.com/help/articles/2571942/pricing-and-fees" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
+      <i><?php echo esc_html__( 'Prerequisites: To use Wise Bank Transfer Payouts, you will need a Wise business account and API access.', 'woo-coupon-usage' ); ?> <a href="https://docs.wise.com/api-docs/features/strong-customer-authentication-sca-for-api" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
+      <i><?php echo esc_html__( 'Note: Payouts can only be made if you have the required funds in your Wise account. No Wise account required for the recipient.', 'woo-coupon-usage' ); ?></i><br/>
+
+      <?php echo wcusage_setting_toggle('.wcusage_field_wise_enable', '.wcu-field-section-tr-payouts-wise'); // Show or Hide ?>
+      <span class="wcu-field-section-tr-payouts-wise">
+
+      <br/><br/>
+
+      <!-- FAQ: Wise Bank Transfer Payouts -->
+      <div class="wcu-admin-faq" style="margin-left: 40px; font-weight: normal;">
+
+        <?php echo wcusage_admin_faq_toggle(
+        "wcu_show_section_qna_wise_payouts",
+        "wcu_qna_wise_payouts",
+        "FAQ: How do Wise Bank Transfer payouts work?");
+        ?>
+
+        <div class="wcu-admin-faq-content wcu_qna_wise_payouts" id="wcu_qna_wise_payouts" style="display: none;">
+
+          <p style="margin-bottom: 10px;">
+            <?php echo esc_html__( 'Wise Bank Transfer payouts allow you to pay affiliates directly to their bank accounts using Wise\'s low-cost international transfer service.', 'woo-coupon-usage' ); ?>
+          </p>
+          <p style="margin-bottom: 10px;">
+            <?php echo esc_html__( 'To use this feature, you will need a Wise business account with API access. You can sign up for a Wise account and get API access on their website.', 'woo-coupon-usage' ); ?>
+          </p>
+          <p style="margin-bottom: 10px;">
+            <?php echo esc_html__( 'Once configured, your affiliates can select "Wise Bank Transfer" as their payout method and enter their bank details.', 'woo-coupon-usage' ); ?>
+          </p>
+
+          <p style="margin-bottom: 10px;">
+            <?php echo esc_html__( 'When you process a payout, the plugin will create a transfer in your Wise account using the provided bank details. You will then need to verify and complete the transfer in Wise.', 'woo-coupon-usage' ); ?>
+          </p>
+
+          <p style="margin-bottom: 0;">
+            <?php echo esc_html__( 'Important: Wise Bank Transfer payouts do not require the recipient to have a Wise account or email address. The payout is sent directly to their bank account using the provided banking details.', 'woo-coupon-usage' ); ?>
+          </p>
+
+          <a href="https://couponaffiliates.com/docs/pro-wise-payouts" target="_blank" class="button button-primary" style="margin-top: 10px;"><?php echo esc_html__( 'View Documentation', 'woo-coupon-usage' ); ?> <span class="fas fa-external-link-alt"></span></a>
+
+          <br/><br/>
+          
+          <strong><?php echo esc_html__( 'For more information, please watch the video below:', 'woo-coupon-usage' ); ?></strong>
+          <br/>
+          <div style="max-width: 720px;">
+          <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1106083661?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Commission Payouts"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+          </div>
+          
+        </div>
+
+      </div>
+
+      <br/>
+
+      <!-- FAQ: Currency & Bank Account Information -->
+      <div class="wcu-admin-faq" style="margin-left: 40px; font-weight: normal;">
+
+        <?php echo wcusage_admin_faq_toggle(
+        "wcu_show_section_qna_wise_currency",
+        "wcu_qna_wise_currency",
+        "FAQ: How does currency conversion work with Wise Bank Transfers?");
+        ?>
+
+        <div class="wcu-admin-faq-content wcu_qna_wise_currency" id="wcu_qna_wise_currency" style="display: none;">
+
+          <p style="margin-bottom: 10px;">
+            <strong><?php echo esc_html__( 'Currency Handling:', 'woo-coupon-usage' ); ?></strong><br/>
+            <?php echo esc_html__( 'Bank transfer payouts are sent in your store\'s base currency and Wise automatically converts them to the recipient\'s bank currency:', 'woo-coupon-usage' ); ?>
+          </p>
+          <ul style="margin-left: 20px; margin-bottom: 15px;">
+            <li><?php echo esc_html__( 'UK Sort Code accounts → Receive GBP (converted from your store currency)', 'woo-coupon-usage' ); ?></li>
+            <li><?php echo esc_html__( 'US ABA Routing accounts → Receive USD (converted from your store currency)', 'woo-coupon-usage' ); ?></li>
+            <li><?php echo esc_html__( 'EU IBAN accounts → Receive EUR (converted from your store currency)', 'woo-coupon-usage' ); ?></li>
+            <li><?php echo esc_html__( 'International SWIFT accounts → Receive local currency (converted from your store currency)', 'woo-coupon-usage' ); ?></li>
+          </ul>
+          <p style="margin-bottom: 10px;">
+            <strong><?php echo esc_html__( 'Currency Conversion:', 'woo-coupon-usage' ); ?></strong><br/>
+            <?php echo esc_html__( 'All payouts are deducted from your store\'s base currency balance. Wise handles currency conversion automatically at their competitive exchange rates. You will see the exact conversion rate and fees before each transfer is processed.', 'woo-coupon-usage' ); ?>
+          </p>
+          <p style="margin-bottom: 0;">
+            <strong><?php echo esc_html__( 'No Email Required:', 'woo-coupon-usage' ); ?></strong><br/>
+            <?php echo esc_html__( 'Bank transfers do not require the recipient to have a Wise account or email address. The payout is sent directly to their bank account using the provided banking details.', 'woo-coupon-usage' ); ?>
+          </p>
+
+        </div>
+
+      </div>
+
+      <br/>
+
+        <!-- Wise Bank Transfer Payouts Configuration -->
+        <div style="margin-left: 40px;">
+
+          <br/>
+
+          <!-- Change Payment Method Label -->
+          <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_wisebank_only', 'Wise Bank Transfer', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '0px'); ?>
+
+          <br/>
+
+          <!-- Change Payment Details Label -->
+          <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_wisebank', 'Bank Account Details', esc_html__( 'Payment Details Section Label', 'woo-coupon-usage' ), '0px'); ?>
+
+          <br/>
+
+          <!-- Payment Method Info -->
+          <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_wisebank_info', 'Please enter your bank account details in the individual fields below. We will create a recipient account and process the payout via Wise. Required fields are marked with an asterisk (*).', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '0px'); ?>
+          <i style="margin-left: 0px;"><?php echo esc_html__( 'Custom information/text shown when payment method is selected (in the dashboard settings).', 'woo-coupon-usage' ); ?></i><br/>
+
+          <div style="margin-left: -40px;">
+          <!-- User Role -->
+          <?php do_action('wcusage_hook_payouts_user_role_select', 'wcusage_field_tr_payouts_wisebank_role'); ?>
+          </div>
+
+        </div>
+      
+        <br/>
+
+        <p style="margin-left: 40px; font-size: 16px; font-weight: bold;">API Credentials*</p>
+
+        <p style="margin-left: 40px;">Instructions: <a href="https://docs.wise.com/api-docs/api-reference/getting-started" target="_blank">https://docs.wise.com/api-docs/api-reference/getting-started</a></p>
+
+        <p style="margin-left: 40px;">Generate API Token: <a href="https://wise.com/your-account/integrations-and-tools/api-tokens/" target="_blank">https://wise.com/profile/api-keys</a></p>
+        
+        <br/>
+
+        <!-- Test Mode Toggle -->
+        <?php echo wcusage_setting_toggle_option('wcusage_field_tr_payouts_wiseapi_test', 0, esc_html__( 'Enable Test Mode?', 'woo-coupon-usage' ), '40px'); ?>
+
+        <br/>
+
+        <script>
+        jQuery( document ).ready(function() {
+          wcusage_check_wise_test_mode();
+          jQuery('.wcusage_field_tr_payouts_wiseapi_test').change(function(){
+            wcusage_check_wise_test_mode();
+          });
+          function wcusage_check_wise_test_mode() {
+            if(jQuery('.wcusage_field_tr_payouts_wiseapi_test').prop('checked')) {
+              jQuery('.wcu-field-section-tr-payouts-wiseapi-live').hide();
+              jQuery('.wcu-field-section-tr-payouts-wiseapi-test').show();
+            } else {
+              jQuery('.wcu-field-section-tr-payouts-wiseapi-live').show();
+              jQuery('.wcu-field-section-tr-payouts-wiseapi-test').hide();
+            }
+          }
+          
+          // Wise Profiles Fetch Functionality
+          jQuery('.wise-fetch-profiles-btn').click(function() {
+            var mode = jQuery(this).data('mode');
+            var tokenField = mode === 'test' ? '#wcusage_field_wiseapi_test_token' : '#wcusage_field_wiseapi_token';
+            var token = jQuery(tokenField).val().trim();
+            var statusSpan = '#wise-fetch-status-' + mode;
+            var dropdown = '#wise-profile-dropdown-' + mode;
+            var selectionDiv = '#wise-profile-selection-' + mode;
+            
+            if (!token) {
+              jQuery(statusSpan).html('<span style="color: red;">Please enter an API token first.</span>');
+              return;
+            }
+            
+            jQuery(this).prop('disabled', true).text('Fetching...');
+            jQuery(statusSpan).html('<span style="color: blue;">Fetching profiles...</span>');
+            jQuery(selectionDiv).hide();
+            
+            // Make AJAX request to fetch profiles
+            jQuery.ajax({
+              url: ajaxurl,
+              type: 'POST',
+              data: {
+                action: 'wcusage_fetch_wise_profiles',
+                token: token,
+                test_mode: mode === 'test' ? 1 : 0,
+                nonce: '<?php echo wp_create_nonce("wcusage_wise_profiles_nonce"); ?>'
+              },
+              success: function(response) {
+                if (response.success && response.data.profiles) {
+                  var profiles = response.data.profiles;
+                  jQuery(dropdown).empty().append('<option value="">Select a profile...</option>');
+                  
+                  jQuery.each(profiles, function(index, profile) {
+                    var optionText = profile.name + ' (' + profile.type + ') - ID: ' + profile.id;
+                    jQuery(dropdown).append('<option value="' + profile.id + '">' + optionText + '</option>');
+                  });
+                  
+                  jQuery(statusSpan).html('<span style="color: green;">Found ' + profiles.length + ' profile(s)</span>');
+                  jQuery(selectionDiv).show();
+                } else {
+                  var errorMsg = response.data && response.data.message ? response.data.message : 'Failed to fetch profiles';
+                  jQuery(statusSpan).html('<span style="color: red;">' + errorMsg + '</span>');
+                }
+              },
+              error: function() {
+                jQuery(statusSpan).html('<span style="color: red;">Error: Unable to fetch profiles</span>');
+              },
+              complete: function() {
+                jQuery('.wise-fetch-profiles-btn[data-mode="' + mode + '"]').prop('disabled', false).text('Fetch Profiles');
+              }
+            });
+          });
+          
+          // Automatically update Profile ID when dropdown selection changes
+          jQuery('#wise-profile-dropdown-live, #wise-profile-dropdown-test').change(function() {
+            var mode = this.id.includes('test') ? 'test' : 'live';
+            var profileIdField = mode === 'test' ? '#wcusage_field_wiseapi_test_profile_id' : '#wcusage_field_wiseapi_profile_id';
+            var selectedId = jQuery(this).val();
+            
+            if (selectedId) {
+              jQuery(profileIdField).val(selectedId);
+              jQuery('#wise-fetch-status-' + mode).html('<span style="color: green;">Profile ID updated!</span>');
+              // Trigger change on #wcusage_field_wiseapi_profile_id
+              jQuery(profileIdField).trigger('change');
+            } else {
+              jQuery(profileIdField).val('');
+              jQuery('#wise-fetch-status-' + mode).html('');
+            }
+          });
+        });
+        </script>
+
+        <span class="wcu-field-section-tr-payouts-wiseapi-live">
+
+            <?php echo wcusage_setting_text_option('wcusage_field_wiseapi_token', '', esc_html__( '[Live] API Token', 'woo-coupon-usage' ), '40px'); ?>
+
+            <br/>
+            
+            <!-- Fetch Profiles Button for Live -->
+            <div style="margin-left: 40px; margin-bottom: 15px;">
+                <button type="button" id="wise-fetch-profiles-live" class="button button-secondary wise-fetch-profiles-btn" data-mode="live">
+                    <?php echo esc_html__( 'Fetch Profiles', 'woo-coupon-usage' ); ?>
+                </button>
+                <span id="wise-fetch-status-live" style="margin-left: 10px;"></span>
+            </div>
+            
+            <!-- Profile Selection Dropdown for Live -->
+            <div id="wise-profile-selection-live" style="margin-left: 40px; margin-bottom: 15px; display: none;">
+                <label for="wise-profile-dropdown-live" style="font-weight: bold;">
+                    <?php echo esc_html__( 'Select Profile:', 'woo-coupon-usage' ); ?>
+                </label><br/>
+                <select id="wise-profile-dropdown-live" style="min-width: 300px; margin-top: 5px;">
+                    <option value=""><?php echo esc_html__( 'Select a profile...', 'woo-coupon-usage' ); ?></option>
+                </select>
+            </div>
+
+            <?php echo wcusage_setting_text_option('wcusage_field_wiseapi_profile_id', '', esc_html__( '[Live] Profile ID', 'woo-coupon-usage' ), '40px'); ?>
+
+        </span>
+
+        <span class="wcu-field-section-tr-payouts-wiseapi-test" style="color: red;">
+
+            <?php echo wcusage_setting_text_option('wcusage_field_wiseapi_test_token', '', esc_html__( '[Test] API Token', 'woo-coupon-usage' ), '40px'); ?>
+
+            <br/>
+            
+            <!-- Fetch Profiles Button for Test -->
+            <div style="margin-left: 40px; margin-bottom: 15px;">
+                <button type="button" id="wise-fetch-profiles-test" class="button button-secondary wise-fetch-profiles-btn" data-mode="test">
+                    <?php echo esc_html__( 'Fetch Profiles', 'woo-coupon-usage' ); ?>
+                </button>
+                <span id="wise-fetch-status-test" style="margin-left: 10px;"></span>
+            </div>
+            
+            <!-- Profile Selection Dropdown for Test -->
+            <div id="wise-profile-selection-test" style="margin-left: 40px; margin-bottom: 15px; display: none;">
+                <label for="wise-profile-dropdown-test" style="font-weight: bold;">
+                    <?php echo esc_html__( 'Select Profile:', 'woo-coupon-usage' ); ?>
+                </label><br/>
+                <select id="wise-profile-dropdown-test" style="min-width: 300px; margin-top: 5px;">
+                    <option value=""><?php echo esc_html__( 'Select a profile...', 'woo-coupon-usage' ); ?></option>
+                </select>
+            </div>
+
+            <?php echo wcusage_setting_text_option('wcusage_field_wiseapi_test_profile_id', '', esc_html__( '[Test] Profile ID', 'woo-coupon-usage' ), '40px'); ?>
+
+        </span>
+
+        <div style="clear: both;"></div>
+
+        <br/>
+
+        <?php
+        // Display dynamic encryption status
+        if (function_exists('wcusage_get_bank_encryption_status_content')) {
+          echo wcusage_get_bank_encryption_status_content();
+        } else {
+          // Fallback static display if function not available
+          ?>
+          <div style="margin-left: 40px; padding: 15px; background: #f9f9f9; border-left: 4px solid #0073aa; margin-bottom: 20px;">
+            <strong><?php echo esc_html__( 'Bank Data Encryption', 'woo-coupon-usage' ); ?></strong><br/>
+            <p style="margin: 10px 0;">
+              <?php echo esc_html__( 'Sensitive bank details are automatically encrypted when you define an encryption key in wp-config.php:', 'woo-coupon-usage' ); ?>
+            </p>
+            <div style="background: #f0f0f1; border: 1px solid #ddd; padding: 10px; margin: 10px 0; font-family: monospace;">
+              <code>define( 'CAFFS_WISE_ENCRYPTION_KEY', 'your-32-character-encryption-key-here' );</code>
+            </div>
+            <p style="margin: 10px 0; color: #d63638;">
+              <strong><?php echo esc_html__( 'Important:', 'woo-coupon-usage' ); ?></strong> 
+              <?php echo esc_html__( 'Store your encryption key securely! If lost, encrypted bank details become permanently unrecoverable.', 'woo-coupon-usage' ); ?>
+            </p>
+          </div>
+          <?php
+        }
+        ?>
+
+      </span>
+
       <!-- Enable Store Credit -->
       <div style="margin-bottom: 40px;" id="storecredit-settings"></div>
 
@@ -861,7 +1249,7 @@ function wcusage_field_cb_payouts( $args )
           <!-- Info -->
           <br/><strong style="margin-left: 40px; display: inline-block;"><label for="scales"><?php echo esc_html__( 'Information:', 'woo-coupon-usage' ); ?></label></strong><br/>
           <p style="margin-left: 40px;">
-            <?php echo esc_html__( 'You are all set! Store credit payouts will now be added to the users wallet automatically in one-click. They can spend this credit when visiting the cart/checkout.', 'woo-coupon-usage' ); ?>
+            <?php echo esc_html__( 'You are all set! Store credit payouts can now be added to the users wallet automatically in one-click. They can spend this credit when visiting the cart/checkout.', 'woo-coupon-usage' ); ?>
           </p>
           <p style="margin-left: 40px;">
             <?php echo esc_html__( 'This is our default store credit system, built directly into this plugin. (A more simple solution with no additional setup needed.)', 'woo-coupon-usage' ); ?>
@@ -1029,6 +1417,7 @@ function wcusage_field_cb_payouts( $args )
           if( wcu_fs()->can_use_premium_code() ) {
             do_action('wcusage_hook_settings_store_credit_options');
           }
+
           ?>
 
         </span>
@@ -1046,7 +1435,7 @@ function wcusage_field_cb_payouts( $args )
 
       <p>If required, you can set one of the payout methods as the default. This means that if the affiliate does not currently have a payout method selected, this one will be enabled by default.</p>
       <p>- If set to "Store Credit Payouts" or "Custom Payment methods" (with field disabled), they will therefore be able to instantly request payouts without needing to select their payout method first.</p>
-      <p>- If set to "Direct Bank Transfer", "PayPal Payouts" or "Stripe Payouts" they will still be required to update and set their payment details in the settings tab, but it will be selected as their default option.</p>
+      <p>- If set to "Direct Bank Transfer", "PayPal Payouts", "Stripe Payouts", or "Wise Bank Transfer Payouts" they will still be required to update and set their payment details in the settings tab, but it will be selected as their default option.</p>
 
       <br/>
 
@@ -1059,6 +1448,7 @@ function wcusage_field_cb_payouts( $args )
           <option value="banktransfer" <?php if($currentdefaulttype == "banktransfer") { ?>selected<?php } ?>><?php echo esc_html__( 'Direct Bank Transfer', 'woo-coupon-usage' ); ?></option>
           <option value="paypalapi" <?php if($currentdefaulttype == "paypalapi") { ?>selected<?php } ?>><?php echo esc_html__( 'PayPal Payouts', 'woo-coupon-usage' ); ?></option>
           <option value="stripeapi" <?php if($currentdefaulttype == "stripeapi") { ?>selected<?php } ?>><?php echo esc_html__( 'Stripe Payouts', 'woo-coupon-usage' ); ?></option>
+          <option value="wisebank" <?php if($currentdefaulttype == "wisebank") { ?>selected<?php } ?>><?php echo esc_html__( 'Wise Bank Transfer Payouts', 'woo-coupon-usage' ); ?></option>
           <option value="credit" <?php if($currentdefaulttype == "credit") { ?>selected<?php } ?>><?php echo esc_html__( 'Store Credit / Wallet', 'woo-coupon-usage' ); ?></option>
       </select>
       </p>
@@ -1184,6 +1574,8 @@ function wcusage_payouts_user_role_select($thisid) {
   </span>
 
   <i style="margin-left: 40px;"><?php echo esc_html__( 'If at-least 1 role is selected, this payout method will only be available for the selected user roles. If none are selected it will be available for all roles.', 'woo-coupon-usage' ); ?></i><br/>
+
+  <br/>
 
   </span>
 

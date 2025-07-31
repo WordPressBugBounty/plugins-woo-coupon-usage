@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.4.3
+Stable tag: 6.5.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -210,6 +210,7 @@ Want to know what new features we're working on releasing in the future? Check o
 If you have any suggestions for additional functionality, need any help, or have found a bug, please <a href="https://couponaffiliates.com/contact">get in touch</a>!
 
 == Installation ==
+
 1. Upload the 'woo-coupon-usage' plugin to the '/wp-content/plugins/' directory.
 2. Activate the affiliate plugin through the 'Plugins' menu in WordPress.
 3. Follow the setup wizard to generate the affiliate dashboard page, affiliate registration page, and configure the basic settings including your commission rates.
@@ -274,8 +275,11 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
-= Version 6.4.3 - 11th July 2025 =
-- Fix: Fixed an issue in the free version causing an error on the wcusage_referrals page.
+= Version 6.5.0 - 31st July 2025 =
+- New: (PRO) Added a new "Wise Payouts" feature to the plugin.
+- New: (PRO) Added an option when "Automatic Payouts" is enabled, to "only enable automatic payouts for specific payout methods".
+- Fix: Fixed an issue with the admin affiliate dashboard links when a coupon contains a "&" character.
+- Other: Tested up to WooCommerce 10.0.
 
 = Version 6.4.2 - 4th July 2025 =
 - New: Added a new "custom affiliate terminology" setting to the plugin "design" settings tab, that allows you to change the word "affiliate" to something else, such as "referrer", "partner", etc. This will change the terminology used throughout the plugin.

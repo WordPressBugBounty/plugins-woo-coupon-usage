@@ -707,7 +707,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
                 }
                 global $wpdb;
                 $table_name = $wpdb->prefix . 'wcusage_register';
-                $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE couponcode = %s", $couponcode ) );
+                $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE couponcode = %s AND status != 'declined'", $couponcode ) );
                 try {
                     $thiscoupon = new WC_Coupon($couponcode);
                 } catch ( Exception $e ) {

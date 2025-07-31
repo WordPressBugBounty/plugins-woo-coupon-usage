@@ -1884,7 +1884,7 @@ function wcusage_admin_faq_toggle(  $id, $class, $title  ) {
         "Hide"
     );
     ?>
-  <p><span class="dashicons dashicons-info" style="margin-top: 5px;"></span>
+  <p style="font-weight: bold;"><span class="dashicons dashicons-info" style="margin-top: 5px;"></span>
   <?php 
     echo esc_html( $title );
     ?>

@@ -254,22 +254,23 @@ function wcusage_field_cb_urls( $args )
         <!-- How many recent clicks should be shown? -->
         <?php echo wcusage_setting_number_option('wcusage_field_show_click_history_amount', '10', esc_html__( 'Clicks Per Page', 'woo-coupon-usage' ), '30px'); ?>
 
+          <?php echo wcusage_setting_toggle('.wcusage_field_load_ajax', '.wcu-field-section-click-history-ajax'); // Show or Hide ?>
+          <span class="wcu-field-section-click-history-ajax">
 
-        <?php echo wcusage_setting_toggle('.wcusage_field_load_ajax', '.wcu-field-section-click-history-ajax'); // Show or Hide ?>
-        <span class="wcu-field-section-click-history-ajax">
+            <br/>
 
-          <br/>
+            <?php echo wcusage_setting_toggle_option('wcusage_field_show_click_history_pagination', 1, esc_html__( 'Enable Pagination', 'woo-coupon-usage' ), '30px'); ?>
+            <i style="margin-left: 30px;"><?php echo esc_html__( 'This will allow affiliates to filter through their whole click history with pagination.', 'woo-coupon-usage' ); ?></i><br/>
 
-          <?php echo wcusage_setting_toggle_option('wcusage_field_show_click_history_pagination', 1, esc_html__( 'Enable Pagination', 'woo-coupon-usage' ), '30px'); ?>
-          <i style="margin-left: 30px;"><?php echo esc_html__( 'This will allow affiliates to filter through their whole click history with pagination.', 'woo-coupon-usage' ); ?></i><br/>
+            <br/>
 
-          <br/>
+            <?php echo wcusage_setting_toggle_option('wcusage_field_show_click_history_converted', 1, 'Enable "Converted Only" Toggle', '30px'); ?>
+            <i style="margin-left: 30px;"><?php echo esc_html__( 'This will allow affiliates to click a toggle to only show converted clicks.', 'woo-coupon-usage' ); ?></i><br/>
 
-          <?php echo wcusage_setting_toggle_option('wcusage_field_show_click_history_converted', 1, 'Enable "Converted Only" Toggle', '30px'); ?>
-          <i style="margin-left: 30px;"><?php echo esc_html__( 'This will allow affiliates to click a toggle to only show converted clicks.', 'woo-coupon-usage' ); ?></i><br/>
+            <br/>
 
-          <br/>
-
+          </span>
+          
           <?php echo wcusage_setting_toggle_option('wcusage_field_track_click_ip', 1, esc_html__( 'Store visitors "IP Address" for referral clicks, instead of a random ID.', 'woo-coupon-usage' ), '30px'); ?>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'The IP address will be stored in the "clicks" database table. The IP address is only used to check if a click has already been tracked for that visitor.', 'woo-coupon-usage' ); ?></i><br/>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'If disabled, it will instead store an extra random ID as a cookie for new referral clicks ("wcusage_referral_id") which will then work in the same way.', 'woo-coupon-usage' ); ?></i><br/>
@@ -280,8 +281,6 @@ function wcusage_field_cb_urls( $args )
           <i style="margin-left: 30px;"><?php echo esc_html__( 'If enabled, all new referral URL clicks from the same user will be tracked (and increases total clicks + visit logged in click history). Only the latest click will be converted if they make a purchase.', 'woo-coupon-usage' ); ?></i><br/>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'If disabled, only the first click from the visitor will be tracked (until the cookie expires).', 'woo-coupon-usage' ); ?></i><br/>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'Note: If enabled, any new clicks (from the same visitor) within the same minute as another will not be logged, and will keep the same ID as the initial click (to prevent spamming the logs).', 'woo-coupon-usage' ); ?></i><br/>
-
-        </span>
 
         </span>
 
