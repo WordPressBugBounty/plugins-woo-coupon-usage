@@ -2211,6 +2211,35 @@ p label {
     }
 }
 
+/* Ensure 3-per-row layout for info boxes inside the Admin Reports stats section */
+.wcusage-reports-stats-section .wcusage-info-box {
+    /* Override wide default */
+    width: calc(33.333% - 1%);
+    float: left;
+    margin: 0.5%;
+    box-sizing: border-box;
+}
+
+/* Contain floats */
+.wcusage-reports-stats-section::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Responsive fallbacks: 2 per row on medium, 1 per row on small */
+@media only screen and (min-width: 920px) and (max-width: 1079px) {
+    .wcusage-reports-stats-section .wcusage-info-box {
+        width: calc(50% - 1%);
+    }
+}
+
+@media only screen and (max-width: 919px) {
+    .wcusage-reports-stats-section .wcusage-info-box {
+        width: 99%;
+    }
+}
+
 .wcusage-reports-stats-title {
     border: 2px #D0D0D0 dotted;
     border-radius: 5px;

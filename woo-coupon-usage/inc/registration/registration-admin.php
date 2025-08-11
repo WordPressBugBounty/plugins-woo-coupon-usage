@@ -15,6 +15,18 @@ function wcusage_admin_registrations_page_html() {
     if ( isset( $_POST['_wpnonce'] ) ) {
         $nonce = sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) );
         if ( wp_verify_nonce( $nonce, 'admin_add_registration_form' ) && wcusage_check_admin_access() ) {
+            // Get the post field values
+            $post_field_values = wcusage_registration_form_post_get_fields( 1 );
+            $username = sanitize_text_field( $post_field_values['username'] );
+            $email = sanitize_text_field( $post_field_values['email'] );
+            if ( wcusage_check_admin_access() ) {
+                // Check if email exists, if so swap the username
+                $user = get_user_by( 'email', $email );
+                if ( $user ) {
+                    $username = $user->user_login;
+                    $_POST['wcu-input-username'] = $username;
+                }
+            }
             echo wp_kses_post( wcusage_post_submit_application( 1 ) );
             // Redirect to admin.php?page=wcusage_affiliates
             $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . $_POST['wcu-input-username'] );
@@ -541,6 +553,18 @@ function wcusage_admin_new_registration_page() {
     if ( isset( $_POST['_wpnonce'] ) ) {
         $nonce = sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) );
         if ( wp_verify_nonce( $nonce, 'admin_add_registration_form' ) && wcusage_check_admin_access() ) {
+            // Get the post field values
+            $post_field_values = wcusage_registration_form_post_get_fields( 1 );
+            $username = sanitize_text_field( $post_field_values['username'] );
+            $email = sanitize_text_field( $post_field_values['email'] );
+            if ( wcusage_check_admin_access() ) {
+                // Check if email exists, if so swap the username
+                $user = get_user_by( 'email', $email );
+                if ( $user ) {
+                    $username = $user->user_login;
+                    $_POST['wcu-input-username'] = $username;
+                }
+            }
             echo wp_kses_post( wcusage_post_submit_application( 1 ) );
             // Redirect to admin.php?page=wcusage_affiliates
             $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . $_POST['wcu-input-username'] );
@@ -641,7 +665,7 @@ function wcusage_admin_new_registration_page() {
         echo esc_html__( 'Email Address', 'woo-coupon-usage' );
         ?></label></th>
           <td><input name="wcu-input-email" type="email" id="wcu-input-email" class="regular-text ltr" value="">
-          <br/><i style="font-size: 10px;">The email address for creating the new user account.</i></td>
+          <br class="wcu-input-email-text"><i style="font-size: 10px;" class="wcu-input-email-text">The email address for creating the new user account.</i></td>
         </tr>
         <tr class="wcu-add-affiliate-first-name">
           <th scope="row"><label for="wcu-input-first-name"><?php 
@@ -830,6 +854,65 @@ function wcusage_admin_new_registration_page() {
       checkUsername();
   });
 
+  // Check email existence
+  jQuery(document).ready(function($) {
+      var emailField = $('#wcu-input-email');
+      var usernameField = $('#wcu-input-username');
+
+      function checkEmail() {
+          var email = emailField.val().trim();
+          var username = usernameField.val().trim();
+
+          if (email.length === 0) {
+              $('.email-exists-message').remove();
+              $('#wcu-register-button').prop('disabled', false);
+              return;
+          }
+
+          $.ajax({
+              url: ajaxurl,
+              method: 'POST',
+              data: {
+                  action: 'wcusage_check_email_exists',
+                  email: email,
+                  username: username
+              },
+              success: function(response) {
+                  if (response.success && response.data.exists) {
+                      if (!response.data.matches_username && username.length > 0) {
+                          // Email exists but doesn't match username
+                          $('.email-exists-message').remove();
+                          $('.wcu-input-email-text').hide();
+                          emailField.after('<p class="email-exists-message" style="color: red; font-size: 12px; margin: 0;"><span class="fa fa-times-circle" style="color: red;"></span> ' + '<?php 
+    echo esc_js( __( 'This email address is already associated with username: ', 'woo-coupon-usage' ) );
+    ?>' + response.data.username + '</p>');
+                          $('#wcu-register-button').prop('disabled', true);
+                      } else {
+                          // Email exists and matches username (or no username entered yet)
+                          $('.email-exists-message').remove();
+                          $('#wcu-register-button').prop('disabled', false);
+                      }
+                  } else {
+                      // Email doesn't exist
+                      $('.email-exists-message').remove();
+                      $('#wcu-register-button').prop('disabled', false);
+                  }
+              }
+          });
+      }
+
+      emailField.on('change', function() {
+          checkEmail();
+      });
+
+      // Also check when username changes (in case email was entered first)
+      usernameField.on('change', function() {
+          if (emailField.val().trim().length > 0) {
+              checkEmail();
+          }
+      });
+  });
+
   // Check coupon code existence
   jQuery(document).ready(function($) {
       var couponField = $('#wcu-input-coupon');
@@ -908,6 +991,31 @@ function wcusage_check_coupon_exists() {
     if ( function_exists( 'wc_get_coupon_id_by_code' ) && wc_get_coupon_id_by_code( $coupon_code ) ) {
         wp_send_json_success( [
             'exists' => true,
+        ] );
+    } else {
+        wp_send_json_success( [
+            'exists' => false,
+        ] );
+    }
+    wp_die();
+}
+
+// Check if email exists via AJAX
+add_action( 'wp_ajax_wcusage_check_email_exists', 'wcusage_check_email_exists' );
+function wcusage_check_email_exists() {
+    if ( !current_user_can( 'manage_options' ) ) {
+        wp_send_json_error();
+    }
+    $email = ( isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '' );
+    $username = ( isset( $_POST['username'] ) ? sanitize_user( wp_unslash( $_POST['username'] ) ) : '' );
+    $user = get_user_by( 'email', $email );
+    if ( $user ) {
+        // Email exists, check if it matches the username
+        $matches_username = $user->user_login === $username;
+        wp_send_json_success( [
+            'exists'           => true,
+            'username'         => $user->user_login,
+            'matches_username' => $matches_username,
         ] );
     } else {
         wp_send_json_success( [

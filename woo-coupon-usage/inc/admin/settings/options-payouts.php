@@ -1007,6 +1007,7 @@ function wcusage_field_cb_payouts( $args )
 
         <br/>
 
+        <?php if( wcu_fs()->can_use_premium_code() ) { ?>
         <script>
         jQuery( document ).ready(function() {
           wcusage_check_wise_test_mode();
@@ -1095,6 +1096,7 @@ function wcusage_field_cb_payouts( $args )
           });
         });
         </script>
+        <?php } ?>
 
         <span class="wcu-field-section-tr-payouts-wiseapi-live">
 

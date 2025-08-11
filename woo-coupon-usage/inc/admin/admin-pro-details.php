@@ -409,6 +409,20 @@ __( 'Automatically pay your affiliates in one-click with Stripe! Your affiliates
 ?>
 
 <?php echo wcusage_output_addon_box(
+__( 'Wise Bank Transfer Payouts', 'woo-coupon-usage' ),
+"wcusage_field_wise_enable",
+__( 'Allow your affiliates to request commission payouts via Wise Bank Transfer.', 'woo-coupon-usage' ),
+"https://couponaffiliates.com/docs/pro-wise-payouts",
+"fab fa-wrench",
+1,
+0,
+0,
+'tab-payouts',
+'wise-settings'
+);
+?>
+
+<?php echo wcusage_output_addon_box(
 __( 'Store Credit Payouts', 'woo-coupon-usage' ),
 "wcusage_field_storecredit_enable",
 __( 'Allow your affiliates to request commission payouts as "Store Credit" which they can use towards purchases in your store at checkout.', 'woo-coupon-usage' ),

@@ -340,43 +340,36 @@ if (!function_exists('wcusage_tab_settings')) {
                                     <?php } ?>
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
                                         <label for="wcu_first_name"><?php echo esc_html__('First Name', 'woo-coupon-usage'); ?>:</label>
-                                        <br/>
                                         <input type="text" class="woocommerce-Input woocommerce-Input--text input-text"
                                             id="wcu_first_name" name="wcu_first_name" value="<?php echo esc_attr($first_name); ?>" autocomplete="given-name">
                                     </p>
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
                                         <label for="wcu_last_name"><?php echo esc_html__('Last Name', 'woo-coupon-usage'); ?>:</label>
-                                        <br/>
                                         <input type="text" class="woocommerce-Input woocommerce-Input--text input-text"
                                             id="wcu_last_name" name="wcu_last_name" value="<?php echo esc_attr($last_name); ?>" autocomplete="family-name">
                                     </p>
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
                                         <label for="wcu_display_name"><?php echo esc_html__('Display Name', 'woo-coupon-usage'); ?>:</label>
-                                        <br/>
                                         <input type="text" class="woocommerce-Input woocommerce-Input--text input-text"
                                             id="wcu_display_name" name="wcu_display_name" value="<?php echo esc_attr($display_name); ?>" autocomplete="nickname">
                                     </p>
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
                                         <label for="wcu_email"><?php echo esc_html__('Email Address', 'woo-coupon-usage'); ?>:</label>
-                                        <br/>
                                         <input type="email" class="woocommerce-Input woocommerce-Input--email input-text"
                                             id="wcu_email" name="wcu_email" value="<?php echo esc_attr($email); ?>" autocomplete="email">
                                     </p>
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
                                         <label for="wcu_phone"><?php echo esc_html__('Phone Number', 'woo-coupon-usage'); ?>:</label>
-                                        <br/>
                                         <input type="tel" class="woocommerce-Input woocommerce-Input--text input-text"
                                             id="wcu_phone" name="wcu_phone" value="<?php echo esc_attr($phone); ?>" autocomplete="tel">
                                     </p>
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
                                         <label for="wcu_website"><?php echo esc_html__('Website', 'woo-coupon-usage'); ?>:</label>
-                                        <br/>
                                         <input type="url" class="woocommerce-Input woocommerce-Input--text input-text"
                                             id="wcu_website" name="wcu_website" value="<?php echo esc_attr($website); ?>" autocomplete="url">
                                     </p>
                                     <p>
                                         <label for="wcu_password"><?php echo esc_html__('Password', 'woo-coupon-usage'); ?>:</label>
-                                        <br/>
                                         <a href="<?php echo esc_url(wp_lostpassword_url()); ?>" target="_blank">
                                             <?php echo esc_html__('Click here to reset your password.', 'woo-coupon-usage'); ?>
                                         </a>

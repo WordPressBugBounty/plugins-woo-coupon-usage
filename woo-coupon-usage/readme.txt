@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.5.0
+Stable tag: 6.5.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -13,9 +13,9 @@ The most powerful affiliate plugin for WooCommerce. Track commission, generate r
 
 == Description ==
 
-**Why is Coupon Affiliates the best affiliate plugin for WooCommerce?**
+**Why is Coupon Affiliates the best WooCommerce affiliate plugin?**
 
-Coupon Affiliates is a powerful coupon-based affiliate plugin for WooCommerce, that is designed to help you grow traffic and increase sales.
+Coupon Affiliates is a powerful affiliate plugin for WooCommerce, that is designed to help you grow traffic and increase sales.
 
 With this plugin you can give your affiliates access to a user-friendly affiliate dashboard for their coupons, to view coupon usage statistics, recent orders, commission earned, referral URLs and more.
 
@@ -274,6 +274,19 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 6.5.1 - 9th August 2025 =
+- New: Added an option to apply custom CSS to the affiliate dashboard and affiliate portal pages in the design settings tab.
+- New: Added an option to choose a custom font to be used on the affiliate portal page in the design settings tab.
+- Tweak: Made some styling/alignment tweaks to the admin reports page.
+- Tweak: Added a check on the "Add New Affiliate" admin page if the username does not exist, but an existing email address is used. This will now show a warning message
+- Tweak: Made some tweaks/fixes to the affiliate portal page on dark mode.
+- Fix: Fixed an issue with the "Allow logged out users to register as an affiliate" option on the affiliate portal.
+- Fix: (PRO) Fixed an issue with the dynamic coupon code generation on the affiliate portal ajax registration form.
+- Fix: (PRO) Fixed an issue with the PDF affiliate report emails not applying CSS styles.
+
+= Version 6.5.0.1 - 1st August 2025 =
+- Fix: Fixed an issue with the action buttons ("Paid" and "Cancel") on the admin payouts page not showing in some cases for manual payout methods.
 
 = Version 6.5.0 - 31st July 2025 =
 - New: (PRO) Added a new "Wise Payouts" feature to the plugin.

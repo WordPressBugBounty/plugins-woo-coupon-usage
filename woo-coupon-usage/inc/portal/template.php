@@ -253,6 +253,17 @@ wp_head();
 ?>
 
     <?php 
+// Apply selected primary font to the portal via CSS variable
+$wcusage_portal_font_family = wcusage_get_setting_value( 'wcusage_portal_font_family', '' );
+if ( !empty( $wcusage_portal_font_family ) ) {
+    // Allow only safe characters for CSS font-family lists
+    $safe_font_family = preg_replace( '/[^a-zA-Z0-9\\s,\\-"\']/', '', $wcusage_portal_font_family );
+    // Remove "quot" text
+    $safe_font_family = str_replace( array("'", '"', 'quot'), '', $safe_font_family );
+    if ( !empty( $safe_font_family ) ) {
+        echo '<style id="wcusage-portal-font">:root{--primary-font: ' . $safe_font_family . ';}</style>';
+    }
+}
 // Unenqueue any stylesheets from the sites theme
 $theme = wp_get_theme();
 $theme_name = $theme->get( 'Name' );
@@ -474,11 +485,21 @@ if ( !$current_user_id ) {
                     <div class="registration-form">
                         <?php 
     $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
-    $wcusage_field_registration_enable_logout = wcusage_get_setting_value( 'wcusage_field_registration_enable_logout', '1' );
-    $wcusage_field_registration_enable_login = wcusage_get_setting_value( 'wcusage_field_registration_enable_login', '1' );
-    if ( $register_loggedin && $wcusage_field_registration_enable && $wcusage_field_registration_enable_logout && $wcusage_field_registration_enable_login ) {
-        echo do_shortcode( '[couponaffiliates-register]' );
-        do_action( 'wcusage_portal_hook_after_registration_form' );
+    if ( $wcusage_field_registration_enable ) {
+        if ( $register_loggedin && is_user_logged_in() ) {
+            echo do_shortcode( '[couponaffiliates-register]' );
+            do_action( 'wcusage_portal_hook_after_registration_form' );
+        } else {
+            echo '<p>' . esc_html__( 'No affiliate coupons are assigned to your account.', 'woo-coupon-usage' ) . '</p>';
+        }
+        if ( !is_user_logged_in() ) {
+            $wcusage_field_registration_enable_logout = wcusage_get_setting_value( 'wcusage_field_registration_enable_logout', '1' );
+            $wcusage_field_registration_enable_login = wcusage_get_setting_value( 'wcusage_field_registration_enable_login', '1' );
+            if ( $wcusage_field_registration_enable_logout && $wcusage_field_registration_enable_login ) {
+                echo do_shortcode( '[couponaffiliates-register]' );
+                do_action( 'wcusage_portal_hook_after_registration_form' );
+            }
+        }
     } else {
         echo '<p>' . esc_html__( 'No affiliate coupons are assigned to your account.', 'woo-coupon-usage' ) . '</p>';
     }
@@ -983,10 +1004,10 @@ function wcusage_portal_tabs(
                 .portal-tablink.active {
                     background: <?php 
                 echo esc_attr( $tab_hover_color );
-                ?> !important;
+                ?>;
                     color: <?php 
                 echo esc_attr( $tab_hover_font_color );
-                ?> !important;
+                ?>;
                 }
                 </style>
                 <?php 

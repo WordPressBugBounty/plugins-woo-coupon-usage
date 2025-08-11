@@ -1175,6 +1175,8 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
     <i><?php echo esc_html__( 'This will show a toggle switch at the top right of the portal to switch between light and dark mode.', 'woo-coupon-usage' ); ?></i>
 
     <br/><br/>
+
+  <!-- Primary Font moved to Design > Portal Colours -->
     
       <span class="setup-hide">
 
@@ -1185,6 +1187,12 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
         <p>
             <?php echo sprintf( wp_kses_post( __( 'You can customise the colors of the affiliate portal in the <a %s>design settings tab</a>.', 'woo-coupon-usage' ) ), '<a href="#" onclick="wcusage_go_to_settings(\'#tab-design\', \'#affiliate-dashboard-colors\');"'); ?>
         </p>
+
+    <strong><?php echo esc_html__( 'Portal Font', 'woo-coupon-usage' ); ?></strong>
+
+    <p>
+      <?php echo sprintf( wp_kses_post( __( 'You can change the primary font used in the affiliate portal in the <a %s>design settings tab</a>.', 'woo-coupon-usage' ) ), '<a href="#" onclick="wcusage_go_to_settings(\'#tab-design\', \'#affiliate-portal-font\');"'); ?>
+    </p>
 
       </span>
 

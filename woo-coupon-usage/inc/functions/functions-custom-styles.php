@@ -188,6 +188,19 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
 		}
 		<?php } ?>
 
+		<?php
+		// Custom Dashboard CSS (Design settings)
+		$wcusage_custom_dashboard_css = wcusage_get_setting_value('wcusage_field_custom_dashboard_css', '');
+		if ( ! empty( $wcusage_custom_dashboard_css ) ) {
+			// Strip HTML tags for safety, but keep CSS characters intact
+			$wcusage_custom_dashboard_css = strip_tags( $wcusage_custom_dashboard_css );
+			?>
+			/* Custom Dashboard CSS */
+			<?php echo $wcusage_custom_dashboard_css; ?>
+			<?php
+		}
+		?>
+
   	</style>
 
   <?php

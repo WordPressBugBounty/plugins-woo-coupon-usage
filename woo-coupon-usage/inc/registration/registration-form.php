@@ -624,6 +624,10 @@ function wcusage_create_new_registration(
 *
 */
 function wcusage_post_submit_application(  $adminpost  ) {
+    // Skip AJAX requests
+    if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+        return;
+    }
     $options = get_option( 'wcusage_options' );
     $wcusage_registration_enable_logout = wcusage_get_setting_value( 'wcusage_field_registration_enable_logout', '1' );
     $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
@@ -1187,15 +1191,6 @@ function wcusage_registration_form_post_get_fields(  $adminpost = 0  ) {
     }
     if ( $adminpost && isset( $_POST['wcu-message'] ) ) {
         $message = sanitize_text_field( $_POST['wcu-message'] );
-    }
-    if ( $auto_coupon && wcu_fs()->can_use_premium_code__premium_only() ) {
-        $couponcode = wcusage_generate_auto_coupon( $username );
-    } else {
-        if ( isset( $_POST['wcu-input-coupon'] ) ) {
-            $couponcode = wc_sanitize_coupon_code( $_POST['wcu-input-coupon'] );
-        } else {
-            $couponcode = "";
-        }
     }
     $info = json_encode( $info );
     $return_array = [];

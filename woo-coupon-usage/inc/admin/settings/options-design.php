@@ -133,18 +133,17 @@ function wcusage_field_cb_design( $args )
   <br/>
 
   </div>
-
+  
   <span class="affiliate-dashboard-page-settings">
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Tab Colours', 'woo-coupon-usage' ); ?></h3>
   </span>
 
   <span class="wcu-field-section-portal">
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Portal Colours', 'woo-coupon-usage' ); ?></h3>
-  </span>  
+  </span>
 
   <!-- Tabs -->
   <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
-
     <span class="affiliate-dashboard-page-settings">
     <h3><?php echo esc_html__( 'Tabs', 'woo-coupon-usage' ); ?></h3>
     </span>
@@ -187,6 +186,78 @@ function wcusage_field_cb_design( $args )
 
 	<br/><hr/>
 
+  <span class="wcu-field-section-portal">
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Portal Fonts', 'woo-coupon-usage' ); ?></h3>
+  </span>  
+
+  <!-- Portal Font (own section) -->
+  <div class="wcusage-settings-style-colors wcu-field-section-portal" style="margin-bottom: 0;" id="affiliate-portal-font">
+    <?php
+      $saved_font = wcusage_get_setting_value('wcusage_portal_font_family', '');
+
+      // WordPress Font Library fonts
+      $wp_font_options = array();
+      if ( function_exists('wp_get_global_settings') ) {
+          $typography_fonts = wp_get_global_settings( array( 'typography', 'fontFamilies' ) );
+          if ( is_array( $typography_fonts ) ) {
+              foreach ( $typography_fonts as $group_fonts ) {
+                  if ( is_array( $group_fonts ) ) {
+                      foreach ( $group_fonts as $font ) {
+                          $name = isset($font['name']) ? $font['name'] : ( isset($font['slug']) ? $font['slug'] : '' );
+                          $family = isset($font['fontFamily']) ? ( is_array($font['fontFamily']) ? implode(', ', $font['fontFamily']) : $font['fontFamily'] ) : '';
+                          if ( $name && $family ) {
+                              $wp_font_options[$name] = $family;
+                          }
+                      }
+                  }
+              }
+          }
+      }
+
+      // Built-in safe stacks
+      $builtin_font_options = array(
+        esc_html__( 'System Default', 'woo-coupon-usage' ) => 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif',
+        'Inter' => '"Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        'Roboto' => '"Roboto", "Helvetica Neue", Arial, sans-serif',
+        'Open Sans' => '"Open Sans", Arial, sans-serif',
+        'Lato' => '"Lato", Arial, sans-serif',
+        'Montserrat' => '"Montserrat", Arial, sans-serif',
+        'Poppins' => '"Poppins", Arial, sans-serif',
+        'Nunito' => '"Nunito", Arial, sans-serif',
+        'Source Sans Pro' => '"Source Sans Pro", Arial, sans-serif',
+        'Work Sans' => '"Work Sans", Arial, sans-serif',
+        'Helvetica Neue' => '"Helvetica Neue", Arial, sans-serif',
+        'Arial' => 'Arial, "Helvetica Neue", sans-serif',
+        'Georgia' => 'Georgia, "Times New Roman", Times, serif',
+        'Merriweather' => '"Merriweather", Georgia, serif',
+      );
+    ?>
+    <h3><?php echo esc_html__( 'Primary Font', 'woo-coupon-usage' ); ?></h3>
+    <p>
+      <select id="wcusage_portal_font_family" name="wcusage_options['wcusage_portal_font_family']" style="min-width: 100%;max-width: 100%;">
+        <option value="" <?php selected( $saved_font, '' ); ?>><?php echo esc_html__( 'Default (inherit browser/system)', 'woo-coupon-usage' ); ?></option>
+        <?php if ( !empty( $wp_font_options ) ) : ?>
+        <optgroup label="<?php echo esc_attr__( 'WordPress Font Library', 'woo-coupon-usage' ); ?>">
+          <?php foreach ( $wp_font_options as $label => $value ) : ?>
+            <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $saved_font, $value ); ?>><?php echo esc_html( $label ); ?></option>
+          <?php endforeach; ?>
+        </optgroup>
+        <?php endif; ?>
+        <optgroup label="<?php echo esc_attr__( 'Built-in Safe Fonts', 'woo-coupon-usage' ); ?>">
+          <?php foreach ( $builtin_font_options as $label => $value ) : ?>
+            <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $saved_font, $value ); ?>><?php echo esc_html( $label ); ?></option>
+          <?php endforeach; ?>
+        </optgroup>
+      </select>
+      <i><?php echo esc_html__( 'Applies to all text in the Affiliate Portal. Fonts available from the WordPress Font Library.', 'woo-coupon-usage' ); ?></i>
+    </p>
+
+  </div>
+
+  <div style="clear: both;"></div>
+
+  <br/><hr/>
+  
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Registration & Login Form', 'woo-coupon-usage' ); ?></h3>
 
   <p>
@@ -231,6 +302,47 @@ function wcusage_field_cb_design( $args )
       <option value="tabs" <?php if($wcusage_field_mobile_menu == "tabs") { ?>selected<?php } ?>><?php echo esc_html__( 'Tabs', 'woo-coupon-usage' ); ?></option>
     </select>
   </p>
+
+  <br/>
+  <hr/>
+
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Custom CSS', 'woo-coupon-usage' ); ?></h3>
+
+  <?php echo wcusage_setting_textarea_option('wcusage_field_custom_dashboard_css', '', esc_html__( 'Custom Dashboard CSS', 'woo-coupon-usage' ), '0px'); ?>
+  
+  <?php
+  // Load WP code editor (CodeMirror) assets and initialize on this textarea
+  if ( function_exists('wp_enqueue_code_editor') ) {
+      $wcu_css_editor_settings = wp_enqueue_code_editor( array(
+        'type' => 'text/css',
+        'codemirror' => array(
+          'mode' => 'css',
+          'lint' => true,
+          'gutters' => array('CodeMirror-lint-markers'),
+          'lineNumbers' => true,
+          'styleActiveLine' => true,
+          'matchBrackets' => true
+        )
+      ) );
+  }
+  ?>
+  <style>
+    /* Make the textarea/editor reasonably sized */
+    #wcusage_field_custom_dashboard_css { width: 100%; min-height: 220px; }
+    .CodeMirror { border: 1px solid #ccd0d4; min-height: 220px; }
+  </style>
+  <script>
+  jQuery(function(){
+    if ( window.wp && wp.codeEditor && document.getElementById('wcusage_field_custom_dashboard_css') ) {
+      try {
+        var settings = <?php echo isset($wcu_css_editor_settings) && $wcu_css_editor_settings ? wp_json_encode( $wcu_css_editor_settings ) : '{}'; ?>;
+        wp.codeEditor.initialize( 'wcusage_field_custom_dashboard_css', settings );
+      } catch(e) {
+        // Fallback silently to plain textarea
+      }
+    }
+  });
+  </script>
 
 	</div>
 

@@ -7,6 +7,8 @@
     --sidebar-text: #ffffff; /* Sidebar text */
     --content-bg: #ffffff; /* Content background */
     --header-footer-bg: #f0f0f0; /* Header and footer background */
+    /* Typography */
+    --primary-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --text-color: #2c3e50; /* Primary text color */
     --secondary-text-color: #7f8c8d; /* Secondary text (e.g., small stats) */
     --border-color: #ddd; /* Borders */
@@ -47,7 +49,7 @@ body.dark-mode {
 
 body {
     margin: 0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: var(--primary-font) !important;
     background: var(--background-color); /* Use variable */
 }
 
@@ -64,7 +66,7 @@ button,
 input,
 select,
 textarea {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: var(--primary-font) !important;
 }
 
 .wcu-settings-tab-content input[type="text"],
@@ -102,8 +104,8 @@ textarea {
 }
 
 .sidebar {
-    width: 210px;
-    min-width: 210px;
+    width: 220px;
+    min-width: 220px;
     background: var(--sidebar-bg); /* Use variable */
     color: var(--sidebar-text); /* Use variable */
     padding: 20px 0;
@@ -144,7 +146,7 @@ textarea {
     transition: background 0.3s, color 0.3s;
     border-left: 4px solid transparent; /* For active tab indicator */
     outline: none;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: var(--primary-font) !important;
     text-decoration: none;
     white-space: normal;
     word-wrap: break-word;
@@ -1047,14 +1049,15 @@ body.dark-mode .wcusage-sales-stats-toggles {
 }
 
 body.dark-mode .wcuTableRow,
-body.dark_mode .wcuTableRow tbody,
-body.dark_mode .wcuTableRow tr,
-body.dark_mode .wcuTableRow th,
-body.dark_mode .wcuTableRow td,
-body.dark_mode .wcuTableCell {
+body.dark-mode .wcuTableRow tbody,
+body.dark-mode .wcuTableRow tr,
+body.dark-mode .wcuTableRow th,
+body.dark-mode .wcuTableRow td,
+body.dark-mode .wcuTableRow .wcuTableCell,
+body.dark-mode .wcuTableCell {
     background: var(--content-bg2);
     color: var(--text-color) !important;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-color) !important;
 }
 body.dark-mode .wcuTableHead,
 body.dark-mode .wcuTableHead-summary,
@@ -1086,7 +1089,7 @@ body.dark-mode .wcusage-tab-section .wcusage-last-days a.wcutab-active {
 body.dark-mode .wcusage-stats-title a {
     color: var(--accent-color) !important;
 }
-body.dark.mode .wcusage-stats-title a:hover {
+body.dark-mode .wcusage-stats-title a:hover {
     color: var(--button-bg-hover) !important;
 }
 
@@ -1097,18 +1100,22 @@ body.dark-mode textarea {
     color: var(--text-color);
 }
 
-body.dark-mode button {
-    border: 1px solid var(--border-color) !important;
+body.dark-mode button,
+body.dark-mode #tab-page-back {
+    background: var(--sidebar-bg) !important;
+    border: 0px solid var(--border-color) !important;
+    color: #fff !important;
 }
 
-body.dark-mode .wcu-campaigns-col1, body.dark.mode .wcu-campaigns-col2 {
+
+body.dark-mode .wcu-campaigns-col1, body.dark-mode .wcu-campaigns-col2 {
     color: var(--text-color) !important;
 }
 
 body.dark-mode .wcu-order-filters-field {
     color: var(--text-color);
 }
-body.dark.mode .wcu-order-filters-field input, body.dark.mode .wcu-order-filters-field select, body.dark.mode .wcu-order-filters-field textarea {
+body.dark-mode .wcu-order-filters-field input, body.dark-mode .wcu-order-filters-field select, body.dark-mode .wcu-order-filters-field textarea {
     background: var(--input-bg);
     border: 1px solid var(--border-color);
     color: var(--text-color);
@@ -1130,9 +1137,9 @@ body.dark-mode .creatives-box {
     color: var(--text-color) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
-body.dark-mode .payouts-box p, body.dark.mode .payouts-box span,
-body.dark.mode .referral-url-box p, body.dark.mode .referral-url-box span, body.dark.mode .referral-url-box strong, body.dark.mode .referral-url-box code,
-body.dark.mode .creatives-box p, body.dark.mode .creatives-box span {
+body.dark-mode .payouts-box p, body.dark-mode .payouts-box span,
+body.dark-mode .referral-url-box p, body.dark-mode .referral-url-box span, body.dark-mode .referral-url-box strong, body.dark-mode .referral-url-box code,
+body.dark-mode .creatives-box p, body.dark-mode .creatives-box span {
     color: var(--text-color) !important;
 }
 
@@ -1155,57 +1162,57 @@ body.dark-mode .sidebar {
     color: var(--sidebar-text);
     border-right: 1px solid var(--border-color);
 }
-body.dark.mode .sidebar-logo h2 {
+body.dark-mode .sidebar-logo h2 {
     color: var(--sidebar-text) !important;
 }
-body.dark.mode .portal-tablink {
+html body.dark-mode .portal-tablink {
     background: var(--sidebar-bg) !important;
     color: var(--sidebar-text);
     border: none !important;
     border-left: 4px solid transparent !important;
 }
-body.dark.mode .portal-tablink.active {
+html body.dark-mode .portal-tablink.active {
     background: var(--sidebar-bg-link) !important;
     border-left: 4px solid var(--sidebar-bg-link) !important;
 }
 
-body.dark.mode .wcusage-progress-bar-text {
+body.dark-mode .wcusage-progress-bar-text {
     color: #515151;
 }
 
-body.dark.mode .wcusage-reward-summary-item {
+body.dark-mode .wcusage-reward-summary-item {
     color: #111 !important;
 }
 
 /* Google chart dark mode styles */
 
-body.dark.mode .wcusagechart {
-    filter: invert(90%);
+body.dark-mode div.wcusagechart {
+    filter: invert(90%) !important;
 }
-body.dark.mode .wcusagechart svg path {
+body.dark-mode .wcusagechart svg path {
     stroke: #000 !important;
 }
-body.dark.mode .wcusagechart svg circle {
+body.dark-mode .wcusagechart svg circle {
     fill: #000 !important;
 }
-body.dark.mode .wcusagechart svg {
+body.dark-mode .wcusagechart svg {
     fill: #000 !important;
     color: #000 !important;
 }
-body.dark.mode .wcusagechart text {
+body.dark-mode .wcusagechart text {
     fill: #000 !important;
 }
 
 /* Dark Mode: MLA */
 
-body.dark.mode .wcu-user-coupon-list {
+body.dark-mode .wcu-user-coupon-list {
     background: var(--content-bg2);
     border: 1px solid var(--border-color);
     color: var(--text-color) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-body.dark.mode #mla_chart_div td.google-visualization-orgchart-node {
+body.dark-mode #mla_chart_div td.google-visualization-orgchart-node {
     background: var(--content-bg2) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-color) !important;

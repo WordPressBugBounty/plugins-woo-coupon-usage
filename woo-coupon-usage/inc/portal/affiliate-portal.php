@@ -31,7 +31,7 @@ function wcusage_add_affiliate_portal_rewrite_rule() {
 function wcusage_check_affiliate_portal_rewrite_rule() {
     global $wp_rewrite;
     $rules = $wp_rewrite->wp_rewrite_rules();
-    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-porta;');
+    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
     $rule = '^' . $wcusage_portal_slug . '/?$';
     return isset($rules[$rule]);
 }

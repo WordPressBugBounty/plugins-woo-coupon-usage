@@ -1091,6 +1091,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
           <br><span class="dashicons dashicons-yes-alt"></span> Commission Payout Tracking
           <br><span class="dashicons dashicons-yes-alt"></span> One-Click Stripe Payouts
           <br><span class="dashicons dashicons-yes-alt"></span> One-Click PayPal Payouts
+          <br><span class="dashicons dashicons-yes-alt"></span> Wise Bank Transfer Payouts
           <br><span class="dashicons dashicons-yes-alt"></span> Scheduled Payout Requests
           <br><span class="dashicons dashicons-yes-alt"></span> Automatic Payouts
           <br><span class="dashicons dashicons-yes-alt"></span> PDF Statements & Invoices
@@ -1503,6 +1504,15 @@ function wcu_admin_enqueue_scripts(  $hook_suffix  ) {
             '1.1',
             true
         );
+        // Enable WordPress code editor (CodeMirror) on settings page for custom CSS textarea
+        if ( function_exists( 'wp_enqueue_code_editor' ) && isset( $_GET['page'] ) && $_GET['page'] == 'wcusage_settings' ) {
+            // Prepare and enqueue editor for CSS; this also ensures necessary scripts/styles are available
+            wp_enqueue_code_editor( array(
+                'type' => 'text/css',
+            ) );
+            wp_enqueue_script( 'code-editor' );
+            wp_enqueue_style( 'code-editor' );
+        }
     }
 }
 
