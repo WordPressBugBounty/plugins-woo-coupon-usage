@@ -1321,8 +1321,7 @@ Label the data
     padding: 0;
     background: transparent;
     border: 0;
-    text-align: center;
-    margin: 0 auto;
+    text-align: left;
     margin-bottom: 7px !important;
     cursor: pointer;
 }
@@ -2227,16 +2226,102 @@ p label {
     clear: both;
 }
 
-/* Responsive fallbacks: 2 per row on medium, 1 per row on small */
-@media only screen and (min-width: 920px) and (max-width: 1079px) {
-    .wcusage-reports-stats-section .wcusage-info-box {
-        width: calc(50% - 1%);
+/* Responsive scrollable tables for dashboard widgets */
+.wcusage-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    border: 1px solid #ececec;
+    padding-bottom: 2px;
+}
+
+.wcusage-table-scroll table {
+    width: 100%;
+    min-width: 590px;
+    border-collapse: collapse;
+    box-sizing: border-box;
+    background: transparent;
+}
+
+.wcusage-table-scroll th,
+.wcusage-table-scroll td {
+    white-space: normal;
+    word-break: break-word;
+    max-width: 180px;
+    box-sizing: border-box;
+}
+
+@media only screen and (max-width: 900px) {
+    .wcusage-admin-page-col table,
+    .wcusage-admin-page-col .wcusage-table-scroll table {
+        font-size: 13px;
+    }
+    .wcusage-admin-page-col th,
+    .wcusage-admin-page-col td {
+        padding: 8px 3px !important;
     }
 }
 
-@media only screen and (max-width: 919px) {
-    .wcusage-reports-stats-section .wcusage-info-box {
-        width: 99%;
+@media only screen and (max-width: 720px) {
+    .wcusage-admin-page-col {
+        padding: 10px 5px 20px 5px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box;
+        overflow-x: visible;
+    }
+    .wcusage-admin-page-col3 {
+        padding: 10px 5px 10px 5px !important;
+    }
+    .wcusage-table-scroll {
+        margin-left: -5px;
+        margin-right: -5px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .wcusage-admin-page-col table,
+    .wcusage-admin-page-col .wcusage-table-scroll table {
+        min-width: 700px;
+        font-size: 12px;
+    }
+    .wcusage-admin-page-col th,
+    .wcusage-admin-page-col td {
+        padding: 7px 2px !important;
+    }
+    .wcusage-table-scroll th,
+    .wcusage-table-scroll td {
+        max-width: 120px;
+    }
+}
+
+/* Ensure scrollbars are visible on overflow for tables */
+.wcusage-admin-page-col .wcusage-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Hide table borders on mobile for cleaner look */
+@media only screen and (max-width: 720px) {
+    .wcusage-admin-page-col table,
+    .wcusage-admin-page-col .wcusage-table-scroll table {
+        border: 0 !important;
+    }
+    .wcusage-admin-table-col-head th,
+    .wcusage-admin-table-col-row td,
+    .wcusage-admin-table-col-footer td {
+        border: 0 !important;
+    }
+}
+
+/* Prevent horizontal scroll on dashboard main container */
+@media only screen and (max-width: 720px) {
+    .wcusage-admin-page {
+        overflow-x: hidden;
     }
 }
 
@@ -2451,6 +2536,15 @@ p label {
     padding: 10px 20px 10px 0 !important;
 }
 
+/* Bulk Payouts */
+
+@media only screen and (min-width: 782px) {
+    .bulk-actions-payouts {
+        display: inline-block;
+        margin: 50px 0px -25px 0;
+    }
+}
+
 /* Settings Toggle Sections */
 
 .wcu_section_settings {
@@ -2651,8 +2745,6 @@ p label {
     background: #e0e0e0;
     border-color: #6b6e73;
 }
-
-/* Leaderboard */
 
 .wcusage-leaderboard {
     background: #fff;

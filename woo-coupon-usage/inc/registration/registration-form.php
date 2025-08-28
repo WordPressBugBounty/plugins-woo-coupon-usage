@@ -11,9 +11,17 @@ if ( $wcusage_field_registration_enable ) {
      */
     add_action( 'wp_head', 'wcusage_registration_form_wp_head' );
     function wcusage_registration_form_wp_head() {
+        if ( !isset( $_POST['submitaffiliateapplication'] ) ) {
+            return;
+        }
         // Only run if current page is not the registration page
         $wcusage_registration_page = wcusage_get_setting_value( 'wcusage_registration_page', '' );
         if ( $wcusage_registration_page && is_page( $wcusage_registration_page ) ) {
+            return;
+        }
+        // Only run if current page is not affiliate dashboard page
+        $wcusage_dashboard_page = wcusage_get_setting_value( 'wcusage_dashboard_page', '' );
+        if ( $wcusage_dashboard_page && is_page( $wcusage_dashboard_page ) ) {
             return;
         }
         if ( isset( $_POST['wcusage_submit_registration_form1'] ) && isset( $_POST['submitaffiliateapplication'] ) ) {
@@ -1144,6 +1152,7 @@ function wcusage_registration_form_post_get_fields(  $adminpost = 0  ) {
     $wcusage_field_registration_emailusername = wcusage_get_setting_value( 'wcusage_field_registration_emailusername', '0' );
     $auto_coupon = "";
     $auto_coupon_format = "";
+    $couponcode = "";
     $username = "";
     $password = "";
     $password_confirm = "";
@@ -1191,6 +1200,14 @@ function wcusage_registration_form_post_get_fields(  $adminpost = 0  ) {
     }
     if ( $adminpost && isset( $_POST['wcu-message'] ) ) {
         $message = sanitize_text_field( $_POST['wcu-message'] );
+    }
+    if ( isset( $_POST['wcu-input-coupon'] ) ) {
+        $couponcode = sanitize_text_field( $_POST['wcu-input-coupon'] );
+    } else {
+        $couponcode = "";
+    }
+    if ( $couponcode == "" ) {
+        $couponcode = wcusage_generate_auto_coupon( $username );
     }
     $info = json_encode( $info );
     $return_array = [];

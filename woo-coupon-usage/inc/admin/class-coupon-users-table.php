@@ -83,8 +83,8 @@ class WC_Coupon_Users_Table extends WP_List_Table {
             if(isset($_POST['filter_role'])) {
                 $current_role = sanitize_text_field($_POST['role']);
             } else {
-                if(isset($_GET['role'])) {
-                    $current_role = $_GET['role'];
+                if ( isset($_GET['role']) ) {
+                    $current_role = sanitize_text_field( wp_unslash( $_GET['role'] ) );
                 }   
             }
 
@@ -110,7 +110,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
                     // Retain other $_GET parameters in the form submission (like the page identifier)
                     foreach ($_GET as $key => $value) {
                         if ($key !== 'role' && $key !== 'filter_role') {
-                            echo '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '">';
+                            echo '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr( is_array($value) ? '' : wp_unslash( $value ) ) . '">';
                         }
                     }
                     ?>
@@ -166,8 +166,8 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         if(isset($_POST['filter_role'])) {
             $role = sanitize_text_field($_POST['role']);
         } else {
-            if(isset($_GET['role'])) {
-                $role = $_GET['role'];
+            if ( isset($_GET['role']) ) {
+                $role = sanitize_text_field( wp_unslash( $_GET['role'] ) );
             }
         }
         
@@ -187,8 +187,20 @@ class WC_Coupon_Users_Table extends WP_List_Table {
 
     function process_bulk_action() {
         
-        // Check nonce for security
-        if ( ! isset( $_POST['_wcusage_bulk_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wcusage_bulk_nonce'] ) ), 'wcusage_affiliates_bulk_action' ) ) {
+        // Check nonce for security (support legacy and current action names)
+        $nonce_valid = false;
+        if ( isset( $_POST['_wcusage_bulk_nonce'] ) ) {
+            $nonce_value = sanitize_text_field( wp_unslash( $_POST['_wcusage_bulk_nonce'] ) );
+            // Current
+            if ( wp_verify_nonce( $nonce_value, 'wcusage_coupon_users_bulk_action' ) ) {
+                $nonce_valid = true;
+            }
+            // Legacy/fallback
+            if ( ! $nonce_valid && wp_verify_nonce( $nonce_value, 'wcusage_affiliates_bulk_action' ) ) {
+                $nonce_valid = true;
+            }
+        }
+        if ( ! $nonce_valid ) {
             return;
         }
 
@@ -198,7 +210,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         }
 
         if ( 'bulk-delete-users' === $this->current_action() ) {
-            $delete_ids = esc_sql( $_POST['bulk-delete'] );
+            $delete_ids = isset($_POST['bulk-delete']) ? array_map( 'absint', (array) $_POST['bulk-delete'] ) : array();
             foreach ( $delete_ids as $id ) {
                 if ( $id != get_current_user_id() ) {
                     wp_delete_user( $id );
@@ -207,7 +219,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         }
 
         if ( 'bulk-delete-all' === $this->current_action() ) {
-            $delete_ids = esc_sql( $_POST['bulk-delete'] );
+            $delete_ids = isset($_POST['bulk-delete']) ? array_map( 'absint', (array) $_POST['bulk-delete'] ) : array();
             foreach ( $delete_ids as $id ) {
                 if ( $id != get_current_user_id() ) {
                     wp_delete_user( $id );
@@ -220,7 +232,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         }
 
         if ( 'bulk-unassign' === $this->current_action() ) {
-            $delete_ids = esc_sql( $_POST['bulk-delete'] );
+            $delete_ids = isset($_POST['bulk-delete']) ? array_map( 'absint', (array) $_POST['bulk-delete'] ) : array();
             foreach ( $delete_ids as $id ) {
                 $coupons = wcusage_get_users_coupons_ids( $id );
                 foreach ($coupons as $coupon) {
@@ -233,13 +245,11 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         }
 
         if ( 'bulk-delete-coupons' === $this->current_action() ) {
-            $delete_ids = esc_sql( $_POST['bulk-delete'] );
+            $delete_ids = isset($_POST['bulk-delete']) ? array_map( 'absint', (array) $_POST['bulk-delete'] ) : array();
             foreach ( $delete_ids as $id ) {
-                foreach ( $delete_ids as $id ) {
-                    $coupons = wcusage_get_users_coupons_ids( $id );
-                    foreach ($coupons as $coupon) {
-                        wp_delete_post( $coupon );
-                    }
+                $coupons = wcusage_get_users_coupons_ids( $id );
+                foreach ($coupons as $coupon) {
+                    wp_delete_post( $coupon );
                 }
             }
         }
@@ -423,13 +433,13 @@ function wcusage_coupon_users_page() {
             <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wcusage_affiliates&action=export_csv'), 'wcusage_export_users_csv')); ?>" class="wcusage-settings-button" id="wcu-admin-export-csv" style="float: right;">
                 <?php echo sprintf(esc_html__('Export %s Users', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?> <span class="fa-solid fa-download"></span>
             </a>
-            <p style="display: block;" class="wcusage_users_page_desc"><?php echo sprintf(esc_html__('This page displays all the users that are assigned to an %s coupon.', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' ))); ?></p>
+            <p class="wcusage_users_page_desc"><?php echo sprintf(esc_html__('This page displays all the users that are assigned to an %s coupon.', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' ))); ?></p>
             <br/>
         </span>
         </h2>
         <form method="post">
             <?php wp_nonce_field( 'wcusage_coupon_users_bulk_action', '_wcusage_bulk_nonce' ); ?>
-            <input type="hidden" name="page" value="<?php echo esc_html($_REQUEST['page']); ?>" />
+            <input type="hidden" name="page" value="<?php echo isset($_REQUEST['page']) ? esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) ) : ''; ?>" />
             <?php $coupon_users_table->search_box('Search Users', 'user_search'); ?>
             <?php $coupon_users_table->display(); ?>
         </form>
@@ -490,13 +500,13 @@ function wcusage_coupon_users_page() {
 add_action('admin_init', 'wcusage_handle_export_csv');
 function wcusage_handle_export_csv() {
     // Check if we're on the correct page and action
-    if (isset($_GET['page']) && 
-        (($_GET['page'] === 'wcusage_coupon_users') || ($_GET['page'] === 'wcusage_affiliates')) && 
-        isset($_GET['action']) && $_GET['action'] === 'export_csv' && 
-        isset($_GET['_wpnonce'])) {
+    if ( isset($_GET['page']) && 
+        ( ( isset($_GET['page']) && ( wp_unslash($_GET['page']) === 'wcusage_coupon_users' || wp_unslash($_GET['page']) === 'wcusage_affiliates' ) ) ) && 
+        isset($_GET['action']) && wp_unslash($_GET['action']) === 'export_csv' && 
+        isset($_GET['_wpnonce']) ) {
         
         // Verify nonce and permissions
-        if (wp_verify_nonce($_GET['_wpnonce'], 'wcusage_export_users_csv')) {
+    if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'wcusage_export_users_csv' ) ) {
             // Double-check admin access
             if (!current_user_can('manage_options') && !current_user_can('administrator')) {
                 wp_die(__('Sorry, you are not allowed to access this page.', 'woo-coupon-usage'));

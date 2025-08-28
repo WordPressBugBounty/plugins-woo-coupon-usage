@@ -210,7 +210,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
 
       .listtheproducts { display: none; }
       .listtheproducts td:before { content: "" !important; }
-      .listtheproducts { margin-top: -20px !important; margin-bottom: 20px !important; }
+      .listtheproducts { padding: 10px; margin-top: -5px !important; margin-bottom: 20px !important; }
       .wcuTableFoot:nth-of-type(1):before { content: "" !important; }
       .wcuTableFoot:nth-of-type(2):before { content: "" !important; }
       .wcuTableFoot:nth-of-type(9):before { content: "" !important; }

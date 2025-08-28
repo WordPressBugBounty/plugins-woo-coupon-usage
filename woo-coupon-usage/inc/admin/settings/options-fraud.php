@@ -30,7 +30,7 @@ function wcusage_field_cb_fraud( $args )
     <br/><i class="wcusage_field_url_referrals_p_info"><?php echo esc_html__( 'This will also allow them to use their own referral link and earn commission on their own purchases.', 'woo-coupon-usage' ); ?></i>
     <br/>
     <i><?php echo esc_html__( 'Unless you have a specific use case, we suggest keeping this disabled as in general it can cause some issues (commission granted to all coupons).', 'woo-coupon-usage' ); ?></i>
-
+    
     <br/><br/>
 
     <!-- Allow multiple affiliate coupons to be used in the same order. -->

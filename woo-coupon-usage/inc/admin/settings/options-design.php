@@ -249,7 +249,7 @@ function wcusage_field_cb_design( $args )
           <?php endforeach; ?>
         </optgroup>
       </select>
-      <i><?php echo esc_html__( 'Applies to all text in the Affiliate Portal. Fonts available from the WordPress Font Library.', 'woo-coupon-usage' ); ?></i>
+      <i><?php echo wp_kses_post( sprintf( __( 'Applies to all text in the Affiliate Portal. Fonts available from the <a href="%s" target="_blank">WordPress Font Library</a>.', 'woo-coupon-usage' ), esc_url( admin_url( 'customize.php?autofocus[section]=wcusage_font_options' ) ) ) ); ?></i>
     </p>
 
   </div>

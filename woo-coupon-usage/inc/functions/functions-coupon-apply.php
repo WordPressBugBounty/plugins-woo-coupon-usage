@@ -33,10 +33,10 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_coupons' ) ) {
 
         $current_coupons++;
 
-        /***** Checks if current user is assigned to the coupon *****/
-
         $wcusage_field_allow_assigned_user = wcusage_get_setting_value('wcusage_field_allow_assigned_user', 1);
         if(!$wcusage_field_allow_assigned_user) {
+
+            /***** Checks if current user is assigned to the coupon *****/
 
             $current_user_id = get_current_user_id();
 
@@ -49,6 +49,21 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_coupons' ) ) {
               wc_clear_notices();
 
               wc_add_notice( esc_html__( "Sorry, you can't use your own affiliate coupon code.", "woo-coupon-usage" ), "error" );
+
+            }
+
+            /***** Checks if current cart email address matches email of user assigned to coupon *****/
+
+            $cart_email = WC()->checkout()->get_value( 'billing_email' );
+            $cart_user_id = get_user_by( 'email', $cart_email )->ID;
+            $iscouponusers2 = wcusage_iscouponusers( $coupon->get_code(), $cart_user_id );
+            if($iscouponusers2) {
+
+              WC()->cart->remove_coupon( $coupon->get_code() );
+
+              wc_clear_notices();
+
+              wc_add_notice( esc_html__( "Sorry, you can't use this coupon code.", "woo-coupon-usage" ), "error" );
 
             }
 
@@ -95,6 +110,8 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_coupons' ) ) {
 add_action( 'woocommerce_applied_coupon', 'wcusage_applied_coupon_check_allow_coupons', 10, 0 );
 add_action( 'woocommerce_before_cart', 'wcusage_applied_coupon_check_allow_coupons', 10, 0 );
 add_action( 'woocommerce_before_checkout_form', 'wcusage_applied_coupon_check_allow_coupons', 10, 0 );
+// On checkout update
+add_action( 'woocommerce_checkout_update_order_review', 'wcusage_applied_coupon_check_allow_coupons', 10, 0 );
 
 /**
  * Function that checks if customer is allowed to use the applied coupons at all stages.
@@ -342,3 +359,116 @@ function wcusage_custom_woocommerce_coupon_html( $discount_html, $coupon ) {
 
     return $discount_html;
 }
+
+// Run at "Place order": remove coupons where the billing email user matches the assigned coupon user.
+if ( ! function_exists( 'wcusage_checkout_place_order_validate_assigned_user_coupon' ) ) {
+  function wcusage_checkout_place_order_validate_assigned_user_coupon() {
+
+    // Respect existing setting: only run this restriction when assigned-user usage is not allowed
+    $wcusage_field_allow_assigned_user = wcusage_get_setting_value('wcusage_field_allow_assigned_user', 1);
+    if ( $wcusage_field_allow_assigned_user ) {
+      return;
+    }
+
+    if ( ! WC()->cart ) {
+      return;
+    }
+
+    // Get billing email from submitted checkout data
+    $cart_email = WC()->checkout()->get_value( 'billing_email' );
+    if ( ! $cart_email && ! empty( $_POST['billing_email'] ) ) {
+      $cart_email = sanitize_email( wp_unslash( $_POST['billing_email'] ) );
+    }
+    if ( ! $cart_email ) {
+      return;
+    }
+
+    // Safe lookup of user by email
+    $cart_user = get_user_by( 'email', $cart_email );
+    $cart_user_id = $cart_user ? (int) $cart_user->ID : 0;
+    if ( ! $cart_user_id ) {
+      return;
+    }
+
+    $removed_any = false;
+
+    foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
+      if ( ! $coupon || empty( $coupon->get_id() ) ) {
+        continue;
+      }
+
+      // Only consider coupons assigned to a user (affiliate coupons)
+      $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
+      if ( ! $coupon_user_id ) {
+        continue;
+      }
+
+      // If billing email's user owns this coupon, remove it
+      if ( function_exists( 'wcusage_iscouponusers' ) && wcusage_iscouponusers( $coupon->get_code(), $cart_user_id ) ) {
+        WC()->cart->remove_coupon( $coupon->get_code() );
+        $removed_any = true;
+      }
+    }
+
+    // If anything was removed, show an error so checkout reloads and the customer sees the message
+    if ( $removed_any ) {
+      wc_add_notice( sprintf( esc_html__( "Sorry, you can't use your own affiliate coupon code '%s'.", "woo-coupon-usage" ), $coupon->get_code() ), 'error' );
+    }
+  }
+}
+add_action( 'woocommerce_checkout_process', 'wcusage_checkout_place_order_validate_assigned_user_coupon', 10 );
+// Block use on 
+
+// Also run during checkout recalculation: remove coupons where updated billing email user matches assigned coupon user.
+if ( ! function_exists( 'wcusage_checkout_update_order_review_validate_assigned_user_coupon' ) ) {
+  function wcusage_checkout_update_order_review_validate_assigned_user_coupon( $post_data ) {
+
+    // Respect setting: only enforce when assigned-user usage is not allowed
+    $wcusage_field_allow_assigned_user = wcusage_get_setting_value('wcusage_field_allow_assigned_user', 1);
+    if ( $wcusage_field_allow_assigned_user || ! WC()->cart ) {
+      return;
+    }
+
+    // Parse posted checkout data to get the latest billing email
+    $data = array();
+    if ( is_string( $post_data ) ) {
+      parse_str( $post_data, $data );
+    } elseif ( is_array( $post_data ) ) {
+      $data = $post_data;
+    }
+
+    $cart_email = '';
+    if ( ! empty( $data['billing_email'] ) ) {
+      $cart_email = sanitize_email( wp_unslash( $data['billing_email'] ) );
+    } elseif ( WC()->checkout() ) {
+      $cart_email = WC()->checkout()->get_value( 'billing_email' );
+    }
+    if ( ! $cart_email ) {
+      return;
+    }
+
+    // Resolve email to WP user ID
+    $cart_user = get_user_by( 'email', $cart_email );
+    $cart_user_id = $cart_user ? (int) $cart_user->ID : 0;
+    if ( ! $cart_user_id ) {
+      return;
+    }
+
+    // Remove any applied affiliate coupon owned by this user
+    foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
+      if ( ! $coupon || empty( $coupon->get_id() ) ) {
+        continue;
+      }
+      $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
+      if ( ! $coupon_user_id ) {
+        continue;
+      }
+      if ( function_exists( 'wcusage_iscouponusers' ) && wcusage_iscouponusers( $coupon->get_code(), $cart_user_id ) ) {
+        WC()->cart->remove_coupon( $coupon->get_code() );
+        // Show notice to inform user about removed coupon
+        wc_add_notice( sprintf( esc_html__( "Sorry, you can't use your own affiliate coupon code '%s'.", "woo-coupon-usage" ), $coupon->get_code() ), 'error' );
+      }
+    }
+  }
+}
+add_action( 'woocommerce_checkout_update_order_review', 'wcusage_checkout_update_order_review_validate_assigned_user_coupon', 9, 1 );

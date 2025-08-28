@@ -14,11 +14,11 @@ class wcusage_registrations_List_Table extends WP_List_Table {
         global $status, $page;
 
         //Set parent defaults
-        parent::__construct( array(
-            'singular'  => 'registrations',
-            'plural'    => 'registration',
-            'ajax'      => false
-        ) );
+    parent::__construct( array(
+      'singular'  => 'registration',
+      'plural'    => 'registrations',
+      'ajax'      => false
+    ) );
 
     }
 
@@ -218,10 +218,11 @@ class wcusage_registrations_List_Table extends WP_List_Table {
     function column_title($item){
 
         //Build row actions
-        $actions = array(
-            'edit'      => sprintf('<a href="?page=%s&action=%s&payout=%s">Edit</a>',sanitize_text_field($_GET['page']),'edit',$item['ID']),
-            'delete'    => sprintf('<a href="?page=%s&action=%s&payout=%s">Delete</a>',sanitize_text_field($_GET['page']),'delete',$item['ID']),
-        );
+    $page_param = isset($_GET['page']) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+    $actions = array(
+      'edit'      => sprintf('<a href="?page=%s&action=%s&payout=%s">Edit</a>', $page_param, 'edit', absint( $item['ID'] ) ),
+      'delete'    => sprintf('<a href="?page=%s&action=%s&payout=%s">Delete</a>', $page_param, 'delete', absint( $item['ID'] ) ),
+    );
 
         //Return the title contents
         return sprintf('%1$s <span style="color:silver">(id:%2$s)</span>%3$s',
@@ -232,11 +233,13 @@ class wcusage_registrations_List_Table extends WP_List_Table {
     }
 
     function column_cb($item){
-        return sprintf(
-            '<input type="checkbox" name="%1$s[]" value="%2$s" />',
-            /*$1%s*/ $this->_args['singular'],  //Let's simply repurpose the table's singular label ("payout")
-            /*$2%s*/ $item['ID']                //The value of the checkbox should be the record's id
-        );
+    $status = isset($item['status']) ? esc_attr($item['status']) : '';
+    return sprintf(
+      '<input type="checkbox" name="%1$s[]" value="%2$s" data-status="%3$s" />',
+      /*$1%s*/ $this->_args['singular'],
+      /*$2%s*/ $item['id'],
+      /*$3%s*/ $status
+    );
     }
 
     function no_items() {
@@ -246,7 +249,7 @@ class wcusage_registrations_List_Table extends WP_List_Table {
     function get_columns(){
 
         $columns = array(
-            //'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
+            'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
             'id'     => esc_html__( 'ID', 'woo-coupon-usage' ),
 			      'userid'  => esc_html__( 'Username', 'woo-coupon-usage' ),
             'couponcode'  => esc_html__( 'Coupon', 'woo-coupon-usage' ),
@@ -265,22 +268,6 @@ class wcusage_registrations_List_Table extends WP_List_Table {
       return $sortable_columns;
     }
 
-    function get_bulk_actions() {
-        $actions = array(
-            //'delete'    => 'Delete',
-        );
-        return $actions;
-    }
-
-    function process_bulk_action() {
-
-        //Detect when a bulk action is being triggered...
-        if( 'delete'===$this->current_action() ) {
-
-        }
-
-    }
-
     function prepare_items() {
 
         global $wpdb; //This is used only if making any database queries
@@ -293,12 +280,10 @@ class wcusage_registrations_List_Table extends WP_List_Table {
 
         $this->_column_headers = array($columns, $hidden, $sortable);
 
-        $this->process_bulk_action();
-
         $table_name = $wpdb->prefix . 'wcusage_register';
 
-        if (isset($_GET['status'])) {
-            $sql = $wpdb->prepare("SELECT * FROM $table_name WHERE status = %s ORDER BY id DESC", sanitize_text_field($_GET['status']));
+    if ( isset($_GET['status']) ) {
+      $sql = $wpdb->prepare("SELECT * FROM $table_name WHERE status = %s ORDER BY id DESC", sanitize_text_field( wp_unslash( $_GET['status'] ) ) );
         } else {
             $sql = "SELECT * FROM $table_name ORDER BY id DESC";
         }

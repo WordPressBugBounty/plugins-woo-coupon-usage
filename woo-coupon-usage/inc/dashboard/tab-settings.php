@@ -161,15 +161,35 @@ function wcusage_ajax_update_settings() {
     $updated_account_fields = [];
     $user_data = ['ID' => $couponuserid];
 
-    foreach($account_fields as $post_key => $meta_key) {
-        if(isset($_POST[$post_key])) {
-            $value = $meta_key === 'user_email' ? sanitize_email($_POST[$post_key]) : sanitize_text_field($_POST[$post_key]);
+    // If $couponuserid matches current user ID
+    if($couponuserid === get_current_user_id()) {
+        foreach($account_fields as $post_key => $meta_key) {
             if($meta_key === 'user_email') {
-                $user_data['user_email'] = $value;
-            } else {
-                update_user_meta($couponuserid, $meta_key, $value);
+                // Check the email is not empty
+                if(empty($_POST[$post_key])) {
+                    wp_send_json_error(esc_html__('Email is required.', 'woo-coupon-usage'));
+                    wp_die();
+                }
+                // Check email is valid
+                if(!is_email($_POST[$post_key])) {
+                    wp_send_json_error(esc_html__('Invalid account email address.', 'woo-coupon-usage'));
+                    wp_die();
+                }
+                // Check email does not already exist
+                if(email_exists($_POST[$post_key])) {
+                    wp_send_json_error(esc_html__('Email already exists.', 'woo-coupon-usage'));
+                    wp_die();
+                }
             }
-            $updated_account_fields[$post_key] = $value;
+            if(isset($_POST[$post_key])) {
+                $value = $meta_key === 'user_email' ? sanitize_email($_POST[$post_key]) : sanitize_text_field($_POST[$post_key]);
+                if($meta_key === 'user_email') {
+                    $user_data['user_email'] = $value;
+                } else {
+                    update_user_meta($couponuserid, $meta_key, $value);
+                }
+                $updated_account_fields[$post_key] = $value;
+            }
         }
     }
 
@@ -356,7 +376,8 @@ if (!function_exists('wcusage_tab_settings')) {
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
                                         <label for="wcu_email"><?php echo esc_html__('Email Address', 'woo-coupon-usage'); ?>:</label>
                                         <input type="email" class="woocommerce-Input woocommerce-Input--email input-text"
-                                            id="wcu_email" name="wcu_email" value="<?php echo esc_attr($email); ?>" autocomplete="email">
+                                            id="wcu_email" name="wcu_email" value="<?php echo esc_attr($email); ?>" autocomplete="email"
+                                            required>
                                     </p>
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
                                         <label for="wcu_phone"><?php echo esc_html__('Phone Number', 'woo-coupon-usage'); ?>:</label>

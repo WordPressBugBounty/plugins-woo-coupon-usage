@@ -310,6 +310,7 @@ function wcusage_dashboard_page_section_activity() {
 
 <div>
     <?php if(!empty($get_activity)) { ?>
+    <div class="wcusage-table-scroll">
     <table style="border: 2px solid #f3f3f3; width: 100%; text-align: center; border-collapse: collapse;">
         <thead>
             <tr class="wcusage-admin-table-col-head">
@@ -355,6 +356,7 @@ function wcusage_dashboard_page_section_activity() {
             </tr>
         </tbody>
     </table>
+    </div>
     <?php } else { ?>
     <p><?php echo esc_html__('No recent activity found.', 'woo-coupon-usage'); ?></p>
     <?php } ?>
@@ -383,6 +385,7 @@ function wcusage_dashboard_page_section_referrals() {
 
 <div>
     <?php if(!empty($orders)) { ?>
+    <div class="wcusage-table-scroll">
     <table style="border: 2px solid #f3f3f3; width: 100%; text-align: center; border-collapse: collapse;">
         <thead>
             <tr class="wcusage-admin-table-col-head">
@@ -423,6 +426,7 @@ function wcusage_dashboard_page_section_referrals() {
             </tr>
         </tbody>
     </table>
+    </div>
     <?php } else { ?>
     <p><?php echo esc_html__('No recent referral orders found.', 'woo-coupon-usage'); ?></p>
     <?php } ?>
@@ -443,6 +447,7 @@ function wcusage_dashboard_page_section_visits() {
 
 <div>
     <?php if(!empty($get_visits)) { ?>
+    <div class="wcusage-table-scroll">
     <table style="border: 2px solid #f3f3f3; width: 100%; text-align: center; border-collapse: collapse;">
         <thead>
             <tr class="wcusage-admin-table-col-head">
@@ -475,6 +480,7 @@ function wcusage_dashboard_page_section_visits() {
             </tr>
         </tbody>
     </table>
+    </div>
     <?php } else { ?>
     <p><?php echo esc_html__('No recent clicks found.', 'woo-coupon-usage'); ?></p>
     <?php } ?>
@@ -507,6 +513,7 @@ function wcusage_dashboard_page_section_coupons() {
 
 <div>
     <?php if(!empty($coupons)) { ?>
+    <div class="wcusage-table-scroll">
     <table style="border: 2px solid #f3f3f3; width: 100%; text-align: center; border-collapse: collapse;">
         <thead>
             <tr class="wcusage-admin-table-col-head">
@@ -537,6 +544,7 @@ function wcusage_dashboard_page_section_coupons() {
             </tr>
         </tbody>
     </table>
+    </div>
     <?php } else { ?>
     <p><?php echo sprintf(esc_html__('No new %s coupons found.', 'woo-coupon-usage'), strtolower(wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )))); ?></p>
     <?php } ?>
@@ -560,6 +568,7 @@ function wcusage_dashboard_page_section_registrations() {
 
 <div>
     <?php if(!empty($get_visits)) { ?>
+    <div class="wcusage-table-scroll">
     <table style="border: 2px solid #f3f3f3; width: 100%; text-align: center; border-collapse: collapse;">
         <thead>
             <tr class="wcusage-admin-table-col-head">
@@ -593,6 +602,7 @@ function wcusage_dashboard_page_section_registrations() {
             </tr>
         </tbody>
     </table>
+    </div>
     <?php } else { ?>
     <p><?php echo sprintf(esc_html__('you have no pending %s registrations.', 'woo-coupon-usage'), strtolower(wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )))); ?></p>
     <?php } ?>
@@ -617,6 +627,7 @@ function wcusage_dashboard_page_section_payouts() {
 
 <div>
     <?php if(!empty($get_visits)) { ?>
+    <div class="wcusage-table-scroll">
     <table style="border: 2px solid #f3f3f3; width: 100%; text-align: center; border-collapse: collapse;">
         <thead>
             <tr class="wcusage-admin-table-col-head">
@@ -648,6 +659,7 @@ function wcusage_dashboard_page_section_payouts() {
             </tr>
         </tbody>
     </table>
+    </div>
     <?php } else { ?>
     <p><?php echo esc_html__('You have no pending payout requests.', 'woo-coupon-usage'); ?></p>
     <?php } ?>
@@ -673,7 +685,18 @@ function wcusage_dashboard_page_html() {
 
     <?php if (class_exists('WooCommerce')) { ?>
         <style>
-        @media screen and (max-width: 1040px) { .wcusage-admin-page-col { width: calc(100% - 85px) !important; } }
+        @media screen and (max-width: 1040px) {
+            .wcusage-admin-page-col {
+                width: 100% !important;
+            }
+            .wcusage-admin-page-col a.button
+            {
+                display: inline-block;
+                width: 100% !important;
+                text-align: center;
+                margin: 22px 0 !important;
+            }
+        }
         .wcusage-admin-page-col-section {
             padding: 10px 0px; margin: 0; list-style: none; display: -webkit-box; display: -moz-box; display: -ms-flexbox; display: -webkit-flex; display: flex; -webkit-flex-flow: row wrap; justify-content: space-around;
         }

@@ -35,6 +35,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
      */
     public function get_columns() {
         $columns = array(
+            'cb'                => '<input type="checkbox" />',
             'ID'                => esc_html__( 'ID', 'woo-coupon-usage' ),
             'post_title'        => esc_html__( 'Coupon Code', 'woo-coupon-usage' ),
             'coupon_type'       => esc_html__( 'Coupon Type', 'woo-coupon-usage' ),
@@ -62,6 +63,95 @@ class wcusage_Coupons_Table extends WP_List_Table {
         $columns['the-actions'] = esc_html__( 'Actions', 'woo-coupon-usage' );
 
         return $columns;
+    }
+
+    /**
+     * Checkbox column for bulk actions
+     */
+    public function column_cb( $item ) {
+        if ( ! is_object( $item ) || ! property_exists( $item, 'ID' ) ) {
+            return '';
+        }
+        return sprintf(
+            '<input type="checkbox" name="bulk-coupons[]" value="%s" />',
+            esc_attr( $item->ID )
+        );
+    }
+
+    /**
+     * Bulk actions available on the coupons table
+     */
+    public function get_bulk_actions() {
+        return array(
+            'bulk-unassign'                 => esc_html__( 'Unassign Affiliates From Coupons', 'woo-coupon-usage' ),
+            'bulk-delete-coupons'           => esc_html__( 'Delete Coupons', 'woo-coupon-usage' ),
+            'bulk-delete-coupons-and-user'  => esc_html__( 'Delete Coupons & Assigned Affiliate User', 'woo-coupon-usage' ),
+        );
+    }
+
+    /**
+     * Handle bulk actions
+     */
+    public function process_bulk_action() {
+        // Nonce check
+        if ( empty( $_POST['_wcusage_bulk_nonce'] ) ) {
+            return;
+        }
+        $nonce_value = sanitize_text_field( wp_unslash( $_POST['_wcusage_bulk_nonce'] ) );
+        if ( ! wp_verify_nonce( $nonce_value, 'wcusage_coupons_bulk_action' ) ) {
+            return;
+        }
+
+        // Permission check
+        if ( ! function_exists( 'wcusage_check_admin_access' ) || ! wcusage_check_admin_access() ) {
+            return;
+        }
+
+        $action = $this->current_action();
+        if ( ! $action ) {
+            return;
+        }
+
+        $ids = isset( $_POST['bulk-coupons'] ) ? array_map( 'absint', (array) $_POST['bulk-coupons'] ) : array();
+        if ( empty( $ids ) ) {
+            return;
+        }
+
+        if ( 'bulk-unassign' === $action ) {
+            foreach ( $ids as $coupon_id ) {
+                update_post_meta( $coupon_id, 'wcu_select_coupon_user', '' );
+            }
+        }
+
+        if ( 'bulk-delete-coupons' === $action ) {
+            foreach ( $ids as $coupon_id ) {
+                wp_delete_post( $coupon_id );
+            }
+        }
+
+        if ( 'bulk-delete-coupons-and-user' === $action ) {
+            $user_ids = array();
+            foreach ( $ids as $coupon_id ) {
+                $user_id = get_post_meta( $coupon_id, 'wcu_select_coupon_user', true );
+                if ( is_numeric( $user_id ) && $user_id ) {
+                    $user_ids[] = (int) $user_id;
+                }
+            }
+            $user_ids = array_unique( $user_ids );
+            foreach ( $user_ids as $uid ) {
+                // Delete all coupons belonging to this user
+                if ( function_exists( 'wcusage_get_users_coupons_ids' ) ) {
+                    $coupons_of_user = (array) wcusage_get_users_coupons_ids( $uid );
+                    foreach ( $coupons_of_user as $c_id ) {
+                        wp_delete_post( $c_id );
+                    }
+                }
+                // Then delete the user
+                if ( $uid && $uid !== get_current_user_id() ) {
+                    wp_delete_user( $uid );
+                }
+            }
+        }
     }
 
     /**
@@ -438,6 +528,8 @@ function wcusage_coupons_page() {
     ) );
 
     $table = new wcusage_Coupons_Table();
+    // Process any submitted bulk actions before preparing items
+    $table->process_bulk_action();
     $affiliate_only = isset( $_GET['affiliate_only'] ) && 'true' === $_GET['affiliate_only'];
     $page_url = admin_url( 'admin.php?page=wcusage-coupons' );
     ?>
@@ -466,10 +558,42 @@ function wcusage_coupons_page() {
             <?php
             $table->prepare_items();
             $table->search_box( 'Search Coupons', 'search_id' );
-            $table->display();
             ?>
         </form>
+        <form method="post" id="wcusage-coupons-bulk-actions">
+            <?php wp_nonce_field( 'wcusage_coupons_bulk_action', '_wcusage_bulk_nonce' ); ?>
+            <input type="hidden" name="page" value="<?php echo esc_attr( isset( $_REQUEST['page'] ) ? esc_html( wp_unslash( $_REQUEST['page'] ) ) : '' ); ?>" />
+            <input type="hidden" name="affiliate_only" value="<?php echo $affiliate_only ? 'true' : ''; ?>" />
+            <input type="hidden" name="s" value="<?php echo isset($_GET['s']) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) : ''; ?>" />
+            <?php $table->display(); ?>
+        </form>
     </div>
+    <script>
+    jQuery(document).ready(function($) {
+        function confirmFor(action) {
+            switch(action) {
+                case 'bulk-unassign':
+                    return '<?php echo esc_js( __( 'Are you sure you want to unassign the selected affiliates from these coupons? This will remove the affiliate assignment but will NOT delete coupons or users.', 'woo-coupon-usage' ) ); ?>';
+                case 'bulk-delete-coupons':
+                    return '<?php echo esc_js( __( 'Are you sure you want to delete the selected coupons?', 'woo-coupon-usage' ) ); ?>';
+                case 'bulk-delete-coupons-and-user':
+                    return '<?php echo esc_js( __( 'Are you sure you want to delete the selected coupons AND their assigned affiliate users? This will also delete all coupons belonging to those users and permanently remove their user accounts.', 'woo-coupon-usage' ) ); ?>';
+            }
+            return '';
+        }
+        $('#doaction, #doaction2').on('click', function(e) {
+            var $select = $(this).siblings('select');
+            if (!$select.length) return;
+            var action = $select.val();
+            if (!action) return;
+            var msg = confirmFor(action);
+            if (msg && !window.confirm(msg)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+    </script>
     <?php
 }
 

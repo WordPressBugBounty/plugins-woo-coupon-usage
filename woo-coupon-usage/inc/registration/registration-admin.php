@@ -29,41 +29,131 @@ function wcusage_admin_registrations_page_html() {
             }
             echo wp_kses_post( wcusage_post_submit_application( 1 ) );
             // Redirect to admin.php?page=wcusage_affiliates
-            $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . $_POST['wcu-input-username'] );
+            $redirect_user = ( isset( $_POST['wcu-input-username'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-input-username'] ) ) : '' );
+            $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . $redirect_user );
             // Redirect via PHP
             wp_redirect( $redirect_url );
             exit;
         }
     }
     // Get POST requests
+    // Handle JS-proxied bulk accept to avoid nested form issues with row forms
     if ( isset( $_POST['_wpnonce'] ) ) {
         $nonce = sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) );
-        if ( wp_verify_nonce( $nonce, 'admin_affiliate_register_form' ) && wcusage_check_admin_access() ) {
-            if ( isset( $_POST['submitregisteraccept'] ) || isset( $_POST['submitregisterdecline'] ) ) {
-                $postid = sanitize_text_field( $_POST['wcu-id'] );
-                $userid = sanitize_text_field( $_POST['wcu-user-id'] );
-                $get_user = get_user_by( 'id', $userid );
-                $coupon_code = sanitize_text_field( $_POST['wcu-coupon-code'] );
-                $message = sanitize_text_field( $_POST['wcu-message'] );
-                $type = sanitize_text_field( $_POST['wcu-type'] );
-            }
-            // If Accepted
-            if ( isset( $_POST['submitregisteraccept'] ) && $coupon_code ) {
-                $status = "accepted";
-                try {
-                    $thiscoupon = new WC_Coupon($coupon_code);
-                    if ( !$thiscoupon->is_valid() ) {
-                        // Update the status of the registration
-                        $setstatus = wcusage_set_registration_status(
-                            $status,
-                            $postid,
+        if ( wp_verify_nonce( $nonce, 'wcusage_bulk_accept' ) && wcusage_check_admin_access() ) {
+            $selected = ( isset( $_POST['registrations'] ) ? array_map( 'absint', (array) $_POST['registrations'] ) : array() );
+            $action = ( isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : 'accept' );
+            // Optional per-row overrides from UI
+            $coupon_overrides = ( isset( $_POST['coupon_for'] ) && is_array( $_POST['coupon_for'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['coupon_for'] ) ) : array() );
+            $message_overrides = ( isset( $_POST['message_for'] ) && is_array( $_POST['message_for'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['message_for'] ) ) : array() );
+            $type_overrides = ( isset( $_POST['type_for'] ) && is_array( $_POST['type_for'] ) ? array_map( 'absint', $_POST['type_for'] ) : array() );
+            $done_count = 0;
+            $skipped_count = 0;
+            $errors = array();
+            if ( !empty( $selected ) ) {
+                global $wpdb;
+                $table_name = $wpdb->prefix . 'wcusage_register';
+                foreach ( $selected as $sel_id ) {
+                    if ( !$sel_id ) {
+                        continue;
+                    }
+                    $row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_name} WHERE id = %d", $sel_id ), ARRAY_A );
+                    if ( !$row ) {
+                        $skipped_count++;
+                        continue;
+                    }
+                    $status_now = ( isset( $row['status'] ) ? $row['status'] : '' );
+                    if ( ($action === 'accept' || $action === 'decline') && in_array( $status_now, ['accepted', 'declined'], true ) ) {
+                        $skipped_count++;
+                        continue;
+                    }
+                    $userid = ( isset( $row['userid'] ) ? absint( $row['userid'] ) : 0 );
+                    $get_user = ( $userid ? get_user_by( 'id', $userid ) : false );
+                    $user_email = ( $get_user && isset( $get_user->user_email ) ? $get_user->user_email : '' );
+                    if ( $action === 'delete' ) {
+                        wcusage_delete_registration_entry( $sel_id );
+                        $done_count++;
+                        continue;
+                    }
+                    if ( $action === 'decline' ) {
+                        $wpdb->update( $table_name, array(
+                            'status' => 'declined',
+                        ), array(
+                            'id' => $sel_id,
+                        ) );
+                        $wpdb->update( $table_name, array(
+                            'dateaccepted' => date( 'Y-m-d H:i:s' ),
+                        ), array(
+                            'id' => $sel_id,
+                        ) );
+                        if ( function_exists( 'wcusage_install_mlainvite_data' ) && $user_email ) {
+                            wcusage_install_mlainvite_data(
+                                '',
+                                $user_email,
+                                'declined',
+                                1
+                            );
+                        }
+                        $message = ( isset( $message_overrides[$sel_id] ) ? sanitize_text_field( $message_overrides[$sel_id] ) : '' );
+                        $coupon_for_email = ( isset( $row['couponcode'] ) ? $row['couponcode'] : '' );
+                        if ( function_exists( 'wcusage_email_affiliate_register_declined' ) ) {
+                            wcusage_email_affiliate_register_declined( $user_email, $coupon_for_email, $message );
+                        }
+                        do_action(
+                            'wcusage_hook_affiliate_register_declined',
+                            $sel_id,
                             $userid,
-                            $coupon_code,
+                            $coupon_for_email,
                             $message,
-                            $type
+                            'declined'
                         );
-                        // Update MLA invite
-                        if ( function_exists( 'wcusage_install_mlainvite_data' ) ) {
+                        $done_count++;
+                        continue;
+                    }
+                    // Accept (default)
+                    $coupon_code = '';
+                    if ( isset( $coupon_overrides[$sel_id] ) && $coupon_overrides[$sel_id] !== '' ) {
+                        $coupon_code = sanitize_text_field( $coupon_overrides[$sel_id] );
+                    } elseif ( isset( $row['couponcode'] ) ) {
+                        $coupon_code = sanitize_text_field( $row['couponcode'] );
+                    }
+                    if ( empty( $coupon_code ) ) {
+                        $username_for_code = ( $get_user && isset( $get_user->user_login ) ? $get_user->user_login : '' );
+                        $coupon_code = ( function_exists( 'wcusage_generate_auto_coupon' ) ? wcusage_generate_auto_coupon( $username_for_code ) : wcusage_url_shorten_random( 7 ) );
+                    }
+                    $type_num = 1;
+                    if ( isset( $type_overrides[$sel_id] ) && $type_overrides[$sel_id] > 0 ) {
+                        $type_num = (int) $type_overrides[$sel_id];
+                    } else {
+                        $stored_type = ( isset( $row['type'] ) ? sanitize_text_field( $row['type'] ) : '' );
+                        $wcusage_coupon_multiple = wcusage_get_setting_value( 'wcusage_field_registration_multiple_template', '0' );
+                        if ( $wcusage_coupon_multiple ) {
+                            for ($x = 1; $x <= 10; $x++) {
+                                $template_num = ( $x === 1 ? '' : '_' . $x );
+                                $template_value = wcusage_get_setting_value( 'wcusage_field_registration_coupon_template' . $template_num, '' );
+                                if ( $template_value && $template_value === $stored_type ) {
+                                    $type_num = $x;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    $message = ( isset( $message_overrides[$sel_id] ) ? sanitize_text_field( $message_overrides[$sel_id] ) : '' );
+                    if ( function_exists( 'wc_get_coupon_id_by_code' ) && wc_get_coupon_id_by_code( $coupon_code ) ) {
+                        $errors[] = sprintf( esc_html__( 'Skipped %s - coupon already exists.', 'woo-coupon-usage' ), esc_html( $coupon_code ) );
+                        $skipped_count++;
+                        continue;
+                    }
+                    wcusage_set_registration_status(
+                        'accepted',
+                        $sel_id,
+                        $userid,
+                        $coupon_code,
+                        $message,
+                        $type_num
+                    );
+                    if ( function_exists( 'wcusage_install_mlainvite_data' ) ) {
+                        if ( $get_user && $get_user->user_email ) {
                             wcusage_install_mlainvite_data(
                                 '',
                                 $get_user->user_email,
@@ -71,31 +161,90 @@ function wcusage_admin_registrations_page_html() {
                                 1
                             );
                         }
-                        // Update users role
-                        $setaffiliaterole = wcusage_set_registration_role( $userid );
-                        // Update Code in Registration
-                        global $wpdb;
-                        $table_name = $wpdb->prefix . 'wcusage_register';
+                    }
+                    wcusage_set_registration_role( $userid );
+                    if ( $coupon_code ) {
                         $wpdb->update( $table_name, array(
                             'couponcode' => $coupon_code,
                         ), array(
-                            'id' => $postid,
+                            'id' => $sel_id,
                         ) );
-                        // Custom Action
-                        do_action(
-                            'wcusage_hook_registration_accepted',
-                            $userid,
-                            $coupon_code,
-                            $type
-                        );
                     }
-                } catch ( Exception $e ) {
-                    // Show error if coupon code does not exist
-                    echo "<div class='notice notice-error is-dismissible' style='position: absolute; width: 75%;'><p>" . esc_html__( 'Failed to create the coupon code: ', 'woo-coupon-usage' ) . esc_html( $coupon_code ) . "</p></div>";
+                    $done_count++;
                 }
-            } else {
-                // Show error if user already exists
-                echo "<div class='notice notice-error is-dismissible' style='position: absolute; width: 75%;'><p>" . esc_html__( 'Coupon code already exists: ', 'woo-coupon-usage' ) . esc_html( $coupon_code ) . "</p></div>";
+            }
+            if ( $action === 'accept' ) {
+                echo '<div class="notice notice-success is-dismissible"><p>' . sprintf( esc_html__( 'Bulk accept complete. Accepted: %1$d. Skipped: %2$d.', 'woo-coupon-usage' ), intval( $done_count ), intval( $skipped_count ) ) . '</p>' . (( !empty( $errors ) ? '<ul style="margin-left: 20px;"><li>' . implode( '</li><li>', array_map( 'wp_kses_post', $errors ) ) . '</li></ul>' : '' )) . '</div>';
+            } elseif ( $action === 'decline' ) {
+                echo '<div class="notice notice-success is-dismissible"><p>' . sprintf( esc_html__( 'Bulk decline complete. Declined: %1$d. Skipped: %2$d.', 'woo-coupon-usage' ), intval( $done_count ), intval( $skipped_count ) ) . '</p></div>';
+            } elseif ( $action === 'delete' ) {
+                echo '<div class="notice notice-success is-dismissible"><p>' . sprintf( esc_html__( 'Bulk delete complete. Deleted: %1$d. Skipped: %2$d.', 'woo-coupon-usage' ), intval( $done_count ), intval( $skipped_count ) ) . '</p></div>';
+            }
+        } elseif ( wp_verify_nonce( $nonce, 'admin_affiliate_register_form' ) && wcusage_check_admin_access() ) {
+            // Collect common POST fields for single accept/decline actions
+            if ( isset( $_POST['submitregisteraccept'] ) || isset( $_POST['submitregisterdecline'] ) ) {
+                $postid = ( isset( $_POST['wcu-id'] ) ? sanitize_text_field( $_POST['wcu-id'] ) : '' );
+                $userid = ( isset( $_POST['wcu-user-id'] ) ? sanitize_text_field( $_POST['wcu-user-id'] ) : '' );
+                $get_user = ( $userid ? get_user_by( 'id', $userid ) : false );
+                $coupon_code = ( isset( $_POST['wcu-coupon-code'] ) ? sanitize_text_field( $_POST['wcu-coupon-code'] ) : '' );
+                $message = ( isset( $_POST['wcu-message'] ) ? sanitize_text_field( $_POST['wcu-message'] ) : '' );
+                $type = ( isset( $_POST['wcu-type'] ) ? sanitize_text_field( $_POST['wcu-type'] ) : '' );
+                // Auto-generate coupon if empty
+                if ( empty( $coupon_code ) ) {
+                    $username_for_code = ( $get_user && isset( $get_user->user_login ) ? $get_user->user_login : '' );
+                    if ( function_exists( 'wcusage_generate_auto_coupon' ) ) {
+                        $coupon_code = wcusage_generate_auto_coupon( $username_for_code );
+                    } else {
+                        $coupon_code = wcusage_url_shorten_random( 7 );
+                    }
+                }
+            }
+            // If Accepted
+            if ( isset( $_POST['submitregisteraccept'] ) ) {
+                $status = "accepted";
+                // Check for existing coupon and abort if duplicate
+                if ( function_exists( 'wc_get_coupon_id_by_code' ) && wc_get_coupon_id_by_code( $coupon_code ) ) {
+                    echo "<div class='notice notice-error is-dismissible' style='position: absolute; width: 75%;'><p>" . esc_html__( 'Coupon code already exists: ', 'woo-coupon-usage' ) . esc_html( $coupon_code ) . "</p></div>";
+                } else {
+                    // Proceed with accept flow
+                    // Update the status of the registration (also creates the coupon from template)
+                    $setstatus = wcusage_set_registration_status(
+                        $status,
+                        $postid,
+                        $userid,
+                        $coupon_code,
+                        $message,
+                        $type
+                    );
+                    // Update MLA invite
+                    if ( function_exists( 'wcusage_install_mlainvite_data' ) ) {
+                        if ( $get_user && $get_user->user_email ) {
+                            wcusage_install_mlainvite_data(
+                                '',
+                                $get_user->user_email,
+                                'accepted',
+                                1
+                            );
+                        }
+                    }
+                    // Update users role
+                    wcusage_set_registration_role( $userid );
+                    // Update Code in Registration
+                    global $wpdb;
+                    $table_name = $wpdb->prefix . 'wcusage_register';
+                    $wpdb->update( $table_name, array(
+                        'couponcode' => $coupon_code,
+                    ), array(
+                        'id' => $postid,
+                    ) );
+                    // Custom Action
+                    do_action(
+                        'wcusage_hook_registration_accepted',
+                        $userid,
+                        $coupon_code,
+                        $type
+                    );
+                }
             }
             // If Declined
             if ( isset( $_POST['submitregisterdecline'] ) ) {
@@ -133,7 +282,7 @@ function wcusage_admin_registrations_page_html() {
     }
     $statussearch = "";
     if ( isset( $_GET['status'] ) ) {
-        $statussearch = $_GET['status'];
+        $statussearch = sanitize_text_field( wp_unslash( $_GET['status'] ) );
     }
     ?>
 
@@ -290,15 +439,130 @@ function wcusage_admin_registrations_page_html() {
     $testListTable = new wcusage_registrations_List_Table();
     $testListTable->prepare_items();
     ?>
-	<div>
-		<div id="icon-users" class="icon32"><br/></div>
-		<input type="hidden" name="page" value="<?php 
-    echo esc_html( $_GET['page'] );
-    ?>" />
-		<?php 
+
+  <!-- Bulk actions toolbar (Apply via proxy form) -->
+  <div class="tablenav top" style="margin: 55px 0 -40px 0; display:flex; gap:10px; align-items:center;">
+    <div style="display:flex; gap:6px; align-items:center;">
+      <label for="wcusage-bulk-select" class="screen-reader-text"><?php 
+    echo esc_html__( 'Bulk actions', 'woo-coupon-usage' );
+    ?></label>
+      <select id="wcusage-bulk-select" class="bulk-actions">
+        <option value="-1"><?php 
+    echo esc_html__( 'Bulk actions', 'woo-coupon-usage' );
+    ?></option>
+        <option value="accept"><?php 
+    echo esc_html__( 'Accept selected', 'woo-coupon-usage' );
+    ?></option>
+        <option value="decline"><?php 
+    echo esc_html__( 'Decline selected', 'woo-coupon-usage' );
+    ?></option>
+        <option value="delete"><?php 
+    echo esc_html__( 'Delete selected', 'woo-coupon-usage' );
+    ?></option>
+      </select>
+      <button type="button" id="wcusage-bulk-apply" class="button action"><?php 
+    echo esc_html__( 'Apply', 'woo-coupon-usage' );
+    ?></button>
+    </div>
+  </div>
+
+	<div id="icon-users" class="icon32"><br/></div>
+	<?php 
     $testListTable->display();
     ?>
-	</div>
+
+  <!-- Hidden proxy form for bulk accepts (avoid nested forms with row actions) -->
+  <form id="wcusage-bulk-proxy" method="post" style="display:none;">
+    <?php 
+    wp_nonce_field( 'wcusage_bulk_accept' );
+    ?>
+    <input type="hidden" name="action" value="accept" />
+  </form>
+  <script type="text/javascript">
+  // Bulk actions UI logic
+  jQuery(document).ready(function($){
+    function getTableCheckboxes(){
+      return $(".wp-list-table input[type='checkbox'][name='registration[]']");
+    }
+    function updateCheckboxAvailability(action){
+      var $boxes = getTableCheckboxes();
+      // Enable all by default
+      $boxes.prop('disabled', false);
+      if (action === 'accept' || action === 'decline') {
+        $boxes.each(function(){
+          var s = $(this).data('status');
+          if (s === 'accepted' || s === 'declined') {
+            $(this).prop('checked', false).prop('disabled', true);
+          }
+        });
+      }
+    }
+    $('#wcusage-bulk-select').on('change', function(){ updateCheckboxAvailability($(this).val()); });
+
+    // Custom bulk Apply -> post to hidden proxy form
+    $('#wcusage-bulk-apply').on('click', function(e){
+      e.preventDefault();
+      var action = $('#wcusage-bulk-select').val();
+      if (action === '-1') { return; }
+      var $checked = $(".wp-list-table input[type='checkbox'][name='registration[]']:checked");
+      if ($checked.length === 0) { return; }
+      if (action === 'delete') {
+        var confirmMsg = "<?php 
+    echo esc_js( __( 'Are you sure you want to delete all these registration entries?', 'woo-coupon-usage' ) );
+    ?>\n\n<?php 
+    echo esc_js( __( 'This will only remove the entry from this page. It will not remove the affiliate user or coupon code.', 'woo-coupon-usage' ) );
+    ?>";
+        if (!window.confirm(confirmMsg)) { return; }
+      }
+      var $form = $('#wcusage-bulk-proxy');
+      // ensure action value is set
+      if ($form.find("input[name='action']").length) {
+        $form.find("input[name='action']").val(action);
+      } else {
+        $('<input>').attr({type:'hidden', name:'action', value:action}).appendTo($form);
+      }
+      // clear old
+      $form.find("input[name='registrations[]'], input[name^='coupon_for'], input[name^='message_for'], input[name^='type_for']").remove();
+      $checked.each(function(){
+        var id = $(this).val();
+        var $tr = $(this).closest('tr');
+        var coupon = $tr.find("input[name='wcu-coupon-code']").val() || '';
+        var message = $tr.find("input[name='wcu-message']").val() || '';
+        var type = $tr.find("input[name='wcu-type']").val() || '';
+        $('<input>').attr({type:'hidden', name:'registrations[]', value:id}).appendTo($form);
+        // Only include coupon/type when needed
+        if (action === 'accept') {
+          $('<input>').attr({type:'hidden', name:'coupon_for['+id+']', value:coupon}).appendTo($form);
+          if (type !== '') {
+            $('<input>').attr({type:'hidden', name:'type_for['+id+']', value:type}).appendTo($form);
+          }
+        }
+        // Include message for accept/decline
+        if (action === 'accept' || action === 'decline') {
+          $('<input>').attr({type:'hidden', name:'message_for['+id+']', value:message}).appendTo($form);
+        }
+      });
+      $form.trigger('submit');
+    });
+
+    // Intercept Bulk Action Apply buttons and submit via proxy hidden form
+    function submitBulkProxy(which){
+      var selectName = which === 'top' ? 'action' : 'action2';
+      var $sel = $("select[name='"+selectName+"']");
+      var val = $sel.val();
+      if (val !== 'accept') { return true; }
+      var $checked = $(".wp-list-table input[type='checkbox'][name='registration[]']:checked");
+      if ($checked.length === 0) { return false; }
+  // We primarily use the custom toolbar above; keeping this for compatibility is optional.
+  return true;
+      return false;
+    }
+
+    $(document).on('click', '#doaction', function(e){ if (submitBulkProxy('top') === false) { e.preventDefault(); } });
+    $(document).on('click', '#doaction2', function(e){ if (submitBulkProxy('bottom') === false) { e.preventDefault(); } });
+  });
+  </script>
+  
 
 </div>
 
@@ -525,7 +789,7 @@ function wcusage_delete_registration_entry(  $id  ) {
  *
  */
 function wcusage_generate_auto_coupon(  $username = ""  ) {
-    return "";
+    return wcusage_url_shorten_random( 7 );
 }
 
 /**
@@ -958,6 +1222,8 @@ function wcusage_admin_new_registration_page() {
       checkCoupon();
   });
   </script>
+
+  
 
   <?php 
 }

@@ -9,7 +9,7 @@
 
 .wcuTable {
 	display: table;
-	width: 100%;
+	width: 100% !important;
 	text-align: center;
 	border: 1px solid #E8E8E8;
 	margin: 0 auto;
@@ -102,8 +102,8 @@ form#product_search_form input {
 	border: 1px solid #e7e7e7;
 	width: auto;
 	max-width: 200px;
-	white-space: nowrap;
-	overflow: hidden;
+	white-space: normal; /* changed from nowrap to normal */
+	overflow-wrap: break-word; /* added for word breaking */
 	/*color: #000;*/
 }
 
@@ -611,6 +611,11 @@ form.wcu_payout_button {
 }
 
 .listtheproducts .wcuTableCell {
+  padding: 0 !important;
+  margin: 0;
+}
+
+.listtheproducts .wcuTableCell {
 	text-align: center;
 }
 
@@ -948,6 +953,16 @@ form.wcu_payout_button {
 #wcu-add-campaign,
 #wcu-add-directlink {
 	padding: 0;
+}
+
+@media only screen and (max-width: 759px) {
+
+	#wcu-add-directlink input, #wcu-add-directlink select {
+		width: 100% !important;
+		max-width: 100% !important;
+		margin-bottom: 10px !important;
+	}
+
 }
 
 @media only screen and (min-width: 760px) {
@@ -1801,6 +1816,7 @@ form.wcu_payout_button {
 	font-weight: bold;
 	z-index: 2;
 	text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
+	width: 100%;
 }
 
 .wcutabcontent p.wcusage-reward-description {

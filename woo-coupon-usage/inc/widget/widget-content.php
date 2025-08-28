@@ -259,7 +259,7 @@ function wcusage_generate_affiliate_dashboard(  $user_coupons, $settings  ) {
                     </div>
                     <div class="wcusage-widget-coupon-description">
                         <?php 
-        echo sprintf( esc_html__( 'Customers get a %s and you earn %s!', 'woo-coupon-usage' ), '<strong>' . esc_html( $discount_text ) . '</strong>', '<strong>' . wp_kses_post( $commission_message ) . '</strong>' );
+        echo sprintf( wp_kses_post( __( 'Customers get a %s and you earn %s!', 'woo-coupon-usage' ) ), '<strong>' . wp_kses_post( $discount_text ) . '</strong>', '<strong>' . wp_kses_post( $commission_message ) . '</strong>' );
         ?>
                     </div>
                 </div>

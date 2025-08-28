@@ -1,6 +1,27 @@
 .wp-list-table .column-ID {
     width: 75px;
 }
+/* Coupons table: shrink checkbox column and ensure borders */
+.wcusage-admin-page .wp-list-table .column-cb,
+.wcusage-admin-page .wp-list-table .check-column {
+    width: 36px !important;
+    min-width: 36px;
+    max-width: 36px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 8px;
+    padding-right: 0;
+}
+.wcusage-admin-page .wp-list-table .check-column input[type="checkbox"] {
+    margin: 0 auto !important;
+}
+.wcusage-admin-page .wp-list-table thead th.check-column,
+.wcusage-admin-page .wp-list-table tbody td.check-column {
+    border-bottom: 1px solid #e2e4e7;
+}
+.wcusage-admin-page .wp-list-table tfoot th.check-column {
+    border-top: 1px solid #e2e4e7;
+}
 .quick-edit-row {
     background: #fff;
 }

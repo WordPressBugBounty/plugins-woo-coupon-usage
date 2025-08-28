@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.5.1
+Stable tag: 6.6.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -275,11 +275,30 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= Version 6.6.0 - 28th August 2025 =
+- New: Added new "bulk actions" functionality for the admin affiliate registrations page, which allows you to bulk accept, decline or delete up to 20 registrations at once.
+- New: Added new "bulk actions" functionality for the admin coupons page, which allows you to bulk delete or unassign affiliates from multiple coupons at once.
+- New: Added new "bulk actions" functionality for the admin commission payouts page, which allows you to complete bulk payouts for up to 10 at once, as long as they are the same status and payment method.
+- New: Added a new filter to the admin commission payouts page to filter payouts by payment method.
+- Tweak: Made a few tweaks throughout the code to improve precautionary security checks, and follow best practices.
+- Fix: Added a potential fix to a rare issue on some sites where referral links would always land on "page not found".
+- Fix: Fixed an issue with the floating widget showing HTML code for the discount amount when it is a fixed amount.
+
+= Version 6.5.3 - 15th August 2025 =
+- Improvement: Made a few small improvements to the mobile version of the affiliate dashboard, affiliate portal, and admin dashboard.
+- Fix: Fixed an issue with the affiliate registration form on the affiliate dashboard page when logged out.
+- Fix: Fixed an issue with updating the account details on the affiliate dashboard sometimes causing the email address to be empty.
+- Fix: Fixed an issue with enabling Wise Payouts.
+
+= Version 6.5.2 - 12th August 2025 =
+- Fix: Fixed a potential PHP error.
+- Fix: Fixed an issue with the pay button being missing for the store credit payout method on the admin payouts page.
+
 = Version 6.5.1 - 9th August 2025 =
 - New: Added an option to apply custom CSS to the affiliate dashboard and affiliate portal pages in the design settings tab.
 - New: Added an option to choose a custom font to be used on the affiliate portal page in the design settings tab.
 - Tweak: Made some styling/alignment tweaks to the admin reports page.
-- Tweak: Added a check on the "Add New Affiliate" admin page if the username does not exist, but an existing email address is used. This will now show a warning message
+- Tweak: Added a check on the "Add New Affiliate" admin page if the username does not exist, but an existing email address is used. This will now show a warning message.
 - Tweak: Made some tweaks/fixes to the affiliate portal page on dark mode.
 - Fix: Fixed an issue with the "Allow logged out users to register as an affiliate" option on the affiliate portal.
 - Fix: (PRO) Fixed an issue with the dynamic coupon code generation on the affiliate portal ajax registration form.

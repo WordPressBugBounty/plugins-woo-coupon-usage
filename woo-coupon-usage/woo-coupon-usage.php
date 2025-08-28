@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
-* Version: 6.5.1
+* Version: 6.6.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -13,7 +13,7 @@
 * Requires Plugins: woocommerce
 *
 * WC requires at least: 3.7
-* WC tested up to: 10.0
+* WC tested up to: 10.1
 *
 */
 if ( !defined( 'ABSPATH' ) ) {
@@ -34,20 +34,21 @@ if ( function_exists( 'wcu_fs' ) ) {
                 // Include Freemius SDK.
                 require_once dirname( __FILE__ ) . '/freemius/start.php';
                 $wcu_fs = fs_dynamic_init( array(
-                    'id'             => '2732',
-                    'slug'           => 'woo-coupon-usage',
-                    'premium_slug'   => 'woo-coupon-usage-pro',
-                    'type'           => 'plugin',
-                    'public_key'     => 'pk_a8d9ceeaec08247afd31dbb3e26b3',
-                    'is_premium'     => false,
-                    'premium_suffix' => '(PRO)',
-                    'has_addons'     => true,
-                    'has_paid_plans' => true,
-                    'trial'          => array(
+                    'id'               => '2732',
+                    'slug'             => 'woo-coupon-usage',
+                    'premium_slug'     => 'woo-coupon-usage-pro',
+                    'type'             => 'plugin',
+                    'public_key'       => 'pk_a8d9ceeaec08247afd31dbb3e26b3',
+                    'is_premium'       => false,
+                    'premium_suffix'   => '(PRO)',
+                    'has_addons'       => true,
+                    'has_paid_plans'   => true,
+                    'is_org_compliant' => true,
+                    'trial'            => array(
                         'days'               => 7,
                         'is_require_payment' => true,
                     ),
-                    'menu'           => array(
+                    'menu'             => array(
                         'slug'       => 'wcusage',
                         'first-path' => 'admin.php?page=wcusage_setup',
                         'support'    => true,
@@ -55,7 +56,7 @@ if ( function_exists( 'wcu_fs' ) ) {
                         'pricing'    => true,
                         'addons'     => false,
                     ),
-                    'is_live'        => true,
+                    'is_live'          => true,
                 ) );
             }
             return $wcu_fs;
@@ -338,7 +339,6 @@ if ( function_exists( 'wcu_fs' ) ) {
     include plugin_dir_path( __FILE__ ) . 'inc/api/coupon-info.php';
     include plugin_dir_path( __FILE__ ) . 'inc/api/users-coupons.php';
     include plugin_dir_path( __FILE__ ) . 'inc/api/request-payout.php';
-    include plugin_dir_path( __FILE__ ) . 'inc/api/add-affiliate.php';
     // WC Account Tab
     $wcusage_field_account_tab = wcusage_get_setting_value( 'wcusage_field_account_tab', 0 );
     if ( $wcusage_field_account_tab ) {
@@ -442,14 +442,5 @@ if ( function_exists( 'wcu_fs' ) ) {
 add_action( 'before_woocommerce_init', function () {
     if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
         \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
-    }
-} );
-/**
- * Redirect from 404 homepage with ?coupon= to actual homepage.
- */
-add_action( 'template_redirect', function () {
-    if ( is_404() && isset( $_GET['coupon'] ) && is_front_page() ) {
-        wp_redirect( home_url() );
-        exit;
     }
 } );
