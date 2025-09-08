@@ -67,21 +67,20 @@ class wcusage_registrations_List_Table extends WP_List_Table {
         case 'userid':
           $user_info = get_userdata($item[$column_name]);
           if($user_info) {
-  				    return $user_info->user_login . "<br/><a href='".esc_url(get_edit_user_link($item['userid']))."' target='_blank' title='".__( 'Edit User', 'woo-coupon-usage' )."'><span class='wcu-table-custom-links dashicons dashicons-edit-page'></span></a>";
+            $view_aff_url = admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . intval($item['userid']));
+            return '<a href="' . esc_url($view_aff_url) . '" title="' . esc_attr__('View Affiliate', 'woo-coupon-usage') . '">' . esc_html($user_info->user_login) . '</a>';
           } else {
               return "-";
           }
         case 'couponcode':
           if(isset($item[$column_name])) {
             $coupon_info_main = wcusage_get_coupon_info($item[$column_name]);
-            $coupon_info = wcusage_get_coupon_info_by_id($coupon_info_main[2]);
-            $uniqueurl = $coupon_info[4];
-            if($coupon_info_main[2]) {
-              return get_the_title($coupon_info_main[2])
-              . "<br/><a href='" . esc_url(admin_url("post.php?post=" . $coupon_info_main[2] . "&action=edit&classic-editor")) . "' target='_blank' title='" . __('Edit Coupon', 'woo-coupon-usage') . "'><span class='wcu-table-custom-links dashicons dashicons-edit-page'></span></a>"
-              . " <a href='" . esc_url($uniqueurl) . "' target='_blank' title='" . __('View Affiliate Dashboard', 'woo-coupon-usage') . "'><span class='wcu-table-custom-links dashicons dashicons-external'></span></a>";
+            $coupon_post_id = isset($coupon_info_main[2]) ? intval($coupon_info_main[2]) : 0;
+            if($coupon_post_id) {
+              $edit_url = admin_url('post.php?post=' . $coupon_post_id . '&action=edit&classic-editor');
+              return '<a href="' . esc_url($edit_url) . '" title="' . esc_attr__('Edit Coupon', 'woo-coupon-usage') . '">' . esc_html(get_the_title($coupon_post_id)) . '</a>';
             } else {
-              return $item[$column_name];
+              return esc_html($item[$column_name]);
             }
           } else {
             return "-";
@@ -176,7 +175,7 @@ class wcusage_registrations_List_Table extends WP_List_Table {
 					}
 					?>
 
-					<?php	if($status == "pending") { ?>
+          <?php	if($status == "pending") { ?>
 
 					<form method="post" id="submitregister">
 
@@ -193,7 +192,35 @@ class wcusage_registrations_List_Table extends WP_List_Table {
   						<?php echo esc_html__( 'Decline', 'woo-coupon-usage' ); ?> <span class="dashicons dashicons-dismiss" style="font-size: 19px;"></span>
   					</button>
 
-					</form>
+          </form>
+
+          <?php } elseif ($status == 'accepted' && !empty($item['userid'])) { ?>
+
+          <?php
+              $view_aff_url = admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . intval($item['userid']));
+              $user_exists  = (bool) get_userdata( intval($item['userid']) );
+              // Build dashboard URL from coupon code
+              $dashboard_url = '';
+              if (!empty($item['couponcode'])) {
+                $coupon_info_main = wcusage_get_coupon_info($item['couponcode']);
+                if (!empty($coupon_info_main[2])) {
+                  $coupon_info = wcusage_get_coupon_info_by_id($coupon_info_main[2]);
+                  if (!empty($coupon_info[4])) {
+                    $dashboard_url = $coupon_info[4];
+                  }
+                }
+              }
+              $has_dashboard = ! empty( $dashboard_url );
+              $dashboard_href = $has_dashboard ? $dashboard_url : '#';
+              $aff_title  = $user_exists ? esc_html__( 'View Affiliate', 'woo-coupon-usage' ) : esc_html__( 'Affiliate user not found', 'woo-coupon-usage' );
+              $dash_title = $has_dashboard ? esc_html__( 'View Dashboard', 'woo-coupon-usage' ) : esc_html__( 'Dashboard URL unavailable', 'woo-coupon-usage' );
+          ?>
+          <a href="<?php echo esc_url($view_aff_url); ?>" target="_blank" class="button button-primary<?php echo $user_exists ? '' : ' disabled'; ?>" aria-disabled="<?php echo $user_exists ? 'false' : 'true'; ?>" <?php echo $user_exists ? '' : 'tabindex="-1"'; ?> title="<?php echo esc_attr( $aff_title ); ?>">
+            <?php echo esc_html__( 'View Affiliate', 'woo-coupon-usage' ); ?> <span class="dashicons dashicons-admin-users"></span>
+          </a>
+          <a href="<?php echo esc_url($dashboard_href); ?>" target="_blank" class="button<?php echo $has_dashboard ? '' : ' disabled'; ?>" aria-disabled="<?php echo $has_dashboard ? 'false' : 'true'; ?>" <?php echo $has_dashboard ? '' : 'tabindex="-1"'; ?> title="<?php echo esc_attr( $dash_title ); ?>">
+            <?php echo esc_html__( 'View Dashboard', 'woo-coupon-usage' ); ?> <span class="dashicons dashicons-external"></span>
+          </a>
 
           <?php } ?>
 

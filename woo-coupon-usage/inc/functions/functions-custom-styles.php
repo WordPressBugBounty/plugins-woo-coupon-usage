@@ -63,8 +63,8 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
   				background: <?php echo esc_html($wcusage_color_button); ?> !important;
   				color: <?php echo esc_html($wcusage_color_button_font); ?> !important;
   				text-shadow: 0 0 2px #000;
-				padding: 5px 10px;
-				font-size: 16px;
+				padding: 5px 10px !important;
+				font-size: 16px !important;
   			}
 		#wcu-add-campaign-button {
 			max-width: 100px;

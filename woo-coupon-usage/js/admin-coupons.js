@@ -159,9 +159,8 @@ jQuery(document).ready(function($) {
                     var username = formData.wcu_select_coupon_user;
                     var $affiliateCell = $tableRow.find('.column-affiliate');
                     if (username) {
-                        // We don't have the ID here, so we'll need to fetch it or assume server handles it
-                        $affiliateCell.html('<a href="' + wcusage_coupons_vars.edit_user_url.replace('0', 'USER_ID_PLACEHOLDER') + '" target="_blank">' + username + '</a>');
-                        // Ideally, fetch the ID from the server response or another AJAX call if needed
+                        // Show username only; link will be correct on full reload when server renders user ID.
+                        $affiliateCell.text(username);
                     } else {
                         $affiliateCell.text('-');
                     }

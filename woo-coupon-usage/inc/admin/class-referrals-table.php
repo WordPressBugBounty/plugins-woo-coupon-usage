@@ -158,7 +158,7 @@ class wcusage_Referrals_Table extends WP_List_Table {
             if ( isset( $getcoupon[1] ) ) {
                 $affiliate_id = $getcoupon[1];
                 $affiliate_username = get_userdata( $affiliate_id )->user_login;
-                $affiliate_ids .= '<a href="' . esc_url( admin_url( 'user-edit.php?user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate_username ) . '</a><br/>';
+                $affiliate_ids .= '<a href="' . esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate_username ) . '</a><br/>';
             }
         } elseif ( $affiliatereferrer ) {
             $getinfo = wcusage_get_the_order_coupon_info( $affiliatereferrer, "", $order_id );
@@ -170,7 +170,7 @@ class wcusage_Referrals_Table extends WP_List_Table {
                 $affiliate_id = $getcoupon[1];
                 if ( $affiliate_id ) {
                     $affiliate_username = get_userdata( $affiliate_id )->user_login;
-                    $affiliate_ids .= '<a href="' . esc_url( admin_url( 'user-edit.php?user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate_username ) . '</a><br/>';
+                    $affiliate_ids .= '<a href="' . esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate_username ) . '</a><br/>';
                 }
             }
         } elseif ( !$lifetimeaffiliate && !$affiliatereferrer && class_exists( 'WooCommerce' ) ) {
@@ -183,7 +183,7 @@ class wcusage_Referrals_Table extends WP_List_Table {
                     if ( isset( $getcoupon[1] ) && $getcoupon[1] != '' ) {
                         $affiliate_id = $getcoupon[1];
                         $affiliate_username = get_userdata( $affiliate_id )->user_login;
-                        $affiliate_ids .= '<a href="' . esc_url( admin_url( 'user-edit.php?user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate_username ) . '</a><br/>';
+                        $affiliate_ids .= '<a href="' . esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate_username ) . '</a><br/>';
                     } else {
                         $affiliate_ids .= '-<br/>';
                     }

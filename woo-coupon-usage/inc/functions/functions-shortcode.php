@@ -68,6 +68,19 @@ function wcusage_couponusage(  $atts  ) {
             $wcusage_field_which_toggle = wcusage_get_setting_value( 'wcusage_field_which_toggle', '1' );
             $wcusage_show_refresh = wcusage_get_setting_value( 'wcusage_field_show_refresh', '0' );
             $couponnotassigned = false;
+            // Check if admin is previewing another user's dashboard
+            $currentuserid = get_current_user_id();
+            $preview_user_id = $currentuserid;
+            $is_admin_preview = false;
+            if ( isset( $_GET['userid'] ) && isset( $_GET['preview_nonce'] ) && wcusage_check_admin_access() ) {
+                $preview_user_id_param = intval( $_GET['userid'] );
+                $preview_nonce = sanitize_text_field( $_GET['preview_nonce'] );
+                // Verify the nonce
+                if ( wp_verify_nonce( $preview_nonce, 'wcusage_preview_affiliate_' . $preview_user_id_param ) ) {
+                    $preview_user_id = $preview_user_id_param;
+                    $is_admin_preview = true;
+                }
+            }
             if ( isset( $_GET['couponid'] ) ) {
                 $urlid = strtolower( $_GET['couponid'] );
             }
@@ -121,6 +134,13 @@ function wcusage_couponusage(  $atts  ) {
                         } else {
                             $username = "";
                         }
+                        // For admin preview, use the preview user's data
+                        if ( $is_admin_preview ) {
+                            $preview_user_data = get_userdata( $preview_user_id );
+                            if ( $preview_user_data ) {
+                                $username = $preview_user_data->user_login;
+                            }
+                        }
                         global $woocommerce;
                         $c = new WC_Coupon($coupon);
                         $the_coupon_usage = $c->get_usage_count();
@@ -148,7 +168,7 @@ function wcusage_couponusage(  $atts  ) {
                             }
                         }
                         // Show Content
-                        if ( ($is_mla_parent || $couponuser && $couponuser == $currentuserid || wcusage_check_admin_access() || $coupon_user_id == "" && !$wcusage_urlprivate) && ($urlid || $couponuser == $currentuserid || !empty( $atts['coupon'] )) ) {
+                        if ( ($is_mla_parent || $couponuser && $couponuser == $preview_user_id || wcusage_check_admin_access() || $coupon_user_id == "" && !$wcusage_urlprivate || $is_admin_preview) && ($urlid || $couponuser == $preview_user_id || !empty( $atts['coupon'] )) ) {
                             ?>
 
 				<div class="wcu-dash-coupon-area">
@@ -180,7 +200,7 @@ function wcusage_couponusage(  $atts  ) {
                             echo '<span class="wcusage-dash-top-links">';
                             // Logout Link
                             $wcusage_field_show_logout_link = wcusage_get_setting_value( 'wcusage_field_show_logout_link', '1' );
-                            if ( is_user_logged_in() && $wcusage_field_show_logout_link ) {
+                            if ( is_user_logged_in() && $wcusage_field_show_logout_link && !$is_admin_preview ) {
                                 $thecurrentuser = get_userdata( $currentuserid );
                                 $display_name = $thecurrentuser->display_name;
                                 $logoutredirectpage = get_page_link( wcusage_get_coupon_shortcode_page_id() );
@@ -188,7 +208,14 @@ function wcusage_couponusage(  $atts  ) {
                             }
                             $wcusage_field_show_username = wcusage_get_setting_value( 'wcusage_field_show_username', '1' );
                             if ( is_user_logged_in() && $wcusage_field_show_username ) {
-                                echo "<span class='wcusage-dash-logout wcusage-dash-username' style='float: right; text-align: right; margin-right: 20px;'><i class='fas fa-user'></i> " . esc_html( $username ) . "</span>";
+                                $display_username = $username;
+                                if ( $is_admin_preview ) {
+                                    $preview_user_data = get_userdata( $preview_user_id );
+                                    if ( $preview_user_data ) {
+                                        $display_username = $preview_user_data->user_login;
+                                    }
+                                }
+                                echo "<span class='wcusage-dash-logout wcusage-dash-username' style='float: right; text-align: right; margin-right: 20px;'><i class='fas fa-user'></i> " . esc_html( $display_username ) . "</span>";
                             }
                             echo '</span>';
                             echo '</h2>';

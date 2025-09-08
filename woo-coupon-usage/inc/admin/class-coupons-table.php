@@ -49,7 +49,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
         }
 
         if ( wcu_fs()->can_use_premium_code() ) {
-            $columns['unpaid_commission'] = esc_html__( 'Unpaid Commission', 'woo-coupon-usage' );
+            $columns['unpaidcommission'] = 'Commission Payouts' . wcusage_admin_tooltip(esc_html__('• Unpaid: Earned from completed orders but not yet paid.', 'woo-coupon-usage') . '<br/>' . esc_html__('• Pending: Payout requests currently awaiting approval.', 'woo-coupon-usage') . '<br/>' . esc_html__('• Paid: Successfully paid to affiliate.', 'woo-coupon-usage'));
         }
 
         $columns['affiliate']     = esc_html__( 'Affiliate User', 'woo-coupon-usage' );
@@ -260,13 +260,44 @@ class wcusage_Coupons_Table extends WP_List_Table {
                 }
                 $commission = $wcu_alltime_stats && isset( $wcu_alltime_stats['total_commission'] ) ? $wcu_alltime_stats['total_commission'] : 0;
                 return $usage > 0 && ! $commission ? "<span title='" . esc_html( $qmessage ) . "'><strong><i class='fa-solid fa-ellipsis'></i></strong></span>" : wcusage_format_price( $commission );
-            case 'unpaid_commission':
+            case 'unpaidcommission':
                 if ( $disable_commission ) {
                     return '-';
                 }
-                return wcusage_format_price( get_post_meta( $item->ID, 'wcu_text_unpaid_commission', true ) );
+                global $wpdb;
+                $payouts_table = $wpdb->prefix . 'wcusage_payouts';
+                
+                // Get the affiliate user ID for this coupon
+                $coupon_user_id = wcusage_get_coupon_info_by_id( $item->ID )[1];
+                
+                // Calculate commission breakdown for this individual coupon
+                $unpaid_commission = (float) get_post_meta( $item->ID, 'wcu_text_unpaid_commission', true );
+                $total_commission = $wcu_alltime_stats && isset( $wcu_alltime_stats['total_commission'] ) ? (float) $wcu_alltime_stats['total_commission'] : 0;
+                $paid_commission = $total_commission - $unpaid_commission;
+                if ( $paid_commission < 0 ) $paid_commission = 0;
+                
+                // Calculate actual pending payments for this coupon's affiliate
+                $pending_payments = 0;
+                if ($coupon_user_id && $wpdb->get_var("SHOW TABLES LIKE '$payouts_table'") == $payouts_table) {
+                    $pending_payouts = $wpdb->get_results($wpdb->prepare(
+                        "SELECT amount FROM $payouts_table WHERE userid = %d AND status IN ('pending', 'created')",
+                        $coupon_user_id
+                    ));
+                    foreach ($pending_payouts as $payout) {
+                        $pending_payments += (float)$payout->amount;
+                    }
+                }
+                
+                $output = '<div style="line-height: 1.4;">';
+                $output .= '<div><strong>Unpaid:</strong> ' . wcusage_format_price( $unpaid_commission ) . '</div>';
+                $output .= '<hr style="margin: 2px 0; border: 0; border-top: 1px solid #ddd;">';
+                $output .= '<div><strong>Pending Payments:</strong> ' . wcusage_format_price( $pending_payments ) . '</div>';
+                $output .= '<hr style="margin: 2px 0; border: 0; border-top: 1px solid #ddd;">';
+                $output .= '<div><strong>Paid:</strong> ' . wcusage_format_price( $paid_commission ) . '</div>';
+                $output .= '</div>';
+                return $output;
             case 'affiliate':
-                return $user_info ? '<a href="' . get_edit_user_link( $coupon_user_id ) . '" target="_blank">' . esc_html( $user_info->user_login ) . '</a>' : '-';
+                return $user_info ? '<a href="' . esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . $coupon_user_id ) ) . '" target="_blank">' . esc_html( $user_info->user_login ) . '</a>' : '-';
             case 'dashboard_link':
                 return '<a href="' . esc_url( $coupon_info[4] ) . '" target="_blank">' . esc_html__( 'View Dashboard', 'woo-coupon-usage' ) . ' <span class="dashicons dashicons-external"></span></a>';
             case 'referral_link':
@@ -313,128 +344,9 @@ class wcusage_Coupons_Table extends WP_List_Table {
             echo '<tr id="coupon-row-' . esc_attr( $coupon_id ) . '">';
             $this->single_row_columns( $item );
             echo '</tr>';
-            ?>
-            <tr class="quick-edit-row" id="quick-edit-<?php echo esc_attr( $coupon_id ); ?>" style="display: none;">
-                <td colspan="<?php echo count( $this->get_columns() ); ?>">
-                    <div class="quick-edit-form">
-                        <div class="quick-edit-fields" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>">
-                            <div class="section-left">
-                                <h3 class="section-heading"><?php esc_html_e( 'Coupon Details', 'woo-coupon-usage' ); ?></h3>
-                                <div class="form-row">
-                                    <div class="form-field">
-                                        <label for="coupon_code_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Coupon Code', 'woo-coupon-usage' ); ?></label>
-                                        <input type="text" id="coupon_code_<?php echo esc_attr( $coupon_id ); ?>" value="<?php echo esc_attr( $coupon->get_code() ); ?>">
-                                    </div>
-                                    <div class="form-field">
-                                        <label for="coupon_description_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Description', 'woo-coupon-usage' ); ?></label>
-                                        <input type="text" id="coupon_description_<?php echo esc_attr( $coupon_id ); ?>" value="<?php echo esc_attr( $coupon->get_description() ); ?>">
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-field">
-                                        <label for="discount_type_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Discount Type', 'woo-coupon-usage' ); ?></label>
-                                        <select id="discount_type_<?php echo esc_attr( $coupon_id ); ?>">
-                                            <option value="fixed_cart" <?php selected( $coupon->get_discount_type(), 'fixed_cart' ); ?>><?php esc_html_e( 'Fixed cart discount', 'woo-coupon-usage' ); ?></option>
-                                            <option value="percent" <?php selected( $coupon->get_discount_type(), 'percent' ); ?>><?php esc_html_e( 'Percentage discount', 'woo-coupon-usage' ); ?></option>
-                                            <option value="fixed_product" <?php selected( $coupon->get_discount_type(), 'fixed_product' ); ?>><?php esc_html_e( 'Fixed product discount', 'woo-coupon-usage' ); ?></option>
-                                        </select>
-                                    </div>
-                                    <div class="form-field">
-                                        <label for="coupon_amount_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Discount Amount', 'woo-coupon-usage' ); ?></label>
-                                        <input type="number" id="coupon_amount_<?php echo esc_attr( $coupon_id ); ?>" step="0.01" value="<?php echo esc_attr( $coupon->get_amount() ); ?>">
-                                    </div>
-                                </div>
-                                <h3 class="section-heading"><?php esc_html_e( 'Spend Limits', 'woo-coupon-usage' ); ?></h3>
-                                <div class="form-row">
-                                    <div class="form-field">
-                                        <label for="minimum_amount_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Minimum Spend', 'woo-coupon-usage' ); ?></label>
-                                        <input type="number" id="minimum_amount_<?php echo esc_attr( $coupon_id ); ?>" step="0.01" value="<?php echo esc_attr( $coupon->get_minimum_amount() ); ?>">
-                                    </div>
-                                    <div class="form-field">
-                                        <label for="maximum_amount_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Maximum Spend', 'woo-coupon-usage' ); ?></label>
-                                        <input type="number" id="maximum_amount_<?php echo esc_attr( $coupon_id ); ?>" step="0.01" value="<?php echo esc_attr( $coupon->get_maximum_amount() ); ?>">
-                                    </div>
-                                </div>
-                                <h3 class="section-heading"><?php esc_html_e( 'Usage Limits', 'woo-coupon-usage' ); ?></h3>
-                                <div class="form-row">
-                                    <div class="form-field">
-                                        <label for="expiry_date_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Expiry Date', 'woo-coupon-usage' ); ?></label>
-                                        <input type="date" id="expiry_date_<?php echo esc_attr( $coupon_id ); ?>" value="<?php echo $coupon->get_date_expires() ? esc_attr( $coupon->get_date_expires()->date( 'Y-m-d' ) ) : ''; ?>">
-                                    </div>
-                                    <div class="form-field">
-                                        <label for="usage_limit_per_user_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Limit Per User', 'woo-coupon-usage' ); ?></label>
-                                        <input type="number" id="usage_limit_per_user_<?php echo esc_attr( $coupon_id ); ?>" min="0" value="<?php echo esc_attr( $coupon->get_usage_limit_per_user() ?: '' ); ?>">
-                                    </div>
-                                </div>
-                                <h3 class="section-heading"><?php esc_html_e( 'Other Settings', 'woo-coupon-usage' ); ?></h3>
-                                <div class="form-field checkbox-group">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="free_shipping_<?php echo esc_attr( $coupon_id ); ?>" <?php checked( $coupon->get_free_shipping() ); ?>>
-                                        <?php esc_html_e( 'Free Shipping', 'woo-coupon-usage' ); ?>
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="exclude_sale_items_<?php echo esc_attr( $coupon_id ); ?>" <?php checked( $coupon->get_exclude_sale_items() ); ?>>
-                                        <?php esc_html_e( 'Exclude Sale Items', 'woo-coupon-usage' ); ?>
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="individual_use_<?php echo esc_attr( $coupon_id ); ?>" <?php checked( $coupon->get_individual_use() ); ?>>
-                                        <?php esc_html_e( 'Individual Use Only', 'woo-coupon-usage' ); ?>
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="wcu_enable_first_order_only_<?php echo esc_attr( $coupon_id ); ?>" <?php checked( get_post_meta( $coupon_id, 'wcu_enable_first_order_only', true ), 'yes' ); ?>>
-                                        <?php esc_html_e( 'New Customers Only', 'woo-coupon-usage' ); ?>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="section-right">
-                                <h3 class="section-heading"><?php esc_html_e( 'Coupon Affiliates', 'woo-coupon-usage' ); ?></h3>
-                                <div class="form-row">
-                                    <div class="form-field">
-                                        <label for="wcu_select_coupon_user_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Affiliate User', 'woo-coupon-usage' ); ?></label>
-                                        <input type="text" 
-                                            id="wcu_select_coupon_user_<?php echo esc_attr( $coupon_id ); ?>" 
-                                            class="wcu-autocomplete-user" 
-                                            value="<?php echo $user_info ? esc_attr( $user_info->user_login ) : ''; ?>"
-                                            placeholder="<?php esc_html_e( 'Search for a user...', 'woo-coupon-usage' ); ?>">
-                                    </div>
-                                    <div class="form-field" <?php if ( !wcu_fs()->can_use_premium_code() ) { ?>style="opacity: 0.5; pointer-events: none;"<?php } ?>>
-                                        <label for="wcu_text_coupon_commission_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Commission (%) Per Order', 'woo-coupon-usage' ); ?><?php if ( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?></label>
-                                        <input type="number" id="wcu_text_coupon_commission_<?php echo esc_attr( $coupon_id ); ?>" step="0.01" value="<?php echo esc_attr( get_post_meta( $coupon_id, 'wcu_text_coupon_commission', true ) ); ?>">
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-field" <?php if ( !wcu_fs()->can_use_premium_code() ) { ?>style="opacity: 0.5; pointer-events: none;"<?php } ?>>
-                                        <label for="wcu_text_coupon_commission_fixed_order_<?php echo esc_attr( $coupon_id ); ?>"><?php printf( esc_html__( 'Commission (%s) Per Order', 'woo-coupon-usage' ), esc_html( $currency_symbol ) ); ?><?php if ( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?></label>
-                                        <input type="number" id="wcu_text_coupon_commission_fixed_order_<?php echo esc_attr( $coupon_id ); ?>" step="0.01" value="<?php echo esc_attr( get_post_meta( $coupon_id, 'wcu_text_coupon_commission_fixed_order', true ) ); ?>">
-                                    </div>
-                                    <div class="form-field" <?php if ( !wcu_fs()->can_use_premium_code() ) { ?>style="opacity: 0.5; pointer-events: none;"<?php } ?>>
-                                        <label for="wcu_text_coupon_commission_fixed_product_<?php echo esc_attr( $coupon_id ); ?>"><?php printf( esc_html__( 'Commission (%s) Per Product', 'woo-coupon-usage' ), esc_html( $currency_symbol ) ); ?><?php if ( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?></label>
-                                        <input type="number" id="wcu_text_coupon_commission_fixed_product_<?php echo esc_attr( $coupon_id ); ?>" step="0.01" value="<?php echo esc_attr( get_post_meta( $coupon_id, 'wcu_text_coupon_commission_fixed_product', true ) ); ?>">
-                                    </div>
-                                </div>
-
-                                <h3 class="section-heading"><?php esc_html_e( 'Commission', 'woo-coupon-usage' ); ?><?php if ( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?></h3>
-                                <div class="form-row">
-                                    <div class="form-field" <?php if ( !wcu_fs()->can_use_premium_code() ) { ?>style="opacity: 0.5; pointer-events: none;"<?php } ?>>
-                                        <label for="wcu_text_unpaid_commission_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Unpaid Commission', 'woo-coupon-usage' ); ?><?php if ( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?></label>
-                                        <input type="number" id="wcu_text_unpaid_commission_<?php echo esc_attr( $coupon_id ); ?>" step="0.01" value="<?php echo esc_attr( get_post_meta( $coupon_id, 'wcu_text_unpaid_commission', true ) ); ?>">
-                                    </div>
-                                    <div class="form-field" <?php if ( !wcu_fs()->can_use_premium_code() ) { ?>style="opacity: 0.5; pointer-events: none;"<?php } ?>>
-                                        <label for="wcu_text_pending_payment_commission_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Pending Payout', 'woo-coupon-usage' ); ?><?php if ( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?></label>
-                                        <input type="number" id="wcu_text_pending_payment_commission_<?php echo esc_attr( $coupon_id ); ?>" step="0.01" value="<?php echo esc_attr( get_post_meta( $coupon_id, 'wcu_text_pending_payment_commission', true ) ); ?>">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="submit inline-edit-save">
-                            <button class="button button-primary save-quick-edit" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Save Changes', 'woo-coupon-usage' ); ?></button>
-                            <button class="button cancel-quick-edit"><?php esc_html_e( 'Cancel', 'woo-coupon-usage' ); ?></button>
-                            <span class="spinner"></span>
-                        </p>
-                    </div>
-                </td>
-            </tr>
-            <?php
+            // Shared quick edit row
+            include_once WCUSAGE_UNIQUE_PLUGIN_PATH . 'inc/admin/partials/quick-edit-coupon.php';
+            wcusage_render_quick_edit_row( $coupon_id, count( $this->get_columns() ) );
         }
     }
     
@@ -523,8 +435,9 @@ function wcusage_coupons_page() {
             'fixed_product'  => esc_html__( 'Fixed Product Discount', 'woo-coupon-usage' ),
             'percent_product' => esc_html__( 'Percentage Product Discount', 'woo-coupon-usage' ),
         ),
-        'currency_symbol' => get_woocommerce_currency_symbol(),
-        'edit_user_url'   => esc_url( get_edit_user_link( 0 ) ), // Base URL with '0' as placeholder
+    'currency_symbol' => get_woocommerce_currency_symbol(),
+    // Base URL with 'USER_ID_PLACEHOLDER' as placeholder for dynamic user id
+    'edit_user_url'   => esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=USER_ID_PLACEHOLDER' ) ),
     ) );
 
     $table = new wcusage_Coupons_Table();

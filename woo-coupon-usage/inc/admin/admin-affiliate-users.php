@@ -53,11 +53,20 @@ function wcusage_handle_unlink_affiliate_via_url() {
  *
  */
 function wcusage_filter_users_custom_button($which) {
-  ?>
-    <script>
-    jQuery(jQuery(".wrap .wcusage-settings-button")[0]).after('<a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New <?php echo wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )); ?></a><a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_affiliates')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Manage <?php echo wcusage_get_affiliate_text(__( 'Affiliates', 'woo-coupon-usage' ), true); ?></a>');
-    </script>
-  <?php
+  // Enqueue JS to inject the action buttons on Users list
+  $script_handle = 'wcusage-admin-affiliate-users';
+  $script_path   = WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-affiliate-users.js';
+  $script_fs     = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin-affiliate-users.js';
+  $script_ver    = file_exists($script_fs) ? filemtime($script_fs) : WCUSAGE_VERSION;
+  wp_enqueue_script($script_handle, $script_path, array('jquery'), $script_ver, true);
+
+  // Localize URLs and labels
+  wp_localize_script($script_handle, 'wcusageAffUsers', array(
+    'addAffiliateUrl'    => admin_url('admin.php?page=wcusage_add_affiliate'),
+    'manageAffiliatesUrl'=> admin_url('admin.php?page=wcusage_affiliates'),
+    'addLabel'           => sprintf(__('Add New %s', 'woo-coupon-usage'), wcusage_get_affiliate_text(__('Affiliate', 'woo-coupon-usage'))),
+    'manageLabel'        => sprintf(__('Manage %s', 'woo-coupon-usage'), wcusage_get_affiliate_text(__('Affiliates', 'woo-coupon-usage'), true)),
+  ));
 }
 add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
 
@@ -182,36 +191,33 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
         admin_url('users.php')
     );
 
-    $unlink_message = '<a href="' . esc_url($unlink_url) . '" onClick="return confirm(\'Unassign ' . wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )) . ' user &#8220;'
-          . esc_attr($user_info->user_login) . '&#8220; from the coupon code &#8220;'
-          . esc_html($coupon_code) . '&#8220;? This will not delete the coupon or user, it will simply remove them from the coupon, so they can no longer gain commission or view the ' . wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )) . ' dashboard for it.\');" 
-          style="text-decoration: underline;"
-          class="wcu-affiliate-tooltip-unlink-button">Unassign</a>';
+  $unlink_message = '<a href="' . esc_url($unlink_url) . '" onClick="return confirm(\'Unassign ' . wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )) . ' user &#8220;'
+      . esc_attr($user_info->user_login) . '&#8220; from the coupon code &#8220;'
+      . esc_html($coupon_code) . '&#8220;? This will not delete the coupon or user, it will simply remove them from the coupon, so they can no longer gain commission or view the ' . wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )) . ' dashboard for it.\');" 
+      class="wcu-affiliate-tooltip-unlink-button">Unassign</a>';
   } else {
       $unlink_message = "";
   }
 
 $coupon_code_linked = "<span class='wcusage-users-affiliate-column'>"
-  ."<div class='custom-tooltip'><a href='javascript:void(0);' style='pointer-events:visible;cursor:pointer;color:darkblue;'>".esc_html($coupon_code)."</a> <span class='dashicons dashicons-info'
-  style='color: green;font-size: 15px;margin-top: 4px;margin-left: -4px;'></span>
-      <div class='tooltip-content'>
-      <span style='font-size: 12px;'>"
+  ."<div class='custom-tooltip'><a href='javascript:void(0);' class='wcusage-tooltip-trigger'>".esc_html($coupon_code)."</a>
+  <div class='tooltip-content wcusage-tooltip-content'>
+  <span class='wcusage-tooltip-inner'>"
       . wp_kses_post($commission_message)
-      . "<a href='".esc_url($dashboard_url)."' target='_blank' class='wcu-affiliate-tooltip-dashboard-button' style='text-decoration: underline;'>"
-      . sprintf(esc_html__( 'View %s Dashboard', 'woo-coupon-usage' ), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))) . "<span class='dashicons dashicons-external' style='text-decoration: none;'></span>"
+      . "<a href='".esc_url($dashboard_url)."' target='_blank' class='wcu-affiliate-tooltip-dashboard-button'>"
+  . sprintf(esc_html__( 'View %s Dashboard', 'woo-coupon-usage' ), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))) . "<span class='dashicons dashicons-external'></span>"
       . "</a>";
       if($wcusage_field_urls_enable) {
-        $coupon_code_linked .= '<div class="wcusage-copyable-link" style="margin: 10px 0;"><strong>' . esc_html__( 'Default Referral Link', 'woo-coupon-usage' ) . ':</strong><br/>'
-        . '<input type="text" id="wcusageLink'.esc_attr($coupon_code).'" value="'.esc_url($link).'"
-        style="max-width: 125px;width: 75%;max-height: 24px;min-height: 24px;font-size: 10px;" readonly>'
-        . '<button type="button" class="wcusage-copy-link-button" style="max-height: 24px;min-height: 24px;"
+        $coupon_code_linked .= '<div class="wcusage-copyable-link"><strong>' . esc_html__( 'Default Referral Link', 'woo-coupon-usage' ) . ':</strong>'
+        . '<input type="text" id="wcusageLink'.esc_attr($coupon_code).'" class="wcusage-copy-link-text" value="'.esc_url($link).'" readonly>'
+        . '<button type="button" class="wcusage-copy-link-button"
         title="'.esc_html__( 'Copy Link', 'woo-coupon-usage' ).'"><i class="fa-regular fa-copy"></i></button>'
         . '</div>';
       } else {
         $coupon_code_linked .= '<br/>';
       }
       $coupon_code_linked .= "<a href='".esc_url(get_admin_url())."post.php?post=".esc_attr($couponid)."&action=edit'
-      target='_blank' class='wcu-affiliate-tooltip-edit-button' style='text-decoration: underline;'>" . esc_html__( 'Edit Coupon', 'woo-coupon-usage' ) . "</a> - "
+      target='_blank' class='wcu-affiliate-tooltip-edit-button'>" . esc_html__( 'Edit Coupon', 'woo-coupon-usage' ) . "</a> - "
       . wp_kses_post($unlink_message)
       . "</span>
       </div>
@@ -264,11 +270,9 @@ $coupon_code_linked = "<span class='wcusage-users-affiliate-column'>"
       $user_info[$key] = $value;
     }
 
-    $info = "<span class='wcusage-users-affiliate-column'>"
-    ."<div class='custom-tooltip'><a href='" . esc_url(admin_url( 'user-edit.php?user_id=' . $user_id )) . "'
-    style='pointer-events:visible;cursor:pointer;color:darkblue;'>".esc_html($username)."</a> <span class='dashicons dashicons-info'
-    style='color: green;font-size: 15px;margin-top: 4px;margin-left: -4px;'></span>
-        <div class='tooltip-content' style='width: auto;max-width: 250px;min-width:125px;'>";
+  $info = "<span class='wcusage-users-affiliate-column'>"
+  ."<div class='custom-tooltip'><a href='" . esc_url(admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . $user_id )) . "' class='wcusage-tooltip-trigger'>".esc_html($username)."</a>
+    <div class='tooltip-content wcusage-tooltip-content'>";
 
         if ( $user_info ) {
             foreach ( $user_info as $key => $value ) {
@@ -282,7 +286,7 @@ $coupon_code_linked = "<span class='wcusage-users-affiliate-column'>"
                   $value = str_replace('http://', '', $value);
                   $value = str_replace('https://', '', $value);
                 }
-                $info .= '<strong style="color: #b7dbdb;">' . esc_html( $key ) . ':</strong><br/>' . wp_kses_post( $value ) . '<br/>';
+                $info .= '<strong class="wcusage-info-label">' . esc_html( $key ) . ':</strong><br/>' . wp_kses_post( $value ) . '<br/>';
             }
             // Remove last <br/>
             $info = substr($info, 0, -5);
@@ -312,3 +316,16 @@ if( !function_exists( 'add_wcusage_coupon_data_tab' ) ) {
   }
 }
 add_filter( 'woocommerce_coupon_data_tabs', 'add_wcusage_coupon_data_tab', 99 , 1 );
+
+/**
+ * Vertically center content in all columns on the Users screen
+ */
+function wcusage_users_table_vertical_center_css() {
+  // Enqueue Users page-specific CSS
+  $style_handle = 'wcusage-admin-affiliate-users';
+  $style_path   = WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-affiliate-users.css';
+  $style_fs     = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-affiliate-users.css';
+  $style_ver    = file_exists($style_fs) ? filemtime($style_fs) : WCUSAGE_VERSION;
+  wp_enqueue_style($style_handle, $style_path, array(), $style_ver);
+}
+add_action('admin_head-users.php', 'wcusage_users_table_vertical_center_css');

@@ -112,7 +112,7 @@ function wcusage_field_cb_payouts( $args )
 
       <!-- Number of days after order "completion" until commission is earned: -->
       <?php echo wcusage_setting_number_option('wcusage_field_payout_days', '0', esc_html__( 'Delay Commission (Number of Days)', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'The number of days after an order is created, that the commission earned is added to the users account as "unpaid commission. Useful if you want to prevent commission being paid out early for orders that may be refunded etc.', 'woo-coupon-usage' ); ?></i><br/>
+      <i><?php echo esc_html__( 'The number of days after an order is created, that the commission earned is added to the users account as "unpaid commission". Useful if you want to prevent commission being paid out early for orders that may be refunded etc.', 'woo-coupon-usage' ); ?></i><br/>
       <i><?php echo esc_html__( 'If set to "0" then commission will be added to the affiliates account instantly when an order is completed.', 'woo-coupon-usage' ); ?></i><br/>
       <i><?php echo esc_html__( 'Requires cron jobs to be enabled on your site. Make sure to test this is working after activating. We highly recommend using "Real Cron Jobs" instead of WP Cron.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/real-cron-job/"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a></i><br/>
 

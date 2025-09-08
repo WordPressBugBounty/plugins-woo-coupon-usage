@@ -220,33 +220,6 @@ function wcusage_section_developers_cb(  $args  ) {
     echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
     ?>" crossorigin="anonymous">
 
-<p class="settings-help-top" style="font-size: 15px; color: green;"><strong>
-
-  <?php 
-    echo esc_html__( "Plugin not working? Need help? Have a suggestion?", "woo-coupon-usage" );
-    ?> <?php 
-    if ( wcu_fs()->can_use_premium_code() ) {
-        ?><a href="<?php 
-        echo esc_url( admin_url( 'admin.php?page=wcusage-contact' ) );
-        ?>"><?php 
-    } else {
-        ?><a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank" style="text-decoration: none;"><?php 
-    }
-    echo esc_html__( "Create a new support ticket", "woo-coupon-usage" );
-    ?> <span class='fas fa-arrow-circle-right'></span></a>
-  <?php 
-    if ( wcu_fs()->can_use_premium_code() ) {
-        ?>
-    <span style="float: right;">
-    <a href="https://couponaffiliates.com/docs/setup-guide-free?utm_campaign=plugin&utm_source=dashboard-link&utm_medium=getting-started" target="_blank"><?php 
-        echo esc_html__( "View setup guide", "woo-coupon-usage" );
-        ?> <span class='fas fa-arrow-circle-right'></span></a>
-  </span>
-  <?php 
-    }
-    ?>
-</strong><br/></p>
-
 <?php 
     $wcusage_field_deactivate_delete = wcusage_get_setting_value( 'wcusage_field_deactivate_delete', '0' );
     if ( $wcusage_field_deactivate_delete ) {
@@ -698,7 +671,6 @@ jQuery( document ).ready(function() {
     ?>
 
 </h2>
-
 <?php 
 }
 
@@ -735,21 +707,41 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         echo do_action( 'wcusage_hook_dashboard_page_header', '' );
         ?>
 
-    <h2 class="wcu-settings-title" style="margin-bottom: 25px;">
-      <?php 
+  <div class="wcu-settings-header">
+      <h2 class="wcu-settings-title">
+        <?php 
         echo esc_html( get_admin_page_title() );
         ?>
-      <a href="<?php 
+        <a href="<?php 
         echo esc_url( admin_url( 'admin.php?page=wcusage_setup' ) );
         ?>" class="wcusage-settings-button"><?php 
         echo esc_html__( 'Setup Wizard', 'woo-coupon-usage' );
         ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
-      <a href="<?php 
+        <a href="<?php 
         echo esc_url( admin_url( 'admin.php?page=wcusage_add_affiliate' ) );
         ?>" class="wcusage-settings-button"><?php 
         echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
         ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
-    </h2>
+        <a href="https://couponaffiliates.com/docs/setup-guide-free?utm_campaign=plugin&utm_source=dashboard-link&utm_medium=getting-started"
+        target="_blank" style="margin-left: 20px; font-size: 14px;"><?php 
+        echo esc_html__( "View setup guide", "woo-coupon-usage" );
+        ?> <span class='fas fa-arrow-circle-right'></span></a>
+      </h2>
+
+  <div id="wcu-settings-search-right" aria-label="Search settings">
+        <div class="wcu-search-row">
+          <span class="wcu-search-prompt" aria-hidden="true">
+            <span class="wcu-search-prompt-text">Looking for something?</span>
+            <span class="wcu-search-prompt-arrow" role="presentation"></span>
+          </span>
+          <input type="search" id="wcu-settings-search" placeholder="Search settings" />
+        </div>
+        <div id="wcu-settings-search-results">
+          <ul></ul>
+        </div>
+  <div id="wcu-settings-search-empty">No matching settings found.</div>
+      </div>
+    </div>
 
   	<?php 
         $coupon_shortcode_page = wcusage_get_coupon_shortcode_page( 1 );
@@ -1504,6 +1496,16 @@ function wcu_admin_enqueue_scripts(  $hook_suffix  ) {
             '1.1',
             true
         );
+        // Settings quick search
+        if ( isset( $_GET['page'] ) && $_GET['page'] == 'wcusage_settings' ) {
+            wp_enqueue_script(
+                'wcusage-settings-search',
+                WCUSAGE_UNIQUE_PLUGIN_URL . 'js/settings-search.js',
+                array('jquery'),
+                '1.0.0',
+                true
+            );
+        }
         // Enable WordPress code editor (CodeMirror) on settings page for custom CSS textarea
         if ( function_exists( 'wp_enqueue_code_editor' ) && isset( $_GET['page'] ) && $_GET['page'] == 'wcusage_settings' ) {
             // Prepare and enqueue editor for CSS; this also ensures necessary scripts/styles are available
@@ -1513,6 +1515,17 @@ function wcu_admin_enqueue_scripts(  $hook_suffix  ) {
             wp_enqueue_script( 'code-editor' );
             wp_enqueue_style( 'code-editor' );
         }
+    }
+    // Always: Registrations page styles (actions column layout/icons)
+    if ( isset( $_GET['page'] ) && $_GET['page'] == 'wcusage_registrations' ) {
+        $style_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-registrations.css';
+        $style_ver = ( file_exists( $style_path ) ? filemtime( $style_path ) : '1.0.0' );
+        wp_enqueue_style(
+            'wcusage-admin-registrations',
+            WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-registrations.css',
+            array(),
+            $style_ver
+        );
     }
 }
 
@@ -1660,9 +1673,18 @@ if ( !function_exists( 'wcusage_setting_tinymce_option' ) ) {
  */
 if ( !function_exists( 'wcusage_setting_option_set_default' ) ) {
     function wcusage_setting_option_set_default(  $options, $name, $default  ) {
+        $options = get_option( 'wcusage_options' );
         if ( !isset( $options[$name] ) && current_user_can( 'manage_options' ) ) {
             $option_group = get_option( 'wcusage_options' );
             $option_group[$name] = $default;
+            // Do not update if the option is already set
+            if ( isset( $option_group[$name] ) && $option_group[$name] != "" ) {
+                return;
+            }
+            // Do not update if $option_group is empty or bool(false) for some reason
+            if ( empty( $option_group ) || $option_group === false ) {
+                return;
+            }
             update_option( 'wcusage_options', $option_group );
         }
     }

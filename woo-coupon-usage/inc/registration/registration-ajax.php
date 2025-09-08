@@ -103,7 +103,8 @@ function wcusage_ajax_submit_registration() {
             $firstname,
             $lastname,
             $couponcode,
-            $website
+            $website,
+            $info
         );
         if ( is_wp_error( $new_affiliate_user ) ) {
             wp_send_json_error( array(

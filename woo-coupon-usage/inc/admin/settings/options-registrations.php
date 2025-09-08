@@ -1001,6 +1001,8 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
           $registrationpage = $options['wcusage_registration_page'];
       } else {
           $registrationpage = wcusage_get_registration_shortcode_page_id();
+          $options['wcusage_registration_page'] = $registrationpage;
+          update_option( 'wcusage_options', $options );
       }
 
       $dropdown_args = array(
@@ -1221,18 +1223,24 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
       function generateCoupon() {
         var couponType = document.getElementById("coupon_type").value;
         var couponDiscount = document.getElementById("coupon_discount").value;
-        var url = '<?php echo esc_url(admin_url()); ?>admin.php?page=wcusage_setup&step=2&action=generate_coupon&coupon_type=' + couponType + '&coupon_discount=' + couponDiscount;
+        var nonce = '<?php echo wp_create_nonce("generate_coupon"); ?>';
+        var url = '<?php echo esc_url(admin_url()); ?>admin.php?page=wcusage_setup&step=2&action=generate_coupon&coupon_type=' + couponType + '&coupon_discount=' + couponDiscount + '&_wpnonce=' + nonce;
         window.location.href = url;
       }
     </script>
 
     <?php
-    if(isset($_GET['coupon_type']) && isset($_GET['coupon_discount'])) {
+    $nonce = $_GET['_wpnonce'];
+    if(isset($_GET['coupon_type']) && isset($_GET['coupon_discount']) && wp_verify_nonce($nonce, 'generate_coupon')) {
 
       // Get coupon code and discount from the URL parameters
       $couponName = "affiliate_template_coupon";
       $couponType = $_GET['coupon_type'];
       $couponDiscount = $_GET['coupon_discount'];
+
+      // Sanitize input
+      $couponDiscount = floatval($couponDiscount);
+      $couponType = sanitize_text_field($couponType);
 
       // Check if coupon "affiliate_template_coupon" already exists
       $coupon_id = wc_get_coupon_id_by_code($couponName);

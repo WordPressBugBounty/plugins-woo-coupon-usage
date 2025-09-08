@@ -101,12 +101,12 @@ if ( !function_exists( 'wcusage_tab_referral_url' ) ) {
             }
             ?><br/>
   				<code style="margin: 10px 0 2px 0; padding: 5px; display: inline-block; background: rgba(0,0,0,0.04); color: #1a1a1a;" id="p1" class="wcu-urllink">
-  					<span id="output-custom-url"><?php 
+            <span id="output-custom-url"><?php 
             echo esc_html( $wcusage_field_default_ref_url );
             ?></span><span id="output-custom-url-sep">?</span><?php 
             echo esc_html( $wcusage_urls_prefix );
             ?>=<?php 
-            echo esc_html( $coupon_code );
+            echo esc_html( rawurlencode( $coupon_code ) );
             ?><span id="output-custom-campaign"></span>
   				</code>
   				<?php 
@@ -169,7 +169,7 @@ function wcusage_get_default_ref_url() {
  */
 function wcusage_get_affiliate_url(  $coupon_code  ) {
     $prefix = wcusage_get_setting_value( 'wcusage_field_urls_prefix', 'coupon' );
-    $affiliate_url = wcusage_get_default_ref_url() . "?" . $prefix . "=" . $coupon_code;
+    $affiliate_url = wcusage_get_default_ref_url() . "?" . $prefix . "=" . rawurlencode( $coupon_code );
     return $affiliate_url;
 }
 
@@ -502,7 +502,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_referral_url_stats' ) ) {
         if(jQuery('#wcu-referral-campaign').val()) {
           jQuery('#output-custom-campaign').text( "&<?php 
                 echo esc_html( $wcusage_src_prefix );
-                ?>=" + jQuery('#wcu-referral-campaign').val() );
+                ?>=" + encodeURIComponent(jQuery('#wcu-referral-campaign').val()) );
         } else {
           jQuery('#output-custom-campaign').text( "" );
         }

@@ -39,7 +39,7 @@ class wcusage_activity_List_Table extends WP_List_Table {
         case 'user_id':
             $user = get_userdata( $item[$column_name] );
             if($user) {
-                return '<a href="'.get_edit_user_link($item[$column_name]).'" title="'.$user->user_login.'" target="_blank">'.$user->first_name.' '.$user->last_name.'</a>';
+                return '<a href="'. esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $item[$column_name]) ) .'" title="'.$user->user_login.'" target="_blank">'.$user->first_name.' '.$user->last_name.'</a>';
             } else {
                 return 'Guest';
             }

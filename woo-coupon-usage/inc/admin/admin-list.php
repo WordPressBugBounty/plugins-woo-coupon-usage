@@ -56,9 +56,9 @@ function wcusage_woo_display_customer_order_coupon_in_column_for_orders( $column
 		if($coupon_user_id) {
   		$user_info = get_userdata($coupon_user_id);
       if($user_info) {
-    		$username = $user_info->user_login;
-    		$userlink = get_edit_user_link($coupon_user_id);
-    		$usernametext = '<a href="'.esc_url($userlink).'" target="_blank">' . esc_html($username) . '</a>';
+        $username = $user_info->user_login;
+        $userlink = admin_url('admin.php?page=wcusage_view_affiliate&user_id='.$coupon_user_id);
+        $usernametext = '<a href="'.esc_url($userlink).'" target="_blank">' . esc_html($username) . '</a>';
       }
 		}
 

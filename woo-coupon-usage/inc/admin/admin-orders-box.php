@@ -254,7 +254,7 @@ function wcusage_custom_box_html_content(
     if ( $wcusage_affiliate_user ) {
         $affiliate = get_user_by( 'ID', $wcusage_affiliate_user );
         $affiliate_username = $affiliate->user_login;
-        echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ) . ": <a href='" . esc_url( admin_url( "user-edit.php?user_id=" . $wcusage_affiliate_user ) ) . "' target='_blank' style='color: #07bbe3;'>" . esc_html( $affiliate_username ) . "</a><br/>";
+        echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ) . ": <a href='" . esc_url( admin_url( "admin.php?page=wcusage_view_affiliate&user_id=" . $wcusage_affiliate_user ) ) . "' target='_blank' style='color: #07bbe3;'>" . esc_html( $affiliate_username ) . "</a><br/>";
     }
     if ( $order->get_status() != "refunded" && !wcusage_coupon_disable_commission( $coupon_id ) ) {
         echo esc_html__( 'Commission', 'woo-coupon-usage' ) . ": " . wp_kses_post( $getinfo['thecommission'] ) . wp_kses_post( $ispaid ) . "<br/>";
@@ -295,7 +295,7 @@ function wcusage_custom_box_html_content(
                     $order_id,
                     $coupon_code
                 );
-                echo "<br/>(" . esc_html( $key ) . ") <a href='" . esc_url( admin_url( "user-edit.php?user_id=" . $parent_user_id ) ) . "' target='_blank' style='color: #07bbe3;'>" . esc_html( $parent_user_name ) . "</a>: " . wp_kses_post( wcusage_format_price( esc_html( $parent_commission ) ) );
+                echo "<br/>(" . esc_html( $key ) . ") <a href='" . esc_url( admin_url( "admin.php?page=wcusage_view_affiliate&user_id=" . $parent_user_id ) ) . "' target='_blank' style='color: #07bbe3;'>" . esc_html( $parent_user_name ) . "</a>: " . wp_kses_post( wcusage_format_price( esc_html( $parent_commission ) ) );
             }
             echo "</p>";
         }

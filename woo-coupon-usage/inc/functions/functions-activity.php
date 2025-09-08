@@ -232,7 +232,7 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
       $coupon_name = '<a href="'.get_edit_post_link($info).'">'.esc_html($coupon_name).'</a>';
       $user_id = $coupon_info[1];
       $username = get_the_author_meta( 'user_login', $user_id );
-      $username = '<a href="'.get_edit_user_link($user_id).'">'.esc_html($username).'</a>';
+  $username = '<a href="'. esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $user_id) ) .'">'.esc_html($username).'</a>';
       if($username == '') {
         $username = '';
       } else {

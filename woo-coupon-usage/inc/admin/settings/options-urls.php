@@ -64,7 +64,7 @@ function wcusage_field_cb_urls( $args )
       <!-- Automatically apply coupon -->
       <?php echo wcusage_setting_toggle_option('wcusage_field_apply_enable', 1, esc_html__( 'Automatically apply coupon to cart/checkout if referral URL is used.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'This will automatically apply the coupon every time at checkout for that visitor, until the cookie expires.', 'woo-coupon-usage' ); ?></i><br/>
-      <i><?php echo esc_html__( 'Please note: A coupon code needs to be applied for the affiliate commission to be tracked/earned.', 'woo-coupon-usage' ); ?></i><br/>
+      <i><?php echo esc_html__( 'Please note: A coupon code needs to be applied for the affiliate commission to be tracked/earned (unless you have enabled the URL tracking without coupon option).', 'woo-coupon-usage' ); ?></i><br/>
 
       <br/>
 

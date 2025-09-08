@@ -109,6 +109,15 @@ function wcusage_options_page() {
             'wcusage_add_affiliate',
             'wcusage_admin_new_registration_page'
         );
+        add_submenu_page(
+            'wcusage_hide',
+            // Hidden to prevent display in menu
+            sprintf( esc_html__( 'View %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
+            sprintf( esc_html__( 'View %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
+            $admin_perms,
+            'wcusage_view_affiliate',
+            'wcusage_view_affiliate_page'
+        );
         if ( $wcusage_field_registration_enable ) {
             add_submenu_page(
                 'wcusage',
@@ -252,3 +261,25 @@ function wcusage_admin_submenu_filter(  $submenu_file  ) {
 }
 
 add_filter( 'submenu_file', 'wcusage_admin_submenu_filter' );
+// JavaScript solution to highlight parent menu on view affiliate page
+function wcusage_admin_menu_highlight_script() {
+    if ( isset( $_GET['page'] ) && $_GET['page'] === 'wcusage_view_affiliate' ) {
+        ?>
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+      // Target only the top-level menu item, not submenu items
+      $('#adminmenu > li > a[href="admin.php?page=wcusage"]').each(function() {
+        $(this).parent('li').addClass('wp-menu-open wp-has-current-submenu');
+      });
+    });
+    </script>
+    <style>
+    #adminmenu .wp-has-current-submenu .wp-submenu {
+      min-width: auto !important;
+    }
+    </style>
+    <?php 
+    }
+}
+
+add_action( 'admin_footer', 'wcusage_admin_menu_highlight_script' );

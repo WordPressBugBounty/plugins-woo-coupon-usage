@@ -49,12 +49,20 @@ function wcusage_field_cb_help( $args )
 
 	<div id="help-area" class="help-area">
 
-  <h1>Documentation</h1>
+  <h1><?php echo esc_html__( 'Support', 'woo-coupon-usage' ); ?></h1>
 
   <hr/>
 
-  <div id="couponaffiliates-support-widget" style="margin-top: 20px; padding: 20px; background: #fff; border: 1px solid #ddd; border-radius: 5px;">
-      <h2>Support Documentation</h2>
+  <?php echo esc_html__( 'Need help? Have a suggestion?', 'woo-coupon-usage' ); ?> <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-contact')); ?>"><?php echo esc_html__( "Create a new support ticket", "woo-coupon-usage" ); ?> <span class='fas fa-arrow-circle-right'></span></a>
+
+  <br/><br/><br/>
+
+  <h1><?php echo esc_html__( 'Documentation', 'woo-coupon-usage' ); ?></h1>
+
+  <hr/>
+
+  <div id="couponaffiliates-support-widget" style="margin-top: 15px; padding: 20px; background: #fff; border: 1px solid #ddd; border-radius: 5px;">
+      <h2><?php echo esc_html__( 'Support Documentation', 'woo-coupon-usage' ); ?></h2>
       <p style="font-size: 16px; margin-bottom: 10px;"><?php echo esc_html__( 'Search our documentation for help with common questions and issues.', 'woo-coupon-usage' ); ?></p>
       <form id="couponaffiliates-docs-search-form" autocomplete="off" style="margin-bottom: 20px;">
           <input class="docs-search-input"

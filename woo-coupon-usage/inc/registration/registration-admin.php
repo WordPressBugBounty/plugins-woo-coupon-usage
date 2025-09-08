@@ -280,6 +280,21 @@ function wcusage_admin_registrations_page_html() {
             }
         }
     }
+    // Enqueue styles for registrations list page (buttons layout and alignment)
+    add_action( 'admin_enqueue_scripts', 'wcusage_enqueue_registrations_admin_assets' );
+    function wcusage_enqueue_registrations_admin_assets(  $hook  ) {
+        if ( isset( $_GET['page'] ) && $_GET['page'] === 'wcusage_registrations' ) {
+            $style = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-registrations.css';
+            $ver = ( file_exists( $style ) ? filemtime( $style ) : '1.0.0' );
+            wp_enqueue_style(
+                'wcusage-admin-registrations',
+                WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-registrations.css',
+                array(),
+                $ver
+            );
+        }
+    }
+
     $statussearch = "";
     if ( isset( $_GET['status'] ) ) {
         $statussearch = sanitize_text_field( wp_unslash( $_GET['status'] ) );
@@ -436,8 +451,10 @@ function wcusage_admin_registrations_page_html() {
   </div>
 
 	<?php 
-    $testListTable = new wcusage_registrations_List_Table();
-    $testListTable->prepare_items();
+    if ( class_exists( 'wcusage_registrations_List_Table' ) ) {
+        $testListTable = new wcusage_registrations_List_Table();
+        $testListTable->prepare_items();
+    }
     ?>
 
   <!-- Bulk actions toolbar (Apply via proxy form) -->
@@ -468,7 +485,9 @@ function wcusage_admin_registrations_page_html() {
 
 	<div id="icon-users" class="icon32"><br/></div>
 	<?php 
-    $testListTable->display();
+    if ( isset( $testListTable ) ) {
+        $testListTable->display();
+    }
     ?>
 
   <!-- Hidden proxy form for bulk accepts (avoid nested forms with row actions) -->

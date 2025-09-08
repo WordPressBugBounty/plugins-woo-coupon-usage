@@ -278,6 +278,10 @@ textarea {
     display: none;
 }
 
+.wcu-coupon-select {
+    color: #2c3e50;
+}
+
 .show_statistics {
     margin-top: -20px;
 }
@@ -1070,6 +1074,11 @@ body.dark-mode .wcuTableFoot strong span {
     color: var(--text-color) !important;
 }
 
+body.dark-mode #wcu-coupon-select {
+    background: none !important;
+    color: var(--text-color) !important
+}
+
 body.dark-mode a {
     color: var(--accent-color) !important;
 }
@@ -1106,7 +1115,6 @@ body.dark-mode #tab-page-back {
     border: 0px solid var(--border-color) !important;
     color: #fff !important;
 }
-
 
 body.dark-mode .wcu-campaigns-col1, body.dark-mode .wcu-campaigns-col2 {
     color: var(--text-color) !important;

@@ -120,7 +120,7 @@ function wcusage_field_cb_currency(  $args  ) {
         $wcusage_field_currency_rate = $get_default_currency_settings['wcusage_field_currency_rate'];
         $thistabsfields = ' <div class="input_fields_wrap"></div>';
         $thistabsfields .= '<span style="display: block; float: left;"><span style="margin-left: 35px; font-size: 12px;">Currency Code:</span><br/> <span style="font-size: 12px;">1.00 x</span> <input type="text" style="max-width: 82px;" id="wcusage_field_currencies_name_' . esc_attr( $i ) . '" customid="wcusage_field_currencies" name="wcusage_options[wcusage_field_currencies][' . esc_attr( $i ) . '][name]" checktype="customnumber" custom1="' . esc_attr( $i ) . '" custom2="name" placeholder="" value="' . esc_attr( $wcusage_field_currency_name ) . '"></span>';
-        $thistabsfields .= '<span style="display: block; float: left;"><span style="margin-left: 18px; font-size: 12px;">Conversion:</span><br/>&nbsp;= <input type="text" style="max-width: 82px;" id="wcusage_field_currencies_rate_' . esc_attr( $i ) . '" customid="wcusage_field_currencies" name="wcusage_options[wcusage_field_currencies][' . esc_attr( $i ) . '][rate]" checktype="customnumber" custom1="' . esc_attr( $i ) . '" custom2="rate" placeholder="1.00" value="' . esc_attr( $wcusage_field_currency_rate ) . '"> <span style="font-size: 12px;">' . esc_html( $defaultcurrency ) . '</span></span>';
+        $thistabsfields .= '<span style="display: block; float: left;"><span style="margin-left: 18px; font-size: 12px;">Conversion:</span><br/>&nbsp;= <input type="number" style="max-width: 82px;" lang="en" id="wcusage_field_currencies_rate_' . esc_attr( $i ) . '" customid="wcusage_field_currencies" name="wcusage_options[wcusage_field_currencies][' . esc_attr( $i ) . '][rate]" checktype="customnumber" custom1="' . esc_attr( $i ) . '" custom2="rate" placeholder="1.00" value="' . esc_attr( $wcusage_field_currency_rate ) . '" oninput="this.value = this.value.replace(/,/g, \'\')"> <span style="font-size: 12px;">' . esc_html( $defaultcurrency ) . '</span></span>';
         echo $thistabsfields;
         echo '<div style="clear: both;"></div><br/><hr/>';
     }
@@ -267,7 +267,7 @@ function wcusage_field_cb_currency(  $args  ) {
       <br/>
 
       <p style="font-weight: bold;"><?php 
-    echo esc_html__( 'Currently the APILayer free plan supports all base currencies and 100 requests/month which is all that is required.', 'woo-coupon-usage' );
+    echo esc_html__( 'The APILayer free plan should support all base currencies and 100 requests/month which is all that is required.', 'woo-coupon-usage' );
     ?></p>
       
       <br/>

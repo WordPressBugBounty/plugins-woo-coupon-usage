@@ -478,12 +478,24 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
         $current_user = wp_get_current_user();
         $current_user_id = $current_user->ID;
         $current_username = $current_user->user_login;
+        // Check if admin is previewing another user's dashboard
+        $preview_user_id = $current_user_id;
+        $is_admin_preview = false;
+        if ( isset( $_GET['userid'] ) && isset( $_GET['preview_nonce'] ) && wcusage_check_admin_access() ) {
+            $preview_user_id_param = intval( $_GET['userid'] );
+            $preview_nonce = sanitize_text_field( $_GET['preview_nonce'] );
+            // Verify the nonce
+            if ( wp_verify_nonce( $preview_nonce, 'wcusage_preview_affiliate_' . $preview_user_id_param ) ) {
+                $preview_user_id = $preview_user_id_param;
+                $is_admin_preview = true;
+            }
+        }
         $args = array(
             'post_type'      => 'shop_coupon',
             'posts_per_page' => -1,
             'meta_query'     => array(array(
                 'key'     => 'wcu_select_coupon_user',
-                'value'   => $current_user_id,
+                'value'   => $preview_user_id,
                 'compare' => '=',
             )),
         );
@@ -505,13 +517,27 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
             }
         } else {
             ?>
+            
+            <?php 
+            // Get username for display
+            $display_username = $current_username;
+            if ( $is_admin_preview ) {
+                $preview_user = get_userdata( $preview_user_id );
+                $display_username = ( $preview_user ? $preview_user->user_login : 'Unknown User' );
+            }
+            ?>
+
             <h3 class="wcu-user-coupon-title"><?php 
             echo esc_html__( "My Affiliate Coupons", "woo-coupon-usage" );
+            ?> <?php 
+            if ( $is_admin_preview ) {
+                echo '<small>(Viewing as: ' . esc_html( $display_username ) . ')</small>';
+            }
             ?></h3>
             <hr class="wcu-user-coupon-linebreak" />
 
             <?php 
-            if ( !is_user_logged_in() ) {
+            if ( !is_user_logged_in() && !$is_admin_preview ) {
                 if ( $wcusage_loginform ) {
                     ob_start();
                     ?>
@@ -601,7 +627,7 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                     $secretid = $coupon . "-" . $postid;
                     $uniqueurl = $page_url . 'couponid=' . $secretid;
                     if ( $numcoupons <= 1 && $wcusage_show_coupon_if_single ) {
-                        if ( wcusage_iscouponusers( $coupon, $current_user_id ) && $lastcoupon != $coupon ) {
+                        if ( wcusage_iscouponusers( $coupon, $preview_user_id ) && $lastcoupon != $coupon ) {
                             $coupon = str_replace( ' ', '%20', $coupon );
                             if ( shortcode_exists( 'couponaffiliates' ) ) {
                                 echo do_shortcode( "[couponaffiliates coupon=" . $coupon . "]" );
@@ -612,7 +638,7 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                     } else {
                         $wcu_select_coupon_user = get_post_meta( $postid, 'wcu_select_coupon_user', true );
                         // This is a user ID
-                        if ( get_the_title() && $wcu_select_coupon_user == $current_user_id ) {
+                        if ( get_the_title() && $wcu_select_coupon_user == $preview_user_id ) {
                             $countcoupons++;
                             $countcouponsloop++;
                             if ( $countcouponsloop == 1 ) {

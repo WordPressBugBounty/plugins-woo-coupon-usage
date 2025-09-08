@@ -20,6 +20,18 @@ $options = get_option( 'wcusage_options' );
 $wcusage_urlprivate = wcusage_get_setting_value( 'wcusage_field_urlprivate', '1' );
 // Check if user is logged in
 $current_user_id = get_current_user_id();
+// Check if admin is previewing another user's dashboard
+$preview_user_id = $current_user_id;
+$is_admin_preview = false;
+if ( isset( $_GET['userid'] ) && isset( $_GET['preview_nonce'] ) && wcusage_check_admin_access() ) {
+    $preview_user_id_param = intval( $_GET['userid'] );
+    $preview_nonce = sanitize_text_field( $_GET['preview_nonce'] );
+    // Verify the nonce
+    if ( wp_verify_nonce( $preview_nonce, 'wcusage_preview_affiliate_' . $preview_user_id_param ) ) {
+        $preview_user_id = $preview_user_id_param;
+        $is_admin_preview = true;
+    }
+}
 if ( isset( $_GET['couponid'] ) ) {
     $coupon_code = strtolower( $_GET['couponid'] );
     $coupon_code = preg_replace( '/-\\d+$/', '', $coupon_code );
@@ -41,14 +53,14 @@ if ( isset( $_GET['couponid'] ) ) {
     $coupons = get_posts( array(
         'post_type'  => 'shop_coupon',
         'meta_key'   => 'wcu_select_coupon_user',
-        'meta_value' => $current_user_id,
+        'meta_value' => $preview_user_id,
     ) );
     wp_reset_postdata();
 } else {
     $coupons = get_posts( array(
         'post_type'   => 'shop_coupon',
         'meta_key'    => 'wcu_select_coupon_user',
-        'meta_value'  => $current_user_id,
+        'meta_value'  => $preview_user_id,
         'numberposts' => 1,
     ) );
     if ( !empty( $coupons ) ) {
@@ -66,16 +78,18 @@ if ( isset( $_GET['couponid'] ) ) {
 $coupons_total = get_posts( array(
     'post_type'  => 'shop_coupon',
     'meta_key'   => 'wcu_select_coupon_user',
-    'meta_value' => $current_user_id,
+    'meta_value' => $preview_user_id,
     'fields'     => 'ids',
 ) );
 $other_view = 0;
-$user_info = get_userdata( $current_user_id );
+$user_info = get_userdata( $preview_user_id );
 if ( isset( $_GET['couponid'] ) ) {
     $other_view = 1;
     $couponinfo = wcusage_get_coupon_info( $_GET['couponid'] );
     $couponuser = $couponinfo[1];
     $user_info = get_userdata( $couponuser );
+} elseif ( $is_admin_preview ) {
+    $other_view = 1;
 } else {
     $couponinfo = wcusage_get_coupon_info( $coupon_code );
     if ( isset( $couponinfo[1] ) ) {
@@ -127,7 +141,7 @@ if ( $postid ) {
         }
     }
     // If not user's coupon, or not MLA parent, or not admin, redirect to affiliate registration page
-    if ( $current_user_id != get_post_meta( $postid, 'wcu_select_coupon_user', true ) && !$is_mla_parent && !wcusage_check_admin_access( $couponuser ) ) {
+    if ( $preview_user_id != get_post_meta( $postid, 'wcu_select_coupon_user', true ) && !$is_mla_parent && !wcusage_check_admin_access( $couponuser ) && !$is_admin_preview ) {
         $registration_page = ( isset( $options['wcusage_registration_page'] ) ? $options['wcusage_registration_page'] : '' );
         if ( $registration_page ) {
             wp_redirect( get_permalink( $registration_page ) );

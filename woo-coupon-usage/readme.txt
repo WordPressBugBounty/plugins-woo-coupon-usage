@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.6.0
+Stable tag: 6.7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -274,6 +274,17 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 6.7.0 - 8th September 2025 =
+- New: Added new "view affiliate" page that allows admins to view detailed information about each individual affiliate, with a summary of their coupons, statistics, referrals, payouts, activity and more. It also includes options to edit the affiliate user. All previous edit affiliate links now go to this new page.
+- New: On the "Coupon Affiliate Users" page, added a new "actions" column with a "view" link, and a "delete" button that has 4 different options for deleting the affiliate users or their coupons.
+- New: On the "Coupon Affiliate Users" page, added a new "sort by" filter to sort the users by total referrals, sales, commission, or unpaid commission.
+- New: Added a new search box to the admin settings page, that lets you look for specific settings on the page more easily.
+- Tweak: Made some changes to the admin "registrations" page including adding some "view affiliate" and "view dashboard" buttons to the action column for accepted registrations.
+- Fix: Fixed an issue with some websites not being able to save settings properly.
+- Fix: Fixed an issue with the referral URL displayed on the affiliate dashboard not being encoded, so coupons with symbols in them were not working properly.
+- Fix: Fixed an issue in some cases where if certain order statuses were selected to show on the affiliate dashboard, certain orders were not updating the "total" or "monthly summary" stats properly.
+- Fix: Fixed a potential PHP error on the admin registrations page.
 
 = Version 6.6.0 - 28th August 2025 =
 - New: Added new "bulk actions" functionality for the admin affiliate registrations page, which allows you to bulk accept, decline or delete up to 20 registrations at once.

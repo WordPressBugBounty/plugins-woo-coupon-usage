@@ -399,7 +399,7 @@ if (!function_exists('wcusage_tab_settings')) {
                                     <p><?php echo esc_html__("Sorry, this coupon is not assigned to you. You can only edit your own account details.", "woo-coupon-usage"); ?></p>
                                     <?php if (wcusage_check_admin_access() && current_user_can('edit_users')) { ?>
                                         <p><?php echo sprintf(esc_html__("[Admin] You can edit the account details for this user in the admin area: %s", "woo-coupon-usage"),
-                                            "<a href='" . get_edit_user_link($couponuserid) . "' target='_blank'>" . esc_html__("Edit User", "woo-coupon-usage") . "</a>"); ?></p>
+                                            "<a href='" . esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $couponuserid) ) . "' target='_blank'>" . esc_html__("View Affiliate", "woo-coupon-usage") . "</a>"); ?></p>
                                         <br/>
                                         <span class='admin-edit-account'>
                                             <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">

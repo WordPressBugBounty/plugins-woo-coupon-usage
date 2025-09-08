@@ -240,6 +240,44 @@
     margin-right: 20px;
 }
 
+/* Settings header & search */
+.wcu-settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+.wcu-settings-title { margin: 0; }
+#wcu-settings-search-right { position: relative; margin-left: auto; }
+#wcu-settings-search-right .wcu-search-row { display: flex; gap: 8px; align-items: center; }
+#wcu-settings-search-right .wcu-search-prompt { display: none; color: #555; font-weight: 600; position: relative; padding-right: 10px; }
+#wcu-settings-search-right .wcu-search-prompt-text { white-space: nowrap; }
+#wcu-settings-search-right .wcu-search-prompt-arrow { display: inline-block; position: relative; width: 28px; height: 10px; margin-left: 8px; }
+#wcu-settings-search-right .wcu-search-prompt-arrow::before { content: ""; position: absolute; left: 0; top: 50%; width: 20px; height: 2px; background: #888; transform: translateY(-50%); border-radius: 1px; opacity: 0.9; }
+#wcu-settings-search-right .wcu-search-prompt-arrow::after { content: ""; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 7px solid #888; opacity: 0.9; }
+#wcu-settings-search { min-width: 260px; max-width: 100%; padding: 6px 10px; }
+#wcu-settings-search-results { position: absolute; right: 0; width: min(520px, 90vw); margin-top: 6px; display: none; border: 1px solid #ddd; border-radius: 6px; background: #fff; max-height: 280px; overflow: auto; z-index: 1000; }
+#wcu-settings-search-results ul { margin: 0; padding: 6px 0; list-style: none; }
+#wcu-settings-search-results li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-bottom: 1px solid #f0f0f0; }
+#wcu-settings-search-results li:last-child { border-bottom: 0; }
+.wcu-settings-header #wcu-settings-search-empty { display: none; margin-top: 8px; color: #555; }
+.wcu-search-item-label { font-weight: 600; }
+.wcu-search-item-meta { color: #666; font-size: 12px; }
+.wcu-search-jump { white-space: nowrap; }
+.wcu-highlight-jump { animation: wcuFlash 1.6s ease-in-out 1; }
+@keyframes wcuFlash { 0% { box-shadow: 0 0 0 0 rgba(50,205,50, 0.0); } 20% { box-shadow: 0 0 0 4px rgba(50,205,50, 0.35); } 60% { box-shadow: 0 0 0 0 rgba(50,205,50, 0.0); } 100% { box-shadow: 0 0 0 0 rgba(50,205,50, 0.0); } }
+@media (max-width: 782px) {
+    .wcu-settings-header { flex-direction: column; align-items: flex-start; }
+    #wcu-settings-search-right { width: 100%; }
+    #wcu-settings-search-right .wcu-search-row { width: 100%; }
+    #wcu-settings-search { width: 100%; min-width: 0; }
+}
+@media (min-width: 783px) {
+    #wcu-settings-search-right .wcu-search-prompt { display: inline-flex; align-items: center; }
+}
+
 /* Pro Details */
 @media only screen and (min-width: 1387px) {
     .wcu-pro-details-col-1 {
@@ -1224,7 +1262,8 @@ Label the data
 .wp-list-table.referrals tr:hover,
 .wp-list-table.affiliateusers tr:hover,
 .wp-list-table.affiliatecoupons tr:hover {
-    outline: 2px solid #AFAFAF;
+    background: #f4fcfc;
+    outline: 2px solid #e2e2e2;
 }
 
 .wp-list-table.payout td,
@@ -2355,37 +2394,181 @@ p label {
 
 /* Tooltip */
 
-/* Custom Tooltip Styles */
+/* Disable any conflicting WordPress tooltip styles */
+.woocommerce-help-tip,
+.wp-tooltip,
+.tooltip,
+.ui-tooltip {
+    display: none !important;
+}
+
+/* Force our custom tooltip styles */
 .custom-tooltip {
-    position: relative;
-    display: inline-block;
-    width: 100%;
+    position: relative !important;
+    display: inline-block !important;
+    width: 100% !important;
+    padding: 8px 20px !important; /* Increased top/bottom padding to cover gap */
+    margin: -8px -20px !important; /* Adjusted margin accordingly */
+}
+
+/* Ensure tooltip containers don't clip the tooltip */
+.custom-tooltip,
+.custom-tooltip * {
+    overflow: visible !important;
+}
+
+/* Ensure payout information containers don't clip tooltips */
+.wcusage-affiliate-info-box,
+.wcusage-affiliate-info-box .info-content,
+.wcusage-affiliate-info-box .info-row {
+    overflow: visible !important;
 }
 
 .custom-tooltip .tooltip-content {
-    display: none;
-    position: absolute;
+    display: none !important;
+    position: absolute !important;
     text-align: center;
-    left: 50%;
-    width: 200px;
-    background: #333 !important;
-    color: #fff !important;
-    transform: translateX(-50%);
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    z-index: 9999999999;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    left: 50% !important;
+    bottom: 100% !important;
+    width: 200px !important;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+    color: #ecf0f1 !important;
+    transform: translateX(-50%) !important;
+    padding: 14px 18px 14px 18px !important;
+    border: none !important;
+    border-radius: 12px !important;
+    z-index: 99999 !important;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    margin-bottom: -5px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    font-size: 13px;
+    line-height: 1.6;
+    font-weight: 400;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .custom-tooltip .tooltip-content p {
-    color: #fff !important;
+    color: #ecf0f1 !important;
+    margin: 0 0 12px 0;
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
 }
 
-.custom-tooltip:hover .tooltip-content {
+.custom-tooltip .tooltip-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Enhanced styling for elements within tooltip */
+.custom-tooltip .tooltip-content .wcusage-copyable-link {
+    margin: 8px 0 6px 0;
+    text-align: center;
+}
+
+.custom-tooltip .tooltip-content .wcusage-copyable-link strong {
     display: block;
+    margin-bottom: 2px;
+    font-size: 11px;
+    color: #bdc3c7;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.custom-tooltip .tooltip-content .wcusage-copyable-link > div {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.custom-tooltip .tooltip-content .wcusage-copy-link-text {
+    flex: 1;
+    min-height: 28px !important;
+    max-height: 28px !important;
+    font-size: 10px !important;
+    padding: 4px 6px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 4px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ecf0f1 !important;
+    text-align: left !important;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+    margin-bottom: 0 !important;
+}
+
+.custom-tooltip .tooltip-content .wcusage-copy-link-button {
+    flex-shrink: 0;
+    min-height: 28px !important;
+    max-height: 28px !important;
+    padding: 4px 8px !important;
+    background: #3498db !important;
+    border: none !important;
+    border-radius: 4px !important;
+    color: white !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+}
+
+.custom-tooltip .tooltip-content .wcusage-copy-link-button:hover {
+    background: #2980b9 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3) !important;
+}
+
+.custom-tooltip .tooltip-content .wcusage-info-label {
+    color: #bdc3c7 !important;
+    font-weight: 600 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 2px !important;
+}
+
+.custom-tooltip .tooltip-content a:not(.wcusage-copy-link-button) {
+    color: #3498db !important;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    display: inline-block;
+    margin: 2px 0;
+}
+
+.custom-tooltip .tooltip-content a:not(.wcusage-copy-link-button):hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+/* Hide tooltip by default, show only on hover of the text */
+.custom-tooltip {
+    display: none;
+}
+
+/* Show tooltip when hovering over the commission text divs */
+div[style*="line-height: 1.4"] div:hover .custom-tooltip,
+.wcusage-stat-box div:hover .custom-tooltip,
+.custom-tooltip:hover {
+    display: inline-block;
+}
+
+/* Show tooltip content on hover of the tooltip icon or expanded area */
+.custom-tooltip:hover .tooltip-content {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(-50%) !important;
+    z-index: 99999 !important;
 }
 
 /* Tooltip container */

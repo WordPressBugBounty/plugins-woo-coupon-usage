@@ -413,7 +413,7 @@ function wcusage_dashboard_page_section_referrals() {
                 $name = trim($user->first_name . ' ' . $user->last_name) ?: $user->user_login;
             ?>
             <tr class="wcusage-admin-table-col-row">
-                <td><a href="<?php echo esc_url(get_edit_user_link($user_id)); ?>" title="<?php echo esc_html($user->user_login); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
+                <td><a href="<?php echo esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $user_id) ); ?>" title="<?php echo esc_html($user->user_login); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
                 <td><?php echo esc_html($order_date); ?></td>
                 <td><a href="<?php echo esc_url(admin_url('post.php?post=' . $order_id . '&action=edit')); ?>">#<?php echo esc_html($order_id); ?></a></td>
                 <td><?php echo wp_kses_post(wcusage_format_price(number_format($total, 2, '.', ''))); ?></td>
@@ -534,7 +534,7 @@ function wcusage_dashboard_page_section_coupons() {
                 $uniqueurl = $coupon_info[4];
             ?>
             <tr class="wcusage-admin-table-col-row">
-                <td><a href="<?php echo esc_url(get_edit_user_link($user_id)); ?>" title="<?php echo esc_html($name); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
+                <td><a href="<?php echo esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $user_id) ); ?>" title="<?php echo esc_html($name); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
                 <td><a href="<?php echo esc_html($uniqueurl); ?>" title="View Dashboard" target="_blank"><?php echo esc_html(get_the_title($coupon_id)); ?></a></td>
                 <td><?php echo esc_html($date); ?></td>
             </tr>
@@ -591,7 +591,7 @@ function wcusage_dashboard_page_section_registrations() {
                 }
             ?>
             <tr class="wcusage-admin-table-col-row">
-                <td><a href="<?php echo esc_url(get_edit_user_link($result->userid)); ?>" title="<?php echo esc_html($name); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
+                <td><a href="<?php echo esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $result->userid) ); ?>" title="<?php echo esc_html($name); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
                 <td><?php echo esc_html($date); ?></td>
                 <td><?php echo esc_html($result->couponcode); ?></td>
                 <td><?php echo ucfirst(esc_html($result->status)); ?></td>
@@ -647,7 +647,7 @@ function wcusage_dashboard_page_section_payouts() {
                 $name = trim($user->first_name . ' ' . $user->last_name) ?: $user->user_login;
             ?>
             <tr class="wcusage-admin-table-col-row">
-                <td><a href="<?php echo get_edit_user_link($result->userid); ?>" title="<?php echo esc_html($user->user_login); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
+                <td><a href="<?php echo esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $result->userid) ); ?>" title="<?php echo esc_html($user->user_login); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
                 <td><?php echo esc_html($date); ?></td>
                 <td><?php echo esc_html($coupon); ?></td>
                 <td><?php echo wp_kses_post(wcusage_format_price(number_format($result->amount, 2, '.', ''))); ?></td>
