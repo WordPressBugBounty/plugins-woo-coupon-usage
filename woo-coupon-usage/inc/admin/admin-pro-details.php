@@ -564,6 +564,20 @@ __( 'Connect your registration form to automatically add affiliates to your mail
 ?>
 
 <?php echo wcusage_output_addon_box(
+__( 'Email Newsletters', 'woo-coupon-usage' ),
+"wcusage_field_email_newsletter_enable",
+__( 'Send a custom email newsletters to all your existing affiliates directly from the plugin, with progress tracking & placeholders.', 'woo-coupon-usage' ),
+"",
+"far fa-newspaper",
+0,
+0,
+0,
+'',
+''
+);
+?>
+
+<?php echo wcusage_output_addon_box(
 __( 'Affiliate Groups', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Assign affiliates to groups and then configure a variety of settings for that whole group.', 'woo-coupon-usage' ),

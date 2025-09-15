@@ -332,6 +332,9 @@ jQuery( document ).ready(function() {
   <?php 
     echo wcusage_admin_settings_tab_click( "#tab-creatives", ".wcusage_row_creatives", 1 );
     ?>
+  <?php 
+    echo wcusage_admin_settings_tab_click( "#tab-newsletter", ".wcusage_row_newsletter", 1 );
+    ?>
 
   <?php 
     echo wcusage_admin_settings_tab_click( "#tab-bonuses", ".wcusage_row_bonuses", 1 );
@@ -570,6 +573,15 @@ jQuery( document ).ready(function() {
             "tab-creatives",
             esc_html__( "Creatives", "woo-coupon-usage" ),
             "fas fa-images",
+            1,
+            ''
+        );
+        ?>
+  <?php 
+        echo wcusage_admin_settings_tab_button(
+            "tab-newsletter",
+            esc_html__( "Newsletters", "woo-coupon-usage" ),
+            "fas fa-envelope",
             1,
             ''
         );
@@ -1675,17 +1687,16 @@ if ( !function_exists( 'wcusage_setting_option_set_default' ) ) {
     function wcusage_setting_option_set_default(  $options, $name, $default  ) {
         $options = get_option( 'wcusage_options' );
         if ( !isset( $options[$name] ) && current_user_can( 'manage_options' ) ) {
-            $option_group = get_option( 'wcusage_options' );
-            $option_group[$name] = $default;
-            // Do not update if the option is already set
-            if ( isset( $option_group[$name] ) && $option_group[$name] != "" ) {
+            // Do not update if the option is already set but it is just empty
+            if ( isset( $options[$name] ) && $options[$name] === '' ) {
                 return;
             }
-            // Do not update if $option_group is empty or bool(false) for some reason
-            if ( empty( $option_group ) || $option_group === false ) {
+            $options[$name] = $default;
+            // Do not update if $options is empty or bool(false) for some reason
+            if ( empty( $options ) || $options === false ) {
                 return;
             }
-            update_option( 'wcusage_options', $option_group );
+            update_option( 'wcusage_options', $options );
         }
     }
 

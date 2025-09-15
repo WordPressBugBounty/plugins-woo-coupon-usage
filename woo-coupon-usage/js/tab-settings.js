@@ -148,6 +148,8 @@ jQuery(document).ready(function($) {
             nonce: $('#wcusage_settings_nonce').val(),
             post_id: $form.data('post-id'),
             wcu_enable_notifications: $('#wcu_enable_notifications').is(':checked') ? '1' : '0',
+            // Newsletter subscription (user meta). If checkbox exists include explicit value so server can detect.
+            wcu_newsletter_subscribed: $('#wcu_newsletter_subscribed').length ? ($('#wcu_newsletter_subscribed').is(':checked') ? '1' : '0') : '1',
             wcu_enable_reports: $('#wcu_enable_reports').is(':checked') ? '1' : '0',
             wcu_notifications_extra: $('#wcu_notifications_extra').val() || '',
             payouttype: $('#wcu-payout-type').val() || '',

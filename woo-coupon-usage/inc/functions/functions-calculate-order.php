@@ -1377,13 +1377,13 @@ if ( !function_exists( 'wcusage_get_base_currency_symbol' ) ) {
         // Gets the base store currency symbol
         $enablecurrency = wcusage_get_setting_value( 'wcusage_field_enable_currency', '0' );
         if ( $enablecurrency && class_exists( 'NumberFormatter' ) ) {
-            $currency1 = get_option( 'woocommerce_currency' );
+            $currency = get_option( 'woocommerce_currency' );
             $locale = get_locale();
-            $formatter = new \NumberFormatter($locale . '@currency=' . $currency1, \NumberFormatter::CURRENCY);
+            $formatter = new \NumberFormatter($locale . '@currency=' . $currency, \NumberFormatter::CURRENCY);
             return $formatter->getSymbol( \NumberFormatter::CURRENCY_SYMBOL );
         } else {
-            $currency1 = get_option( 'woocommerce_currency' );
-            return get_woocommerce_currency_symbol( $currency1 );
+            $currency = get_option( 'woocommerce_currency' );
+            return get_woocommerce_currency_symbol( $currency );
         }
     }
 

@@ -30,6 +30,14 @@ function wcusage_ajax_update_settings() {
     // Update notification settings
     $wcu_enable_notifications = isset($_POST['wcu_enable_notifications']) ? sanitize_text_field($_POST['wcu_enable_notifications']) : '0';
     update_post_meta($postid, 'wcu_enable_notifications', $wcu_enable_notifications);
+    
+    // Newsletter subscription toggle (user meta) - default subscribed (meta absent). If checkbox unchecked we add meta flag.
+    $newsletter_subscribed = isset($_POST['wcu_newsletter_subscribed']) ? '1' : '0';
+    if($newsletter_subscribed === '1') {
+        delete_user_meta($couponuserid, 'wcusage_newsletter_unsubscribed');
+    } else {
+        update_user_meta($couponuserid, 'wcusage_newsletter_unsubscribed', 1);
+    }
 
     $enable_reports_user_option = wcusage_get_setting_value('wcusage_field_enable_reports_user_option', 1);
     if ($enable_reports_user_option) {
@@ -301,6 +309,16 @@ if (!function_exists('wcusage_tab_settings')) {
                             <p><input type="checkbox" id="wcu_enable_notifications" name="wcu_enable_notifications"
                                 value="1" <?php if ($wcu_enable_notifications) { ?>checked<?php } ?>>
                                 <?php echo esc_html__("Enable Email Notifications", "woo-coupon-usage"); ?></p>
+
+                            <?php
+                            // Newsletter subscription state: subscribed if user meta flag not set
+                            $is_unsub = get_user_meta($couponuserid, 'wcusage_newsletter_unsubscribed', true) ? true : false;
+                            $global_unsub_enabled = wcusage_get_setting_value('wcusage_field_newsletter_enable_unsubscribe', 1);
+                            if($global_unsub_enabled) { ?>
+                                <p><input type="checkbox" id="wcu_newsletter_subscribed" name="wcu_newsletter_subscribed" value="1" <?php if(!$is_unsub) { ?>checked<?php } ?>>
+                                <?php echo esc_html__("Subscribe to Affiliate Newsletters", "woo-coupon-usage"); ?>
+                                <br/><span style="font-size:11px;color:#555;"><?php echo esc_html__("Uncheck to stop receiving affiliate newsletter emails.", "woo-coupon-usage"); ?></span></p>
+                            <?php } ?>
 
                             <?php if ($enable_reports_user_option && $wcusage_field_enable_reports && wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code()) { ?>
                                 <?php

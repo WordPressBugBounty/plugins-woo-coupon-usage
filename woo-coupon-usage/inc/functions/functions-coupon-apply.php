@@ -78,25 +78,79 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_coupons' ) ) {
     $wcusage_field_allow_multiple_coupons = wcusage_get_setting_value('wcusage_field_allow_multiple_coupons', 0);
     if(!$wcusage_field_allow_multiple_coupons) {
 
-      if($current_coupons > 1) {
+  if($current_coupons > 1) {
 
-        foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
+        // Respect click attribution setting
+        $first_click = wcusage_get_setting_value('wcusage_field_click_attribution_first', '0');
 
+        // Capture current applied coupons in order
+        $applied_coupons = array();
+        if ( function_exists('WC') && WC()->cart ) {
+          $applied_coupons = WC()->cart->get_applied_coupons(); // array of codes in apply order
+        }
+
+  // Remove all coupons first
+  // Suppress cookie adjustments while we resolve conflicts
+  global $wcusage_suppress_cookie_on_remove;
+  $wcusage_suppress_cookie_on_remove = true;
+  foreach ( WC()->cart->get_coupons() as $code => $coupon ) {
           WC()->cart->remove_coupon( $coupon->get_code() );
-
           wc_clear_notices();
-
         }
+  // End suppression; we'll re-apply the chosen coupon next
+  $wcusage_suppress_cookie_on_remove = false;
 
-        // get wcusage_referral or wcusage_referral_code cookie and set that as coupon
-        $referral_code = "";
-        if(isset($_COOKIE['wcusage_referral_code'])) {
-          $referral_code = $_COOKIE['wcusage_referral_code'];
-        } else if(isset($_COOKIE['wcusage_referral'])) {
-          $referral_code = $_COOKIE['wcusage_referral'];
-        }
-        if($referral_code) {
-          WC()->cart->add_discount( $referral_code );
+        if ( $first_click ) {
+          // Keep the last applied affiliate coupon (manual choice wins)
+          if ( ! empty( $applied_coupons ) ) {
+            $last_applied = end( $applied_coupons );
+            if ( $last_applied ) {
+              WC()->cart->add_discount( $last_applied );
+            }
+          }
+        } else {
+          // Last-click: prefer the newest applied affiliate coupon this request
+          $reapplied = false;
+          if ( ! empty( $applied_coupons ) ) {
+            // Iterate from newest to oldest
+            for ( $i = count( $applied_coupons ) - 1; $i >= 0; $i-- ) {
+              $code_try = $applied_coupons[$i];
+              // Check if this code is an affiliate coupon
+              $is_affiliate = false;
+              try {
+                $wc_c = new WC_Coupon( $code_try );
+                if ( $wc_c && method_exists( $wc_c, 'get_id' ) ) {
+                  $cid = $wc_c->get_id();
+                  if ( $cid ) {
+                    $assigned_user = get_post_meta( $cid, 'wcu_select_coupon_user', true );
+                    if ( $assigned_user ) {
+                      $is_affiliate = true;
+                    }
+                  }
+                }
+              } catch ( Exception $e ) {
+                $is_affiliate = false;
+              }
+              if ( $is_affiliate ) {
+                WC()->cart->add_discount( $code_try );
+                $reapplied = true;
+                break;
+              }
+            }
+          }
+
+          if ( ! $reapplied ) {
+            // Fallback: prefer the current referral cookie coupon (may be stale during this request)
+            $referral_code = "";
+            if(isset($_COOKIE['wcusage_referral_code'])) {
+              $referral_code = $_COOKIE['wcusage_referral_code'];
+            } else if(isset($_COOKIE['wcusage_referral'])) {
+              $referral_code = $_COOKIE['wcusage_referral'];
+            }
+            if($referral_code) {
+              WC()->cart->add_discount( $referral_code );
+            }
+          }
         }
 
         wc_add_notice( esc_html__( "Sorry, you can only use one affiliate coupon per order.", "woo-coupon-usage" ), "error" );
@@ -351,11 +405,31 @@ function wcusage_custom_woocommerce_coupon_html( $discount_html, $coupon ) {
         return $discount_html;
     }
     
-    // Check if the discount amount is £0.00
-    if ( WC()->cart->get_coupon_discount_amount( $coupon->get_code(), true ) == 0 ) {
-        // Hide the £0.00 value but keep the Remove link
-        $discount_html = '<a href="' . esc_url( add_query_arg( 'remove_coupon', $coupon->get_code(), wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" aria-label="' . esc_attr__( 'Remove this item', 'woocommerce' ) . '">' . esc_html__( '[Remove]', 'woocommerce' ) . '</a>';
+  // Check if the discount amount is £0.00
+  if ( WC()->cart->get_coupon_discount_amount( $coupon->get_code(), true ) == 0 ) {
+    // Hide the £0.00 value but keep the Remove link. Prefer extracting the existing link from $discount_html
+    // to preserve WooCommerce's nonce and attributes. Fallback to building a URL if needed.
+    $extracted = '';
+    if ( is_string( $discount_html ) ) {
+      // Find the first anchor tag (usually the remove link) and keep from there onwards
+      $a_pos = strpos( $discount_html, '<a ' );
+      if ( $a_pos !== false ) {
+        $extracted = substr( $discount_html, $a_pos );
+      }
     }
+
+    if ( $extracted ) {
+      $discount_html = $extracted;
+    } else {
+      // Build a safe remove URL as a fallback
+      if ( function_exists( 'wc_get_cart_remove_coupon_url' ) ) {
+        $remove_url = wc_get_cart_remove_coupon_url( $coupon->get_code() );
+      } else {
+        $remove_url = add_query_arg( 'remove_coupon', $coupon->get_code(), wc_get_cart_url() );
+      }
+      $discount_html = '<a href="' . esc_url( $remove_url ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '" aria-label="' . esc_attr( sprintf( __( 'Remove coupon: %s', 'woocommerce' ), $coupon->get_code() ) ) . '">' . esc_html__( '[Remove]', 'woocommerce' ) . '</a>';
+    }
+  }
 
     return $discount_html;
 }

@@ -239,6 +239,31 @@ function wcusage_field_cb_urls( $args )
 
         </div>
 
+        <!-- ********** Click Attribution ********** -->
+        <br/><hr/>
+
+        <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Click Attribution', 'woo-coupon-usage' ); ?>:</h3>
+
+        <?php
+          // Single source of truth: 0 = Last-Click (default), 1 = First-Click
+          echo wcusage_setting_select_option(
+            'wcusage_field_click_attribution_first',
+            '0',
+            esc_html__( 'Attribution Model', 'woo-coupon-usage' ),
+            '0px',
+            array(
+              '0' => esc_html__( 'Last-Click Attribution (Default)', 'woo-coupon-usage' ),
+              '1' => esc_html__( 'First-Click Attribution', 'woo-coupon-usage' )
+            )
+          );
+        ?>
+
+        <p style="margin-top:6px;">
+          <i>- <?php echo esc_html__( 'Last-Click: New referral links overwrite referral cookies and auto-applied coupon with the latest affiliate.', 'woo-coupon-usage' ); ?></i><br/>
+          <i>- <?php echo esc_html__( 'First-Click: Once a referral cookie exists, later referral links won’t replace it or the cart coupon automatically; customers can still manually apply a different coupon.', 'woo-coupon-usage' ); ?></i><br/>
+          <i><?php echo esc_html__( 'Bare in mind: In both cases the referral link cookie will take priority over the cart coupon in terms of awarding the affiliate.', 'woo-coupon-usage' ); ?></i>
+        </p>
+
         <!-- ********** Click Log ********** -->
         <br/><hr/>
 

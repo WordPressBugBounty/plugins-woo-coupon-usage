@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.7.0
+Stable tag: 6.8.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -274,6 +274,13 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 6.8.0 - 15th September 2025 =
+- New: Added a new "Email Newsletter" feature to the plugin. This allows you to send custom email newsletters to all your affiliates, or specific groups of affiliates. You can create and send newsletters directly from the WordPress admin area, and view a log of all sent newsletters.
+- New: Added a new referral link click "Attribution Model" option to the plugin settings, to allow you to choose between "Last-click" or "First-click" attribution for the referral URL tracking. This will determine whether the first or last referral URL used by a customer is credited with the conversion when they place an order.
+- Tweak: (PRO) The custom payout amount field on the affiliate dashboard payouts tab is now always 2 decimal places.
+- Fix: Fixed an issue with deleting admin accounts triggering user roles to be deleted.
+- Fix: Fixed a potential PHP warning on the floating widget when a coupon has no statistics yet.
 
 = Version 6.7.0 - 8th September 2025 =
 - New: Added new "view affiliate" page that allows admins to view detailed information about each individual affiliate, with a summary of their coupons, statistics, referrals, payouts, activity and more. It also includes options to edit the affiliate user. All previous edit affiliate links now go to this new page.

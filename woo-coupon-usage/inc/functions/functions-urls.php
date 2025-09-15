@@ -174,9 +174,30 @@ add_action('init', 'wcusage_url_cookie', 1);
             $coupon_id = $coupon->get_id();
           }
 
+          // Track if we replaced the referral cookie (used to force new click record)
+          $did_replace_referral = false;
           if($wcusage_store_cookies) {
-  				  setcookie('wcusage_referral', $thereferral, $expiry, '/');
-            setcookie("wcusage_referral_code", "", 1);
+            $first_click = wcusage_get_setting_value('wcusage_field_click_attribution_first', '0');
+            $has_existing = ( isset($_COOKIE['wcusage_referral']) && sanitize_text_field( wp_unslash($_COOKIE['wcusage_referral']) ) ) || ( isset($_COOKIE['wcusage_referral_code']) && sanitize_text_field( wp_unslash($_COOKIE['wcusage_referral_code']) ) );
+            if( $first_click && $has_existing ) {
+              // Do not replace existing referral cookies in first-click mode.
+            } else {
+              // Determine if the referral code is changing (last-click replacement)
+              $existing_ref = '';
+              if ( isset($_COOKIE['wcusage_referral']) ) {
+                $existing_ref = sanitize_text_field( wp_unslash( $_COOKIE['wcusage_referral'] ) );
+              }
+              if ( strtolower($existing_ref) !== strtolower($thereferral) ) {
+                $did_replace_referral = true;
+              }
+        // Mark pending value for this request so removal hooks won't clear it.
+        $GLOBALS['wcusage_referral_cookie_pending'] = $thereferral;
+      		setcookie('wcusage_referral', $thereferral, $expiry, '/');
+              // In last-click mode, clear wcusage_referral_code to prefer live referral.
+              if( ! $first_click ) {
+                setcookie("wcusage_referral_code", "", 1);
+              }
+            }
           }
 
           if($wcusage_field_show_click_history) {
@@ -206,8 +227,8 @@ add_action('init', 'wcusage_url_cookie', 1);
             }
 
             $wcusage_field_show_click_history = wcusage_get_setting_value('wcusage_field_show_click_history', 1 );
-            // If not currently a click ID or track all clicks enabled. Add click to database.
-            if( !$clickcookie || ($wcusage_field_track_all_clicks && !$clickcookie_recent) ) {
+            // If replacement occurred OR not currently a click ID OR track all clicks enabled, add click
+            if( $did_replace_referral || !$clickcookie || ($wcusage_field_track_all_clicks && !$clickcookie_recent) ) {
               $addclick = wcusage_install_clicks_data($coupon_id, $campaign, '', $refpage, 0, $ipaddress);
               if($wcusage_store_cookies) {
                 setcookie('wcusage_referral_click', $addclick, $expiry, '/'); // Updates click ID cookie
@@ -277,10 +298,22 @@ if( !function_exists( 'wcusage_apply_coupon_to_cart' ) ) {
     $wcusage_apply_enable = wcusage_get_setting_value('wcusage_field_apply_enable', '1');
     $wcusage_field_apply_instant_enable = wcusage_get_setting_value('wcusage_field_apply_instant_enable', '1');
 
+    // Attribution mode and existing cookies
+    $first_click = wcusage_get_setting_value('wcusage_field_click_attribution_first', '0');
+    $has_ref_cookie = false;
+    $cookie_ref = wcusage_get_cookie_value("wcusage_referral");
+    $cookie_ref_code = wcusage_get_cookie_value("wcusage_referral_code");
+    if( $cookie_ref || $cookie_ref_code ) { $has_ref_cookie = true; }
+
     // Apply Coupon Via Referral Link
     $thereferral = wcusage_get_referral_value();
     if($thereferral && $wcusage_apply_enable && $wcusage_field_apply_instant_enable) {
+      // In first-click mode, if a referral cookie already exists, do not auto-apply new coupon
+      if( $first_click && $has_ref_cookie ) {
+        // Skip applying new coupon from URL
+      } else {
       wcusage_auto_apply_discount_coupon($thereferral);
+      }
     }
 
     // Apply Coupon Via MLA Link
@@ -288,14 +321,36 @@ if( !function_exists( 'wcusage_apply_coupon_to_cart' ) ) {
     if($mla_link_normal) {
       $thereferral = wcusage_get_mla_referral_value();
       if($thereferral && $wcusage_apply_enable && $wcusage_field_apply_instant_enable) {
-        wcusage_auto_apply_discount_coupon($thereferral);
+        if( $first_click && $has_ref_cookie ) {
+          // Skip applying new coupon from MLA URL if first-click already set
+        } else {
+          wcusage_auto_apply_discount_coupon($thereferral);
+        }
       }
     }
 
     // Apply Coupon Via Cookie
     $cookie = wcusage_get_cookie_value("wcusage_referral");
     if($cookie && !is_admin() && $wcusage_apply_enable) {
-    		wcusage_auto_apply_discount_coupon($cookie);
+      $first_click = wcusage_get_setting_value('wcusage_field_click_attribution_first', '0');
+      if( $first_click && function_exists('WC') && WC()->cart ) {
+        // If a different affiliate coupon is already applied, don't auto-apply cookie coupon
+        $has_other_coupon = false;
+        foreach ( WC()->cart->get_coupons() as $code => $c_obj ) {
+          if ( $c_obj && method_exists($c_obj, 'get_code') ) {
+            $applied_code = strtolower( $c_obj->get_code() );
+            if ( $applied_code && $applied_code !== strtolower( $cookie ) ) {
+              $has_other_coupon = true;
+              break;
+            }
+          }
+        }
+        if( ! $has_other_coupon ) {
+          wcusage_auto_apply_discount_coupon($cookie);
+        }
+      } else {
+        wcusage_auto_apply_discount_coupon($cookie);
+      }
     }
 
 	}
@@ -464,7 +519,13 @@ if( !function_exists( 'wcusage_auto_apply_discount_coupon' ) ) {
  *
  */
 if( !function_exists( 'wcusage_action_woocommerce_removed_coupon' ) ) {
-	function wcusage_action_woocommerce_removed_coupon( $coupon_code ) {
+  function wcusage_action_woocommerce_removed_coupon( $coupon_code ) {
+    // If we're resolving conflicts or have a pending new cookie this request, skip cookie changes.
+    global $wcusage_suppress_cookie_on_remove;
+    $pending = isset($GLOBALS['wcusage_referral_cookie_pending']) ? $GLOBALS['wcusage_referral_cookie_pending'] : '';
+    if ( !empty($wcusage_suppress_cookie_on_remove) || !empty($pending) ) {
+      return;
+    }
     if(!$coupon_code) { return; }
     if (headers_sent()) {
       return;

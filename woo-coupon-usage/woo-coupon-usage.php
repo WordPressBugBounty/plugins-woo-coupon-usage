@@ -1,10 +1,10 @@
 <?php
 
 /**
-* Plugin Name: Coupon Affiliates for WooCommerce
+* Plugin Name: Coupon Affiliates for WooCommerce (PRO)
 * Plugin URI: https://couponaffiliates.com
 * Description: The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
-* Version: 6.7.0
+* Version: 6.8.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -249,6 +249,51 @@ if ( function_exists( 'wcu_fs' ) ) {
 
     add_action( 'admin_enqueue_scripts', 'enqueue_coupon_title_change_confirmation' );
     /*** Include Files ***/
+    // Helper: Detect if site likely uses an SMTP plugin for outgoing email.
+    if ( !function_exists( 'wcusage_is_smtp_configured' ) ) {
+        function wcusage_is_smtp_configured() {
+            if ( !function_exists( 'is_plugin_active' ) ) {
+                include_once ABSPATH . 'wp-admin/includes/plugin.php';
+            }
+            $smtp_plugins = array(
+                'wp-mail-smtp/wp_mail_smtp.php',
+                'post-smtp/postman-smtp.php',
+                'post-smtp/post-smtp.php',
+                'easy-wp-smtp/easy-wp-smtp.php',
+                'fluent-smtp/fluent-smtp.php',
+                'mailgun/mailgun.php',
+                'sendgrid-email-delivery-simplified/wpsendgrid.php',
+                'sendinblue/sendinblue.php',
+                'smtp-mailer/main.php',
+                'gmail-smtp/smtp.php',
+                'amazon-ses-smtp/wp-aws-ses.php'
+            );
+            foreach ( $smtp_plugins as $plug ) {
+                if ( function_exists( 'is_plugin_active' ) && is_plugin_active( $plug ) ) {
+                    return true;
+                }
+            }
+            // Heuristic: additional phpmailer_init hooks often indicate SMTP plugin.
+            if ( has_action( 'phpmailer_init' ) ) {
+                global $wp_filter;
+                $hooks = ( isset( $wp_filter['phpmailer_init'] ) ? $wp_filter['phpmailer_init'] : null );
+                if ( $hooks ) {
+                    $count = 0;
+                    if ( is_object( $hooks ) && property_exists( $hooks, 'callbacks' ) ) {
+                        $count = count( $hooks->callbacks );
+                    } elseif ( is_array( $hooks ) ) {
+                        $count = count( $hooks );
+                    }
+                    if ( $count > 1 ) {
+                        return true;
+                    }
+                    // >1 implies something else hooked besides core.
+                }
+            }
+            return false;
+        }
+
+    }
     // Admin Settings
     include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/admin-options.php';
     include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/admin-options-update.php';

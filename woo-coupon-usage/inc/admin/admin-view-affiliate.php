@@ -366,7 +366,7 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'overvi
                     <div id="tab-overview" class="tab-content <?php echo $current_tab === 'overview' ? 'active' : ''; ?>">
                         <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
                             <i class="fas fa-chart-line" style="color: #007cba; margin-right: 10px;"></i>
-                            <?php echo esc_html__('Overview Statistics', 'woo-coupon-usage'); ?>
+                            <?php echo esc_html__('Statistics Overview', 'woo-coupon-usage'); ?>
                         </h3>
 
                         <?php wcusage_display_affiliate_stats($user_id, 'all'); ?>

@@ -49,7 +49,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
         }
 
         if ( wcu_fs()->can_use_premium_code() ) {
-            $columns['unpaidcommission'] = 'Commission Payouts' . wcusage_admin_tooltip(esc_html__('• Unpaid: Earned from completed orders but not yet paid.', 'woo-coupon-usage') . '<br/>' . esc_html__('• Pending: Payout requests currently awaiting approval.', 'woo-coupon-usage') . '<br/>' . esc_html__('• Paid: Successfully paid to affiliate.', 'woo-coupon-usage'));
+            $columns['unpaidcommission'] = 'Payouts' . wcusage_admin_tooltip(esc_html__('• Unpaid: Earned from completed orders but not yet paid.', 'woo-coupon-usage') . '<br/>' . esc_html__('• Pending: Payout requests currently awaiting approval.', 'woo-coupon-usage') . '<br/>' . esc_html__('• Paid: Successfully paid to affiliate.', 'woo-coupon-usage'));
         }
 
         $columns['affiliate']     = esc_html__( 'Affiliate User', 'woo-coupon-usage' );
@@ -291,7 +291,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
                 $output = '<div style="line-height: 1.4;">';
                 $output .= '<div><strong>Unpaid:</strong> ' . wcusage_format_price( $unpaid_commission ) . '</div>';
                 $output .= '<hr style="margin: 2px 0; border: 0; border-top: 1px solid #ddd;">';
-                $output .= '<div><strong>Pending Payments:</strong> ' . wcusage_format_price( $pending_payments ) . '</div>';
+                $output .= '<div><strong>Pending:</strong> ' . wcusage_format_price( $pending_payments ) . '</div>';
                 $output .= '<hr style="margin: 2px 0; border: 0; border-top: 1px solid #ddd;">';
                 $output .= '<div><strong>Paid:</strong> ' . wcusage_format_price( $paid_commission ) . '</div>';
                 $output .= '</div>';
@@ -481,6 +481,20 @@ function wcusage_coupons_page() {
             <?php $table->display(); ?>
         </form>
     </div>
+    <style>
+    /* Vertically center all table cell contents on this page */
+    .wp-list-table tbody td,
+    .wp-list-table thead th {
+        vertical-align: middle;
+    }
+    .wp-list-table .column-cb {
+        width: 40px !important;
+    }
+    .wp-list-table .column-cb input, .check-column input {
+        margin-top: 1px !important;
+        margin-left: 0px !important;
+    }
+    </style>
     <script>
     jQuery(document).ready(function($) {
         function confirmFor(action) {

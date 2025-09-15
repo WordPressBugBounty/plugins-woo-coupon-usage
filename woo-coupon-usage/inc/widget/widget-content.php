@@ -756,11 +756,15 @@ function wcusage_get_floating_widget_referrals(  $coupon_id  ) {
                         0,
                         1
                     );
-                    $total = $calculateorder['ordertotal'];
+                    // Defensive defaults to avoid undefined index notices
+                    if ( !is_array( $calculateorder ) ) {
+                        $calculateorder = array();
+                    }
+                    $total = ( isset( $calculateorder['ordertotal'] ) ? (float) $calculateorder['ordertotal'] : 0 );
+                    $discount_amount = ( isset( $calculateorder['orderdiscount'] ) ? (float) $calculateorder['orderdiscount'] : 0 );
+                    $commission = ( isset( $calculateorder['totalcommission'] ) ? (float) $calculateorder['totalcommission'] : 0 );
                     $total_formatted = wcusage_format_price( $total );
-                    $discount_amount = $calculateorder['orderdiscount'];
                     $discount_formatted = wcusage_format_price( $discount_amount );
-                    $commission = $calculateorder['totalcommission'];
                 }
                 $commission_formatted = wcusage_format_price( $commission );
                 ?>
