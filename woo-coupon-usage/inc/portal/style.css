@@ -764,13 +764,25 @@ body,
 .registration-form select,
 .login-form textarea,
 .registration-form textarea {
-    outline: auto !important;
+    /* Remove default always-visible outline; keep inputs selectable */
+    outline: none !important;
     -webkit-touch-callout: auto;
     -webkit-user-select: auto;
     -khtml-user-select: auto;
     -moz-user-select: auto;
     -ms-user-select: auto;
     user-select: auto;
+}
+
+/* Accessible focus ring only when navigating with keyboard */
+.login-form input:focus-visible,
+.login-form select:focus-visible,
+.registration-form input:focus-visible,
+.registration-form select:focus-visible,
+.login-form textarea:focus-visible,
+.registration-form textarea:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
 }
 
 .wcusagechart {

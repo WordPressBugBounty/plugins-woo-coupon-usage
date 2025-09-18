@@ -1084,6 +1084,7 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
                   '<?php echo esc_url(admin_url("admin-ajax.php")); ?>',
                   {
                       'action': 'wcusage_generate_registration_page'
+                      , 'nonce': '<?php echo esc_js( wp_create_nonce( 'wcusage_generate_registration_page' ) ); ?>'
                   },
                   function(response) {
                       if (response.success) {
@@ -1560,7 +1561,18 @@ function wcusage_check_registration_shortcode() {
 add_action('wp_ajax_wcusage_generate_registration_page', 'wcusage_generate_registration_page');
 function wcusage_generate_registration_page() {
 
-    $current_user_id = get_current_user_id();
+  // Capability check: restrict to plugin admin access
+  if ( ! function_exists( 'wcusage_check_admin_access' ) || ! wcusage_check_admin_access() ) {
+    wp_send_json_error( array( 'message' => __( 'Access denied.', 'woo-coupon-usage' ) ), 403 );
+  }
+
+  // Nonce check for CSRF protection
+  $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+  if ( ! wp_verify_nonce( $nonce, 'wcusage_generate_registration_page' ) ) {
+    wp_send_json_error( array( 'message' => __( 'Invalid request. Please refresh and try again.', 'woo-coupon-usage' ) ), 400 );
+  }
+
+  $current_user_id = get_current_user_id();
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'posts';

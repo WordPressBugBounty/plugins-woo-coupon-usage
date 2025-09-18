@@ -1084,6 +1084,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         <div style="font-size: 12px;" class="wcu-settings-sidebar-pro-upgrade-showmore-content">
           <br><span class="dashicons dashicons-yes-alt"></span> Advanced Admin Reports
           <br><span class="dashicons dashicons-yes-alt"></span> Affiliate Email Reports
+          <br><span class="dashicons dashicons-yes-alt"></span> Affiliate Email Newsletters
           <br><span class="dashicons dashicons-yes-alt"></span> Automation Features
           <br><span class="dashicons dashicons-yes-alt"></span> Advanced Registration Features
           <br><span class="dashicons dashicons-yes-alt"></span> Creatives Section
@@ -1685,6 +1686,23 @@ if ( !function_exists( 'wcusage_setting_tinymce_option' ) ) {
  */
 if ( !function_exists( 'wcusage_setting_option_set_default' ) ) {
     function wcusage_setting_option_set_default(  $options, $name, $default  ) {
+        // Optionally collect defaults into a registry (only during setup wizard
+        // or when explicitly enabled via a flag).
+        global $wcusage_all_default_settings, $wcusage_collect_defaults_enabled;
+        $collect_defaults = !empty( $wcusage_collect_defaults_enabled );
+        if ( !$collect_defaults ) {
+            // Allow automatic collection when on the setup wizard page in admin.
+            $on_setup_page = function_exists( 'is_admin' ) && is_admin() && isset( $_GET['page'] ) && $_GET['page'] === 'wcusage_setup';
+            $collect_defaults = $on_setup_page;
+        }
+        if ( $collect_defaults ) {
+            if ( !is_array( $wcusage_all_default_settings ) ) {
+                $wcusage_all_default_settings = array();
+            }
+            if ( !array_key_exists( $name, $wcusage_all_default_settings ) ) {
+                $wcusage_all_default_settings[$name] = $default;
+            }
+        }
         $options = get_option( 'wcusage_options' );
         if ( !isset( $options[$name] ) && current_user_can( 'manage_options' ) ) {
             // Do not update if the option is already set but it is just empty
@@ -1749,6 +1767,83 @@ if ( !function_exists( 'wcusage_tinymce_ajax_script' ) ) {
   });
   </script>
   <?php 
+    }
+
+}
+/**
+ * Ensure (and return) all settings defaults.
+ *
+ * This triggers every settings field callback once in an output buffer so that
+ * any wcusage_setting_option_set_default() calls inside them populate missing
+ * defaults without needing to visit the settings UI manually.
+ *
+ * Returns the full wcusage_options array after defaults have been applied.
+ */
+if ( !function_exists( 'wcusage_get_all_default_settings' ) ) {
+    function wcusage_get_all_default_settings() {
+        // Prevent running multiple times needlessly in a single request.
+        static $ran = false;
+        global $wcusage_all_default_settings, $wcusage_collect_defaults_enabled;
+        if ( !$ran ) {
+            $ran = true;
+            // Enable collection while we invoke field callbacks, and restore after.
+            $prev_collect_flag = $wcusage_collect_defaults_enabled;
+            $wcusage_collect_defaults_enabled = true;
+            // List of callbacks registered via add_settings_field in this file.
+            $callbacks = array(
+                'wcusage_field_cb',
+                'wcusage_field_cb_commission',
+                'wcusage_field_cb_fraud',
+                'wcusage_field_cb_urls',
+                'wcusage_field_cb_notifications',
+                'wcusage_field_cb_currency',
+                'wcusage_field_cb_payouts',
+                'wcusage_field_cb_invoices',
+                // premium only – existence checked below
+                'wcusage_field_cb_reports',
+                'wcusage_field_cb_custom_tabs',
+                'wcusage_field_cb_registration',
+                'wcusage_field_cb_subscriptions',
+                'wcusage_field_cb_creatives',
+                // premium
+                'wcusage_field_cb_newsletter',
+                // premium
+                'wcusage_field_cb_bonuses',
+                // premium
+                'wcusage_field_cb_mla',
+                // premium
+                'wcusage_field_cb_design',
+                'wcusage_field_cb_widget',
+                'wcusage_field_cb_debug',
+                'wcusage_field_cb_help',
+                'wcusage_field_cb_pro_details',
+            );
+            foreach ( $callbacks as $cb ) {
+                if ( function_exists( $cb ) ) {
+                    ob_start();
+                    try {
+                        call_user_func( $cb, array() );
+                        // side effects populate registry
+                    } catch ( \Throwable $e ) {
+                        // ignore
+                    }
+                    ob_end_clean();
+                }
+            }
+            // Restore previous collection flag state.
+            $wcusage_collect_defaults_enabled = $prev_collect_flag;
+        }
+        // Merge any missing defaults into stored options (non-destructive).
+        $options = get_option( 'wcusage_options', array() );
+        if ( is_array( $wcusage_all_default_settings ) ) {
+            $merged = $options + $wcusage_all_default_settings;
+            // keep existing values
+            if ( $merged !== $options ) {
+                update_option( 'wcusage_options', $merged );
+                $options = $merged;
+            }
+        }
+        return $options;
     }
 
 }

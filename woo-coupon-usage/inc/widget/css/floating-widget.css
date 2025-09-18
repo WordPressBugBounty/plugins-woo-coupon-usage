@@ -858,12 +858,6 @@
     box-shadow: 0 0 0 3px rgba(27, 62, 71, 0.1) !important;
 }
 
-.wcusage-widget-registration-form input[type="text"]:invalid,
-.wcusage-widget-registration-form input[type="email"]:invalid,
-.wcusage-widget-registration-form input[type="password"]:invalid {
-    border-color: #ef4444 !important;
-}
-
 /* Checkbox styling */
 .wcusage-widget-registration-form .wcu-reg-terms {
     display: flex !important;
@@ -1234,12 +1228,6 @@
     outline: none !important;
     border-color: #1b3e47 !important;
     box-shadow: 0 0 0 3px rgba(27, 62, 71, 0.1) !important;
-}
-
-.wcusage-widget-registration-form input[type="text"]:invalid,
-.wcusage-widget-registration-form input[type="email"]:invalid,
-.wcusage-widget-registration-form input[type="password"]:invalid {
-    border-color: #ef4444 !important;
 }
 
 /* Checkbox styling */

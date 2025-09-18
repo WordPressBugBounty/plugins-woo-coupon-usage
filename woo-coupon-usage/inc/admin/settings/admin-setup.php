@@ -315,6 +315,13 @@ function wcusage_setup_page_html() {
           
           // Save option "wcusage_setup_complete"
           update_option( 'wcusage_setup_complete', '1' );
+
+          // Populate any remaining default settings not yet stored.
+          if ( function_exists( 'wcusage_get_all_default_settings' ) ) {
+            wcusage_get_all_default_settings();
+          }
+          // Fire a hook so extensions can react after defaults are ensured.
+          do_action( 'wcusage_setup_completed' );
           ?>
 
           <h1><?php echo esc_html__('Setup Wizard Complete!', 'woo-coupon-usage'); ?></h1>

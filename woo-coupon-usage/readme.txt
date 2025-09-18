@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.8.0
+Stable tag: 6.8.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -274,6 +274,11 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 6.8.1 - 18th September 2025 =
+- Tweak: Removed the blue outline on the affiliate portal login form and registration form fields.
+- Tweak: New installs will no automatically save the default settings on the setup wizard even if they do not visit the settings page.
+- Security Fix: Fixed a potential small "Broken Access Control" vulnerability bug (reported by "Legion Hunter" via Patchstack).
 
 = Version 6.8.0 - 15th September 2025 =
 - New: Added a new "Email Newsletter" feature to the plugin. This allows you to send custom email newsletters to all your affiliates, or specific groups of affiliates. You can create and send newsletters directly from the WordPress admin area, and view a log of all sent newsletters.

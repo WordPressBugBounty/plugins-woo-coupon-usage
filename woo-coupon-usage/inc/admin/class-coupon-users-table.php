@@ -589,7 +589,7 @@ function wcusage_coupon_users_page() {
     
     <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
 
-    <style>@media screen and (min-width: 782px) { .wcusage_users_page_desc { margin-bottom: -40px; } }</style>
+    <style>@media screen and (min-width: 782px) { .wcusage_users_page_desc { margin-bottom: -5px; } }</style>
 	<div class="wrap wcusage_users_page_header">
 
         <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
