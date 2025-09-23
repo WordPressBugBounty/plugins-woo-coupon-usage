@@ -613,18 +613,19 @@ function wcusage_field_cb_registration( $args )
 
           <hr/>
 
-          <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Custom Fields', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?></h3>
+          <h3 style="margin-bottom: 0px;"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Custom FormFields', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?></h3>
 
           <?php
           $tiersnumber = wcusage_get_setting_value('wcusage_field_registration_custom_fields', '5');
-          echo wcusage_setting_number_option('wcusage_field_registration_custom_fields', $tiersnumber, esc_html__( 'Number of Custom Fields', 'woo-coupon-usage' ), '0px');
+          // Hidden field to persist count on full save; actual updates are done via AJAX below.
           ?>
-          <i><?php echo esc_html__( 'Please refresh the page when you update this number, to add/remove the new settings below.', 'woo-coupon-usage' ); ?></i><br/>
-
+          <input type="hidden" name="wcusage_options[wcusage_field_registration_custom_fields]" id="wcusage_field_registration_custom_fields" value="<?php echo esc_attr( $tiersnumber ); ?>" />
+          <?php
+          ?>
           <br/>
 
           <style>.registration_custom_fields .wcu-update-icon { display: none !important; }</style>
-          <div class="registration_custom_fields">
+          <div class="registration_custom_fields" id="wcu-registration-custom-fields">
           <?php for ($x = 1; $x <= $tiersnumber; $x++) {
             $type = "";
             ?>
@@ -768,6 +769,18 @@ function wcusage_field_cb_registration( $args )
             <br/><br/>
 
           <?php } ?>
+          </div>
+
+
+          <div style="margin: 6px 0 40px 0;">
+            <button type="button" class="button button-primary" id="wcu-add-custom-field">
+              <span class="dashicons dashicons-plus-alt2" style="vertical-align: text-bottom;"></span>
+              <?php echo esc_html__( 'Add New Field', 'woo-coupon-usage' ); ?>
+            </button>
+            <button type="button" class="button" id="wcu-remove-last-custom-field" style="margin-left: 6px;">
+              <span class="dashicons dashicons-minus" style="vertical-align: text-bottom;"></span>
+              <?php echo esc_html__( 'Remove Last Field', 'woo-coupon-usage' ); ?>
+            </button>
           </div>
 
           <hr/>
@@ -1536,6 +1549,24 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
 
 }
 add_action( 'wp_ajax_wcusage_update_custom_fields', 'wcusage_update_custom_fields' );
+
+/**
+ * Update custom fields count (AJAX)
+ */
+function wcusage_update_custom_fields_count() {
+  check_ajax_referer( 'wcusage_custom_fields', '_ajax_nonce' );
+
+  $count = isset($_POST['count']) ? intval($_POST['count']) : 0;
+  if ($count < 0) $count = 0;
+  if ($count > 200) $count = 200; // hard upper bound safety
+
+  $option_group = get_option('wcusage_options');
+  $option_group['wcusage_field_registration_custom_fields'] = $count;
+  update_option( 'wcusage_options', $option_group );
+
+  wp_send_json_success( array( 'count' => $count ) );
+}
+add_action( 'wp_ajax_wcusage_update_custom_fields_count', 'wcusage_update_custom_fields_count' );
 
 // Function to check wcusage_check_registration_shortcode
 add_action( 'wp_ajax_wcusage_check_registration_shortcode', 'wcusage_check_registration_shortcode' );

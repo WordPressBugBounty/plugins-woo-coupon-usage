@@ -1188,6 +1188,8 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
             <?php echo sprintf( wp_kses_post( __( 'You can customise the colors of the affiliate portal in the <a %s>design settings tab</a>.', 'woo-coupon-usage' ) ), '<a href="#" onclick="wcusage_go_to_settings(\'#tab-design\', \'#affiliate-dashboard-colors\');"'); ?>
         </p>
 
+    <br/>
+
     <strong><?php echo esc_html__( 'Portal Font', 'woo-coupon-usage' ); ?></strong>
 
     <p>
@@ -1260,6 +1262,11 @@ if( !function_exists( 'wcusage_setting_section_ordersalestracking' ) ) {
           );
         }
         $i = 0;
+        // Ensure the group key is present in POST even if all checkboxes are unchecked,
+        // so sanitize callback can detect an intentional clear.
+        if ( ! $type ) {
+          echo '<input type="hidden" name="wcusage_options[wcusage_field_order_type_custom][__present]" value="1">';
+        }
         foreach( $orderstatuses as $key => $status ){
 
           if($status == "Refunded") {

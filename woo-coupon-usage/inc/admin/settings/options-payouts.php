@@ -878,7 +878,7 @@ function wcusage_field_cb_payouts( $args )
       <i><?php echo esc_html__( 'Wise Bank Transfer Payouts allows you to one-click pay your affiliates directly to their bank account through Wise with low transfer fees.', 'woo-coupon-usage' ); ?></i><br/>
       <i><?php echo esc_html__( 'Wise fees vary based on the currency and destination.', 'woo-coupon-usage' ); ?> <a href="https://wise.com/help/articles/2571942/pricing-and-fees" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
       <i><?php echo esc_html__( 'Prerequisites: To use Wise Bank Transfer Payouts, you will need a Wise business account and API access.', 'woo-coupon-usage' ); ?> <a href="https://docs.wise.com/api-docs/features/strong-customer-authentication-sca-for-api" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
-      <i><?php echo esc_html__( 'Note: Payouts can only be made if you have the required funds in your Wise account. No Wise account required for the recipient.', 'woo-coupon-usage' ); ?></i><br/>
+      <i><?php echo esc_html__( 'No Wise account is required for the recipient.', 'woo-coupon-usage' ); ?></i><br/>
 
       <?php echo wcusage_setting_toggle('.wcusage_field_wise_enable', '.wcu-field-section-tr-payouts-wise'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-wise">
@@ -1395,25 +1395,6 @@ function wcusage_field_cb_payouts( $args )
             <?php echo wcusage_setting_toggle_option('wcusage_field_tr_payouts_storecredit_users_col', 1, esc_html__( 'Show "Store Credit" column on admin users list?', 'woo-coupon-usage' ), '40px'); ?>
             <i style="margin-left: 40px;"><?php echo esc_html__( 'This will show the current "Store Credit" for each user on the "All Users" admin page.', 'woo-coupon-usage' ); ?></i><br/>
 
-            <br/>
-
-            <!-- Commission Bonus % -->
-            <?php echo wcusage_setting_number_option('wcusage_field_tr_payouts_storecredit_bonus', '0', esc_html__( 'Bonus Commission (%)', 'woo-coupon-usage' ), '40px'); ?>
-            <i style="margin-left: 40px;"><?php echo esc_html__( 'Give affiliates extra commission % as a bonus for selecting Store Credit as their payout method.', 'woo-coupon-usage' ); ?></i><br/>
-            <i style="margin-left: 40px;"><?php echo esc_html__( 'This bonus is not applied on the dashboard or when they request payouts. It will simply apply the bonus % as additional credit, when the payout is marked as paid.', 'woo-coupon-usage' ); ?></i><br/>
-
-            <?php if(get_option("woocommerce_tax_display_cart") == "incl") { ?>
-
-              <br/>
-
-              <!-- "Store Credit" Exclude Tax -->
-              <?php echo wcusage_setting_toggle_option('wcusage_field_tr_payouts_storecredit_excl_tax', 0, esc_html__( 'Exclude/Remove taxes from Store Credit in cart.', 'woo-coupon-usage' ), '40px'); ?>
-              <i style="margin-left: 40px;"><?php echo esc_html__( 'This will remove/deduct the tax amount from the store credit, if it is added to the credit amount in the cart.', 'woo-coupon-usage' ); ?></i><br/>
-
-            <?php } ?>
-            
-          </span>
-
           <?php
           // Custom Hook
           if( wcu_fs()->can_use_premium_code() ) {
@@ -1421,6 +1402,25 @@ function wcusage_field_cb_payouts( $args )
           }
 
           ?>
+
+          <br/>
+
+          <!-- Commission Bonus % -->
+          <?php echo wcusage_setting_number_option('wcusage_field_tr_payouts_storecredit_bonus', '0', esc_html__( 'Bonus Commission (%)', 'woo-coupon-usage' ), '40px'); ?>
+          <i style="margin-left: 40px;"><?php echo esc_html__( 'Give affiliates extra commission % as a bonus for selecting Store Credit as their payout method.', 'woo-coupon-usage' ); ?></i><br/>
+          <i style="margin-left: 40px;"><?php echo esc_html__( 'This bonus is not applied on the dashboard or when they request payouts. It will simply apply the bonus % as additional credit, when the payout is marked as paid.', 'woo-coupon-usage' ); ?></i><br/>
+
+          <?php if(get_option("woocommerce_tax_display_cart") == "incl") { ?>
+
+            <br/>
+
+            <!-- "Store Credit" Exclude Tax -->
+            <?php echo wcusage_setting_toggle_option('wcusage_field_tr_payouts_storecredit_excl_tax', 0, esc_html__( 'Exclude/Remove taxes from Store Credit in cart.', 'woo-coupon-usage' ), '40px'); ?>
+            <i style="margin-left: 40px;"><?php echo esc_html__( 'This will remove/deduct the tax amount from the store credit, if it is added to the credit amount in the cart.', 'woo-coupon-usage' ); ?></i><br/>
+
+          <?php } ?>
+            
+          </span>
 
         </span>
 

@@ -8,7 +8,12 @@ if ( !defined( 'ABSPATH' ) ) {
  */
 function wcusage_settings_init() {
     // register a new setting for "wcusage" page
-    register_setting( 'wcusage', 'wcusage_options' );
+    // Attach sanitize callback so legacy bulk save (options.php) merges into existing
+    // options instead of overwriting missing keys (which can happen due to hidden tabs
+    // or PHP max_input_vars limits).
+    register_setting( 'wcusage', 'wcusage_options', array(
+        'sanitize_callback' => 'wcusage_options_sanitize',
+    ) );
     // register a new section in the "wcusage" page
     $options = get_option( 'wcusage_options' );
     add_settings_section(
@@ -198,6 +203,48 @@ function wcusage_settings_init() {
 
 //register our wcusage_settings_init to the admin_init action hook
 add_action( 'admin_init', 'wcusage_settings_init' );
+/**
+ * Sanitize handler for wcusage_options.
+ *
+ * Merges the submitted array with the existing option so that any fields not
+ * present in the POST (e.g., hidden tabs, or trimmed by max_input_vars) are
+ * preserved instead of being reset to defaults.
+ *
+ * - Submitted empty strings and explicit 0 values still override previous values.
+ * - Arrays are merged recursively, preferring submitted values.
+ */
+if ( !function_exists( 'wcusage_options_sanitize' ) ) {
+    function wcusage_options_sanitize(  $input  ) {
+        // Ensure only authorized users can affect options via direct calls.
+        if ( function_exists( 'current_user_can' ) && !current_user_can( 'manage_options' ) ) {
+            return get_option( 'wcusage_options', array() );
+        }
+        // Normalize input/output arrays.
+        $new = ( is_array( $input ) ? $input : array() );
+        $old = get_option( 'wcusage_options', array() );
+        // Start from existing options so keys not present in POST (hidden tabs, max_input_vars) are preserved.
+        $merged = ( is_array( $old ) ? $old : array() );
+        // For keys present in POST:
+        // - If value is an array (e.g., multi-checkbox groups like wcusage_field_order_type_custom),
+        //   REPLACE the entire array so unchecked items (omitted in POST) are removed.
+        // - If scalar, overwrite value directly (allows 0/empty string to override).
+        foreach ( $new as $key => $value ) {
+            if ( is_array( $value ) ) {
+                // Remove presence marker if provided by forms to allow clearing all items
+                if ( array_key_exists( '__present', $value ) ) {
+                    unset($value['__present']);
+                }
+                // Replace entire array for array-typed settings
+                $merged[$key] = $value;
+                // can be empty array to intentionally clear
+            } else {
+                $merged[$key] = $value;
+            }
+        }
+        return $merged;
+    }
+
+}
 // Display admin settings
 function wcusage_section_developers_cb(  $args  ) {
     if ( !wcu_fs()->is__premium_only() || !wcu_fs()->can_use_premium_code() ) {
@@ -891,7 +938,8 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         <i style="margin-top: -5px;"><?php 
         echo esc_html__( 'This will disable automatic ajax saving, and instead will enable the "Save Settings" button, and you will save all settings at once.', 'woo-coupon-usage' );
         ?></i>
-        <br/>
+        
+        <br/><br/>
 
         <script>
         jQuery( document ).ready(function() {
@@ -1518,6 +1566,25 @@ function wcu_admin_enqueue_scripts(  $hook_suffix  ) {
                 '1.0.0',
                 true
             );
+            // Registrations settings dynamic custom fields handler
+            $reg_js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/registrations-settings.js';
+            $reg_js_ver = ( file_exists( $reg_js_path ) ? filemtime( $reg_js_path ) : '1.0.0' );
+            wp_enqueue_script(
+                'wcusage-registrations-settings',
+                WCUSAGE_UNIQUE_PLUGIN_URL . 'js/registrations-settings.js',
+                array('jquery'),
+                $reg_js_ver,
+                true
+            );
+            $wcusage_options = get_option( 'wcusage_options' );
+            $custom_fields_count = ( isset( $wcusage_options['wcusage_field_registration_custom_fields'] ) ? intval( $wcusage_options['wcusage_field_registration_custom_fields'] ) : 5 );
+            wp_localize_script( 'wcusage-registrations-settings', 'wcuRegSettings', array(
+                'ajaxurl'      => admin_url( 'admin-ajax.php' ),
+                'nonce'        => wp_create_nonce( 'wcusage_custom_fields' ),
+                'initialCount' => $custom_fields_count,
+                'textLabel'    => esc_html__( 'Text:', 'woo-coupon-usage' ),
+                'fieldLabel'   => esc_html__( 'Field Label:', 'woo-coupon-usage' ),
+            ) );
         }
         // Enable WordPress code editor (CodeMirror) on settings page for custom CSS textarea
         if ( function_exists( 'wp_enqueue_code_editor' ) && isset( $_GET['page'] ) && $_GET['page'] == 'wcusage_settings' ) {

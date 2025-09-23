@@ -248,11 +248,47 @@ if ( $wcusage_field_registration_enable ) {
                         if ( is_user_logged_in() && (!$wcusage_registration_enable_admincan && wcusage_check_admin_access() || !wcusage_check_admin_access()) ) {
                             ?>
 
+              <p class="wcu-register-field-col wcu-register-field-col-1"><label for="wcu-input-first-name"><?php 
+                            echo esc_html__( 'First Name', 'woo-coupon-usage' );
+                            ?>:</label>
+                <input type="text" id="wcu-input-first-name" name="wcu-input-first-name" class="input-text
+                form-control" value="<?php 
+                            echo esc_html( $user_info->first_name );
+                            ?>" style="max-width: 300px;"
+                <?php 
+                            if ( $user_info->first_name ) {
+                                ?> disabled<?php 
+                            }
+                            ?>>
+              </p>
+
+              <p class="wcu-register-field-col wcu-register-field-col-2"><label for="wcu-input-last-name"><?php 
+                            echo esc_html__( 'Last Name', 'woo-coupon-usage' );
+                            ?>:</label>
+                <input type="text" id="wcu-input-last-name" name="wcu-input-last-name" class="input-text
+                form-control" value="<?php 
+                            echo esc_html( $user_info->last_name );
+                            ?>" style="max-width: 300px;"
+                <?php 
+                            if ( $user_info->last_name ) {
+                                ?> disabled<?php 
+                            }
+                            ?>>
+              </p>
+
               <p class="wcu-register-field-col-username"><label for="wcu-input-username"><?php 
                             echo esc_html__( 'Username', 'woo-coupon-usage' );
                             ?>:</label>
                 <input type="text" id="wcu-input-username" name="wcu-input-username" class="input-text form-control" value="<?php 
                             echo esc_html( $user_info->user_login );
+                            ?>" style="max-width: 300px;" disabled>
+              </p>
+
+              <p class="wcu-register-field-col-email"><label for="wcu-input-email"><?php 
+                            echo esc_html__( 'Email Address', 'woo-coupon-usage' );
+                            ?>:</label>
+                <input type="email" id="wcu-input-email" name="wcu-input-email" class="input-text form-control" value="<?php 
+                            echo esc_html( $user_info->user_email );
                             ?>" style="max-width: 300px;" disabled>
               </p>
 

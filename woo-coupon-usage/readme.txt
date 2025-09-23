@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.8
-Stable tag: 6.8.1
+Stable tag: 6.8.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -275,9 +275,15 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= Version 6.8.2 - 23rd September 2025 =
+- Tweak: Updated the registration form "Custom Fields" settings section to allow dynamically adding and removing fields more easily without needing to refresh the page.
+- Fix: Potential fix to an issue with some websites when bulk saving the settings.
+- Fix: Fixed an issue with Freemius "opt in" for the free version on activating the plugin.
+- Other: Updated to Freemius SDK 2.12.2.
+
 = Version 6.8.1 - 18th September 2025 =
 - Tweak: Removed the blue outline on the affiliate portal login form and registration form fields.
-- Tweak: New installs will no automatically save the default settings on the setup wizard even if they do not visit the settings page.
+- Tweak: New installs will now automatically save the default settings on the setup wizard even if they do not visit the settings page.
 - Security Fix: Fixed a potential small "Broken Access Control" vulnerability bug (reported by "Legion Hunter" via Patchstack).
 
 = Version 6.8.0 - 15th September 2025 =

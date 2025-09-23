@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
-* Version: 6.8.1
+* Version: 6.8.2
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -71,6 +71,7 @@ if ( function_exists( 'wcu_fs' ) ) {
         // Signal that SDK was initiated.
         do_action( 'wcu_fs_loaded' );
         function wcu_fs_settings_url() {
+            // Open the Freemius connect screen on the top-level page.
             return admin_url( 'admin.php?page=wcusage' );
         }
 
@@ -479,12 +480,56 @@ if ( function_exists( 'wcu_fs' ) ) {
         if ( get_transient( 'wcusage_activation_redirect' ) && !$wcusage_setup_complete ) {
             // Delete the transient so the redirect only happens once
             delete_transient( 'wcusage_activation_redirect' );
-            // Perform the redirect
+            // If Freemius opt-in is still pending, show the Freemius connect screen first.
+            if ( function_exists( 'wcu_fs' ) ) {
+                $fs = wcu_fs();
+                $optin_pending = false;
+                if ( method_exists( $fs, 'is_pending_activation' ) && $fs->is_pending_activation() ) {
+                    $optin_pending = true;
+                } elseif ( method_exists( $fs, 'is_registered' ) && method_exists( $fs, 'is_anonymous' ) ) {
+                    // Treat as pending if not registered and not explicitly anonymous (opted-out).
+                    $optin_pending = !$fs->is_registered( true ) && !$fs->is_anonymous();
+                }
+                if ( $optin_pending ) {
+                    wp_safe_redirect( admin_url( 'admin.php?page=wcusage' ) );
+                    exit;
+                }
+            }
+            // Otherwise proceed to setup wizard as before.
             wp_safe_redirect( admin_url( 'admin.php?page=wcusage_setup' ) );
             exit;
         }
     }
 
+    /**
+     * If Freemius opt-in is pending, redirect Settings/Setup pages
+     * to the top-level page which will display the connect screen.
+     */
+    add_action( 'admin_init', function () {
+        if ( !is_admin() ) {
+            return;
+        }
+        if ( !function_exists( 'wcu_fs' ) ) {
+            return;
+        }
+        // Only gate our plugin pages.
+        $page = ( isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '' );
+        if ( !in_array( $page, array('wcusage_settings', 'wcusage_setup'), true ) ) {
+            return;
+        }
+        $fs = wcu_fs();
+        $optin_pending = false;
+        if ( method_exists( $fs, 'is_pending_activation' ) && $fs->is_pending_activation() ) {
+            $optin_pending = true;
+        } elseif ( method_exists( $fs, 'is_registered' ) && method_exists( $fs, 'is_anonymous' ) ) {
+            $optin_pending = !$fs->is_registered( true ) && !$fs->is_anonymous();
+        }
+        if ( $optin_pending ) {
+            // Avoid loops by not redirecting if we're already on the top-level page.
+            wp_safe_redirect( admin_url( 'admin.php?page=wcusage' ) );
+            exit;
+        }
+    }, 3 );
 }
 /**
  * Compatible with WooCommerce HP
