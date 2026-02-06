@@ -20,12 +20,12 @@ function wcusage_field_cb_payouts( $args )
   <hr/>
 
     <!-- Enable Payouts Features -->
-    <?php echo wcusage_setting_toggle_option('wcusage_field_tracking_enable', 1, esc_html__( 'Enable Payouts Features', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_toggle_option('wcusage_field_tracking_enable', 1, esc_html__( 'Enable Payouts Features', 'woo-coupon-usage' ), '0px'); ?>
 
     <i><?php echo esc_html__( 'This will enable payouts features, and keep track of "unpaid commission" for each coupon, whenever new orders are created using that coupon.', 'woo-coupon-usage' ); ?></i><br/>
 
 
-    <?php echo wcusage_setting_toggle('.wcusage_field_tracking_enable', '.wcu-field-section-payouts-features'); // Show or Hide ?>
+    <?php wcusage_setting_toggle('.wcusage_field_tracking_enable', '.wcu-field-section-payouts-features'); // Show or Hide ?>
     <span class="wcu-field-section-payouts-features">
 
   		<br/>
@@ -41,7 +41,7 @@ function wcusage_field_cb_payouts( $args )
       });
       </script>
       <!-- Enable Payout Requests & Log Features -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_payouts_enable', 1, esc_html__( 'Enable Payout Requests & Log Features', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_payouts_enable', 1, esc_html__( 'Enable Payout Requests & Log Features', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'This will show a "Payouts" tab on the coupon usage/info page, so the affiliate can view their unpaid commission, and request payouts.', 'woo-coupon-usage' ); ?></i><br/>
       <i><?php echo esc_html__( 'For this to show, a user/affiliate account must be assigned to that coupon. The tab is only shown to this user.', 'woo-coupon-usage' ); ?></i><br/>
 
@@ -73,11 +73,9 @@ function wcusage_field_cb_payouts( $args )
 
           <br/><br/>
           
-          <strong><?php echo esc_html__( 'For more information, please watch the video below:', 'woo-coupon-usage' ); ?></strong>
+          <strong><?php echo esc_html__( 'For more information, watch the video:', 'woo-coupon-usage' ); ?></strong>
           <br/>
-          <div style="max-width: 720px;">
-          <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/837140385?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Commission Payouts"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
-          </div>
+          <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/837140385?badge=0&autopause=0&player_id=0&app_id=58479/embed' ); ?>
 
         </div>
 
@@ -88,33 +86,42 @@ function wcusage_field_cb_payouts( $args )
 
       <h3 id ="wcu-setting-header-payouts-general"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Payouts Settings:</h3>
 
-      <?php echo wcusage_setting_toggle_option('wcusage_field_payout_request_button', 1, esc_html__( 'Show "Request Payout" button on affiliate dashboard.', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_payout_request_button', 1, esc_html__( 'Show "Request Payout" button on affiliate dashboard.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'When enabled, the "Request Payout" button will be shown on the affiliate dashboard, allowing affiliates to manually request payouts.', 'woo-coupon-usage' ); ?></i><br/>
       <i><?php echo esc_html__( 'Turn this off if you want to show all their payout details on the payouts tab, but payouts requests themselves will all be handled by admins (or scheduled).', 'woo-coupon-usage' ); ?></i><br/>
       
       <br/>
 
-      <?php echo wcusage_setting_toggle_option('wcusage_field_payout_details_required', 1, esc_html__( 'Require payment details to request payout.', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_payout_details_required', 1, esc_html__( 'Require payment details to request payout.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'When enabled, the affiliate will be required to enter their payment details before they can request a payout.', 'woo-coupon-usage' ); ?></i><br/>
 
       <br/>
 
-      <?php echo wcusage_setting_toggle_option('wcusage_field_payout_custom_amount', 1, esc_html__( 'Allow affiliates to enter a custom payout amount.', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_payout_custom_amount', 1, esc_html__( 'Allow affiliates to enter a custom payout amount.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'When enabled, the affiliate can enter a custom amount for their payout request. The minimum amount will still be the payment threshold, and maximum amount is their total available unpaid commission.', 'woo-coupon-usage' ); ?></i><br/>
 
       <br/>
 
       <!-- How much unpaid commission must be earned before the affiliate can request a payout. -->
-      <?php echo wcusage_setting_number_option('wcusage_field_payout_threshold', '0', esc_html__( 'Payment Threshold', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_number_option('wcusage_field_payout_threshold', '0', esc_html__( 'Payment Threshold', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'How much "unpaid commission" must be earned/available, before the affiliate can request a payout.', 'woo-coupon-usage' ); ?></i>
 
   		<br/><br/>
 
       <!-- Number of days after order "completion" until commission is earned: -->
-      <?php echo wcusage_setting_number_option('wcusage_field_payout_days', '0', esc_html__( 'Delay Commission (Number of Days)', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_number_option('wcusage_field_payout_days', '0', esc_html__( 'Delay Commission (Number of Days)', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'The number of days after an order is created, that the commission earned is added to the users account as "unpaid commission". Useful if you want to prevent commission being paid out early for orders that may be refunded etc.', 'woo-coupon-usage' ); ?></i><br/>
       <i><?php echo esc_html__( 'If set to "0" then commission will be added to the affiliates account instantly when an order is completed.', 'woo-coupon-usage' ); ?></i><br/>
       <i><?php echo esc_html__( 'Requires cron jobs to be enabled on your site. Make sure to test this is working after activating. We highly recommend using "Real Cron Jobs" instead of WP Cron.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/real-cron-job/"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a></i><br/>
+
+      <br/><hr/>
+
+       <h3 id="wcu-setting-header-payouts-scheduled"><span class="dashicons dashicons-admin-generic"
+       style="margin-top: 2px;"></span> <?php echo esc_html__( 'Unpaid Commission', 'woo-coupon-usage' ); ?>:</h3>
+
+      <p><?php echo esc_html__( 'Unpaid Commission is the total commission amount that has been earned by affiliates, but not yet paid out.', 'woo-coupon-usage' ); ?></p>
+
+      <p><?php echo esc_html__( 'This commission earned once an order is marked as completed (or other selected statuses below), and is available for affiliates to request payouts for.', 'woo-coupon-usage' ); ?></p>
 
       <br/>
 
@@ -172,7 +179,7 @@ function wcusage_field_cb_payouts( $args )
         unset($orderstatuses['wc-checkout-draft']);
       } else {
         $orderstatuses = array(
-          'wc-completed'  => esc_html__( 'Completed', 'woocommerce' ),
+          'wc-completed'  => esc_html__( 'Completed', 'woo-coupon-usage' ),
         );
       }
       ?>
@@ -185,10 +192,10 @@ function wcusage_field_cb_payouts( $args )
 
       <br/>
 
-       <?php echo wcusage_setting_toggle_option('wcusage_field_payout_status_multiple', 0, esc_html__( 'Advanced: Enable multiple order statuses.', 'woo-coupon-usage' ), '0px'); ?>
+       <?php wcusage_setting_toggle_option('wcusage_field_payout_status_multiple', 0, esc_html__( 'Advanced: Enable multiple order statuses.', 'woo-coupon-usage' ), '0px'); ?>
        <i><?php echo esc_html__( 'Only enable this if you have multiple different "final" order statuses that should grant "unpaid commission".', 'woo-coupon-usage' ); ?></i><br/>
 
-       <?php echo wcusage_setting_toggle('.wcusage_field_payout_status_multiple', '.wcu-field-payout-statuses'); // Show or Hide ?>
+       <?php wcusage_setting_toggle('.wcusage_field_payout_status_multiple', '.wcu-field-payout-statuses'); // Show or Hide ?>
        <span class="wcu-field-payout-statuses" style="display: block; margin-left: 40px;">
 
        <br/>
@@ -239,9 +246,12 @@ function wcusage_field_cb_payouts( $args )
             // Force completed to be checked
             if($key == "wc-completed") {
               if(!isset($options['wcusage_payout_statuses_custom']['wc-completed']) || $checkedx) {
-                $option_group = get_option('wcusage_options');
-                $option_group['wcusage_payout_statuses_custom']['wc-completed'] = "on";
-                update_option( 'wcusage_options', $option_group );
+                // Only update on non-GET requests
+                if ( $_SERVER['REQUEST_METHOD'] !== 'GET' ) {
+                  $option_group = get_option('wcusage_options');
+                  $option_group['wcusage_payout_statuses_custom']['wc-completed'] = "on";
+                  update_option( 'wcusage_options', $option_group );
+                }
                 $checkedx = "checked";
               }
             }
@@ -270,16 +280,31 @@ function wcusage_field_cb_payouts( $args )
 
         <?php } ?>
 
+       <br/><br/><hr/>
+
+       <h3 id="wcu-setting-header-payouts-scheduled"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Pending Commission', 'woo-coupon-usage' ); ?>:</h3>
+
+       <p><?php echo esc_html__( 'Pending Commission allows affiliates to track commission from orders that are not yet completed, but displayed on the dashboard.', 'woo-coupon-usage' ); ?></p>
+       
+       <p><?php echo esc_html__( 'This is useful for showing withheld commission, which would convert it to "unpaid commission" once the order is completed, which they can then request payouts for.', 'woo-coupon-usage' ); ?></p>
+
+       <p><?php echo esc_html__( 'The "Pending Commission" will be displayed in the "Payouts" tab as a small notice just above the "Unpaid Commission" amount.', 'woo-coupon-usage' ); ?></p>
+
+       <br/>
+
+        <?php wcusage_setting_toggle_option('wcusage_field_payout_pending_enable', 1, esc_html__( 'Enable "Pending Commission" tracking.', 'woo-coupon-usage' ), '0px'); ?>
+        <i><?php echo esc_html__( 'When enabled, "Pending Commission" will be tracked and shown on the payouts tab for statuses that are set to show on the dashboard but not completed yet (not granted unpaid commission).', 'woo-coupon-usage' ); ?></i><br/>
+        
        <br/><hr/>
 
        <h3 id="wcu-setting-header-payouts-scheduled"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Scheduled Payout Requests', 'woo-coupon-usage' ); ?>:</h3>
 
-       <?php echo wcusage_setting_toggle_option('wcusage_field_enable_payoutschedule', 0, 'Enable Scheduled Payout Requests', '0px'); ?>
+       <?php wcusage_setting_toggle_option('wcusage_field_enable_payoutschedule', 0, 'Enable Scheduled Payout Requests', '0px'); ?>
        <i><?php echo esc_html__( 'Enable this to automatically submit "payout requests" for your affiliates, every month/week/day, if they meet certain criteria.', 'woo-coupon-usage' ); ?></i><br/>
        <i><?php echo esc_html__( 'This will work in the same way as if the user clicked the "Request Payout" button in their dashboard.', 'woo-coupon-usage' ); ?></i><br/>
        <i><?php echo esc_html__( 'Requires cron jobs to be enabled.', 'woo-coupon-usage' ); ?></i><br/>
 
-        <?php echo wcusage_setting_toggle('.wcusage_field_enable_payoutschedule', '.wcu-field-section-payoutschedule'); // Show or Hide ?>
+        <?php wcusage_setting_toggle('.wcusage_field_enable_payoutschedule', '.wcu-field-section-payoutschedule'); // Show or Hide ?>
         <span class="wcu-field-section-payoutschedule">
 
          <br/>
@@ -322,12 +347,12 @@ function wcusage_field_cb_payouts( $args )
 
         <br/>
 
-        <?php echo wcusage_setting_toggle_option('wcusage_field_enable_payoutschedule_limit_types', 0, esc_html__( 'Only schedule payouts for specific payout methods.', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_enable_payoutschedule_limit_types', 0, esc_html__( 'Only schedule payouts for specific payout methods.', 'woo-coupon-usage' ), '0px'); ?>
         <i><?php echo esc_html__( 'If enabled, you can select which payout methods should be used for scheduled payouts.', 'woo-coupon-usage' ); ?></i><br/>
 
         <br/>
 
-        <?php echo wcusage_setting_toggle('.wcusage_field_enable_payoutschedule_limit_types', '.wcu-field-payout-methods-one'); // Show or Hide ?>
+        <?php wcusage_setting_toggle('.wcusage_field_enable_payoutschedule_limit_types', '.wcu-field-payout-methods-one'); // Show or Hide ?>
         <span class="wcu-field-payout-methods-one">
 
         <strong><label for="scales"><?php echo esc_html__( 'Select Payout Methods to Schedule:', 'woo-coupon-usage' ); ?></label></strong><br/>
@@ -389,33 +414,33 @@ function wcusage_field_cb_payouts( $args )
 
         <h3 id="wcu-setting-header-payouts-scheduled"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Automatic Payouts', 'woo-coupon-usage' ); ?>:</h3>
 
-        <?php echo wcusage_setting_toggle_option('wcusage_payouts_auto_accept', 0, 'Automatically and instantly pay affiliates commission into their account, after a payout request is made.', '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_payouts_auto_accept', 0, 'Automatically and instantly pay affiliates commission into their account, after a payout request is made.', '0px'); ?>
         <i><?php echo esc_html__( 'With this enabled commission will be paid instantly into the affiliate account automatically, as soon as they request a payout. This will apply to Stripe, PayPal and Store Credit payout methods.', 'woo-coupon-usage' ); ?></i><br/>
         <i><?php echo esc_html__( 'For Wise bank transfer payouts, it will automatically complete the first step of creating the unfunded payment in Wise ready to complete manually.', 'woo-coupon-usage' ); ?></i><br/>
         <i><?php echo esc_html__( 'Warning: If you use this option, you should be even more careful of fraudulent activity. We do recommend reviewing and accepting payouts manually instead, simply so you can make sure each payout is valid and non-fraudulent.', 'woo-coupon-usage' ); ?></i><br/>
 
-        <?php echo wcusage_setting_toggle('.wcusage_payouts_auto_accept', '.wcu-field-section-auto-payout'); // Show or Hide ?>
+        <?php wcusage_setting_toggle('.wcusage_payouts_auto_accept', '.wcu-field-section-auto-payout'); // Show or Hide ?>
         <span class="wcu-field-section-auto-payout">
 
           <br/>
 
           <!-- Threshold -->
-          <?php echo wcusage_setting_number_option('wcusage_payouts_auto_accept_threshold', '200', esc_html__( 'Threshold for automatic payouts', 'woo-coupon-usage' ) . ": (" . wcusage_get_currency_symbol() . ")", '40px'); ?>
+          <?php wcusage_setting_number_option('wcusage_payouts_auto_accept_threshold', '200', esc_html__( 'Threshold for automatic payouts', 'woo-coupon-usage' ) . ": (" . wcusage_get_currency_symbol() . ")", '40px'); ?>
           <i style="margin-left: 40px;"><?php echo esc_html__( 'Set a threshold on the maximum amount that can be paid automatically. Any payout requests above this amount will require manual approval.', 'woo-coupon-usage' ); ?></i><br/>
 
           <br/>
 
           <!-- Manual First Payout -->
-          <?php echo wcusage_setting_toggle_option('wcusage_payouts_auto_accept_first_manual', 0, 'Require manual approval for affiliates first payout request.', '40px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_payouts_auto_accept_first_manual', 0, 'Require manual approval for affiliates first payout request.', '40px'); ?>
           <i style="margin-left: 40px;"><?php echo esc_html__( 'With this enabled, the first ever payout request by an affiliate will require manual approval. After they have at-least 1 completed payout, all future payouts can be paid automatically.', 'woo-coupon-usage' ); ?></i><br/>
 
           <br/>
 
           <!-- Only enable for specific payout methods -->
-          <?php echo wcusage_setting_toggle_option('wcusage_payouts_auto_accept_specific_methods', 0, 'Only enable automatic payouts for specific payout methods.', '40px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_payouts_auto_accept_specific_methods', 0, 'Only enable automatic payouts for specific payout methods.', '40px'); ?>
           <i style="margin-left: 40px;"><?php echo esc_html__( 'If enabled, you can select which payout methods should be eligible for automatic payouts.', 'woo-coupon-usage' ); ?></i><br/>
 
-          <?php echo wcusage_setting_toggle('.wcusage_payouts_auto_accept_specific_methods', '.wcu-field-auto-payout-methods'); // Show or Hide ?>
+          <?php wcusage_setting_toggle('.wcusage_payouts_auto_accept_specific_methods', '.wcu-field-auto-payout-methods'); // Show or Hide ?>
           <span class="wcu-field-auto-payout-methods">
 
             <br/>
@@ -488,35 +513,35 @@ function wcusage_field_cb_payouts( $args )
       <div style="margin-bottom: 20px;"></div>
 
       <span class="wcu-admin-payouts-headers">
-        <?php echo wcusage_setting_toggle_option('wcusage_field_paypal_enable', 0, esc_html__( 'Custom Payment Method', 'woo-coupon-usage' ) . " #1 (Manual)", '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_paypal_enable', 0, esc_html__( 'Custom Payment Method', 'woo-coupon-usage' ) . " #1 (Manual)", '0px'); ?>
       </span>
       <i><?php echo esc_html__( 'A custom "manual" payment method of your choice.', 'woo-coupon-usage' ); ?></i><br/>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_paypal_enable', '.wcu-field-section-tr-payouts-paypal'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_paypal_enable', '.wcu-field-section-tr-payouts-paypal'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-paypal">
 
         <br/>
 
         <!-- Change Payment Method Label (Default: "Manual") -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypal_only', 'Manual', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_paypal_only', 'Manual', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
         <!-- Payment Method Info -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypal_info', '', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_paypal_info', '', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '40px'); ?>
         <i style="margin-left: 40px;"><?php echo esc_html__( 'Custom information/text shown when payment method is selected (in the dashboard settings).', 'woo-coupon-usage' ); ?></i><br/>
 
     		<br/>
 
-        <?php echo wcusage_setting_toggle_option('wcusage_field_paypal_enable_field', 1, esc_html__( 'Show Payment Details Field', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_paypal_enable_field', 1, esc_html__( 'Show Payment Details Field', 'woo-coupon-usage' ), '40px'); ?>
 
-        <?php echo wcusage_setting_toggle('.wcusage_field_paypal_enable_field', '.wcu-field-section-tr-payouts-paypal-field'); // Show or Hide ?>
+        <?php wcusage_setting_toggle('.wcusage_field_paypal_enable_field', '.wcu-field-section-tr-payouts-paypal-field'); // Show or Hide ?>
         <span class="wcu-field-section-tr-payouts-paypal-field">
 
           <br/>
 
           <!-- Change Payment Details Label (Default: "Payment Details") -->
-          <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypal', 'Payment Details', esc_html__( 'Payment Details Field Label', 'woo-coupon-usage' ), '40px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_tr_payouts_paypal', 'Payment Details', esc_html__( 'Payment Details Field Label', 'woo-coupon-usage' ), '40px'); ?>
 
         </span>
 
@@ -526,33 +551,33 @@ function wcusage_field_cb_payouts( $args )
       <div style="margin-bottom: 40px;"></div>
 
       <span class="wcu-admin-payouts-headers">
-        <?php echo wcusage_setting_toggle_option('wcusage_field_paypal2_enable', 0, esc_html__( 'Custom Payment Method', 'woo-coupon-usage' ) . " #2 (Manual)", '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_paypal2_enable', 0, esc_html__( 'Custom Payment Method', 'woo-coupon-usage' ) . " #2 (Manual)", '0px'); ?>
       </span>
       <i><?php echo esc_html__( 'A custom "manual" payment method of your choice.', 'woo-coupon-usage' ); ?></i><br/>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_paypal2_enable', '.wcu-field-section-tr-payouts-paypal2'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_paypal2_enable', '.wcu-field-section-tr-payouts-paypal2'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-paypal2">
 
         <!-- Change Payment Method Label (Default: "Manual") -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypal2_only', 'Manual', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_paypal2_only', 'Manual', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
         <!-- Payment Method Info -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypal2_info', '', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_paypal2_info', '', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '40px'); ?>
         <i style="margin-left: 40px;"><?php echo esc_html__( 'Custom information/text shown when payment method is selected (in the dashboard settings).', 'woo-coupon-usage' ); ?></i><br/>
 
         <br/>
 
-        <?php echo wcusage_setting_toggle_option('wcusage_field_paypal2_enable_field', 1, esc_html__( 'Show Payment Details Field', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_paypal2_enable_field', 1, esc_html__( 'Show Payment Details Field', 'woo-coupon-usage' ), '40px'); ?>
 
-        <?php echo wcusage_setting_toggle('.wcusage_field_paypal2_enable_field', '.wcu-field-section-tr-payouts-paypal2-field'); // Show or Hide ?>
+        <?php wcusage_setting_toggle('.wcusage_field_paypal2_enable_field', '.wcu-field-section-tr-payouts-paypal2-field'); // Show or Hide ?>
         <span class="wcu-field-section-tr-payouts-paypal2-field">
 
           <br/>
 
           <!-- Change Payment Details Label (Default: "Payment Details") -->
-          <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypal2', 'Payment Details', esc_html__( 'Payment Details Field Label', 'woo-coupon-usage' ), '40px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_tr_payouts_paypal2', 'Payment Details', esc_html__( 'Payment Details Field Label', 'woo-coupon-usage' ), '40px'); ?>
 
         </span>
 
@@ -562,58 +587,58 @@ function wcusage_field_cb_payouts( $args )
       <div style="margin-bottom: 40px;"></div>
 
       <span class="wcu-admin-payouts-headers">
-        <?php echo wcusage_setting_toggle_option('wcusage_field_banktransfer_enable', 0, esc_html__( 'Direct Bank Transfer (Manual)', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_banktransfer_enable', 0, esc_html__( 'Direct Bank Transfer (Manual)', 'woo-coupon-usage' ), '0px'); ?>
       </span>
       <i><?php echo esc_html__( 'A direct bank transfer payment method (paid manually).', 'woo-coupon-usage' ); ?></i><br/>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_banktransfer_enable', '.wcu-field-section-tr-payouts-banktransfer'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_banktransfer_enable', '.wcu-field-section-tr-payouts-banktransfer'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-banktransfer">
 
         <br/>
 
         <!-- Change Payment Method Label (Default: "Manual") -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_only', 'Bank Transfer', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_only', 'Bank Transfer', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
         <!-- Payment Method Info -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_info', '', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_info', '', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '40px'); ?>
         <i style="margin-left: 40px;"><?php echo esc_html__( 'Custom information/text shown when payment method is selected (in the dashboard settings).', 'woo-coupon-usage' ); ?></i><br/>
 
         <br/>
 
         <!-- Change Name Label -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_name', 'Payee Name', esc_html__( '"Payee Name" Field Label', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_name', 'Payee Name', esc_html__( '"Payee Name" Field Label', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
         <!-- Change Sort Code Label -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_sort', 'Sort Code', esc_html__( '"Sort Code" Field Label', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_sort', 'Sort Code', esc_html__( '"Sort Code" Field Label', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
         <!-- Change Account Number Label -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_account', 'Account Number', esc_html__( '"Account Number" Field Label', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_account', 'Account Number', esc_html__( '"Account Number" Field Label', 'woo-coupon-usage' ), '40px'); ?>
         
         <br/>
 
         <!-- Change Account Other Info Label -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_other', '', esc_html__( 'Extra Field Label', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_other', '', esc_html__( 'Extra Field Label', 'woo-coupon-usage' ), '40px'); ?>
         
         <br class="wcusage_field_tr_payouts_banktransfer_other2" style="display: none;"/>
 
         <!-- Change Account Other Info Label -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_other2', '', esc_html__( 'Extra Field Label', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_other2', '', esc_html__( 'Extra Field Label', 'woo-coupon-usage' ), '40px'); ?>
 
         <br class="wcusage_field_tr_payouts_banktransfer_other3" style="display: none;"/>
 
         <!-- Change Account Other Info Label -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_other3', '', esc_html__( 'Extra Field Label', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_other3', '', esc_html__( 'Extra Field Label', 'woo-coupon-usage' ), '40px'); ?>
 
         <br class="wcusage_field_tr_payouts_banktransfer_other4" style="display: none;"/>
 
         <!-- Change Account Other Info Label -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_other4', '', esc_html__( 'Extra Field Label', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_banktransfer_other4', '', esc_html__( 'Extra Field Label', 'woo-coupon-usage' ), '40px'); ?>
 
         <!-- Only show extra fields if previous field is filled -->
         <script>
@@ -658,30 +683,30 @@ function wcusage_field_cb_payouts( $args )
       <div style="margin-bottom: 40px;" id="paypalapi-settings"></div>
 
       <span class="wcu-admin-payouts-headers">
-        <?php echo wcusage_setting_toggle_option('wcusage_field_paypalapi_enable', 0, esc_html__( 'PayPal Payouts', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_paypalapi_enable', 0, esc_html__( 'PayPal Payouts', 'woo-coupon-usage' ), '0px'); ?>
       </span>
       <i><?php echo esc_html__( 'PayPal Payouts payment method will allow you to one-click pay your affiliates directly into their PayPal account.', 'woo-coupon-usage' ); ?>
       <?php echo esc_html__( 'In most cases PayPal Payouts fees are 2%.', 'woo-coupon-usage' ); ?> <a href="https://www.paypal.com/us/webapps/mpp/merchant-fees#paypal-payouts" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
       <i><?php echo esc_html__( 'Prerequisites: To use PayPal Payouts, you will need a PayPal business account and must have access to it’s PayPal Payouts features.', 'woo-coupon-usage' ); ?> <a href="https://developer.paypal.com/docs/payouts/integrate/prerequisites" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
       <i><?php echo esc_html__( 'Note: Payouts can only be made if you have the required funds in your PayPal account.', 'woo-coupon-usage' ); ?></i><br/>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_paypalapi_enable', '.wcu-field-section-tr-payouts-paypalapi'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_paypalapi_enable', '.wcu-field-section-tr-payouts-paypalapi'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-paypalapi">
 
         <br/>
 
         <!-- Change Payment Method Label (Default: "Manual") -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypalapi_only', 'PayPal Payouts', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_paypalapi_only', 'PayPal Payouts', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
         <!-- Change Payment Details Label (Default: "Payment Details") -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypalapi', 'PayPal Email Address', esc_html__( 'Payment Details Field Label', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_paypalapi', 'PayPal Email Address', esc_html__( 'Payment Details Field Label', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
         <!-- Payment Method Info -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypalapi_info', '', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_paypalapi_info', '', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '40px'); ?>
         <i style="margin-left: 40px;"><?php echo esc_html__( 'Custom information/text shown when payment method is selected (in the dashboard settings).', 'woo-coupon-usage' ); ?></i><br/>
 
         <br/>
@@ -691,12 +716,12 @@ function wcusage_field_cb_payouts( $args )
         <br/>
 
         <!-- Change PayPal Payment Subject -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypalapi_subject', 'Commission Payout', esc_html__( 'Payment Subject', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_paypalapi_subject', 'Commission Payout', esc_html__( 'Payment Subject', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
         <!-- Change PayPal Payment Message -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_paypalapi_message', 'Congrats, you have received a new commission payout!', esc_html__( 'Payment Message', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_paypalapi_message', 'Congrats, you have received a new commission payout!', esc_html__( 'Payment Message', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
@@ -707,7 +732,7 @@ function wcusage_field_cb_payouts( $args )
         <br/>
 
         <!-- Change Payment Details Label (Default: "Payment Details") -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_tr_payouts_paypalapi_test', 0, esc_html__( 'Enable Test Mode?', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_tr_payouts_paypalapi_test', 0, esc_html__( 'Enable Test Mode?', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
@@ -731,21 +756,21 @@ function wcusage_field_cb_payouts( $args )
 
         <span class="wcu-field-section-tr-payouts-paypalapi-live">
 
-            <?php echo wcusage_setting_text_option('wcusage_field_paypalapi_id', '', esc_html__( '[Live] Client ID', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_paypalapi_id', '', esc_html__( '[Live] Client ID', 'woo-coupon-usage' ), '40px'); ?>
 
             <br/>
 
-            <?php echo wcusage_setting_text_option('wcusage_field_paypalapi_secret', '', esc_html__( '[Live] Client Secret', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_paypalapi_secret', '', esc_html__( '[Live] Client Secret', 'woo-coupon-usage' ), '40px'); ?>
 
         </span>
 
         <span class="wcu-field-section-tr-payouts-paypalapi-test" style="color: red;">
 
-            <?php echo wcusage_setting_text_option('wcusage_field_paypalapi_test_id', '', esc_html__( '[Test] Client ID', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_paypalapi_test_id', '', esc_html__( '[Test] Client ID', 'woo-coupon-usage' ), '40px'); ?>
 
             <br/>
 
-            <?php echo wcusage_setting_text_option('wcusage_field_paypalapi_test_secret', '', esc_html__( '[Test] Client Secret', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_paypalapi_test_secret', '', esc_html__( '[Test] Client Secret', 'woo-coupon-usage' ), '40px'); ?>
 
         </span>
 
@@ -760,7 +785,7 @@ function wcusage_field_cb_payouts( $args )
       <div style="margin-bottom: 40px;" id="stripeapi-settings"></div>
 
       <span class="wcu-admin-payouts-headers">
-        <?php echo wcusage_setting_toggle_option('wcusage_field_stripeapi_enable', 0, esc_html__( 'Stripe Payouts', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_stripeapi_enable', 0, esc_html__( 'Stripe Payouts', 'woo-coupon-usage' ), '0px'); ?>
       </span>
       <?php
       $usaicon = '<img src="'.WCUSAGE_UNIQUE_PLUGIN_URL.'images/us.png" style="height: 8px;"> US';
@@ -770,7 +795,7 @@ function wcusage_field_cb_payouts( $args )
       <?php echo esc_html__( 'Fees vary (typically around 1% - 2%). Learn more about Stripe Connect', 'woo-coupon-usage' ); ?> <a href="https://stripe.com/connect" target="_blank">here</a>.</i><br/>
       <i><?php echo esc_html__( 'Note: Payouts can only be made if you have the required funds in your Stripe account.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-stripe-payouts/#funds" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a></i><br/>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_stripeapi_enable', '.wcu-field-section-tr-payouts-stripeapi'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_stripeapi_enable', '.wcu-field-section-tr-payouts-stripeapi'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-stripeapi">
 
         <br/>
@@ -786,17 +811,17 @@ function wcusage_field_cb_payouts( $args )
         <br/><br/>
 
         <!-- Change Payment Method Label -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_stripeapi_only', 'Stripe Payouts', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_stripeapi_only', 'Stripe Payouts', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
         <!-- Change Stripe Account Label -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_stripeapi', 'Stripe Account', esc_html__( 'Stripe Account Label', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_stripeapi', 'Stripe Account', esc_html__( 'Stripe Account Label', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
         <!-- Payment Method Info -->
-        <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_stripeapi_info', '', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_tr_payouts_stripeapi_info', '', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '40px'); ?>
         <i style="margin-left: 40px;"><?php echo esc_html__( 'Custom information/text shown when payment method is selected (in the dashboard settings).', 'woo-coupon-usage' ); ?></i><br/>
 
         <br/>
@@ -810,7 +835,7 @@ function wcusage_field_cb_payouts( $args )
         <br/>
 
         <!-- Change Payment Details Label (Default: "Payment Details") -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_tr_payouts_stripeapi_test', 0, esc_html__( 'Enable Test Mode?', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_tr_payouts_stripeapi_test', 0, esc_html__( 'Enable Test Mode?', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
@@ -834,21 +859,21 @@ function wcusage_field_cb_payouts( $args )
 
         <span class="wcu-field-section-tr-payouts-stripeapi-live">
 
-          <?php echo wcusage_setting_text_option('wcusage_field_stripeapi_publish', '', esc_html__( '[Live] API Publishable Key', 'woo-coupon-usage' ), '40px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_stripeapi_publish', '', esc_html__( '[Live] API Publishable Key', 'woo-coupon-usage' ), '40px'); ?>
 
           <br/>
 
-          <?php echo wcusage_setting_text_option('wcusage_field_stripeapi_secret', '', esc_html__( '[Live] API Secret Key', 'woo-coupon-usage' ), '40px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_stripeapi_secret', '', esc_html__( '[Live] API Secret Key', 'woo-coupon-usage' ), '40px'); ?>
 
         </span>
 
         <span class="wcu-field-section-tr-payouts-stripeapi-test" style="color: red;">
 
-          <?php echo wcusage_setting_text_option('wcusage_field_stripeapi_test_publish', '', esc_html__( '[Test] API Publishable Key', 'woo-coupon-usage' ), '40px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_stripeapi_test_publish', '', esc_html__( '[Test] API Publishable Key', 'woo-coupon-usage' ), '40px'); ?>
 
           <br/>
 
-          <?php echo wcusage_setting_text_option('wcusage_field_stripeapi_test_secret', '', esc_html__( '[Test] API Secret Key', 'woo-coupon-usage' ), '40px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_stripeapi_test_secret', '', esc_html__( '[Test] API Secret Key', 'woo-coupon-usage' ), '40px'); ?>
 
         </span>
 
@@ -863,7 +888,7 @@ function wcusage_field_cb_payouts( $args )
       <div style="margin-bottom: 40px;" id="wise-settings"></div>
 
       <span class="wcu-admin-payouts-headers">
-        <?php echo wcusage_setting_toggle_option('wcusage_field_wise_enable', 0, esc_html__( 'Wise Bank Transfer Payouts', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_wise_enable', 0, esc_html__( 'Wise Bank Transfer Payouts', 'woo-coupon-usage' ), '0px'); ?>
       </span>
 
       <!-- Beta Message -->
@@ -880,7 +905,7 @@ function wcusage_field_cb_payouts( $args )
       <i><?php echo esc_html__( 'Prerequisites: To use Wise Bank Transfer Payouts, you will need a Wise business account and API access.', 'woo-coupon-usage' ); ?> <a href="https://docs.wise.com/api-docs/features/strong-customer-authentication-sca-for-api" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
       <i><?php echo esc_html__( 'No Wise account is required for the recipient.', 'woo-coupon-usage' ); ?></i><br/>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_wise_enable', '.wcu-field-section-tr-payouts-wise'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_wise_enable', '.wcu-field-section-tr-payouts-wise'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-wise">
 
       <br/><br/>
@@ -916,13 +941,11 @@ function wcusage_field_cb_payouts( $args )
 
           <a href="https://couponaffiliates.com/docs/pro-wise-payouts" target="_blank" class="button button-primary" style="margin-top: 10px;"><?php echo esc_html__( 'View Documentation', 'woo-coupon-usage' ); ?> <span class="fas fa-external-link-alt"></span></a>
 
-          <br/><br/>
-          
-          <strong><?php echo esc_html__( 'For more information, please watch the video below:', 'woo-coupon-usage' ); ?></strong>
           <br/>
-          <div style="max-width: 720px;">
-          <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1106083661?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Commission Payouts"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
-          </div>
+          
+          <strong><?php echo esc_html__( 'For more information, watch the video:', 'woo-coupon-usage' ); ?></strong>
+          <br/>
+          <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/1106083661?badge=0&autopause=0&player_id=0&app_id=58479/embed' ); ?>
           
         </div>
 
@@ -972,17 +995,17 @@ function wcusage_field_cb_payouts( $args )
           <br/>
 
           <!-- Change Payment Method Label -->
-          <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_wisebank_only', 'Wise Bank Transfer', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_tr_payouts_wisebank_only', 'Wise Bank Transfer', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '0px'); ?>
 
           <br/>
 
           <!-- Change Payment Details Label -->
-          <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_wisebank', 'Bank Account Details', esc_html__( 'Payment Details Section Label', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_tr_payouts_wisebank', 'Bank Account Details', esc_html__( 'Payment Details Section Label', 'woo-coupon-usage' ), '0px'); ?>
 
           <br/>
 
           <!-- Payment Method Info -->
-          <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_wisebank_info', 'Please enter your bank account details in the individual fields below. We will create a recipient account and process the payout via Wise. Required fields are marked with an asterisk (*).', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_tr_payouts_wisebank_info', 'Please enter your bank account details in the individual fields below. We will create a recipient account and process the payout via Wise. Required fields are marked with an asterisk (*).', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '0px'); ?>
           <i style="margin-left: 0px;"><?php echo esc_html__( 'Custom information/text shown when payment method is selected (in the dashboard settings).', 'woo-coupon-usage' ); ?></i><br/>
 
           <div style="margin-left: -40px;">
@@ -1003,7 +1026,7 @@ function wcusage_field_cb_payouts( $args )
         <br/>
 
         <!-- Test Mode Toggle -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_tr_payouts_wiseapi_test', 0, esc_html__( 'Enable Test Mode?', 'woo-coupon-usage' ), '40px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_tr_payouts_wiseapi_test', 0, esc_html__( 'Enable Test Mode?', 'woo-coupon-usage' ), '40px'); ?>
 
         <br/>
 
@@ -1100,7 +1123,7 @@ function wcusage_field_cb_payouts( $args )
 
         <span class="wcu-field-section-tr-payouts-wiseapi-live">
 
-            <?php echo wcusage_setting_text_option('wcusage_field_wiseapi_token', '', esc_html__( '[Live] API Token', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_wiseapi_token', '', esc_html__( '[Live] API Token', 'woo-coupon-usage' ), '40px'); ?>
 
             <br/>
             
@@ -1122,13 +1145,13 @@ function wcusage_field_cb_payouts( $args )
                 </select>
             </div>
 
-            <?php echo wcusage_setting_text_option('wcusage_field_wiseapi_profile_id', '', esc_html__( '[Live] Profile ID', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_wiseapi_profile_id', '', esc_html__( '[Live] Profile ID', 'woo-coupon-usage' ), '40px'); ?>
 
         </span>
 
         <span class="wcu-field-section-tr-payouts-wiseapi-test" style="color: red;">
 
-            <?php echo wcusage_setting_text_option('wcusage_field_wiseapi_test_token', '', esc_html__( '[Test] API Token', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_wiseapi_test_token', '', esc_html__( '[Test] API Token', 'woo-coupon-usage' ), '40px'); ?>
 
             <br/>
             
@@ -1150,7 +1173,7 @@ function wcusage_field_cb_payouts( $args )
                 </select>
             </div>
 
-            <?php echo wcusage_setting_text_option('wcusage_field_wiseapi_test_profile_id', '', esc_html__( '[Test] Profile ID', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_wiseapi_test_profile_id', '', esc_html__( '[Test] Profile ID', 'woo-coupon-usage' ), '40px'); ?>
 
         </span>
 
@@ -1188,12 +1211,12 @@ function wcusage_field_cb_payouts( $args )
       <div style="margin-bottom: 40px;" id="storecredit-settings"></div>
 
       <span class="wcu-admin-payouts-headers">
-        <?php echo wcusage_setting_toggle_option('wcusage_field_storecredit_enable', 0, esc_html__( 'Store Credit / Wallet', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_storecredit_enable', 0, esc_html__( 'Store Credit / Wallet', 'woo-coupon-usage' ), '0px'); ?>
       </span>
       <i><?php echo esc_html__( 'Store credit payouts will allow affiliates to have commission paid out into a "wallet" which they can then use as a discount to purchase items/products from your shop.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-store-credit" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a></i><br/>
       <i><?php echo esc_html__( 'If you want to show the logged in users current store credit balance somewhere, use the shortcode', 'woo-coupon-usage' ); ?>: [couponaffiliates_credit]</i><br/>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_storecredit_enable', '.wcu-field-section-tr-payouts-storecredit'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_storecredit_enable', '.wcu-field-section-tr-payouts-storecredit'); // Show or Hide ?>
       <span class="wcu-field-section-tr-payouts-storecredit">
 
         <br/>
@@ -1347,25 +1370,25 @@ function wcusage_field_cb_payouts( $args )
         <span class="section-default-credit-system-settings">
 
           <!-- Change Payment Method Label - Store Credit -->
-          <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_only', 'Store Credit', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_only', 'Store Credit', esc_html__( 'Payment Method Name', 'woo-coupon-usage' ), '40px'); ?>
           <i style="margin-left: 40px;"><?php echo esc_html__( 'The name of your Store Credit wallet, show in the payout method selection etc.', 'woo-coupon-usage' ); ?></i><br/>
 
           <br/>
 
           <!-- Payment Method Info - Store Credit -->
-          <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_info', '', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '40px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_info', '', esc_html__( 'Payment Method Information', 'woo-coupon-usage' ), '40px'); ?>
           <i style="margin-left: 40px;"><?php echo esc_html__( 'Custom information/text shown when payment method is selected (in the dashboard settings).', 'woo-coupon-usage' ); ?></i><br/>
 
           <br/>
 
           <!-- "Store Credit Balance" Text - Store Credit -->
-          <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_balance', 'Store Credit Balance', esc_html__( 'Custom "Store Credit Balance" Text', 'woo-coupon-usage' ), '40px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_balance', 'Store Credit Balance', esc_html__( 'Custom "Store Credit Balance" Text', 'woo-coupon-usage' ), '40px'); ?>
           <i style="margin-left: 40px;"><?php echo esc_html__( 'Text shown next to the users store credit balance.', 'woo-coupon-usage' ); ?></i><br/>
 
           <br/>
 
           <!-- Custom "Affiliate Commission" Text -->
-          <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_description', 'Affiliate Commission', esc_html__( 'Custom "Affiliate Commission" Text', 'woo-coupon-usage' ), '40px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_description', 'Affiliate Commission', esc_html__( 'Custom "Affiliate Commission" Text', 'woo-coupon-usage' ), '40px'); ?>
           <i style="margin-left: 40px;"><?php echo esc_html__( 'Used when describing the store credit payment/transaction in the logs.', 'woo-coupon-usage' ); ?></i><br/>
 
           <span class="section-default-credit-system section-default-credit-system-default">
@@ -1373,27 +1396,35 @@ function wcusage_field_cb_payouts( $args )
             <br/>
 
             <!-- Change Cart Discount Text - Store Credit -->
-            <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_discount', 'Store Credit Discount', esc_html__( 'Cart Discount Text', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_discount', 'Store Credit Discount', esc_html__( 'Cart Discount Text', 'woo-coupon-usage' ), '40px'); ?>
             <i style="margin-left: 40px;"><?php echo esc_html__( 'This is the name of the discount shown on the cart page, when store credit is applied.', 'woo-coupon-usage' ); ?></i><br/>
 
             <br/>
 
             <!-- "Affiliate store credit available" Text - Store Credit -->
-            <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_available', 'Affiliate store credit available', esc_html__( 'Custom "Affiliate store credit available" Text', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_available', 'Affiliate store credit available', esc_html__( 'Custom "Affiliate store credit available" Text', 'woo-coupon-usage' ), '40px'); ?>
             <i style="margin-left: 40px;"><?php echo esc_html__( 'Shown on the cart/checkout page when they have credit available to spend.', 'woo-coupon-usage' ); ?></i><br/>
 
             <br/>
 
             <!-- "Apply {credit} credit to this order." Text - Store Credit -->
-            <?php echo wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_apply', 'Apply {credit} credit to this order.', esc_html__( 'Custom "Apply credit to this order" Text', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_tr_payouts_storecredit_apply', 'Apply {credit} credit to this order.', esc_html__( 'Custom "Apply credit to this order" Text', 'woo-coupon-usage' ), '40px'); ?>
             <i style="margin-left: 40px;"><?php echo esc_html__( 'This is shown below the message above, next to a checkbox, allowing them to apply some or all of their credit to the cart.', 'woo-coupon-usage' ); ?></i><br/>
             <i style="margin-left: 40px;"><?php echo esc_html__( 'Use merge tag {credit} to show the amount of credit they can apply.', 'woo-coupon-usage' ); ?></i><br/>
 
             <br/>
 
+
             <!-- Show "Store Credit" Column on Users List -->
-            <?php echo wcusage_setting_toggle_option('wcusage_field_tr_payouts_storecredit_users_col', 1, esc_html__( 'Show "Store Credit" column on admin users list?', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_toggle_option('wcusage_field_tr_payouts_storecredit_users_col', 1, esc_html__( 'Show "Store Credit" column on admin users list?', 'woo-coupon-usage' ), '40px'); ?>
             <i style="margin-left: 40px;"><?php echo esc_html__( 'This will show the current "Store Credit" for each user on the "All Users" admin page.', 'woo-coupon-usage' ); ?></i><br/>
+
+            <br/>
+
+            <!-- Multi-currency support for Store Credit -->
+            <?php wcusage_setting_toggle_option('wcusage_field_tr_payouts_storecredit_multicurrency', 1, esc_html__( 'Enable multi-currency support for store credit?', 'woo-coupon-usage' ), '40px'); ?>
+            <i style="margin-left: 40px;"><?php echo esc_html__( 'If enabled, store credit will be converted and displayed in the selected currency at checkout. If disabled, all store credit will use the base store currency only.', 'woo-coupon-usage' ); ?></i><br/>
+            <i style="margin-left: 40px;"><?php echo sprintf( esc_html__( 'Note: This requires the <a href="%s" target="_blank">multi-currency module</a> to be enabled and configured.', 'woo-coupon-usage' ), 'https://couponaffiliates.com/docs/multi-currency-support/' ); ?></i><br/>
 
           <?php
           // Custom Hook
@@ -1406,7 +1437,7 @@ function wcusage_field_cb_payouts( $args )
           <br/>
 
           <!-- Commission Bonus % -->
-          <?php echo wcusage_setting_number_option('wcusage_field_tr_payouts_storecredit_bonus', '0', esc_html__( 'Bonus Commission (%)', 'woo-coupon-usage' ), '40px'); ?>
+          <?php wcusage_setting_number_option('wcusage_field_tr_payouts_storecredit_bonus', '0', esc_html__( 'Bonus Commission (%)', 'woo-coupon-usage' ), '40px'); ?>
           <i style="margin-left: 40px;"><?php echo esc_html__( 'Give affiliates extra commission % as a bonus for selecting Store Credit as their payout method.', 'woo-coupon-usage' ); ?></i><br/>
           <i style="margin-left: 40px;"><?php echo esc_html__( 'This bonus is not applied on the dashboard or when they request payouts. It will simply apply the bonus % as additional credit, when the payout is marked as paid.', 'woo-coupon-usage' ); ?></i><br/>
 
@@ -1415,7 +1446,7 @@ function wcusage_field_cb_payouts( $args )
             <br/>
 
             <!-- "Store Credit" Exclude Tax -->
-            <?php echo wcusage_setting_toggle_option('wcusage_field_tr_payouts_storecredit_excl_tax', 0, esc_html__( 'Exclude/Remove taxes from Store Credit in cart.', 'woo-coupon-usage' ), '40px'); ?>
+            <?php wcusage_setting_toggle_option('wcusage_field_tr_payouts_storecredit_excl_tax', 0, esc_html__( 'Exclude/Remove taxes from Store Credit in cart.', 'woo-coupon-usage' ), '40px'); ?>
             <i style="margin-left: 40px;"><?php echo esc_html__( 'This will remove/deduct the tax amount from the store credit, if it is added to the credit amount in the cart.', 'woo-coupon-usage' ); ?></i><br/>
 
           <?php } ?>
@@ -1503,12 +1534,15 @@ function wcusage_payouts_user_role_select($thisid) {
     $toggle_checked = 0;
   } else {
     $toggle_checked = 1;
-    $options1 = get_option('wcusage_options');
-    $options1[$thisid . '_toggle'] = 1;
-    update_option('wcusage_options', $options1);
+    // Only update on non-GET requests
+    if ( $_SERVER['REQUEST_METHOD'] !== 'GET' ) {
+      $options1 = get_option('wcusage_options');
+      $options1[$thisid . '_toggle'] = 1;
+      update_option('wcusage_options', $options1);
+    }
   }
-  echo wcusage_setting_toggle_option($thisid.'_toggle', $toggle_checked, esc_html__( 'Limit to certain user roles & groups?', 'woo-coupon-usage' ), '40px');
-  echo wcusage_setting_toggle('.'.$thisid.'_toggle', '.payouts-role-select-'.$thisid); // Show or Hide
+  wcusage_setting_toggle_option($thisid.'_toggle', $toggle_checked, esc_html__( 'Limit to certain user roles & groups?', 'woo-coupon-usage' ), '40px');
+  wcusage_setting_toggle('.'.$thisid.'_toggle', '.payouts-role-select-'.$thisid); // Show or Hide
   ?>
 
   <script>

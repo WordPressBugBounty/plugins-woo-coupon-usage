@@ -19,10 +19,10 @@ function wcusage_field_cb_design( $args )
 
   <p>
     <div class="wcu-terminology">
-    <?php echo wcusage_setting_text_option('wcusage_field_custom_affiliate_text', '', esc_html__( 'Custom "Affiliate" terminology:', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_text_option('wcusage_field_custom_affiliate_text', '', esc_html__( 'Custom "Affiliate" terminology:', 'woo-coupon-usage' ), '0px'); ?>
     </div>
     <div class="wcu-terminology">
-    <?php echo wcusage_setting_text_option('wcusage_field_custom_affiliates_text', '', esc_html__( 'Custom "Affiliates" terminology:', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_text_option('wcusage_field_custom_affiliates_text', '', esc_html__( 'Custom "Affiliates" terminology:', 'woo-coupon-usage' ), '0px'); ?>
     </div>
     <script>
     /* Only enable the "affiliates" text field if the "affiliate" text field is not empty */
@@ -66,7 +66,7 @@ function wcusage_field_cb_design( $args )
   <?php $wcusage_field_show_tabs = wcusage_get_setting_value('wcusage_field_show_tabs', '1');
   if(!$wcusage_field_show_tabs) { ?>
   <!-- Enable "tabbed" layout - Discontinued but option hidden if turned off -->
-  <?php echo wcusage_setting_toggle_option('wcusage_field_show_tabs', 1, esc_html__( 'Enable "tabbed" layout (recommended).', 'woo-coupon-usage' ), '0px'); ?>
+  <?php wcusage_setting_toggle_option('wcusage_field_show_tabs', 1, esc_html__( 'Enable "tabbed" layout (recommended).', 'woo-coupon-usage' ), '0px'); ?>
 	<br/>
   <?php } ?>
 
@@ -153,10 +153,10 @@ function wcusage_field_cb_design( $args )
     </span>
 
     <!-- Background -->
-    <?php echo wcusage_setting_color_option('wcusage_field_color_tab', '#1b3e47', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_color_option('wcusage_field_color_tab', '#1b3e47', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
 
     <!-- Text -->
-    <?php echo wcusage_setting_color_option('wcusage_field_color_tab_font', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_color_option('wcusage_field_color_tab_font', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
 
   </div>
 
@@ -172,17 +172,17 @@ function wcusage_field_cb_design( $args )
     </span>
 
     <!-- Background -->
-    <?php echo wcusage_setting_color_option('wcusage_field_color_tab_hover', '#005d75', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_color_option('wcusage_field_color_tab_hover', '#005d75', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
 
     <!-- Text -->
-    <?php echo wcusage_setting_color_option('wcusage_field_color_tab_hover_font', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_color_option('wcusage_field_color_tab_hover_font', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
 
   </div>
   <div style="clear: both;"></div>
 
   <br/><hr/>
 
-  <?php echo do_action('wcusage_hook_setting_section_colours'); ?>
+  <?php do_action('wcusage_hook_setting_section_colours'); ?>
 
 	<br/><hr/>
 
@@ -274,19 +274,19 @@ function wcusage_field_cb_design( $args )
   <br/>
 
   <!-- Use the email address as username. -->
-  <?php echo wcusage_setting_toggle_option('wcusage_field_form_style_columns', 1, esc_html__( 'Enable 2 Column Layout', 'woo-coupon-usage' ), '0px'); ?>
+  <?php wcusage_setting_toggle_option('wcusage_field_form_style_columns', 1, esc_html__( 'Enable 2 Column Layout', 'woo-coupon-usage' ), '0px'); ?>
   <i><?php echo esc_html__( 'With this enabled, some of the fields on the form will be displayed in 2 columns, such as first and last name.', 'woo-coupon-usage' ); ?></i><br/>
 
   <br/>
 
   <!-- Form Title -->
-  <?php echo wcusage_setting_text_option('wcusage_field_registration_form_title', '', esc_html__( 'Custom Registration Form Title', 'woo-coupon-usage' ), '0px'); ?>
+  <?php wcusage_setting_text_option('wcusage_field_registration_form_title', '', esc_html__( 'Custom Registration Form Title', 'woo-coupon-usage' ), '0px'); ?>
   <i><?php echo esc_html__( 'Default', 'woo-coupon-usage' ); ?>: <?php echo esc_html__( 'Register New Affiliate Account', 'woo-coupon-usage' ); ?></i><br/>
 
   <br/>
 
   <!-- Submit button text field label -->
-  <?php echo wcusage_setting_text_option('wcusage_field_registration_submit_button_text', '', esc_html__( 'Custom Submit Button Text', 'woo-coupon-usage' ), '0px'); ?>
+  <?php wcusage_setting_text_option('wcusage_field_registration_submit_button_text', '', esc_html__( 'Custom Submit Button Text', 'woo-coupon-usage' ), '0px'); ?>
   <i><?php echo esc_html__( 'Default', 'woo-coupon-usage' ); ?>: <?php echo esc_html__( 'Submit Application', 'woo-coupon-usage' ); ?></i><br/>
 
 	<br/><hr/>
@@ -308,7 +308,7 @@ function wcusage_field_cb_design( $args )
 
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Custom CSS', 'woo-coupon-usage' ); ?></h3>
 
-  <?php echo wcusage_setting_textarea_option('wcusage_field_custom_dashboard_css', '', esc_html__( 'Custom Dashboard CSS', 'woo-coupon-usage' ), '0px'); ?>
+  <?php wcusage_setting_textarea_option('wcusage_field_custom_dashboard_css', '', esc_html__( 'Custom Dashboard CSS', 'woo-coupon-usage' ), '0px'); ?>
   
   <?php
   // Load WP code editor (CodeMirror) assets and initialize on this textarea
@@ -382,10 +382,10 @@ if( !function_exists( 'wcusage_setting_section_colours' ) ) {
     <h3><?php echo esc_html__( 'Table Header & Footer', 'woo-coupon-usage' ); ?></h3>
 
     <!-- Background -->
-    <?php echo wcusage_setting_color_option('wcusage_field_color_table', '#f4f4f4', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_color_option('wcusage_field_color_table', '#f4f4f4', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
 
     <!-- Text -->
-    <?php echo wcusage_setting_color_option('wcusage_field_color_table_font', '#0a0a0a', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_color_option('wcusage_field_color_table_font', '#0a0a0a', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
 
   </div>
 
@@ -395,10 +395,10 @@ if( !function_exists( 'wcusage_setting_section_colours' ) ) {
     <h3><?php echo esc_html__( 'Buttons', 'woo-coupon-usage' ); ?></h3>
 
     <!-- Background -->
-    <?php echo wcusage_setting_color_option('wcusage_field_color_button', '#005d75', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_color_option('wcusage_field_color_button', '#005d75', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
 
     <!-- Text -->
-    <?php echo wcusage_setting_color_option('wcusage_field_color_button_font', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_color_option('wcusage_field_color_button_font', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
 
   </div>
 
@@ -408,10 +408,10 @@ if( !function_exists( 'wcusage_setting_section_colours' ) ) {
     <h3><?php echo esc_html__( 'Buttons Hover', 'woo-coupon-usage' ); ?></h3>
 
     <!-- Background -->
-    <?php echo wcusage_setting_color_option('wcusage_field_color_button_hover', '#1b3e47', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_color_option('wcusage_field_color_button_hover', '#1b3e47', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
 
     <!-- Text -->
-    <?php echo wcusage_setting_color_option('wcusage_field_color_button_font_hover', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_color_option('wcusage_field_color_button_font_hover', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
 
   </div>
 
@@ -422,7 +422,7 @@ if( !function_exists( 'wcusage_setting_section_colours' ) ) {
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Icons', 'woo-coupon-usage' ); ?></h3>
 
   <!-- Show icons on affiliate dashboard tabs -->
-  <?php echo wcusage_setting_toggle_option('wcusage_field_show_tabs_icons', 1, esc_html__( 'Show icons on the affiliate dashboard tabs.', 'woo-coupon-usage' ), '0px'); ?>
+  <?php wcusage_setting_toggle_option('wcusage_field_show_tabs_icons', 1, esc_html__( 'Show icons on the affiliate dashboard tabs.', 'woo-coupon-usage' ), '0px'); ?>
 
   <div style="clear: both;"></div>
 
@@ -434,7 +434,7 @@ if( !function_exists( 'wcusage_setting_section_colours' ) ) {
     <h3><?php echo esc_html__( 'Icon Colour', 'woo-coupon-usage' ); ?></h3>
 
     <!-- Main -->
-    <?php echo wcusage_setting_color_option('wcusage_field_color_stats_icon', '#bebebe', '', '0px'); ?>
+    <?php wcusage_setting_color_option('wcusage_field_color_stats_icon', '#bebebe', '', '0px'); ?>
 
   </div>
 
@@ -450,7 +450,7 @@ if( !function_exists( 'wcusage_setting_section_colours' ) ) {
       <h3><?php echo esc_html__( 'Line Graph', 'woo-coupon-usage' ); ?> (PRO)</h3>
 
       <!-- Main -->
-      <?php echo wcusage_setting_color_option('wcusage_field_color_line_graph', '#008000', '', '0px'); ?>
+      <?php wcusage_setting_color_option('wcusage_field_color_line_graph', '#008000', '', '0px'); ?>
 
     </span>
 

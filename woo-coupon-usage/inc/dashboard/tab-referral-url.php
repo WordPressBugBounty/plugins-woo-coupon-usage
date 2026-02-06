@@ -34,7 +34,7 @@ if ( !function_exists( 'wcusage_tab_referral_url' ) ) {
         ?>
 
 		<?php 
-        echo do_action( 'wcusage_hook_scripts_tab_referral_url_stats' );
+        do_action( 'wcusage_hook_scripts_tab_referral_url_stats' );
         // Get Referral Tab Scripts
         ?>
 
@@ -94,10 +94,10 @@ if ( !function_exists( 'wcusage_tab_referral_url' ) ) {
                 ?>p1short<?php 
             }
             ?>')"><?php 
-            echo ucfirst( esc_html__( "Copy", "woo-coupon-usage" ) );
+            echo esc_html( ucfirst( __( "Copy", "woo-coupon-usage" ) ) );
             ?> <i id="wcu-copy-p1" class="far fa-copy"></i> <i id="wcu-copied-p1" style="display: none;" class="fas fa-check-circle"></i></button> <?php 
             if ( $wcusage_field_show_shortlink ) {
-                echo do_action( 'wcusage_hook_url_shorten_form' );
+                do_action( 'wcusage_hook_url_shorten_form' );
             }
             ?><br/>
   				<code style="margin: 10px 0 2px 0; padding: 5px; display: inline-block; background: rgba(0,0,0,0.04); color: #1a1a1a;" id="p1" class="wcu-urllink">
@@ -141,39 +141,6 @@ if ( !function_exists( 'wcusage_tab_referral_url' ) ) {
 
 }
 /**
- * Gets the default referral URL, updates if wrong domain
- */
-function wcusage_get_default_ref_url() {
-    // Get the default referral URL from the settings or use the home URL as a fallback.
-    $wcusage_field_default_ref_url = wcusage_get_setting_value( 'wcusage_field_default_ref_url', get_home_url() );
-    // Get the host/domain of the default referral URL.
-    $default_ref_domain = parse_url( $wcusage_field_default_ref_url, PHP_URL_HOST );
-    // Get the host/domain of the current WordPress site.
-    $site_domain = parse_url( get_home_url(), PHP_URL_HOST );
-    // Get the path of the default referral URL.
-    $path = parse_url( $wcusage_field_default_ref_url, PHP_URL_PATH );
-    // Check if the domains match.
-    if ( $default_ref_domain === $site_domain ) {
-        return trailingslashit( $wcusage_field_default_ref_url );
-    } else {
-        // Update the default referral URL with the home URL and get the path.
-        $options = get_option( 'wcusage_options' );
-        $options['wcusage_field_default_ref_url'] = trailingslashit( get_home_url() ) . ltrim( $path, '/' );
-        update_option( 'wcusage_options', $options );
-        return wcusage_get_setting_value( 'wcusage_field_default_ref_url', get_home_url() );
-    }
-}
-
-/**
- * Gets the affiliate referral URL
- */
-function wcusage_get_affiliate_url(  $coupon_code  ) {
-    $prefix = wcusage_get_setting_value( 'wcusage_field_urls_prefix', 'coupon' );
-    $affiliate_url = wcusage_get_default_ref_url() . "?" . $prefix . "=" . rawurlencode( $coupon_code );
-    return $affiliate_url;
-}
-
-/**
  * Gets the stats for referral URL
  *
  * @param int $postid
@@ -198,7 +165,7 @@ if ( !function_exists( 'wcusage_tab_referral_url_stats' ) ) {
         $converted = 0
     ) {
         // Show Stats Boxes
-        echo do_action(
+        do_action(
             'wcusage_hook_get_referral_url_stats',
             $postid,
             $coupon_code,
@@ -207,7 +174,7 @@ if ( !function_exists( 'wcusage_tab_referral_url_stats' ) ) {
         // diplay clicks / visits table
         $wcusage_field_show_click_history = wcusage_get_setting_value( 'wcusage_field_show_click_history', 1 );
         if ( $wcusage_field_show_click_history ) {
-            echo do_action(
+            do_action(
                 'wcusage_hook_display_coupon_url_clicks',
                 $postid,
                 $campaign,
@@ -535,17 +502,17 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_referral_url_stats' ) ) {
           <p style="float: right; font-size: 12px; margin: 0;">
             <a class="wcusage-clicks-prev-page" href="javascript:void(0);">
               <i class="fas fa-arrow-left" style="font-size: 12px;" title="<?php 
-                        echo ucfirst( esc_html__( "Previous Page", "woo-coupon-usage" ) );
+                        echo esc_html( ucfirst( __( "Previous Page", "woo-coupon-usage" ) ) );
                         ?>"></i> <?php 
-                        echo ucfirst( esc_html__( "Previous", "woo-coupon-usage" ) );
+                        echo esc_html( ucfirst( __( "Previous", "woo-coupon-usage" ) ) );
                         ?>
             </a>
             &nbsp;&nbsp;
             <a class="wcusage-clicks-next-page" href="javascript:void(0);">
               <?php 
-                        echo ucfirst( esc_html__( "Next", "woo-coupon-usage" ) );
+                        echo esc_html( ucfirst( __( "Next", "woo-coupon-usage" ) ) );
                         ?> <i class="fas fa-arrow-right" style="font-size: 12px;" title="<?php 
-                        echo ucfirst( esc_html__( "Next Page", "woo-coupon-usage" ) );
+                        echo esc_html( ucfirst( __( "Next Page", "woo-coupon-usage" ) ) );
                         ?>"></i>
             </a>
           </p>

@@ -36,7 +36,7 @@ function wcusage_bulk_product_fields() {
 function wcusage_bulk_product_page() {
 
     // Check if user is administrator
-    if (!current_user_can('manage_options')) {
+    if ( ! wcusage_check_admin_access() ) {
         wp_die('Error: Permission denied.');
     }
     
@@ -47,7 +47,7 @@ function wcusage_bulk_product_page() {
     <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
 
     <div class="wrap wcusage-admin-page">
-        <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
+        <?php do_action('wcusage_hook_dashboard_page_header', ''); ?>
     </div>
 
     <div class="wrap wcusage-bulk-edit-products wcusage-tools">
@@ -236,7 +236,7 @@ function wcusage_update_product() {
 
     $response = array();
 
-    if (!current_user_can('manage_options') || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'bulk_product_update')) {
+        if ( ! wcusage_check_admin_access() || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'bulk_product_update')) {
         $response['success'] = false;
         $response['error_message'] = 'Security check failed.';
         wp_send_json($response);

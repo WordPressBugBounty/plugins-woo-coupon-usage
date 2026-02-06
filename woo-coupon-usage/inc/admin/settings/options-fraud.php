@@ -24,9 +24,9 @@ function wcusage_field_cb_fraud( $args )
     <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Coupon Usage Restrictions', 'woo-coupon-usage' ); ?>:</h3>
 
     <!-- Allow affiliate user to apply their own coupon code at cart / checkout. -->
-    <?php echo wcusage_setting_toggle_option('wcusage_field_allow_assigned_user', 1, esc_html__( 'Allow affiliate user to apply their own coupon code at cart / checkout.', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_toggle_option('wcusage_field_allow_assigned_user', 1, esc_html__( 'Allow affiliate user to apply their own coupon code at cart / checkout.', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'When disabled, the affiliate user will be prevented from using their own coupon code (coupons they are assigned to) at cart or checkout.', 'woo-coupon-usage' ); ?></i>
-    <?php echo wcusage_setting_toggle('.wcusage_field_url_referrals', '.wcusage_field_url_referrals_p_info'); // Show or Hide ?>
+    <?php wcusage_setting_toggle('.wcusage_field_url_referrals', '.wcusage_field_url_referrals_p_info'); // Show or Hide ?>
     <br/><i class="wcusage_field_url_referrals_p_info"><?php echo esc_html__( 'This will also allow them to use their own referral link and earn commission on their own purchases.', 'woo-coupon-usage' ); ?></i>
     <br/>
     <i><?php echo esc_html__( 'Unless you have a specific use case, we suggest keeping this disabled as in general it can cause some issues (commission granted to all coupons).', 'woo-coupon-usage' ); ?></i>
@@ -34,7 +34,7 @@ function wcusage_field_cb_fraud( $args )
     <br/><br/>
 
     <!-- Allow multiple affiliate coupons to be used in the same order. -->
-    <?php echo wcusage_setting_toggle_option('wcusage_field_allow_multiple_coupons', 0, esc_html__( 'Allow multiple affiliate coupons to be used in the same order.', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_toggle_option('wcusage_field_allow_multiple_coupons', 0, esc_html__( 'Allow multiple affiliate coupons to be used in the same order.', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'When disabled, it will only allow 1 affiliate coupon to be used per order. (This is any coupons that have an affiliate user assigned to them.)', 'woo-coupon-usage' ); ?></i>
     <br/>
     <i><?php echo esc_html__( 'We highly recommend that you keep this option DISABLED, as it may cause some issues, or paying too much commission.', 'woo-coupon-usage' ); ?></i>
@@ -48,6 +48,12 @@ function wcusage_field_cb_fraud( $args )
     <br/>
     <?php } ?>
     <br/>
+
+    <!-- Require referral link before affiliate coupons can be applied. -->
+    <?php wcusage_setting_toggle_option('wcusage_field_require_referral_link', 0, esc_html__( 'Require customers to visit the affiliate referral link before applying their coupon.', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( 'When enabled, affiliate coupons can only be applied if the customer currently has the tracking cookie from that affiliate referral link.', 'woo-coupon-usage' ); ?></i>
+
+    <br/><br/>
 
     <!-- Allow affiliate coupons to be used by existing and new customers. -->
     <p>
@@ -80,7 +86,7 @@ function wcusage_field_cb_fraud( $args )
     <br/>
 
     <!-- Blocked Domains -->
-    <?php echo wcusage_setting_textarea_option('wcusage_field_fraud_block_ips', "", esc_html__( 'Blocked "Visitor ID" or "IP Address" List', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_textarea_option('wcusage_field_fraud_block_ips', "", esc_html__( 'Blocked "Visitor ID" or "IP Address" List', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'Enter one per line.', 'woo-coupon-usage' ); ?></i><br/>
 
     <div <?php if( !wcu_fs()->can_use_premium_code() || !wcu_fs()->is_premium() ) { ?>style="opacity: 0.4; pointer-events: none;" class="wcu-settings-pro-only"<?php } ?>>
@@ -100,13 +106,13 @@ function wcusage_field_cb_fraud( $args )
       <br/>
 
       <!-- Blocked Domains -->
-      <?php echo wcusage_setting_textarea_option('wcusage_field_fraud_block_domains', "", esc_html__( 'Blocked Domains List', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_textarea_option('wcusage_field_fraud_block_domains', "", esc_html__( 'Blocked Domains List', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'Enter one per line. You do not need to include "http://", "https://", or "www." in the domain.', 'woo-coupon-usage' ); ?></i><br/>
 
       <br/>
 
       <!-- Allow manually application of affiliate coupons. -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_fraud_block_domains_manual', 0, esc_html__( 'Also block MANUAL use of affiliate coupons, if referred by a blocked domain.', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_fraud_block_domains_manual', 0, esc_html__( 'Also block MANUAL use of affiliate coupons, if referred by a blocked domain.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'When enabled, visitors referred by blocked domains will be completely blocked from entering any affiliate coupons manually (as long as the cookie is saved).', 'woo-coupon-usage' ); ?></i>
 
       <br/><br/><hr/>
@@ -124,12 +130,12 @@ function wcusage_field_cb_fraud( $args )
         <?php echo esc_html__( 'View "Direct Link Tracking" Settings', 'woo-coupon-usage' ); ?>
       </a>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_enable_directlinks', '.wcu-field-section-directlinks'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_enable_directlinks', '.wcu-field-section-directlinks'); // Show or Hide ?>
       <span class="wcu-field-section-directlinks">
 
         <br/><br/>
 
-        <?php echo wcusage_setting_toggle_option('wcusage_field_enable_directlinks_protection', 0, 'Only allow affiliate coupons to be applied when directly linked by an approved domain.', '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_enable_directlinks_protection', 0, 'Only allow affiliate coupons to be applied when directly linked by an approved domain.', '0px'); ?>
         <i><?php echo esc_html__( 'Enabling this option will prevent ALL affiliate coupons and referral links from working UNLESS the customer was directly linked by the approved domain that is assigned to that coupon.', 'woo-coupon-usage' ); ?></i><br/>
 
       </span>

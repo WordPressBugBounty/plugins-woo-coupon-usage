@@ -297,7 +297,7 @@ function wcusage_generate_affiliate_dashboard(  $user_coupons, $settings  ) {
             
             <div class="wcusage-widget-stats">
                 <?php 
-        echo wcusage_get_floating_widget_stats( $first_coupon_id );
+        echo wp_kses_post( wcusage_get_floating_widget_stats( $first_coupon_id ) );
         ?>
             </div>
         </div>
@@ -325,7 +325,7 @@ function wcusage_generate_affiliate_dashboard(  $user_coupons, $settings  ) {
         ?>
             
             <?php 
-        echo wcusage_get_floating_widget_referrals( $first_coupon_id );
+        echo wp_kses_post( wcusage_get_floating_widget_referrals( $first_coupon_id ) );
         ?>
         </div>
         <?php 
@@ -354,7 +354,8 @@ function wcusage_generate_affiliate_dashboard(  $user_coupons, $settings  ) {
         ?>
             
             <?php 
-        echo wcusage_get_floating_widget_payouts( $first_coupon_id );
+        echo wp_kses_post( wcusage_get_floating_widget_payouts( $first_coupon_id ) );
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         ?>
         </div>
         <?php 
@@ -383,7 +384,8 @@ function wcusage_generate_affiliate_dashboard(  $user_coupons, $settings  ) {
         ?>
             
             <?php 
-        echo wcusage_get_floating_widget_creatives( $first_coupon_id );
+        echo wp_kses_post( wcusage_get_floating_widget_creatives( $first_coupon_id ) );
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         ?>
         </div>
         <?php 
@@ -482,9 +484,11 @@ function wcusage_get_floating_widget_stats(  $coupon_id  ) {
             // Get total clicks for this coupon
             $click_query = $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE couponid = %d", $coupon_id );
             $total_clicks = $wpdb->get_var( $click_query );
+            // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
             // Get conversions (clicks that resulted in orders)
             $conversion_query = $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE couponid = %d AND converted = 1", $coupon_id );
             $total_conversions = $wpdb->get_var( $conversion_query );
+            // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
             // Calculate conversion rate
             if ( $total_clicks > 0 ) {
                 $conversion_rate = round( $total_conversions / $total_clicks * 100, 1 );
@@ -893,7 +897,9 @@ function wcusage_get_floating_widget_payouts(  $coupon_id  ) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'wcusage_payouts';
         $pending_payouts = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $table_name . " WHERE couponid = %d AND status = 'pending' ORDER BY id DESC LIMIT 5", $coupon_id ) );
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         $completed_payouts = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $table_name . " WHERE couponid = %d AND status = 'paid' ORDER BY id DESC LIMIT 5", $coupon_id ) );
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         ob_start();
         ?>
 
@@ -904,12 +910,12 @@ function wcusage_get_floating_widget_payouts(  $coupon_id  ) {
         <!-- Unpaid Commission -->
         <div class="wcusage-widget-stat-box" style="margin-bottom: 15px;">
             <span class="wcusage-widget-stat-value"><?php 
-        echo wcusage_format_price( number_format(
+        echo wp_kses_post( wcusage_format_price( number_format(
             (float) $unpaid_commission,
             2,
             '.',
             ''
-        ) );
+        ) ) );
         ?></span>
             <span class="wcusage-widget-stat-label"><?php 
         echo esc_html__( 'Unpaid Commission', 'woo-coupon-usage' );
@@ -947,10 +953,10 @@ function wcusage_get_floating_widget_payouts(  $coupon_id  ) {
                 ?>
                 <div class="wcusage-widget-table-row">
                     <span class="wcusage-widget-table-amount"><?php 
-                echo wcusage_format_price( $payout->amount );
+                echo wp_kses_post( wcusage_format_price( $payout->amount ) );
                 ?></span>
                     <span class="wcusage-widget-table-date"><?php 
-                echo date_i18n( 'M j, Y', strtotime( $payout->date ) );
+                echo esc_html( date_i18n( 'M j, Y', strtotime( $payout->date ) ) );
                 ?></span>
                     <span class="wcusage-widget-table-status pending"><?php 
                 echo esc_html__( 'Pending', 'woo-coupon-usage' );
@@ -979,10 +985,10 @@ function wcusage_get_floating_widget_payouts(  $coupon_id  ) {
                 ?>
                 <div class="wcusage-widget-table-row">
                     <span class="wcusage-widget-table-amount"><?php 
-                echo wcusage_format_price( $payout->amount );
+                echo wp_kses_post( wcusage_format_price( $payout->amount ) );
                 ?></span>
                     <span class="wcusage-widget-table-date"><?php 
-                echo date_i18n( 'M j, Y', strtotime( $payout->datepaid ) );
+                echo esc_html( date_i18n( 'M j, Y', strtotime( $payout->datepaid ) ) );
                 ?></span>
                     <span class="wcusage-widget-table-status paid"><?php 
                 echo esc_html__( 'Paid', 'woo-coupon-usage' );

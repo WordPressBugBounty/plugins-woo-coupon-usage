@@ -142,13 +142,16 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'wcusage_clicks';
         $query = "SELECT * FROM {$table_name} WHERE couponid = %d {$campaignline} {$convertedline} ORDER BY id DESC LIMIT %d OFFSET %d";
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         $query = $wpdb->prepare(
             $query,
             $postid,
             $wcusage_field_show_click_history_amount,
             $offset
         );
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         $result2 = $wpdb->get_results( $query );
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         $totalresults = count( $result2 );
         ?>
 
@@ -196,10 +199,10 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
             echo "<tr class='wcu-thetitlerow'>";
             echo "<td class='wcuTableHead'>#</td>";
             if ( $show_converted_col ) {
-                echo "<td class='wcuTableHead'><i class='fas fa-cart-plus' title='" . ucfirst( esc_html__( 'Converted?', 'woo-coupon-usage' ) ) . "'></i></td>";
+                echo "<td class='wcuTableHead'><i class='fas fa-cart-plus' title='" . esc_attr( ucfirst( esc_html__( 'Converted?', 'woo-coupon-usage' ) ) ) . "'></i></td>";
             }
-            echo "<td class='wcuTableHead' style='max-width: 300px;'>" . ucfirst( esc_html__( 'Landing Page', 'woo-coupon-usage' ) ) . "</td>";
-            echo "<td class='wcuTableHead' style='max-width: 350px;'>" . ucfirst( esc_html__( 'Referring URL', 'woo-coupon-usage' ) ) . "</td>";
+            echo "<td class='wcuTableHead' style='max-width: 300px;'>" . esc_html( ucfirst( esc_html__( 'Landing Page', 'woo-coupon-usage' ) ) ) . "</td>";
+            echo "<td class='wcuTableHead' style='max-width: 350px;'>" . esc_html( ucfirst( esc_html__( 'Referring URL', 'woo-coupon-usage' ) ) ) . "</td>";
             echo "<td class='wcuTableHead'>" . ucfirst( esc_html__( 'Date', 'woo-coupon-usage' ) ) . "</td>";
             echo "</tr>";
             foreach ( $result2 as $result ) {

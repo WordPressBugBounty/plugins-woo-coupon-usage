@@ -55,17 +55,15 @@ function wcusage_field_cb_pro_details( $args )
     <?php
     // Black Friday Deal
     $todayDate = strtotime('now');
-    $dealDateBegin = strtotime('15-11-2023');
-    $dealDateEnd = strtotime('30-11-2023');
+    $dealDateBegin = strtotime('15-11-2025');
+    $dealDateEnd = strtotime('30-11-2025');
     if ($todayDate >= $dealDateBegin && $todayDate <= $dealDateEnd) { $specialsale = true; } else { $specialsale = false; }
     ?>
     <p style="margin-top: 20px;">
     <?php if($specialsale) { ?>
-      <strong style="color: red;"><span class="fas fa-star fa-spin"></span> Black Friday Sale! 30% off PRO with code: BF2024</strong>
+      <strong style="color: red;"><span class="fas fa-star fa-spin"></span> Black Friday Sale! 30% off PRO with code: BF2025</strong>
     <?php } ?>
     </p>
-
-    <br/><br/>
 
     </div>
 
@@ -75,29 +73,30 @@ function wcusage_field_cb_pro_details( $args )
 
     <div class="wcu-pro-col-inner">
 
-      <center>
-      <strong style="margin-bottom: 8px; display: block;">PRO Dashboard Example:</strong>
-      <div class="wistia_responsive_padding" style="padding:56.25% 0 0 0;position:relative;"><div class="wistia_responsive_wrapper" style="height:100%;left:0;position:absolute;top:0;width:100%;"><iframe src="https://fast.wistia.net/embed/iframe/5vmaa8bn3i?seo=false&videoFoam=true" title="Affiliate Dashboard - Demo Video" allow="autoplay; fullscreen" allowtransparency="true" frameborder="0" scrolling="no" class="wistia_embed" name="wistia_embed" msallowfullscreen width="100%" height="100%"></iframe></div></div>
-      <script src="https://fast.wistia.net/assets/external/E-v1.js" async></script>
-      </center>
+    <center>
+      
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/SqxMX07VM44?si=K7N7nVVez_zqRFTG" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </center>
 
     </div>
 
   </div>
 
-  <div style="clear: both;"></div>
+  <hr/>
+
+  <div style="clear: both; width: 100%;"></div>
 
   <?php } ?>
 
-  <hr/>
-
-<h1 style="margin-bottom: 15px;">PRO <?php echo esc_html__( 'Modules & Features', 'woo-coupon-usage' ); ?>:</h1>
+<h1 style="margin-bottom: 0px;">PRO <?php echo esc_html__( 'Modules & Features', 'woo-coupon-usage' ); ?>:</h1>
 
 <p><?php echo esc_html__( 'The below section includes a list of most of the modules and features included in the Pro plan. However other smaller features and customisations can be found throughout the settings page.', 'woo-coupon-usage' ); ?></p>
-<br/>
 
+<div style="flex-basis: 100%; height: 0;"></div>
+
+<?php // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <!-- Advanced Admin Reports -->
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Advanced Admin Reports', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Access to unlimited date range, export to excel, and date comparison features on the admin reports.', 'woo-coupon-usage' ),
@@ -112,7 +111,7 @@ __( 'Access to unlimited date range, export to excel, and date comparison featur
 ?>
 
 <!-- Affiliate Reports -->
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Affiliate Email Reports', 'woo-coupon-usage' ),
 "wcusage_field_enable_reports",
 __( 'Automatically send an email report (and PDF) to affiliates every week/month with a summary of their recent commission and referral stats.', 'woo-coupon-usage' ),
@@ -127,7 +126,7 @@ __( 'Automatically send an email report (and PDF) to affiliates every week/month
 ?>
 
 <!-- Affiliate Registration -->
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Advanced Registration Features', 'woo-coupon-usage' ),
 "",
 __( 'Enable some more advanced affiliate registration features such as custom form fields, multiple templates, dynamic code generator, auto accept, auto registration, and more.', 'woo-coupon-usage' ),
@@ -141,7 +140,7 @@ __( 'Enable some more advanced affiliate registration features such as custom fo
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( '(MLA) Multi-Level Affiliates', 'woo-coupon-usage' ),
 "wcusage_field_mla_enable",
 __( 'Your users can become super-affiliates and invite other affiliates to be a part of their network. They will then earn extra commission from all their referrals.', 'woo-coupon-usage' ),
@@ -156,7 +155,7 @@ __( 'Your users can become super-affiliates and invite other affiliates to be a 
 ?>
 
 <!-- Monthly Summary -->
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Monthly Summary', 'woo-coupon-usage' ),
 "wcusage_field_show_months_table",
 __( 'Show a table with a monthly summary of orders for the coupon, with total sales, commission, and more.', 'woo-coupon-usage' ),
@@ -170,7 +169,7 @@ __( 'Show a table with a monthly summary of orders for the coupon, with total sa
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Creatives', 'woo-coupon-usage' ),
 "wcusage_field_creatives_enable",
 __( 'Display a creatives section with downloadable banners, videos, PDFs, and colors. They can also generate an embed code to easily display it on their site.', 'woo-coupon-usage' ),
@@ -184,7 +183,7 @@ __( 'Display a creatives section with downloadable banners, videos, PDFs, and co
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Dynamic Creatives', 'woo-coupon-usage' ),
 "wcusage_field_creatives_enable",
 __( 'Build "dynamic" creatives, which automatically generate unique and personalised image/banner for each of your affiliates based on certain merge tags.', 'woo-coupon-usage' ),
@@ -198,7 +197,7 @@ __( 'Build "dynamic" creatives, which automatically generate unique and personal
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Performance Bonuses', 'woo-coupon-usage' ),
 "wcusage_field_bonuses_enable",
 __( 'Give your affiliates bonuses when they reach certain goals, such as some bonus commission once they reach a certain amount of sales.', 'woo-coupon-usage' ),
@@ -212,7 +211,7 @@ __( 'Give your affiliates bonuses when they reach certain goals, such as some bo
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Leaderboards', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Create and display leaderboards on your posts or pages with rankings for your affiliates total referrals.', 'woo-coupon-usage' ),
@@ -226,7 +225,7 @@ __( 'Create and display leaderboards on your posts or pages with rankings for yo
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Product Rates Table', 'woo-coupon-usage' ),
 "wcusage_field_rates_enable",
 __( 'Show a table of the commission rates earned for that specific affiliate/coupon, on each individual product.', 'woo-coupon-usage' ),
@@ -240,7 +239,7 @@ __( 'Show a table of the commission rates earned for that specific affiliate/cou
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Custom Commission Per Coupon, Product, Category, or User Role/Group', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Set custom "flexible commission" amounts for each individual coupon, product, category, or user group/role.', 'woo-coupon-usage' ),
@@ -254,7 +253,7 @@ __( 'Set custom "flexible commission" amounts for each individual coupon, produc
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Campaigns (Referral URL)', 'woo-coupon-usage' ),
 "wcusage_field_show_campaigns",
 __( 'Allow your affiliates to create referral "campaigns" and then create custom URLs to track clicks/conversions per campaign.', 'woo-coupon-usage' ),
@@ -268,7 +267,7 @@ __( 'Allow your affiliates to create referral "campaigns" and then create custom
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Social Sharing (Referral URL)', 'woo-coupon-usage' ),
 "wcusage_field_show_social",
 __( 'Add social sharing buttons to the referral URL tab, so affiliates can instantly share their generated referral link.', 'woo-coupon-usage' ),
@@ -282,7 +281,7 @@ __( 'Add social sharing buttons to the referral URL tab, so affiliates can insta
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Short URL Generator (Referral URL)', 'woo-coupon-usage' ),
 "wcusage_field_show_shortlink",
 __( 'Add a button to the referral URL tab, to allow affiliate users to generate a short URL for their referral link automatically.', 'woo-coupon-usage' ),
@@ -296,7 +295,7 @@ __( 'Add a button to the referral URL tab, to allow affiliate users to generate 
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'QR Code Generator (Referral URL)', 'woo-coupon-usage' ),
 "wcusage_field_show_qrcodes",
 __( 'Add a button to the referral URL tab, to allow affiliate users to automatically generate a QR code for their referral link.', 'woo-coupon-usage' ),
@@ -310,7 +309,7 @@ __( 'Add a button to the referral URL tab, to allow affiliate users to automatic
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Direct Link Tracking (Referrals)', 'woo-coupon-usage' ),
 "wcusage_field_enable_directlinks",
 __( 'Affiliates can link directly to your website via their website without needing an affiliate link.', 'woo-coupon-usage' ),
@@ -324,7 +323,7 @@ __( 'Affiliates can link directly to your website via their website without need
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Affiliate Landing Pages (Referrals)', 'woo-coupon-usage' ),
 "wcusage_field_landing_pages",
 __( 'Ability to link a landing page to an affiliate coupon, which will then work the same as a referral URL. It is also possible to automatically generate pages.', 'woo-coupon-usage' ),
@@ -338,7 +337,7 @@ __( 'Ability to link a landing page to an affiliate coupon, which will then work
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Automated Conversion Rates', 'woo-coupon-usage' ),
 "wcusage_field_landing_pages",
 __( 'Ability automatically collect the latest conversion rates for currencies, and update them automatically in the multi-currency settings.', 'woo-coupon-usage' ),
@@ -352,7 +351,7 @@ __( 'Ability automatically collect the latest conversion rates for currencies, a
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Payouts Features', 'woo-coupon-usage' ),
 "wcusage_field_tracking_enable",
 __( 'Enable Payouts features, and automatically add "unpaid" commission to the affiliates account on order completion, ready for payout.', 'woo-coupon-usage' ),
@@ -366,7 +365,7 @@ __( 'Enable Payouts features, and automatically add "unpaid" commission to the a
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Payout Requests (Payouts)', 'woo-coupon-usage' ),
 "wcusage_field_payouts_enable",
 __( 'Affiliates can select a payment method, then request and track payouts for unpaid commission, if they meet the threshold.', 'woo-coupon-usage' ),
@@ -380,7 +379,7 @@ __( 'Affiliates can select a payment method, then request and track payouts for 
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'PayPal Payouts', 'woo-coupon-usage' ),
 "wcusage_field_paypalapi_enable",
 __( 'Automatically pay your affiliates in one-click with PayPal Payouts! Your affiliates get paid instantly directly from your account.', 'woo-coupon-usage' ),
@@ -394,7 +393,7 @@ __( 'Automatically pay your affiliates in one-click with PayPal Payouts! Your af
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Stripe Payouts', 'woo-coupon-usage' ),
 "wcusage_field_stripeapi_enable",
 __( 'Automatically pay your affiliates in one-click with Stripe! Your affiliates get paid instantly directly from your Stripe funds.', 'woo-coupon-usage' ),
@@ -408,12 +407,12 @@ __( 'Automatically pay your affiliates in one-click with Stripe! Your affiliates
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Wise Bank Transfer Payouts', 'woo-coupon-usage' ),
 "wcusage_field_wise_enable",
 __( 'Allow your affiliates to request commission payouts via Wise Bank Transfer.', 'woo-coupon-usage' ),
 "https://couponaffiliates.com/docs/pro-wise-payouts",
-"fab fa-wrench",
+"fas fa-bank",
 1,
 0,
 0,
@@ -422,7 +421,7 @@ __( 'Allow your affiliates to request commission payouts via Wise Bank Transfer.
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Store Credit Payouts', 'woo-coupon-usage' ),
 "wcusage_field_storecredit_enable",
 __( 'Allow your affiliates to request commission payouts as "Store Credit" which they can use towards purchases in your store at checkout.', 'woo-coupon-usage' ),
@@ -436,7 +435,7 @@ __( 'Allow your affiliates to request commission payouts as "Store Credit" which
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Scheduled Requests (Payouts)', 'woo-coupon-usage' ),
 "wcusage_field_enable_payoutschedule",
 __( 'Automatically submit "payout requests" for your affiliates, every month, week or day, if they meet certain criteria.', 'woo-coupon-usage' ),
@@ -450,7 +449,7 @@ __( 'Automatically submit "payout requests" for your affiliates, every month, we
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Invoices (Payouts)', 'woo-coupon-usage' ),
 "wcusage_field_payouts_enable_invoices",
 __( 'Allow affiliates to upload their invoice when requesting a payout for their unpaid commission.', 'woo-coupon-usage' ),
@@ -464,7 +463,7 @@ __( 'Allow affiliates to upload their invoice when requesting a payout for their
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'PDF Statements (Payouts)', 'woo-coupon-usage' ),
 "wcusage_field_payouts_enable_statements",
 __( 'Automatically generate a PDF statement when your affiliates request a commission payout.', 'woo-coupon-usage' ),
@@ -478,7 +477,7 @@ __( 'Automatically generate a PDF statement when your affiliates request a commi
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Delayed Commission (Payouts)', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Automatically add unpaid commission a number of days after completion (optional).', 'woo-coupon-usage' ),
@@ -492,7 +491,7 @@ __( 'Automatically add unpaid commission a number of days after completion (opti
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Commission Line Graphs', 'woo-coupon-usage' ),
 "wcusage_field_show_graphs",
 __( 'Show some nice line graphs on the statistics tab of the affiliate dashboard.', 'woo-coupon-usage' ),
@@ -507,7 +506,7 @@ __( 'Show some nice line graphs on the statistics tab of the affiliate dashboard
 ?>
 
 <!-- Excel Export -->
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Export to Excel Buttons', 'woo-coupon-usage' ),
 "",
 __( 'Show an "export to excel" button for the "monthly summary" and "recent orders" tables.', 'woo-coupon-usage' ),
@@ -521,7 +520,7 @@ __( 'Show an "export to excel" button for the "monthly summary" and "recent orde
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Custom Dashboard Tabs', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Create your own tabs, to display custom sections and content on the affiliate dashboard.', 'woo-coupon-usage' ),
@@ -535,7 +534,7 @@ __( 'Create your own tabs, to display custom sections and content on the affilia
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Lifetime Commission', 'woo-coupon-usage' ),
 "wcusage_field_lifetime",
 __( 'Give your affiliates lifetime commission for ALL future purchases from all their referred users.', 'woo-coupon-usage' ),
@@ -549,7 +548,7 @@ __( 'Give your affiliates lifetime commission for ALL future purchases from all 
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Mailing List Integrations', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Connect your registration form to automatically add affiliates to your mailing list.', 'woo-coupon-usage' ),
@@ -563,7 +562,7 @@ __( 'Connect your registration form to automatically add affiliates to your mail
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Email Newsletters', 'woo-coupon-usage' ),
 "wcusage_field_email_newsletter_enable",
 __( 'Send a custom email newsletters to all your existing affiliates directly from the plugin, with progress tracking & placeholders.', 'woo-coupon-usage' ),
@@ -577,7 +576,7 @@ __( 'Send a custom email newsletters to all your existing affiliates directly fr
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Affiliate Groups', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Assign affiliates to groups and then configure a variety of settings for that whole group.', 'woo-coupon-usage' ),
@@ -591,7 +590,7 @@ __( 'Assign affiliates to groups and then configure a variety of settings for th
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Terms & Conditions Generator Tool', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Easily generate a Terms & Conditions template for your affiliate program, which you can then link to in the registration form.', 'woo-coupon-usage' ),
@@ -605,7 +604,7 @@ __( 'Easily generate a Terms & Conditions template for your affiliate program, w
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'Priority Support', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Get priority support, and your suggestions will have more priority for development.', 'woo-coupon-usage' ),
@@ -619,7 +618,7 @@ __( 'Get priority support, and your suggestions will have more priority for deve
 );
 ?>
 
-<?php echo wcusage_output_addon_box(
+<?php wcusage_output_addon_box(
 __( 'All Future Pro Features', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'More features coming soon. Get access to all future features included in the Pro version!', 'woo-coupon-usage' ) . " <a href='https://roadmap.couponaffiliates.com/roadmap' target='_blank'>View Roadmap</a>",
@@ -632,6 +631,7 @@ __( 'More features coming soon. Get access to all future features included in th
 ''
 );
 ?>
+<?php // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
 <!-- On Click Settings Button - Go to Settings Section -->
 <script>
@@ -654,13 +654,16 @@ function wcusage_go_to_settings(settings1, settings2) {
 }
 </script>
 
+<!-- Break the flexbox -->
+<div style="flex-basis: 100%; height: 0;"></div>
+
 <div style="clear: both;"></div>
 
-  <br/>
+</div>
 
-	<?php echo esc_html__( 'Learn more about Pro and upgrade at', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com" target="_blank">couponaffiliates.com</a>
+<br/>
 
-	</div>
+<?php echo esc_html__( 'Learn more about Pro and upgrade at', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com" target="_blank">couponaffiliates.com</a>
 
  <?php
 }

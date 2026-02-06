@@ -337,42 +337,22 @@ function wcusage_on_new_order_delete_cookies(  $order_id  ) {
         // wcusage_referral
         if ( isset( $_COOKIE['wcusage_referral'] ) ) {
             unset($_COOKIE['wcusage_referral']);
-            setcookie(
-                'wcusage_referral',
-                '',
-                -1,
-                '/'
-            );
+            wcusage_set_cookie( 'wcusage_referral', '', -1 );
         }
         // wcusage_referral_code
         if ( isset( $_COOKIE['wcusage_referral_code'] ) ) {
             unset($_COOKIE['wcusage_referral_code']);
-            setcookie(
-                'wcusage_referral_code',
-                '',
-                -1,
-                '/'
-            );
+            wcusage_set_cookie( 'wcusage_referral_code', '', -1 );
         }
         // wcusage_referral_click
         if ( isset( $_COOKIE['wcusage_referral_click'] ) ) {
             unset($_COOKIE['wcusage_referral_click']);
-            setcookie(
-                'wcusage_referral_click',
-                '',
-                -1,
-                '/'
-            );
+            wcusage_set_cookie( 'wcusage_referral_click', '', -1 );
         }
         // wcusage_referral_campaign
         if ( isset( $_COOKIE['wcusage_referral_campaign'] ) ) {
             unset($_COOKIE['wcusage_referral_campaign']);
-            setcookie(
-                'wcusage_referral_campaign',
-                '',
-                -1,
-                '/'
-            );
+            wcusage_set_cookie( 'wcusage_referral_campaign', '', -1 );
         }
     }
 }

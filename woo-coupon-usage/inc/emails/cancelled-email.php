@@ -54,7 +54,21 @@ function wcusage_order_refund_email($order_id, $coupon_code, $status) {
     $valueuser = get_post_meta( $id, "wcu_select_coupon_user", true );
 
     $calculateorder = wcusage_calculate_order_data( $order_id, $coupon_code, 0, 1 );
-    $totalcommission = $calculateorder['totalcommission'];
+    $totalcommission = isset($calculateorder['totalcommission']) ? $calculateorder['totalcommission'] : 0;
+
+    // Fallback to get saved commission if 0 (e.g. if order status changed to cancelled/refunded)
+    if( empty($totalcommission) ) {
+        $totalcommission = wcusage_order_meta( $order_id, 'wcusage_total_commission', true );
+    }
+
+    // Fallback to wcusage_stats if still empty
+    if( empty($totalcommission) ) {
+        $stats = wcusage_order_meta( $order_id, 'wcusage_stats', true );
+        if( is_array($stats) && isset($stats['commission']) ) {
+            $totalcommission = $stats['commission'];
+        }
+    }
+
     $valuecommission = wcusage_format_price( number_format((float)$totalcommission, 2, '.', '') );
 
     $wcu_enable_notifications = get_post_meta( $id, 'wcu_enable_notifications', true );

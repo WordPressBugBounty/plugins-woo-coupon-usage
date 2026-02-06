@@ -161,27 +161,178 @@ class wcusage_Coupons_Table extends WP_List_Table {
         $columns = $this->get_columns();
         $this->_column_headers = array( $columns, array(), array() );
 
-        $search = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : false;
+        // Inputs
+        $search        = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : false;
         $affiliate_only = isset( $_GET['affiliate_only'] ) && 'true' === $_GET['affiliate_only'];
+        $orderby_coupon = isset( $_GET['orderby_coupon'] ) ? sanitize_key( wp_unslash( $_GET['orderby_coupon'] ) ) : 'id';
 
-        if ( $affiliate_only ) {
-            $this->coupons = $this->get_affiliate_coupons( $search );
-        } else {
-            $this->coupons = $this->get_all_coupons( $search );
+        // Filters
+        $filter_aff_user = isset( $_GET['affiliate_user'] ) ? sanitize_text_field( wp_unslash( $_GET['affiliate_user'] ) ) : '';
+        $filter_coupon   = isset( $_GET['coupon_code'] ) ? sanitize_text_field( wp_unslash( $_GET['coupon_code'] ) ) : '';
+        $filter_status   = isset( $_GET['coupon_status'] ) ? sanitize_key( wp_unslash( $_GET['coupon_status'] ) ) : '';
+
+        $filters = array(
+            'affiliate_user' => $filter_aff_user,
+            'coupon_code'    => $filter_coupon,
+            'coupon_status'  => $filter_status,
+        );
+
+        // Pagination
+        $per_page     = 20; // Keep modest for performance; could be made user-configurable
+        $current_page = max( 1, $this->get_pagenum() );
+
+        // Build query args
+        $args = array(
+            'post_type'      => 'shop_coupon',
+            'posts_per_page' => $per_page,
+            'paged'          => $current_page,
+            's'              => $search,
+            'no_found_rows'  => false, // we need total for pagination
+        );
+
+        // Default sorting by ID (newest first) without computing metrics for all records
+        if ( 'id' === $orderby_coupon || empty( $orderby_coupon ) ) {
+            $args['orderby'] = 'ID';
+            $args['order']   = 'DESC';
         }
 
-        $per_page     = 20;
-        $current_page = $this->get_pagenum();
-        $total_items  = $this->coupons ? count( $this->coupons ) : 0;
+        // Apply filters
+        $this->apply_coupon_filters_to_query_args( $args, $filters );
+
+        // Affiliate-only filter
+        if ( $affiliate_only ) {
+            $meta_query = isset( $args['meta_query'] ) && is_array( $args['meta_query'] ) ? $args['meta_query'] : array();
+            $meta_query[] = array(
+                'key'     => 'wcu_select_coupon_user',
+                'value'   => array( '' ),
+                'compare' => 'NOT IN',
+            );
+            $args['meta_query'] = $meta_query;
+        }
+
+        // Determine the correct valid offset to avoid duplicates across pages
+        $desired_valid_offset = ( $current_page - 1 ) * $per_page;
+        $skipped_valid        = 0;
+        $items                = array();
+        $filtered_out_total   = 0;
+
+        // Helper: validate a batch
+        $validate_batch = function( $posts ) {
+            $valid = array();
+            foreach ( (array) $posts as $item ) {
+                if ( ! is_object( $item ) || empty( $item->ID ) ) { continue; }
+                if ( ! $item->post_title ) { continue; }
+                $resolved_coupon_id = wc_get_coupon_id_by_code( $item->post_title );
+                if ( ! $resolved_coupon_id ) { continue; }
+                $assigned_user_id = get_post_meta( (int) $item->ID, 'wcu_select_coupon_user', true );
+                if ( ! empty( $assigned_user_id ) && ! get_userdata( (int) $assigned_user_id ) ) { continue; }
+                $valid[] = $item;
+            }
+            return $valid;
+        };
+
+        // First page query (capture totals)
+        $args_first = $args;
+        $args_first['paged'] = 1;
+        $args_first['no_found_rows'] = false;
+        $q_first = new WP_Query( $args_first );
+        $max_pages = max( 1, (int) $q_first->max_num_pages );
+        $found_posts = (int) $q_first->found_posts;
+
+        $batch_valid = $validate_batch( $q_first->posts );
+        $filtered_out_total += max( 0, (int) $q_first->post_count - count( $batch_valid ) );
+
+        $scan_page = 1;
+        // Skip valid items until we reach desired offset
+        while ( $skipped_valid < $desired_valid_offset && $scan_page <= $max_pages ) {
+            if ( $scan_page > 1 ) {
+                $args_page = $args;
+                $args_page['paged'] = $scan_page;
+                $args_page['no_found_rows'] = true;
+                $q_page = new WP_Query( $args_page );
+                $batch_valid = $validate_batch( $q_page->posts );
+                $filtered_out_total += max( 0, (int) $q_page->post_count - count( $batch_valid ) );
+            }
+
+            $need_to_skip = $desired_valid_offset - $skipped_valid;
+            if ( $need_to_skip >= count( $batch_valid ) ) {
+                $skipped_valid += count( $batch_valid );
+                $scan_page++;
+                continue;
+            }
+
+            // We reached the offset within this batch; take the remainder for current page
+            $remainder = array_slice( $batch_valid, $need_to_skip );
+            foreach ( $remainder as $post_obj ) {
+                $items[] = $post_obj;
+                if ( count( $items ) >= $per_page ) { break; }
+            }
+            $skipped_valid = $desired_valid_offset; // offset satisfied
+            $scan_page++;
+            break;
+        }
+
+        // If offset already satisfied and we still don't have enough items, continue scanning next pages
+        while ( count( $items ) < $per_page && $scan_page <= $max_pages ) {
+            $args_page = $args;
+            $args_page['paged'] = $scan_page;
+            $args_page['no_found_rows'] = true;
+            $q_page = new WP_Query( $args_page );
+            if ( empty( $q_page->posts ) ) { break; }
+            $batch_valid = $validate_batch( $q_page->posts );
+            $filtered_out_total += max( 0, (int) $q_page->post_count - count( $batch_valid ) );
+            foreach ( $batch_valid as $post_obj ) {
+                $items[] = $post_obj;
+                if ( count( $items ) >= $per_page ) { break 2; }
+            }
+            $scan_page++;
+        }
+
+        // Optional in-page sorting for derived metrics (usage, sales, commission) –
+        // performed on the compiled items for this page only
+        if ( in_array( $orderby_coupon, array( 'usage', 'sales', 'commission' ), true ) ) {
+            $all_stats_enabled = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_meta', '1' );
+            usort( $items, function( $a, $b ) use ( $orderby_coupon, $all_stats_enabled ) {
+                $get_metrics = function( $it ) use ( $all_stats_enabled ) {
+                    $id   = isset( $it->ID ) ? (int) $it->ID : 0;
+                    $code = isset( $it->post_title ) ? $it->post_title : '';
+                    $stats = $id ? get_post_meta( $id, 'wcu_alltime_stats', true ) : array();
+                    $usage = 0;
+                    if ( $code ) {
+                        try {
+                            $wc = new WC_Coupon( $code );
+                            $usage = $stats && isset( $stats['total_count'] ) ? (float) $stats['total_count'] : (float) $wc->get_usage_count();
+                        } catch ( Exception $e ) { $usage = 0; }
+                    }
+                    $sales = 0.0;
+                    $commission = 0.0;
+                    if ( $all_stats_enabled && $stats ) {
+                        $sales = isset( $stats['total_orders'] ) ? (float) $stats['total_orders'] : 0.0;
+                        if ( isset( $stats['total_discount'] ) ) { $sales -= (float) $stats['total_discount']; }
+                        $commission = isset( $stats['total_commission'] ) ? (float) $stats['total_commission'] : 0.0;
+                    }
+                    return array( 'usage' => $usage, 'sales' => $sales, 'commission' => $commission, 'id' => (float) $id );
+                };
+                $ma = $get_metrics( $a );
+                $mb = $get_metrics( $b );
+                if ( $ma[ $orderby_coupon ] === $mb[ $orderby_coupon ] ) {
+                    // Tie-breaker by ID desc
+                    return $mb['id'] <=> $ma['id'];
+                }
+                return $mb[ $orderby_coupon ] <=> $ma[ $orderby_coupon ]; // Desc
+            } );
+        }
+
+        // Assign and paginate
+    $this->items = $items;
+    // Adjust totals by subtracting the number of items we filtered out in the pages we scanned.
+    // Note: This reflects exact removals for scanned pages; items filtered in unseen pages are not deducted.
+    $total_items = max( 0, (int) $found_posts - (int) $filtered_out_total );
 
         $this->set_pagination_args( array(
             'total_items' => $total_items,
             'per_page'    => $per_page,
         ) );
-
-        if ( $total_items > 0 ) {
-            $this->items = array_slice( $this->coupons, ( ( $current_page - 1 ) * $per_page ), $per_page );
-        }
     }
 
     /**
@@ -247,19 +398,19 @@ class wcusage_Coupons_Table extends WP_List_Table {
             case 'sales':
                 $all_stats = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_meta', '1' );
                 if ( ! $all_stats || ! $wcu_alltime_stats ) {
-                    return '';
+                    return '<span title="' . esc_html( $qmessage ) . '"><strong><i class="fa-solid fa-ellipsis"></i></strong></span>';
                 }
                 $sales = isset( $wcu_alltime_stats['total_orders'] ) ? $wcu_alltime_stats['total_orders'] : 0;
                 if ( isset( $wcu_alltime_stats['total_discount'] ) ) {
                     $sales = (float) $sales - (float) $wcu_alltime_stats['total_discount'];
                 }
-                return $usage > 0 && ! $sales ? "<span title='" . esc_html( $qmessage ) . "'><strong><i class='fa-solid fa-ellipsis'></i></strong></span>" : wcusage_format_price( $sales );
+                return $usage > 0 && !$sales ? "<span title='" . esc_html( $qmessage ) . "'><strong><i class='fa-solid fa-ellipsis'></i></strong></span>" : wcusage_format_price( $sales );
             case 'commission':
                 if ( $disable_commission && wcusage_get_setting_value( 'wcusage_field_commission_disable_non_affiliate', '0' ) ) {
                     return '-';
                 }
                 $commission = $wcu_alltime_stats && isset( $wcu_alltime_stats['total_commission'] ) ? $wcu_alltime_stats['total_commission'] : 0;
-                return $usage > 0 && ! $commission ? "<span title='" . esc_html( $qmessage ) . "'><strong><i class='fa-solid fa-ellipsis'></i></strong></span>" : wcusage_format_price( $commission );
+                return $usage > 0 && !$commission ? "<span title='" . esc_html( $qmessage ) . "'><strong><i class='fa-solid fa-ellipsis'></i></strong></span>" : wcusage_format_price( $commission );
             case 'unpaidcommission':
                 if ( $disable_commission ) {
                     return '-';
@@ -278,11 +429,11 @@ class wcusage_Coupons_Table extends WP_List_Table {
                 
                 // Calculate actual pending payments for this coupon's affiliate
                 $pending_payments = 0;
-                if ($coupon_user_id && $wpdb->get_var("SHOW TABLES LIKE '$payouts_table'") == $payouts_table) {
+                if ($coupon_user_id && $wpdb->get_var("SHOW TABLES LIKE '$payouts_table'") == $payouts_table) { // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
                     $pending_payouts = $wpdb->get_results($wpdb->prepare(
                         "SELECT amount FROM $payouts_table WHERE userid = %d AND status IN ('pending', 'created')",
                         $coupon_user_id
-                    ));
+                    )); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
                     foreach ($pending_payouts as $payout) {
                         $pending_payments += (float)$payout->amount;
                     }
@@ -336,7 +487,6 @@ class wcusage_Coupons_Table extends WP_List_Table {
             } catch ( Exception $e ) {
                 continue;
             }
-            $users = get_users( array( 'fields' => array( 'ID', 'user_login' ), 'orderby' => 'login' ) );
             $currency_symbol = get_woocommerce_currency_symbol();
             $coupon_user_id = wcusage_get_coupon_info_by_id( $item->ID )[1];
             $user_info = get_userdata( $coupon_user_id );
@@ -345,7 +495,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
             $this->single_row_columns( $item );
             echo '</tr>';
             // Shared quick edit row
-            include_once WCUSAGE_UNIQUE_PLUGIN_PATH . 'inc/admin/partials/quick-edit-coupon.php';
+            include_once WCUSAGE_UNIQUE_PLUGIN_PATH . 'inc/admin/tools/quick-edit-coupon.php';
             wcusage_render_quick_edit_row( $coupon_id, count( $this->get_columns() ) );
         }
     }
@@ -356,10 +506,13 @@ class wcusage_Coupons_Table extends WP_List_Table {
      * @param string $search
      * @return array
      */
-    public function get_affiliate_coupons( $search = '' ) {
+    public function get_affiliate_coupons( $search = '', $filters = array() ) {
+        // Deprecated in favor of paginated query inside prepare_items().
+        // Kept for backward compatibility if referenced elsewhere.
         $args = array(
             'post_type'      => 'shop_coupon',
-            'posts_per_page' => -1,
+            'posts_per_page' => 20,
+            'paged'          => 1,
             's'              => $search,
             'meta_query'     => array(
                 array(
@@ -369,16 +522,9 @@ class wcusage_Coupons_Table extends WP_List_Table {
                 ),
             ),
         );
-
-        $coupons = get_posts( $args );
-        $valid_coupons = array();
-        foreach ( $coupons as $coupon ) {
-            $coupon_user_id = get_post_meta( $coupon->ID, 'wcu_select_coupon_user', true );
-            if ( $coupon_user_id && get_userdata( $coupon_user_id ) ) {
-                $valid_coupons[] = $coupon;
-            }
-        }
-        return $valid_coupons;
+        $this->apply_coupon_filters_to_query_args( $args, $filters );
+        $q = new WP_Query( $args );
+        return $q->posts;
     }
 
     /**
@@ -387,14 +533,133 @@ class wcusage_Coupons_Table extends WP_List_Table {
      * @param string $search
      * @return array
      */
-    public function get_all_coupons( $search = '' ) {
+    public function get_all_coupons( $search = '', $filters = array() ) {
+        // Deprecated in favor of paginated query inside prepare_items().
+        // Kept for backward compatibility if referenced elsewhere.
         $args = array(
             'post_type'      => 'shop_coupon',
             's'              => $search,
-            'posts_per_page' => -1,
+            'posts_per_page' => 20,
+            'paged'          => 1,
         );
-        $coupons_query = new WP_Query( $args );
-        return $coupons_query->posts;
+        $this->apply_coupon_filters_to_query_args( $args, $filters );
+        $q = new WP_Query( $args );
+        return $q->posts;
+    }
+
+    /**
+     * Apply affiliate user, coupon code, status, and date filters to WP_Query args
+     */
+    private function apply_coupon_filters_to_query_args( &$args, $filters ) {
+        if ( ! is_array( $filters ) ) { return; }
+        $meta_query = isset( $args['meta_query'] ) && is_array( $args['meta_query'] ) ? $args['meta_query'] : array();
+
+        // Affiliate user -> convert username to user ID
+        if ( ! empty( $filters['affiliate_user'] ) ) {
+            $user = get_user_by( 'login', $filters['affiliate_user'] );
+            if ( ! $user && is_numeric( $filters['affiliate_user'] ) ) {
+                $user = get_user_by( 'id', (int) $filters['affiliate_user'] );
+            }
+            if ( $user ) {
+                $meta_query[] = array(
+                    'key'   => 'wcu_select_coupon_user',
+                    'value' => (string) $user->ID,
+                );
+            } else {
+                // No user match: ensure no results
+                $meta_query[] = array(
+                    'key'   => 'wcu_select_coupon_user',
+                    'value' => '__no_such_user__',
+                );
+            }
+        }
+
+        // Coupon code filter (overrides generic search if provided)
+        if ( ! empty( $filters['coupon_code'] ) ) {
+            $args['s'] = $filters['coupon_code'];
+        }
+
+        // Coupon status (post status)
+        if ( ! empty( $filters['coupon_status'] ) ) {
+            $args['post_status'] = sanitize_key( $filters['coupon_status'] );
+        }
+
+        if ( ! empty( $meta_query ) ) {
+            $args['meta_query'] = $meta_query;
+        }
+    }
+
+    /**
+     * Render filters next to bulk actions in the table toolbar
+     */
+    public function extra_tablenav( $which ) {
+        if ( 'top' !== $which ) return;
+
+    $current_aff_user = isset($_REQUEST['affiliate_user']) ? sanitize_text_field( wp_unslash( $_REQUEST['affiliate_user'] ) ) : '';
+        $current_coupon   = isset($_REQUEST['coupon_code']) ? sanitize_text_field( wp_unslash( $_REQUEST['coupon_code'] ) ) : '';
+        $current_status   = isset($_REQUEST['coupon_status']) ? sanitize_key( wp_unslash( $_REQUEST['coupon_status'] ) ) : '';
+        $current_orderby  = isset($_REQUEST['orderby_coupon']) ? sanitize_key( wp_unslash( $_REQUEST['orderby_coupon'] ) ) : 'id';
+    $current_aff_only = isset($_REQUEST['affiliate_only']) ? sanitize_text_field( wp_unslash( $_REQUEST['affiliate_only'] ) ) : '';
+        $current_page_slug = isset($_REQUEST['page']) ? sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) : 'wcusage_coupons';
+        $action_url = esc_url( admin_url( 'admin.php?page=' . $current_page_slug ) );
+
+        echo '<div class="alignleft actions wcusage-admin-title-filters" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">';
+        // User filter input (label removed, placeholder used instead)
+        echo '<div style="display:flex;align-items:center;gap:6px;">'
+            . '<input type="text" class="wcu-autocomplete-user" name="affiliate_user" data-label="username"'
+            . ' value="' . esc_attr( $current_aff_user ) . '" placeholder="' . esc_attr__( 'Username...', 'woo-coupon-usage' ) . '" style="min-width:140px;" />'
+            . '</div>';
+        // Coupon filter input (label removed, placeholder used instead)
+        echo '<div style="display:flex;align-items:center;gap:6px;">'
+            . '<input type="text" name="coupon_code" value="' . esc_attr( $current_coupon ) . '" placeholder="' . esc_attr__( 'Coupon...', 'woo-coupon-usage' ) . '" style="min-width:140px;" />'
+            . '</div>';
+        // Status select (label removed; keep options as-is)
+        echo '<div style="display:flex;align-items:center;gap:6px;">'
+            . '<select name="coupon_status">'
+            . '<option value="">' . esc_html__( 'Any Status', 'woo-coupon-usage' ) . '</option>';            
+            $statuses = array(
+                'publish' => esc_html__( 'Published', 'woo-coupon-usage' ),
+                'draft'   => esc_html__( 'Draft', 'woo-coupon-usage' ),
+                'pending' => esc_html__( 'Pending', 'woo-coupon-usage' ),
+                'private' => esc_html__( 'Private', 'woo-coupon-usage' ),
+            );
+            foreach ( $statuses as $key => $label ) {
+                echo '<option value="' . esc_attr( $key ) . '"' . selected( $current_status, $key, false ) . '>' . esc_html( $label ) . '</option>';
+            }
+        echo '</select></div>';
+        // Show scope selector (All vs Affiliate Only)
+        echo '<div style="display:flex;align-items:center;gap:6px;">'
+            . '<select name="affiliate_only">'
+                . '<option value="">' . esc_html__( 'All Coupons', 'woo-coupon-usage' ) . '</option>'
+                . '<option value="true"' . selected( $current_aff_only, 'true', false ) . '>' . esc_html__( 'Affiliate Coupons Only', 'woo-coupon-usage' ) . '</option>'
+            . '</select>'
+        . '</div>';
+
+        // (Removed duplicate Show scope selector with label)
+
+        // Filter submit with GET, so it doesn't interfere with bulk POST
+    echo '<button class="button" type="submit" formmethod="get" formaction="' . esc_url( $action_url ) . '">' . esc_html__( 'Filter', 'woo-coupon-usage' ) . '</button>';
+    echo '<a href="' . esc_url( $action_url ) . '">' . esc_html__( 'Reset', 'woo-coupon-usage' ) . '</a>';
+        echo '</div>';
+
+        // Separate Sort controls (next to bulk actions) - use JS to apply via GET to avoid nested forms
+        echo '<div class="alignleft actions wcusage-admin-sort" style="display:flex;align-items:center;gap:6px;">';
+            echo '<select name="orderby_coupon" class="wcusage-orderby-coupon">';
+                    $sort_opts = array(
+                        ''           => esc_html__( 'Sort By...', 'woo-coupon-usage' ),
+                        'id'         => esc_html__( 'ID (Newest First)', 'woo-coupon-usage' ),
+                        'usage'      => esc_html__( 'Total Usage', 'woo-coupon-usage' ),
+                        'sales'      => esc_html__( 'Total Sales', 'woo-coupon-usage' ),
+                        'commission' => esc_html__( 'Total Commission', 'woo-coupon-usage' ),
+                    );
+                    foreach ( $sort_opts as $k => $lbl ) {
+                        echo '<option value="' . esc_attr( $k ) . '"' . selected( $current_orderby, $k, false ) . '>' . esc_html( $lbl ) . '</option>';
+                    }
+            echo '</select>';
+            echo '<button class="button wcusage-apply-sort" type="button">' . esc_html__( 'Sort', 'woo-coupon-usage' ) . '</button>';
+        echo '</div>';
+
+        // Sorting behavior handled in js/admin-coupons.js
     }
 }
 
@@ -404,7 +669,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
  */
 function wcusage_coupons_page() {
     if ( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'admin_add_registration_form' ) && wcusage_check_admin_access() ) {
-        echo wp_kses_post( wcusage_post_submit_application( 1 ) );
+        echo wcusage_post_submit_application(1); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     }
 
     if ( isset( $_GET['delete_coupon'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'delete_coupon' ) && wcusage_check_admin_access() ) {
@@ -413,7 +678,12 @@ function wcusage_coupons_page() {
         if ( $coupon ) {
             $coupon_name = $coupon->post_title;
             wp_delete_post( $coupon_id );
-            echo '<p class="notice notice-success is-dismissible" style="padding: 10px; margin: 10px 0;">' . esc_html__( 'Coupon "' . $coupon_name . '" deleted successfully.', 'woo-coupon-usage' ) . '</p>';
+            echo '<p class="notice notice-success is-dismissible" style="padding: 10px; margin: 10px 0;">' 
+                . sprintf(
+                    esc_html__( 'Coupon "%s" deleted successfully.', 'woo-coupon-usage' ),
+                    esc_html( $coupon_name )
+                ) 
+                . '</p>';
         }
     }
 
@@ -435,9 +705,15 @@ function wcusage_coupons_page() {
             'fixed_product'  => esc_html__( 'Fixed Product Discount', 'woo-coupon-usage' ),
             'percent_product' => esc_html__( 'Percentage Product Discount', 'woo-coupon-usage' ),
         ),
-    'currency_symbol' => get_woocommerce_currency_symbol(),
-    // Base URL with 'USER_ID_PLACEHOLDER' as placeholder for dynamic user id
-    'edit_user_url'   => esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=USER_ID_PLACEHOLDER' ) ),
+        'currency_symbol' => get_woocommerce_currency_symbol(),
+        // Base URL with 'USER_ID_PLACEHOLDER' as placeholder for dynamic user id
+        'edit_user_url'   => esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=USER_ID_PLACEHOLDER' ) ),
+        // Bulk action confirmation messages (moved from inline script)
+        'bulk_confirm' => array(
+            'bulk_unassign' => __( 'Are you sure you want to unassign the selected affiliates from these coupons? This will remove the affiliate assignment but will NOT delete coupons or users.', 'woo-coupon-usage' ),
+            'bulk_delete_coupons' => __( 'Are you sure you want to delete the selected coupons?', 'woo-coupon-usage' ),
+            'bulk_delete_coupons_and_user' => __( 'Are you sure you want to delete the selected coupons AND their assigned affiliate users? This will also delete all coupons belonging to those users and permanently remove their user accounts.', 'woo-coupon-usage' ),
+        ),
     ) );
 
     $table = new wcusage_Coupons_Table();
@@ -457,27 +733,29 @@ function wcusage_coupons_page() {
                 <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage-bulk-edit-coupon' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Bulk Edit Coupons', 'woo-coupon-usage' ); ?></a>
             </span>
             <br/>
-            <span class="wcusage-admin-title-filters" style="margin-bottom: 10px;">
-                <form method="get" style="display: inline;">
-                    <input type="hidden" name="page" value="<?php echo esc_attr( isset( $_REQUEST['page'] ) ? esc_html( wp_unslash( $_REQUEST['page'] ) ) : '' ); ?>" />
-                    <input type="checkbox" name="affiliate_only" value="true" <?php checked( $affiliate_only ); ?> onchange="this.form.submit();">
-                    <?php esc_html_e( 'Show Affiliate Coupons Only', 'woo-coupon-usage' ); ?>
-                </form>
-            </span>
+            
         </h1>
         <form method="get" id="wcusage-coupons-filter">
             <input type="hidden" name="page" value="<?php echo esc_attr( isset( $_REQUEST['page'] ) ? esc_html( wp_unslash( $_REQUEST['page'] ) ) : '' ); ?>" />
-            <input type="hidden" name="affiliate_only" value="<?php echo $affiliate_only ? 'true' : ''; ?>" />
+            
+            <?php
+            $current_aff_user = isset($_GET['affiliate_user']) ? sanitize_text_field( wp_unslash( $_GET['affiliate_user'] ) ) : '';
+            $current_coupon   = isset($_GET['coupon_code']) ? sanitize_text_field( wp_unslash( $_GET['coupon_code'] ) ) : '';
+            $current_status   = isset($_GET['coupon_status']) ? sanitize_key( wp_unslash( $_GET['coupon_status'] ) ) : '';
+            $current_orderby  = isset($_GET['orderby_coupon']) ? sanitize_key( wp_unslash( $_GET['orderby_coupon'] ) ) : 'id';
+            ?>
             <?php
             $table->prepare_items();
-            $table->search_box( 'Search Coupons', 'search_id' );
             ?>
         </form>
         <form method="post" id="wcusage-coupons-bulk-actions">
             <?php wp_nonce_field( 'wcusage_coupons_bulk_action', '_wcusage_bulk_nonce' ); ?>
             <input type="hidden" name="page" value="<?php echo esc_attr( isset( $_REQUEST['page'] ) ? esc_html( wp_unslash( $_REQUEST['page'] ) ) : '' ); ?>" />
             <input type="hidden" name="affiliate_only" value="<?php echo $affiliate_only ? 'true' : ''; ?>" />
-            <input type="hidden" name="s" value="<?php echo isset($_GET['s']) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) : ''; ?>" />
+            <input type="hidden" name="affiliate_user" value="<?php echo esc_attr( $current_aff_user ); ?>" />
+            <input type="hidden" name="coupon_code" value="<?php echo esc_attr( $current_coupon ); ?>" />
+            <input type="hidden" name="coupon_status" value="<?php echo esc_attr( $current_status ); ?>" />
+            <input type="hidden" name="orderby_coupon" value="<?php echo esc_attr( $current_orderby ); ?>" />
             <?php $table->display(); ?>
         </form>
     </div>
@@ -495,32 +773,7 @@ function wcusage_coupons_page() {
         margin-left: 0px !important;
     }
     </style>
-    <script>
-    jQuery(document).ready(function($) {
-        function confirmFor(action) {
-            switch(action) {
-                case 'bulk-unassign':
-                    return '<?php echo esc_js( __( 'Are you sure you want to unassign the selected affiliates from these coupons? This will remove the affiliate assignment but will NOT delete coupons or users.', 'woo-coupon-usage' ) ); ?>';
-                case 'bulk-delete-coupons':
-                    return '<?php echo esc_js( __( 'Are you sure you want to delete the selected coupons?', 'woo-coupon-usage' ) ); ?>';
-                case 'bulk-delete-coupons-and-user':
-                    return '<?php echo esc_js( __( 'Are you sure you want to delete the selected coupons AND their assigned affiliate users? This will also delete all coupons belonging to those users and permanently remove their user accounts.', 'woo-coupon-usage' ) ); ?>';
-            }
-            return '';
-        }
-        $('#doaction, #doaction2').on('click', function(e) {
-            var $select = $(this).siblings('select');
-            if (!$select.length) return;
-            var action = $select.val();
-            if (!action) return;
-            var msg = confirmFor(action);
-            if (msg && !window.confirm(msg)) {
-                e.preventDefault();
-                return false;
-            }
-        });
-    });
-    </script>
+    
     <?php
 }
 

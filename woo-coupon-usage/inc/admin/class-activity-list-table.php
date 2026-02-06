@@ -108,11 +108,11 @@ class wcusage_activity_List_Table extends WP_List_Table {
         $table_name = $wpdb->prefix . 'wcusage_activity';
 
         if (isset($_GET['status'])) {
-            $sql = $wpdb->prepare("SELECT * FROM $table_name WHERE status = %s ORDER BY id DESC", sanitize_text_field($_GET['status']));
+            $sql = $wpdb->prepare("SELECT * FROM $table_name WHERE status = %s ORDER BY id DESC", sanitize_text_field($_GET['status'])); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         } else {
-            $sql = "SELECT * FROM $table_name ORDER BY id DESC";
+            $sql = "SELECT * FROM $table_name ORDER BY id DESC"; // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         }
-        $data = $wpdb->get_results($sql, ARRAY_A);        
+        $data = $wpdb->get_results($sql, ARRAY_A); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter        
 
         $current_page = $this->get_pagenum();
 

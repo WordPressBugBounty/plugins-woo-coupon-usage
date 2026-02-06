@@ -39,7 +39,7 @@ function wcusage_field_cb_currency(  $args  ) {
 
   <!-- Main Currency -->
   <?php 
-    echo wcusage_setting_toggle_option(
+    wcusage_setting_toggle_option(
         'wcusage_field_enable_currency',
         0,
         esc_html__( 'Enable multi currency settings.', 'woo-coupon-usage' ),
@@ -48,7 +48,7 @@ function wcusage_field_cb_currency(  $args  ) {
     ?>
 
   <?php 
-    echo wcusage_setting_toggle( '.wcusage_field_enable_currency', '.wcu-field-section-currency' );
+    wcusage_setting_toggle( '.wcusage_field_enable_currency', '.wcu-field-section-currency' );
     // Show or Hide
     ?>
   <span class="wcu-field-section-currency">
@@ -71,7 +71,7 @@ function wcusage_field_cb_currency(  $args  ) {
 
   <!-- Save Rate -->
   <?php 
-    echo wcusage_setting_toggle_option(
+    wcusage_setting_toggle_option(
         'wcusage_field_enable_currency_save_rate',
         0,
         esc_html__( 'Save the conversion rate for each order.', 'woo-coupon-usage' ),
@@ -79,7 +79,7 @@ function wcusage_field_cb_currency(  $args  ) {
     );
     ?>
   <i><?php 
-    echo esc_html__( 'With this enabled, it will permanently save and use the commission rate that was set at the time the order is created, even if you update the rates below.', 'woo-coupon-usage' );
+    echo esc_html__( 'With this enabled, it will permanently save and use the conversion rate that was set at the time the order is created, even if you update the rates below.', 'woo-coupon-usage' );
     ?></i><br/>
   <i><?php 
     echo esc_html__( '(This is saved as meta data "wcusage_currency_conversion" for the order.)', 'woo-coupon-usage' );
@@ -95,7 +95,7 @@ function wcusage_field_cb_currency(  $args  ) {
     $currencynumber = wcusage_get_setting_value( 'wcusage_field_currency_number', '5' );
     ?>
   <?php 
-    echo wcusage_setting_number_option(
+    wcusage_setting_number_option(
         'wcusage_field_currency_number',
         $currencynumber,
         esc_html__( 'Number of Extra Currencies', 'woo-coupon-usage' ),
@@ -114,15 +114,39 @@ function wcusage_field_cb_currency(  $args  ) {
     }
     // Loop through custom tabs
     for ($i = 1; $i <= $currencynumber; $i++) {
-        echo '<h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Currency #' . $i . '</h3>';
+        echo '<h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Currency #' . esc_html( $i ) . '</h3>';
         $get_default_currency_settings = wcusage_get_default_currency_settings( $i );
         $wcusage_field_currency_name = $get_default_currency_settings['wcusage_field_currency_name'];
         $wcusage_field_currency_rate = $get_default_currency_settings['wcusage_field_currency_rate'];
-        $thistabsfields = ' <div class="input_fields_wrap"></div>';
-        $thistabsfields .= '<span style="display: block; float: left;"><span style="margin-left: 35px; font-size: 12px;">Currency Code:</span><br/> <span style="font-size: 12px;">1.00 x</span> <input type="text" style="max-width: 82px;" id="wcusage_field_currencies_name_' . esc_attr( $i ) . '" customid="wcusage_field_currencies" name="wcusage_options[wcusage_field_currencies][' . esc_attr( $i ) . '][name]" checktype="customnumber" custom1="' . esc_attr( $i ) . '" custom2="name" placeholder="" value="' . esc_attr( $wcusage_field_currency_name ) . '"></span>';
-        $thistabsfields .= '<span style="display: block; float: left;"><span style="margin-left: 18px; font-size: 12px;">Conversion:</span><br/>&nbsp;= <input type="number" style="max-width: 82px;" lang="en" id="wcusage_field_currencies_rate_' . esc_attr( $i ) . '" customid="wcusage_field_currencies" name="wcusage_options[wcusage_field_currencies][' . esc_attr( $i ) . '][rate]" checktype="customnumber" custom1="' . esc_attr( $i ) . '" custom2="rate" placeholder="1.00" value="' . esc_attr( $wcusage_field_currency_rate ) . '" oninput="this.value = this.value.replace(/,/g, \'\')"> <span style="font-size: 12px;">' . esc_html( $defaultcurrency ) . '</span></span>';
-        echo $thistabsfields;
-        echo '<div style="clear: both;"></div><br/><hr/>';
+        ?>
+    <div class="input_fields_wrap"></div>
+    <span style="display: block; float: left;"><span style="margin-left: 35px; font-size: 12px;">Currency Code:</span><br/> <span style="font-size: 12px;">1.00 x</span> <input type="text" style="max-width: 82px;" id="wcusage_field_currencies_name_<?php 
+        echo esc_attr( $i );
+        ?>" customid="wcusage_field_currencies" name="wcusage_options[wcusage_field_currencies][<?php 
+        echo esc_attr( $i );
+        ?>][name]" checktype="customnumber" custom1="<?php 
+        echo esc_attr( $i );
+        ?>" custom2="name" placeholder="" value="<?php 
+        echo esc_attr( $wcusage_field_currency_name );
+        ?>"></span>
+    <span style="display: block; float: left;"><span style="margin-left: 18px; font-size: 12px;">Conversion:</span><br/>&nbsp;= <input type="number"
+    style="max-width: 82px;" lang="en" id="wcusage_field_currencies_rate_<?php 
+        echo esc_attr( $i );
+        ?>"
+    customid="wcusage_field_currencies" name="wcusage_options[wcusage_field_currencies][<?php 
+        echo esc_attr( $i );
+        ?>][rate]"
+    checktype="customnumber" custom1="<?php 
+        echo esc_attr( $i );
+        ?>" custom2="rate" placeholder="1.00"
+    step="0.01" min="0"
+    value="<?php 
+        echo esc_attr( $wcusage_field_currency_rate );
+        ?>" oninput="this.value = this.value.replace(/,/g, '')"> <span style="font-size: 12px;"><?php 
+        echo esc_html( $defaultcurrency );
+        ?></span></span>
+    <div style="clear: both;"></div><br/><hr/>
+    <?php 
     }
     ?>
 
@@ -235,7 +259,7 @@ function wcusage_field_cb_currency(  $args  ) {
         ?></p>
       
       <p style="font-weight: bold;"><?php 
-        echo sprintf( __( 'If you need to use a different base currency (%s), you will need to upgrade to the "Basic" API plan.', 'woo-coupon-usage' ), $defaultcurrency );
+        echo sprintf( esc_html__( 'If you need to use a different base currency (%s), you will need to upgrade to the "Basic" API plan.', 'woo-coupon-usage' ), esc_html( $defaultcurrency ) );
         ?></p>
 
       <?php 
@@ -248,7 +272,7 @@ function wcusage_field_cb_currency(  $args  ) {
     $exchangeratesapi = wcusage_get_setting_value( 'wcusage_field_exchangeratesapi', '' );
     ?>
       <?php 
-    echo wcusage_setting_text_option(
+    wcusage_setting_text_option(
         'wcusage_field_exchangeratesapi',
         $exchangeratesapi,
         esc_html__( 'Exchangerates API Key', 'woo-coupon-usage' ) . ":",
@@ -276,7 +300,7 @@ function wcusage_field_cb_currency(  $args  ) {
     $apilayer = wcusage_get_setting_value( 'wcusage_field_apilayer', '' );
     ?>
       <?php 
-    echo wcusage_setting_text_option(
+    wcusage_setting_text_option(
         'wcusage_field_apilayer',
         $apilayer,
         esc_html__( 'APILayer API Key', 'woo-coupon-usage' ) . ":",

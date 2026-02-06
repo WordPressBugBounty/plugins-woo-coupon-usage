@@ -89,6 +89,13 @@ jQuery(document).ready(function($) {
         $('.sidebar').toggleClass('active');
     });
 
+    // Close sidebar when clicking the explicit close button
+    $(document).on('click', '.wcu-mobile-menu-close', function(e) {
+        e.preventDefault();
+        $('.sidebar').removeClass('active');
+        $('.hamburger-menu').removeClass('active');
+    });
+
     // Close sidebar when clicking outside on mobile
     $(document).on('click', function(e) {
         if (window.innerWidth <= 768) {
@@ -98,6 +105,36 @@ jQuery(document).ready(function($) {
             }
         }
     });
+});
+
+/* Long coupon title handling (mobile header) */
+
+jQuery(document).ready(function($) {
+    const updateLongTitleClass = function() {
+        const header = $('.content-header');
+        if (!header.length) {
+            return;
+        }
+
+        let titleText = '';
+        const select = $('#wcu-coupon-select');
+        if (select.length) {
+            titleText = (select.find('option:selected').text() || '').trim();
+        } else {
+            const headerText = header.find('.welcome-header').text() || '';
+            titleText = headerText.replace(/\s+/g, ' ').trim();
+        }
+
+        if (titleText.length > 9) {
+            header.addClass('wcu-header-title-long');
+        } else {
+            header.removeClass('wcu-header-title-long');
+        }
+    };
+
+    updateLongTitleClass();
+    $(document).on('change', '#wcu-coupon-select', updateLongTitleClass);
+    $(window).on('resize', updateLongTitleClass);
 });
 
 /* Profile */

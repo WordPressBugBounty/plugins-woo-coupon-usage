@@ -4,8 +4,8 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
-Tested up to: 6.8
-Stable tag: 6.8.2
+Tested up to: 6.9
+Stable tag: 7.3.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -252,8 +252,8 @@ Yes. If you need any help setting up the affiliate plugin, please free to <a hre
 = How can I report issues/bugs with the plugin? =
 You can report feature bugs by creating a <a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0">support ticket</a>. Please provide as much information as possible to make it easier for us to find a solution for you.
 
-= How can I report security bugs? =
-You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/woo-coupon-usage)
+= Where do I report security bugs found in this plugin? =
+Please report security bugs found in the source code of the undefined plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/9e5fb610-859b-44d5-95a4-697c049fa837). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
 == Screenshots ==
 
@@ -275,8 +275,158 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= Version 7.3.2 - 4th February 2026 =
+- Tweak: Update to the way settings are saved to be more reliable and sets defaults properly.
+- Tweak: A few tweaks to the admin settings page.
+- Tweak: Several small code improvements and optimizations throughout the plugin to better meet coding standards.
+- Tweak: Stats will no longer auto-refresh on the affiliate dashboard/portal when changing rates, if the "never update the saved commission" setting is enabled.
+- Tweak: Some tweaks to ensure admin settings save properly in some cases.
+- Tweak: Small tweaks to the design and layout of the plugins admin header area.
+- Tweak: (PRO) Updated styling for the "MLA Tier Commission Rates" tiers on the settings page.
+- Fix: Resolved mobile dashboard tab dropdown issues and PHP warnings caused by undefined dashboard tab settings.
+- Fix: Added no-cache headers for admin settings page and AJAX settings saves to prevent cached/stale saves on some hosts.
+- Fix: Fixed an error showing in the order/sales tracking settings.
+
+= Version 7.3.1 - 29th January 2026 =
+- Tweak: (PRO) Added support for special characters in payout statement PDF generation.
+- Tweak: Disabled cache/minify/lazyload optimizations on affiliate dashboard and portal pages to prevent settings/portal save issues.
+- Tweak: (PRO) Added AJAX loading for the 'couponaffiliates-leaderboard' shortcode with a loading animation.
+- Tweak: (PRO) Added an "AJAX load" toggle to the leaderboard generator and 'ajax="no"' shortcode option to render immediately.
+- Tweak: (PRO) Added MLA payouts to the admin manual "create payouts" page.
+- Tweak: Made a few improvements to the affiliate dashboard mobile header and side menu on mobile.
+- Tweak: (PRO) Added pending commission to the view affiliate admin page.
+- Fix: Resolved reordering behavior for custom registration form fields when using the move buttons in some cases.
+- Fix: (PRO) Leaderboard "Current Month" now calculates on demand when monthly stats haven’t been cached yet.
+- Fix: Prevented "Invalid coupon" fatal errors when deleted coupons are recreated with the same code.
+- Fix: Hardened affiliate dashboard AJAX handlers to avoid infinite loading when coupons are missing or recreated.
+- Fix: (PRO) Fixed group fixed-order commission being ignored when percentage commission was also set.
+- Fix: (PRO) Fixed performance bonuses not triggering due to incorrect user role matching.
+- Fix: Registration submissions now work when auto-login after registration is disabled.
+- Fix: Prevented creating user accounts when registration fails due to an existing coupon code, avoiding username-exists errors on retry.
+- Fix: (PRO) Prevented PHP errors/warnings when dividing empty values or with empty strings in some cases.
+- Fix: Fixed an issue with changing color text fields not auto-saving.
+
+= Version 7.3.0 - 13th January 2026 =
+- New: (PRO) Added new "Pending Commission" feature for commission payouts tracking.
+- New: (PRO) Added an option to only auto-accept registrations for certain user roles or groups.
+- New: Added an option to customise the pending affiliate registration message.
+- Tweak: (PRO) For the "Custom Form Fields" radio field, added an "options" setting to define the different options/values.
+- Tweak: (PRO) Improved the layout of the checkbox and radio fields on the affiliate registration form.
+- Tweak: Small tweaks and fixes for the view affiliate admin page.
+- Tweak: Improvement to the IP address logging for referral URL clicks.
+- Tweak: Added a close button to the mobile sidebar menu on the affiliate portal.
+- Tweak: Made a few precautionary security improvements.
+- Tweak: Improvement to the speed of generating admin reports.
+- Tweak: Made a tweak to the delayed commission cron job logic to check previous days that may have been missed.
+- Fix: Fixed an issue with the admin reports not generating if orders contained deleted products.
+- Fix: Fixed an issue with the CSS and JS not loading properly after submitting the affiliate registration form.
+- Fix: Fixed a potential issue with unintended user role removal when editing users.
+- Fix: Fixed an issue with not being able to add new affiliates when the coupon code previously existed but was deleted from a previous affiliate registration that was accepted.
+- Fix: (PRO) Fixed an issue in some cases with not being able tot save the payout settings on the affiliate dashboard.
+- Fix: (PRO) Fixed an issue with affiliate group commission rates when the user was assigned to multiple user roles. It will now get the highest commission rate from the roles assigned.
+
+= Version 7.2.3 - 15th December 2025 =
+- New: Added a alternative method of creating the cookies for referral link tracking, with JS, when headers have already been sent, which can sometimes happen with certain themes/plugins.
+- Tweak: Made a few tweaks to the cookie system to be more reliable in some cases.
+- Fix: Fixed a potential issue on the MLA dashboard when viewing a sub affiliate dashboard as the parent affiliate in some cases.
+- Fix: Fixed a potential PHP error when the registration form when the coupon is empty.
+- Fix: Fixed an issue since the last update, with the fields on the admin "affiliate registrations" page not showing properly in some cases.
+- Fix: (PRO) Fixed an issue since the last update, on the floating widget, with the social share buttons not showing properly.
+
+= Version 7.2.2 - 9th December 2025 =
+- New: (PRO) Added [affiliate_qrcode] shortcode to display the QR code for the affiliate's referral URL on any page.
+- Improvement: Improved the performance of the "Affiliate Orders" admin page.
+- Tweak: Added support for some store credit plugins in some cases causing issues with the commission calculations.
+- Tweak: Updated "Failed" orders to also show stats as 0.00 on the affiliate dashboard statistics.
+- Tweak: Made a few code tweaks and improvements throughout the plugin to better meet coding standards.
+- Fix: Fixed the affiliate order cancellation emails showing the commission amount as 0.00.
+- Fix: Fixed a potential issue with switching tabs on the affiliate dashboard in some cases.
+- Fix: Fixed a potential PHP error in PHP 8.3+ when calculating order data in some cases.
+- Fix: (PRO) Small fix for QR code generation in some cases.
+- Other: Tested with WordPress 6.9.
+
+= Version 7.2.1 - 12th November 2025 =
+- New: Added an option in "Commission > Advanced Calculation" Settings to choose the commission rounding mode (Round to nearest or Round down/truncate).
+- New: Added a new option to the fraud settings: Require customers to visit the affiliate referral link before applying their coupon.
+- New: Added clearer options to show the login form and registration for on the affiliate portal or dashboard page.
+- Tweak: Added a warning message under the "Affiliate Portal" toggle when "Anyone can register" is disabled, and defaults the registration form to hidden.
+- Tweak: Made some tweaks/improvements to the "User role required for plugin admin capabilities" setting functionality.
+- Tweak: On the view affiliate page, when the a coupons statistics need calculating, it now show the coupon and "calculate statistics" button for those coupons next to the message.
+- Fix: Fixed an issue with the "Affiliate User" field dropdown when editing a coupon.
+- Dev: Added developer hook "wcusage_before_payout_submit" a payout is made.
+- Other: Updated to Freemius SDK 2.13.0.
+
+= Version 7.2.0 - 4th November 2025 =
+- Improvement: Made some changes to the admin dashboard page, and added ajax pagination to all the different sections.
+- Tweak: Made a variety of code improvements and optimizations throughout the plugin to better meet coding standards.
+
+= Version 7.1.5 - 4th November 2025 =
+- Tweak: Added a warning message on the "affiliate registration form" settings if "Anyone can register" is disabled.
+
+= Version 7.1.4 - 4th November 2025 =
+- Tweak: Fixed and issue on the affiliate orders page.
+
+= Version 7.1.2 - 4th November 2025 =
+- Tweak: Security improvement.
+
+= Version 7.1.0 - 28th October 2025 = 
+- New: Added filters to the "Affiliate Orders" admin page.
+- New: (PRO) Added an "Export Orders" button to the "Affiliate Orders" admin page to export the filtered orders list to a CSV file.
+- New: The "Affiliate Orders" admin page is now displaying the total items and pages on the pagination.
+- New: Added filters to the "Affiliate Coupons" admin page.
+- New: Added a "sort by" option to the admin "Affiliate Coupons" page.
+- New: (PRO) Added filters to the "Commission Payouts" admin page.
+- New: (PRO) Added an "Export Payouts" button to the "Commission Payouts" admin page to export the filtered payouts list to a CSV file.
+- New: (PRO) Updated the "Statements" admin page to have more columns and details, and a download button, for each statement.
+- New: (PRO) Updated the "Performance Bonuses" admin page to have more columns and details, for each bonus.
+- Improvement: You can now drag and reorder the sections on the admin dashboard page.
+- Tweak: On the admin dashboard, the "Affiliate Program Statistics" now shows "This Month" as the default, with "Last 7 Days" moved to the last option.
+- Tweak: The core WooCommerce orders page "Coupon Affiliate" column now shows the coupon, user, and commission.
+- Tweak: (PRO) For the product rates tab, added an option to choose the "product price display", choosing whether the coupon discount is applied to the price that is shown.
+- Fix: The "affiliate portal logo" will now automatically save when selecting a new image from the media library.
+- Fix: Fixed an issue with the affiliate coupons admin page sometimes showing empty rows.
+- Fix: Fixed an issue with the "filter by coupon code" not working on the WooCommerce orders admin page with HPOS.
+- Fix: (PRO) Fixed an issue with the MLA portal not loading scripts properly, so some things like copy to clipboard were not working.
+- Fix: (PRO) Fixed an issue with not being able to edit the PRO settings in the "Registrations" settings tab.
+- Fix: (PRO) Partial fix for some broken text output on PDF statements.
+
+= Version 7.0.3 - 17th October 2025 =
+- Tweak: Small tweak to the admin notifications dropdown.
+- Tweak: Added a bulk "Save All" button with AJAX saving is enabled, when switching from the legacy option.
+- Fix: Fixed a PHP error when special characters are used in the custom "affiliate" text.
+- Fix: Fixed an issue with the settings page redirect after opting in on plugin activation.
+
+= Version 7.0.2 - 16th October 2025 =
+- Fix: Fixed an issue with ajax saving on the settings page not working in some cases.
+
+= Version 7.0.1 - 14th October 2025 =
+- Tweak: Made a few small tweaks and fixes to the settings page, and saving settings functionality.
+- Fix: Fixed an issue with the admin users list and affiliate user page "payouts" details showing incorrectly in some cases.
+- Fix: Fixed an issue with disabling the "Enable Affiliate Registration Features" option on step 2 of the setup wizard not letting you continue.
+
+= Version 7.0.0 - 14th October 2025 =
+- New: Updated the header bar on the plugins admin pages to include a more useful menu with quick links to important pages.
+- New: Added a new "notifications" icon to the header bar on the plugins admin pages, which will when there is new referrals, pending registrations, payout requests, and more.
+- New: On the admin dashboard, added a new sidebar with an "Affiliate Overview" showing the total number of affiliates, latest affiliates, and top affiliates.
+- New: Updated the layout of the plugins settings page with the navigation tabs now on the left side.
+- New: Made improvements to the "Affiliate Dashboard Customisation" settings section for simpler tab customisation.
+- New: You can now re-order the tabs on the affiliate dashboard and affiliate portal via drag and drop in the "Affiliate Dashboard Customisation" settings.
+- New: Added an option to the admin reports to filter by user group/role when "only show coupons assigned to an affiliate user" is enabled.
+- New: (PRO) Added an option to disable the invoice upload option for certain payout methods.
+- New: (PRO) Added an option to include a square image/logo in the center of the QR code generated for referral URLs.
+- New: (PRO) New merge tags added to the "Dynamic Code Generator" settings: {first_name}, {last_name}, {first_name_initial}, {last_name_initial}. Also added a new filter for developers to make custom changes to the generated code.
+- New: (PRO) Added mailjet.com as a new option for the mailing list integrations.
+- New: (PRO) Added a new option to the built-in store credit payout method to "enable multi-currency support for store credit".
+- New: (PRO) For the "custom tabs" added an option to set the tab in the menu to "open as external link instead of tab".
+- Tweak: (PRO) Added details about the built-in newsletter system in the mailing list integrations settings section.
+- Fix: Fixed the "Subscribe to Affiliate Newsletters" option showing on the settings tab of the affiliate dashboard even when disabled in the settings.
+- Fix: Fixed an issue with the settings page redirecting to the dashboard page on some websites.
+- Fix: Fixed some issues with the "search settings" feature on the settings page.
+- Fix: Fixed a potential issue with saving settings in some cases.
+- Other: Updated translations.
+
 = Version 6.8.2 - 23rd September 2025 =
-- Tweak: Updated the registration form "Custom Fields" settings section to allow dynamically adding and removing fields more easily without needing to refresh the page.
+- Tweak: (PRO) Updated the registration form "Custom Fields" settings section to allow dynamically adding and removing fields more easily without needing to refresh the page.
 - Fix: Potential fix to an issue with some websites when bulk saving the settings.
 - Fix: Fixed an issue with Freemius "opt in" for the free version on activating the plugin.
 - Other: Updated to Freemius SDK 2.12.2.
@@ -482,7 +632,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 - Tweak: The admin add new affiliate form is now hidden if the template coupon has not been created and set in the settings.
 - Tweak: On the "recent orders" tab made the "time" column display on one line with a larger minimum width.
 - Fix: Fixed a small styling issue with the footer of the "recent orders" table on the affiliate dashboard.
-- Fix: (PRO) Fixed an issue with not being able to configure some of the settings in the PRO version since a recent update.
+- Fix: (PRO) Fixed an issue with not being ablef the settings in the PRO version since a recent update.
 - Fix: (PRO) Fixed an issue with the "Show All Product Variations" option not working for the "Product Rates" tab.
 - Other: Tested with WordPress 6.8
 
@@ -522,7 +672,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 - Improvement: Rebuilt part of the code for generating admin reports. This is now much faster and reliable for sites with lots of coupons and orders.
 - Improvement: (PRO) Significantly improved the performance on the commission line graphs on the affiliate dashboard.
 - Fix: (PRO) Fixed an issue with some shortcodes not working in the affiliate dashboard custom tabs.
-- Fix: (PRO) Fixed a HTML markup issue when hovering over a payout method tooltip on the affiliate dashboard.
+- Fix: (PRO) Fixed a HTML markup issue when hovering over a payout method t to configure some oooltip on the affiliate dashboard.
 - Fix: (PRO) Fixed an issue with the "Assign to role" option for "multiple templates" not showing the currently selected option in the settings.
 - Fix: Fixed an issue with the affiliate registration form not working on the affiliate dashboard page with this option disabled: Show registration form on affiliate dashboard page (logged in users).
 - Other: Tested with WooCommerce 9.7.1

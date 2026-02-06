@@ -93,21 +93,51 @@ if( !function_exists( 'wcusage_fix_defer_js' ) ) {
  *
  */
 function wcusage_fix_cache() {
-	$post_id = get_the_ID();
-	$dashboard_page = wcusage_get_setting_value('wcusage_dashboard_page', '');
-	$mla_dashboard_page = wcusage_get_setting_value('wcusage_mla_dashboard_page', '');
-  $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
-	if( $post_id == $dashboard_page
-  || $post_id == $mla_dashboard_page
-  || is_account_page()
-  || ( !is_admin() && isset($_SERVER['REQUEST_URI']) && strpos( $_SERVER['REQUEST_URI'], $wcusage_portal_slug ) !== false ) ) {
-    if ( ! defined( 'DONOTCACHEPAGE' ) ) {
-		  define( 'DONOTCACHEPAGE', true );
-    }
-    if ( function_exists( 'nocache_headers' ) ) {
-      nocache_headers();
-    }
-	}
+  if ( is_admin() ) {
+    return;
+  }
+
+  if ( get_query_var( 'affiliate_portal' ) ) {
+    $is_affiliate_page = true;
+  } else {
+    $post_id = get_the_ID();
+    $dashboard_page = wcusage_get_setting_value('wcusage_dashboard_page', '');
+    $mla_dashboard_page = wcusage_get_setting_value('wcusage_mla_dashboard_page', '');
+    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+    $is_affiliate_page = (
+      $post_id == $dashboard_page
+      || $post_id == $mla_dashboard_page
+      || is_account_page()
+      || ( !is_admin() && isset($_SERVER['REQUEST_URI']) && strpos( $_SERVER['REQUEST_URI'], $wcusage_portal_slug ) !== false )
+    );
+  }
+
+  if ( ! $is_affiliate_page ) {
+    return;
+  }
+
+  if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+    define( 'DONOTCACHEPAGE', true );
+  }
+  if ( ! defined( 'DONOTCACHEDB' ) ) {
+    define( 'DONOTCACHEDB', true );
+  }
+  if ( ! defined( 'DONOTCACHEOBJECT' ) ) {
+    define( 'DONOTCACHEOBJECT', true );
+  }
+  if ( ! defined( 'DONOTMINIFY' ) ) {
+    define( 'DONOTMINIFY', true );
+  }
+  if ( ! defined( 'DONOTCDN' ) ) {
+    define( 'DONOTCDN', true );
+  }
+  if ( ! defined( 'DONOTLAZYLOAD' ) ) {
+    define( 'DONOTLAZYLOAD', true );
+  }
+
+  if ( function_exists( 'nocache_headers' ) ) {
+    nocache_headers();
+  }
 }
 add_action( 'template_redirect', 'wcusage_fix_cache' );
 
@@ -233,7 +263,7 @@ if( !function_exists( 'wcusage_custom_profile_redirect' ) ) {
 
       if(wcusage_get_coupon_shortcode_page_id()) {
   			if ( get_queried_object_id() == wcusage_get_coupon_shortcode_page_id() ) {
-  				wp_redirect( $_SERVER['REQUEST_URI'] );
+  				wp_safe_redirect( $_SERVER['REQUEST_URI'] );
   				exit;
   			}
   		}
@@ -243,7 +273,7 @@ if( !function_exists( 'wcusage_custom_profile_redirect' ) ) {
   
       if($wcusage_field_portal_enable && $portal_slug) {
         if ( strpos( $_SERVER['REQUEST_URI'], $portal_slug ) !== false ) {
-          wp_redirect( $_SERVER['REQUEST_URI'] );
+          wp_safe_redirect( $_SERVER['REQUEST_URI'] );
           exit;
         }
       }
@@ -298,6 +328,44 @@ add_action( 'woocommerce_login_redirect', 'wcusage_custom_login_redirect', 9999,
 
 
 /**
+ * Retrieve the capability required for Coupon Affiliates admin pages.
+ *
+ * @return string
+ */
+if ( ! function_exists( 'wcusage_get_admin_menu_capability' ) ) {
+  function wcusage_get_admin_menu_capability() {
+
+    $default_capability = 'administrator';
+    $options = get_option( 'wcusage_options', array() );
+
+    $configured_capability = $default_capability;
+    if ( isset( $options['wcusage_field_admin_permission'] ) && is_string( $options['wcusage_field_admin_permission'] ) ) {
+      $maybe_capability = sanitize_key( $options['wcusage_field_admin_permission'] );
+      if ( '' !== $maybe_capability ) {
+        $configured_capability = $maybe_capability;
+      }
+    }
+
+    if ( current_user_can( 'administrator' ) ) {
+      $configured_capability = 'administrator';
+    }
+
+    $configured_capability = apply_filters( 'wcusage_admin_menu_capability', $configured_capability, $options );
+
+    if ( ! is_string( $configured_capability ) ) {
+      $configured_capability = $default_capability;
+    } else {
+      $configured_capability = sanitize_key( $configured_capability );
+      if ( '' === $configured_capability ) {
+        $configured_capability = $default_capability;
+      }
+    }
+
+    return $configured_capability;
+  }
+}
+
+/**
  * Check if user has admin access based on settings
  *
  * @return bool
@@ -306,25 +374,22 @@ add_action( 'woocommerce_login_redirect', 'wcusage_custom_login_redirect', 9999,
 if( !function_exists( 'wcusage_check_admin_access' ) ) {
   function wcusage_check_admin_access() {
 
-  	$options = get_option( 'wcusage_options' );
+    $capability = wcusage_get_admin_menu_capability();
+    $custom_filter = (bool) apply_filters( 'wcusage_custom_admin_access', false );
 
-  	if(isset($options['wcusage_field_admin_permission'])) {
-  		$wcusage_field_order_sort = $options['wcusage_field_admin_permission'];
-  	} else {
-  		$wcusage_field_order_sort = "administrator";
-  	}
+    if ( $custom_filter ) {
+      return true;
+    }
 
-    // Custom Filter
-    $custom_filter = apply_filters( 'wcusage_custom_admin_access', false );
+    if ( $capability && current_user_can( $capability ) ) {
+      return true;
+    }
 
-    // 
-  	if( current_user_can($wcusage_field_order_sort) || current_user_can('administrator') || $custom_filter ) {
-  		return true;
-  	} else {
-  		return false;
-  	}
+    if ( current_user_can( 'administrator' ) ) {
+      return true;
+    }
 
-  	return false;
+    return false;
 
   }
 }
@@ -490,13 +555,18 @@ if( !function_exists( 'wcusage_get_language_code' ) ) {
  *
  */
 if( !function_exists( 'wcusage_load_custom_language_wpml' ) ) {
-	function wcusage_load_custom_language_wpml($language) {
-		if (class_exists('SitePress')) {
-		  global $sitepress;
-		  $sitepress->switch_lang($language, true);
-		  load_plugin_textdomain( 'woo-coupon-usage', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-		}
-	}
+    function wcusage_load_custom_language_wpml($language) {
+        if (class_exists('SitePress')) {
+          global $sitepress;
+          $sitepress->switch_lang($language, true);
+          if ( defined('WCUSAGE_UNIQUE_PLUGIN_PATH') ) {
+            $plugin_main = WCUSAGE_UNIQUE_PLUGIN_PATH . 'woo-coupon-usage.php';
+            load_plugin_textdomain( 'woo-coupon-usage', false, dirname( plugin_basename( $plugin_main ) ) . '/languages' );
+          } else {
+            load_plugin_textdomain( 'woo-coupon-usage', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+          }
+        }
+    }
 }
 
 /**
@@ -508,7 +578,7 @@ if( !function_exists( 'wcusage_load_custom_language_wpml' ) ) {
 if( !function_exists( 'wcusage_ajax_error' ) ) {
   function wcusage_ajax_error() {
 
-    $ajaxerrormessage = '<br/><span style="color: red; font-weight: bold;">' . wp_kses_post( 'ERROR: Failed to load ajax request. Session may have timed out. Refresh the page to try again.', 'woo-coupon-usage' ) . '</span>';
+  $ajaxerrormessage = '<br/><span style="color: red; font-weight: bold;">' . esc_html( __( 'ERROR: Failed to load ajax request. Session may have timed out. Refresh the page to try again.', 'woo-coupon-usage' ) ) . '</span>';
     if(current_user_can( 'edit_posts' )) {
       $ajaxerrormessage .= '<br/>Admin: If this keeps happening, <a href="https://couponaffiliates.com/docs/error-ajax-request/" target="_blank"><strong>click here</strong></a> for more information.';
     }
@@ -544,6 +614,7 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
 
 				/*** REFRESH STATS? ***/
 				$force_refresh_stats = 0;
+        $never_update_commission_meta = wcusage_get_setting_value('wcusage_field_enable_never_update_commission_meta', '0');
 
 				$wcu_last_refreshed = get_post_meta( $postid, 'wcu_last_refreshed', true );
 				$wcu_alltime_stats = get_post_meta( $postid, 'wcu_alltime_stats', true );
@@ -551,11 +622,13 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
 				$combined_commission = wcusage_commission_message($postid);
 				$current_commission_message = get_post_meta( $postid, 'wcu_commission_message', true );
 
-				// This checks to see if commission amount updated, if so then refresh stats
-				if($combined_commission != $current_commission_message) {
-					update_post_meta( $postid, 'wcu_commission_message', $combined_commission );
-					$force_refresh_stats = 1;
-				}
+        // This checks to see if commission amount updated, if so then refresh stats
+        if($combined_commission != $current_commission_message) {
+          update_post_meta( $postid, 'wcu_commission_message', $combined_commission );
+          if(!$never_update_commission_meta) {
+            $force_refresh_stats = 1;
+          }
+        }
 
 				// Force refresh stats if coupon usage is more than 10, but stats are not set
 				$wcusage_field_enable_coupon_all_stats_meta = wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_meta', '1');
@@ -579,7 +652,7 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
 				$wcusage_field_enable_coupon_all_stats_batch = wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_batch', '1');
 
 				// Check if force refresh needed
-				if( $force_refresh_stats || ( $wcusage_refresh_date && ($wcusage_refresh_date > $wcu_last_refreshed) ) ) {
+        if( $force_refresh_stats || ( !$never_update_commission_meta && $wcusage_refresh_date && ($wcusage_refresh_date > $wcu_last_refreshed) ) ) {
 					$force_refresh_stats = 1;
 					if(!$wcusage_field_enable_coupon_all_stats_batch) {
 						update_post_meta( $postid, 'wcu_last_refreshed', $wcusage_refresh_date );
@@ -613,3 +686,4 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
         
     }
 }
+

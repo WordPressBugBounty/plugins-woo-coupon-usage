@@ -18,7 +18,7 @@ function wcusage_settings_init() {
     $options = get_option( 'wcusage_options' );
     add_settings_section(
         'wcusage_section_developers',
-        esc_html__( ' ', 'woo-coupon-usage' ),
+        '',
         'wcusage_section_developers_cb',
         'wcusage'
     );
@@ -204,6 +204,205 @@ function wcusage_settings_init() {
 //register our wcusage_settings_init to the admin_init action hook
 add_action( 'admin_init', 'wcusage_settings_init' );
 /**
+ * Get wcusage_options array safely.
+ * Always returns an array, never false.
+ */
+if ( !function_exists( 'wcusage_get_options' ) ) {
+    function wcusage_get_options() {
+        $options = get_option( 'wcusage_options', array() );
+        return ( is_array( $options ) ? $options : array() );
+    }
+
+}
+/**
+ * Merge updates into base options array.
+ * Arrays are replaced entirely to allow clearing unchecked checkboxes.
+ */
+if ( !function_exists( 'wcusage_options_merge' ) ) {
+    function wcusage_options_merge(  $base, $updates  ) {
+        $merged = ( is_array( $base ) ? $base : array() );
+        $new = ( is_array( $updates ) ? $updates : array() );
+        foreach ( $new as $key => $value ) {
+            // Replace arrays entirely to allow clearing unchecked values
+            $merged[$key] = $value;
+        }
+        return $merged;
+    }
+
+}
+/**
+ * Update options using merge strategy.
+ * Use this in AJAX handlers to update specific fields without wiping others.
+ */
+if ( !function_exists( 'wcusage_update_options_merge' ) ) {
+    function wcusage_update_options_merge(  $updates  ) {
+        $current = wcusage_get_options();
+        $merged = wcusage_options_merge( $current, $updates );
+        if ( $merged !== $current ) {
+            update_option( 'wcusage_options', $merged );
+        }
+        return $merged;
+    }
+
+}
+/**
+ * Register a default value for a setting.
+ * Used by wcusage_get_all_default_settings() to collect defaults.
+ */
+if ( !function_exists( 'wcusage_register_default_setting' ) ) {
+    function wcusage_register_default_setting(  $name, $default  ) {
+        global $wcusage_all_default_settings;
+        if ( $default === '' || $default === null ) {
+            return;
+        }
+        if ( !is_array( $wcusage_all_default_settings ) ) {
+            $wcusage_all_default_settings = array();
+        }
+        if ( !array_key_exists( $name, $wcusage_all_default_settings ) ) {
+            $wcusage_all_default_settings[$name] = $default;
+        }
+    }
+
+}
+/**
+ * Apply all registered defaults to the database.
+ * Called after wcusage_get_all_default_settings() collects defaults.
+ */
+if ( !function_exists( 'wcusage_apply_registered_defaults' ) ) {
+    function wcusage_apply_registered_defaults() {
+        global $wcusage_all_default_settings;
+        $options = wcusage_get_options();
+        if ( !is_array( $wcusage_all_default_settings ) || empty( $wcusage_all_default_settings ) ) {
+            return $options;
+        }
+        $merged = $options;
+        foreach ( $wcusage_all_default_settings as $key => $value ) {
+            if ( !array_key_exists( $key, $merged ) ) {
+                $merged[$key] = $value;
+            }
+        }
+        if ( $merged !== $options ) {
+            update_option( 'wcusage_options', $merged );
+        }
+        // Mark that defaults have been applied (simple flag, not per-key tracking)
+        update_option( 'wcusage_default_set', '1' );
+        return $merged;
+    }
+
+}
+/**
+ * Apply defaults when settings page loads.
+ * Also provides self-healing if options get wiped.
+ */
+if ( !function_exists( 'wcusage_apply_defaults_on_settings_page' ) ) {
+    function wcusage_apply_defaults_on_settings_page() {
+        if ( !function_exists( 'current_user_can' ) || !current_user_can( 'manage_options' ) ) {
+            return;
+        }
+        if ( !is_admin() ) {
+            return;
+        }
+        if ( isset( $_GET['page'] ) && $_GET['page'] === 'wcusage_settings' ) {
+            $options = wcusage_get_options();
+            $default_set = get_option( 'wcusage_default_set', array() );
+            if ( !is_array( $default_set ) ) {
+                $default_set = array();
+            }
+            $force_defaults = isset( $_GET['wcusage_init_defaults'] ) && $_GET['wcusage_init_defaults'] === '1';
+            // Skip defaults if existing install has 50+ options (already populated)
+            // Just mark as set and avoid processing
+            if ( empty( $default_set ) && !$force_defaults && count( $options ) >= 50 ) {
+                update_option( 'wcusage_default_set', '1' );
+                return;
+            }
+            // Apply defaults if: forced, never set before, OR if options are empty (self-healing)
+            // Safe to use empty($default_set) - defaults only fill missing keys, never override existing
+            if ( $force_defaults || empty( $default_set ) || empty( $options ) ) {
+                if ( function_exists( 'wcusage_get_all_default_settings' ) ) {
+                    global $wcusage_allow_defaults_update;
+                    $wcusage_allow_defaults_update = true;
+                    try {
+                        wcusage_get_all_default_settings();
+                    } finally {
+                        $wcusage_allow_defaults_update = false;
+                    }
+                }
+            }
+        }
+    }
+
+    add_action( 'admin_init', 'wcusage_apply_defaults_on_settings_page', 20 );
+}
+/**
+ * Merge all wcusage_options updates by default to avoid wiping unrelated keys.
+ * 
+ * This hook intercepts ALL updates to wcusage_options and ensures that:
+ * - AJAX updates only change the fields they intend to change
+ * - GET requests can't accidentally wipe settings
+ * - Bulk saves preserve hidden/untouched fields
+ * - Empty arrays and non-arrays are blocked during GET requests
+ */
+if ( !function_exists( 'wcusage_merge_option_updates' ) ) {
+    function wcusage_merge_option_updates(  $new_value, $old_value, $option  ) {
+        if ( $option !== 'wcusage_options' ) {
+            return $new_value;
+        }
+        $method = ( isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( $_SERVER['REQUEST_METHOD'] ) : '' );
+        $is_settings_page = isset( $_GET['page'] ) && $_GET['page'] === 'wcusage_settings';
+        global $wcusage_allow_defaults_update;
+        $is_get_settings = $method === 'GET' && $is_settings_page && empty( $wcusage_allow_defaults_update ) && !(function_exists( 'wp_doing_ajax' ) && wp_doing_ajax());
+        $old = ( is_array( $old_value ) ? $old_value : wcusage_get_options() );
+        // Block non-array updates during GET requests
+        if ( !is_array( $new_value ) && $is_get_settings ) {
+            return $old;
+        }
+        // Block empty array updates during GET requests
+        if ( $is_get_settings && empty( $new_value ) ) {
+            return $old;
+        }
+        // During GET requests, only allow specific whitelisted keys to be updated
+        if ( $is_get_settings ) {
+            $allow_update_keys = array('wcusage_refresh_date');
+            if ( isset( $_GET['update_conversion_rates'] ) ) {
+                $allow_update_keys[] = 'wcusage_field_currencies';
+            }
+            if ( array_key_exists( '__force_update', $new_value ) ) {
+                $force_update = !empty( $new_value['__force_update'] );
+                unset($new_value['__force_update']);
+                if ( !$force_update ) {
+                    $allow_update_keys = array();
+                }
+            }
+            foreach ( $new_value as $key => $value ) {
+                if ( !array_key_exists( $key, $old ) && !in_array( $key, $allow_update_keys, true ) ) {
+                    unset($new_value[$key]);
+                    continue;
+                }
+                if ( array_key_exists( $key, $old ) && !in_array( $key, $allow_update_keys, true ) ) {
+                    $new_value[$key] = $old[$key];
+                }
+            }
+        }
+        // Allow explicit full replace when requested (escape hatch)
+        if ( array_key_exists( '__full_replace', $new_value ) ) {
+            $replace = !empty( $new_value['__full_replace'] );
+            unset($new_value['__full_replace']);
+            if ( $replace ) {
+                return $new_value;
+            }
+        }
+        // Merge new values into existing options
+        return wcusage_options_merge( $old, $new_value );
+    }
+
+    add_filter(
+        'pre_update_option_wcusage_options',
+        'wcusage_merge_option_updates',
+        5,
+        3
+    );
+}
+/**
  * Sanitize handler for wcusage_options.
  *
  * Merges the submitted array with the existing option so that any fields not
@@ -222,26 +421,7 @@ if ( !function_exists( 'wcusage_options_sanitize' ) ) {
         // Normalize input/output arrays.
         $new = ( is_array( $input ) ? $input : array() );
         $old = get_option( 'wcusage_options', array() );
-        // Start from existing options so keys not present in POST (hidden tabs, max_input_vars) are preserved.
-        $merged = ( is_array( $old ) ? $old : array() );
-        // For keys present in POST:
-        // - If value is an array (e.g., multi-checkbox groups like wcusage_field_order_type_custom),
-        //   REPLACE the entire array so unchecked items (omitted in POST) are removed.
-        // - If scalar, overwrite value directly (allows 0/empty string to override).
-        foreach ( $new as $key => $value ) {
-            if ( is_array( $value ) ) {
-                // Remove presence marker if provided by forms to allow clearing all items
-                if ( array_key_exists( '__present', $value ) ) {
-                    unset($value['__present']);
-                }
-                // Replace entire array for array-typed settings
-                $merged[$key] = $value;
-                // can be empty array to intentionally clear
-            } else {
-                $merged[$key] = $value;
-            }
-        }
-        return $merged;
+        return wcusage_options_merge( $old, $new );
     }
 
 }
@@ -268,28 +448,6 @@ function wcusage_section_developers_cb(  $args  ) {
     ?>" crossorigin="anonymous">
 
 <?php 
-    $wcusage_field_deactivate_delete = wcusage_get_setting_value( 'wcusage_field_deactivate_delete', '0' );
-    if ( $wcusage_field_deactivate_delete ) {
-        echo "<p style='color: red; font-weight: bold;'>" . esc_html__( "[Warning] You have this option enabled: Delete plugin options and custom database tables on plugin deletion. (See 'Debug' Settings)", "woo-coupon-usage" ) . "</p>";
-    }
-    ?>
-
-<?php 
-    if ( !wcu_fs()->is_premium() && wcu_fs()->can_use_premium_code() ) {
-        ?>
-<p style="font-size: 20px; color: red;"><strong>
-  <?php 
-        echo esc_html__( "You have a Pro license! Please deactivate the FREE version and install the PRO version instead to enable the new functionality.", "woo-coupon-usage" );
-        ?>
-</strong><br/></p>
-<?php 
-    }
-    ?>
-
-<?php 
-    ?>
-
-<?php 
     if ( class_exists( 'WooCommerce' ) ) {
         if ( version_compare( WC_VERSION, 3.7, "<=" ) ) {
             ?>
@@ -312,126 +470,115 @@ function wcusage_section_developers_cb(  $args  ) {
     ?>
 
 <!---
-***** Script to Toggle Settings Tabs *****
+***** Script to Toggle Settings Sidebar *****
 --->
 
 <script>
 jQuery( document ).ready(function() {
 
-  jQuery( ".nav-tab" ).on('click', function(){
-    jQuery(".nav-tab" ).removeClass("active");
-		jQuery( this ).addClass("active");
-    if ( jQuery(document).scrollTop() >= 175 ) {
-      jQuery('html, body').animate({
-          scrollTop: jQuery(".nav-tab-wrapper-before").offset().top - 32
-      }, 200);
-    }
+  // Handle sidebar navigation clicks
+  jQuery( ".wcu-sidebar-link" ).on('click', function(){
+  jQuery(".wcu-sidebar-link" ).removeClass("active");
+  jQuery( this ).addClass("active");
+  // Always scroll to top of window and content area
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  jQuery('html, body').animate({ scrollTop: 0 }, 100);
+  var $content = jQuery('.wcu-admin-content');
+  if ($content.length) {
+    $content.animate({ scrollTop: 0 }, 100);
+  }
 	});
 
+  // Set first tab as active by default
+  jQuery(".wcu-sidebar-link").first().addClass("active");
+  jQuery(".wcusage_row").first().show();
+
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-general", ".wcusage_row_general", 0 );
+    wcusage_admin_settings_tab_click( "#tab-general", ".wcusage_row_general", 0 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-commission", ".wcusage_row_commission", 1 );
+    wcusage_admin_settings_tab_click( "#tab-commission", ".wcusage_row_commission", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-fraud", ".wcusage_row_fraud", 1 );
+    wcusage_admin_settings_tab_click( "#tab-fraud", ".wcusage_row_fraud", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-pro", ".wcusage_row_pro", 1 );
+    wcusage_admin_settings_tab_click( "#tab-pro", ".wcusage_row_pro", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-urls", ".wcusage_row_urls", 1 );
+    wcusage_admin_settings_tab_click( "#tab-urls", ".wcusage_row_urls", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-notifications", ".wcusage_row_notifications", 1 );
+    wcusage_admin_settings_tab_click( "#tab-notifications", ".wcusage_row_notifications", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-payouts", ".wcusage_row_payouts", 1 );
+    wcusage_admin_settings_tab_click( "#tab-payouts", ".wcusage_row_payouts", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-invoices", ".wcusage_row_invoices", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-reports", ".wcusage_row_reports", 1 );
+    wcusage_admin_settings_tab_click( "#tab-currency", ".wcusage_row_currency", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-custom-tabs", ".wcusage_row_custom_tabs", 1 );
+    wcusage_admin_settings_tab_click( "#tab-registration", ".wcusage_row_registration", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-currency", ".wcusage_row_currency", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-registration", ".wcusage_row_registration", 1 );
+    wcusage_admin_settings_tab_click( "#tab-subscriptions", ".wcusage_row_subscriptions", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-creatives", ".wcusage_row_creatives", 1 );
-    ?>
-  <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-newsletter", ".wcusage_row_newsletter", 1 );
+    wcusage_admin_settings_tab_click( "#tab-translations", ".wcusage_row_translations", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-bonuses", ".wcusage_row_bonuses", 1 );
+    wcusage_admin_settings_tab_click( "#tab-design", ".wcusage_row_design", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-mla", ".wcusage_row_mla", 1 );
+    wcusage_admin_settings_tab_click( "#tab-widget", ".wcusage_row_widget", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-subscriptions", ".wcusage_row_subscriptions", 1 );
+    wcusage_admin_settings_tab_click( "#tab-debug", ".wcusage_row_debug", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-translations", ".wcusage_row_translations", 1 );
+    wcusage_admin_settings_tab_click( "#tab-help", ".wcusage_row_help", 1 );
     ?>
 
   <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-design", ".wcusage_row_design", 1 );
-    ?>
-
-  <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-widget", ".wcusage_row_widget", 1 );
-    ?>
-
-  <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-debug", ".wcusage_row_debug", 1 );
-    ?>
-
-  <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-help", ".wcusage_row_help", 1 );
-    ?>
-
-  <?php 
-    echo wcusage_admin_settings_tab_click( "#tab-pro-details", ".wcusage_row_pro_details", 1 );
+    wcusage_admin_settings_tab_click( "#tab-pro-details", ".wcusage_row_pro_details", 1 );
     ?>
 
 });
 </script>
 
 <!---
-***** Show Settings Tabs *****
+***** Settings Layout with Sidebar *****
 --->
 
-<div class="nav-tab-wrapper-before"></div>
-<h2 class="nav-tab-wrapper">
-
-  <!--- GENERAL --->
-  <?php 
-    echo wcusage_admin_settings_tab_button(
+<div class="wcu-admin-layout-container">
+  
+  <!-- Left Sidebar Navigation (Flat List, No Groups) -->
+  <div class="wcu-admin-sidebar">
+    <nav class="wcu-admin-sidebar-nav">
+      <ul class="wcu-sidebar-menu">
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_admin_settings_sidebar_button(
         "tab-general",
         esc_html__( "General", "woo-coupon-usage" ),
         "fa fa-gear",
@@ -439,10 +586,10 @@ jQuery( document ).ready(function() {
         ''
     );
     ?>
-
-  <!--- COMMISSION --->
-  <?php 
-    echo wcusage_admin_settings_tab_button(
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_admin_settings_sidebar_button(
         "tab-commission",
         esc_html__( "Commission", "woo-coupon-usage" ),
         "fas fa-money-bill-wave",
@@ -450,74 +597,13 @@ jQuery( document ).ready(function() {
         ''
     );
     ?>
-
-  <!--- URLS --->
-  <?php 
-    echo wcusage_admin_settings_tab_button(
-        "tab-urls",
-        esc_html__( "Referral Links", "woo-coupon-usage" ),
-        "fas fa-link",
-        0,
-        ''
-    );
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_js_settings_tab_toggle( '.wcusage_field_enable_currency', '', '#tab-currency' );
     ?>
-
-  <!--- Fraud --->
-  <?php 
-    echo wcusage_admin_settings_tab_button(
-        "tab-fraud",
-        esc_html__( "Fraud", "woo-coupon-usage" ),
-        "fa-solid fa-user-secret",
-        0,
-        ''
-    );
-    ?>
-
-  <!--- NOTIFICATIONS --->
-  <?php 
-    echo wcusage_admin_settings_tab_button(
-        "tab-notifications",
-        esc_html__( "Emails", "woo-coupon-usage" ),
-        "fas fa-envelope",
-        0,
-        ''
-    );
-    ?>
-
-  <!--- SUBSCRIPTIONS --->
-  <?php 
-    $wcusage_subscriptions_enable = ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ) ? true : false );
-    if ( $wcusage_subscriptions_enable ) {
-        echo wcusage_admin_settings_tab_button(
-            "tab-subscriptions",
-            esc_html__( "Subscriptions", "woo-coupon-usage" ),
-            "fas fa-sync-alt",
-            0,
-            ''
-        );
-    }
-    ?>
-
-  <!--- TRANSLATIONS --->
-  <?php 
-    $wcusage_field_show_custom_translations = wcusage_get_setting_value( 'wcusage_field_show_custom_translations', '0' );
-    if ( $wcusage_field_show_custom_translations ) {
-        echo wcusage_admin_settings_tab_button(
-            "tab-translations",
-            esc_html__( "Translations", "woo-coupon-usage" ),
-            "fas fa-language",
-            0,
-            ''
-        );
-    }
-    ?>
-
-  <!--- CURRENCY --->
-  <?php 
-    echo wcusage_js_settings_tab_toggle( '.wcusage_field_enable_currency', '', '#tab-currency' );
-    ?>
-  <?php 
-    echo wcusage_admin_settings_tab_button(
+          <?php 
+    wcusage_admin_settings_sidebar_button(
         "tab-currency",
         esc_html__( "Currencies", "woo-coupon-usage" ),
         "fas fa-dollar-sign",
@@ -525,10 +611,10 @@ jQuery( document ).ready(function() {
         ''
     );
     ?>
-
-  <!--- REGISTRATION --->
-  <?php 
-    echo wcusage_admin_settings_tab_button(
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_admin_settings_sidebar_button(
         "tab-registration",
         esc_html__( "Registration", "woo-coupon-usage" ),
         "fas fa-user-circle",
@@ -536,19 +622,48 @@ jQuery( document ).ready(function() {
         ''
     );
     ?>
-
-  <!--- PAYOUTS --->
-  <?php 
-    if ( wcu_fs()->can_use_premium_code() ) {
-        ?>
-  <?php 
-        echo wcusage_js_settings_tab_toggle( '.wcusage_field_tracking_enable', '', '#tab-payouts' );
-        ?>
-  <?php 
-    }
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_admin_settings_sidebar_button(
+        "tab-urls",
+        esc_html__( "Referral Links", "woo-coupon-usage" ),
+        "fas fa-link",
+        0,
+        ''
+    );
     ?>
-  <?php 
-    echo wcusage_admin_settings_tab_button(
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_admin_settings_sidebar_button(
+        "tab-fraud",
+        esc_html__( "Fraud Prevention", "woo-coupon-usage" ),
+        "fa-solid fa-user-secret",
+        0,
+        ''
+    );
+    ?>
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_admin_settings_sidebar_button(
+        "tab-notifications",
+        esc_html__( "Emails", "woo-coupon-usage" ),
+        "fas fa-envelope",
+        0,
+        ''
+    );
+    ?>
+        </li>
+        <?php 
+    ?>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_js_settings_tab_toggle( '.wcusage_field_tracking_enable', '', '#tab-payouts' );
+    ?>
+          <?php 
+    wcusage_admin_settings_sidebar_button(
         "tab-payouts",
         esc_html__( "Payouts", "woo-coupon-usage" ),
         "fas fa-handshake",
@@ -556,138 +671,64 @@ jQuery( document ).ready(function() {
         ''
     );
     ?>
-
-  <!-- INVOICES --->
-  <?php 
-    if ( wcu_fs()->can_use_premium_code() ) {
-        ?>
-    <?php 
-        echo wcusage_js_settings_tab_toggle( '.wcusage_field_payouts_enable_invoices', '.wcusage_field_payouts_enable_statements', '#tab-invoices' );
-        ?>
-    <?php 
-        echo wcusage_admin_settings_tab_button(
-            "tab-invoices",
-            esc_html__( "Invoices", "woo-coupon-usage" ),
-            "fas fa-file-invoice",
-            1,
-            ''
-        );
-        ?>
-  <?php 
-    }
+        </li>
+        <?php 
     ?>
-
-  <?php 
-    if ( wcu_fs()->can_use_premium_code() ) {
-        ?>
-  <!-- REPORTS --->
-  <?php 
-        echo wcusage_js_settings_tab_toggle( '.wcusage_field_enable_reports', '', '#tab-reports' );
-        ?>
-  <?php 
-        echo wcusage_admin_settings_tab_button(
-            "tab-reports",
-            esc_html__( "Reports", "woo-coupon-usage" ),
-            "fas fa-file-alt",
-            1,
-            ''
-        );
-        ?>
-
-  <!--- TABS --->
-  <?php 
-        echo wcusage_admin_settings_tab_button(
-            "tab-custom-tabs",
-            esc_html__( "Tabs", "woo-coupon-usage" ),
-            "fas fa-folder-plus",
-            1,
-            ''
-        );
-        ?>
-  <?php 
-    }
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_js_settings_tab_toggle( '.wcusage_field_enable_reports', '', '#tab-reports' );
     ?>
-
-  <!--- CREATIVES --->
-  <?php 
-    if ( wcu_fs()->can_use_premium_code() ) {
-        ?>
-  <?php 
-        echo wcusage_js_settings_tab_toggle( '.wcusage_field_creatives_enable', '', '#tab-creatives' );
-        ?>
-  <?php 
-        echo wcusage_admin_settings_tab_button(
-            "tab-creatives",
-            esc_html__( "Creatives", "woo-coupon-usage" ),
-            "fas fa-images",
-            1,
-            ''
-        );
-        ?>
-  <?php 
-        echo wcusage_admin_settings_tab_button(
-            "tab-newsletter",
-            esc_html__( "Newsletters", "woo-coupon-usage" ),
-            "fas fa-envelope",
-            1,
-            ''
-        );
-        ?>
-  <?php 
-    }
-    ?>
-
-  <!-- REWARDS --->
-  <?php 
-    if ( wcu_fs()->can_use_premium_code() ) {
-        ?>
-  <?php 
-        echo wcusage_admin_settings_tab_button(
-            "tab-bonuses",
-            esc_html__( "Bonuses", "woo-coupon-usage" ),
-            "fas fa-gift",
-            1,
-            ''
-        );
-        ?>
-  <?php 
-    }
-    ?>
-
-  <!--- MLA --->
-  <?php 
-    if ( wcu_fs()->can_use_premium_code() ) {
-        ?>
-  <?php 
-        echo wcusage_js_settings_tab_toggle( '.wcusage_field_mla_enable', '', '#tab-mla' );
-        ?>
-  <?php 
-        echo wcusage_admin_settings_tab_button(
-            "tab-mla",
-            esc_html__( "MLA", "woo-coupon-usage" ),
-            "fa-solid fa-users",
-            1,
-            ''
-        );
-        ?>
-  <?php 
-    }
-    ?>
-  
-  <!--- FLOATING WIDGET --->
-  <?php 
-    echo wcusage_admin_settings_tab_button(
-        "tab-widget",
-        esc_html__( "Widget", "woo-coupon-usage" ),
-        "fas fa-square-caret-right",
-        0,
+          <?php 
+    wcusage_admin_settings_sidebar_button(
+        "tab-reports",
+        esc_html__( "Reports", "woo-coupon-usage" ),
+        "fas fa-file-alt",
+        1,
         ''
     );
     ?>
-  
-  <!--- DESIGN --->
-  <?php 
-    echo wcusage_admin_settings_tab_button(
+        </li>
+        <?php 
+    ?>
+        <?php 
+    $wcusage_subscriptions_enable = ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ) ? true : false );
+    if ( $wcusage_subscriptions_enable ) {
+        ?>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+        wcusage_admin_settings_sidebar_button(
+            "tab-subscriptions",
+            esc_html__( "Subscriptions", "woo-coupon-usage" ),
+            "fas fa-sync-alt",
+            0,
+            ''
+        );
+        ?>
+        </li>
+        <?php 
+    }
+    ?>
+        <?php 
+    $wcusage_field_show_custom_translations = wcusage_get_setting_value( 'wcusage_field_show_custom_translations', '0' );
+    if ( $wcusage_field_show_custom_translations ) {
+        ?>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+        wcusage_admin_settings_sidebar_button(
+            "tab-translations",
+            esc_html__( "Translations", "woo-coupon-usage" ),
+            "fas fa-language",
+            0,
+            ''
+        );
+        ?>
+        </li>
+        <?php 
+    }
+    ?>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_admin_settings_sidebar_button(
         "tab-design",
         esc_html__( "Design", "woo-coupon-usage" ),
         "fas fa-palette",
@@ -695,10 +736,21 @@ jQuery( document ).ready(function() {
         ''
     );
     ?>
-
-  <!--- DEBUGS --->
-  <?php 
-    echo wcusage_admin_settings_tab_button(
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_admin_settings_sidebar_button(
+        "tab-widget",
+        esc_html__( "Floating Widget", "woo-coupon-usage" ),
+        "fas fa-square-caret-right",
+        0,
+        ''
+    );
+    ?>
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_admin_settings_sidebar_button(
         "tab-debug",
         esc_html__( "Debug", "woo-coupon-usage" ),
         "fas fa-wrench",
@@ -706,21 +758,21 @@ jQuery( document ).ready(function() {
         ''
     );
     ?>
-
-  <!--- HOW TO --->
-  <?php 
-    echo wcusage_admin_settings_tab_button(
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_admin_settings_sidebar_button(
         "tab-help",
-        esc_html__( "Help", "woo-coupon-usage" ),
+        esc_html__( "Help & Support", "woo-coupon-usage" ),
         "fas fa-question-circle",
         0,
-        'background: RoyalBlue; color: #fff;'
+        'background: #bb9523; color: #fff;'
     );
     ?>
-
-  <!--- MODULES --->
-  <?php 
-    echo wcusage_admin_settings_tab_button(
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_admin_settings_sidebar_button(
         "tab-pro-details",
         esc_html__( "PRO Modules", "woo-coupon-usage" ),
         "fas fa-star",
@@ -728,8 +780,13 @@ jQuery( document ).ready(function() {
         'background: green; color: #fff;'
     );
     ?>
-
-</h2>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  
+  <!-- Main Content Area -->
+  <div class="wcu-admin-content">
 <?php 
 }
 
@@ -747,11 +804,19 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         // check if the user have submitted the settings
         // wordpress will add the "settings-updated" $_GET parameter to the url
         if ( isset( $_GET['settings-updated'] ) ) {
-            // add settings saved message with the class of "updated"
+            // Compose message with number of changed settings (legacy bulk save)
+            $changed_msg = esc_html__( 'Settings Saved', 'woo-coupon-usage' );
+            if ( function_exists( 'get_transient' ) ) {
+                $changed = get_transient( 'wcusage_last_bulk_changed_count' );
+                if ( false !== $changed ) {
+                    $changed_msg = sprintf( esc_html__( '%d settings updated.', 'woo-coupon-usage' ), intval( $changed ) );
+                    delete_transient( 'wcusage_last_bulk_changed_count' );
+                }
+            }
             add_settings_error(
                 'wcusage_messages',
                 'wcusage_message',
-                esc_html__( 'Settings Saved', 'woo-coupon-usage' ),
+                $changed_msg,
                 'updated'
             );
             flush_rewrite_rules( false );
@@ -763,7 +828,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
    <div class="wrap plugin-settings wcusage-settings">
 
    <?php 
-        echo do_action( 'wcusage_hook_dashboard_page_header', '' );
+        do_action( 'wcusage_hook_dashboard_page_header', '' );
         ?>
 
   <div class="wcu-settings-header">
@@ -779,7 +844,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         <a href="<?php 
         echo esc_url( admin_url( 'admin.php?page=wcusage_add_affiliate' ) );
         ?>" class="wcusage-settings-button"><?php 
-        echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
+        echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ) );
         ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
         <a href="https://couponaffiliates.com/docs/setup-guide-free?utm_campaign=plugin&utm_source=dashboard-link&utm_medium=getting-started"
         target="_blank" style="margin-left: 20px; font-size: 14px;"><?php 
@@ -793,14 +858,42 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
             <span class="wcu-search-prompt-text">Looking for something?</span>
             <span class="wcu-search-prompt-arrow" role="presentation"></span>
           </span>
-          <input type="search" id="wcu-settings-search" placeholder="Search settings" />
+          <input type="search" id="wcu-settings-search" placeholder="Search settings..." />
         </div>
         <div id="wcu-settings-search-results">
           <ul></ul>
         </div>
-  <div id="wcu-settings-search-empty">No matching settings found.</div>
+  <div id="wcu-settings-search-empty" style="display:none;">
+    <ul>
+      <li class="wcu-search-no-results" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; color: #888;">
+        <span style="font-weight: 600;">No matching settings found.</span>
+      </li>
+    </ul>
+  </div>
       </div>
     </div>
+
+    <?php 
+        $wcusage_field_deactivate_delete = wcusage_get_setting_value( 'wcusage_field_deactivate_delete', '0' );
+        if ( $wcusage_field_deactivate_delete ) {
+            echo "<p style='color: red; font-weight: bold; margin-bottom: 0;'>" . esc_html__( "[Warning] You have this option enabled: Delete plugin options and custom database tables on plugin deletion. (See 'Debug' Settings)", "woo-coupon-usage" ) . "</p>";
+        }
+        ?>
+
+    <?php 
+        if ( !wcu_fs()->is_premium() && wcu_fs()->can_use_premium_code() ) {
+            ?>
+    <p style="font-size: 20px; color: red; margin-bottom: 0;"><strong>
+      <?php 
+            echo esc_html__( "You have a Pro license! Please deactivate the FREE version and install the PRO version instead to enable the new functionality.", "woo-coupon-usage" );
+            ?>
+    </strong></p>
+    <?php 
+        }
+        ?>
+
+    <?php 
+        ?>
 
   	<?php 
         $coupon_shortcode_page = wcusage_get_coupon_shortcode_page( 1 );
@@ -884,7 +977,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         ?>
 
     <?php 
-        echo wcusage_test_report_form();
+        wcusage_test_report_form();
         ?>
 
     <?php 
@@ -907,12 +1000,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         ?>
 
   	<!-- Generate Settings Page Area -->
-  	<form class="wcusage_row_setting wcusage-settings-form" action="options.php" method="post"
-    style="margin-top: 10px; <?php 
-        if ( wcu_fs()->can_use_premium_code() ) {
-            ?>float: none; width: 100%; max-width: none; margin: 0 auto; overflow: hidden; box-sizing: border-box;<?php 
-        }
-        ?>">
+  	<form class="wcusage_row_setting wcusage-settings-form" action="options.php" method="post">
   	<?php 
         settings_fields( 'wcusage' );
         do_settings_sections( 'wcusage' );
@@ -920,41 +1008,51 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
       <br/><hr/>
 
-      <p style="font-size: 20px; color: green; display: none;" id="wcu-number-settings-saved-message"><i class="fas fa-check-square" style="font-size: 20px; color: green; background: transparent; padding: 0;"></i>&nbsp; <span id="wcu-number-settings-saved">0</span> settings were updated (this session).</p>
+      <p style="font-size: 20px; color: green; display: none;" id="wcu-number-settings-saved-message"><i class="fas fa-check-square" style="font-size: 20px; color: green; background: transparent; padding: 0;"></i>&nbsp; <span id="wcu-number-settings-saved">0</span> settings have been successfully updated & saved.</p>
+      <div id="wcu-save-all-container" style="display:none; margin-top:6px;">
+        <button type="button" id="wcu-save-all-button" class="button button-small" style="padding: 0 8px; height: 24px; line-height: 22px;">
+          <?php 
+        echo esc_html__( 'Save All Settings', 'woo-coupon-usage' );
+        ?>
+        </button>
+        <span id="wcu-save-all-status" style="margin-left:8px; font-size:12px; color:#666; display:none;"></span>
+      </div>
 
-      <div style="transform: scale(0.8); transform-origin: 0 0;">
+      <div style="transform: scale(0.7); transform-origin: 0 0; margin-top: 40px;">
 
-        <strong><?php 
-        echo esc_html__( 'Settings not saving automatically?', 'woo-coupon-usage' );
-        ?></strong><br/>
         <?php 
-        echo wcusage_setting_toggle_option(
+        $wcusage_field_settings_legacy = wcusage_get_setting_value( 'wcusage_field_settings_legacy', '0' );
+        ?>
+        <?php 
+        wcusage_setting_select_option(
             'wcusage_field_settings_legacy',
-            0,
-            esc_html__( 'Enable legacy (bulk) saving for settings page.', 'woo-coupon-usage' ),
-            '0px'
+            $wcusage_field_settings_legacy,
+            esc_html__( 'Settings not saving correctly? Switch saving mode', 'woo-coupon-usage' ),
+            '0px',
+            array(
+                '0' => esc_html__( 'Automatic Saving (AJAX)', 'woo-coupon-usage' ),
+                '1' => esc_html__( 'Manual Saving (Legacy bulk)', 'woo-coupon-usage' ),
+            )
         );
         ?>
         <i style="margin-top: -5px;"><?php 
-        echo esc_html__( 'This will disable automatic ajax saving, and instead will enable the "Save Settings" button, and you will save all settings at once.', 'woo-coupon-usage' );
+        echo esc_html__( 'Selecting manual will disable automatic ajax saving, and instead will enable the "Save Settings" button, and you will save all settings at once.', 'woo-coupon-usage' );
         ?></i>
         
-        <br/><br/>
+        <br/>
 
         <script>
         jQuery( document ).ready(function() {
-          if( jQuery('#wcusage_field_settings_legacy').prop('checked') ) {
-            jQuery('.wcu-field-section-save').show();
-          } else {
-            jQuery('.wcu-field-section-save').hide();
-          }
-          jQuery('#wcusage_field_settings_legacy').change(function(){
-            if(jQuery(this).prop('checked')) {
+          function wcusage_update_save_visibility() {
+            var val = jQuery('#wcusage_field_settings_legacy').val();
+            if (val === '1') {
               jQuery('.wcu-field-section-save').show();
             } else {
               jQuery('.wcu-field-section-save').hide();
             }
-          });
+          }
+          wcusage_update_save_visibility();
+          jQuery('#wcusage_field_settings_legacy').on('change', wcusage_update_save_visibility);
         });
         </script>
         <span class="wcu-field-section-save">
@@ -967,7 +1065,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         if ( ini_get( 'max_input_vars' ) < 1000 ) {
             ?>
           <p style="font-size: 14px; color: red;"><strong><?php 
-            echo sprintf( esc_html__( 'Settings not saving? Try disabling "legacy" saving, or increasing your PHP "max_input_vars" in your hosting configuration to 1000 or higher (currently %s).', 'woo-coupon-usage' ), ini_get( 'max_input_vars' ) );
+            echo sprintf( esc_html__( 'Settings not saving? Try disabling "legacy" saving, or increasing your PHP "max_input_vars" in your hosting configuration to 1000 or higher (currently %s).', 'woo-coupon-usage' ), esc_html( ini_get( 'max_input_vars' ) ) );
             ?> <a href="https://couponaffiliates.com/docs/increase-max-input-vars-limit" target="_blank"><?php 
             echo esc_html__( 'Learn More.', 'woo-coupon-usage' );
             ?></a></strong><br/></p>
@@ -979,7 +1077,9 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
       </div>
 
-      <br/><p style="display: block; font-size: 15px; margin-bottom: 10px; font-weight: bold;">
+      <div style="margin-top: 30px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 5px;">
+
+      <p style="display: block; font-size: 15px; margin-top: 0px; margin-bottom: 0px; font-weight: bold;">
       <?php 
         echo esc_html__( 'Need help? Have a suggestion? Found a bug?', 'woo-coupon-usage' );
         ?> <?php 
@@ -991,119 +1091,64 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
             ?><a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank"><?php 
         }
         echo esc_html__( 'Create a support ticket.', 'woo-coupon-usage' );
+        ?></a>
+      </p>
+
+      <br/>
+
+      <span style="font-size: 11px; color: #9c9c9cff;">
+      <?php 
+        $pluginname = "woo-coupon-usage";
+        // If PRO version, get that version number
+        if ( wcu_fs()->can_use_premium_code() ) {
+            $pluginname = "woo-coupon-usage-pro";
+        }
+        $plugin = get_plugin_data( WP_PLUGIN_DIR . '/' . $pluginname . '/woo-coupon-usage.php', false, false );
+        $pluginversion = $plugin['Version'];
         ?>
-      </a>
+      Thank you for using Coupon Affiliates<?php 
+        if ( $pluginversion ) {
+            ?> Version <?php 
+            echo esc_html( $pluginversion );
+        }
+        ?>. <a href="https://roadmap.couponaffiliates.com/updates" target="_blank">View Changelog</a>.
+      <br/>
+      Developed and supported by <a href="https://relywp.com">RelyWP Ltd</a>.
+      </span>
+
+      </div>
 
   	</form>
-
-  </div>
-
-  <?php 
-        if ( !wcu_fs()->can_use_premium_code() ) {
-            ?>
-    <div class="wcu-settings-sidebar" style="margin-top: -10px;">
-
-    <a href="https://couponaffiliates.com/docs/setup-guide-free?utm_campaign=plugin&utm_source=dashboard-sidebar&utm_medium=setup-guide" style="text-decoration: none;" target="_blank">
-      <div class="wcu-settings-sidebar-box">
-        <span style="font-size: 10px; color: green; font-weight: bold;">Need help getting started?</span><br/>
-        Setup Guide <span class="dashicons dashicons-external"></span>
-      </div>
-    </a>
-
-  <style>
-  .premium-only-settings .switch,
-  .premium-only-settings select,
-  .premium-only-settings input {
-      pointer-events: none !important;
-  }
-  #wcu-settings-sidebar-pro-upgrade {
-    --borderWidth: 5px;
-    background: #1D1F20;
-    position: relative;
-    border-radius: var(--borderWidth);
-  }
-  #wcu-settings-sidebar-pro-upgrade:after {
-    content: '';
-    position: absolute;
-    top: calc(-1 * var(--borderWidth));
-    left: calc(-1 * var(--borderWidth));
-    height: calc(100% + var(--borderWidth) * 2);
-    width: calc(100% + var(--borderWidth) * 2);
-    background: linear-gradient(60deg, #1a9612, #0c5a07, #000000, #1a9612, #0c5a07, #000000);
-    z-index: -1;
-    animation: animatedgradient 3s ease alternate infinite;
-    background-size: 300% 300%;
-    border-radius: 10px;
-  }
-  @keyframes animatedgradient {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
-  }
-  .wcu-settings-sidebar-pro-upgrade-button {
-    font-size: 18px;
-    line-height: 30px;
-    margin: 15px auto 0 auto;
-    background: linear-gradient(-45deg,#1a9612,#0c5a07,#1a9612,#0c5a07);
-    background-size: 250% 250% !important;
-    padding: 5px;
-    color: #fff;
-    border-radius: 20px;
-    display: block;
-    width: 190px;
-    border: 2px solid #fff;
-  }
-  .wcu-settings-sidebar-pro-upgrade-button:hover {
-    background: #1a9612;
-  }
-  .wcu-settings-sidebar-pro-upgrade-showmore {
-    font-size: 15px;
-    color: #fff !important;
-    text-decoration: none;
-    line-height: 20px;
-    margin-top: 20px;
-    margin-bottom: -12px;
-    font-weight: bold;
-  }
-  .wcu-settings-sidebar-pro-upgrade-showmore:hover, .wcu-settings-sidebar-pro-upgrade-showmore:active {
-    color: #1a9612 !important;
-    border: 0 !important;
-    text-decoration: none !important;
-    box-shadow: none !important;
-  }
-  </style>
-
-  <?php 
-            if ( !wcu_fs()->can_use_premium_code() ) {
+    
+    </div> <!-- Close wcu-admin-content -->
+    
+    <?php 
+        // Output PRO upgrade sidebar for both desktop and mobile using a reusable function
+        if ( !function_exists( 'wcusage_output_pro_upgrade_sidebar' ) ) {
+            function wcusage_output_pro_upgrade_sidebar() {
                 ?>
-
-    <script>
-    jQuery( document ).ready(function() {
-      jQuery('.wcu-settings-sidebar-pro-upgrade-showmore-content').hide();
-      jQuery('.wcu-settings-sidebar-pro-upgrade-showmore').click(function(){
-        jQuery('.wcu-settings-sidebar-pro-upgrade-showmore-content').show();
-      });
-    });
-    </script>
-
-      <div id="wcu-settings-sidebar-pro-upgrade" style="background: #333; color: #fff;
-      padding: 22px 10px 30px 10px; font-size: 22px; text-align: center; border-radius: 10px; margin-top: 17px; margin-bottom: 18px; margin-left: 7px; width: calc(100% - 34px);">
-        <span style="font-size: 10px; color: #fff;">Want more advanced features?</span><br/>
-        <p style="font-size: 24px; line-height: 30px; margin: 0;">Upgrade to PRO!</p>
-        <a href="<?php 
-                echo wcu_fs()->get_upgrade_url();
-                ?>&trial=true" style="text-decoration: none;" target="_blank">
-        <p class="wcu-settings-sidebar-pro-upgrade-button">FREE 7 DAY TRIAL <span class="fas fa-arrow-right"></span></p>
+        <a href="https://couponaffiliates.com/docs/setup-guide-free?utm_campaign=plugin&utm_source=dashboard-sidebar&utm_medium=setup-guide" style="text-decoration: none;" target="_blank">
+          <div class="wcu-settings-sidebar-box">
+            <span style="font-size: 10px; color: green; font-weight: bold;">Need help getting started?</span><br/>
+            Setup Guide <span class="dashicons dashicons-external"></span>
+          </div>
         </a>
-        <p style="font-size: 10px; line-height: 20px; margin-top: 15px;">After your trial, just $12.99 per month.</p>
-
-        <?php 
+        <script>
+        jQuery( document ).ready(function() {
+          jQuery('.wcu-settings-sidebar-pro-upgrade-showmore-content').hide();
+          jQuery('.wcu-settings-sidebar-pro-upgrade-showmore').click(function(){
+            jQuery('.wcu-settings-sidebar-pro-upgrade-showmore-content').show();
+          });
+        });
+        </script>
+        <div id="wcu-settings-sidebar-pro-upgrade">
+          <span style="font-size: 10px; color: #fff;">Want more advanced features?</span><br/>
+          <p style="font-size: 24px; line-height: 30px; margin: 0;">Upgrade to PRO!</p>
+          <a href="https://couponaffiliates.com/pricing?utm_campaign=plugin&utm_source=dashboard-sidebar&utm_medium=pro-upgrade" target="_blank" style="text-decoration: none;">
+          <p class="wcu-settings-sidebar-pro-upgrade-button">FREE 7 DAY TRIAL <span class="fas fa-arrow-right"></span></p>
+          </a>
+          <p style="font-size: 10px; line-height: 20px; margin-top: 15px;">After your trial, just $12.99 per month.</p>
+          <?php 
                 // Black Friday Deal
                 $todayDate = strtotime( 'now' );
                 $dealDateBegin = strtotime( '15-11-2025' );
@@ -1114,104 +1159,117 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
                     $specialsale = false;
                 }
                 ?>
-      <?php 
+          <?php 
                 if ( !$specialsale ) {
                     ?>
-        <p style="font-size: 12px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;">20% discount code: DASH20</p>
-      <?php 
+            <p style="font-size: 12px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;">20% discount code: DASH20</p>
+          <?php 
                 } else {
                     ?>
-        <p style="font-size: 14px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;">Black Friday - 30% discount!<br/>Use code: BF2025</p>
-      <?php 
+            <p style="font-size: 14px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;">Black Friday - 30% discount!<br/>Use code: BF2025</p>
+          <?php 
                 }
                 ?>
-        
-        <a href="#!" onclick="return false;" class="wcu-settings-sidebar-pro-upgrade-showmore">
-          What's included? <span class="fas fa-angle-double-down"></span>
+          <a href="#!" onclick="return false;" class="wcu-settings-sidebar-pro-upgrade-showmore">
+            What's included? <span class="fas fa-angle-double-down"></span>
+          </a>
+          <div style="font-size: 12px;" class="wcu-settings-sidebar-pro-upgrade-showmore-content">
+            <br><span class="dashicons dashicons-yes-alt"></span> Advanced Admin Reports
+            <br><span class="dashicons dashicons-yes-alt"></span> Affiliate Email Reports
+            <br><span class="dashicons dashicons-yes-alt"></span> Affiliate Email Newsletters
+            <br><span class="dashicons dashicons-yes-alt"></span> Automation Features
+            <br><span class="dashicons dashicons-yes-alt"></span> Advanced Registration Features
+            <br><span class="dashicons dashicons-yes-alt"></span> Creatives Section
+            <br><span class="dashicons dashicons-yes-alt"></span> Dynamic Creatives
+            <br><span class="dashicons dashicons-yes-alt"></span> Performance Bonuses
+            <br><span class="dashicons dashicons-yes-alt"></span> Multi-Level Affiliates
+            <br><span class="dashicons dashicons-yes-alt"></span> Unpaid Commission Tracking
+            <br><span class="dashicons dashicons-yes-alt"></span> Commission Payout Requests
+            <br><span class="dashicons dashicons-yes-alt"></span> Commission Payout Tracking
+            <br><span class="dashicons dashicons-yes-alt"></span> One-Click Stripe Payouts
+            <br><span class="dashicons dashicons-yes-alt"></span> One-Click PayPal Payouts
+            <br><span class="dashicons dashicons-yes-alt"></span> Wise Bank Transfer Payouts
+            <br><span class="dashicons dashicons-yes-alt"></span> Scheduled Payout Requests
+            <br><span class="dashicons dashicons-yes-alt"></span> Automatic Payouts
+            <br><span class="dashicons dashicons-yes-alt"></span> PDF Statements & Invoices
+            <br><span class="dashicons dashicons-yes-alt"></span> Lifetime Commissions
+            <br><span class="dashicons dashicons-yes-alt"></span> Affiliate Landing Pages
+            <br><span class="dashicons dashicons-yes-alt"></span> Monthly Summary Table
+            <br><span class="dashicons dashicons-yes-alt"></span> Commission Line Graphs
+            <br><span class="dashicons dashicons-yes-alt"></span> Export to Excel Buttons
+            <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per Coupon
+            <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per Product
+            <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per Role
+            <br><span class="dashicons dashicons-yes-alt"></span> Campaigns
+            <br><span class="dashicons dashicons-yes-alt"></span> Direct Link Tracking
+            <br><span class="dashicons dashicons-yes-alt"></span> Social Sharing
+            <br><span class="dashicons dashicons-yes-alt"></span> Short URL Generator
+            <br><span class="dashicons dashicons-yes-alt"></span> QR Code Generator
+            <br><span class="dashicons dashicons-yes-alt"></span> Custom Dashboard Tabs
+            <br><span class="dashicons dashicons-yes-alt"></span> and more great features!
+            <br>
+            <br><span class="dashicons dashicons-yes-alt"></span> All Future PRO Features
+            <br><span class="dashicons dashicons-yes-alt"></span> Priority UK-based Support
+            <br><span class="dashicons dashicons-yes-alt"></span> 14 Day Money-Back Guarantee
+          </div>
+        </div>
+        <a href="https://couponaffiliates.com?utm_campaign=plugin&utm_source=dashboard-sidebar&utm_medium=learn-more"
+        style="text-decoration: none;" target="_blank">
+          <div class="wcu-learn-more-pro">
+            Learn more about PRO <span class="dashicons dashicons-external"></span>
+          </div>
         </a>
-        <div style="font-size: 12px;" class="wcu-settings-sidebar-pro-upgrade-showmore-content">
-          <br><span class="dashicons dashicons-yes-alt"></span> Advanced Admin Reports
-          <br><span class="dashicons dashicons-yes-alt"></span> Affiliate Email Reports
-          <br><span class="dashicons dashicons-yes-alt"></span> Affiliate Email Newsletters
-          <br><span class="dashicons dashicons-yes-alt"></span> Automation Features
-          <br><span class="dashicons dashicons-yes-alt"></span> Advanced Registration Features
-          <br><span class="dashicons dashicons-yes-alt"></span> Creatives Section
-          <br><span class="dashicons dashicons-yes-alt"></span> Dynamic Creatives
-          <br><span class="dashicons dashicons-yes-alt"></span> Performance Bonuses
-          <br><span class="dashicons dashicons-yes-alt"></span> Multi-Level Affiliates
-          <br><span class="dashicons dashicons-yes-alt"></span> Unpaid Commission Tracking
-          <br><span class="dashicons dashicons-yes-alt"></span> Commission Payout Requests
-          <br><span class="dashicons dashicons-yes-alt"></span> Commission Payout Tracking
-          <br><span class="dashicons dashicons-yes-alt"></span> One-Click Stripe Payouts
-          <br><span class="dashicons dashicons-yes-alt"></span> One-Click PayPal Payouts
-          <br><span class="dashicons dashicons-yes-alt"></span> Wise Bank Transfer Payouts
-          <br><span class="dashicons dashicons-yes-alt"></span> Scheduled Payout Requests
-          <br><span class="dashicons dashicons-yes-alt"></span> Automatic Payouts
-          <br><span class="dashicons dashicons-yes-alt"></span> PDF Statements & Invoices
-          <br><span class="dashicons dashicons-yes-alt"></span> Lifetime Commissions
-          <br><span class="dashicons dashicons-yes-alt"></span> Affiliate Landing Pages
-          <br><span class="dashicons dashicons-yes-alt"></span> Monthly Summary Table
-          <br><span class="dashicons dashicons-yes-alt"></span> Commission Line Graphs
-          <br><span class="dashicons dashicons-yes-alt"></span> Export to Excel Buttons
-          <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per Coupon
-          <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per Product
-          <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per Role
-          <br><span class="dashicons dashicons-yes-alt"></span> Campaigns
-          <br><span class="dashicons dashicons-yes-alt"></span> Direct Link Tracking
-          <br><span class="dashicons dashicons-yes-alt"></span> Social Sharing
-          <br><span class="dashicons dashicons-yes-alt"></span> Short URL Generator
-          <br><span class="dashicons dashicons-yes-alt"></span> QR Code Generator
-          <br><span class="dashicons dashicons-yes-alt"></span> Custom Dashboard Tabs
-          <br><span class="dashicons dashicons-yes-alt"></span> and more great features!
-          <br>
-          <br><span class="dashicons dashicons-yes-alt"></span> All Future PRO Features
-          <br><span class="dashicons dashicons-yes-alt"></span> Priority UK-based Support
-          <br><span class="dashicons dashicons-yes-alt"></span> 14 Day Money-Back Guarantee
-        </div>
+        <!-- Claim LIFETIME Deal Link -->
+        <a href="https://couponaffiliates.com/pricing?utm_campaign=plugin&utm_source=dashboard-sidebar&utm_medium=lifetime-deal"
+        style="text-decoration: none; margin-top: -10px;" target="_blank">
+          <div style="text-align: center; font-size: 12px; font-weight: bold; margin: 10px;">
+            Pay once with lifetime deal <span class="dashicons dashicons-external"></span>
+          </div>
+        </a>
+  <center><a href="https://twitter.com/CouponAffs" target="_blank" rel="noopener" class="button">Follow @CouponAffs on X</a></center>
+        <button type="button" class="wcu-sidebar-toggle" style="margin:18px auto 0 auto;display:block;padding:7px 18px;border-radius:18px;border:none;background:#e5e7eb;color:#333;font-size:15px;cursor:pointer;">Hide Sidebar &raquo;</button>
+        <script>
+        jQuery(function($){
+          $('.wcu-sidebar-toggle').on('click', function(){
+            $('.wcu-settings-sidebar-bottom').remove();
+          });
+        });
+        </script>
+        <?php 
+            }
 
+        }
+        ?>
+    <?php 
+        if ( !wcu_fs()->can_use_premium_code() ) {
+            ?>
+      <!-- Pro Upgrade Sidebar (for free version) -->
+      <div class="wcu-settings-sidebar-bottom">
+        <?php 
+            wcusage_output_pro_upgrade_sidebar();
+            ?>
       </div>
+    <?php 
+        }
+        ?>
+    
 
-      <a href="https://couponaffiliates.com?utm_campaign=plugin&utm_source=dashboard-sidebar&utm_medium=learn-more" style="text-decoration: none;" target="_blank">
-        <div style="background: #333; background-size: 250% 250% !important; color: #fff;
-        padding: 22px 0 22px 0; font-size: 18px; text-align: center; border-radius: 10px; border: 2px solid #F8F8FF; margin-bottom: 10px;">
-          Learn more about PRO <span class="dashicons dashicons-external"></span>
-        </div>
-      </a>
+    </div> <!-- Close wcu-admin-layout-container -->
 
     <?php 
-            }
+        if ( !wcu_fs()->can_use_premium_code() ) {
             ?>
-
-    <br/><br/>
-
-    <center><a href="https://twitter.com/CouponAffs?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @CouponAffs</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script></center>
-
-    <br/><br/>
-
-    </div>
+      <!-- Pro Upgrade Sidebar (for free version, mobile placement) -->
+      <div class="wcu-settings-sidebar-bottom-mobile">
+        <?php 
+            wcusage_output_pro_upgrade_sidebar();
+            ?>
+      </div>
     <?php 
         }
         ?>
 
    <div style="clear: both;"></div>
-
-   <br/><br/>
-
-    <span>
-    <?php 
-        $pluginname = "woo-coupon-usage";
-        $plugin = get_plugin_data( WP_PLUGIN_DIR . '/' . $pluginname . '/' . $pluginname . '.php', false, false );
-        $pluginversion = $plugin['Version'];
-        ?>
-    Thank you for using Coupon Affiliates<?php 
-        if ( $pluginversion ) {
-            ?> Version <?php 
-            echo esc_html( $pluginversion );
-        }
-        ?>. <a href="https://roadmap.couponaffiliates.com/updates" target="_blank">View Changelog</a>.
-    <br/><br/>
-    Developed and supported by <a href="https://relywp.com">RelyWP Ltd</a>.
-    </span>
 
    <?php 
     }
@@ -1228,7 +1286,9 @@ function wcusage_get_plugin_version(  $pluginname  ) {
  */
 if ( !function_exists( 'wcusage_setting_toggle' ) ) {
     function wcusage_setting_toggle(  $toggleclass, $showclass  ) {
-        return "<script>\r\n    jQuery( document ).ready(function() {\r\n      if(!jQuery('" . $toggleclass . "').prop('checked')) {\r\n        jQuery('" . $showclass . "').hide();\r\n      }\r\n      jQuery('" . $toggleclass . "').change(function(){\r\n        if(jQuery(this).prop('checked')) {\r\n          jQuery('" . $showclass . "').show();\r\n        } else {\r\n          jQuery('" . $showclass . "').hide();\r\n        }\r\n      });\r\n    });\r\n    </script>";
+        $script = "<script>\r\n    jQuery( document ).ready(function() {\r\n      if(!jQuery('" . $toggleclass . "').prop('checked')) {\r\n        jQuery('" . $showclass . "').hide();\r\n      }\r\n      jQuery('" . $toggleclass . "').change(function(){\r\n        if(jQuery(this).prop('checked')) {\r\n          jQuery('" . $showclass . "').show();\r\n        } else {\r\n          jQuery('" . $showclass . "').hide();\r\n        }\r\n      });\r\n    });\r\n    </script>";
+        echo $script;
+        return $script;
     }
 
 }
@@ -1361,7 +1421,7 @@ if ( !function_exists( 'wcusage_setting_select_option' ) ) {
         ?>]">
         <?php 
         foreach ( $items as $option_value => $option_name ) {
-            echo '<option value="' . $option_value . '" ' . selected( $setting, $option_value, false ) . '>' . $option_name . '</option>';
+            echo '<option value="' . esc_attr( $option_value ) . '" ' . selected( $setting, $option_value, false ) . '>' . esc_html( $option_name ) . '</option>';
         }
         ?>
       </select>
@@ -1535,7 +1595,7 @@ if ( !function_exists( 'wcusage_setting_user_role' ) ) {
         $roles = $wp_roles->get_names();
         echo '<option value="">- ' . esc_html__( 'All Roles', 'woo-coupon-usage' ) . ' -</option>';
         foreach ( $roles as $role_value => $role_name ) {
-            echo '<option value="' . $role_value . '" ' . selected( $role, $role_value, false ) . '>' . $role_name . '</option>';
+            echo '<option value="' . esc_attr( $role_value ) . '" ' . selected( $role, $role_value, false ) . '>' . esc_html( $role_name ) . '</option>';
         }
         ?>
     </select>
@@ -1742,7 +1802,7 @@ if ( !function_exists( 'wcusage_setting_tinymce_option' ) ) {
             'tinymce'       => true,
             'editor_height' => $size,
         );
-        echo wcusage_tinymce_ajax_script( $name );
+        wcusage_tinymce_ajax_script( $name );
         wp_editor( $setting, $name, $settings1 );
     }
 
@@ -1753,6 +1813,10 @@ if ( !function_exists( 'wcusage_setting_tinymce_option' ) ) {
  */
 if ( !function_exists( 'wcusage_setting_option_set_default' ) ) {
     function wcusage_setting_option_set_default(  $options, $name, $default  ) {
+        // If $default is empty, do nothing
+        if ( $default === '' || $default === null ) {
+            return;
+        }
         // Optionally collect defaults into a registry (only during setup wizard
         // or when explicitly enabled via a flag).
         global $wcusage_all_default_settings, $wcusage_collect_defaults_enabled;
@@ -1763,25 +1827,7 @@ if ( !function_exists( 'wcusage_setting_option_set_default' ) ) {
             $collect_defaults = $on_setup_page;
         }
         if ( $collect_defaults ) {
-            if ( !is_array( $wcusage_all_default_settings ) ) {
-                $wcusage_all_default_settings = array();
-            }
-            if ( !array_key_exists( $name, $wcusage_all_default_settings ) ) {
-                $wcusage_all_default_settings[$name] = $default;
-            }
-        }
-        $options = get_option( 'wcusage_options' );
-        if ( !isset( $options[$name] ) && current_user_can( 'manage_options' ) ) {
-            // Do not update if the option is already set but it is just empty
-            if ( isset( $options[$name] ) && $options[$name] === '' ) {
-                return;
-            }
-            $options[$name] = $default;
-            // Do not update if $options is empty or bool(false) for some reason
-            if ( empty( $options ) || $options === false ) {
-                return;
-            }
-            update_option( 'wcusage_options', $options );
+            wcusage_register_default_setting( $name, $default );
         }
     }
 
@@ -1792,14 +1838,14 @@ if ( !function_exists( 'wcusage_setting_option_set_default' ) ) {
  */
 if ( !function_exists( 'wcusage_get_setting_value' ) ) {
     function wcusage_get_setting_value(  $theoption, $thedefault  ) {
-        $options = get_option( 'wcusage_options' );
-        if ( isset( $options[$theoption] ) && $options[$theoption] != "" ) {
+        $options = wcusage_get_options();
+        if ( array_key_exists( $theoption, $options ) ) {
             $wcusage_field = $options[$theoption];
         } else {
             $wcusage_field = $thedefault;
         }
         if ( !is_array( $wcusage_field ) ) {
-            $wcusage_field = esc_attr( $wcusage_field );
+            $wcusage_field = wp_kses_post( $wcusage_field );
         }
         return $wcusage_field;
     }
@@ -1900,17 +1946,7 @@ if ( !function_exists( 'wcusage_get_all_default_settings' ) ) {
             // Restore previous collection flag state.
             $wcusage_collect_defaults_enabled = $prev_collect_flag;
         }
-        // Merge any missing defaults into stored options (non-destructive).
-        $options = get_option( 'wcusage_options', array() );
-        if ( is_array( $wcusage_all_default_settings ) ) {
-            $merged = $options + $wcusage_all_default_settings;
-            // keep existing values
-            if ( $merged !== $options ) {
-                update_option( 'wcusage_options', $merged );
-                $options = $merged;
-            }
-        }
-        return $options;
+        return wcusage_apply_registered_defaults();
     }
 
 }
@@ -1929,7 +1965,7 @@ if ( !function_exists( 'wcusage_admin_settings_tab_button' ) ) {
         ?>
   <a href="javascript:void(0);" class="nav-tab" <?php 
         if ( $css ) {
-            echo 'style="' . $css . '"';
+            echo 'style="' . esc_attr( $css ) . '"';
         }
         ?> id="<?php 
         echo esc_attr( $id );
@@ -1943,6 +1979,46 @@ if ( !function_exists( 'wcusage_admin_settings_tab_button' ) ) {
         ?> settings-tab-icon"></span>
     <?php 
         echo esc_html( $name );
+        if ( !wcu_fs()->can_use_premium_code() && $pro ) {
+            ?><span class="wcu-settings-pro-icon">Pro</span><?php 
+        }
+        ?>
+  </a>
+  <?php 
+    }
+
+}
+/**
+ * Function to display a sidebar menu item
+ *
+ */
+if ( !function_exists( 'wcusage_admin_settings_sidebar_button' ) ) {
+    function wcusage_admin_settings_sidebar_button(
+        $id,
+        $name,
+        $icon,
+        $pro,
+        $css
+    ) {
+        ?>
+  <a href="javascript:void(0);" class="wcu-sidebar-link" <?php 
+        if ( $css ) {
+            echo 'style="' . esc_attr( $css ) . '"';
+        }
+        ?> id="<?php 
+        echo esc_attr( $id );
+        ?>" <?php 
+        if ( (!wcu_fs()->can_use_premium_code() || !wcu_fs()->is_premium()) && $pro ) {
+            ?>style="opacity: 0.4;"<?php 
+        }
+        ?>>
+    <span class="<?php 
+        echo esc_attr( $icon );
+        ?> wcu-sidebar-icon"></span>
+    <span class="wcu-sidebar-text"><?php 
+        echo esc_html( $name );
+        ?></span>
+    <?php 
         if ( !wcu_fs()->can_use_premium_code() && $pro ) {
             ?><span class="wcu-settings-pro-icon">Pro</span><?php 
         }
@@ -1977,6 +2053,7 @@ if ( !function_exists( 'wcusage_admin_settings_tab_click' ) ) {
  */
 if ( !function_exists( 'wcusage_js_settings_tab_toggle' ) ) {
     function wcusage_js_settings_tab_toggle(  $class1, $class2, $tab  ) {
+        $rand = rand( 1000, 9999 );
         ?>
   <script>
   jQuery( document ).ready(function() {
@@ -1995,39 +2072,45 @@ if ( !function_exists( 'wcusage_js_settings_tab_toggle' ) ) {
     var tabid = "<?php 
         echo esc_html( $tab );
         ?>";
-    if( !jQuery(class1).prop('checked')<?php 
-        if ( $class2 ) {
-            ?> && !jQuery(class2).prop('checked')<?php 
+
+    function wcuUpdateTabVisibility<?php 
+        echo esc_html( $rand );
+        ?>() {
+      var enabled = false;
+      // Check all matching toggles (including dynamically added ones)
+      jQuery(class1).each(function() {
+        if (jQuery(this).is(':checked')) {
+          enabled = true;
         }
-        ?> ) {
-      jQuery(tabid).hide();
-    } else {
-      jQuery(tabid).show();
-    }
-    jQuery(class1).on('change', function() {
-      if(jQuery(class1).prop('checked')<?php 
-        if ( $class2 ) {
-            ?> || jQuery(class2).prop('checked')<?php 
-        }
-        ?> ) {
-        jQuery(tabid).show();
-      } else {
-        jQuery(tabid).hide();
-      }
-    });
-    <?php 
+      });
+      <?php 
         if ( $class2 ) {
             ?>
-    jQuery(class2).on('change', function() {
-      if(jQuery(class1).prop('checked') || jQuery(class2).prop('checked')) {
+      jQuery(class2).each(function() {
+        if (jQuery(this).is(':checked')) {
+          enabled = true;
+        }
+      });
+      <?php 
+        }
+        ?>
+      if (enabled) {
         jQuery(tabid).show();
       } else {
         jQuery(tabid).hide();
       }
-    });
-    <?php 
+    }
+
+    wcuUpdateTabVisibility<?php 
+        echo esc_html( $rand );
+        ?>();
+    jQuery(document).on('change', class1<?php 
+        if ( $class2 ) {
+            ?> + ',' + class2<?php 
         }
-        ?>
+        ?>, wcuUpdateTabVisibility<?php 
+        echo esc_html( $rand );
+        ?>);
   });
   </script>
   <?php 
@@ -2082,7 +2165,7 @@ if ( !function_exists( 'wcu_admin_settings_showhide_toggle' ) ) {
 function wcusage_admin_faq_toggle(  $id, $class, $title  ) {
     ?>
   <?php 
-    echo wcu_admin_settings_showhide_toggle(
+    wcu_admin_settings_showhide_toggle(
         $id,
         $class,
         "Show",
@@ -2108,8 +2191,28 @@ function wcusage_admin_faq_toggle(  $id, $class, $title  ) {
  *
  */
 if ( !function_exists( 'wcusage_admin_tooltip' ) ) {
-    function wcusage_admin_tooltip(  $text  ) {
-        return "<span class='wcusage-users-affiliate-column' style='margin-left: 5px; display: inline-block;'>\r\n    <span class='custom-tooltip'><span class='dashicons dashicons-editor-help' style='color: green;'></span>\r\n        <span class='tooltip-content' style='white-space: normal;'>\r\n        <span style='font-size: 12px;'>" . $text . "</span>\r\n        </span>\r\n    </span>\r\n    </span>";
+    function wcusage_admin_tooltip(  $text, $icon = 'dashicons-editor-help'  ) {
+        return "<span class='wcusage-users-affiliate-column' style='margin-left: 5px; display: inline-block;'>\r\n    <span class='custom-tooltip'><span class='dashicons " . esc_attr( $icon ) . "' style='color: green;'></span>\r\n        <span class='tooltip-content' style='white-space: normal;'>\r\n        <span style='font-size: 12px;'>" . $text . "</span>\r\n        </span>\r\n    </span>\r\n    </span>";
+    }
+
+}
+if ( !function_exists( 'wcusage_admin_vimeo_embed' ) ) {
+    function wcusage_admin_vimeo_embed(  $embed_url  ) {
+        $embed_url = esc_url( $embed_url );
+        $html = '<div style="max-width: 720px;">' . '<div style="padding:56.25% 0 0 0;position:relative;">' . '<iframe src="' . $embed_url . '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen="allowfullscreen" frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>' . '</div>' . '</div>';
+        $allowed_html = array(
+            'div'    => array(
+                'style' => true,
+            ),
+            'iframe' => array(
+                'src'             => true,
+                'allow'           => true,
+                'allowfullscreen' => true,
+                'frameborder'     => true,
+                'style'           => true,
+            ),
+        );
+        return wp_kses( $html, $allowed_html );
     }
 
 }

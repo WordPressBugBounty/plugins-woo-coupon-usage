@@ -21,7 +21,7 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_coupons' ) ) {
         if($coupon->get_code() == $wcusage_field_registration_coupon_template) {
           WC()->cart->remove_coupon( $coupon->get_code() );
           wc_clear_notices();
-          if(current_user_can('manage_options')) {
+          if ( wcusage_check_admin_access() ) {
             wc_add_notice( esc_html__( "Admin notice: The 'template coupon code' can not be applied to any cart.", "woo-coupon-usage" ), "error" );
           }
         }
@@ -187,6 +187,40 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_customer' ) ) {
           continue;
         }
 
+        $require_referral_link = wcusage_get_setting_value('wcusage_field_require_referral_link', 0);
+        if ( $require_referral_link ) {
+          $coupon_code = strtolower( $coupon->get_code() );
+          $ref_sources = array();
+
+          if ( isset( $_COOKIE['wcusage_referral'] ) ) {
+            $ref_sources[] = sanitize_text_field( wp_unslash( $_COOKIE['wcusage_referral'] ) );
+          }
+
+          if ( isset( $_COOKIE['wcusage_referral_code'] ) ) {
+            $ref_sources[] = sanitize_text_field( wp_unslash( $_COOKIE['wcusage_referral_code'] ) );
+          }
+
+          global $wp_session;
+          if ( isset( $wp_session['wcusage_referral'] ) ) {
+            $ref_sources[] = sanitize_text_field( $wp_session['wcusage_referral'] );
+          }
+
+          $matching_referral = false;
+          foreach ( $ref_sources as $ref_source ) {
+            if ( $ref_source && strtolower( $ref_source ) === $coupon_code ) {
+              $matching_referral = true;
+              break;
+            }
+          }
+
+          if ( ! $matching_referral ) {
+            wc_clear_notices();
+            WC()->cart->remove_coupon( $coupon->get_code() );
+            wc_add_notice( esc_html__( 'Sorry, this affiliate coupon can only be used after visiting the affiliate referral link.', 'woo-coupon-usage' ), 'error' );
+            continue;
+          }
+        }
+
         /***** Check existing customer. *****/
 
         $allow_all_customers = wcusage_get_setting_value('wcusage_field_allow_all_customers', 1);
@@ -305,7 +339,7 @@ if( !function_exists( 'wcusage_is_customer_blacklisted' ) ) {
 
       $referral_id = "";
       if(!$ip_address) {
-        $ip_address = $_SERVER['REMOTE_ADDR'];
+        $ip_address = wcusage_get_ip_only();
         if(isset($_COOKIE['wcusage_referral_id'])) {
           $referral_id = $_COOKIE['wcusage_referral_id'];
         }

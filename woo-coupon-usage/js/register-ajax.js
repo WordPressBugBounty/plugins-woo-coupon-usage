@@ -21,6 +21,10 @@ jQuery(document).ready(function($) {
             contentType: false,
             success: function(response) {
                 if (response.success) {
+                    if (response.data && response.data.redirect) {
+                        window.location.href = response.data.redirect;
+                        return;
+                    }
                     $('#wcu_form_affiliate_register').replaceWith('<div class="success-message">' + response.data.message + '</div>');
                 } else {
                     alert('Error: ' + response.data.message); // Show error message

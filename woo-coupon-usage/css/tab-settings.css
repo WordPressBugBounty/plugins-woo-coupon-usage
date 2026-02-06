@@ -14,6 +14,10 @@
 
 .wcu-settings-tab-nav li {
     margin: 0;
+    list-style: none;
+}
+.wcu-settings-tab-nav li::marker {
+    content: none;
 }
 
 .wcu-settings-tab-nav a {

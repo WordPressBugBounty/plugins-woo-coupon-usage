@@ -1,28 +1,41 @@
 jQuery(document).ready(function() {
 
+	/* Tab Switching */
+	window.wcuOpenTab = function(evt, tabName) {
+		jQuery(".wcutabcontent").css("display", "none");
+		jQuery(".wcutabcontent").removeClass( "active" );
+		jQuery("#" + tabName).css("display", "block");
+		jQuery("#" + tabName).addClass( "active" );
+	}
+
 	jQuery(document).ready(function(){
-		jQuery('.wcutablinks').on('click', function(){
+		jQuery('.wcutablinks').on('click', function(e){
 			jQuery('.wcutablinks').removeClass('wcutab-active');
 			jQuery(this).addClass('wcutab-active');
+			
+			var tabName = jQuery(this).data('content');
+			if(tabName) {
+				wcuOpenTab(e, tabName);
+			}
 		});
 	});
 
 	jQuery('.coupon-box').hide();
-	jQuery('#search-coupon').click(function(){
+	jQuery(document).on('click', '#search-coupon', function(){
 		jQuery('.coupon-box').hide();
 		var txt = jQuery('#search-criteria').val();
 		jQuery('.coupon-box table:contains("'+txt+'")').show().parent().show();
 	});
-    jQuery('#search-criteria').keyup(function(event) {
+    jQuery(document).on('keyup', '#search-criteria', function(event) {
 		jQuery('.coupon-box').hide();
 		var txt = jQuery('#search-criteria').val();
 		jQuery('.coupon-box table:contains("'+txt+'")').show().parent().show();
     });
-	jQuery('#search-coupon-all').click(function(){
+	jQuery(document).on('click', '#search-coupon-all', function(){
 		jQuery('.coupon-box').toggle();
 	});
 
-	jQuery('#wcusage-last-days7').click(function(){
+	jQuery(document).on('click', '#wcusage-last-days7', function(){
 		jQuery('.wcusage-show-last-7').show();
 		jQuery('#wcusage-last-days7').css("color", "#333");
 		jQuery('#wcusage-last-days7').addClass('wcutab-active');
@@ -35,7 +48,7 @@ jQuery(document).ready(function() {
 		jQuery('.wcusage-show-last-all-30').hide();
 	});
 
-	jQuery('#wcusage-last-days30').click(function(){
+	jQuery(document).on('click', '#wcusage-last-days30', function(){
 		jQuery('.wcusage-show-last-7').hide();
 		jQuery('#wcusage-last-days7').css("color", "#a6a6a6");
 		jQuery('#wcusage-last-days7').removeClass('wcutab-active');
@@ -48,7 +61,7 @@ jQuery(document).ready(function() {
 		jQuery('.wcusage-show-last-all-30').show();
 	});
 
-	jQuery('#wcusage-last-days-all').click(function(){
+	jQuery(document).on('click', '#wcusage-last-days-all', function(){
 		jQuery('.wcusage-show-last-7').hide();
 		jQuery('#wcusage-last-days7').css("color", "#a6a6a6");
 		jQuery('#wcusage-last-days7').removeClass('wcutab-active');
@@ -73,7 +86,7 @@ jQuery(document).ready(function() {
 
 	/* Password Toggle */
 	jQuery( document ).ready(function() {
-		jQuery(".wcu-toggle-password").click(function() {
+		jQuery(document).on('click', '.wcu-toggle-password', function() {
 			jQuery(this).toggleClass("fa-eye fa-eye-slash");
 			var input = jQuery(jQuery(this).attr("toggle"));
 			if (input.attr("type") == "password") {
@@ -110,7 +123,7 @@ function wcu_reset_copy(elementId) {
 
 /* Search MLA Summary Field */
 jQuery( document ).ready(function($) {
-jQuery("#wcu-summary-search").on("keyup", function() {
+jQuery(document).on("keyup", "#wcu-summary-search", function() {
 	var value = this.value.toLowerCase().trim();
 	jQuery(".wcu-table-mla-summary tr").each(function(index) {
 		jQuery(this).find("td").each(function () {
@@ -167,7 +180,7 @@ function wcuCopyToClipboard(elementId, iconid) {
 
 /* Make all fields required if bank transfer is selected */
 jQuery( document ).ready(function() {
-	jQuery( "#wcu-payout-type" ).change(function() {
+	jQuery(document).on('change', '#wcu-payout-type', function() {
 		var currentpayout = jQuery('#wcu-payout-type').find(":selected").val();
 		if(currentpayout == "banktransfer") {
 			if(jQuery('#wcu-bank-input1').length > 0) {

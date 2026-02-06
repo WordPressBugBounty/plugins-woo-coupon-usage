@@ -23,7 +23,7 @@ function wcusage_bulk_assign_coupons_fields()
 function wcusage_bulk_assign_coupons_page() {
 
     // Check if user is administrator
-    if (!current_user_can('manage_options')) {
+    if ( ! wcusage_check_admin_access() ) {
         wp_die('Error: Permission denied.');
     }
 
@@ -32,7 +32,7 @@ function wcusage_bulk_assign_coupons_page() {
     ?>
 
     <div class="wrap wcusage-admin-page">
-        <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
+        <?php do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
     </div>
 
     <div class="wrap wcusage-tools">

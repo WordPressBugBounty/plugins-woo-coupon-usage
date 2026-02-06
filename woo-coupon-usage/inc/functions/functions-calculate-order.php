@@ -227,11 +227,11 @@ if ( !function_exists( 'wcusage_get_order_totals' ) ) {
             $line_total = $item->get_total();
             $line_subtotal_tax = $item->get_subtotal_tax();
             $line_total_tax = $item->get_total_tax();
-            $line_discount = $line_total - $line_subtotal;
+            $line_discount = (float) $line_total - (float) $line_subtotal;
             // (Negative number)
             $quantity = $item->get_quantity();
-            $line_discount_per_item = ( $quantity > 0 ? $line_discount / $quantity : 0 );
-            $line_discount_tax = $line_total_tax - $line_subtotal_tax;
+            $line_discount_per_item = ( $quantity > 0 ? (float) $line_discount / (float) $quantity : 0 );
+            $line_discount_tax = (float) $line_total_tax - (float) $line_subtotal_tax;
             // (Negative number)
             // Get Refunded Quantity
             $refunded_quantity = 0;
@@ -250,8 +250,8 @@ if ( !function_exists( 'wcusage_get_order_totals' ) ) {
             $refunded_tax = 0;
             if ( $refunded_quantity > 0 ) {
                 if ( $line_items > 1 ) {
-                    $refunded_tax = $line_total_tax / $line_items;
-                    $total_discount += $refunded_discount / $line_items;
+                    $refunded_tax = (float) $line_total_tax / (float) $line_items;
+                    $total_discount += (float) $refunded_discount / (float) $line_items;
                 } else {
                     $refunded_tax = $line_total_tax;
                     $total_discount += $refunded_discount;
@@ -440,12 +440,8 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                 } else {
                     $affiliatecommission = $current_commission;
                 }
-                $affiliatecommission = number_format(
-                    (float) $affiliatecommission,
-                    2,
-                    '.',
-                    ''
-                );
+                // Apply rounding mode to percentage-based affiliate commission
+                $affiliatecommission = wcusage_round_commission_amount( $affiliatecommission, 2 );
                 $totalorders += $ordertotal;
                 $totalorders = number_format(
                     (float) $totalorders,
@@ -501,7 +497,7 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                 // Deduct custom percent
                 $deduct_percent_show = wcusage_get_setting_value( 'wcusage_field_affiliate_deduct_percent_show', '0' );
                 $deduct_percent = wcusage_get_setting_value( 'wcusage_field_affiliate_deduct_percent', '0' );
-                $deduct_percent = (100 - $deduct_percent) / 100;
+                $deduct_percent = (100 - (float) $deduct_percent) / 100;
                 if ( $deduct_percent && $deduct_percent_show ) {
                     $ordertotal = $ordertotal * $deduct_percent;
                     $ordertotaldiscounted = $ordertotaldiscounted * $deduct_percent;
@@ -527,7 +523,7 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                         $totaldiscounts = wcusage_calculate_currency( $currencycode, $totaldiscounts, $wcusage_currency_conversion );
                         $totalordersexcl = wcusage_calculate_currency( $currencycode, $totalordersexcl, $wcusage_currency_conversion );
                         $totalcommission = wcusage_calculate_currency( $currencycode, $totalcommission, $wcusage_currency_conversion );
-                        $fixed_order_commission = wcusage_calculate_currency( $currencycode, $fixed_order_commission, $wcusage_currency_conversion );
+                        $fixed_order_commission = $fixed_order_commission;
                     }
                 }
                 $allstats = [];
@@ -561,13 +557,12 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                     );
                 }
                 // Filter to edit allstats
-                $allstats['commission'] = number_format(
-                    (float) $all_commission,
-                    2,
-                    '.',
-                    ''
-                );
+                // Apply rounding mode to combined commission value
+                $allstats['commission'] = wcusage_round_commission_amount( $all_commission, 2 );
                 $all_orderexcl = (float) $ordertotal - (float) $totaldiscounts;
+                if ( $all_orderexcl < 0 ) {
+                    $all_orderexcl = 0;
+                }
                 $allstats['orderexcl'] = number_format(
                     (float) $all_orderexcl,
                     2,
@@ -600,12 +595,12 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                 $return_array['fixed_order_commission'] = $fixed_order_commission;
                 $return_array['commission_summary'] = $commission_summary;
             }
-            // If order status is refunded return 0 values
+            // If order status is refunded, cancelled or failed return 0 values
             $order_status = "";
             if ( !empty( $order->get_status() ) ) {
                 $order_status = $order->get_status();
             }
-            if ( isset( $order_status ) && ($order_status == "refunded" || $order_status == "cancelled") ) {
+            if ( isset( $order_status ) && ($order_status == "refunded" || $order_status == "cancelled" || $order_status == "failed") ) {
                 $return_array = [];
                 $return_array['ordertotal'] = 0;
                 $return_array['orderdiscount'] = 0;
@@ -634,6 +629,37 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
             $return_array = [];
             return $return_array;
         }
+    }
+
+}
+/**
+ * Centralized rounding for commission amounts, honoring plugin setting.
+ * Modes:
+ * - standard (default): round half up to N decimals
+ * - down: round down (floor/truncate) to N decimals
+ */
+if ( !function_exists( 'wcusage_round_commission_amount' ) ) {
+    function wcusage_round_commission_amount(  $amount, $decimals = 2  ) {
+        $mode = wcusage_get_setting_value( 'wcusage_field_commission_rounding_mode', 'standard' );
+        $amount = (float) $amount;
+        $decimals = (int) $decimals;
+        if ( $decimals < 0 ) {
+            $decimals = 0;
+        }
+        if ( $mode === 'down' ) {
+            $mult = pow( 10, $decimals );
+            // Commissions should be non-negative; floor is fine. For negatives, still floor for consistency.
+            $amount = floor( $amount * $mult ) / $mult;
+        } else {
+            $amount = round( $amount, $decimals );
+        }
+        // Always return normalized string with dot separator for consistent storage
+        return number_format(
+            (float) $amount,
+            $decimals,
+            '.',
+            ''
+        );
     }
 
 }
@@ -705,8 +731,10 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         $fixed_order_commission = wcusage_get_setting_value( 'wcusage_field_affiliate_fixed_order', '0' );
         // Overwrite with custom coupon amount
         $wcu_text_coupon_commission_fixed_order = get_post_meta( $couponid, 'wcu_text_coupon_commission_fixed_order', true );
-        if ( $wcu_text_coupon_commission_fixed_order != "" && $wcu_text_coupon_commission_fixed_order >= 0 ) {
-            $fixed_order_commission = $wcu_text_coupon_commission_fixed_order;
+        if ( $wcu_text_coupon_commission_fixed_order !== "" && is_numeric( $wcu_text_coupon_commission_fixed_order ) && $wcu_text_coupon_commission_fixed_order >= 0 ) {
+            if ( (float) $wcu_text_coupon_commission_fixed_order > 0 || (float) $fixed_order_commission <= 0 ) {
+                $fixed_order_commission = $wcu_text_coupon_commission_fixed_order;
+            }
         }
         // Get Default Commission %
         $option_affiliate = wcusage_get_setting_value( 'wcusage_field_affiliate', '0' );
@@ -924,10 +952,10 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         }
                         // Deduct custom percent
                         $deduct_percent = wcusage_get_setting_value( 'wcusage_field_affiliate_deduct_percent', '0' );
-                        $deduct_percent = (100 - $deduct_percent) / 100;
+                        $deduct_percent = (100 - (float) $deduct_percent) / 100;
                         // Get Commission Amount Percentage (Decimal)
                         if ( is_numeric( $option_affiliate ) ) {
-                            $affiliate_commission_amount = $option_affiliate / 100;
+                            $affiliate_commission_amount = (float) $option_affiliate / 100;
                         } else {
                             $affiliate_commission_amount = 0;
                         }
@@ -947,7 +975,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         if ( $product_percent != "" && $product_percent >= 0 && $productpriority || $product_percent > 0 && $option_affiliate == "" ) {
                             // If product priority or product commission set but no other commmission options available.
                             $product_percent = (int) $product_percent;
-                            $product_commission_amount = $product_percent / 100;
+                            $product_commission_amount = (float) $product_percent / 100;
                             if ( $wcusage_show_commission_before_discount ) {
                                 $this_line_total_commission += $this_line_subtotal * $deduct_percent * $product_commission_amount;
                             } else {
@@ -995,9 +1023,9 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         }
                         // Add tax to fixed commission amounts
                         if ( $wcusage_show_tax_fixed ) {
-                            $fixed_product_commission_total_tax = $fixed_product_commission_total * wcusage_get_order_tax_percent( $orderid );
+                            $fixed_product_commission_total_tax = $fixed_product_commission_total * $taxpercent;
                             $fixed_product_commission_total += $fixed_product_commission_total_tax;
-                            $fixed_order_commission_tax = $fixed_order_commission * wcusage_get_order_tax_percent( $orderid );
+                            $fixed_order_commission_tax = $fixed_order_commission * $taxpercent;
                             $fixed_order_commission += $fixed_order_commission_tax;
                         }
                         // Count Items
@@ -1053,7 +1081,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                 // ***** Deduct Custom Discounts Commission ***** //
                 $total_fees = wcusage_get_total_fees( $orderid );
                 if ( is_numeric( $option_affiliate ) ) {
-                    $affiliate_commission_amount = $option_affiliate / 100;
+                    $affiliate_commission_amount = (float) $option_affiliate / 100;
                 } else {
                     $affiliate_commission_amount = 0;
                 }
@@ -1065,7 +1093,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                     $total_fees_add_commission = $fee_total_added * $affiliate_commission_amount;
                     $totalcommission = $totalcommission + $total_fees_add_commission;
                     if ( $wcusage_show_tax ) {
-                        $total_fees_add_tax = $fee_total_added * wcusage_get_order_tax_percent( $orderid );
+                        $total_fees_add_tax = $fee_total_added * $taxpercent;
                         $total_fees_add_tax_commission = $total_fees_add_tax * $affiliate_commission_amount;
                         if ( $total_fees_add_tax_commission > 0 ) {
                             $totalcommission = $totalcommission + $total_fees_add_tax_commission;
@@ -1088,7 +1116,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                 if ( !$wcusage_field_commission_before_discount_custom ) {
                     $total_fees_remove_commission = $total_fees_remove * $affiliate_commission_amount;
                     if ( $wcusage_show_tax ) {
-                        $total_fees_remove_commission_tax = $total_fees_remove_commission * wcusage_get_order_tax_percent( $orderid );
+                        $total_fees_remove_commission_tax = $total_fees_remove_commission * $taxpercent;
                         $total_fees_remove_commission += $total_fees_remove_commission_tax;
                     }
                     $totalcommission = $totalcommission - $total_fees_remove_commission;
@@ -1107,7 +1135,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                 if ( $commission_include_shipping && $order->get_total_shipping() ) {
                     $include_shipping_tax = 0;
                     if ( $wcusage_show_tax ) {
-                        $include_shipping_tax = $order->get_total_shipping() * wcusage_get_order_tax_percent( $orderid );
+                        $include_shipping_tax = $order->get_total_shipping() * $taxpercent;
                     }
                     $included_shipping = $order->get_total_shipping() + $include_shipping_tax;
                     $included_shipping_commission = $included_shipping * $affiliate_commission_amount;
@@ -1115,6 +1143,36 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                     // Update Commission Summary
                     if ( is_array( $commission_summary ) ) {
                         $commission_summary['Shipping']['commission'] = "-" . $included_shipping_commission;
+                    }
+                }
+                // ***** Deduct Store Credit Commission ***** //
+                $store_credit_used = 0;
+                // WebToffee Smart Coupons
+                $wt_store_credit_used = $order->get_meta( 'wt_store_credit_used' );
+                if ( !empty( $wt_store_credit_used ) ) {
+                    if ( is_array( $wt_store_credit_used ) ) {
+                        foreach ( $wt_store_credit_used as $credit ) {
+                            if ( is_numeric( $credit ) ) {
+                                $store_credit_used += $credit;
+                            }
+                        }
+                    } elseif ( is_numeric( $wt_store_credit_used ) ) {
+                        $store_credit_used += $wt_store_credit_used;
+                    }
+                }
+                // Filter for other store credit plugins
+                $store_credit_used = apply_filters( 'wcusage_order_store_credit', $store_credit_used, $order );
+                if ( $store_credit_used > 0 ) {
+                    $store_credit_commission_deduction = $store_credit_used * $affiliate_commission_amount;
+                    $totalcommission = $totalcommission - $store_credit_commission_deduction;
+                    // Update Commission Summary
+                    if ( is_array( $commission_summary ) ) {
+                        $commission_summary['Store Credit']['commission'] = "-" . number_format(
+                            (float) $store_credit_commission_deduction,
+                            4,
+                            '.',
+                            ''
+                        );
                     }
                 }
                 // ***** Currency Convert ***** //
@@ -1148,12 +1206,8 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         if ( $totalcommission || $meta_total_commission ) {
                             if ( $meta_total_commission == "" || !$never_update_commission_meta ) {
                                 if ( $save_order_commission_meta ) {
-                                    $meta_data['wcusage_total_commission'] = number_format(
-                                        (float) $totalcommission,
-                                        2,
-                                        '.',
-                                        ''
-                                    );
+                                    // Store commission with selected rounding mode
+                                    $meta_data['wcusage_total_commission'] = wcusage_round_commission_amount( $totalcommission, 2 );
                                 }
                             }
                         }
@@ -1215,12 +1269,12 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                 $commission_summary = wcusage_order_meta( $orderid, 'wcusage_commission_summary', true );
             }
         }
-        $totalcommission = number_format(
-            (float) $totalcommission,
-            2,
-            '.',
-            ''
-        );
+        // Final rounding for returned commission (pre-currency conversion in this function)
+        $totalcommission = wcusage_round_commission_amount( $totalcommission, 2 );
+        // If less than 0, set to 0
+        if ( $totalcommission < 0 ) {
+            $totalcommission = 0;
+        }
         // Return Values
         $return_array['totalcommission'] = $totalcommission;
         $return_array['fixed_product_commission_total'] = $fixed_product_commission_total;
@@ -1295,6 +1349,11 @@ if ( !function_exists( 'wcusage_get_currency_rate' ) ) {
             if ( $wcusage_field_currency_name == $currency && $wcusage_field_currency_rate ) {
                 $rate = $wcusage_field_currency_rate;
             }
+        }
+        // Always return a valid float rate, default to 1 if not found or invalid
+        $rate = floatval( $rate );
+        if ( $rate <= 0 ) {
+            $rate = 1.0;
         }
         return $rate;
     }
@@ -1471,7 +1530,7 @@ if ( !function_exists( 'wcusage_get_order_tax_percent' ) ) {
             $theordertotal = $order->get_total();
             $theordertotaltax = $order->get_total_tax();
             if ( $theordertotaltax > 0 && $theordertotal > $theordertotaltax ) {
-                $taxpercent = $theordertotaltax / ($theordertotal - $theordertotaltax);
+                $taxpercent = (float) $theordertotaltax / ((float) $theordertotal - (float) $theordertotaltax);
             } else {
                 $taxpercent = 0;
             }
@@ -1525,20 +1584,21 @@ if ( !function_exists( 'wcusage_get_tax_to_remove' ) ) {
     function wcusage_get_tax_to_remove(  $orderid  ) {
         $order = wc_get_order( $orderid );
         $wcusage_show_tax = wcusage_get_setting_value( 'wcusage_field_show_tax', '0' );
+        $taxpercent = wcusage_get_order_tax_percent( $orderid );
         if ( $wcusage_show_tax ) {
             // Get Tax To Remove
             $wcusage_field_commission_include_shipping = wcusage_get_setting_value( 'wcusage_field_commission_include_shipping', '0' );
             $shipping_tax = 0;
             if ( !$wcusage_field_commission_include_shipping ) {
                 $shipping = $order->get_total_shipping();
-                $shipping_tax = $shipping * wcusage_get_order_tax_percent( $orderid );
+                $shipping_tax = $shipping * $taxpercent;
             }
             $wcusage_field_commission_include_fees = wcusage_get_setting_value( 'wcusage_field_commission_include_fees', '0' );
             $fees_tax = 0;
             if ( !$wcusage_field_commission_include_fees ) {
                 $total_fees = wcusage_get_total_fees( $orderid );
                 $fee_total_added = $total_fees['fee_total_add'];
-                $fees_tax = $fee_total_added * wcusage_get_order_tax_percent( $orderid );
+                $fees_tax = $fee_total_added * $taxpercent;
             }
             $remove_tax = $shipping_tax + $fees_tax;
         } else {

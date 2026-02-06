@@ -261,9 +261,13 @@ form#product_search_form input {
 		margin-bottom: 5px;
 	}
 
-	.wcu-dash-coupon-area .wcutabcontent .wcuTableRow,
-	.wcu-dash-coupon-area .wcutabcontent .listtheproducts {
+	.wcu-dash-coupon-area .wcutabcontent .wcuTableRow {
 		display: block;
+		margin-bottom: 15px;
+	}
+
+	.wcu-dash-coupon-area .wcutabcontent .listtheproducts {
+		display: table-row-group;
 		margin-bottom: 15px;
 	}
 
@@ -1527,33 +1531,42 @@ form.wcu_payout_button {
 .wcu-tooltip {
 	position: relative;
 	display: inline-block;
-	z-index: 999999;
+	cursor: help;
 }
 
-/* Tooltip text */
-.wcu-tooltip .wcu-tooltiptext {
+.wcu-tooltip .wcu-tooltip-text {
 	visibility: hidden;
-	opacity: 0;
-	width: max-content;
-	min-width: 200px;
-	max-width: 300px;
-	background-color: black;
+	width: 250px;
+	background-color: #333;
 	color: #fff;
-	text-align: left;
-	padding: 5px 10px;
-	border-radius: 6px;
-	position: absolute !important;
-	z-index: 999999 !important;
-	top: calc(100% + 5px);
-	left: 0;
+	text-align: center;
+	border-radius: 4px;
+	padding: 8px 10px;
+	position: absolute;
+	z-index: 99999;
+	bottom: 140%;
+	left: 50%;
+	transform: translateX(-50%);
+	opacity: 0;
 	transition: opacity 0.3s;
-	word-wrap: break-word;
-	white-space: normal;
-	pointer-events: none;
+	font-size: 12px;
+	line-height: 1.4;
+	font-weight: normal;
+	box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* Show the tooltip text when you mouse over the tooltip container */
-.wcu-tooltip:hover .wcu-tooltiptext {
+.wcu-tooltip .wcu-tooltip-text::after {
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	margin-left: -5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: #333 transparent transparent transparent;
+}
+
+.wcu-tooltip:hover .wcu-tooltip-text {
 	visibility: visible;
 	opacity: 1;
 }

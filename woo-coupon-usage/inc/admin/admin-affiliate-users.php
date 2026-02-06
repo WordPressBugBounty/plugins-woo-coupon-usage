@@ -41,7 +41,8 @@ function wcusage_handle_unlink_affiliate_via_url() {
           if($current_role) {
             $current_page = add_query_arg('role', $current_role, $current_page);
           }
-          wp_redirect($current_page);
+          wp_safe_redirect($current_page);
+          exit;
       } else {
           wp_die('Invalid coupon ID.');
       }

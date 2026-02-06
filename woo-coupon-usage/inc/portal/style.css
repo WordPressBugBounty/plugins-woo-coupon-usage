@@ -153,10 +153,6 @@ textarea {
     overflow-wrap: break-word;
 }
 
-.portal-tablink:hover, .portal-tabcontent.active {
-    border: none;
-}
-
 .portal-tablink i {
     width: 10px;
     margin-right: 10px;
@@ -409,7 +405,13 @@ textarea {
     line-height: 18px;
 }
 .registration-form .wcu_form_affiliate_register input, .woocommerce-form-login input {
-    margin-bottom: 10px !important;
+    margin-bottom: 12px !important;
+}
+/* Radio top margin */
+.registration-form .wcu_form_affiliate_register input[type="radio"],
+.woocommerce-form-login input[type="radio"] {
+    margin-bottom: 0px !important;
+    margin-top: 10px !important;
 }
 /* Not on checkboxes */
 body .registration-form .wcu_form_affiliate_register input[type="checkbox"],
@@ -421,8 +423,9 @@ body .woocommerce-form-login input[type="checkbox"] {
     text-align: center;
 }
 
-.woocommerce-form-login p.form-row {
+.affiliate-portal-container .woocommerce-form-login p.form-row {
     margin-top: 0px;
+    margin-bottom: 0px;
 }
 
 .form-row .woocommerce-form__input.woocommerce-form__input-checkbox {
@@ -860,6 +863,11 @@ body,
     color: var(--accent-color); /* Use variable */
 }
 
+/* Mobile sidebar close button (hidden on desktop) */
+.wcu-mobile-menu-close-wrap {
+    display: none;
+}
+
 /* Mobile Menu Styles */
 @media (max-width: 768px) {
     .affiliate-portal-container {
@@ -875,17 +883,19 @@ body,
 
     .sidebar {
         width: 250px; /* Slightly wider on mobile for better touch usability */
+        max-width: 85vw;
         position: fixed;
         top: 0;
-        left: -250px; /* Hidden off-screen by default */
+        left: 0;
         height: 100%;
         z-index: 1000;
-        transform: translateX(0); /* For transition */
+        transform: translateX(-100%); /* Hidden off-screen by default */
         overflow-y: auto; /* Allow scrolling if menu is long */
+        box-sizing: border-box;
     }
 
     .sidebar.active {
-        left: 0; /* Slide in when active */
+        transform: translateX(0); /* Slide in when active */
     }
 
     .content {
@@ -897,21 +907,63 @@ body,
         flex-direction: row; /* Keep items in a row */
         align-items: center;
         justify-content: space-between; /* Space between hamburger, title, and profile */
+        gap: 10px;
+    }
+
+    .content-header.wcu-header-title-long {
+        flex-wrap: wrap;
     }
 
     .welcome-header {
         margin-bottom: 0;
         margin-left: 10px; /* Space after hamburger */
         flex-grow: 1;
+        min-width: 0;
+    }
+
+
+    .welcome-header h1 {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    @media (max-width: 500px) {
+        .content-header.wcu-header-title-long .welcome-header {
+            order: 10;
+            flex: 1 1 100%;
+            margin-left: 0;
+            text-align: center;
+        }
+
+        .content-header.wcu-header-title-long .welcome-header h1,
+        .content-header.wcu-header-title-long .welcome-header select,
+        .content-header.wcu-header-title-long .welcome-header input[type="hidden"] + span {
+            text-align: center;
+        }
+    }
+
+    .welcome-header select,
+    .welcome-header input[type="hidden"] + span {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .profile-dropdown {
         margin-top: 0;
         margin-left: auto; /* Push to the right */
+        flex-shrink: 0;
     }
 
     .dark-mode-toggle {
         margin-right: 10px;
+        flex-shrink: 0;
+    }
+
+    .content-header .hamburger-menu {
+        flex-shrink: 0;
     }
 
     .content-body {
@@ -958,6 +1010,33 @@ body,
 
     .portal-tablink {
         padding: 15px 20px; /* Increase padding for better touch targets */
+    }
+
+    .wcu-mobile-menu-close-wrap {
+        display: block;
+        position: sticky;
+        bottom: 0;
+        padding: 15px 20px;
+        background: inherit;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .wcu-mobile-menu-close {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 17px;
+        line-height: 18px;
+        background: var(--button-bg);
+        color: var(--button-text);
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .wcu-mobile-menu-close:hover,
+    .wcu-mobile-menu-close:focus {
+        background: var(--button-bg-hover);
+        outline: none;
     }
 }
 

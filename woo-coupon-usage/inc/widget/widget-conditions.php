@@ -58,7 +58,7 @@ function wcusage_is_affiliate_page_quick() {
     $page_slug = '';
     if (isset($_SERVER['REQUEST_URI'])) {
         $request_uri = $_SERVER['REQUEST_URI'];
-        $parsed_url = parse_url($request_uri);
+        $parsed_url = wp_parse_url($request_uri);
         $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
         $page_slug = trim($path, '/');
     }
@@ -247,7 +247,7 @@ function wcusage_is_affiliate_page() {
     }
     
     // Check for affiliate registration landing page (legacy check)
-    $wcusage_field_registration_enable = wcusage_get_setting_value('wcusage_field_registration_enable', '0');
+    $wcusage_field_registration_enable = wcusage_get_setting_value('wcusage_field_registration_enable', '1');
     if ($wcusage_field_registration_enable) {
         $wcusage_field_registration_page = wcusage_get_setting_value('wcusage_field_registration_page', '');
         if ($wcusage_field_registration_page && is_page($wcusage_field_registration_page)) {

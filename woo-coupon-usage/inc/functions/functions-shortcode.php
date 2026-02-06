@@ -22,6 +22,19 @@ function wcusage_couponusage(  $atts  ) {
                 return '';
             }
             $has_run_my_shortcode = true;
+            if ( !wp_script_is( 'woo-coupon-usage', 'enqueued' ) ) {
+                if ( wp_script_is( 'woo-coupon-usage', 'registered' ) ) {
+                    wp_enqueue_script( 'woo-coupon-usage' );
+                } else {
+                    wp_enqueue_script(
+                        'woo-coupon-usage',
+                        WCUSAGE_UNIQUE_PLUGIN_URL . 'js/woo-coupon-usage.js',
+                        array('jquery'),
+                        '5.8.0',
+                        false
+                    );
+                }
+            }
             $wcusage_field_show_graphs = wcusage_get_setting_value( 'wcusage_field_show_graphs', 1 );
             ?>
 
@@ -30,11 +43,6 @@ function wcusage_couponusage(  $atts  ) {
             ?>" crossorigin="anonymous">
 
 		<?php 
-            if ( $wcusage_field_show_graphs ) {
-                ?>
-		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-		<?php 
-            }
             ?>
 
     	<?php 

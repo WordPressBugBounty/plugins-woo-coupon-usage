@@ -13,7 +13,7 @@ function wcusage_affiliate_portal_redirect_registration() {
                 $submit_form = wcusage_post_submit_application(0);
                 $status = $submit_form['status'];
                 // Redirect to the affiliate portal page
-                wp_redirect(home_url('/' . $wcusage_portal_slug . '/?status=' . $status));
+                wp_safe_redirect(home_url('/' . $wcusage_portal_slug . '/?status=' . $status));
                 exit;
             }
         }

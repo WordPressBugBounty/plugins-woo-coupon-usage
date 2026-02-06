@@ -76,7 +76,9 @@ function wcusage_install_register_data(
     $info = sanitize_text_field( $info );
     // Check already submission for user id within the last 10 seconds
     $query = $wpdb->prepare( "SELECT id FROM {$table_name} WHERE userid = %d AND date > DATE_SUB(NOW(), INTERVAL 10 SECOND) LIMIT 1", $userid );
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
     $result = $wpdb->get_results( $query );
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
     if ( !empty( $result ) ) {
         $last_id = $result[0]->id;
         return $last_id;
@@ -107,4 +109,57 @@ function wcusage_install_register_data(
         $couponcode
     );
     return $last_id;
+}
+
+/**
+ * Check if auto-accept should apply for this registration.
+ *
+ * If the limiter is enabled, auto-accept will only apply when:
+ * - The user's current role/group matches one selected in settings, OR
+ * - The role/group assigned to the selected registration template matches one selected in settings.
+ *
+ * If no roles/groups are selected, auto-accept is not restricted.
+ */
+function wcusage_registration_auto_accept_allowed(  $user_id, $type_num = ''  ) {
+    $limit_enabled = wcusage_get_setting_value( 'wcusage_field_registration_auto_accept_limit', '0' );
+    if ( !$limit_enabled ) {
+        return true;
+    }
+    $options = get_option( 'wcusage_options' );
+    $selected_roles = array();
+    if ( isset( $options['wcusage_field_registration_auto_accept_roles'] ) && is_array( $options['wcusage_field_registration_auto_accept_roles'] ) ) {
+        foreach ( $options['wcusage_field_registration_auto_accept_roles'] as $role_key => $enabled ) {
+            if ( $enabled ) {
+                $selected_roles[] = $role_key;
+            }
+        }
+    }
+    // If none selected, treat as unrestricted.
+    if ( empty( $selected_roles ) ) {
+        return true;
+    }
+    $user = get_user_by( 'id', $user_id );
+    if ( !$user || !is_array( $user->roles ) ) {
+        return false;
+    }
+    foreach ( $user->roles as $role ) {
+        if ( in_array( $role, $selected_roles, true ) ) {
+            return true;
+        }
+    }
+    // Support: template-assigned roles/groups (added on acceptance), based on the selected template type.
+    $multiple_template = wcusage_get_setting_value( 'wcusage_field_registration_multiple_template', '0' );
+    $template_roles = wcusage_get_setting_value( 'wcusage_field_registration_multiple_template_roles', '0' );
+    if ( $multiple_template && $template_roles ) {
+        $suffix = '';
+        if ( $type_num && $type_num !== '1' ) {
+            $suffix = '_' . $type_num;
+        }
+        $template_role = wcusage_get_setting_value( 'wcusage_field_registration_coupon_template_role' . $suffix, '' );
+        $template_role = sanitize_text_field( $template_role );
+        if ( $template_role && in_array( $template_role, $selected_roles, true ) ) {
+            return true;
+        }
+    }
+    return false;
 }

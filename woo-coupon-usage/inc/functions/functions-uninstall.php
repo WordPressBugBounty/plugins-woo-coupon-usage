@@ -47,23 +47,23 @@ if( !function_exists( 'wcu_fs_uninstall_cleanup' ) ) {
 
       // Delete Register Table
       $table_name1 = $wpdb->prefix . 'wcusage_register';
-      $wpdb->query( "DROP TABLE IF EXISTS " . $table_name1 );
+      $wpdb->query( "DROP TABLE IF EXISTS " . $table_name1 ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
       // Delete Payouts Table
       $table_name2 = $wpdb->prefix . 'wcusage_payouts';
-      $wpdb->query( "DROP TABLE IF EXISTS " . $table_name2 );
+      $wpdb->query( "DROP TABLE IF EXISTS " . $table_name2 ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
       // Delete Campaigns Table
       $table_name3 = $wpdb->prefix . 'wcusage_campaigns';
-      $wpdb->query( "DROP TABLE IF EXISTS " . $table_name3 );
+      $wpdb->query( "DROP TABLE IF EXISTS " . $table_name3 ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
       // Delete Clicks Table
       $table_name4 = $wpdb->prefix . 'wcusage_clicks';
-      $wpdb->query( "DROP TABLE IF EXISTS " . $table_name4 );
+      $wpdb->query( "DROP TABLE IF EXISTS " . $table_name4 ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
       // Delete Direct Links Table
       $table_name5 = $wpdb->prefix . 'wcusage_directlinks';
-      $wpdb->query( "DROP TABLE IF EXISTS " . $table_name5 );
+      $wpdb->query( "DROP TABLE IF EXISTS " . $table_name5 ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
     }
 

@@ -3,8 +3,16 @@
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
-$wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '0' );
+$wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
 if ( $wcusage_field_registration_enable ) {
+    // Get a sanitized prefill value for the registration form.
+    function wcusage_registration_prefill_value(  $key, $fallback = ''  ) {
+        if ( isset( $GLOBALS['wcusage_registration_prefill'] ) && is_array( $GLOBALS['wcusage_registration_prefill'] ) && array_key_exists( $key, $GLOBALS['wcusage_registration_prefill'] ) ) {
+            return (string) $GLOBALS['wcusage_registration_prefill'][$key];
+        }
+        return (string) $fallback;
+    }
+
     /*
      * WP Head Check Registration Form
      *
@@ -69,6 +77,9 @@ if ( $wcusage_field_registration_enable ) {
             'type'     => '',
         ), $atts );
         ob_start();
+        // Used to hide the form after a successful submit (avoids relying on <style> output that may be sanitized).
+        unset($GLOBALS['wcusage_registration_hide_form']);
+        unset($GLOBALS['wcusage_registration_prefill']);
         $options = get_option( 'wcusage_options' );
         $current_user_id = get_current_user_id();
         $user_info = get_userdata( $current_user_id );
@@ -161,250 +172,266 @@ if ( $wcusage_field_registration_enable ) {
                 }
                 // Display form response if available
                 if ( !empty( $form_response ) ) {
-                    echo '<div class="wcu-registration-response">' . $form_response . '</div>';
+                    echo '<div class="wcu-registration-response">' . wp_kses_post( $form_response ) . '</div>';
                 }
                 // Display widget submission message if available
                 if ( !empty( $widget_submission_message ) ) {
-                    echo '<div class="wcu-registration-response">' . $widget_submission_message . '</div>';
+                    echo '<div class="wcu-registration-response">' . wp_kses_post( $widget_submission_message ) . '</div>';
                 }
-                // Form Title
-                $wcusage_field_registration_form_title = wcusage_get_setting_value( 'wcusage_field_registration_form_title', '' );
-                if ( $wcusage_field_registration_form_title ) {
-                    $form_title = $wcusage_field_registration_form_title;
-                } else {
-                    $form_title = sprintf( esc_html__( 'Register New %s Account', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
-                }
-                ?>
+                $hide_form_after_submit = !empty( $GLOBALS['wcusage_registration_hide_form'] );
+                if ( !$hide_form_after_submit ) {
+                    // Form Title
+                    $wcusage_field_registration_form_title = wcusage_get_setting_value( 'wcusage_field_registration_form_title', '' );
+                    if ( $wcusage_field_registration_form_title ) {
+                        $form_title = $wcusage_field_registration_form_title;
+                    } else {
+                        $form_title = sprintf( esc_html__( 'Register New %s Account', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
+                    }
+                    ?>
 
       <p class="wcusage-register-form-title" style="font-size: 1.2em;"><strong><?php 
-                echo esc_html( $form_title );
-                ?>:</strong></p>
+                    echo esc_html( $form_title );
+                    ?>:</strong></p>
 
       <link rel="stylesheet" href="<?php 
-                echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
-                ?>" crossorigin="anonymous">
+                    echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
+                    ?>" crossorigin="anonymous">
 
       <?php 
-                // Disable form for existing affiliates?
-                $disable_existing = wcusage_get_setting_value( 'wcusage_field_registration_disable_existing', '1' );
-                $is_existing_affiliate = 0;
-                if ( $disable_existing && is_user_logged_in() && $current_user_id ) {
-                    $users_coupons = wcusage_get_users_coupons_ids( $current_user_id );
-                    if ( !empty( $users_coupons ) ) {
-                        $is_existing_affiliate = 1;
+                    // Disable form for existing affiliates?
+                    $disable_existing = wcusage_get_setting_value( 'wcusage_field_registration_disable_existing', '1' );
+                    $is_existing_affiliate = 0;
+                    if ( $disable_existing && is_user_logged_in() && $current_user_id ) {
+                        $users_coupons = wcusage_get_users_coupons_ids( $current_user_id );
+                        if ( !empty( $users_coupons ) ) {
+                            $is_existing_affiliate = 1;
+                        }
                     }
-                }
-                // Check if user already has active application
-                if ( is_user_logged_in() ) {
-                    global $wpdb;
-                    $table_name = $wpdb->prefix . 'wcusage_register';
-                    $existing = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_name} WHERE userid = %d AND status = 'pending' ORDER BY id DESC", $current_user_id ) );
-                } else {
-                    $existing = 0;
-                }
-                // Check if user already has active application
-                if ( empty( $existing ) || wcusage_check_admin_access() && $wcusage_registration_enable_admincan ) {
-                    ?>
-
-        <?php 
-                    // Get template coupon code
-                    $registration_coupon_template = wcusage_get_setting_value( 'wcusage_field_registration_coupon_template', '' );
-                    $wcusage_field_form_style = wcusage_get_setting_value( 'wcusage_field_form_style', '3' );
-                    $wcusage_field_form_style_columns = wcusage_get_setting_value( 'wcusage_field_form_style_columns', '1' );
-                    $name_required = wcusage_get_setting_value( 'wcusage_field_registration_name_required', '0' );
-                    $field_password_confirm = wcusage_get_setting_value( 'wcusage_field_registration_password_confirm', '0' );
-                    $get_template_coupon = wcusage_get_coupon_info( $registration_coupon_template );
-                    $wcusage_registration_page = wcusage_get_setting_value( 'wcusage_registration_page', '' );
-                    $registration_page_url = get_permalink( $wcusage_registration_page );
-                    // If registration page is not set, use home page URL
-                    if ( !$registration_page_url ) {
-                        $registration_page_url = home_url();
+                    // Check if user already has active application
+                    if ( is_user_logged_in() ) {
+                        global $wpdb;
+                        $table_name = $wpdb->prefix . 'wcusage_register';
+                        $existing = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_name} WHERE userid = %d AND status = 'pending' ORDER BY id DESC", $current_user_id ) );
+                        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+                    } else {
+                        $existing = 0;
                     }
-                    ?>
-
-        <?php 
-                    if ( !$is_existing_affiliate || wcusage_check_admin_access() && $wcusage_registration_enable_admincan ) {
+                    // Check if user already has active application
+                    if ( empty( $existing ) || wcusage_check_admin_access() && $wcusage_registration_enable_admincan ) {
                         ?>
+
+        <?php 
+                        // Get template coupon code
+                        $registration_coupon_template = wcusage_get_setting_value( 'wcusage_field_registration_coupon_template', '' );
+                        $wcusage_field_form_style = wcusage_get_setting_value( 'wcusage_field_form_style', '3' );
+                        $wcusage_field_form_style_columns = wcusage_get_setting_value( 'wcusage_field_form_style_columns', '1' );
+                        $name_required = wcusage_get_setting_value( 'wcusage_field_registration_name_required', '0' );
+                        $field_password_confirm = wcusage_get_setting_value( 'wcusage_field_registration_password_confirm', '0' );
+                        $get_template_coupon = wcusage_get_coupon_info( $registration_coupon_template );
+                        $wcusage_registration_page = wcusage_get_setting_value( 'wcusage_registration_page', '' );
+                        $registration_page_url = get_permalink( $wcusage_registration_page );
+                        // If registration page is not set, use home page URL
+                        if ( !$registration_page_url ) {
+                            $registration_page_url = home_url();
+                        }
+                        ?>
+
+        <?php 
+                        if ( !$is_existing_affiliate || wcusage_check_admin_access() && $wcusage_registration_enable_admincan ) {
+                            ?>
 
           <!-- Form -->
           <div class="wcu_form_style_<?php 
-                        echo esc_html( $wcusage_field_form_style );
-                        if ( $wcusage_field_form_style_columns ) {
-                            ?> wcu_form_style_columns<?php 
-                        }
-                        ?>">
+                            echo esc_html( $wcusage_field_form_style );
+                            if ( $wcusage_field_form_style_columns ) {
+                                ?> wcu_form_style_columns<?php 
+                            }
+                            ?>">
           <form method="post" id="wcu_form_affiliate_register" class="wcu_form_affiliate_register" enctype="multipart/form-data"
           <?php 
-                        if ( isset( $atts['type'] ) && $atts['type'] == "widget" ) {
-                            ?>
+                            if ( isset( $atts['type'] ) && $atts['type'] == "widget" ) {
+                                ?>
           action="<?php 
-                            echo esc_url( $registration_page_url );
-                            ?>"
+                                echo esc_url( $registration_page_url );
+                                ?>"
           <?php 
-                        }
-                        ?>>
-
-            <?php 
-                        if ( is_user_logged_in() && (!$wcusage_registration_enable_admincan && wcusage_check_admin_access() || !wcusage_check_admin_access()) ) {
-                            ?>
-
-              <p class="wcu-register-field-col wcu-register-field-col-1"><label for="wcu-input-first-name"><?php 
-                            echo esc_html__( 'First Name', 'woo-coupon-usage' );
-                            ?>:</label>
-                <input type="text" id="wcu-input-first-name" name="wcu-input-first-name" class="input-text
-                form-control" value="<?php 
-                            echo esc_html( $user_info->first_name );
-                            ?>" style="max-width: 300px;"
-                <?php 
-                            if ( $user_info->first_name ) {
-                                ?> disabled<?php 
                             }
                             ?>>
+
+            <?php 
+                            if ( is_user_logged_in() && (!$wcusage_registration_enable_admincan && wcusage_check_admin_access() || !wcusage_check_admin_access()) ) {
+                                ?>
+
+              <p class="wcu-register-field-col wcu-register-field-col-1"><label for="wcu-input-first-name"><?php 
+                                echo esc_html__( 'First Name', 'woo-coupon-usage' );
+                                ?>:</label>
+                <input type="text" id="wcu-input-first-name" name="wcu-input-first-name" class="input-text
+                form-control" value="<?php 
+                                echo esc_html( $user_info->first_name );
+                                ?>" style="max-width: 300px;"
+                <?php 
+                                if ( $user_info->first_name ) {
+                                    ?> disabled<?php 
+                                }
+                                ?>>
               </p>
 
               <p class="wcu-register-field-col wcu-register-field-col-2"><label for="wcu-input-last-name"><?php 
-                            echo esc_html__( 'Last Name', 'woo-coupon-usage' );
-                            ?>:</label>
+                                echo esc_html__( 'Last Name', 'woo-coupon-usage' );
+                                ?>:</label>
                 <input type="text" id="wcu-input-last-name" name="wcu-input-last-name" class="input-text
                 form-control" value="<?php 
-                            echo esc_html( $user_info->last_name );
-                            ?>" style="max-width: 300px;"
+                                echo esc_html( $user_info->last_name );
+                                ?>" style="max-width: 300px;"
                 <?php 
-                            if ( $user_info->last_name ) {
-                                ?> disabled<?php 
-                            }
-                            ?>>
+                                if ( $user_info->last_name ) {
+                                    ?> disabled<?php 
+                                }
+                                ?>>
               </p>
 
               <p class="wcu-register-field-col-username"><label for="wcu-input-username"><?php 
-                            echo esc_html__( 'Username', 'woo-coupon-usage' );
-                            ?>:</label>
+                                echo esc_html__( 'Username', 'woo-coupon-usage' );
+                                ?>:</label>
                 <input type="text" id="wcu-input-username" name="wcu-input-username" class="input-text form-control" value="<?php 
-                            echo esc_html( $user_info->user_login );
-                            ?>" style="max-width: 300px;" disabled>
+                                echo esc_html( $user_info->user_login );
+                                ?>" style="max-width: 300px;" disabled>
               </p>
 
               <p class="wcu-register-field-col-email"><label for="wcu-input-email"><?php 
-                            echo esc_html__( 'Email Address', 'woo-coupon-usage' );
-                            ?>:</label>
+                                echo esc_html__( 'Email Address', 'woo-coupon-usage' );
+                                ?>:</label>
                 <input type="email" id="wcu-input-email" name="wcu-input-email" class="input-text form-control" value="<?php 
-                            echo esc_html( $user_info->user_email );
-                            ?>" style="max-width: 300px;" disabled>
+                                echo esc_html( $user_info->user_email );
+                                ?>" style="max-width: 300px;" disabled>
               </p>
 
             <?php 
-                        } else {
-                            ?>
+                            } else {
+                                ?>
 
               <p class="wcu-register-field-col wcu-register-field-col-1"><label for="wcu-input-first-name"><?php 
-                            echo esc_html__( 'First Name', 'woo-coupon-usage' );
-                            ?>:<?php 
-                            if ( $name_required ) {
-                                ?>*<?php 
-                            }
-                            ?></label>
-                <input type="text" id="wcu-input-first-name" name="wcu-input-first-name" class="input-text form-control" value="" style="max-width: 300px;" <?php 
-                            if ( $name_required ) {
-                                ?>required<?php 
-                            }
-                            ?>>
+                                echo esc_html__( 'First Name', 'woo-coupon-usage' );
+                                ?>:<?php 
+                                if ( $name_required ) {
+                                    ?>*<?php 
+                                }
+                                ?></label>
+                <input type="text" id="wcu-input-first-name" name="wcu-input-first-name" class="input-text form-control" value="<?php 
+                                echo esc_attr( wcusage_registration_prefill_value( 'firstname' ) );
+                                ?>" style="max-width: 300px;" <?php 
+                                if ( $name_required ) {
+                                    ?>required<?php 
+                                }
+                                ?>>
               </p>
 
               <p class="wcu-register-field-col wcu-register-field-col-2"><label for="wcu-input-last-name"><?php 
-                            echo esc_html__( 'Last Name', 'woo-coupon-usage' );
-                            ?>:<?php 
-                            if ( $name_required ) {
-                                ?>*<?php 
-                            }
-                            ?></label>
-                <input type="text" id="wcu-input-last-name" name="wcu-input-last-name" class="input-text form-control" value="" style="max-width: 300px;" <?php 
-                            if ( $name_required ) {
-                                ?>required<?php 
-                            }
-                            ?>>
+                                echo esc_html__( 'Last Name', 'woo-coupon-usage' );
+                                ?>:<?php 
+                                if ( $name_required ) {
+                                    ?>*<?php 
+                                }
+                                ?></label>
+                <input type="text" id="wcu-input-last-name" name="wcu-input-last-name" class="input-text form-control" value="<?php 
+                                echo esc_attr( wcusage_registration_prefill_value( 'lastname' ) );
+                                ?>" style="max-width: 300px;" <?php 
+                                if ( $name_required ) {
+                                    ?>required<?php 
+                                }
+                                ?>>
               </p>
 
               <?php 
-                            if ( !$wcusage_field_registration_emailusername ) {
-                                ?>
+                                if ( !$wcusage_field_registration_emailusername ) {
+                                    ?>
               <p class="wcu-register-field-col-username wcu-register-field-col-1"><label for="wcu-input-username"><?php 
-                                echo esc_html__( 'Username', 'woo-coupon-usage' );
-                                ?>:*</label>
-                <input type="text" id="wcu-input-username" name="wcu-input-username" class="input-text form-control" value="" style="max-width: 300px;" required>
+                                    echo esc_html__( 'Username', 'woo-coupon-usage' );
+                                    ?>:*</label>
+                <input type="text" id="wcu-input-username" name="wcu-input-username" class="input-text form-control" value="<?php 
+                                    echo esc_attr( wcusage_registration_prefill_value( 'username' ) );
+                                    ?>" style="max-width: 300px;" required>
               </p>
               <?php 
-                            }
-                            ?>
+                                }
+                                ?>
 
               <p class="wcu-register-field-col-email <?php 
-                            if ( !$wcusage_field_registration_emailusername ) {
-                                ?>wcu-register-field-col-2<?php 
-                            }
-                            ?>"><label for="wcu-input-email"><?php 
-                            echo esc_html__( 'Email Address', 'woo-coupon-usage' );
-                            ?>:*</label>
-                <input type="email" id="wcu-input-email" name="wcu-input-email" class="input-text form-control" value="" style="max-width: 300px;" required>
+                                if ( !$wcusage_field_registration_emailusername ) {
+                                    ?>wcu-register-field-col-2<?php 
+                                }
+                                ?>"><label for="wcu-input-email"><?php 
+                                echo esc_html__( 'Email Address', 'woo-coupon-usage' );
+                                ?>:*</label>
+                <input type="email" id="wcu-input-email" name="wcu-input-email" class="input-text form-control" value="<?php 
+                                echo esc_attr( wcusage_registration_prefill_value( 'email' ) );
+                                ?>" style="max-width: 300px;" required>
               </p>
 
               <div style="clear: both;"></div>
 
               <p class="wcu-register-field-col-password<?php 
-                            if ( $field_password_confirm ) {
-                                ?> wcu-register-field-col-1<?php 
-                            }
-                            ?>"><label for="wcu-input-password"><?php 
-                            echo esc_html__( 'Password', 'woo-coupon-usage' );
-                            ?>:*</label>
+                                if ( $field_password_confirm ) {
+                                    ?> wcu-register-field-col-1<?php 
+                                }
+                                ?>"><label for="wcu-input-password"><?php 
+                                echo esc_html__( 'Password', 'woo-coupon-usage' );
+                                ?>:*</label>
                 <input type="password" id="wcu-input-password" name="wcu-input-password" class="input-text form-control" value="" style="max-width: 300px; display: inline-block;" required>
               </p>
 
               <?php 
-                            if ( $field_password_confirm ) {
-                                ?>
-              <p class="wcu-register-field-col-password-confirm<?php 
                                 if ( $field_password_confirm ) {
-                                    ?> wcu-register-field-col-2<?php 
-                                }
-                                ?>"><label for="wcu-input-password-confirm"><?php 
-                                echo esc_html__( 'Confirm Password', 'woo-coupon-usage' );
-                                ?>:*</label>
+                                    ?>
+              <p class="wcu-register-field-col-password-confirm<?php 
+                                    if ( $field_password_confirm ) {
+                                        ?> wcu-register-field-col-2<?php 
+                                    }
+                                    ?>"><label for="wcu-input-password-confirm"><?php 
+                                    echo esc_html__( 'Confirm Password', 'woo-coupon-usage' );
+                                    ?>:*</label>
                 <input type="password" id="wcu-input-password-confirm" name="wcu-input-password-confirm" class="input-text form-control" value="" style="max-width: 300px; display: inline-block;" required>
               </p>
               <?php 
-                            }
-                            ?>
+                                }
+                                ?>
 
               <div style="clear: both;"></div>
 
             <?php 
-                        }
-                        ?>
+                            }
+                            ?>
 
             <!-- Preferred Code -->
             <?php 
-                        if ( !$auto_coupon ) {
-                            ?>
+                            if ( !$auto_coupon ) {
+                                ?>
             <?php 
-                            $wcusage_field_registration_coupon_label = wcusage_get_setting_value( 'wcusage_field_registration_coupon_label', esc_html__( 'Preferred Coupon Code', 'woo-coupon-usage' ) );
-                            ?>
+                                $wcusage_field_registration_coupon_label = wcusage_get_setting_value( 'wcusage_field_registration_coupon_label', esc_html__( 'Preferred Coupon Code', 'woo-coupon-usage' ) );
+                                if ( !$wcusage_field_registration_coupon_label ) {
+                                    $wcusage_field_registration_coupon_label = esc_html__( 'Preferred Coupon Code', 'woo-coupon-usage' );
+                                }
+                                ?>
             <p class="wcu-register-field-col"><label for="wcu-input-coupon"><?php 
-                            echo esc_html( $wcusage_field_registration_coupon_label );
-                            ?>:*</label>
-              <input type="text" id="wcu-input-coupon" name="wcu-input-coupon" class="input-text form-control" value="" minlength="3" style="max-width: 300px;" required>
+                                echo esc_html( $wcusage_field_registration_coupon_label );
+                                ?>:*</label>
+              <input type="text" id="wcu-input-coupon" name="wcu-input-coupon" class="input-text form-control" value="<?php 
+                                echo esc_attr( wcusage_registration_prefill_value( 'couponcode' ) );
+                                ?>" minlength="3" style="max-width: 300px;" required>
             </p>
             <?php 
-                        }
-                        ?>
-
-            <?php 
-                        ?>
-
-            <?php 
-                        $wcusage_registration_enable_honeypot = wcusage_get_setting_value( 'wcusage_registration_enable_honeypot', 1 );
-                        ?>
-            <?php 
-                        if ( $wcusage_registration_enable_honeypot ) {
+                            }
                             ?>
+
+            <?php 
+                            ?>
+
+            <?php 
+                            $wcusage_registration_enable_honeypot = wcusage_get_setting_value( 'wcusage_registration_enable_honeypot', 1 );
+                            ?>
+            <?php 
+                            if ( $wcusage_registration_enable_honeypot ) {
+                                ?>
             <!-- HP -->
             <div style="display: none;">
               <label for="wcu-input-hp">Dont put anything here..</label>
@@ -412,135 +439,147 @@ if ( $wcusage_field_registration_enable ) {
               form-control" autocomplete="off" value="">
             </div>
             <?php 
-                        }
-                        ?>
+                            }
+                            ?>
 
             <!-- Terms -->
             <?php 
-                        if ( $wcusage_field_registration_enable_terms ) {
-                            ?>
+                            if ( $wcusage_field_registration_enable_terms ) {
+                                ?>
             <div class="wcu-reg-terms">
               <span style="margin-top: 1px; margin-right: 7px;">
                 <input type="checkbox" name="reg-checkbox" value="check" id="agree" style="margin: 0;" required></span>
               <span style="line-height: 1.5em !important;"><?php 
-                            echo html_entity_decode( $wcusage_field_registration_terms_message );
-                            ?></span>
+                                echo wp_kses_post( html_entity_decode( $wcusage_field_registration_terms_message ) );
+                                ?></span>
             </div>
             <?php 
-                        }
-                        ?>
+                            }
+                            ?>
 
             <div style="clear: both;"></div>
 
             <!-- Recaptcha -->
             <?php 
-                        if ( $enable_captcha == "1" && !empty( $wcusage_registration_recaptcha_key ) && $wcusage_registration_recaptcha_key != "" ) {
-                            ?>
+                            if ( $enable_captcha == "1" && !empty( $wcusage_registration_recaptcha_key ) && $wcusage_registration_recaptcha_key != "" ) {
+                                ?>
             <p>
             <div class="captcha_wrapper">
                 <div class="g-recaptcha" data-sitekey="<?php 
-                            echo esc_attr( $wcusage_registration_recaptcha_key );
-                            ?>"></div>
+                                echo esc_attr( $wcusage_registration_recaptcha_key );
+                                ?>"></div>
             </div>
             </p>
             <?php 
-                        }
-                        ?>
+                            }
+                            ?>
 
             <!-- Turnstile -->
             <?php 
-                        if ( $enable_captcha == "2" && !empty( $wcusage_registration_turnstile_key ) && $wcusage_registration_turnstile_key != "" ) {
-                            ?>
+                            if ( $enable_captcha == "2" && !empty( $wcusage_registration_turnstile_key ) && $wcusage_registration_turnstile_key != "" ) {
+                                ?>
             <p>
             <div class="captcha_wrapper">
                 <div class="cf-turnstile" data-sitekey="<?php 
-                            echo esc_attr( $wcusage_registration_turnstile_key );
-                            ?>"></div>
+                                echo esc_attr( $wcusage_registration_turnstile_key );
+                                ?>"></div>
             </div>
             </p>
             <?php 
-                        }
-                        ?>
+                            }
+                            ?>
 
             <div style="clear: both;"></div>
 
             <?php 
-                        $submit_button_text = wcusage_get_setting_value( 'wcusage_field_registration_submit_button_text', '' );
-                        if ( !$submit_button_text ) {
-                            $submit_button_text = esc_html__( 'Submit Application', 'woo-coupon-usage' );
-                        }
-                        ?>
+                            $submit_button_text = wcusage_get_setting_value( 'wcusage_field_registration_submit_button_text', '' );
+                            if ( !$submit_button_text ) {
+                                $submit_button_text = esc_html__( 'Submit Application', 'woo-coupon-usage' );
+                            }
+                            ?>
 
             <?php 
-                        wp_nonce_field( 'wcusage_verify_submit_registration_form1', 'wcusage_submit_registration_form1' );
-                        ?>
+                            wp_nonce_field( 'wcusage_verify_submit_registration_form1', 'wcusage_submit_registration_form1' );
+                            ?>
             <?php 
-                        wp_nonce_field( 'wcusage_verify_submit_registration_form2', 'wcusage_submit_registration_form2' );
-                        ?>
+                            wp_nonce_field( 'wcusage_verify_submit_registration_form2', 'wcusage_submit_registration_form2' );
+                            ?>
 
             <p class="wcu-register-form-button"><input type="submit" class="woocommerce-button button"  id="wcu-register-button" name="submitaffiliateapplication" value="<?php 
-                        echo esc_attr( $submit_button_text );
-                        ?>"></p>
+                            echo esc_attr( $submit_button_text );
+                            ?>"></p>
 
             <i class="register-spinner fa fa-spinner fa-spin" style="display: none; text-align: center; margin: 10px auto; font-size: 20px; width: 40px;"></i>
 
             <?php 
-                        // If atts type is set to "widget" add an extra hidden field
-                        if ( isset( $atts['type'] ) && $atts['type'] == "widget" ) {
-                            ?>
+                            // If atts type is set to "widget" add an extra hidden field
+                            if ( isset( $atts['type'] ) && $atts['type'] == "widget" ) {
+                                ?>
               <input type="hidden" name="wcu-form-type" value="widget">
               <?php 
-                        }
-                        ?>
+                            }
+                            ?>
 
           </form>
           </div>
 
         <?php 
-                    } else {
-                        $coupon_shortcode_page = wcusage_get_coupon_shortcode_page( '0' );
-                        ?>
+                        } else {
+                            $coupon_shortcode_page = wcusage_get_coupon_shortcode_page( '0' );
+                            ?>
 
           <?php 
-                        if ( !isset( $_POST['submitaffiliateapplication'] ) ) {
-                            ?>
+                            if ( !isset( $_POST['submitaffiliateapplication'] ) ) {
+                                ?>
           <p><?php 
-                            echo sprintf( esc_html__( 'You are already registered as an %s.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
-                            ?></p>
+                                printf( esc_html__( 'You are already registered as an %s.', 'woo-coupon-usage' ), esc_html( strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) ) );
+                                ?></p>
           <?php 
-                        }
-                        ?>
+                            }
+                            ?>
 
           <p style="font-weight: bold;">
             <a href="<?php 
-                        echo esc_url( $coupon_shortcode_page );
-                        ?>" style="text-decoration: none;">
+                            echo esc_url( $coupon_shortcode_page );
+                            ?>" style="text-decoration: none;">
               <button class="wcu-save-settings-button woocommerce-Button button"><?php 
-                        echo sprintf( esc_html__( 'View %s dashboard', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
-                        ?> ></button>
+                            printf( esc_html__( 'View %s dashboard', 'woo-coupon-usage' ), esc_html( strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) ) );
+                            ?> ></button>
             </a>
           </p>
 
           <?php 
+                        }
+                        ?>
+
+      <?php 
+                    } else {
+                        if ( !isset( $_POST['submitaffiliateapplication'] ) ) {
+                            $pending_message_enable = wcusage_get_setting_value( 'wcusage_field_registration_pending_message_enable', '0' );
+                            if ( $pending_message_enable ) {
+                                $pending_default_message = '<p>You have a pending affiliate application.</p><p>We are reviewing your application and will be in touch soon!</p>';
+                                $pending_message = wcusage_get_setting_value( 'wcusage_field_registration_pending_message', $pending_default_message );
+                                echo '<div class="registration-message">' . wp_kses_post( $pending_message ) . '</div>';
+                            } else {
+                                ?>
+
+            <p class="registration-message"><?php 
+                                printf( esc_html__( 'You have a pending %s application.', 'woo-coupon-usage' ), esc_html( strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) ) );
+                                ?></p>
+
+            <p class="registration-message"><?php 
+                                echo esc_html__( 'We are reviewing your application and will be in touch soon!', 'woo-coupon-usage' );
+                                ?></p>
+
+            <?php 
+                            }
+                        }
                     }
                     ?>
 
       <?php 
-                } else {
-                    if ( !isset( $_POST['submitaffiliateapplication'] ) ) {
-                        ?>
-
-          <p class="registration-message"><?php 
-                        echo sprintf( esc_html__( 'You have a pending %s application.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
-                        ?></p>
-
-          <p class="registration-message"><?php 
-                        echo esc_html__( 'We are reviewing your application and will be in touch soon!', 'woo-coupon-usage' );
-                        ?></p>
-
-          <?php 
-                    }
                 }
+                // End hide-after-submit check
                 ?>
 
       </div>
@@ -561,7 +600,7 @@ if ( $wcusage_field_registration_enable ) {
 
     <?php 
         } else {
-            echo "<p>" . sprintf( esc_html__( 'Sorry, you are not currently allowed to apply as an %s.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) ) . "</p>";
+            echo wp_kses_post( "<p>" . sprintf( esc_html__( 'Sorry, you are not currently allowed to apply as an %s.', 'woo-coupon-usage' ), esc_html( strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) ) ) . "</p>" );
         }
         $thecontent = ob_get_contents();
         ob_end_clean();
@@ -613,7 +652,8 @@ function wcusage_create_new_registration(
         );
         // If auto accept is enabled, then instantly accept
         $auto_accept = "";
-        if ( $auto_accept || $accept ) {
+        $do_auto_accept = $auto_accept && wcusage_registration_auto_accept_allowed( $userid, $type );
+        if ( $do_auto_accept || $accept ) {
             $setstatus = wcusage_set_registration_status(
                 'accepted',
                 $getregisterid,
@@ -723,10 +763,18 @@ function wcusage_post_submit_application(  $adminpost  ) {
     $password_confirm = sanitize_text_field( $post_field_values['password_confirm'] );
     $message = sanitize_text_field( $post_field_values['message'] );
     $role = sanitize_text_field( $post_field_values['role'] );
-    // Refills the fields if it failed to submit.
-    $refillfields = "\r\n  <script>\r\n  jQuery( document ).ready(function() {\r\n    jQuery('#wcu-input-username').val('" . esc_html( $username ) . "');\r\n    jQuery('#wcu-input-email').val('" . esc_html( $email ) . "');\r\n    jQuery('#wcu-input-first-name').val('" . esc_html( $firstname ) . "');\r\n    jQuery('#wcu-input-last-name').val('" . esc_html( $lastname ) . "');\r\n    jQuery('#wcu-input-coupon').val('" . esc_html( $couponcode ) . "');\r\n    jQuery('#wcu-input-website').val('" . esc_html( $website ) . "');\r\n    jQuery('#wcu-input-type').val('" . esc_html( $type ) . "');\r\n    jQuery('#wcu-input-promote').val('" . esc_html( $promote ) . "');\r\n    jQuery('#wcu-input-referrer').val('" . esc_html( $referrer ) . "');\r\n  });\r\n  </script>\r\n  ";
-    // Remove the wrapping div since it's now handled in the shortcode
-    // echo "<div class='wcu-registration-response'>";
+    // Store submitted values so the shortcode can re-render the form with values prefilled (no inline <script> needed).
+    $GLOBALS['wcusage_registration_prefill'] = array(
+        'username'   => $username,
+        'email'      => $email,
+        'firstname'  => $firstname,
+        'lastname'   => $lastname,
+        'couponcode' => $couponcode,
+        'website'    => $website,
+        'type'       => $type,
+        'promote'    => $promote,
+        'referrer'   => $referrer,
+    );
     $captcha_checked = false;
     if ( isset( $_SESSION['wcu_captcha_verified'] ) ) {
         $hash_username = wp_hash( $username );
@@ -735,6 +783,9 @@ function wcusage_post_submit_application(  $adminpost  ) {
         }
     }
     $captchaverify = wcusage_registration_form_verify_captcha( $adminpost );
+    if ( isset( $_POST['submitaffiliateapplication'] ) ) {
+        do_action( 'wcusage_hook_registration_form_submitted' );
+    }
     if ( !$enable_captcha || ($captcha_checked || $captchaverify) ) {
         // clear the session
         if ( isset( $_SESSION['wcu_captcha_verified'] ) ) {
@@ -745,6 +796,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
             $field_password_confirm = wcusage_get_setting_value( 'wcusage_field_registration_password_confirm', '0' );
             if ( wcusage_register_verify( $post_field_values ) ) {
                 echo wcusage_register_verify( $post_field_values );
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             } else {
                 // Clear sessions wcu_login_success and wcu_login_username
                 if ( isset( $_SESSION['wcu_login_success'] ) ) {
@@ -756,6 +808,18 @@ function wcusage_post_submit_application(  $adminpost  ) {
                 global $wpdb;
                 $table_name = $wpdb->prefix . 'wcusage_register';
                 $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE couponcode = %s AND status != 'declined'", $couponcode ) );
+                // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+                if ( $count > 0 && function_exists( 'wc_get_coupon_id_by_code' ) ) {
+                    $coupon_post_id = wc_get_coupon_id_by_code( $couponcode );
+                    // If the coupon post no longer exists but previous submissions were accepted, allow re-using the code.
+                    if ( !$coupon_post_id ) {
+                        $accepted_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE couponcode = %s AND status = 'accepted'", $couponcode ) );
+                        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+                        if ( $accepted_count > 0 ) {
+                            $count = 0;
+                        }
+                    }
+                }
                 try {
                     $thiscoupon = new WC_Coupon($couponcode);
                 } catch ( Exception $e ) {
@@ -837,7 +901,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
                     $wcusage_field_registration_submit_type = wcusage_get_setting_value( 'wcusage_field_registration_submit_type', 'message' );
                     $wcusage_field_registration_accept_redirect = wcusage_get_setting_value( 'wcusage_field_registration_accept_redirect', wcusage_get_coupon_shortcode_page_id() );
                     if ( !$adminpost ) {
-                        echo "<style>.wcu_form_affiliate_register, .wcusage-register-form-title { display: none; }</style>";
+                        $GLOBALS['wcusage_registration_hide_form'] = true;
                     }
                     if ( $wcusage_field_registration_submit_type == "redirect" && !$adminpost ) {
                         $redirectpage = get_permalink( $wcusage_field_registration_accept_redirect );
@@ -856,7 +920,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
               <?php 
                         // Do The Page Redirect
                         echo '<meta http-equiv="refresh" content="0; URL=' . esc_html( $redirectpage ) . '" />';
-                        wp_redirect( $redirectpage );
+                        wp_safe_redirect( $redirectpage );
                         exit;
                     } else {
                         if ( !$adminpost ) {
@@ -864,30 +928,32 @@ function wcusage_post_submit_application(  $adminpost  ) {
                                 if ( isset( $options['wcusage_field_registration_accept_message'] ) ) {
                                     $acceptmessage = $options['wcusage_field_registration_accept_message'];
                                 } else {
-                                    $acceptmessage = sprintf( esc_html__( 'Your %s application for the coupon code "{coupon}" has been submitted. Please check your email.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
+                                    $acceptmessage = sprintf( esc_html__( 'Your %s application for the coupon code "{coupon}" has been submitted.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                                 }
                             } else {
                                 $acceptmessage = sprintf( esc_html__( 'Your %s application has been submitted.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                             }
                         } else {
-                            $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '0' );
+                            $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
                             if ( $wcusage_field_registration_enable ) {
-                                $acceptmessage = sprintf( '<div class="notice notice-success is-dismissible" style="margin-top: 20px;"><p>- An %s application has been submitted for user "{username}" for the coupon "{coupon}".</p>', strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
+                                $acceptmessage = '<div class="notice notice-success is-dismissible" style="margin-top: 20px;">';
+                                $acceptmessage .= '<p>- ' . sprintf( esc_html__( 'An %1$s application has been submitted for user "{username}" for the coupon "{coupon}".', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) ) . '</p>';
                                 if ( !$accept ) {
-                                    $acceptmessage .= '<p>- You can view, edit and accept the application below.</p>';
+                                    $acceptmessage .= '<p>- ' . esc_html__( 'You can view, edit and accept the application below.', 'woo-coupon-usage' ) . '</p>';
                                 } else {
-                                    $acceptmessage .= sprintf( '<p>- The %s application was automatically accepted.</p>', strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
+                                    $acceptmessage .= '<p>- ' . sprintf( esc_html__( 'The %1$s application was automatically accepted.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) ) . '</p>';
                                 }
                                 if ( $user_id ) {
-                                    $acceptmessage .= sprintf( "<p>- The %s user did not exist, so a new user account has been created, and details sent to their email.</p>", strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
+                                    $acceptmessage .= '<p>- ' . sprintf( esc_html__( 'The %1$s user did not exist, so a new user account has been created, and details sent to their email.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) ) . '</p>';
                                 }
-                                $acceptmessage .= "</div>";
+                                $acceptmessage .= '</div>';
                             } else {
-                                $acceptmessage = sprintf( '<div class="notice notice-success is-dismissible"><p>- %s user "{username}" was assigned to the new %s coupon "{coupon}".</p>', ucfirst( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
+                                $acceptmessage = '<div class="notice notice-success is-dismissible">';
+                                $acceptmessage .= '<p>- ' . sprintf( esc_html__( '%1$s user "{username}" was assigned to the new %2$s coupon "{coupon}".', 'woo-coupon-usage' ), ucfirst( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) ) . '</p>';
                                 if ( $user_id ) {
-                                    $acceptmessage .= sprintf( "<p>- The %s user did not exist, so a new user account has been created, and details sent to their email.</p>", strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
+                                    $acceptmessage .= '<p>- ' . sprintf( esc_html__( 'The %1$s user did not exist, so a new user account has been created, and details sent to their email.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) ) . '</p>';
                                 }
-                                $acceptmessage .= "</div>";
+                                $acceptmessage .= '</div>';
                             }
                         }
                         $acceptmessage = str_replace( "{username}", $username, $acceptmessage );
@@ -896,12 +962,14 @@ function wcusage_post_submit_application(  $adminpost  ) {
                         echo "<p style='margin-top: 20px;'>" . wp_kses_post( $acceptmessage ) . "</p>";
                     }
                 } else {
-                    echo $refillfields;
-                    echo "<p style='margin-top: 20px; font-weight: bold; color: red;'>" . sprintf( esc_html__( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ), $couponcode ) . "</p>";
+                    echo wp_kses_post( "<p style='margin-top: 20px; font-weight: bold; color: red;'>" . sprintf( esc_html__( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ), esc_html( $couponcode ) ) . "</p>" );
                 }
             }
             // Session
             $_SESSION['wcu_registration_token'] = uniqid();
+            if ( isset( $_SESSION['wcu_registration_user_created'] ) ) {
+                unset($_SESSION['wcu_registration_user_created']);
+            }
         } else {
             if ( isset( $_SESSION["wcu_registration_token"] ) ) {
                 unset($_SESSION["wcu_registration_token"]);
@@ -909,9 +977,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
         }
     } else {
         echo "<p style='color: red; font-weight: bold;'>" . esc_html__( 'Please complete the captcha.', 'woo-coupon-usage' ) . "</p>";
-        echo $refillfields;
     }
-    // echo "</div>";
 }
 
 /*
@@ -973,23 +1039,38 @@ function wcusage_register_verify(  $post_field_values  ) {
     if ( isset( $post_field_values['password_confirm'] ) ) {
         $password_confirm = sanitize_text_field( $post_field_values['password_confirm'] );
     }
-    // Refills the fields if it failed to submit.
-    $refillfields = "\r\n  <script>\r\n  jQuery( document ).ready(function() {\r\n    jQuery('#wcu-input-username').val('" . esc_html( $username ) . "');\r\n    jQuery('#wcu-input-email').val('" . esc_html( $email ) . "');\r\n    jQuery('#wcu-input-first-name').val('" . esc_html( $firstname ) . "');\r\n    jQuery('#wcu-input-last-name').val('" . esc_html( $lastname ) . "');\r\n    jQuery('#wcu-input-coupon').val('" . esc_html( $couponcode ) . "');\r\n    jQuery('#wcu-input-website').val('" . esc_html( $website ) . "');\r\n    jQuery('#wcu-input-type').val('" . esc_html( $type ) . "');\r\n    jQuery('#wcu-input-promote').val('" . esc_html( $promote ) . "');\r\n    jQuery('#wcu-input-referrer').val('" . esc_html( $referrer ) . "');\r\n  });\r\n  </script>\r\n  ";
+    $skip_existing_user = false;
+    $auto_login_enabled = wcusage_get_setting_value( 'wcusage_field_registration_auto_login', '1' );
+    if ( !$auto_login_enabled && isset( $_SESSION['wcu_registration_user_created'] ) ) {
+        $created_hash = sanitize_text_field( wp_unslash( $_SESSION['wcu_registration_user_created'] ) );
+        $current_hash = wp_hash( $username . '|' . $email );
+        if ( $created_hash === $current_hash ) {
+            $skip_existing_user = true;
+        }
+    }
+    // Store submitted values so the form can be re-rendered with values prefilled.
+    $GLOBALS['wcusage_registration_prefill'] = array(
+        'username'   => $username,
+        'email'      => $email,
+        'firstname'  => $firstname,
+        'lastname'   => $lastname,
+        'couponcode' => $couponcode,
+        'website'    => $website,
+        'type'       => $type,
+        'promote'    => $promote,
+        'referrer'   => $referrer,
+    );
     $output = "";
-    if ( !$skip_username && username_exists( $username ) && !is_user_logged_in() && !is_admin() && !isset( $_SESSION['wcu_registration_token'] ) ) {
+    if ( !$skip_username && !$skip_existing_user && username_exists( $username ) && !is_user_logged_in() && !is_admin() && !isset( $_SESSION['wcu_registration_token'] ) ) {
         $output = "<p style='color: red; font-weight: bold;'>" . esc_html__( 'This username already exists. Please try again, or login first.', 'woo-coupon-usage' ) . "</p>";
         $output .= "<p><a href='" . esc_url( get_permalink( get_option( 'woocommerce_myaccount_page_id' ) ) ) . "'>" . esc_html__( 'Login to your account.', 'woo-coupon-usage' ) . "</a></p>";
-        $output .= $refillfields;
-    } elseif ( !$skip_username && email_exists( $email ) && !is_user_logged_in() && !is_admin() && !isset( $_SESSION['wcu_registration_token'] ) ) {
+    } elseif ( !$skip_username && !$skip_existing_user && email_exists( $email ) && !is_user_logged_in() && !is_admin() && !isset( $_SESSION['wcu_registration_token'] ) ) {
         $output = "<p style='color: red; font-weight: bold;'>" . esc_html__( 'This email already exists. Please try again, or login first.', 'woo-coupon-usage' ) . "</p>";
         $output .= "<p><a href='" . esc_url( get_permalink( get_option( 'woocommerce_myaccount_page_id' ) ) ) . "'>" . esc_html__( 'Login to your account.', 'woo-coupon-usage' ) . "</a></p>";
-        $output .= $refillfields;
     } elseif ( !username_exists( $username ) && !$email && is_admin() && !isset( $_SESSION['wcu_registration_token'] ) ) {
         $output = "<p style='color: red; font-weight: bold;'>" . esc_html__( 'This user does not exist, please enter a valid user, or enter an email address to create a new account.', 'woo-coupon-usage' ) . "</p>";
-        $output .= $refillfields;
     } elseif ( $field_password_confirm && $password != $password_confirm ) {
         $output = "<p style='color: red; font-weight: bold;'>" . esc_html__( 'The passwords do not match. Please try again.', 'woo-coupon-usage' ) . "</p>";
-        $output .= $refillfields;
     } else {
         $output = "";
     }
@@ -1023,6 +1104,9 @@ function wcusage_login_after_registration() {
                 $website = $post_field_values['website'];
                 $info = sanitize_text_field( $post_field_values['info'] );
                 if ( !wcusage_register_verify( $post_field_values ) ) {
+                    if ( !wcusage_registration_coupon_available( $couponcode ) ) {
+                        return;
+                    }
                     // Add User
                     $new_affiliate_user = wcusage_add_new_affiliate_user(
                         $username,
@@ -1038,6 +1122,9 @@ function wcusage_login_after_registration() {
                     $new_password = $new_affiliate_user['new_password'];
                     if ( $new_password ) {
                         $password = $new_password;
+                    }
+                    if ( $userid ) {
+                        $_SESSION['wcu_registration_user_created'] = wp_hash( $username . '|' . $email );
                     }
                     // Login
                     $auto_login = wcusage_get_setting_value( 'wcusage_field_registration_auto_login', '1' );
@@ -1243,7 +1330,9 @@ function wcusage_registration_form_post_get_fields(  $adminpost = 0  ) {
         $couponcode = "";
     }
     if ( $couponcode == "" ) {
-        $couponcode = wcusage_generate_auto_coupon( $username );
+        $first_name_for_coupon = ( isset( $firstname ) ? $firstname : '' );
+        $last_name_for_coupon = ( isset( $lastname ) ? $lastname : '' );
+        $couponcode = wcusage_generate_auto_coupon( $username, $first_name_for_coupon, $last_name_for_coupon );
     }
     $info = json_encode( $info );
     $return_array = [];
@@ -1319,4 +1408,37 @@ function wcusage_registration_form_verify_captcha(  $adminpost  ) {
         $captchaverify = true;
     }
     return $captchaverify;
+}
+
+/*
+* Check if a coupon code is available for registration
+*
+*/
+function wcusage_registration_coupon_available(  $couponcode  ) {
+    if ( empty( $couponcode ) ) {
+        return false;
+    }
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'wcusage_register';
+    $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE couponcode = %s AND status != 'declined'", $couponcode ) );
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    if ( $count > 0 && function_exists( 'wc_get_coupon_id_by_code' ) ) {
+        $coupon_post_id = wc_get_coupon_id_by_code( $couponcode );
+        if ( !$coupon_post_id ) {
+            $accepted_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE couponcode = %s AND status = 'accepted'", $couponcode ) );
+            // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+            if ( $accepted_count > 0 ) {
+                $count = 0;
+            }
+        }
+    }
+    try {
+        $thiscoupon = new WC_Coupon($couponcode);
+    } catch ( Exception $e ) {
+        $thiscoupon = false;
+    }
+    if ( $count <= 0 && (!$thiscoupon || !$thiscoupon->is_valid()) ) {
+        return true;
+    }
+    return false;
 }

@@ -18,7 +18,7 @@ return;
 <!-- Output Page -->
 <div class="wrap plugin-settings">
 
-	<?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
+	<?php do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
 
 	<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
@@ -40,9 +40,7 @@ return;
 		$days = intval($days);
 		$tablename = $wpdb->prefix . 'wcusage_activity';
 		$date_limit = gmdate('Y-m-d H:i:s', strtotime("-$days days"));
-		$sql = "DELETE FROM `$tablename` WHERE `date` < %s";
-		$prepared_query = $wpdb->prepare($sql, $date_limit);
-		$result = $wpdb->query($prepared_query);
+		$result = $wpdb->query($wpdb->prepare("DELETE FROM `$tablename` WHERE `date` < %s", $date_limit)); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 		echo wp_kses_post("<div><p>Logs older than $days day(s) have been deleted.</p></div>");
 	}
 	$ListTable = new wcusage_activity_List_Table();

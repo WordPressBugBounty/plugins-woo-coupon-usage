@@ -146,7 +146,7 @@ function wcusage_setup_page_html() {
 
           <form action="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_setup&step=2" method="post">
 
-            <?php echo do_action( 'wcusage_hook_setting_section_dashboard_page' ); ?>
+            <?php do_action( 'wcusage_hook_setting_section_dashboard_page' ); ?>
 
             <hr style="margin: 25px 0;" />
 
@@ -181,10 +181,10 @@ function wcusage_setup_page_html() {
             <hr style="margin: 20px 0;">
 
             <!-- Enable Affiliate Registration Features -->
-            <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable', 1, esc_html__( 'Enable Affiliate Registration Features', 'woo-coupon-usage' ), '0px'); ?>
+            <?php wcusage_setting_toggle_option('wcusage_field_registration_enable', 1, esc_html__( 'Enable Affiliate Registration Features', 'woo-coupon-usage' ), '0px'); ?>
             <i><?php echo esc_html__( 'This will enable the coupon affiliate registration features on your website.', 'woo-coupon-usage' ); ?></i><br/>
 
-            <?php echo wcusage_setting_toggle('.wcusage_field_registration_enable', '.wcu-field-section-registration-settings'); // Show or Hide ?>
+            <?php wcusage_setting_toggle('.wcusage_field_registration_enable', '.wcu-field-section-registration-settings'); // Show or Hide ?>
             <span class="wcu-field-section-registration-settings">
 
               <br/>
@@ -214,18 +214,46 @@ function wcusage_setup_page_html() {
 
               <script>
               jQuery(document).ready(function($) {
-                $('#wcusage_field_registration_coupon_template').prop('required', true);
+                // Only require the template coupon if registration system is enabled.
+                function wcusage_toggle_template_required() {
+                  var $template = $('#wcusage_field_registration_coupon_template');
+                  // Attempt to find the registration enable toggle by id or name.
+                  var $enable = $('#wcusage_field_registration_enable');
+                  if(!$enable.length) {
+                    $enable = $("[name='wcusage_options[wcusage_field_registration_enable]']");
+                  }
+                  var $submit = $('#submit_step2');
+                  var enabled = false;
+                  if($enable.length) {
+                    if($enable.is(':checkbox')) {
+                      enabled = $enable.is(':checked');
+                    } else {
+                      enabled = ($enable.val() === '1');
+                    }
+                  }
+                  if(enabled) {
+                    $template.prop('required', true);
+                    $template.trigger('change');
+                  } else {
+                    $template.prop('required', false);
+                    if($submit.length) {
+                      $submit.prop('disabled', false).removeClass('disabled');
+                    }
+                  }
+                }
+                wcusage_toggle_template_required();
+                jQuery(document).on('change', '#wcusage_field_registration_enable, [name="wcusage_options[wcusage_field_registration_enable]"]', wcusage_toggle_template_required);
               });
               </script>
 
               <br/>
 
-              <?php echo do_action( 'wcusage_hook_setting_section_registration_page' ); ?>
+              <?php do_action( 'wcusage_hook_setting_section_registration_page' ); ?>
 
               <br/><hr style="margin: 15px 0 25px 0;"/>
 
               <!-- Template Coupon -->
-              <?php echo do_action( 'wcusage_hook_setting_section_registration_template' ); ?>
+              <?php do_action( 'wcusage_hook_setting_section_registration_template' ); ?>
 
               <br/><hr style="margin: 15px 0 25px 0;"/>
 
@@ -252,7 +280,7 @@ function wcusage_setup_page_html() {
 
             <!-- Commission -->
             <h3><span class="dashicons dashicons-admin-generic"></span> <?php echo esc_html__( 'Commission Amounts', 'woo-coupon-usage' ); ?>:</h3>
-            <?php echo do_action( 'wcusage_hook_setting_section_commission_amounts' ); ?>
+            <?php do_action( 'wcusage_hook_setting_section_commission_amounts' ); ?>
 
             <hr style="margin: 25px 0 25px 0;" />
 
@@ -271,7 +299,7 @@ function wcusage_setup_page_html() {
             <!-- Tax -->
             <h3><span class="dashicons dashicons-admin-generic"></span> <?php echo esc_html__( 'Tax Settings', 'woo-coupon-usage' ); ?>:</h3>
 
-            <?php echo do_action( 'wcusage_hook_setting_section_tax' ); ?>
+            <?php do_action( 'wcusage_hook_setting_section_tax' ); ?>
 
             <br/>
 
@@ -295,7 +323,7 @@ function wcusage_setup_page_html() {
             
             <p style="margin-bottom: 20px;"><?php echo esc_html__('Finally, we need to setup the email notifications for your affiliate program.', 'woo-coupon-usage'); ?></p>
 
-            <?php echo do_action('wcusage_hook_setting_section_email_free'); ?>
+            <?php do_action('wcusage_hook_setting_section_email_free'); ?>
 
             <p>
               <?php echo esc_html__('Note: You can customise some other email notifications on the plugin settings page later if needed.', 'woo-coupon-usage'); ?>
@@ -375,7 +403,7 @@ function wcusage_setup_page_html() {
 
             <div class="step-box">
               <h3><span class="step-number">2)</span> Manage Coupons</h3>
-              <p><?php echo sprintf( wp_kses_post( __('View and manage all of your affiliate coupons, and access links to each of their affiliate dashboards on the <a href="%s" target="_blank">coupons list</a> page.', 'woo-coupon-usage') ), admin_url("admin.php?page=wcusage_coupons")); ?></p>
+              <p><?php echo sprintf( wp_kses_post( __('View and manage all of your affiliate coupons, and access links to each of their affiliate dashboards on the <a href="%s" target="_blank">coupons list</a> page.', 'woo-coupon-usage') ), esc_url(admin_url("admin.php?page=wcusage_coupons"))); ?></p>
             </div>
 
             <?php
@@ -393,22 +421,22 @@ function wcusage_setup_page_html() {
               <h3><span class="step-number">3)</span> Template Coupon</h3>
               <?php if($template_id) { ?>
                 <p>
-                  <?php echo sprintf( wp_kses_post( __('You can <a href="%s" target="_blank">edit your template coupon</a> if you want to change the default affiliate coupon settings.', 'woo-coupon-usage') ), admin_url("post.php?post=" . $template_id . "&action=edit")); ?>
-                  <?php echo sprintf( wp_kses_post( __('This is the template coupon used for generating new affiliate coupons when a new affiliate is created.', 'woo-coupon-usage') ), admin_url("admin.php?page=wcusage_coupon_stats&coupon_id=" . $template_id)); ?>
+                  <?php echo sprintf( wp_kses_post( __('You can <a href="%s" target="_blank">edit your template coupon</a> if you want to change the default affiliate coupon settings.', 'woo-coupon-usage') ), esc_url(admin_url("post.php?post=" . $template_id . "&action=edit"))); ?>
+                  <?php echo sprintf( wp_kses_post( __('This is the template coupon used for generating new affiliate coupons when a new affiliate is created.', 'woo-coupon-usage') ), esc_url(admin_url("admin.php?page=wcusage_coupon_stats&coupon_id=" . $template_id))); ?>
                 </p>
               <?php } else { ?>
-                <p><?php echo sprintf( wp_kses_post( __('Don\'t forget to <a href="%s" target="_blank">create your template coupon</a> and set this in the plugin settings! <a href="%s" target="_blank">Learn More</a>.', 'woo-coupon-usage') ), admin_url("post-new.php?post_type=shop_coupon"), 'https://couponaffiliates.com/docs/template-coupon-code/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step'); ?></p>
+                <p><?php echo sprintf( wp_kses_post( __('Don\'t forget to <a href="%s" target="_blank">create your template coupon</a> and set this in the plugin settings! <a href="%s" target="_blank">Learn More</a>.', 'woo-coupon-usage') ), esc_url(admin_url("post-new.php?post_type=shop_coupon")), 'https://couponaffiliates.com/docs/template-coupon-code/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step'); ?></p>
               <?php } ?>
             </div>
 
             <div class="step-box">
               <h3><span class="step-number">4)</span> Add New Affiliates</h3>
-              <p><?php echo sprintf( wp_kses_post( __('Ready to get started? Create your first affiliate user on the <a href="%s" target="_blank">affiliates page</a> or share your <a href="%s" target="_blank">affiliate registration form</a> with people to signup. Any new affiliate registrations will auto-create their new coupon code.', 'woo-coupon-usage') ), admin_url("admin.php?page=wcusage_affiliates"), esc_url(get_permalink($registrationpage)) ); ?></p>
+              <p><?php echo sprintf( wp_kses_post( __('Ready to get started? Create your first affiliate user on the <a href="%s" target="_blank">affiliates page</a> or share your <a href="%s" target="_blank">affiliate registration form</a> with people to signup. Any new affiliate registrations will auto-create their new coupon code.', 'woo-coupon-usage') ), esc_url(admin_url("admin.php?page=wcusage_affiliates")), esc_url(get_permalink($registrationpage)) ); ?></p>
             </div>
 
             <div class="step-box">
               <h3><span class="step-number">5)</span> Explore PRO Features</h3>
-              <p><?php echo sprintf( wp_kses_post( __('For advanced features like automated payouts, multi-level affiliates, dynamic creatives, performance bonuses, affiliate groups, email reports, and more, visit the <a href="%s" target="_blank">PRO modules section</a>.', 'woo-coupon-usage') ), admin_url('admin.php?page=wcusage_settings&section=tab-pro-details')); ?></p>
+              <p><?php echo sprintf( wp_kses_post( __('For advanced features like automated payouts, multi-level affiliates, dynamic creatives, performance bonuses, affiliate groups, email reports, and more, visit the <a href="%s" target="_blank">PRO modules section</a>.', 'woo-coupon-usage') ), esc_url(admin_url('admin.php?page=wcusage_settings&section=tab-pro-details'))); ?></p>
             </div>
 
             <?php if( wcu_fs()->can_use_premium_code() ) { ?>
@@ -416,7 +444,7 @@ function wcusage_setup_page_html() {
             <div class="step-box">
               <h3><span class="step-number">6)</span> Commission Payouts Settings</h3>
               <p>
-                <?php echo sprintf( wp_kses_post( __('Setup your commission payout methods and settings on the <a href="%s" target="_blank">payouts settings page</a>. You can pay your affiliates via PayPal, Stripe, or Store Credit, and even automate payouts to be paid automatically on a scheduled basis.', 'woo-coupon-usage') ), admin_url('admin.php?page=wcusage_settings&section=tab-payouts')); ?>
+                <?php echo sprintf( wp_kses_post( __('Setup your commission payout methods and settings on the <a href="%s" target="_blank">payouts settings page</a>. You can pay your affiliates via PayPal, Stripe, or Store Credit, and even automate payouts to be paid automatically on a scheduled basis.', 'woo-coupon-usage') ), esc_url(admin_url('admin.php?page=wcusage_settings&section=tab-payouts'))); ?>
                 <a href="https://couponaffiliates.com/docs/commission-tracking-and-payouts/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step" target="_blank"><?php echo esc_html__('Learn more about payouts.', 'woo-coupon-usage'); ?></a>
               </p>
             </div>
@@ -424,7 +452,7 @@ function wcusage_setup_page_html() {
 
           </div>
 
-          <p><strong><?php echo sprintf( wp_kses_post( __('Be sure to watch the setup guide video below, for a detailed walkthrough.', 'woo-coupon-usage') ), admin_url('admin.php?page=wcusage_contact')); ?>
+          <p><strong><?php echo sprintf( wp_kses_post( __('Be sure to watch the setup guide video below, for a detailed walkthrough.', 'woo-coupon-usage') ), esc_url(admin_url('admin.php?page=wcusage_contact'))); ?>
           <?php echo wp_kses_post(__('Need help?', 'woo-coupon-usage')); ?> <?php if ( wcu_fs()->can_use_premium_code() ) { ?><a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage-contact" target="_blank"><?php } else { ?><a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank" style="text-decoration: none;"><?php } ?><?php echo esc_html__('Create a new support ticket', 'woo-coupon-usage'); ?></a>.</strong><br/></p>
 
           <br/>
@@ -449,8 +477,8 @@ function wcusage_setup_page_html() {
 
           <br/>
 
-          <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/709270929?h=9ad67fcaad&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Coupon Affiliates - Setup Guide 2 - Short Version"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
-
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/64Sub5pKf7k?si=oS-OgpSonXAflh8p" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          
           <br/>
 
           <p style="margin: 0 0 10px 0;"><a href="https://couponaffiliates.com/docs/setup-guide-free/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step" target="_blank" style="text-decoration: none;"><?php echo esc_html__('Open setup guide in new tab', 'woo-coupon-usage'); ?> <i class="fa-solid fa-arrow-up-right-from-square"></i></a></p>
@@ -487,7 +515,7 @@ function wcusage_setup_page_html() {
               array(
                   'id' => 'registration',
                   'question' => __('How do I create affiliate users?', 'woo-coupon-usage'),
-                  'answer' => sprintf(__('You can manually create an affiliate by <a href="%s" target="_blank">clicking here</a>.<br/><br/>You can add either an existing or new user. Alternatively, you can also link users to your <a href="%s" target="_blank">affiliate registration page</a> to submit an affiliate application. When an affiliate user is added, this will automatically create the affiliate coupon, assign the user to it, and send them a link to the affiliate dashboard. <a href="%s" target="_blank">Learn more about affiliate registration.</a>', 'woo-coupon-usage'), admin_url('admin.php?page=wcusage_add_affiliate'), get_permalink($registrationpage), 'https://couponaffiliates.com/docs/affiliate-registration/'),
+                  'answer' => sprintf(__('You can manually create an affiliate by <a href="%s" target="_blank">clicking here</a>.<br/><br/>You can add either an existing or new user. Alternatively, you can also link users to your <a href="%s" target="_blank">affiliate registration page</a> to submit an affiliate application. When an affiliate user is added, this will automatically create the affiliate coupon, assign the user to it, and send them a link to the affiliate dashboard. <a href="%s" target="_blank">Learn more about affiliate registration.</a>', 'woo-coupon-usage'), esc_url(admin_url('admin.php?page=wcusage_add_affiliate')), get_permalink($registrationpage), 'https://couponaffiliates.com/docs/affiliate-registration/'),
               ),
               array(
                   'id' => 'payouts',
@@ -497,8 +525,8 @@ function wcusage_setup_page_html() {
               ),
               array(
                   'question' => __('How are referral URLs generated?', 'woo-coupon-usage'),
-                  'answer' => __('Referral URLs can be easily generated by the affiliate (or you) on the coupon affiliate dashboard. They can customise the link, and if enabled, also generate short URLs, QR codes, campaigns, and more.')
-                  . '<br/><br/>' . __('By default, the referral URLs will automatically apply the affiliates coupon code to the customers cart when clicked. The affiliate can view their referral link clicks and conversions on the affiliate dashboard.')
+                  'answer' => __('Referral URLs can be easily generated by the affiliate (or you) on the coupon affiliate dashboard. They can customise the link, and if enabled, also generate short URLs, QR codes, campaigns, and more.', 'woo-coupon-usage')
+                  . '<br/><br/>' . __('By default, the referral URLs will automatically apply the affiliates coupon code to the customers cart when clicked. The affiliate can view their referral link clicks and conversions on the affiliate dashboard.', 'woo-coupon-usage')
                   . '<br/><br/>' . sprintf(__('If needed, you can <a href="%s" target="_blank">make the link alone track referrals</a> without requiring the affiliates coupon to be applied, ensuring affiliates receive credit for every sale referred.', 'woo-coupon-usage'), 'https://couponaffiliates.com/docs/tracking-conversions-via-referral-url-without-coupons/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step')
                   . '<br/><br/>' . sprintf(__('<a href="%s" target="_blank">Learn more about referral URLs.</a>', 'woo-coupon-usage'), 'https://couponaffiliates.com/docs/referral-urls/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step'),
               ),
@@ -508,7 +536,7 @@ function wcusage_setup_page_html() {
               ),
               array(
                   'question' => __('Can I view the dashboard for each of my affiliates?', 'woo-coupon-usage'),
-                  'answer' => sprintf(__('Yes, you can view the dashboard for each of your affiliates\' coupons by going to the <a href="%s" target="_blank">coupons page</a> and click the "Dashboard" link.', 'woo-coupon-usage'), admin_url("admin.php?page=wcusage_coupons")),
+                  'answer' => sprintf(__('Yes, you can view the dashboard for each of your affiliates\' coupons by going to the <a href="%s" target="_blank">coupons page</a> and click the "Dashboard" link.', 'woo-coupon-usage'), esc_url(admin_url("admin.php?page=wcusage_coupons"))),
               ),
               array(
                   'question' => __('Where can I get plugin support?', 'woo-coupon-usage'),
@@ -538,7 +566,9 @@ function wcusage_setup_page_html() {
 
                   <?php if(isset($qa['id']) && $qa['id'] == 'payouts') { ?>
                     <br/><br/><strong><?php echo esc_html__('Commission payouts setup guide (PRO):', 'woo-coupon-usage'); ?></strong>
-                    <br/><br/><div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/837140385?badge=0&amp;autopause=0&amp;quality_selector=1&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Commission Payouts"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>                <?php } ?>
+                    <br/><br/>
+                    <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/837140385?badge=0&autopause=0&player_id=0&app_id=58479/embed' ); ?>
+                  <?php } ?>
                   <?php } ?>
 
               </div>
@@ -596,13 +626,13 @@ function wcusage_setup_page_html() {
               <?php
               // Black Friday Deal
               $todayDate = strtotime('now');
-              $dealDateBegin = strtotime('15-11-2023');
-              $dealDateEnd = strtotime('30-11-2023');
+              $dealDateBegin = strtotime('15-11-2025');
+              $dealDateEnd = strtotime('30-11-2025');
               if ($todayDate >= $dealDateBegin && $todayDate <= $dealDateEnd) { $specialsale = true; } else { $specialsale = false; }
               ?>
               <?php if($specialsale) { ?>
                 <br/><br/>
-                <strong style="color: #ce1a1a; font-size: 14px;"><span class="fas fa-star fa-spin"></span> Black Friday Sale! 30% off with code: BF2024</strong>
+                <strong style="color: #ce1a1a; font-size: 14px;"><span class="fas fa-star fa-spin"></span> Black Friday Sale! 30% off with code: BF2025</strong>
               <?php } ?>
 
             <?php } ?>

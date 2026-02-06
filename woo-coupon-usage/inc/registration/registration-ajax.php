@@ -52,6 +52,7 @@ function wcusage_ajax_submit_registration() {
         }
     }
     $info = json_encode( $info );
+    do_action( 'wcusage_hook_registration_form_submitted' );
     // Assume password confirmation is optional based on a setting (adjust as needed)
     $field_password_confirm = wcusage_get_setting_value( 'wcusage_field_registration_password_confirm', '0' );
     // Perform validations
@@ -133,8 +134,16 @@ function wcusage_ajax_submit_registration() {
         ) );
         error_log( 'CA: Failed to store registration data for user ID: ' . $userid );
     }
+    // Determine whether this submission should be auto-accepted.
+    $wcusage_field_registration_auto_accept = wcusage_get_setting_value( 'wcusage_field_registration_auto_accept', '0' );
+    $do_auto_accept = false;
+    if ( $wcusage_field_registration_auto_accept ) {
+        $do_auto_accept = wcusage_registration_auto_accept_allowed( $userid, $type );
+    }
     // Send notification emails
-    wcusage_email_affiliate_register( $email, $couponcode, $firstname );
+    if ( !$do_auto_accept ) {
+        wcusage_email_affiliate_register( $email, $couponcode, $firstname );
+    }
     wcusage_email_admin_affiliate_register(
         $username,
         $couponcode,
@@ -144,6 +153,36 @@ function wcusage_ajax_submit_registration() {
         $type,
         $info
     );
+    // Auto-accept (creates coupon instantly) if enabled and allowed.
+    if ( $do_auto_accept ) {
+        wcusage_set_registration_status(
+            'accepted',
+            $getregisterid,
+            $userid,
+            $couponcode,
+            '',
+            $type
+        );
+        // Custom Action
+        do_action(
+            'wcusage_hook_registration_accepted',
+            $userid,
+            $couponcode,
+            $type
+        );
+        // Update MLA invite
+        $get_user = get_user_by( 'id', $userid );
+        if ( $get_user && function_exists( 'wcusage_install_mlainvite_data' ) ) {
+            wcusage_install_mlainvite_data(
+                '',
+                $get_user->user_email,
+                'accepted',
+                1
+            );
+        }
+        // Set affiliate role
+        wcusage_set_registration_role( $userid );
+    }
     // Auto-login process if the user is newly created
     if ( !is_user_logged_in() && isset( $new_affiliate_user ) ) {
         wp_set_current_user( $userid );
@@ -151,24 +190,32 @@ function wcusage_ajax_submit_registration() {
         $current_user = wp_get_current_user();
         do_action( 'wp_login', $username, $current_user );
     }
-    // Return a success response
-    $wcusage_field_registration_auto_accept = wcusage_get_setting_value( 'wcusage_field_registration_auto_accept', '0' );
-    $coupon_shortcode_page = wcusage_get_coupon_shortcode_page( '0' );
-    if ( !$wcusage_field_registration_auto_accept ) {
+    // Success response (match non-AJAX "Form Submission" settings)
+    $wcusage_field_registration_submit_type = wcusage_get_setting_value( 'wcusage_field_registration_submit_type', 'message' );
+    if ( $wcusage_field_registration_submit_type === 'redirect' ) {
+        $wcusage_field_registration_accept_redirect = wcusage_get_setting_value( 'wcusage_field_registration_accept_redirect', wcusage_get_coupon_shortcode_page_id() );
+        $redirect_url = get_permalink( $wcusage_field_registration_accept_redirect );
         wp_send_json_success( array(
-            'message' => '<p class="registration-message">' . esc_html__( 'Your application has been submitted successfully.', 'woo-coupon-usage' ) . '</p>
-        <p class="registration-message">' . esc_html__( 'Please check your email for further instructions.', 'woo-coupon-usage' ) . '</p>',
-        ) );
-    } else {
-        wp_send_json_success( array(
-            'message' => '<p class="registration-message">' . esc_html__( 'Your application has been submitted successfully.', 'woo-coupon-usage' ) . '</p>
-        <p style="font-weight: bold;">
-            <a href="' . esc_url( $coupon_shortcode_page ) . '">
-              <button class="wcu-save-settings-button woocommerce-Button button" style="margin-top: 10px !important;">' . esc_html__( 'View affiliate dashboard', 'woo-coupon-usage' ) . ' <span class="fa fa-arrow-right"></span>' . '</button>
-            </a>
-        </p>',
+            'redirect' => esc_url_raw( $redirect_url ),
         ) );
     }
+    $custom_accept_message = wcusage_get_setting_value( 'wcusage_field_registration_accept_message', '' );
+    if ( !empty( $custom_accept_message ) ) {
+        $acceptmessage = $custom_accept_message;
+    } else {
+        $acceptmessage = sprintf( esc_html__( 'Your %s application for the coupon code "{coupon}" has been submitted.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
+    }
+    $acceptmessage = str_replace( '{username}', $username, $acceptmessage );
+    $acceptmessage = str_replace( '{coupon}', $couponcode, $acceptmessage );
+    $message_html = '<p class="registration-message">' . wp_kses_post( $acceptmessage ) . '</p>';
+    // Preserve existing AJAX UX: if auto-accepted and not redirecting, include a quick dashboard button.
+    if ( $do_auto_accept ) {
+        $coupon_shortcode_page = wcusage_get_coupon_shortcode_page( '0' );
+        $message_html .= '<p style="font-weight: bold;">' . '<a href="' . esc_url( $coupon_shortcode_page ) . '">' . '<button class="wcu-save-settings-button woocommerce-Button button" style="margin-top: 10px !important;">' . esc_html__( 'View affiliate dashboard', 'woo-coupon-usage' ) . ' <span class="fa fa-arrow-right"></span>' . '</button>' . '</a>' . '</p>';
+    }
+    wp_send_json_success( array(
+        'message' => $message_html,
+    ) );
     // Auto-login process if the user is newly created
     if ( !is_user_logged_in() && isset( $new_affiliate_user ) ) {
         wp_set_current_user( $userid );

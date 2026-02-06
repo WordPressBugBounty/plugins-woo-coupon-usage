@@ -5,11 +5,12 @@ if(!defined('ABSPATH')) {
 
 // Register the admin menu page
 function affiliate_page_generator_menu() {
+    $capability = function_exists( 'wcusage_get_admin_menu_capability' ) ? wcusage_get_admin_menu_capability() : 'manage_options';
     add_submenu_page(
         'wcusage_tools',
         __('Affiliate Program - Signup Promo Page Generator', 'woo-coupon-usage'),
         __('Affiliate Program - Signup Promo Page Generator', 'woo-coupon-usage'),
-        'manage_options',
+        $capability,
         'signup-page-generator',
         'affiliate_page_generator_admin_page'
     );
@@ -19,7 +20,7 @@ add_action('admin_menu', 'affiliate_page_generator_menu');
 // Create the admin page content
 function affiliate_page_generator_admin_page() {
     // Check user capabilities
-    if (!current_user_can('manage_options')) {
+    if ( ! wcusage_check_admin_access() ) {
         return;
     }
 
@@ -384,7 +385,7 @@ $page_content = '<!-- wp:group {"layout":{"type":"constrained","contentSize":"12
 
     <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
 
-    <?php echo do_action('wcusage_hook_dashboard_page_header', ''); ?>
+    <?php do_action('wcusage_hook_dashboard_page_header', ''); ?>
 
     <div class="wrap affiliate-page-generator-wrap">
         

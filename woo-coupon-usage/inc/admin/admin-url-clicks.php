@@ -74,7 +74,7 @@ if(isset($_POST['_wpnonce'])) {
 <!-- Output Page -->
 <div class="wrap plugin-settings">
 
-  <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
+  <?php do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
 
 	<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
@@ -120,6 +120,6 @@ if(isset($_POST['_wpnonce'])) {
 function wcusage_delete_click_entry($id) {
   global $wpdb;
   $table_name = $wpdb->prefix . 'wcusage_clicks';
-  $query = $wpdb->prepare("DELETE FROM $table_name WHERE id = %d", $id);
-  return $wpdb->query($query);
+  $query = $wpdb->prepare("DELETE FROM $table_name WHERE id = %d", $id); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+  return $wpdb->query($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 }

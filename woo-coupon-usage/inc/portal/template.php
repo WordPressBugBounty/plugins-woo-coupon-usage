@@ -144,16 +144,29 @@ if ( $postid ) {
     if ( $preview_user_id != get_post_meta( $postid, 'wcu_select_coupon_user', true ) && !$is_mla_parent && !wcusage_check_admin_access( $couponuser ) && !$is_admin_preview ) {
         $registration_page = ( isset( $options['wcusage_registration_page'] ) ? $options['wcusage_registration_page'] : '' );
         if ( $registration_page ) {
-            wp_redirect( get_permalink( $registration_page ) );
+            wp_safe_redirect( get_permalink( $registration_page ) );
             exit;
         }
     }
 }
 // Enqueue necessary styles and scripts
+if ( !wp_script_is( 'woo-coupon-usage', 'enqueued' ) ) {
+    if ( wp_script_is( 'woo-coupon-usage', 'registered' ) ) {
+        wp_enqueue_script( 'woo-coupon-usage' );
+    } else {
+        wp_enqueue_script(
+            'woo-coupon-usage',
+            WCUSAGE_UNIQUE_PLUGIN_URL . 'js/woo-coupon-usage.js',
+            array('jquery'),
+            '5.8.0',
+            false
+        );
+    }
+}
 wp_enqueue_script(
-    'woo-coupon-usage',
+    'wcusage-portal',
     WCUSAGE_UNIQUE_PLUGIN_URL . 'js/portal.js',
-    array('jquery'),
+    array('jquery', 'woo-coupon-usage'),
     '6.3.7',
     false
 );
@@ -169,16 +182,6 @@ wp_enqueue_style(
     array(),
     '6.3.7'
 );
-$wcusage_field_show_graphs = wcusage_get_setting_value( 'wcusage_field_show_graphs', 1 );
-if ( $wcusage_field_show_graphs ) {
-    wp_enqueue_script(
-        'google-charts',
-        'https://www.gstatic.com/charts/loader.js',
-        array(),
-        null,
-        true
-    );
-}
 do_action( 'wcusage_hook_custom_styles' );
 // Enqueue custom scripts and styles for the registration form
 wp_enqueue_script(
@@ -246,6 +249,8 @@ $portal_footer_text = wcusage_get_setting_value( 'wcusage_portal_footer_text', '
 $portal_footer_text = htmlspecialchars_decode( $portal_footer_text );
 // Show login and registration forms
 $register_loggedin = wcusage_get_setting_value( 'wcusage_field_registration_enable_register_loggedin', '1' );
+$wcusage_portal_login_enabled = wcusage_get_setting_value( 'wcusage_field_loginform', '1' );
+$wcusage_portal_registration_enabled = wcusage_get_setting_value( 'wcusage_field_enable_portal_registration', '1' );
 ?>
 
 <!DOCTYPE html>
@@ -275,7 +280,7 @@ if ( !empty( $wcusage_portal_font_family ) ) {
     // Remove "quot" text
     $safe_font_family = str_replace( array("'", '"', 'quot'), '', $safe_font_family );
     if ( !empty( $safe_font_family ) ) {
-        echo '<style id="wcusage-portal-font">:root{--primary-font: ' . $safe_font_family . ';}</style>';
+        echo '<style id="wcusage-portal-font">:root{--primary-font: ' . esc_html( $safe_font_family ) . ';}</style>';
     }
 }
 // Unenqueue any stylesheets from the sites theme
@@ -340,6 +345,14 @@ wcusage_portal_tabs(
             <?php 
 do_action( 'wcusage_portal_hook_sidebar_bottom' );
 ?>
+
+            <div class="wcu-mobile-menu-close-wrap">
+                <button type="button" class="wcu-mobile-menu-close">
+                    <?php 
+echo esc_html__( 'Close Menu', 'woo-coupon-usage' );
+?>
+                </button>
+            </div>
         </div>
 
         <!-- Right Content Area -->
@@ -369,42 +382,61 @@ if ( !$current_user_id ) {
                 <?php 
     do_action( 'wcusage_portal_hook_after_header' );
     ?>
-                <div class="login-registration-container">
-                    <div class="login-form">
-                        <h2 class="wcusage-login-form-title"><?php 
-    esc_html_e( 'Login', 'woo-coupon-usage' );
-    ?></h2>
-                        <?php 
-    if ( function_exists( 'wc_print_notices' ) ) {
-        woocommerce_output_all_notices();
-    }
-    if ( function_exists( 'woocommerce_login_form' ) ) {
-        woocommerce_login_form();
-    }
-    ?>
-                        <?php 
-    do_action( 'wcusage_portal_hook_after_login_form' );
-    ?>
-                    </div>
-                    <?php 
+                <?php 
     $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
     $wcusage_field_registration_enable_logout = wcusage_get_setting_value( 'wcusage_field_registration_enable_logout', '1' );
     $wcusage_field_registration_enable_login = wcusage_get_setting_value( 'wcusage_field_registration_enable_login', '1' );
-    if ( $wcusage_field_registration_enable && $wcusage_field_registration_enable_logout && $wcusage_field_registration_enable_login ) {
+    $wcusage_should_show_registration = $wcusage_portal_registration_enabled && $wcusage_field_registration_enable && $wcusage_field_registration_enable_logout && $wcusage_field_registration_enable_login;
+    if ( $wcusage_portal_login_enabled || $wcusage_should_show_registration ) {
         ?>
-                    <div class="registration-form">
+                <div class="login-registration-container">
+                    <?php 
+        if ( $wcusage_portal_login_enabled ) {
+            ?>
+                    <div class="login-form">
+                        <h2 class="wcusage-login-form-title"><?php 
+            esc_html_e( 'Login', 'woo-coupon-usage' );
+            ?></h2>
                         <?php 
-        // Display couponaffiliates-register shortcode
-        echo do_shortcode( '[couponaffiliates-register]' );
-        ?>
+            if ( function_exists( 'wc_print_notices' ) ) {
+                woocommerce_output_all_notices();
+            }
+            if ( function_exists( 'woocommerce_login_form' ) ) {
+                woocommerce_login_form();
+            }
+            ?>
                         <?php 
-        do_action( 'wcusage_portal_hook_after_registration_form' );
-        ?>
+            do_action( 'wcusage_portal_hook_after_login_form' );
+            ?>
                     </div>
                     <?php 
+        }
+        ?>
+                    <?php 
+        if ( $wcusage_should_show_registration ) {
+            ?>
+                    <div class="registration-form">
+                        <?php 
+            // Display couponaffiliates-register shortcode
+            echo do_shortcode( '[couponaffiliates-register]' );
+            ?>
+                        <?php 
+            do_action( 'wcusage_portal_hook_after_registration_form' );
+            ?>
+                    </div>
+                    <?php 
+        }
+        ?>
+                </div>
+                <?php 
+    } else {
+        ?>
+                    <p><?php 
+        esc_html_e( 'You do not have permission to access the affiliate portal.', 'woo-coupon-usage' );
+        ?></p>
+                <?php 
     }
     ?>
-                </div>
                 <?php 
     if ( $portal_footer_text ) {
         ?>
@@ -540,12 +572,12 @@ if ( !$current_user_id ) {
                         <?php 
     if ( $coupons_total && count( $coupons_total ) > 0 || isset( $_GET['couponid'] ) ) {
         // If multiple coupons, show dropdown with current coupon selected
-        if ( $coupons_total && count( $coupons_total ) > 1 ) {
+        if ( $coupons_total && count( $coupons_total ) > 1 && !isset( $_GET['couponid'] ) ) {
             if ( isset( $_GET['couponid'] ) ) {
                 $wcusage_before_title = wcusage_get_setting_value( 'wcusage_before_title', '' );
                 $wcusage_before_title = "<span class='wcu-coupon-title-prefix'>" . esc_html( $wcusage_before_title ) . "</span>";
                 if ( $wcusage_before_title ) {
-                    echo $wcusage_before_title;
+                    echo wp_kses_post( $wcusage_before_title );
                 }
                 // Dropdown with all coupons, clicking one opens that coupon's dashboard, icon to right
                 echo '<select id="wcu-coupon-select" style="margin-left: 0px; font-size: 24px; width: 250px;
@@ -554,7 +586,7 @@ if ( !$current_user_id ) {
                     $coupon_id = $coupon->ID;
                     $coupon_title = $coupon->post_title;
                     $selected = ( $coupon_title == $coupon_code ? 'selected' : '' );
-                    echo '<option value="' . esc_attr( $coupon_title ) . '" ' . $selected . '>' . esc_html( $coupon_title ) . '</option>';
+                    echo '<option value="' . esc_attr( $coupon_title ) . '" ' . esc_attr( $selected ) . '>' . esc_html( $coupon_title ) . '</option>';
                 }
                 echo '</select>';
                 // Open selected coupon dashboard
@@ -793,7 +825,9 @@ function wcusage_portal_tabs(
     $force_refresh_stats
 ) {
     $options = get_option( 'wcusage_options' );
+    $custom_order = ( isset( $options['wcusage_dashboard_tabs_layout'] ) ? $options['wcusage_dashboard_tabs_layout'] : '' );
     $show_tabs_icons = wcusage_get_setting_value( 'wcusage_field_show_tabs_icons', '1' );
+    $wcusage_field_show_statistics_tab = wcusage_get_setting_value( 'wcusage_field_show_statistics_tab', '1' );
     $wcusage_field_show_order_tab = wcusage_get_setting_value( 'wcusage_field_show_order_tab', '1' );
     $option_coupon_orders = wcusage_get_setting_value( 'wcusage_field_orders', '10' );
     $wcusage_field_urls_enable = wcusage_get_setting_value( 'wcusage_field_urls_enable', '1' );
@@ -814,7 +848,7 @@ function wcusage_portal_tabs(
             'content-id' => 'wcu1',
             'label'      => __( 'Statistics', 'woo-coupon-usage' ),
             'icon'       => 'fas fa-chart-line',
-            'condition'  => true,
+            'condition'  => $wcusage_field_show_statistics_tab,
         ],
         [
             'tab-id'     => 'tab-page-monthly',
@@ -894,25 +928,90 @@ function wcusage_portal_tabs(
                 if ( !$hide && $custom_tab_name ) {
                     $custom_icon = $options['wcusage_field_custom_tabs_icon_' . $i];
                     $custom_icon = ( $custom_icon ? 'fas fa-' . $custom_icon : '' );
-                    $tabs[] = [
-                        'tab-id'     => 'tab-custom-' . $i,
-                        'content-id' => 'wcu0' . $i,
-                        'label'      => $custom_tab_name,
-                        'icon'       => $custom_icon,
-                        'condition'  => true,
-                    ];
+                    $legacy_external = ( isset( $options['wcusage_field_custom_tabs'][$i]['external'] ) ? $options['wcusage_field_custom_tabs'][$i]['external'] : '' );
+                    $custom_external = wcusage_get_setting_value( 'wcusage_field_custom_tabs_external_' . $i, $legacy_external );
+                    $legacy_external_url = ( isset( $options['wcusage_field_custom_tabs'][$i]['external_url'] ) ? $options['wcusage_field_custom_tabs'][$i]['external_url'] : '' );
+                    $custom_external_url = wcusage_get_setting_value( 'wcusage_field_custom_tabs_external_url_' . $i, $legacy_external_url );
+                    // If external + URL valid, mark with special content id 'external'
+                    if ( $custom_external == '1' && $custom_external_url ) {
+                        $tabs[] = [
+                            'tab-id'       => 'tab-custom-' . $i,
+                            'content-id'   => 'external',
+                            'external_url' => esc_url( $custom_external_url ),
+                            'label'        => $custom_tab_name,
+                            'icon'         => $custom_icon,
+                            'condition'    => true,
+                        ];
+                    } else {
+                        $tabs[] = [
+                            'tab-id'     => 'tab-custom-' . $i,
+                            'content-id' => 'wcu0' . $i,
+                            'label'      => $custom_tab_name,
+                            'icon'       => $custom_icon,
+                            'condition'  => true,
+                        ];
+                    }
                 }
             }
         }
     }
-    // Add Back to Site link at very bottom of tabs
-    $tabs = array_merge( $tabs, [[
+    // Add Back to Site link at very bottom (always last regardless of order setting)
+    $back_tab = [
         'tab-id'     => 'tab-page-back',
         'content-id' => 'wcu-back',
         'label'      => __( 'Back to site', 'woo-coupon-usage' ),
         'icon'       => 'fas fa-arrow-left',
         'condition'  => true,
-    ]] );
+    ];
+    // Reorder according to custom order setting shared with dashboard
+    if ( $custom_order ) {
+        $order_keys = array_filter( array_map( 'trim', explode( ',', $custom_order ) ) );
+        $reordered = [];
+        foreach ( $order_keys as $key ) {
+            foreach ( $tabs as $t ) {
+                if ( $t['tab-id'] === $key ) {
+                    $reordered[] = $t;
+                    break;
+                }
+            }
+        }
+        // Append any tabs not captured (new ones)
+        foreach ( $tabs as $t ) {
+            $exists = false;
+            foreach ( $reordered as $rt ) {
+                if ( $rt['tab-id'] === $t['tab-id'] ) {
+                    $exists = true;
+                    break;
+                }
+            }
+            if ( !$exists ) {
+                $reordered[] = $t;
+            }
+        }
+        $tabs = $reordered;
+    }
+    // Finally append back tab
+    $tabs[] = $back_tab;
+    // Filter out tabs disabled via new visibility toggles (wcusage_dashboard_tab_visible_<tab-id>)
+    if ( is_array( $tabs ) ) {
+        foreach ( $tabs as $idx => $t ) {
+            $tid = ( isset( $t['tab-id'] ) ? $t['tab-id'] : $idx );
+            $vis_opt_key = 'wcusage_dashboard_tab_visible_' . $tid;
+            if ( isset( $options[$vis_opt_key] ) && (int) $options[$vis_opt_key] !== 1 ) {
+                unset($tabs[$idx]);
+            }
+        }
+    }
+    // Determine first visible tab id to set active state dynamically
+    $first_visible = '';
+    foreach ( $tabs as $t ) {
+        if ( $t['tab-id'] !== 'tab-page-back' && $t['condition'] ) {
+            $first_visible = $t['tab-id'];
+            break;
+        }
+    }
+    // Track whether we auto-clicked first tab via JS (will inject script after list rendered)
+    $portal_first_tab_id = $first_visible;
     foreach ( $tabs as $tab ) {
         $wcusage_field_tracking_enable = wcusage_get_setting_value( 'wcusage_field_tracking_enable', '1' );
         $wcusage_field_payouts_enable = wcusage_get_setting_value( 'wcusage_field_payouts_enable', '1' );
@@ -945,88 +1044,126 @@ function wcusage_portal_tabs(
             <?php 
         } else {
             if ( $tab['condition'] ) {
-                ?>
-                <button id="<?php 
-                echo esc_attr( $tab['tab-id'] );
-                ?>" class="portal-tablink <?php 
-                if ( $tab['tab-id'] == 'tab-page-stats' ) {
-                    echo 'active';
+                if ( isset( $tab['content-id'] ) && $tab['content-id'] === 'external' && isset( $tab['external_url'] ) ) {
+                    ?>
+                    <a id="<?php 
+                    echo esc_attr( $tab['tab-id'] );
+                    ?>" class="portal-tablink" href="<?php 
+                    echo esc_url( $tab['external_url'] );
+                    ?>" target="_blank" rel="noopener noreferrer" style="background: <?php 
+                    echo esc_attr( $tab_color );
+                    ?>; color: <?php 
+                    echo esc_attr( $tab_font_color );
+                    ?>;">
+                        <?php 
+                    if ( $show_tabs_icons && $tab['icon'] ) {
+                        ?><i class="<?php 
+                        echo esc_attr( $tab['icon'] );
+                        ?> fa-xs"></i><?php 
+                    }
+                    ?>
+                        <?php 
+                    echo esc_html( $tab['label'] );
+                    ?> <span class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;"></span>
+                    </a>
+                <?php 
+                } else {
+                    ?>
+                    <button id="<?php 
+                    echo esc_attr( $tab['tab-id'] );
+                    ?>" class="portal-tablink <?php 
+                    if ( $tab['tab-id'] == $first_visible ) {
+                        echo 'active';
+                    }
+                    ?>"
+                    data-content-id="<?php 
+                    echo esc_attr( $tab['content-id'] );
+                    ?>" onclick="wcusage_portal_open_tab(event, '<?php 
+                    echo esc_attr( $tab['tab-id'] );
+                    ?>', '<?php 
+                    echo esc_attr( $tab['content-id'] );
+                    ?>', '<?php 
+                    echo esc_js( $postid );
+                    ?>', '<?php 
+                    echo esc_js( $coupon_code );
+                    ?>', '<?php 
+                    echo esc_js( $force_refresh_stats );
+                    ?>')" style="background: <?php 
+                    echo esc_attr( $tab_color );
+                    ?>; color: <?php 
+                    echo esc_attr( $tab_font_color );
+                    ?>;">
+                        <?php 
+                    if ( $show_tabs_icons && $tab['icon'] ) {
+                        ?><i class="<?php 
+                        echo esc_attr( $tab['icon'] );
+                        ?> fa-xs"></i><?php 
+                    }
+                    ?>
+                        <?php 
+                    echo esc_html( $tab['label'] );
+                    ?>
+                    </button>
+                <?php 
                 }
-                ?>"
-                data-content-id="<?php 
-                echo esc_attr( $tab['content-id'] );
-                ?>" onclick="wcusage_portal_open_tab(event, '<?php 
-                echo esc_attr( $tab['tab-id'] );
-                ?>', '<?php 
-                echo esc_attr( $tab['content-id'] );
-                ?>', '<?php 
-                echo esc_js( $postid );
-                ?>', '<?php 
-                echo esc_js( $coupon_code );
-                ?>', '<?php 
-                echo esc_js( $force_refresh_stats );
-                ?>')" style="background: <?php 
-                echo esc_attr( $tab_color );
-                ?>; color: <?php 
-                echo esc_attr( $tab_font_color );
-                ?>;">
-                    <?php 
-                if ( $show_tabs_icons && $tab['icon'] ) {
-                    ?><i class="<?php 
-                    echo esc_attr( $tab['icon'] );
-                    ?> fa-xs"></i><?php 
-                }
                 ?>
-                    <?php 
-                echo esc_html( $tab['label'] );
-                ?>
-                </button>
                 <script>
-                    document.getElementById('<?php 
-                echo esc_attr( $tab['tab-id'] );
-                ?>').addEventListener('mouseover', function() {
-                        this.style.background = '<?php 
-                echo esc_attr( $tab_hover_color );
+                (function(){
+                  var el = document.getElementById('<?php 
+                echo esc_js( $tab['tab-id'] );
+                ?>');
+                  if(!el) return;
+                  el.addEventListener('mouseover', function() {
+                      this.style.background = '<?php 
+                echo esc_js( $tab_hover_color );
                 ?>';
-                        this.style.color = '<?php 
-                echo esc_attr( $tab_hover_font_color );
+                      this.style.color = '<?php 
+                echo esc_js( $tab_hover_font_color );
                 ?>';
-                    });
-                    document.getElementById('<?php 
-                echo esc_attr( $tab['tab-id'] );
-                ?>').addEventListener('mouseout', function() {
-                        this.style.background = '<?php 
-                echo esc_attr( $tab_color );
+                  });
+                  el.addEventListener('mouseout', function() {
+                      this.style.background = '<?php 
+                echo esc_js( $tab_color );
                 ?>';
-                        this.style.color = '<?php 
-                echo esc_attr( $tab_font_color );
+                      this.style.color = '<?php 
+                echo esc_js( $tab_font_color );
                 ?>';
-                    });
-                    document.getElementById('<?php 
-                echo esc_attr( $tab['tab-id'] );
-                ?>').addEventListener('click', function() {
-                        this.style.background = '<?php 
-                echo esc_attr( $tab_hover_color );
+                  });
+                  el.addEventListener('click', function() {
+                      this.style.background = '<?php 
+                echo esc_js( $tab_hover_color );
                 ?>';
-                        this.style.color = '<?php 
-                echo esc_attr( $tab_hover_font_color );
+                      this.style.color = '<?php 
+                echo esc_js( $tab_hover_font_color );
                 ?>';
-                        this.classList.add('active');
-                    });
+                      this.classList.add('active');
+                  });
+                })();
                 </script>
                 <style>
                 .portal-tablink.active {
                     background: <?php 
                 echo esc_attr( $tab_hover_color );
-                ?>;
+                ?> !important;
                     color: <?php 
                 echo esc_attr( $tab_hover_font_color );
-                ?>;
+                ?> !important;
                 }
                 </style>
                 <?php 
             }
         }
+    }
+    // JS: ensure first visible tab triggers its click handler (loads content) if not statistics or if order changed
+    if ( $portal_first_tab_id ) {
+        echo '<script>document.addEventListener("DOMContentLoaded",function(){
+        // Delay it by 100ms to ensure DOM ready
+        setTimeout(function(){
+            var el=document.getElementById("' . esc_js( $portal_first_tab_id ) . '");
+            if(el && !el.classList.contains("portal-tab-init")){ el.classList.add("portal-tab-init"); el.click();
+            }
+        }, 100);
+        });</script>';
     }
     do_action( 'wcusage_hook_after_normal_tabs', $wcusage_page_load );
     // Custom Hook

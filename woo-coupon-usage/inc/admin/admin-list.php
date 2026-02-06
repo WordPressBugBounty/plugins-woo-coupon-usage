@@ -11,19 +11,21 @@ function wcusage_woo_customer_order_coupon_column_for_orders( $columns ) {
 
 		$new_columns[$column_key] = $column_label;
 
-		if ( 'expiry_date' === $column_key ) {
-			$new_columns['coupon_affiliate'] = sprintf(esc_html__('%s User', 'woocommerce'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )));
-		}
+    if ( 'expiry_date' === $column_key ) {
+      /* translators: %s: affiliate label. */
+      $new_columns['coupon_affiliate'] = sprintf(esc_html__('%s User', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )));
+    }
 
     if ( wcu_fs()->can_use_premium_code() ) {
-			if ( 'expiry_date' === $column_key ) {
-				$new_columns['coupon_unpaid_commission'] = esc_html__('Unpaid Commission', 'woocommerce');
-			}
+      if ( 'expiry_date' === $column_key ) {
+        $new_columns['coupon_unpaid_commission'] = esc_html__('Unpaid Commission', 'woo-coupon-usage');
+      }
 		}
 
-    if ( 'expiry_date' === $column_key ) {
-        $new_columns['coupon_dash_link'] = sprintf(esc_html__('%s Dashboard', 'woocommerce'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )));
-    }
+  if ( 'expiry_date' === $column_key ) {
+    /* translators: %s: affiliate label. */
+    $new_columns['coupon_dash_link'] = sprintf(esc_html__('%s Dashboard', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )));
+  }
 
     }
     return $new_columns;
@@ -170,15 +172,15 @@ function wcusage_coupons_filter_cpt($views) {
   );
 
   $result = new WP_Query($query);
-  if ( isset($_GET['affiliate']) ) {
-    $class = 'class="current"';
-  } else {
-    $class = '';
-  }
-  $views['missing_related'] = sprintf(__('<a href="%s"'. $class .'>%s Coupons <span class="count">(%d)</span></a>', 'affiliate coupons'),
-  admin_url('edit.php?post_type=shop_coupon&affiliate=1'),
-  wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )),
-  $result->found_posts);
+  $class_attr = isset($_GET['affiliate']) ? ' class="current"' : '';
+  /* translators: 1: coupons admin URL, 2: current class attribute, 3: affiliate label, 4: number of coupons. */
+  $views['missing_related'] = sprintf(
+    __( '<a href="%1$s"%2$s>%3$s Coupons <span class="count">(%4$d)</span></a>', 'woo-coupon-usage' ),
+    admin_url( 'edit.php?post_type=shop_coupon&affiliate=1' ),
+    $class_attr,
+    wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ),
+    $result->found_posts
+  );
 
   return $views;
 

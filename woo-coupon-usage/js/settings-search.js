@@ -45,12 +45,19 @@ jQuery(function($){
 
   // Helper: open any collapsed Show/Hide ancestors for a given element
   function openShowhideAncestors($elem){
+    // Safety check: if this is a heading element, don't open any toggles
+    if($elem.is('h1, h2, h3, h4, h5, h6')){
+      return;
+    }
+    
+    // Only open ancestors that actually contain this element as a child
     var ancestors = $elem.parents().filter(function(){
       var id = this.id;
       if(!id) return false;
       var btnSelector = '#wcu_show_' + id.replace(/^wcu_/, '');
       return jQuery(this).is(':hidden') && jQuery(btnSelector).length > 0;
     });
+    
     jQuery(ancestors.get().reverse()).each(function(){
       var id = this.id;
       var btnSelector = '#wcu_show_' + id.replace(/^wcu_/, '');
@@ -58,7 +65,15 @@ jQuery(function($){
       if($btn.length && jQuery(this).is(':hidden')){
         $btn.trigger('click');
       } else if(jQuery(this).is(':hidden')) {
-        jQuery(this).show();
+        // Try alternative button patterns
+        var altBtnSelector = '#wcu_show_' + id;
+        var $altBtn = jQuery(altBtnSelector);
+        if($altBtn.length){
+          $altBtn.trigger('click');
+        } else {
+          // If no button found but element is hidden, just show it
+          jQuery(this).show();
+        }
       }
     });
   }
@@ -68,16 +83,21 @@ jQuery(function($){
     if(!matches.length){
       $resultsWrap.hide();
       $empty.show();
+      $empty.css('display', 'block');
       return;
     }
     $empty.hide();
+    $empty.css('display', 'none');
     $.each(matches, function(i, m){
       var tabTitle = m.tab ? m.tab.title : 'Other';
       var $li = $('<li/>');
+      var typeLabel = 'Setting';
+      if(m.type === 'heading') typeLabel = 'Section';
+      if(m.type === 'tab') typeLabel = 'Tab';
       var $info = $('<div/>').append(
         $('<div/>', { 'class': 'wcu-search-item-label', text: m.label })
       ).append(
-        $('<div/>', { 'class': 'wcu-search-item-meta', text: tabTitle + ' • ' + (m.type === 'heading' ? 'Section' : ('#' + m.fieldId)) })
+        $('<div/>', { 'class': 'wcu-search-item-meta', text: tabTitle + ' • ' + typeLabel + (m.type !== 'heading' && m.type !== 'tab' ? ' (#' + m.fieldId + ')' : '') })
       );
       var $btn = $('<button/>', { 'class': 'button button-primary wcu-search-jump', text: 'Go to settings' });
       $btn.on('click', function(ev){
@@ -85,72 +105,125 @@ jQuery(function($){
         var $target = $('#'+m.pid);
         if($target.length){
           var $row = $target.closest('.wcusage_row');
-          $('.nav-tab').removeClass('active');
-          if(m.tab && m.tab.$el && m.tab.$el.length){ m.tab.$el.addClass('active'); }
-          $('.wcusage_row').hide();
+          // Get the ID of the closest row, if any
+          var rowId = $row.length ? $row.attr('id') : null;
+
+          // Detect tab from row class and auto-click tab
+          var tabId = null;
+          if($row.length){
+            var classes = ($row.attr('class')||'').split(/\s+/);
+            for(var i=0;i<classes.length;i++){
+              var match = classes[i].match(/^wcusage_row_([a-z0-9_-]+)$/);
+              if(match){
+                tabId = '#tab-' + match[1].replace(/_/g,'-');
+                break;
+              }
+            }
+          }
+          if(tabId && $(tabId).length){
+            $(tabId).trigger('click');
+            $('.wcu-sidebar-link').removeClass('active');
+            // Add .active to the item with ID matching the tab (without #tab-)
+            $(tabId).addClass('active');
+          }
           $row.show();
+
           var $scrollTarget = $target;
 
-          if(m.type === 'heading'){
-            // If we know the linked section, open it and prefer scrolling to it
-            if(m.sectionId){
-              var $section = jQuery('#'+m.sectionId);
-              if($section.length){
-                // Open the section if hidden via its matching show button
-                if($section.is(':hidden')){
-                  var btnSelector = '#wcu_show_' + m.sectionId.replace(/^wcu_/, '');
-                  var $btn = jQuery(btnSelector);
-                  if($btn.length){ $btn.trigger('click'); }
-                }
-                // Open any hidden ancestors too
-                openShowhideAncestors($section);
-                $scrollTarget = $section;
-              }
-            } else {
-              // No explicit section container; still ensure ancestors of heading are visible
-              openShowhideAncestors($target);
-            }
+          if(m.type === 'heading' || m.type === 'tab'){
+            $scrollTarget = $target;
           } else {
-            // For field/option targets, ensure hidden ancestors are opened
             openShowhideAncestors($target);
-          }
-
-          // If the target or chosen section is still hidden due to a parent conditional setting,
-          // find the controlling option (checkbox/toggle) and scroll to that instead.
-          function findConditionalController($elem){
-            var $gatingInput = null;
-            var $gatingP = null;
-            var $r = $elem.closest('.wcusage_row');
-            $elem.parents().each(function(){
-              var cls = this.className || '';
-              var match = cls.match(/wcu-field-section-([a-z0-9_-]+)/);
-              if(match){
-                var key = match[1];
-                var sel = '.wcusage_field_' + key + '_enable';
-                var $ctrl = $r.find(sel).first();
-                if($ctrl.length){
-                  $gatingInput = $ctrl;
-                  $gatingP = $ctrl.closest('p[id$="_p"]');
-                  return false; // break loop
+            var $hiddenParent = $target.closest('div[style*="display:none"], div[style*="display: none"]');
+            if($hiddenParent.length){
+              var parentId = $hiddenParent.attr('id');
+              if(parentId){
+                var $controlBtn = jQuery('#wcu_show_' + parentId.replace(/^wcu_/, ''), 
+                                        '#wcu_show_' + parentId,
+                                        'button[onclick*="wcusage_toggle_settings(\''+parentId+'\')"]',
+                                        'button[onclick*="' + parentId + '"]').first();
+                if($controlBtn.length){
+                  $controlBtn.trigger('click');
                 }
               }
-            });
-            if($gatingInput){ return { $input: $gatingInput, $p: $gatingP }; }
-            return null;
-          }
-
-          if(!$scrollTarget.is(':visible')){
-            var ctrl = findConditionalController($scrollTarget);
-            if(ctrl){
-              $scrollTarget = (ctrl.$p && ctrl.$p.length) ? ctrl.$p : ctrl.$input;
+            }
+            var $tabSettingsParent = $target.closest('div[id^="wcu_tab_settings_"]');
+            if($tabSettingsParent.length && $tabSettingsParent.is(':hidden')){
+              var tabSettingsId = $tabSettingsParent.attr('id');
+              var $tabToggleBtn = jQuery('button[onclick*="wcusage_toggle_settings(\''+tabSettingsId+'\')"]').first();
+              if($tabToggleBtn.length){
+                $tabToggleBtn.trigger('click');
+              }
+            }
+            var $tabItemParent = $target.closest('.wcusage-tab-item');
+            if($tabItemParent.length){
+              var $hiddenSection = $tabItemParent.find('div[id^="wcu_tab_settings_"][style*="display:none"], div[id^="wcu_tab_settings_"][style*="display: none"]').first();
+              if($hiddenSection.length && $target.closest($hiddenSection).length){
+                var sectionId = $hiddenSection.attr('id');
+                var $sectionToggleBtn = $tabItemParent.find('button[onclick*="wcusage_toggle_settings(\''+sectionId+'\')"]').first();
+                if($sectionToggleBtn.length){
+                  $sectionToggleBtn.trigger('click');
+                }
+              }
+            }
+            var $section = $target.closest('div[id], span[class*="wcu-field-section"]');
+            while($section.length && !$target.is(':visible')){
+              var sectionId = $section.attr('id');
+              var sectionClass = $section.attr('class');
+              if(sectionId){
+                var $btn = jQuery('#wcu_show_' + sectionId.replace(/^wcu_/, ''), 
+                                 '#wcu_show_' + sectionId,
+                                 'button[onclick*="wcusage_toggle_settings(\''+sectionId+'\')"]').first();
+                if($btn.length && $section.is(':hidden')){
+                  $btn.trigger('click');
+                  break;
+                }
+              }
+              if(sectionClass && sectionClass.indexOf('wcu-field-section-') !== -1){
+                var match = sectionClass.match(/wcu-field-section-([a-z0-9_-]+)/);
+                if(match){
+                  var key = match[1];
+                  var $enableBtn = jQuery('#wcu_show_' + key, 'button[onclick*="' + key + '"]').first();
+                  if($enableBtn.length){
+                    $enableBtn.trigger('click');
+                    break;
+                  }
+                }
+              }
+              $section = $section.parent().closest('div[id], span[class*="wcu-field-section"]');
+            }
+            if(!$target.is(':visible')){
+              function findConditionalController($elem){
+                var $gatingInput = null;
+                var $gatingP = null;
+                var $r = $elem.closest('.wcusage_row');
+                $elem.parents().each(function(){
+                  var cls = this.className || '';
+                  var match = cls.match(/wcu-field-section-([a-z0-9_-]+)/);
+                  if(match){
+                    var key = match[1];
+                    var sel = '.wcusage_field_' + key + '_enable';
+                    var $ctrl = $r.find(sel).first();
+                    if($ctrl.length){
+                      $gatingInput = $ctrl;
+                      $gatingP = $ctrl.closest('p[id$="_p"]');
+                      return false;
+                    }
+                  }
+                });
+                if($gatingInput){ return { $input: $gatingInput, $p: $gatingP }; }
+                return null;
+              }
+              var ctrl = findConditionalController($target);
+              if(ctrl){
+                $scrollTarget = (ctrl.$p && ctrl.$p.length) ? ctrl.$p : ctrl.$input;
+              }
             }
           }
-
           var offset = $scrollTarget.offset().top - 80;
           jQuery('html, body').animate({ scrollTop: offset }, 250);
           $scrollTarget.addClass('wcu-highlight-jump');
           setTimeout(function(){ $scrollTarget.removeClass('wcu-highlight-jump'); }, 1700);
-          // Close results dropdown after navigating
           $resultsWrap.hide();
           $search.blur();
         }
@@ -184,9 +257,17 @@ jQuery(function($){
     $empty.hide();
     if(!q){ return; }
 
+    // Force a small delay to ensure any dynamic content has loaded
+    setTimeout(function(){
+      performSearch(q);
+    }, 50);
+  }
+
+  function performSearch(q){
     var matches = [];
     $('.wcusage_row p[id$="_p"]').each(function(){
       var $p = $(this);
+      // Do NOT skip hidden rows; allow searching in all tabs
       var pid = $p.attr('id');
       if(!pid){ return; }
       var labelText = '';
@@ -197,7 +278,18 @@ jQuery(function($){
         if($lbl.length){ labelText = $.trim($lbl.text()); }
       }
       if(!labelText){ labelText = $.trim($p.text()); }
-      var hay = labelText.toLowerCase();
+      // Also search in description text (italic text or text after the main label)
+      var fullText = labelText;
+      var $italic = $p.find('i');
+      if($italic.length){
+        $italic.each(function(){
+          var italicText = $.trim($(this).text());
+          if(italicText && fullText.toLowerCase().indexOf(italicText.toLowerCase()) === -1){
+            fullText += ' ' + italicText;
+          }
+        });
+      }
+      var hay = fullText.toLowerCase();
       if(hay.indexOf(q) === -1){ return; }
       var $row = $p.closest('.wcusage_row');
       var rowClass = '';
@@ -212,9 +304,10 @@ jQuery(function($){
       matches.push({ label: labelText, pid: pid, rowClass: rowClass, tab: tabInfo, fieldId: fieldId });
     });
 
-    // Also index section headings (h3) and link to their sections
-    $('.wcusage_row h3').each(function(){
+    // Also index section headings (h1, h2, h3) and link to their sections
+    $('.wcusage_row h1, .wcusage_row h2, .wcusage_row h3').each(function(){
       var $h = $(this);
+      // Do NOT skip hidden rows; allow searching in all tabs
       var textOnly = $.trim($h.clone().children().remove().end().text());
       if(!textOnly) return;
       var hay = textOnly.toLowerCase();
@@ -228,8 +321,8 @@ jQuery(function($){
         }
       }
       var tabInfo = tabMap[rowClass] || null;
-  // Ensure heading has an id for scrolling (unique across searches)
-  var hid = ensureHeadingId($h);
+      // Ensure heading has an id for scrolling (unique across searches)
+      var hid = ensureHeadingId($h);
       // Prefer deriving section from the Show/Hide button within the heading
       var sectionId = '';
       var $btn = $h.find('.wcu-showhide-button[id^="wcu_show_"]').first();
@@ -237,12 +330,77 @@ jQuery(function($){
         var btnId = $btn.attr('id');
         sectionId = 'wcu_' + btnId.replace(/^wcu_show_/, '');
       }
-      // Fallback: find the next section container after the heading
+      // Fallback: find the next section container after the heading (within reasonable distance)
       if(!sectionId){
         var $section = $h.nextAll('div[id^="wcu_section_"]').first();
-        if($section.length){ sectionId = $section.attr('id'); }
+        if($section.length){
+          // Make sure the section is reasonably close (within 3 siblings)
+          var distance = $h.nextAll().index($section);
+          if(distance >= 0 && distance <= 2){
+            sectionId = $section.attr('id');
+          }
+        }
+      }
+      // Additional fallback: look for show/hide buttons after the heading (within next 2 elements)
+      if(!sectionId){
+        var $nextBtn = $h.nextAll().slice(0, 2).find('.wcu-showhide-button[id^="wcu_show_"]').first();
+        if($nextBtn.length){
+          var btnId = $nextBtn.attr('id');
+          sectionId = 'wcu_' + btnId.replace(/^wcu_show_/, '');
+        }
+      }
+      // Look for dynamic toggle buttons (onclick handlers) - also within next 2 elements
+      if(!sectionId){
+        var $toggleBtn = $h.nextAll().slice(0, 2).find('button[onclick*="wcusage_toggle_settings"]').first();
+        if($toggleBtn.length){
+          var onclick = $toggleBtn.attr('onclick') || '';
+          var match = onclick.match(/wcusage_toggle_settings\('([^']+)'\)/);
+          if(match){
+            sectionId = match[1];
+          }
+        }
       }
       matches.push({ type: 'heading', label: textOnly, pid: hid, rowClass: rowClass, tab: tabInfo, fieldId: hid, sectionId: sectionId });
+    });
+
+    // Also search within dynamic tab headers and labels
+    $('.wcusage-tab-item').each(function(){
+      var $tabItem = $(this);
+      // Do NOT skip hidden rows; allow searching in all tabs
+      var tabId = $tabItem.attr('id');
+      if(!tabId) return;
+      var labelText = $.trim($tabItem.find('strong').first().text());
+      if(!labelText) return;
+      var hay = labelText.toLowerCase();
+      if(hay.indexOf(q) === -1) return;
+      var $row = $tabItem.closest('.wcusage_row');
+      var rowClass = '';
+      if($row.length){
+        var classes = ($row.attr('class')||'').split(/\s+/);
+        for(var i=0;i<classes.length;i++){
+          if(classes[i].indexOf('wcusage_row_') === 0){ rowClass = classes[i]; break; }
+        }
+      }
+      var tabInfo = tabMap[rowClass] || null;
+      // Look for the settings section ID
+      var sectionId = '';
+      var $toggleBtn = $tabItem.find('button[onclick*="wcusage_toggle_settings"]').first();
+      if($toggleBtn.length){
+        var onclick = $toggleBtn.attr('onclick') || '';
+        var match = onclick.match(/wcusage_toggle_settings\('([^']+)'\)/);
+        if(match){
+          sectionId = match[1];
+        }
+      }
+      matches.push({ 
+        type: 'tab', 
+        label: labelText, 
+        pid: tabId, 
+        rowClass: rowClass, 
+        tab: tabInfo, 
+        fieldId: tabId, 
+        sectionId: sectionId 
+      });
     });
 
     // Deduplicate by normalized label key WITHIN THE SAME TAB, keeping the first occurrence
@@ -260,8 +418,8 @@ jQuery(function($){
     }
 
     deduped.sort(function(a,b){
-      var at = (a.type === 'heading') ? 0 : 1;
-      var bt = (b.type === 'heading') ? 0 : 1;
+      var at = (a.type === 'heading') ? 0 : (a.type === 'tab') ? 1 : 2;
+      var bt = (b.type === 'heading') ? 0 : (b.type === 'tab') ? 1 : 2;
       if(at !== bt) return at - bt;
       return (a.label||'').localeCompare(b.label||'');
     });

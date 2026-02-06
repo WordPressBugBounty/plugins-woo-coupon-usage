@@ -310,14 +310,17 @@ if (!function_exists('wcusage_tab_settings')) {
                                 value="1" <?php if ($wcu_enable_notifications) { ?>checked<?php } ?>>
                                 <?php echo esc_html__("Enable Email Notifications", "woo-coupon-usage"); ?></p>
 
-                            <?php
-                            // Newsletter subscription state: subscribed if user meta flag not set
-                            $is_unsub = get_user_meta($couponuserid, 'wcusage_newsletter_unsubscribed', true) ? true : false;
-                            $global_unsub_enabled = wcusage_get_setting_value('wcusage_field_newsletter_enable_unsubscribe', 1);
-                            if($global_unsub_enabled) { ?>
-                                <p><input type="checkbox" id="wcu_newsletter_subscribed" name="wcu_newsletter_subscribed" value="1" <?php if(!$is_unsub) { ?>checked<?php } ?>>
-                                <?php echo esc_html__("Subscribe to Affiliate Newsletters", "woo-coupon-usage"); ?>
-                                <br/><span style="font-size:11px;color:#555;"><?php echo esc_html__("Uncheck to stop receiving affiliate newsletter emails.", "woo-coupon-usage"); ?></span></p>
+                            <?php if (wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code()) { ?>
+                                <?php
+                                // Newsletter subscription state: subscribed if user meta flag not set
+                                $is_unsub = get_user_meta($couponuserid, 'wcusage_newsletter_unsubscribed', true) ? true : false;
+                                $newsletters_enabled = wcusage_get_setting_value('wcusage_field_email_newsletter_enable', 0);
+                                $global_unsub_enabled = wcusage_get_setting_value('wcusage_field_newsletter_enable_unsubscribe', 1);
+                                if($newsletters_enabled &&$global_unsub_enabled) { ?>
+                                    <p><input type="checkbox" id="wcu_newsletter_subscribed" name="wcu_newsletter_subscribed" value="1" <?php if(!$is_unsub) { ?>checked<?php } ?>>
+                                    <?php echo esc_html__("Subscribe to Affiliate Newsletters", "woo-coupon-usage"); ?>
+                                    <br/><span style="font-size:11px;color:#555;"><?php echo esc_html__("Uncheck to stop receiving affiliate newsletter emails.", "woo-coupon-usage"); ?></span></p>
+                                <?php } ?>
                             <?php } ?>
 
                             <?php if ($enable_reports_user_option && $wcusage_field_enable_reports && wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code()) { ?>
@@ -373,7 +376,7 @@ if (!function_exists('wcusage_tab_settings')) {
                                         <div style="margin-bottom: 10px;" class="profile-picture">
                                             <?php echo get_avatar($couponuserid, 96); ?>
                                         </div>
-                                        <p style="margin-top: 0px;font-size:12px;"><?php echo esc_html__('Your profile picture is managed via Gravatar. To set or change it, visit '); ?><a href="https://gravatar.com/profile/avatars" target="_blank"><?php echo esc_html__('Gravatar.com'); ?></a>.</p>
+                                        <p style="margin-top: 0px;font-size:12px;"><?php echo esc_html__('Your profile picture is managed via Gravatar. To set or change it, visit ', 'woo-coupon-usage'); ?><a href="https://gravatar.com/profile/avatars" target="_blank"><?php echo esc_html__('Gravatar.com', 'woo-coupon-usage'); ?></a>.</p>
                                     </p>
                                     <?php } ?>
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">

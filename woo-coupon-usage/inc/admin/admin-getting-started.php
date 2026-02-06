@@ -58,7 +58,7 @@ function wcusage_getting_started_create() {
     // Remove GET variable from URL
     if(isset($_GET['create_new_dashboard'])) {
       $url = remove_query_arg('create_new_dashboard');
-      wp_redirect($url);
+      wp_safe_redirect($url);
       exit;
     }
 
@@ -207,7 +207,7 @@ add_action( 'wcusage_hook_checklist', 'wcusage_hook_checklist_function' );
 function wcusage_hook_checklist_function() {
 ?>
   <div class="wcusage-checklist" style="display: none; border: 1px solid #ccc;
-  min-width: 400px; padding: 5px 20px 10px 20px; background: #f9f9f9; border-radius: 5px; margin: 0 0 20px 0;">
+  min-width: 400px; padding: 5px 20px 10px 20px; background: #f9f9f9; border-radius: 5px; margin: 20px 0 5px 0;">
       <h2 style="font-size: 20px; margin-top: 15px;"><?php echo esc_html__( "Setup Checklist", "woo-coupon-usage" ); ?></h2>
       <?php
       $show = false;

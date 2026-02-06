@@ -4,17 +4,7 @@ if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
 function wcusage_options_page() {
-    $options = get_option( 'wcusage_options' );
-    $admin_perms = "administrator";
-    if ( isset( $options['wcusage_field_admin_permission'] ) ) {
-        if ( current_user_can( 'administrator' ) ) {
-            $admin_perms = "administrator";
-        } else {
-            $admin_perms = $options['wcusage_field_admin_permission'];
-        }
-    } else {
-        $admin_perms = "administrator";
-    }
+    $admin_perms = wcusage_get_admin_menu_capability();
     // add top level menu page
     add_menu_page(
         esc_html__( 'Coupon Affiliates', 'woo-coupon-usage' ),
@@ -37,7 +27,7 @@ function wcusage_options_page() {
         'wcusage_hide',
         esc_html__( 'Coupon Affiliates: Info & Help', 'woo-coupon-usage' ),
         esc_html__( 'Info & Help', 'woo-coupon-usage' ),
-        'manage_options',
+        $admin_perms,
         'wcusage_help',
         'wcusage_admin_list_page_html'
     );
@@ -45,7 +35,7 @@ function wcusage_options_page() {
         'wcusage_hide',
         esc_html__( 'Coupon Affiliates: Setup Wizard', 'woo-coupon-usage' ),
         esc_html__( 'Setup Wizard', 'woo-coupon-usage' ),
-        'manage_options',
+        $admin_perms,
         'wcusage_setup',
         'wcusage_setup_page_html'
     );
@@ -173,40 +163,40 @@ function wcusage_options_page() {
         }
         add_submenu_page(
             'wcusage_tools',
-            'Import/Export Custom Tables',
-            'Import/Export Custom Tables',
+            esc_html__( 'Import/Export Custom Tables', 'woo-coupon-usage' ),
+            esc_html__( 'Import/Export Custom Tables', 'woo-coupon-usage' ),
             $admin_perms,
             'wcusage-data-import-export',
             'wcusage_data_import_export_page'
         );
         add_submenu_page(
             'wcusage_tools',
-            sprintf( 'Bulk Create: %s Coupons', wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
-            sprintf( 'Bulk Create: %s Coupons', wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
+            sprintf( esc_html__( 'Bulk Create: %s Coupons', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
+            sprintf( esc_html__( 'Bulk Create: %s Coupons', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
             $admin_perms,
             'wcusage-bulk-coupon-creator',
             'wcusage_bulk_coupon_creator_page'
         );
         add_submenu_page(
             'wcusage_tools',
-            'Bulk Assign: Coupons to Orders',
-            'Bulk Assign: Coupons to Orders',
+            esc_html__( 'Bulk Assign: Coupons to Orders', 'woo-coupon-usage' ),
+            esc_html__( 'Bulk Assign: Coupons to Orders', 'woo-coupon-usage' ),
             $admin_perms,
             'wcusage-bulk-assign-coupons',
             'wcusage_bulk_assign_coupons_page'
         );
         add_submenu_page(
             'wcusage_tools',
-            sprintf( 'Bulk Assign: Per-%s Product Rates', wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
-            sprintf( 'Bulk Assign: Per-%s Product Rates', wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
+            sprintf( esc_html__( 'Bulk Assign: Per-%s Product Rates', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
+            sprintf( esc_html__( 'Bulk Assign: Per-%s Product Rates', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ),
             $admin_perms,
             'wcusage-bulk-product-rates',
             'wcusage_bulk_assign_rates_page'
         );
         add_submenu_page(
             'wcusage_tools',
-            'Bulk Edit: Product Settings',
-            'Bulk Edit: Product Settings',
+            esc_html__( 'Bulk Edit: Product Settings', 'woo-coupon-usage' ),
+            esc_html__( 'Bulk Edit: Product Settings', 'woo-coupon-usage' ),
             $admin_perms,
             'wcusage-bulk-edit-product',
             'wcusage_bulk_product_page'

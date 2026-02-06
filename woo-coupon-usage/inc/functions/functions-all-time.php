@@ -19,6 +19,7 @@ if ( !function_exists( 'wcusage_update_all_stats' ) ) {
                 date( "Y-m-d" ),
                 '',
                 1,
+                1,
                 1
             );
         } else {
@@ -219,6 +220,7 @@ function wcusage_get_orders_by_coupon_ajax() {
         $enddate,
         '',
         1,
+        1,
         1
     );
     echo json_encode( $fullorders['allstats'] );
@@ -322,6 +324,7 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
     );
     // Get the oldest order date
     $results = $wpdb->get_results( $wpdb->prepare( $query . " ORDER BY order_date ASC LIMIT %d", 1 ) );
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
     if ( !empty( $results ) ) {
         $first_order_date = $results[0]->order_date;
         $wcusage_hide_all_time = wcusage_get_setting_value( 'wcusage_field_hide_all_time', '0' );
@@ -333,6 +336,7 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
     }
     // Get the newest order date
     $results2 = $wpdb->get_results( $wpdb->prepare( $query . " ORDER BY order_date DESC LIMIT %d", 1 ) );
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
     if ( !empty( $results2 ) ) {
         $last_order_date = $results2[0]->order_date;
     } else {
@@ -346,6 +350,7 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
     $post_id = $coupon_info[2];
     delete_post_meta( $post_id, 'wcu_alltime_stats' );
     delete_post_meta( $post_id, 'wcu_last_refreshed' );
+    update_post_meta( $post_id, 'wcu_text_pending_order_commission', 0 );
     ?>
 
     <script>
@@ -377,7 +382,7 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
     echo esc_html( $last_order_date );
     ?>');
     var updateStatsNonce = '<?php 
-    echo wp_create_nonce( 'wcusage_update_stats_nonce' );
+    echo esc_html( wp_create_nonce( 'wcusage_update_stats_nonce' ) );
     ?>';
 
     function getOrders() {
@@ -393,7 +398,7 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
       'coupon_code': '<?php 
     echo esc_html( $coupon_code );
     ?>',
-      '_ajax_nonce': updateStatsNonce
+      'security': updateStatsNonce
       },
       success: function(response) {
         loop++;
@@ -403,6 +408,7 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
         allstats.full_discount += Number(responseData.full_discount);
         allstats.total_commission += Number(responseData.total_commission);
         allstats.total_shipping += Number(responseData.total_shipping);
+        console.log('Testing responseData:', responseData);
         for (var key in responseData.commission_summary) {
           if (allstats.commission_summary[key]) {
           allstats.commission_summary[key].total += Number(responseData.commission_summary[key].total);
@@ -440,7 +446,7 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
         }
       },
       error: function(error) {
-        console.log(error);
+        console.log('Testing error: ', error);
       }
     });
     }

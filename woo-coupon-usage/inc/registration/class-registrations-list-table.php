@@ -179,7 +179,7 @@ class wcusage_registrations_List_Table extends WP_List_Table {
 
 					<form method="post" id="submitregister">
 
-  					<?php echo $inputfields;?>
+  					<?php echo $inputfields; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
             <?php wp_nonce_field( 'admin_affiliate_register_form' ); ?>
 
@@ -226,7 +226,7 @@ class wcusage_registrations_List_Table extends WP_List_Table {
 
 					<form method="post" id="submitregister">
 
-  					<?php echo $inputfields2; ?>
+  					<?php echo $inputfields2; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
             <?php wp_nonce_field( 'admin_affiliate_register_form' ); ?>
 
@@ -247,8 +247,8 @@ class wcusage_registrations_List_Table extends WP_List_Table {
         //Build row actions
     $page_param = isset($_GET['page']) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
     $actions = array(
-      'edit'      => sprintf('<a href="?page=%s&action=%s&payout=%s">Edit</a>', $page_param, 'edit', absint( $item['ID'] ) ),
-      'delete'    => sprintf('<a href="?page=%s&action=%s&payout=%s">Delete</a>', $page_param, 'delete', absint( $item['ID'] ) ),
+      'edit'      => sprintf('<a href="?page=%s&action=%s&payout=%s">%s</a>', $page_param, 'edit', absint( $item['ID'] ), esc_html__( 'Edit', 'woo-coupon-usage' ) ),
+      'delete'    => sprintf('<a href="?page=%s&action=%s&payout=%s">%s</a>', $page_param, 'delete', absint( $item['ID'] ), esc_html__( 'Delete', 'woo-coupon-usage' ) ),
     );
 
         //Return the title contents
@@ -270,7 +270,7 @@ class wcusage_registrations_List_Table extends WP_List_Table {
     }
 
     function no_items() {
-     esc_html_e( 'No registrations applications found.' );
+      esc_html_e( 'No registrations applications found.', 'woo-coupon-usage' );
     }
 
     function get_columns(){
@@ -310,11 +310,11 @@ class wcusage_registrations_List_Table extends WP_List_Table {
         $table_name = $wpdb->prefix . 'wcusage_register';
 
     if ( isset($_GET['status']) ) {
-      $sql = $wpdb->prepare("SELECT * FROM $table_name WHERE status = %s ORDER BY id DESC", sanitize_text_field( wp_unslash( $_GET['status'] ) ) );
+      $sql = $wpdb->prepare("SELECT * FROM $table_name WHERE status = %s ORDER BY id DESC", sanitize_text_field( wp_unslash( $_GET['status'] ) ) ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         } else {
-            $sql = "SELECT * FROM $table_name ORDER BY id DESC";
+            $sql = "SELECT * FROM $table_name ORDER BY id DESC"; // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         }
-        $data = $wpdb->get_results($sql, ARRAY_A);
+        $data = $wpdb->get_results($sql, ARRAY_A); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         
         $current_page = $this->get_pagenum();
 

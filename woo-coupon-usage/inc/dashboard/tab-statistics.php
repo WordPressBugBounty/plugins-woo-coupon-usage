@@ -301,10 +301,8 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                                 echo '<div class="wcusage-info-box wcusage-info-box-percent">';
                                 echo '<p>';
                                 $commissionthisstyles = "";
-                                if ( strlen( $combined_commission ) >= 14 ) {
-                                    $commissionthisstyles = 'font-size: 15px; line-height: 16px;';
-                                } elseif ( strlen( $combined_commission ) < 12 && strlen( $combined_commission ) > 10 ) {
-                                    $commissionthisstyles = 'font-size: 19px; line-height: 20px;';
+                                if ( strlen( $combined_commission ) >= 19 ) {
+                                    $commissionthisstyles = 'font-size: 18px; line-height: 18px;';
                                 }
                                 echo '<span class="wcusage-info-box-title">' . esc_html__( "Commission", "woo-coupon-usage" ) . ":</span> ";
                                 echo '<span class="wcu-total-commission-text" style="' . esc_attr( $commissionthisstyles ) . '">' . wp_kses_post( $combined_commission ) . "</span> ";
@@ -333,7 +331,7 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                             echo '<div class="wcusage-sales-stats">';
                             if ( !$wcusage_hide_all_time ) {
                                 echo '<div class="wcusage-show-last-all">';
-                                echo do_action(
+                                do_action(
                                     'wcusage_hook_get_main_info_boxes',
                                     $fullorders,
                                     '',
@@ -347,7 +345,7 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                             } else {
                                 echo '<div class="wcusage-show-last-30">';
                             }
-                            echo do_action(
+                            do_action(
                                 'wcusage_hook_get_main_info_boxes',
                                 $this30orders,
                                 $past60orders,
@@ -356,7 +354,7 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                             );
                             echo '</div>';
                             echo '<div class="wcusage-show-last-7" style="display: none;">';
-                            echo do_action(
+                            do_action(
                                 'wcusage_hook_get_main_info_boxes',
                                 $this7orders,
                                 $past14orders,
@@ -425,12 +423,13 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                             $unpaid_commission = $couponinfo[2];
                             $pendingpayments = get_post_meta( $postid, 'wcu_text_pending_payment_commission', true );
                             $result2 = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_name} WHERE couponid = %d AND status = 'paid' ORDER BY id DESC LIMIT 50", $postid ) );
+                            // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
                             $paid_amount = 0;
                             foreach ( $result2 as $row2 ) {
                                 $paid_amount += $row2->amount;
                             }
                             echo '<div style="width: 100%; clear: both;"></div>';
-                            echo '<div style="' . $margintop . '">';
+                            echo '<div style="' . esc_attr( $margintop ) . '">';
                             echo '<p class="wcusage-stats-title">' . esc_html__( "Commission Payouts", "woo-coupon-usage" ) . ' <a href="javascript:void(0);" class="wcusage-payouts-link" style="margin-left: 5px; font-size: 12px; font-weight: bold;">' . esc_html__( "View More", "woo-coupon-usage" ) . ' <i class="fa-solid fa-arrow-right"></i></a></p>';
                             echo '<script>
                         jQuery(document).ready(function($) {
@@ -441,19 +440,19 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                         });
                         </script>';
                             echo '<div class="wcusage-sales-stats">';
-                            echo '<div class="wcusage-info-box wcusage-info-box-dollar2"><p><span class="wcusage-info-box-title">' . esc_html__( "Unpaid Commission:", "woo-coupon-usage" ) . '</span> <span id="wcu-the-discount-type">' . wcusage_format_price( number_format(
+                            echo '<div class="wcusage-info-box wcusage-info-box-dollar2"><p><span class="wcusage-info-box-title">' . esc_html__( "Unpaid Commission:", "woo-coupon-usage" ) . '</span> <span id="wcu-the-discount-type">' . wp_kses_post( wcusage_format_price( number_format(
                                 (float) $unpaid_commission,
                                 2,
                                 '.',
                                 ''
-                            ) ) . '</span></p></div>';
-                            echo '<div class="wcusage-info-box wcusage-info-box-dollar3"><p><span class="wcusage-info-box-title">' . esc_html__( "Pending Payments:", "woo-coupon-usage" ) . '</span> <span id="wcu-the-discount-type">' . wcusage_format_price( number_format(
+                            ) ) ) . '</span></p></div>';
+                            echo '<div class="wcusage-info-box wcusage-info-box-dollar3"><p><span class="wcusage-info-box-title">' . esc_html__( "Pending Payments:", "woo-coupon-usage" ) . '</span> <span id="wcu-the-discount-type">' . wp_kses_post( wcusage_format_price( number_format(
                                 (float) $pendingpayments,
                                 2,
                                 '.',
                                 ''
-                            ) ) . '</span></p></div>';
-                            echo '<div class="wcusage-info-box wcusage-info-box-dollar4"><p><span class="wcusage-info-box-title">' . esc_html__( "Completed Payments:", "woo-coupon-usage" ) . '</span> <span id="wcu-the-discount-type">' . wcusage_format_price( $paid_amount ) . '</span></p></div>';
+                            ) ) ) . '</span></p></div>';
+                            echo '<div class="wcusage-info-box wcusage-info-box-dollar4"><p><span class="wcusage-info-box-title">' . esc_html__( "Completed Payments:", "woo-coupon-usage" ) . '</span> <span id="wcu-the-discount-type">' . wp_kses_post( wcusage_format_price( $paid_amount ) ) . '</span></p></div>';
                             echo '<div style="width: 100%; clear: both;"></div>';
                             echo '</div>';
                             echo '</div>';
@@ -764,7 +763,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
                 echo esc_html( $language );
                 ?>',
           };
-          jQuery.ajax({
+              jQuery.ajax({
               type: 'POST',
               url: '<?php 
                 echo esc_url( admin_url( 'admin-ajax.php' ) );

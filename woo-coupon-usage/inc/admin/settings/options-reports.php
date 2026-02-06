@@ -16,7 +16,7 @@ function wcusage_field_cb_reports( $args )
 
     <hr/>
 
-    <?php echo wcusage_setting_toggle_option('wcusage_field_enable_reports', 0, 'Enable "Affiliate Reports" Features', '0px'); ?>
+    <?php wcusage_setting_toggle_option('wcusage_field_enable_reports', 0, 'Enable "Affiliate Reports" Features', '0px'); ?>
 
     <br/>
 
@@ -45,7 +45,7 @@ function wcusage_field_cb_reports( $args )
 
     </div>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_enable_reports', '.wcu-field-section-reports'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_enable_reports', '.wcu-field-section-reports'); // Show or Hide ?>
       <span class="wcu-field-section-reports">
 
             <br/><hr/>
@@ -93,15 +93,15 @@ function wcusage_field_cb_reports( $args )
 
             <h3 id="statements-settings"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> General Settings:</h3>
 
-            <?php echo wcusage_setting_toggle_option('wcusage_field_enable_reports_user_option', 1, 'Give affiliates option to toggle on/off email reports.', '0px'); ?>
+            <?php wcusage_setting_toggle_option('wcusage_field_enable_reports_user_option', 1, 'Give affiliates option to toggle on/off email reports.', '0px'); ?>
             <i><?php echo esc_html__( 'If enabled, an option will be displayed in the affiliate dashboard settings tab, allowing affiliates to turn off the email reports.', 'woo-coupon-usage' ); ?></i>
 
-            <?php echo wcusage_setting_toggle('.wcusage_field_enable_reports_user_option', '.wcu-field-section-reports-option'); // Show or Hide ?>
+            <?php wcusage_setting_toggle('.wcusage_field_enable_reports_user_option', '.wcu-field-section-reports-option'); // Show or Hide ?>
             <span class="wcu-field-section-reports-option">
 
               <br/><br/>
 
-              <?php echo wcusage_setting_toggle_option('wcusage_field_enable_reports_default', 1, 'Make "Affiliate Reports" enabled by default for all coupon affiliates.', '0px'); ?>
+              <?php wcusage_setting_toggle_option('wcusage_field_enable_reports_default', 1, 'Make "Affiliate Reports" enabled by default for all coupon affiliates.', '0px'); ?>
               <i><?php echo esc_html__( 'If enabled, the affiliate reports will be turned on by default for all affiliate users (if they have not yet updated the setting). They can toggle this off in the settings tab of their dashboard. If disabled, then the reports will be turned off by default, and the affiliate user will need to toggle it on to receive the reports.', 'woo-coupon-usage' ); ?></i>
 
             </span>
@@ -126,7 +126,13 @@ function wcusage_field_cb_reports( $args )
                               var attachment = custom_uploader.state().get('selection').first().toJSON();
                               $('.wcusage_field_pdfreport_statements_logo').attr('src', attachment.url);
                               $('.wcusage_field_pdfreport_statements_logo_url').val(attachment.url);
-                              $('.wcusage_field_pdfreport_statements_logo_url').change();
+                $('.wcusage_field_pdfreport_statements_logo_url').change();
+                // Explicitly trigger AJAX save for report header logo
+                if (typeof window.wcu_ajax_update_the_options === 'function') {
+                  try {
+                    window.wcu_ajax_update_the_options(jQuery('#wcusage_field_pdfreport_statements_logo'), 'id', 'wcu-update-text', 1, '', '');
+                  } catch (e) {}
+                }
                           })
                           .open();
                       });
@@ -161,7 +167,13 @@ function wcusage_field_cb_reports( $args )
                               var attachment = custom_uploader.state().get('selection').first().toJSON();
                               $('.wcusage_field_pdfreport_statements_email_logo').attr('src', attachment.url);
                               $('.wcusage_field_pdfreport_statements_email_logo_url').val(attachment.url);
-                              $('.wcusage_field_pdfreport_statements_email_logo_url').change();
+                $('.wcusage_field_pdfreport_statements_email_logo_url').change();
+                // Explicitly trigger AJAX save for report email header logo
+                if (typeof window.wcu_ajax_update_the_options === 'function') {
+                  try {
+                    window.wcu_ajax_update_the_options(jQuery('#wcusage_field_pdfreport_statements_email_logo'), 'id', 'wcu-update-text', 1, '', '');
+                  } catch (e) {}
+                }
                           })
                           .open();
                       });
@@ -186,7 +198,7 @@ function wcusage_field_cb_reports( $args )
               </style>
               <?php
               $wcusage_field_pdfreports_text_header = wcusage_get_setting_value('wcusage_field_pdfreports_text_header', '');
-              echo wcusage_setting_tinymce_option('wcusage_field_pdfreports_text_header', $wcusage_field_pdfreports_text_header, "Report Header Text", '0px');
+              wcusage_setting_tinymce_option('wcusage_field_pdfreports_text_header', $wcusage_field_pdfreports_text_header, "Report Header Text", '0px');
               ?>
 
               <br/>
@@ -197,14 +209,14 @@ function wcusage_field_cb_reports( $args )
               </style>
               <?php
               $wcusage_field_pdfreports_text_footer = wcusage_get_setting_value('wcusage_field_pdfreports_text_footer', '');
-              echo wcusage_setting_tinymce_option('wcusage_field_pdfreports_text_footer', $wcusage_field_pdfreports_text_footer, "Report Footer Text", '0px');
+              wcusage_setting_tinymce_option('wcusage_field_pdfreports_text_footer', $wcusage_field_pdfreports_text_footer, "Report Footer Text", '0px');
               ?>
 
               <br/>
 
               <!-- "Affiliate Report" -->
               <?php $wcusage_field_pdfreports_text_title = wcusage_get_setting_value('wcusage_field_pdfreports_text_title', 'Affiliate Report'); ?>
-              <?php echo wcusage_setting_text_option('wcusage_field_pdfreports_text_title', $wcusage_field_pdfreports_text_title, esc_html__( 'Report Title', 'woo-coupon-usage' ) . ' ("Affiliate Report"):', '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_field_pdfreports_text_title', $wcusage_field_pdfreports_text_title, esc_html__( 'Report Title', 'woo-coupon-usage' ) . ' ("Affiliate Report"):', '0px'); ?>
 
               <br/>
 
@@ -221,40 +233,40 @@ function wcusage_field_cb_reports( $args )
 
               <br/>
 
-              <?php echo wcusage_setting_toggle_option('wcusage_field_reports_show_sales', 1, 'Show "Sales Statistics" Section', '0px'); ?>
+              <?php wcusage_setting_toggle_option('wcusage_field_reports_show_sales', 1, 'Show "Sales Statistics" Section', '0px'); ?>
 
-              <?php echo wcusage_setting_toggle('.wcusage_field_reports_show_sales', '.wcu-field-section-reports-text-sales'); // Show or Hide ?>
+              <?php wcusage_setting_toggle('.wcusage_field_reports_show_sales', '.wcu-field-section-reports-text-sales'); // Show or Hide ?>
               <span class="wcu-field-section-reports-text-sales">
 
                 <!-- "Sales Statistics" -->
                 <?php $wcusage_field_pdfreports_text_sales = wcusage_get_setting_value('wcusage_field_pdfreports_text_sales', 'Sales Statistics'); ?>
-                <?php echo wcusage_setting_text_option('wcusage_field_pdfreports_text_sales', $wcusage_field_pdfreports_text_sales, esc_html__( 'Custom Text', 'woo-coupon-usage' ) . ":", '0px'); ?>
+                <?php wcusage_setting_text_option('wcusage_field_pdfreports_text_sales', $wcusage_field_pdfreports_text_sales, esc_html__( 'Custom Text', 'woo-coupon-usage' ) . ":", '0px'); ?>
 
               </span>
 
               <br/>
 
-              <?php echo wcusage_setting_toggle_option('wcusage_field_reports_show_commission', 1, 'Show "Commission Statistics" Section', '0px'); ?>
+              <?php wcusage_setting_toggle_option('wcusage_field_reports_show_commission', 1, 'Show "Commission Statistics" Section', '0px'); ?>
 
-              <?php echo wcusage_setting_toggle('.wcusage_field_reports_show_commission', '.wcu-field-section-reports-text-commission'); // Show or Hide ?>
+              <?php wcusage_setting_toggle('.wcusage_field_reports_show_commission', '.wcu-field-section-reports-text-commission'); // Show or Hide ?>
               <span class="wcu-field-section-reports-text-commission">
 
                 <!-- "Commission Statistics" -->
                 <?php $wcusage_field_pdfreports_text_commission = wcusage_get_setting_value('wcusage_field_pdfreports_text_commission', 'Commission Statistics'); ?>
-                <?php echo wcusage_setting_text_option('wcusage_field_pdfreports_text_commission', $wcusage_field_pdfreports_text_commission, esc_html__( 'Custom Text', 'woo-coupon-usage' ) . ":", '0px'); ?>
+                <?php wcusage_setting_text_option('wcusage_field_pdfreports_text_commission', $wcusage_field_pdfreports_text_commission, esc_html__( 'Custom Text', 'woo-coupon-usage' ) . ":", '0px'); ?>
 
               </span>
 
               <br/>
 
-              <?php echo wcusage_setting_toggle_option('wcusage_field_reports_show_referral', 1, 'Show "Referral URL Statistics" Section', '0px'); ?>
+              <?php wcusage_setting_toggle_option('wcusage_field_reports_show_referral', 1, 'Show "Referral URL Statistics" Section', '0px'); ?>
 
-              <?php echo wcusage_setting_toggle('.wcusage_field_reports_show_referral', '.wcu-field-section-reports-text-url'); // Show or Hide ?>
+              <?php wcusage_setting_toggle('.wcusage_field_reports_show_referral', '.wcu-field-section-reports-text-url'); // Show or Hide ?>
               <span class="wcu-field-section-reports-text-url">
 
                 <!-- "Referral URL Statistics" -->
                 <?php $wcusage_field_pdfreports_text_url = wcusage_get_setting_value('wcusage_field_pdfreports_text_url', 'Referral URL Statistics'); ?>
-                <?php echo wcusage_setting_text_option('wcusage_field_pdfreports_text_url', $wcusage_field_pdfreports_text_url, esc_html__( 'Custom Text', 'woo-coupon-usage' ) . ":", '0px'); ?>
+                <?php wcusage_setting_text_option('wcusage_field_pdfreports_text_url', $wcusage_field_pdfreports_text_url, esc_html__( 'Custom Text', 'woo-coupon-usage' ) . ":", '0px'); ?>
 
               </span>
 

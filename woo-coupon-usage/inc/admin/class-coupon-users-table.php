@@ -358,7 +358,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
             
             // Redirect with success message
             $redirect_url = add_query_arg( 'wcusage_message', urlencode( $message ), wp_get_referer() );
-            wp_redirect( $redirect_url );
+            wp_safe_redirect( $redirect_url );
             exit;
         }
     }
@@ -384,7 +384,10 @@ class WC_Coupon_Users_Table extends WP_List_Table {
             if(!$usage) {
                 global $woocommerce;
                 $coupon_code = get_the_title($coupon);
-                $c = new WC_Coupon($coupon_code);
+                $c = wcusage_get_coupon_object_safe($coupon_code);
+                if(!$c) {
+                    continue;
+                }
                 $usage = $c->get_usage_count();
             }
             if($usage) {
@@ -427,27 +430,42 @@ class WC_Coupon_Users_Table extends WP_List_Table {
                 $payouts_table = $wpdb->prefix . 'wcusage_payouts';
                 $coupons = wcusage_get_users_coupons_ids( $user_id );
                 $unpaid_commission = 0;
-                $total_commission = 0;
+                $total_commission = 0; // Still accumulate total commission for fallback when payouts table absent
                 foreach ($coupons as $coupon) {
-                    $unpaid_commission += (float)get_post_meta($coupon, 'wcu_text_unpaid_commission', true);
+                    $unpaid_commission += (float) get_post_meta($coupon, 'wcu_text_unpaid_commission', true);
                     $wcu_alltime_stats = get_post_meta($coupon, 'wcu_alltime_stats', true);
-                    if($wcu_alltime_stats && isset($wcu_alltime_stats['total_commission'])) {
-                        $total_commission += (float)$wcu_alltime_stats['total_commission'];
+                    if ( $wcu_alltime_stats && isset( $wcu_alltime_stats['total_commission'] ) ) {
+                        $total_commission += (float) $wcu_alltime_stats['total_commission'];
                     }
                 }
-                $paid_commission = $total_commission - $unpaid_commission;
-                if($paid_commission < 0) $paid_commission = 0;
-                
-                // Calculate actual pending payments from payouts table
+
+                // Default values
+                $paid_commission = 0;
                 $pending_payments = 0;
-                if ($wpdb->get_var("SHOW TABLES LIKE '$payouts_table'") == $payouts_table) {
-                    $pending_payouts = $wpdb->get_results($wpdb->prepare(
-                        "SELECT amount FROM $payouts_table WHERE userid = %d AND status IN ('pending', 'created')",
-                        $user_id
-                    ));
-                    foreach ($pending_payouts as $payout) {
-                        $pending_payments += (float)$payout->amount;
+                $processing_payments = 0; // Not displayed yet, but available for future use
+
+                $payouts_table_exists = ( $wpdb->get_var("SHOW TABLES LIKE '$payouts_table'") == $payouts_table ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+                if ( $payouts_table_exists ) {
+                    $totals = $wpdb->get_row(
+                        $wpdb->prepare(
+                            "SELECT
+                                COALESCE(SUM(CASE WHEN status = 'paid' THEN amount END), 0) AS paid_total,
+                                COALESCE(SUM(CASE WHEN status = 'processing' THEN amount END), 0) AS processing_total,
+                                COALESCE(SUM(CASE WHEN status IN ('pending','created') THEN amount END), 0) AS pending_total
+                             FROM $payouts_table
+                             WHERE userid = %d",
+                            $user_id
+                        )
+                    ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+                    if ( $totals ) {
+                        $paid_commission      = (float) $totals->paid_total;
+                        $processing_payments  = (float) $totals->processing_total; // reserved
+                        $pending_payments     = (float) $totals->pending_total;
                     }
+                } else {
+                    // Fallback paid calculation when payouts table not present
+                    $paid_commission = $total_commission - $unpaid_commission;
+                    if ( $paid_commission < 0 ) { $paid_commission = 0; }
                 }
                 
                 $output = '<div style="line-height: 1.4;">';
@@ -564,7 +582,7 @@ function wcusage_coupon_users_page() {
     if(isset($_POST['_wpnonce'])) {
         $nonce = sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) );
         if( wp_verify_nonce( $nonce, 'admin_add_registration_form' ) && wcusage_check_admin_access() ) {
-            echo wp_kses_post(wcusage_post_submit_application(1));
+            echo wcusage_post_submit_application(1); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         }
     }
 
@@ -573,11 +591,11 @@ function wcusage_coupon_users_page() {
         if(isset($_GET['user'])) {
             $username = sanitize_text_field($_GET['user']);
             echo '<div class="notice notice-success is-dismissible"><p>'
-            . sprintf(esc_html__('The %s user %s has been successfully added.', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )), $username)
+            . sprintf(esc_html__('The %s user %s has been successfully added.', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' ))), esc_html($username))
             . '</p></div>';
         } else {
             echo '<div class="notice notice-success is-dismissible"><p>'
-            . sprintf(esc_html__('The %s user has been successfully added.', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )))
+            . sprintf(esc_html__('The %s user has been successfully added.', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' ))))
             . '</p></div>';
         }
     }
@@ -589,21 +607,26 @@ function wcusage_coupon_users_page() {
     
     <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
 
-    <style>@media screen and (min-width: 782px) { .wcusage_users_page_desc { margin-bottom: -5px; } }</style>
+    <style>
+    @media screen and (min-width: 782px) {
+        .wcusage_users_page_desc { margin-bottom: -5px; }
+    }
+    @media screen and (max-width: 782px) {
+        .wcusage_users_page_desc { display: inline-block; }
+    }
+    </style>
 	<div class="wrap wcusage_users_page_header">
 
-        <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
+        <?php do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
 
 		<h2 class="wp-heading-inline wcusage-admin-title">
-        <?php echo sprintf(esc_html__('Coupon %s Users', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?>
+        <?php echo sprintf(esc_html__('Coupon %s Users', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )))); ?>
         <span class="wcusage-admin-title-buttons">
-            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New <?php echo wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )); ?></a>
-            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-bulk-coupon-creator')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Bulk Create <?php echo wcusage_get_affiliate_text(__( 'Affiliates', 'woo-coupon-usage' ), true); ?></a>
+            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New <?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?></a>
+            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-bulk-coupon-creator')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Bulk Create <?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliates', 'woo-coupon-usage' ), true)); ?></a>
             <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wcusage_affiliates&action=export_csv'), 'wcusage_export_users_csv')); ?>" class="wcusage-settings-button" id="wcu-admin-export-csv" style="float: right;">
-                <?php echo sprintf(esc_html__('Export %s Users', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?> <span class="fa-solid fa-download"></span>
+                <?php echo sprintf(esc_html__('Export %s Users', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )))); ?> <span class="fa-solid fa-download"></span>
             </a>
-            <p class="wcusage_users_page_desc"><?php echo sprintf(esc_html__('This page displays all the users that are assigned to an %s coupon.', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' ))); ?></p>
-            <br/>
         </span>
         </h2>
         
@@ -677,13 +700,13 @@ function wcusage_coupon_users_page() {
             var actionText = '';
             switch (actionSelected) {
                 case 'bulk-delete-users':
-                    actionText = 'Are you sure you want to delete selected <?php echo wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )); ?> users?\n\nThis will NOT delete the coupons assigned to them.';
+                    actionText = 'Are you sure you want to delete selected <?php echo esc_js(wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' ))); ?> users?\n\nThis will NOT delete the coupons assigned to them.';
                     break;
                 case 'bulk-delete-all':
-                    actionText = 'Are you sure you want to delete the selected <?php echo wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )); ?> users, and delete all the coupons they are assigned to?';
+                    actionText = 'Are you sure you want to delete the selected <?php echo esc_js(wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' ))); ?> users, and delete all the coupons they are assigned to?';
                     break;
                 case 'bulk-unassign':
-                    actionText = 'Are you sure you want to unassign the selected users from their coupons?\n\nThis will essentially remove their access to the <?php echo wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' )); ?> dashboard and commission earnings.\n\nThe users and coupons will NOT be deleted.';
+                    actionText = 'Are you sure you want to unassign the selected users from their coupons?\n\nThis will essentially remove their access to the <?php echo esc_js(wcusage_get_affiliate_text(__( 'affiliate', 'woo-coupon-usage' ))); ?> dashboard and commission earnings.\n\nThe users and coupons will NOT be deleted.';
                     break;
                 case 'bulk-delete-coupons':
                     actionText = 'Are you sure you want to delete the coupons assigned to the selected users?\n\nThe users will NOT be deleted.';
@@ -716,8 +739,8 @@ function wcusage_handle_export_csv() {
         // Verify nonce and permissions
     if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'wcusage_export_users_csv' ) ) {
             // Double-check admin access
-            if (!current_user_can('manage_options') && !current_user_can('administrator')) {
-                wp_die(__('Sorry, you are not allowed to access this page.', 'woo-coupon-usage'));
+            if ( ! wcusage_check_admin_access() ) {
+                wp_die(esc_html__('Sorry, you are not allowed to access this page.', 'woo-coupon-usage'));
             }
             
             wcusage_export_coupon_users_csv();
@@ -823,7 +846,10 @@ function wcusage_export_coupon_users_csv() {
                     $total_commission += $wcu_alltime_stats['total_commission'];
                 }
             } else {
-                $c = new WC_Coupon($coupon_code);
+                $c = wcusage_get_coupon_object_safe($coupon_code);
+                if(!$c) {
+                    continue;
+                }
                 $usage = $c->get_usage_count();
                 $total_referrals += $usage;
             }
@@ -958,7 +984,10 @@ if( !function_exists( 'wcusage_get_coupon_users' ) ) {
                         } else {
                             global $woocommerce;
                             $coupon_code = get_the_title($coupon);
-                            $c = new WC_Coupon($coupon_code);
+                            $c = wcusage_get_coupon_object_safe($coupon_code);
+                            if(!$c) {
+                                continue;
+                            }
                             $usage = $c->get_usage_count();
                         }
                         if($usage) {

@@ -120,7 +120,7 @@ function wcusage_custom_box_html(  $post  ) {
         <label for="wcusage_referrer_coupon"><?php 
         echo esc_html__( 'Affiliate Referrer Coupon', 'woo-coupon-usage' );
         ?>: <?php 
-        echo wc_help_tip( esc_html__( 'Set the primary referral coupon for this order. This will override all other settings, as the default and only coupon that will earn commission from this order.', 'woo-coupon-usage' ), false );
+        echo wp_kses_post( wc_help_tip( esc_html__( 'Set the primary referral coupon for this order. This will override all other settings, as the default and only coupon that will earn commission from this order.', 'woo-coupon-usage' ), false ) );
         ?>
         </label>
         <input type="text" id="wcusage_referrer_coupon" name="wcusage_referrer_coupon" value="<?php 
@@ -224,14 +224,22 @@ function wcusage_custom_box_html_content(
     $getinfo = wcusage_get_the_order_coupon_info( $coupon_code, "", $order_id );
     $coupon_info = wcusage_get_coupon_info( $coupon_code );
     $coupon_id = $coupon_info[2];
+    // Check if pending commission needs to be added
+    if ( function_exists( 'wcusage_check_and_add_pending_commission' ) ) {
+        wcusage_check_and_add_pending_commission( $order_id );
+    }
     echo "<p style='position: absolute; right: 10px; top: -2px; margin: 0; padding: 0;'>";
     echo "<a href='" . esc_url( admin_url( 'post.php?post=' . esc_attr( $order_id ) . '&action=edit&refresh_stats=1' ) ) . "' style='text-decoration: none;'\r\n    onClick='return confirm(\"" . esc_html__( 'Are you sure you want to refresh the affiliate stats for this order? This will delete the current referral stats/commission and recalculate them.', 'woo-coupon-usage' ) . "\");'\r\n    title='" . esc_html__( 'Recalculate the affiliate stats for this order.', 'woo-coupon-usage' ) . "'\r\n    ><span class='dashicons dashicons-update' style='font-size: 14px; height: 14px; display: inline-block; margin-top: 4px;'></span></a>";
     if ( isset( $_GET['refresh_stats'] ) && $_GET['refresh_stats'] ) {
+        if ( function_exists( 'wcusage_update_pending_commission_action' ) ) {
+            wcusage_update_pending_commission_action( $order_id, 'remove' );
+        }
         delete_post_meta( $order_id, 'wcusage_commission_summary' );
         delete_post_meta( $order_id, 'wcusage_stats' );
         delete_post_meta( $order_id, 'wcusage_total_commission' );
         $url = remove_query_arg( 'refresh_stats' );
-        wp_redirect( $url );
+        wp_safe_redirect( $url );
+        exit;
     }
     echo "</p>";
     echo "<p>";
@@ -462,17 +470,17 @@ function add_coupon_link_below_coupons(  $order_id  ) {
 
                 $.ajax({
                     url: '<?php 
-        echo admin_url( 'admin-ajax.php' );
+        echo esc_url( admin_url( 'admin-ajax.php' ) );
         ?>',
                     type: 'POST',
                     data: {
                         action: 'add_coupon_to_order',
                         order_id: '<?php 
-        echo $order->get_id();
+        echo esc_js( $order->get_id() );
         ?>',
                         coupon_code: couponCode,
                         security: '<?php 
-        echo wp_create_nonce( 'add_coupon_nonce' );
+        echo esc_js( wp_create_nonce( 'add_coupon_nonce' ) );
         ?>'
                     },
                     success: function(response) {
@@ -500,7 +508,7 @@ function add_coupon_link_below_coupons(  $order_id  ) {
         ?>')) {
                     $.ajax({
                         url: '<?php 
-        echo admin_url( 'admin-ajax.php' );
+        echo esc_url( admin_url( 'admin-ajax.php' ) );
         ?>',
                         type: 'POST',
                         data: {
@@ -508,7 +516,7 @@ function add_coupon_link_below_coupons(  $order_id  ) {
                             order_id: orderId,
                             coupon_code: couponCode,
                             security: '<?php 
-        echo wp_create_nonce( 'remove_coupon_nonce' );
+        echo esc_js( wp_create_nonce( 'remove_coupon_nonce' ) );
         ?>'
                         },
                         success: function(response) {

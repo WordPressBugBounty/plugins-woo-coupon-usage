@@ -8,10 +8,12 @@ function wcusage_tools_page() {
 
     <div class="wrap admin-tools" style="margin: 0;">
 
+        <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
+
         <div class="wrap wcusage-admin-page">
 
-            <?php echo do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
-
+            <?php do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
+            
             <h1>Coupon Affiliates - Admin Tools</h1>
             <br/>
         

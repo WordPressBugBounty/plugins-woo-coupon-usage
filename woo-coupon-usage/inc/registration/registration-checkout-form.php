@@ -70,7 +70,7 @@ function wcusage_checkout_affiliate_register_fields() {
           woocommerce_form_field( 'wcusage_join_affiliate_program_coupon', array(
               'type'      => 'text',
               'class'     => array('input-text'),
-              'label'     => esc_html__('What is your preferred affiliate coupon code?') . " <abbr class='required' title='required'>*</abbr>",
+              'label'     => esc_html__('What is your preferred affiliate coupon code?', 'woo-coupon-usage') . " <abbr class='required' title='required'>*</abbr>",
           ),  WC()->checkout->get_value( 'wcusage_join_affiliate_program_coupon' ) );
           echo '</div><br/>';
         }
@@ -109,12 +109,13 @@ function wcusage_checkout_affiliate_register_field_submit( $order_id ) {
       $userid = $user_info->ID;
       $email = sanitize_email( $user_info->user_email );
       $firstname = sanitize_text_field( $user_info->first_name );
+      $lastname = sanitize_text_field( $user_info->last_name );
 
       $auto_coupon = wcusage_get_setting_value('wcusage_field_registration_auto_coupon', '0');
 
       if( $auto_coupon && wcu_fs()->can_use_premium_code__premium_only() ) {
 
-        $couponcode = wcusage_generate_auto_coupon($username);
+        $couponcode = wcusage_generate_auto_coupon($username, $firstname, $lastname);
 
       } else {
 

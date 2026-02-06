@@ -33,7 +33,7 @@ function wcusage_field_cb_custom_tabs( $args )
 
   <!-- Number of custom tabs -->
   <?php $tabsnumber = wcusage_get_setting_value('wcusage_field_custom_tabs_number', '2'); ?>
-  <?php echo wcusage_setting_number_option('wcusage_field_custom_tabs_number', $tabsnumber, esc_html__( 'Number of custom tabs', 'woo-coupon-usage' ), '0px'); ?>
+  <?php wcusage_setting_number_option('wcusage_field_custom_tabs_number', $tabsnumber, esc_html__( 'Number of custom tabs', 'woo-coupon-usage' ), '0px'); ?>
   <i><?php echo esc_html__( 'Please refresh the page to add/remove the new tab settings (found below) when you update this number.', 'woo-coupon-usage' ); ?></i><br/>
 
  <br/><hr/>
@@ -47,6 +47,10 @@ function wcusage_field_cb_custom_tabs( $args )
     } else {
         $wcusage_field_custom_tab = "";
     }
+  // External link toggle + URL (new top-level toggle with backward compatibility)
+  $legacy_external = isset($options['wcusage_field_custom_tabs'][$i]['external']) ? $options['wcusage_field_custom_tabs'][$i]['external'] : '';
+  $wcusage_field_custom_tab_external = wcusage_get_setting_value('wcusage_field_custom_tabs_external_'.$i, $legacy_external);
+  $wcusage_field_custom_tab_external_url = isset($options['wcusage_field_custom_tabs'][$i]['external_url']) ? $options['wcusage_field_custom_tabs'][$i]['external_url'] : '';
     if(isset($options['wcusage_field_custom_tabs'][$i]['header'])) {
         $wcusage_field_custom_tab_header = $options['wcusage_field_custom_tabs'][$i]['header'];
     } else {
@@ -59,31 +63,32 @@ function wcusage_field_cb_custom_tabs( $args )
     }
     echo ' <div class="input_fields_wrap"></div>';
 
-    echo '<strong>Tab Name:</strong><br/>';
-    echo '<input type="text" id="wcusage_field_custom_tabs" checktype="customnumber" custom1="'.esc_attr($i).'" custom2="name" name="wcusage_options[wcusage_field_custom_tabs]['.esc_attr($i).'][name]" value="'.$wcusage_field_custom_tab.'">';
-    echo '<br/><i>' . esc_html__('The name of the tab button.', 'woo-coupon-usage') . '</i>';
+  echo '<strong>Tab Name:</strong><br/>';
+  echo '<input type="text" id="wcusage_field_custom_tabs" checktype="customnumber" custom1="'.esc_attr($i).'" custom2="name" name="wcusage_options[wcusage_field_custom_tabs]['.esc_attr($i).'][name]" value="'.esc_attr($wcusage_field_custom_tab).'">';
+  echo '<br/><i>' . esc_html__('The name of the tab button.', 'woo-coupon-usage') . '</i>';
 
-    echo '<br/><br/>';
+  echo '<br/><br/>';
 
-    echo '<strong>Tab Header:</strong><br/>';
-    echo '<input type="text" id="wcusage_field_custom_tabs" checktype="customnumber" custom1="'.esc_attr($i).'" custom2="header" name="wcusage_options[wcusage_field_custom_tabs]['.esc_attr($i).'][header]" value="'.$wcusage_field_custom_tab_header.'">';
-    echo '<br/><i>' . esc_html__('The header text displayed at the top of the tab content.', 'woo-coupon-usage') . '</i>';
-    ?>
+  // External link toggle using helper
+  echo '<div class="wcusage-custom-tab-external-wrapper">';
+  wcusage_setting_toggle_option('wcusage_field_custom_tabs_external_'.esc_attr($i), $legacy_external ? 1 : 0, esc_html__('Open as external link instead of tab?', 'woo-coupon-usage'), '0px');
+  echo '<br/><i style="margin-top:-8px; display:block;">' . esc_html__('If enabled, this tab becomes a link opening in a new browser tab and the header/content settings below are hidden.', 'woo-coupon-usage') . '</i>';
+  echo '<br/></div>';
 
-    <br/><br/>
+  echo '<div class="wcusage-custom-tab-external-url-wrapper wcusage-custom-tab-extra-'.esc_attr($i).'" style="margin-top:10px;'.($wcusage_field_custom_tab_external == '1' ? '' : ' display:none;').'">';
+  wcusage_setting_text_option('wcusage_field_custom_tabs_external_url_'.esc_attr($i), $wcusage_field_custom_tab_external_url, esc_html__('External URL:', 'woo-coupon-usage'), '0px');
+  echo '</div><br/>';
 
-    <!-- Select a user role: multi select -->
-    <p class="creative-type-user-role">
-      <label for="user_role"><strong><?php echo esc_html__('Limit to certain user roles & groups?', 'woo-coupon-usage'); ?></strong>
-    </label>
+  ?>
+  <!-- Select a user role: multi select -->
+  <p class="creative-type-user-role">
+      <label for="user_role"><strong><?php echo esc_html__('Limit to certain user roles & groups?', 'woo-coupon-usage'); ?></strong></label>
 
       <br/>
 
-      <!-- User Role Select -->
       <span class="payouts-role-select-wrapper">
 
-        <span style="height: 50px; width: 250px; overflow-y: auto;
-        display: block; border: 1px solid #ddd; padding: 10px;">
+        <span style="height: 50px; width: 250px; overflow-y: auto; display: block; border: 1px solid #ddd; padding: 10px;">
 
         <?php
         $thisid = 'wcusage_field_custom_tabs_roles_'.$i;
@@ -106,9 +111,15 @@ function wcusage_field_cb_custom_tabs( $args )
         foreach ($current_selected_roles as $key => $role) {
           $rolesx = get_editable_roles();
           if (!isset($rolesx[$key])) {
-            $options_new = get_option('wcusage_options');
-            unset($options_new[$thisid][$key]);
-            update_option('wcusage_options', $options_new);
+            // Only update on non-GET requests
+            if ( $_SERVER['REQUEST_METHOD'] !== 'GET' ) {
+              $options_new = get_option('wcusage_options');
+              if ( ! is_array( $options_new ) ) {
+                $options_new = array();
+              }
+              unset($options_new[$thisid][$key]);
+              update_option('wcusage_options', $options_new);
+            }
             unset($options[$thisid][$key]);
           }
         }
@@ -145,13 +156,11 @@ function wcusage_field_cb_custom_tabs( $args )
 
     </p>
 
-    <br/>
+  <br/>
 
-    <!-- Pick a font awesome icon -->
-    <p class="creative-type-icon">
-      <label for="icon"><strong><?php echo esc_html__('Tab Icon:', 'woo-coupon-usage'); ?></strong>
-    </label>
-
+  <!-- Pick a font awesome icon (always visible) -->
+  <p class="creative-type-icon">
+      <label for="icon"><strong><?php echo esc_html__('Tab Icon:', 'woo-coupon-usage'); ?></strong></label>
       <br/>
 
       <?php
@@ -192,8 +201,14 @@ function wcusage_field_cb_custom_tabs( $args )
       });
       </script>
 
-    <?php
-    echo '<br/><br/>';
+  <?php // Re-open PHP fully for editor internal wrapper
+  echo '<br/><br/>';
+  // Now open internal fields wrapper for header + content only
+  echo '<div class="wcusage-custom-tab-internal-fields wcusage-custom-tab-internal-'.esc_attr($i).'"'.($wcusage_field_custom_tab_external == '1' ? ' style="display:none;"' : '').'>'; // open internal fields wrapper
+  echo '<strong>Tab Header:</strong><br/>';
+  echo '<input type="text" id="wcusage_field_custom_tabs" checktype="customnumber" custom1="'.esc_attr($i).'" custom2="header" name="wcusage_options[wcusage_field_custom_tabs]['.esc_attr($i).'][header]" value="'.$wcusage_field_custom_tab_header.'">';
+  echo '<br/><i>' . esc_html__('The header text displayed at the top of the tab content.', 'woo-coupon-usage') . '</i>';
+  echo '<br/><br/>';
     $settingstabscontent = array(
         'wpautop' => true,
         'media_buttons' => true,
@@ -206,6 +221,7 @@ function wcusage_field_cb_custom_tabs( $args )
     echo wcusage_tinymce_ajax_script('wcusage_field_custom_tabs_content_' . esc_html($i));
     wp_editor( $wcusage_field_custom_tabs_content, 'wcusage_field_custom_tabs_content_' . esc_html($i), $settingstabscontent );
     echo '<br/><hr/>';
+  echo '</div>'; // close internal fields wrapper (header + content only)
     ?>
     <script type="text/javascript">
        jQuery(document).ready(function(){
@@ -215,6 +231,19 @@ function wcusage_field_cb_custom_tabs( $args )
           jQuery('#wcusage_field_custom_tabs_content_<?php echo esc_html($i); ?>').attr('custom2','content');
           jQuery('#wcusage_field_custom_tabs_content_<?php echo esc_html($i); ?>').attr('customid','wcusage_field_custom_tabs');
        });
+    </script>
+    <script type="text/javascript">
+      jQuery(document).ready(function(){
+        jQuery('#wcusage_field_custom_tabs_external_<?php echo esc_js($i); ?>').on('change', function(){
+          if(jQuery(this).is(':checked')) {
+            jQuery('.wcusage-custom-tab-internal-<?php echo esc_js($i); ?>').slideUp();
+            jQuery('.wcusage-custom-tab-extra-<?php echo esc_js($i); ?>').slideDown();
+          } else {
+            jQuery('.wcusage-custom-tab-internal-<?php echo esc_js($i); ?>').slideDown();
+            jQuery('.wcusage-custom-tab-extra-<?php echo esc_js($i); ?>').slideUp();
+          }
+        });
+      });
     </script>
     <?php
   }

@@ -68,6 +68,56 @@ function wcusage_get_coupon_id($coupon_code) {
 }
 
 /**
+ * Safely get a WC_Coupon object without throwing exceptions.
+ *
+ * @param mixed $coupon_value
+ *
+ * @return WC_Coupon|false
+ */
+if( !function_exists( 'wcusage_get_coupon_object_safe' ) ) {
+	function wcusage_get_coupon_object_safe( $coupon_value ) {
+		if ( empty( $coupon_value ) ) {
+			return false;
+		}
+
+		$coupon_id = 0;
+		$coupon_value_string = is_string( $coupon_value ) ? $coupon_value : (string) $coupon_value;
+		if ( function_exists( 'wc_get_coupon_id_by_code' ) ) {
+			$coupon_id_by_code = wc_get_coupon_id_by_code( $coupon_value_string );
+		} else {
+			$coupon_id_by_code = 0;
+		}
+
+		if ( is_numeric( $coupon_value ) ) {
+			$candidate_id = absint( $coupon_value );
+			if ( $candidate_id && get_post_type( $candidate_id ) === 'shop_coupon' ) {
+				$coupon_id = $candidate_id;
+			} elseif ( $coupon_id_by_code ) {
+				$coupon_id = $coupon_id_by_code;
+			}
+		} else {
+			$coupon_id = $coupon_id_by_code;
+		}
+
+		if ( $coupon_id ) {
+			$coupon_value = $coupon_id;
+		}
+
+		try {
+			$coupon = new WC_Coupon( $coupon_value );
+		} catch ( Exception $e ) {
+			return false;
+		}
+
+		if ( ! $coupon || ! $coupon->get_id() ) {
+			return false;
+		}
+
+		return $coupon;
+	}
+}
+
+/**
  * Get coupon ID by coupon code via ajax
  *
  * @param string $coupon_code
@@ -76,8 +126,13 @@ function wcusage_get_coupon_id($coupon_code) {
  *
  */
 add_action('wp_ajax_wcusage_ajax_get_coupon_id', 'wcusage_ajax_get_coupon_id');
-add_action('wp_ajax_nopriv_wcusage_ajax_get_coupon_id', 'wcusage_ajax_get_coupon_id');
 function wcusage_ajax_get_coupon_id() {
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'wcusage_ajax_get_coupon_id_nonce')) {
+        wp_die('Security check failed');
+    }
+    if (!current_user_can('manage_options')) {
+        wp_die('Access denied');
+    }
 	$coupon_id = wcusage_get_coupon_id($_POST['coupon_name']);
     echo esc_html($coupon_id);
     wp_die();

@@ -22,13 +22,13 @@ function wcusage_field_cb_notifications( $args )
     <br/>
 
     <!-- General Email Settings & Free Email Settings -->
-    <?php echo do_action('wcusage_hook_setting_section_email_free'); ?>
+    <?php do_action('wcusage_hook_setting_section_email_free'); ?>
 
     <!-- Cancelled Order Email -->
     <div class="wcu-setting-email-notification-box">
 
       <span id="wcu-setting-email-notification-new-usage">
-      <?php echo wcusage_setting_toggle_option('wcusage_field_cancel_email_enable', 0, esc_html__( 'Referred Order Cancelled', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_cancel_email_enable', 0, esc_html__( 'Referred Order Cancelled', 'woo-coupon-usage' ), '0px'); ?>
       </span>
 
       <i><?php echo esc_html__( 'Send an email to affiliates if order they referred has been cancelled, refunded, or failed. Only when status was previously "completed".', 'woo-coupon-usage' ); ?></i>
@@ -43,13 +43,13 @@ function wcusage_field_cb_notifications( $args )
         <br/>
 
         <!-- Email Notification Subject -->
-        <?php echo wcusage_setting_text_option('wcusage_field_cancel_email_subject', esc_html__( "Your referred order #{id} has been cancelled.", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_cancel_email_subject', esc_html__( "Your referred order #{id} has been cancelled.", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
         <br/>
 
         <?php
         $email2message = "Hi {name},\r\n<br/>\r\nWe're sorry to inform you that one of your referred orders has been {status}.\r\n<br/>\r\nOrder ID: {id}\r\n<br/>\r\nThe following commission has been removed from your account: {commission}\r\n<br/>\r\nThank you for your continued support.";
-        echo wcusage_setting_tinymce_option('wcusage_field_cancel_email_message', $email2message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+        wcusage_setting_tinymce_option('wcusage_field_cancel_email_message', $email2message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
         ?>
 
         <br/>
@@ -63,7 +63,7 @@ function wcusage_field_cb_notifications( $args )
     <!-- PRO Email Settings -->
     <div <?php if( !wcu_fs()->can_use_premium_code() || !wcu_fs()->is_premium() ) { ?>style="opacity: 0.4; pointer-events: none;" class="wcu-settings-pro-only"<?php } ?>>
 
-      <?php echo wcusage_setting_toggle_option('wcusage_field_email_enable_extra', 1, $probrackets . esc_html__( 'Enable the "Additional Email Addresses" field in affiliate settings.', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_email_enable_extra', 1, $probrackets . esc_html__( 'Enable the "Additional Email Addresses" field in affiliate settings.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'This will allow them to add extra emails to send their email notifications to.', 'woo-coupon-usage' ); ?></i>
 
       <br/><br/><br/>
@@ -71,7 +71,7 @@ function wcusage_field_cb_notifications( $args )
     </div>
 
     <!-- Registration Email Settings -->
-    <?php echo do_action('wcusage_hook_setting_section_email_registration'); ?>
+    <?php do_action('wcusage_hook_setting_section_email_registration'); ?>
 
     <!-- PRO Email Settings -->
     <div <?php if( !wcu_fs()->can_use_premium_code() || !wcu_fs()->is_premium() ) { ?>style="opacity: 0.4; pointer-events: none;" class="wcu-settings-pro-only"<?php } ?>>
@@ -89,7 +89,7 @@ function wcusage_field_cb_notifications( $args )
       ** [Admin Email] New Payout
       ********************
       -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_email_payout_admin_enable', 1, esc_html__( 'New Payout Request', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_email_payout_admin_enable', 1, esc_html__( 'New Payout Request', 'woo-coupon-usage' ), '0px'); ?>
 
       <i><?php echo esc_html__( 'Send an email to admin when there is a new payout request for unpaid commission.', 'woo-coupon-usage' ); ?></i>
 
@@ -103,7 +103,7 @@ function wcusage_field_cb_notifications( $args )
         <br/>
 
         <!-- Email Notification Subject -->
-        <?php echo wcusage_setting_text_option('wcusage_field_email_payout_admin_subject', esc_html__( "New Payout Request: {coupon}", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_email_payout_admin_subject', esc_html__( "New Payout Request: {coupon}", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
         <br/>
 
@@ -114,7 +114,7 @@ function wcusage_field_cb_notifications( $args )
         . "<br/><br/>Coupon code: {coupon}"
         . "<br/><br/>Amount: " . get_woocommerce_currency_symbol() . "{amount}"
         . "<br/><br/>You can manage this payout here: {adminpayoutsurl}";
-        echo wcusage_setting_tinymce_option('wcusage_field_email_payout_admin_message', $email4messagepayout, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+        wcusage_setting_tinymce_option('wcusage_field_email_payout_admin_message', $email4messagepayout, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
         ?>
 
         <br/>
@@ -132,7 +132,7 @@ function wcusage_field_cb_notifications( $args )
       ** [Admin Email] New Payout Request (Bulk Scheduled)
       ********************
       -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_email_payout_admin_enable', 1, esc_html__( 'New Payout Request (Bulk Scheduled)', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_email_payout_admin_enable', 1, esc_html__( 'New Payout Request (Bulk Scheduled)', 'woo-coupon-usage' ), '0px'); ?>
 
       <i><?php echo esc_html__( 'Send an email to admin when there are 1 or more "scheduled" payout requests (this will be sent instead of multiple individual emails).', 'woo-coupon-usage' ); ?></i>
 
@@ -146,7 +146,7 @@ function wcusage_field_cb_notifications( $args )
         <br/>
 
         <!-- Email Notification Subject -->
-        <?php echo wcusage_setting_text_option('wcusage_field_email_payout_admin_bulk_subject', esc_html__( "{number} New Payout Requests", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_email_payout_admin_bulk_subject', esc_html__( "{number} New Payout Requests", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
         <br/>
 
@@ -155,7 +155,7 @@ function wcusage_field_cb_notifications( $args )
         $email4messagepayoutbulk = "{number} new commission payouts have been automatically requested:"
         . "<br/><br/>{payoutslist}"
         . "<br/><br/>You can manage these payouts here: {adminpayoutsurl}";
-        echo wcusage_setting_tinymce_option('wcusage_field_email_payout_admin_bulk_message', $email4messagepayoutbulk, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+        wcusage_setting_tinymce_option('wcusage_field_email_payout_admin_bulk_message', $email4messagepayoutbulk, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
         ?>
 
         <br/>
@@ -173,7 +173,7 @@ function wcusage_field_cb_notifications( $args )
       ** [User Email] New Commission Payout
       ********************
       -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_email_payout_affiliate_enable', 1, esc_html__( 'New Commission Payout', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_email_payout_affiliate_enable', 1, esc_html__( 'New Commission Payout', 'woo-coupon-usage' ), '0px'); ?>
 
       <i><?php echo esc_html__( 'Send an email to affiliates when a payout request is successfully marked as paid.', 'woo-coupon-usage' ); ?></i>
 
@@ -187,7 +187,7 @@ function wcusage_field_cb_notifications( $args )
         <br/>
 
         <!-- Email Notification Subject -->
-        <?php echo wcusage_setting_text_option('wcusage_field_email_payout_affiliate_subject', esc_html__( "New Commission Payout!", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_email_payout_affiliate_subject', esc_html__( "New Commission Payout!", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
         <br/>
 
@@ -199,7 +199,7 @@ function wcusage_field_cb_notifications( $args )
         . "<br/><br/>Coupon code: {coupon}"
         . "<br/><br/>Amount: " . get_woocommerce_currency_symbol() . "{amount}"
         . "<br/><br/>Payment method: {method}";
-        echo wcusage_setting_tinymce_option('wcusage_field_email_payout_affiliate_message', $email5messagepayout, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+        wcusage_setting_tinymce_option('wcusage_field_email_payout_affiliate_message', $email5messagepayout, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
         ?>
 
         <br/>
@@ -210,7 +210,7 @@ function wcusage_field_cb_notifications( $args )
 
     </div>
 
-    <?php echo wcusage_setting_toggle('.wcusage_field_enable_directlinks', '.wcu-field-section-directlinks'); // Show or Hide ?>
+    <?php wcusage_setting_toggle('.wcusage_field_enable_directlinks', '.wcu-field-section-directlinks'); // Show or Hide ?>
     <span class="wcu-field-section-directlinks">
 
         <br/>
@@ -226,7 +226,7 @@ function wcusage_field_cb_notifications( $args )
           ** [Admin Email] New Domain Request
           ********************
           -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_email_direct_link_admin_enable', 1, esc_html__( 'New "Direct Link Tracking" Domain', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_email_direct_link_admin_enable', 1, esc_html__( 'New "Direct Link Tracking" Domain', 'woo-coupon-usage' ), '0px'); ?>
 
           <i><?php echo esc_html__( 'Send an email to admin when a new domain is added by affiliate for direct link tracking.', 'woo-coupon-usage' ); ?></i>
 
@@ -240,7 +240,7 @@ function wcusage_field_cb_notifications( $args )
             <br/>
 
             <!-- Email Notification Subject -->
-            <?php echo wcusage_setting_text_option('wcusage_field_email_direct_link_admin_subject', esc_html__( "New Domain Request (Direct Link Tracking)", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_email_direct_link_admin_subject', esc_html__( "New Domain Request (Direct Link Tracking)", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
             <br/>
 
@@ -250,7 +250,7 @@ function wcusage_field_cb_notifications( $args )
             . "<br/><br/>Coupon code: {coupon}"
             . "<br/><br/>Domain: {domain}"
             . "<br/><br/>You can approve or decline this domain here: {adminurl}";
-            echo wcusage_setting_tinymce_option('wcusage_field_email_direct_link_admin_message', $email6message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+            wcusage_setting_tinymce_option('wcusage_field_email_direct_link_admin_message', $email6message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
             <br/>
@@ -268,7 +268,7 @@ function wcusage_field_cb_notifications( $args )
           ** [Admin Email] New Domain Request
           ********************
           -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_email_direct_link_accept_enable', 1, esc_html__( 'Domain Accepted', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_email_direct_link_accept_enable', 1, esc_html__( 'Domain Accepted', 'woo-coupon-usage' ), '0px'); ?>
 
           <i><?php echo esc_html__( 'Send an email to affiliate users when their domain is accepted for Direct Link Tracking.', 'woo-coupon-usage' ); ?></i>
 
@@ -282,7 +282,7 @@ function wcusage_field_cb_notifications( $args )
             <br/>
 
             <!-- Email Notification Subject -->
-            <?php echo wcusage_setting_text_option('wcusage_field_email_direct_link_accept_subject', esc_html__( "Domain Accepted: {domain}", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_email_direct_link_accept_subject', esc_html__( "Domain Accepted: {domain}", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
             <br/>
 
@@ -295,7 +295,7 @@ function wcusage_field_cb_notifications( $args )
             . "<br/><br/>You can now link directly to our website on this domain, and it will work in the same way as a referral URL."
             . "<br/><br/>"
             . "{dashboardurl}";
-            echo wcusage_setting_tinymce_option('wcusage_field_email_direct_link_accept_message', $email7message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+            wcusage_setting_tinymce_option('wcusage_field_email_direct_link_accept_message', $email7message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
             <br/>
@@ -313,7 +313,7 @@ function wcusage_field_cb_notifications( $args )
           ** [User Email] Domain Request Declined
           ********************
           -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_email_direct_link_decline_enable', 1, esc_html__( 'Domain Declined', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_email_direct_link_decline_enable', 1, esc_html__( 'Domain Declined', 'woo-coupon-usage' ), '0px'); ?>
 
           <i><?php echo esc_html__( 'Send an email to affiliate users when their domain is declined for Direct Link Tracking.', 'woo-coupon-usage' ); ?></i>
 
@@ -327,7 +327,7 @@ function wcusage_field_cb_notifications( $args )
             <br/>
 
             <!-- Email Notification Subject -->
-            <?php echo wcusage_setting_text_option('wcusage_field_email_direct_link_decline_subject', esc_html__( "Domain Declined: {domain}", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_email_direct_link_decline_subject', esc_html__( "Domain Declined: {domain}", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
             <br/>
 
@@ -337,7 +337,7 @@ function wcusage_field_cb_notifications( $args )
             . "<br/><br/>Sorry, your domain has been declined for direct link tracking."
             . "<br/><br/>Coupon code: {coupon}"
             . "<br/><br/>Domain: {domain}";
-            echo wcusage_setting_tinymce_option('wcusage_field_email_direct_link_decline_message', $email7message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+            wcusage_setting_tinymce_option('wcusage_field_email_direct_link_decline_message', $email7message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
             <br/>
@@ -350,7 +350,7 @@ function wcusage_field_cb_notifications( $args )
 
     </span>
 
-    <?php echo wcusage_setting_toggle('.wcusage_field_mla_enable', '.wcu-field-section-mla-emails'); // Show or Hide ?>
+    <?php wcusage_setting_toggle('.wcusage_field_mla_enable', '.wcu-field-section-mla-emails'); // Show or Hide ?>
     <span class="wcu-field-section-mla-emails">
 
         <br/>
@@ -366,7 +366,7 @@ function wcusage_field_cb_notifications( $args )
           ** [User Email] Affiliate Program Invitation
           ********************
           -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_email_mla_invite_enable', 1, esc_html__( 'Affiliate Program Invitation', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_email_mla_invite_enable', 1, esc_html__( 'Affiliate Program Invitation', 'woo-coupon-usage' ), '0px'); ?>
 
           <i><?php echo esc_html__( 'Send an email when parent invite enters an email address to send affiliate program invitation.', 'woo-coupon-usage' ); ?></i>
 
@@ -380,7 +380,7 @@ function wcusage_field_cb_notifications( $args )
             <br/>
 
             <!-- Email Notification Subject -->
-            <?php echo wcusage_setting_text_option('wcusage_field_email_mla_invite_subject', esc_html__( "Affiliate Program Invitation", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_email_mla_invite_subject', esc_html__( "Affiliate Program Invitation", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
             <br/>
 
@@ -390,7 +390,7 @@ function wcusage_field_cb_notifications( $args )
             . "<br/><br/>You have just been invited to join our affiliate program."
             . "<br/><br/>Earn commission on all the sales that you refer to us!"
             . "<br/><br/>Get started by registering here: {inviteurl}";
-            echo wcusage_setting_tinymce_option('wcusage_field_email_mla_invite_message', $email51message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+            wcusage_setting_tinymce_option('wcusage_field_email_mla_invite_message', $email51message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
             <br/>
@@ -408,7 +408,7 @@ function wcusage_field_cb_notifications( $args )
           ** [Parent Email] Affiliate Program Invitation
           ********************
           -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_email_mla_sub_referral_enable', 1, esc_html__( 'New Sub-Affiliate Referral', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_email_mla_sub_referral_enable', 1, esc_html__( 'New Sub-Affiliate Referral', 'woo-coupon-usage' ), '0px'); ?>
 
           <i><?php echo esc_html__( 'Send an email to parent affiliate when a sub-affiliate refers a new order (and it is completed).', 'woo-coupon-usage' ); ?></i>
 
@@ -422,7 +422,7 @@ function wcusage_field_cb_notifications( $args )
             <br/>
 
             <!-- Email Notification Subject -->
-            <?php echo wcusage_setting_text_option('wcusage_field_email_mla_sub_referral_subject', esc_html__( "(MLA) New Sub-Affiliate Referral", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_email_mla_sub_referral_subject', esc_html__( "(MLA) New Sub-Affiliate Referral", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
             <br/>
 
@@ -431,7 +431,7 @@ function wcusage_field_cb_notifications( $args )
             $email51message = "Hello {name},"
             . "<br/><br/>Congratulations, your sub-affiliate member '{sub-affiliate-user}' has referrered a new sale!"
             . "<br/><br/>You earned a commission share of: {commission}";
-            echo wcusage_setting_tinymce_option('wcusage_field_email_mla_sub_referral_message', $email51message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+            wcusage_setting_tinymce_option('wcusage_field_email_mla_sub_referral_message', $email51message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
             <br/>
@@ -449,7 +449,7 @@ function wcusage_field_cb_notifications( $args )
           ** [Parent Email] Affiliate Program Invitation
           ********************
           -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_email_mla_sub_signup_enable', 1, esc_html__( 'New Sub-Affiliate Signup', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_email_mla_sub_signup_enable', 1, esc_html__( 'New Sub-Affiliate Signup', 'woo-coupon-usage' ), '0px'); ?>
 
           <i><?php echo esc_html__( 'Send an email to parent affiliate when a new affiliate signs up in their MLA network.', 'woo-coupon-usage' ); ?></i>
 
@@ -463,7 +463,7 @@ function wcusage_field_cb_notifications( $args )
             <br/>
 
             <!-- Email Notification Subject -->
-            <?php echo wcusage_setting_text_option('wcusage_field_email_mla_sub_signup_subject', esc_html__( "New Sub-Affiliate Signup", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_email_mla_sub_signup_subject', esc_html__( "New Sub-Affiliate Signup", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
             <br/>
 
@@ -472,7 +472,7 @@ function wcusage_field_cb_notifications( $args )
             $email51message = "Hello {name},"
             . "<br/><br/>The user '{sub-affiliate-user}' has just become a tier {sub-affiliate-tier} affiliate in your MLA network!"
             . "<br/><br/>You will earn {sub-affiliate-commission}% commission on all sales they refer to us.";
-            echo wcusage_setting_tinymce_option('wcusage_field_email_mla_sub_signup_message', $email51message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+            wcusage_setting_tinymce_option('wcusage_field_email_mla_sub_signup_message', $email51message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
             <br/>
@@ -510,19 +510,19 @@ if( !function_exists( 'wcusage_setting_sectio_email_free' ) ) {
   ?>
 
     <!-- From Email Address -->
-    <?php echo wcusage_setting_text_option('wcusage_field_from_email', $admin_email, esc_html__( 'From Email Address:', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_text_option('wcusage_field_from_email', $admin_email, esc_html__( 'From Email Address:', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( '(If you are using a mail SMTP plugin, the from email may be overridden.)', 'woo-coupon-usage' ); ?></i><br/>
 
     <br/>
 
     <!-- From Name -->
-    <?php echo wcusage_setting_text_option('wcusage_field_from_name', get_bloginfo( 'name' ), esc_html__( 'From Name:', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_text_option('wcusage_field_from_name', get_bloginfo( 'name' ), esc_html__( 'From Name:', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( '(If you are using a mail SMTP plugin, the from name may be overridden.)', 'woo-coupon-usage' ); ?></i><br/>
     
     <br/>
 
     <!-- Admin email address for notifications -->
-    <?php echo wcusage_setting_text_option('wcusage_field_registration_admin_email', get_bloginfo( 'admin_email' ), esc_html__( 'Email address for recieving admin notifications:', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_text_option('wcusage_field_registration_admin_email', get_bloginfo( 'admin_email' ), esc_html__( 'Email address for recieving admin notifications:', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'This is the email address that will recieve admin notifications such as new affiliate registrations, and payout notifications.', 'woo-coupon-usage' ); ?></i>
 
     <br/>
@@ -532,7 +532,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_free' ) ) {
     <br/>
 
     <!-- Enable New Order Info -->
-    <?php echo wcusage_setting_toggle_option('wcusage_field_new_order_info', 1, esc_html__( 'Enable "Affiliate Information" section in the admin "New Order" email.', 'woo-coupon-usage' ), '0px'); ?>
+    <?php wcusage_setting_toggle_option('wcusage_field_new_order_info', 1, esc_html__( 'Enable "Affiliate Information" section in the admin "New Order" email.', 'woo-coupon-usage' ), '0px'); ?>
 
     </span>
 
@@ -552,7 +552,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_free' ) ) {
     <div class="wcu-setting-email-notification-box">
 
       <span id="wcu-setting-email-notification-new-usage">
-      <?php echo wcusage_setting_toggle_option('wcusage_field_email_enable', 1, esc_html__( 'New Order Referral', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_email_enable', 1, esc_html__( 'New Order Referral', 'woo-coupon-usage' ), '0px'); ?>
       </span>
 
       <i><?php echo esc_html__( 'Send an email to affiliates whenever their coupon code is used.', 'woo-coupon-usage' ); ?></i>
@@ -581,13 +581,13 @@ if( !function_exists( 'wcusage_setting_sectio_email_free' ) ) {
         <br/>
 
         <!-- Email Notification Subject -->
-        <?php echo wcusage_setting_text_option('wcusage_field_email_subject', esc_html__( "You have made a new referral sale!", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_email_subject', esc_html__( "You have made a new referral sale!", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
         <br/>
 
         <?php
-        $email1message = "Hello {name},\r\n<br/>\r\nCongratulations, you have just made a new referral sale, with the coupon code: {coupon}\r\n<br/>\r\nYou have earned {commission} in unpaid commission!\r\n<br/>\r\nHere's a list of items the customer purchased:\r\n<br/>\r\n{listproducts}\r\n<br/>\r\nThank you for your support!\r\n<br>\r\n" . get_bloginfo( 'name' );
-        echo wcusage_setting_tinymce_option('wcusage_field_email_message', $email1message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+        $email1message = "Hello {name},\r\n<br/>\r\nCongratulations, you just referred a new order to us, with the coupon code: {coupon}\r\n<br/>\r\nYou have earned {commission} in unpaid commission!\r\n<br/>\r\nHere's a list of items the customer purchased:\r\n<br/>\r\n{listproducts}\r\n<br/>\r\nThank you for your support!\r\n<br>\r\n" . get_bloginfo( 'name' );
+        wcusage_setting_tinymce_option('wcusage_field_email_message', $email1message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
         ?>
 
         <br/>
@@ -625,7 +625,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
         ** [User Email] Affiliate Application Submitted
         ********************
         -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_email_registration_enable', 1, esc_html__( 'Affiliate Application Submitted', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_email_registration_enable', 1, esc_html__( 'Affiliate Application Submitted', 'woo-coupon-usage' ), '0px'); ?>
 
         <i><?php echo esc_html__( 'Send an email to affiliate when they submit the affiliate application form.', 'woo-coupon-usage' ); ?></i>
 
@@ -639,7 +639,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
           <br/>
 
           <!-- Email Notification Subject -->
-          <?php echo wcusage_setting_text_option('wcusage_field_email_registration_subject', esc_html__( "Affiliate Application Submitted", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_email_registration_subject', esc_html__( "Affiliate Application Submitted", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
           <br/>
 
@@ -652,7 +652,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
           . "has been submitted."
           . "<br/><br/>"
           . "We will review your application and get back to you soon.";
-          echo wcusage_setting_tinymce_option('wcusage_field_email_registration_message', $email2message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+          wcusage_setting_tinymce_option('wcusage_field_email_registration_message', $email2message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
           ?>
 
           <br/>
@@ -670,7 +670,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
         ** [User Email] New Affiliate Account Created
         ********************
         -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_email_registration_new_enable', 1, esc_html__( 'New Affiliate Account Created', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_email_registration_new_enable', 1, esc_html__( 'New Affiliate Account Created', 'woo-coupon-usage' ), '0px'); ?>
 
         <i><?php echo esc_html__( 'Send a custom new user account email (replaces default registration email).', 'woo-coupon-usage' ); ?></i>
 
@@ -684,7 +684,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
           <br/>
 
           <!-- Email Notification Subject -->
-          <?php echo wcusage_setting_text_option('wcusage_field_email_registration_new_subject', esc_html__( "Affiliate Account Login Details", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_email_registration_new_subject', esc_html__( "Affiliate Account Login Details", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
           <br/>
 
@@ -701,7 +701,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
           . "You can login and access the affiliate dashboard page here: "
           . "<br/>"
           . "{dashboardurl}";
-          echo wcusage_setting_tinymce_option('wcusage_field_email_registration_new_message', $email3message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+          wcusage_setting_tinymce_option('wcusage_field_email_registration_new_message', $email3message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
           ?>
 
           <br/>
@@ -719,7 +719,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
         ** [Admin Email] New Affiliate Application
         ********************
         -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_email_registration_admin_enable', 1, esc_html__( 'New Affiliate Application', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_email_registration_admin_enable', 1, esc_html__( 'New Affiliate Application', 'woo-coupon-usage' ), '0px'); ?>
 
         <i><?php echo esc_html__( 'Send an email to admin when there is a new affiliate application.', 'woo-coupon-usage' ); ?></i>
 
@@ -733,7 +733,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
           <br/>
 
           <!-- Email Notification Subject -->
-          <?php echo wcusage_setting_text_option('wcusage_field_email_registration_admin_subject', esc_html__( "New Affiliate Application", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_email_registration_admin_subject', esc_html__( "New Affiliate Application", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
           <br/>
 
@@ -744,7 +744,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
           . "<br/><br/>Preferred coupon code: {coupon}"
           . "<br/><br/>{custom-fields}"
           . "<br/><br/>You can approve or decline this application here: {adminurl}";
-          echo wcusage_setting_tinymce_option('wcusage_field_email_registration_admin_message', $email4message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+          wcusage_setting_tinymce_option('wcusage_field_email_registration_admin_message', $email4message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
           ?>
 
           <br/>
@@ -762,7 +762,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
         ** [User Email] Affiliate Application Accepted
         ********************
         -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_email_registration_accept_enable', 1, esc_html__( 'Affiliate Application Accepted', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_email_registration_accept_enable', 1, esc_html__( 'Affiliate Application Accepted', 'woo-coupon-usage' ), '0px'); ?>
 
         <i><?php echo esc_html__( 'Send an email to affiliate when their affiliate application is accepted.', 'woo-coupon-usage' ); ?></i>
 
@@ -776,7 +776,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
           <br/>
 
           <!-- Email Notification Subject -->
-          <?php echo wcusage_setting_text_option('wcusage_field_email_registration_accept_subject', esc_html__( "Affiliate Application Accepted!", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_email_registration_accept_subject', esc_html__( "Affiliate Application Accepted!", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
           <br/>
 
@@ -787,7 +787,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
           . "<br/><br/>Your default referral link is: {referralurl}"
           . "<br/><br/>You can also use the affiliate dashboard to generate referral links for specific pages and campaigns."
           . "<br/><br/>{message}";
-          echo wcusage_setting_tinymce_option('wcusage_field_email_registration_accept_message', $email5message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+          wcusage_setting_tinymce_option('wcusage_field_email_registration_accept_message', $email5message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
           ?>
 
           <br/>
@@ -805,7 +805,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
         ** [User Email] Affiliate Application declined
         ********************
         -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_email_registration_decline_enable', 1, esc_html__( 'Affiliate Application declined', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_email_registration_decline_enable', 1, esc_html__( 'Affiliate Application declined', 'woo-coupon-usage' ), '0px'); ?>
 
         <i><?php echo esc_html__( 'Send an email to affiliate when their affiliate application is declined.', 'woo-coupon-usage' ); ?></i>
 
@@ -819,7 +819,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
           <br/>
 
           <!-- Email Notification Subject -->
-          <?php echo wcusage_setting_text_option('wcusage_field_email_registration_decline_subject', esc_html__( "Affiliate Application Declined", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_text_option('wcusage_field_email_registration_decline_subject', esc_html__( "Affiliate Application Declined", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
           <br/>
 
@@ -828,7 +828,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
           $email6message = "Sorry, your affiliate application has been declined for the coupon code: {coupon}"
           . "<br/><br/>Please feel free to submit another application for a different coupon code, or contact us if you have any questions."
           . "<br/><br/>{message}";
-          echo wcusage_setting_tinymce_option('wcusage_field_email_registration_decline_message', $email6message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+          wcusage_setting_tinymce_option('wcusage_field_email_registration_decline_message', $email6message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
           ?>
 
           <br/>

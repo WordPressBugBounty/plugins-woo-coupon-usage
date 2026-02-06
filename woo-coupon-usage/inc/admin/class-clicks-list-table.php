@@ -127,7 +127,7 @@ class wcusage_clicks_List_Table extends WP_List_Table {
 					<input type="text" id="wcu-status-delete" name="wcu-status-delete" value="cancel" style="display: none;">
           <?php wp_nonce_field( 'delete_url' ); ?>
 
-          <button onClick="return confirm('\nAre you sure you want to delete visit #<?php echo esc_attr($item['id']); ?>?');"
+          <button onClick="return confirm('Are you sure you want to delete visit #<?php echo esc_attr($item['id']); ?>?');"
             title="<?php echo esc_html__( 'Delete this visit.', 'woo-coupon-usage' ); ?>"
           type="submit" name="submitclickdelete" style="padding: 0; background: 0; border: 0; cursor: pointer; margin-bottom: 5px; color: #B52828;">
             <i class="fa-solid fa-trash-can"></i> <?php echo esc_html__( 'Delete', 'woo-coupon-usage' ); ?>
@@ -142,7 +142,7 @@ class wcusage_clicks_List_Table extends WP_List_Table {
 
         //Build row actions
         $actions = array(
-            'delete'    => sprintf('<a href="?page=%s&action=%s&click=%s">Delete</a>', sanitize_text_field( $_GET['page'] ),'delete',$item['ID']),
+          'delete'    => sprintf('<a href="?page=%s&action=%s&click=%s">%s</a>', sanitize_text_field( $_GET['page'] ), 'delete', $item['ID'], esc_html__( 'Delete', 'woo-coupon-usage' )),
         );
 
         //Return the title contents
@@ -235,15 +235,15 @@ class wcusage_clicks_List_Table extends WP_List_Table {
         // Combine where clauses into a single string
         if (!empty($where_clauses)) {
           $sqlwhere = " WHERE " . implode(" AND ", $where_clauses);
-          $full_query = "SELECT * FROM $table_name" . $sqlwhere . " ORDER BY id DESC";
+          $full_query = "SELECT * FROM $table_name" . $sqlwhere . " ORDER BY id DESC"; // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
           // Prepare the full query with all parameters
-          $sql = $wpdb->prepare($full_query, ...$params);
+          $sql = $wpdb->prepare($full_query, ...$params); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         } else {
-          $sql = "SELECT * FROM $table_name ORDER BY id DESC";
+          $sql = "SELECT * FROM $table_name ORDER BY id DESC"; // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
           
         }
 
-        $data = $wpdb->get_results($sql, ARRAY_A);
+        $data = $wpdb->get_results($sql, ARRAY_A); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
         $current_page = $this->get_pagenum();
 

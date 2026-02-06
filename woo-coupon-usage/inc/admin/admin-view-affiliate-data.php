@@ -16,11 +16,11 @@ function wcusage_render_pagination($type, $page, $per_page, $total) {
             <span class="displaying-num"><?php echo esc_html($total); ?> <?php echo esc_html__('items', 'woo-coupon-usage'); ?></span>
             <span class="pagination-links" data-type="<?php echo esc_attr($type); ?>">
                 <a class="first-page button" data-page="1" aria-disabled="<?php echo $page <= 1 ? 'true' : 'false'; ?>">«</a>
-                <a class="prev-page button" data-page="<?php echo max(1, $page - 1); ?>" aria-disabled="<?php echo $page <= 1 ? 'true' : 'false'; ?>">‹</a>
+                <a class="prev-page button" data-page="<?php echo esc_attr(max(1, $page - 1)); ?>" aria-disabled="<?php echo $page <= 1 ? 'true' : 'false'; ?>">‹</a>
                 <span class="paging-input">
                     <input class="current-page" type="text" size="2" value="<?php echo esc_attr($page); ?>" aria-label="Current page"> of <span class="total-pages"><?php echo esc_html($total_pages); ?></span>
                 </span>
-                <a class="next-page button" data-page="<?php echo min($total_pages, $page + 1); ?>" aria-disabled="<?php echo $page >= $total_pages ? 'true' : 'false'; ?>">›</a>
+                <a class="next-page button" data-page="<?php echo esc_attr(min($total_pages, $page + 1)); ?>" aria-disabled="<?php echo $page >= $total_pages ? 'true' : 'false'; ?>">›</a>
                 <a class="last-page button" data-page="<?php echo esc_attr($total_pages); ?>" aria-disabled="<?php echo $page >= $total_pages ? 'true' : 'false'; ?>">»</a>
             </span>
         </div>
@@ -83,8 +83,8 @@ function wcusage_affiliate_referrals_table($user_id, $page = 1, $per_page = 20, 
          WHERE p.post_type = 'shop_order'
            AND p.post_status IN ('" . implode("','", array_keys($statuses)) . "')" . $where_date,
         $params
-    );
-    $total = intval($wpdb->get_var($count_sql));
+    ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $total = intval($wpdb->get_var($count_sql)); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
     $list_sql = $wpdb->prepare(
         "SELECT DISTINCT p.ID AS order_id, p.post_date AS order_date
@@ -95,8 +95,8 @@ function wcusage_affiliate_referrals_table($user_id, $page = 1, $per_page = 20, 
         AND p.post_status IN ('" . implode("','", array_keys($statuses)) . "')" . $where_date .
         " ORDER BY p.post_date DESC LIMIT %d OFFSET %d",
         array_merge($params, array($per_page, $offset))
-    );
-    $orders = $wpdb->get_results($list_sql);
+    ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $orders = $wpdb->get_results($list_sql); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
     if (empty($orders)) {
         echo '<p>' . esc_html__('No recent referrals found for this affiliate\'s coupons. This could mean that the assigned coupons have not been used in any orders yet, or the orders are still pending.', 'woo-coupon-usage') . '</p>';
@@ -135,8 +135,8 @@ function wcusage_affiliate_referrals_table($user_id, $page = 1, $per_page = 20, 
                     <td><?php echo esc_html($order->get_date_created()->date_i18n(get_option('date_format'))); ?></td>
                     <td><?php echo esc_html($customer_name); ?></td>
                     <td><?php echo esc_html($coupon_code); ?></td>
-                    <td><?php echo wcusage_format_price($order->get_total()); ?></td>
-                    <td><?php echo wcusage_format_price($commission); ?></td>
+                    <td><?php echo wp_kses_post(wcusage_format_price($order->get_total())); ?></td>
+                    <td><?php echo wp_kses_post(wcusage_format_price($commission)); ?></td>
                     <td><?php echo esc_html(wc_get_order_status_name($order->get_status())); ?></td>
                 </tr>
             <?php endforeach; ?>
@@ -159,7 +159,7 @@ function wcusage_affiliate_visits_table($user_id, $page = 1, $per_page = 20, $st
     }
 
     $table_name = $wpdb->prefix . 'wcusage_clicks';
-    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) { // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         echo '<div class="notice notice-info"><p>';
         echo esc_html__('Click tracking is not currently enabled.', 'woo-coupon-usage');
         echo '<br><br>';
@@ -186,14 +186,14 @@ function wcusage_affiliate_visits_table($user_id, $page = 1, $per_page = 20, $st
     $count_sql = $wpdb->prepare(
         "SELECT COUNT(*) FROM $table_name WHERE couponid IN $in_clause" . $where_date,
         $params
-    );
-    $total = intval($wpdb->get_var($count_sql));
+    ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $total = intval($wpdb->get_var($count_sql)); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
     $list_sql = $wpdb->prepare(
         "SELECT * FROM $table_name WHERE couponid IN $in_clause" . $where_date . " ORDER BY date DESC LIMIT %d OFFSET %d",
         array_merge($params, array($per_page, $offset))
-    );
-    $clicks = $wpdb->get_results($list_sql);
+    ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $clicks = $wpdb->get_results($list_sql); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
     if (empty($clicks)) {
         echo '<p>' . esc_html__('No recent visits found for this affiliate\'s coupons.', 'woo-coupon-usage') . '</p>';
@@ -204,7 +204,7 @@ function wcusage_affiliate_visits_table($user_id, $page = 1, $per_page = 20, $st
         <thead>
             <tr>
                 <th><?php echo esc_html__('ID', 'woo-coupon-usage'); ?></th>
-                <th><?php echo sprintf(esc_html__('%s Coupon', 'woo-coupon-usage'), wcusage_get_affiliate_text(__('Affiliate', 'woo-coupon-usage'))); ?></th>
+                <th><?php echo esc_html(sprintf(esc_html__('%s Coupon', 'woo-coupon-usage'), wcusage_get_affiliate_text(__('Affiliate', 'woo-coupon-usage')))); ?></th>
                 <th><?php echo esc_html__('Landing Page', 'woo-coupon-usage'); ?></th>
                 <th><?php echo esc_html__('Referrer URL', 'woo-coupon-usage'); ?></th>
                 <th><?php echo esc_html__('IP Address', 'woo-coupon-usage'); ?></th>
@@ -282,7 +282,7 @@ function wcusage_affiliate_visits_table($user_id, $page = 1, $per_page = 20, $st
                             <input type="text" id="wcu-id" name="wcu-id" value="<?php echo esc_attr($click->id); ?>" style="display: none;">
                             <input type="text" id="wcu-status-delete" name="wcu-status-delete" value="cancel" style="display: none;">
                             <?php wp_nonce_field('delete_url'); ?>
-                            <button onClick="return confirm('\nAre you sure you want to delete visit #<?php echo esc_attr($click->id); ?>?');"
+                            <button onClick="return confirm('Are you sure you want to delete visit #<?php echo esc_attr($click->id); ?>?');"
                                 title="<?php echo esc_attr__('Delete this visit.', 'woo-coupon-usage'); ?>"
                                 type="submit" name="submitclickdelete" style="padding: 0; background: 0; border: 0; cursor: pointer; margin-bottom: 5px; color: #B52828;">
                                 <i class="fa-solid fa-trash-can"></i> <?php echo esc_html__('Delete', 'woo-coupon-usage'); ?>
@@ -303,7 +303,7 @@ if (!function_exists('wcusage_affiliate_payouts_table')) {
 function wcusage_affiliate_payouts_table($user_id, $page = 1, $per_page = 20, $start_date = '', $end_date = '') {
     global $wpdb;
     $table_name = $wpdb->prefix . 'wcusage_payouts';
-    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) { // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         echo '<p>' . esc_html__('Payouts system not enabled or table not found.', 'woo-coupon-usage') . '</p>';
         return;
     }
@@ -323,14 +323,14 @@ function wcusage_affiliate_payouts_table($user_id, $page = 1, $per_page = 20, $s
     $count_sql = $wpdb->prepare(
         "SELECT COUNT(*) FROM $table_name WHERE userid = %d" . $where_date,
         $params
-    );
-    $total = intval($wpdb->get_var($count_sql));
+    ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $total = intval($wpdb->get_var($count_sql)); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
     $list_sql = $wpdb->prepare(
         "SELECT * FROM $table_name WHERE userid = %d" . $where_date . " ORDER BY id DESC LIMIT %d OFFSET %d",
         array_merge($params, array($per_page, $offset))
-    );
-    $payouts = $wpdb->get_results($list_sql);
+    ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $payouts = $wpdb->get_results($list_sql); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
     if (empty($payouts)) {
         echo '<p>' . esc_html__('No payout history found.', 'woo-coupon-usage') . '</p>';
@@ -381,7 +381,7 @@ function wcusage_affiliate_payouts_table($user_id, $page = 1, $per_page = 20, $s
                 <tr>
                     <td><?php echo esc_html($payout->id); ?></td>
                     <td><?php echo esc_html($coupon_title); ?></td>
-                    <td><?php echo wcusage_format_price($payout->amount); ?></td>
+                    <td><?php echo wp_kses_post(wcusage_format_price($payout->amount)); ?></td>
                     <td><?php echo esc_html($payout->method); ?></td>
                     <td><span class="order-status <?php echo esc_attr($status_class); ?>"><?php echo esc_html(ucfirst($payout->status)); ?></span></td>
                     <?php if ($show_files_column): ?>
@@ -456,12 +456,12 @@ function wcusage_affiliate_activity_table($user_id, $page = 1, $per_page = 20, $
     $offset = ($page - 1) * $per_page;
 
     // Count
-    $count_sql = $wpdb->prepare("SELECT COUNT(*) FROM $table_name" . $where, $params);
-    $total = intval($wpdb->get_var($count_sql));
+    $count_sql = $wpdb->prepare("SELECT COUNT(*) FROM $table_name" . $where, $params); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $total = intval($wpdb->get_var($count_sql)); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
     // Fetch
-    $list_sql = $wpdb->prepare("SELECT * FROM $table_name" . $where . " ORDER BY id DESC LIMIT %d OFFSET %d", array_merge($params, array($per_page, $offset)));
-    $activities = $wpdb->get_results($list_sql, ARRAY_A);
+    $list_sql = $wpdb->prepare("SELECT * FROM $table_name" . $where . " ORDER BY id DESC LIMIT %d OFFSET %d", array_merge($params, array($per_page, $offset))); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $activities = $wpdb->get_results($list_sql, ARRAY_A); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
     if (empty($activities)) {
         echo '<p>' . esc_html__('No activity found for this affiliate.', 'woo-coupon-usage') . '</p>';

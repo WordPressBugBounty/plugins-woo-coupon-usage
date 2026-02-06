@@ -1,5 +1,4 @@
 jQuery(document).ready(function($) {
-
     // Hide the View Affiliate submenu item on all pages
     $('#toplevel_page_wcusage .wp-submenu a[href*="page=wcusage_view_affiliate"]').parent('li').hide();
 

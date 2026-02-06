@@ -772,7 +772,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         $order_refunds = $orderinfo->get_refunds();
                         // Get subscription renewal icon if exist
                         $subicon = wcusage_get_sub_order_icon( $orderid );
-                        $random = rand();
+                        $random = wp_rand();
                         ?>
 
               <!-- Script for toggling list of products section -->
@@ -860,29 +860,29 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         }
                         // Total
                         if ( $option_show_amount != "0" ) {
-                            echo "<td class='wcuTableCell'> " . wcusage_format_price( $ordertotal ) . "</td>";
+                            echo "<td class='wcuTableCell'> " . wp_kses_post( wcusage_format_price( $ordertotal ) ) . "</td>";
                             $col2 = true;
                         }
                         if ( $option_show_amount_saved != "0" ) {
-                            echo "<td class='wcuTableCell'> " . wcusage_format_price( number_format(
+                            echo "<td class='wcuTableCell'> " . wp_kses_post( wcusage_format_price( number_format(
                                 (float) $totaldiscounts,
                                 2,
                                 '.',
                                 ''
-                            ) ) . "</td>";
+                            ) ) ) . "</td>";
                             $col3 = true;
                         }
                         if ( $option_show_amount != 0 ) {
-                            echo "<td class='wcuTableCell'> " . wcusage_format_price( number_format(
+                            echo "<td class='wcuTableCell'> " . wp_kses_post( wcusage_format_price( number_format(
                                 (float) $ordertotaldiscounted,
                                 2,
                                 '.',
                                 ''
-                            ) ) . "</td>";
+                            ) ) ) . "</td>";
                         }
                         // Tax
                         if ( $option_show_tax != "0" ) {
-                            echo "<td class='wcuTableCell'> " . wcusage_format_price( $orderinfo->get_total_tax() ) . "</td>";
+                            echo "<td class='wcuTableCell'> " . wp_kses_post( wcusage_format_price( $orderinfo->get_total_tax() ) ) . "</td>";
                             $col11 = true;
                         }
                         // Commission
@@ -891,12 +891,12 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                             if ( $type == "mla" ) {
                                 echo "<span title='Your commission earned from this sub-affiliate referral.'>";
                             }
-                            echo wcusage_format_price( number_format(
+                            echo wp_kses_post( wcusage_format_price( number_format(
                                 (float) $totalcommission,
                                 2,
                                 '.',
                                 ''
-                            ) );
+                            ) ) );
                             if ( $type == "mla" ) {
                                 echo "</span>";
                             }
@@ -905,7 +905,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         }
                         // Shipping
                         if ( $option_show_shipping != "0" ) {
-                            echo "<td class='wcuTableCell'> " . wcusage_format_price( $shipping ) . "</td>";
+                            echo "<td class='wcuTableCell'> " . wp_kses_post( wcusage_format_price( $shipping ) ) . "</td>";
                             $col6 = true;
                         }
                         // Country
@@ -951,7 +951,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         }
                         /* Show the "MORE" products list column / toggle on table */
                         if ( $option_show_list_products == "1" ) {
-                            if ( $orderinfo->get_items() && $orderinfo->get_status() != "refunded" ) {
+                            if ( $orderinfo->get_items() && $orderinfo->get_status() != "refunded" && $orderinfo->get_status() != "cancelled" && $orderinfo->get_status() != "failed" ) {
                                 echo "<td class='wcuTableCell excludeThisClass orderproductstd orderproductstd" . esc_attr( $random ) . "-" . esc_html( $orderid ) . "' style='min-width: 100px; font-size: 16px;'>";
                                 echo "<a class='listproductsbutton' href='javascript:void(0);' id='listproductsbutton-" . esc_attr( $random ) . "-" . esc_html( $orderid ) . "'>" . esc_html__( "MORE", "woo-coupon-usage" ) . " <i class='fas fa-chevron-down'></i> <i class='fas fa-chevron-up' style='display: none;'></i></i></i></a>";
                             } else {
@@ -1036,7 +1036,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
               <script>
               jQuery( document ).ready(function() {
                 jQuery( '#wcu-orders-start' ).val("<?php 
-                        echo date( "Y-m-d", strtotime( $showdate ) );
+                        echo esc_html( date( "Y-m-d", strtotime( $showdate ) ) );
                         ?>");
               });
               </script>
@@ -1074,42 +1074,42 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                     echo "<td class='wcuTableFoot'></td>";
                 }
                 if ( $col2 ) {
-                    echo "<td class='wcuTableFoot'><strong>" . wcusage_format_price( number_format(
+                    echo "<td class='wcuTableFoot'><strong>" . wp_kses_post( wcusage_format_price( number_format(
                         (float) $combined_ordertotal,
                         2,
                         '.',
                         ''
-                    ) ) . "</strong></td>";
+                    ) ) ) . "</strong></td>";
                 }
                 if ( $col3 ) {
-                    echo "<td class='wcuTableFoot'><strong>" . wcusage_format_price( number_format(
+                    echo "<td class='wcuTableFoot'><strong>" . wp_kses_post( wcusage_format_price( number_format(
                         (float) $combined_total_discount,
                         2,
                         '.',
                         ''
-                    ) ) . "</strong></td>";
+                    ) ) ) . "</strong></td>";
                 }
-                echo "<td class='wcuTableFoot'><strong>" . wcusage_format_price( number_format(
+                echo "<td class='wcuTableFoot'><strong>" . wp_kses_post( wcusage_format_price( number_format(
                     (float) $combined_ordertotaldiscounted,
                     2,
                     '.',
                     ''
-                ) ) . "</strong></td>";
+                ) ) ) . "</strong></td>";
                 if ( $col5 ) {
-                    echo "<td class='wcuTableFoot'><strong>" . wcusage_format_price( number_format(
+                    echo "<td class='wcuTableFoot'><strong>" . wp_kses_post( wcusage_format_price( number_format(
                         (float) $combined_totalcommission,
                         2,
                         '.',
                         ''
-                    ) ) . "</strong></td>";
+                    ) ) ) . "</strong></td>";
                 }
                 if ( $col6 ) {
-                    echo "<td class='wcuTableFoot'><strong>" . wcusage_format_price( number_format(
+                    echo "<td class='wcuTableFoot'><strong>" . wp_kses_post( wcusage_format_price( number_format(
                         (float) $combined_shipping,
                         2,
                         '.',
                         ''
-                    ) ) . "</strong></td>";
+                    ) ) ) . "</strong></td>";
                 }
                 $finalcolspan = 1;
                 if ( $col8 ) {

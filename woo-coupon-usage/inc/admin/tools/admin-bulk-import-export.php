@@ -25,7 +25,7 @@ function wcusage_data_import_export_tables() {
 function wcusage_data_import_export_page() {
 
     // Check if user is administrator
-    if (!current_user_can('manage_options')) {
+    if ( ! wcusage_check_admin_access() ) {
         wp_die('Error: Permission denied.');
     }
 
@@ -114,7 +114,7 @@ function wcusage_handle_export_import() {
     if (isset($_GET['export'], $_GET['table'], $_GET['nonce']) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ) ), 'export-nonce-' . $_GET['table'])) {
 
         // Check if user is administrator
-        if (!current_user_can('manage_options')) {
+        if ( ! wcusage_check_admin_access() ) {
             wp_die('Error: Permission denied. Failed to export data.', 'Error',  array( 'response' => 500, 'back_link' => true ));
         }
 
@@ -132,7 +132,7 @@ function wcusage_handle_export_import() {
         $table = sanitize_text_field($_GET['table']);
         $filename = $table . '.csv';
 
-        $data = $wpdb->get_results($wpdb->prepare("SELECT * FROM `$wpdb->prefix$table`"), ARRAY_A);
+        $data = $wpdb->get_results($wpdb->prepare("SELECT * FROM `$wpdb->prefix$table`"), ARRAY_A); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
         if ($data) {
 
@@ -157,7 +157,7 @@ function wcusage_handle_export_import() {
     if (isset($_POST['table'], $_FILES['import_file']) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['import_nonce'] ) ), 'import-nonce-' . $_POST['table'])) {
         
         // Check if user is administrator
-        if (!current_user_can('manage_options')) {
+        if ( ! wcusage_check_admin_access() ) {
             wp_die('Error: Permission denied. Failed to export data.', 'Error',  array( 'response' => 500, 'back_link' => true ));
         }
 
@@ -165,7 +165,7 @@ function wcusage_handle_export_import() {
         if (isset($_POST['table'])) {
             $table = sanitize_text_field($_POST['table']);
             if (!in_array($table, $tables)) {
-                wp_die('Error: Failed to find the table ' . $table, 'Error',  array( 'response' => 500, 'back_link' => true ));
+                wp_die(sprintf(esc_html__('Error: Failed to find the table %s', 'woo-coupon-usage'), esc_html($table)), 'Error',  array( 'response' => 500, 'back_link' => true ));
             }
         }
 
@@ -191,7 +191,7 @@ function wcusage_handle_export_import() {
             $headers = fgetcsv($handle, 1000, ",");
             // get headers from the current table in database
             $table = sanitize_text_field($_POST['table']);
-            $expected_headers = $wpdb->get_col("SHOW COLUMNS FROM " . $wpdb->prefix . $table);
+            $expected_headers = $wpdb->get_col("SHOW COLUMNS FROM " . $wpdb->prefix . $table); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
             if ($headers !== $expected_headers) {
                 wp_die('Error: The CSV file does not have the expected headers.', 'Error',  array( 'response' => 500, 'back_link' => true ));
             }
@@ -212,7 +212,7 @@ function wcusage_handle_export_import() {
                 id mediumint(9) NOT NULL AUTO_INCREMENT,
                 data text NOT NULL,
                 PRIMARY KEY (id)
-            );");
+            );"); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         }
 
         $handle = fopen($file['tmp_name'], 'r');
@@ -223,7 +223,7 @@ function wcusage_handle_export_import() {
 
             // Get the actual column names from the table
             $table = sanitize_text_field($_POST['table']);
-            $table_columns = $wpdb->get_col($wpdb->prepare("DESCRIBE `$wpdb->prefix$table`"));
+            $table_columns = $wpdb->get_col($wpdb->prepare("DESCRIBE `$wpdb->prefix$table`")); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
             // Check if CSV column headers match the table columns
             if ($headers !== $table_columns) {
@@ -231,7 +231,7 @@ function wcusage_handle_export_import() {
             }
 
             if(in_array($table, $tables)) {
-                $wpdb->query("TRUNCATE TABLE `$wpdb->prefix$table`");
+                $wpdb->query("TRUNCATE TABLE `$wpdb->prefix$table`"); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
             }
 
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {

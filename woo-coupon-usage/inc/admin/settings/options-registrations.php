@@ -21,14 +21,20 @@ function wcusage_field_cb_registration( $args )
     <?php if( !wcu_fs()->can_use_premium_code() ) { ?>
     <br/><p>- <?php echo esc_html__( 'PRO features: Custom form fields, dynamic code generator, auto accept, auto registration, and join button on checkout.', 'woo-coupon-usage' ); ?></p>
     <?php } ?>
+    
+    <?php if ( ! get_option( 'users_can_register' ) ) { ?>
+      <p style="color: #c44747ff; font-size: 12px;" class="registration-warning">
+        <?php echo sprintf( wp_kses_post( __( 'Warning: You have "<a href="%s" target="_blank">Anyone can register</a>" disabled in WordPress, which will be ignored for the registration form on the affiliate dashboard.', 'woo-coupon-usage' ) ), esc_url( admin_url( 'options-general.php' ) . '#users_can_register' ) ); ?>
+      </p>
+    <?php } ?>
 
   	<br/><hr/>
 
       <!-- Enable Affiliate Registration Features -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable', 1, esc_html__( 'Enable Affiliate Registration Features', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_enable', 1, esc_html__( 'Enable Affiliate Registration Features', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'This will enable the coupon affiliate registration system on your website.', 'woo-coupon-usage' ); ?></i><br/>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_registration_enable', '.wcu-field-section-registration-settings'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_registration_enable', '.wcu-field-section-registration-settings'); // Show or Hide ?>
       <span class="wcu-field-section-registration-settings">
 
         <?php if(!$wcusage_registration_page) { ?>
@@ -42,7 +48,7 @@ function wcusage_field_cb_registration( $args )
         <br/><br/>
 
         <!-- Registration Page -->
-        <?php echo do_action( 'wcusage_hook_setting_section_registration_page' ); ?>
+        <?php do_action( 'wcusage_hook_setting_section_registration_page' ); ?>
 
         <br/><br/>
 
@@ -74,9 +80,7 @@ function wcusage_field_cb_registration( $args )
             <strong><?php echo esc_html__( 'For more information, please see the video below:', 'woo-coupon-usage' ); ?></strong>
 
             <br/>
-            <div style="max-width: 720px;">
-            <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/713487822?badge=0&autopause=0&player_id=0&app_id=58479/embed" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>
-            </div>
+            <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/713487822?badge=0&autopause=0&player_id=0&app_id=58479/embed' ); ?>
 
           </div>
 
@@ -85,48 +89,66 @@ function wcusage_field_cb_registration( $args )
         <br/><hr/>
 
         <!-- Template Coupon -->
-        <?php echo do_action( 'wcusage_hook_setting_section_registration_template' ); ?>
+        <?php do_action( 'wcusage_hook_setting_section_registration_template' ); ?>
 
         <!-- Template Coupon Multi -->
-        <?php echo do_action( 'wcusage_hook_setting_section_registration_template2' ); ?>
+        <?php do_action( 'wcusage_hook_setting_section_registration_template2' ); ?>
 
         <br/><hr/>
 
         <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Form Visibility Settings', 'woo-coupon-usage' ); ?></h3>
 
-        <!-- Show registration form on affiliate page for logged in users -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_register_loggedin', 1, esc_html__( 'Show registration form on affiliate dashboard page (logged in users).', 'woo-coupon-usage' ), '0px'); ?>
-        <i><?php echo esc_html__( 'If the user is not already registered as an affiliate and has no active coupons, this will show the registration from on the affiliate dashboard page.', 'woo-coupon-usage' ); ?></i><br/>
+        <?php wcusage_setting_toggle_option('wcusage_field_loginform', 1, esc_html__( 'Show login form on affiliate dashboard.', 'woo-coupon-usage' ), '0px'); ?>
+
+        <br/>
+
+        <?php
+        $wcusage_portal_enabled_on_load = wcusage_get_setting_value('wcusage_field_portal_enable', '0');
+        $wcusage_users_can_register = (int) get_option('users_can_register');
+        // Default to enabled for existing portals, but keep disabled when the portal toggle is off and user registration is disabled
+        $wcusage_portal_form_default = 1;
+        if ('1' !== $wcusage_portal_enabled_on_load && !$wcusage_users_can_register) {
+          $wcusage_portal_form_default = 0;
+        }
+        wcusage_setting_toggle_option('wcusage_field_enable_portal_registration', $wcusage_portal_form_default, esc_html__( 'Show registration form on affiliate dashboard.', 'woo-coupon-usage' ), '0px');
+        ?>
+        
+        <?php wcusage_setting_toggle('.wcusage_field_enable_portal_registration', '#wcu-dashboard-register-settings'); // Show or Hide ?>
+
+        <div id="wcu-dashboard-register-settings">
+
+          <br/>
+
+          <!-- Show registration form on affiliate page for logged in users -->
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_register_loggedin', 1, esc_html__( 'Show for logged in users.', 'woo-coupon-usage' ), '40px'); ?>
+          <i style="margin-left: 40px;"><?php echo esc_html__( 'If the user is not already registered as an affiliate and has no active coupons, this will show the registration from on the affiliate dashboard page.', 'woo-coupon-usage' ); ?></i><br/>
+
+          <br/>
+          
+          <!-- Show registration form on affiliate page for logged out users. -->
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_login', 1, esc_html__( 'Show for logged out users.', 'woo-coupon-usage' ), '40px'); ?>
+          <i style="margin-left: 40px;"><?php echo esc_html__( 'This will show the affiliate application/registration form automatically on the affiliate page for logged out users (alongside the login form).', 'woo-coupon-usage' ); ?></i><br/>
+
+        </div>
 
         <br/>
 
         <!-- Allow logged out users to register for an affiliate coupon. -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_logout', 1, esc_html__( 'Allow logged out users to register as an affiliate.', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_logout', 1, esc_html__( 'Allow logged out users to register as an affiliate.', 'woo-coupon-usage' ), '0px'); ?>
         <i><?php echo esc_html__( 'With this enabled, logged out users can view the registration form (with some extra fields). When submitted it will create a new account for them, and submit the affiliate application.', 'woo-coupon-usage' ); ?></i><br/>
         <i><?php echo esc_html__( 'With this disabled, only logged in users can apply.', 'woo-coupon-usage' ); ?></i><br/>
-
-        <?php echo wcusage_setting_toggle('.wcusage_field_registration_enable_logout', '.wcu-field-section-registration-enable-login'); // Show or Hide ?>
-      	<span class="wcu-field-section-registration-enable-login">
-
-          <br/>
-
-          <!-- Show registration form on affiliate page for logged out users. -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_login', 1, esc_html__( 'Show registration form on affiliate dashboard page (logged out users).', 'woo-coupon-usage' ), '40px'); ?>
-          <i style="margin-left: 40px;"><?php echo esc_html__( 'This will show the affiliate application/registration form automatically on the affiliate page for logged out users (alongside the login form).', 'woo-coupon-usage' ); ?></i><br/>
-
-        </span>
 
         <br/>
 
         <!-- Disable form for existing affiliates -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_registration_disable_existing', 1, esc_html__( 'Disable registration form for existing affiliate users.', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_registration_disable_existing', 1, esc_html__( 'Disable registration form for existing affiliate users.', 'woo-coupon-usage' ), '0px'); ?>
         <i><?php echo esc_html__( 'If enabled, then the registration form shortcode will be disabled/hidden for any affiliate user that is already assigned to an affiliate coupon.', 'woo-coupon-usage' ); ?></i><br/>
 
         <?php $wcusage_field_registration_enable_admincan = wcusage_get_setting_value('wcusage_field_registration_enable_admincan', '0'); ?>
         <?php if($wcusage_field_registration_enable_admincan) { ?>
         <br/>
         <!-- Allow administrator users to fill out the registration form for new users. -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_admincan', 0, esc_html__( 'Allow administrator users to fill out the registration form for new users.', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_admincan', 0, esc_html__( 'Allow administrator users to fill out the registration form for new users.', 'woo-coupon-usage' ), '0px'); ?>
         <i><?php echo esc_html__( 'With this enabled, "administrator" users will be able to fill out the affiliate registration form for new users (custom username/email etc), whilst logged in.', 'woo-coupon-usage' ); ?></i><br/>
         <i><?php echo esc_html__( 'As an admin, you can also manually add new affiliate registrations easily in the "Registrations" admin page, via the "Create New Registration" button.', 'woo-coupon-usage' ); ?></i><br/>
         <?php } ?>
@@ -136,25 +158,25 @@ function wcusage_field_cb_registration( $args )
       <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Basic Fields Customisation', 'woo-coupon-usage' ); ?></h3>
       
       <!-- First name and last name. -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_registration_name_required', 0, esc_html__( 'First & Last Name Required', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_name_required', 0, esc_html__( 'First & Last Name Required', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'With this enabled, the first name and last name fields will be required.', 'woo-coupon-usage' ); ?></i><br/>
 
       <br/>
 
       <!-- Use the email address as username. -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_registration_emailusername', 0, esc_html__( 'Use the email address as username.', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_emailusername', 0, esc_html__( 'Use the email address as username.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'With this enabled, the username field will be hidden, and the email address will be used as their username instead.', 'woo-coupon-usage' ); ?></i><br/>
 
       <br/>
 
       <!-- First name and last name. -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_registration_password_confirm', 0, esc_html__( 'Show "Confirm Password" Field', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_password_confirm', 0, esc_html__( 'Show "Confirm Password" Field', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'With this enabled, a second password field will be shown to require users to confirm their password.', 'woo-coupon-usage' ); ?></i><br/>
 
       <br/>
 
       <!-- "Preferred Coupon Code" Field Label -->
-      <?php echo wcusage_setting_text_option('wcusage_field_registration_coupon_label', '', esc_html__( 'Custom "Preferred Coupon Code" Field Label', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_text_option('wcusage_field_registration_coupon_label', '', esc_html__( 'Custom "Preferred Coupon Code" Field Label', 'woo-coupon-usage' ), '0px'); ?>
 
       <br/><hr/>
 
@@ -183,18 +205,18 @@ function wcusage_field_cb_registration( $args )
       <h3 id="wcu-setting-header-terms"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Terms and Conditions Acceptance Checkbox', 'woo-coupon-usage' ); ?></h3>
 
       <!-- Enable terms acceptance checkbox on affiliate registration form. -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_terms', 0, esc_html__( 'Enable terms and conditions checkbox on registration form.', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_terms', 0, esc_html__( 'Enable terms and conditions checkbox on registration form.', 'woo-coupon-usage' ), '0px'); ?>
 
       <style>
       #wcusage_field_registration_terms_message_ifr { height: 60px !important; }
       </style>
-      <?php echo wcusage_setting_toggle('.wcusage_field_registration_enable_terms', '.wcu-field-section-registration-terms-message'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_registration_enable_terms', '.wcu-field-section-registration-terms-message'); // Show or Hide ?>
       <div class="wcu-field-section-registration-terms-message">
         <br/>
         <!-- Terms and Conditions Message -->
         <?php
         $terms1message = wcusage_get_setting_value('wcusage_field_registration_terms_message', 'I have read and agree to the Affiliate Terms and Privacy Policy.');
-        echo wcusage_setting_tinymce_option('wcusage_field_registration_terms_message', $terms1message, "Terms and Conditions Message", '0px');
+        wcusage_setting_tinymce_option('wcusage_field_registration_terms_message', $terms1message, "Terms and Conditions Message", '0px');
         ?>
         <i><?php echo esc_html__( 'Enter your terms acceptance message. Make sure you edit the message to include links to your terms and privacy policy!', 'woo-coupon-usage' ); ?></i><br/>
       </div>
@@ -256,8 +278,8 @@ function wcusage_field_cb_registration( $args )
         </style>
         <!-- Message -->
         <?php
-        $terms2message = wcusage_get_setting_value('wcusage_field_registration_accept_message', 'Your affiliate application for the coupon code "{coupon}" has been submitted. Please check your email.');
-        echo wcusage_setting_tinymce_option('wcusage_field_registration_accept_message', $terms2message, 'Message', '0px');
+        $terms2message = wcusage_get_setting_value('wcusage_field_registration_accept_message', 'Your affiliate application for the coupon code "{coupon}" has been submitted.');
+        wcusage_setting_tinymce_option('wcusage_field_registration_accept_message', $terms2message, 'Submission Message', '0px');
         ?>
         <i><?php echo esc_html__( 'This is the message shown on the page as soon as the user submits the application form. The {couponcode} placeholder will be replaced with their chosen coupon code.', 'woo-coupon-usage' ); ?></i><br/>
       </div>
@@ -293,21 +315,39 @@ function wcusage_field_cb_registration( $args )
       </div>
 
       <br/>
+
+      <!-- Pending Application Message -->
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_pending_message_enable', 0, esc_html__( 'Customise the pending application message (shown while awaiting review).', 'woo-coupon-usage' ), '0px'); ?>
+      
+      <br/>
+
+      <?php wcusage_setting_toggle('.wcusage_field_registration_pending_message_enable', '.wcu-field-section-registration-pending-message'); // Show or Hide ?>
+      <span class="wcu-field-section-registration-pending-message">
+        <style>
+        #wcusage_field_registration_pending_message_ifr { height: 80px !important; }
+        </style>
+        <?php
+        $pending_default_message = '<p>You have a pending affiliate application.</p><p>We are reviewing your application and will be in touch soon!</p>';
+        $pending_message = wcusage_get_setting_value('wcusage_field_registration_pending_message', $pending_default_message);
+        wcusage_setting_tinymce_option('wcusage_field_registration_pending_message', $pending_message, esc_html__( 'Pending Application Message', 'woo-coupon-usage' ), '0px');
+        ?>
+        <br/>
+      </span>
       
       <!-- Automatically log the user in after registration. -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_registration_auto_login', 1, esc_html__( 'Automatically log the user in after registration.', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_login', 1, esc_html__( 'Automatically log the user in after registration.', 'woo-coupon-usage' ), '0px'); ?>
 
       <br/><hr/>
 
       <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( '"Coupon Affiliate" User Role', 'woo-coupon-usage' ); ?></h3>
 
       <!-- Upon new registration, assign user to custom "coupon affiliate" user role. -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_register_role', 1, esc_html__( 'Upon new registration, assign user to custom "coupon affiliate" user role.', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_register_role', 1, esc_html__( 'Upon new registration, assign user to custom "coupon affiliate" user role.', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'With this enabled, instead of using the default WordPress "subscriber" user role, new affiliate users will be assigned to the custom "coupon affiliate" user role (or the custom role defined below) instead.', 'woo-coupon-usage' ); ?></i><br/>
 
       <br/>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_register_role', '.wcu-field-section-registration-accepted-role'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_register_role', '.wcu-field-section-registration-accepted-role'); // Show or Hide ?>
       <span class="wcu-field-section-registration-accepted-role">
         <p>
 
@@ -337,14 +377,14 @@ function wcusage_field_cb_registration( $args )
         <br/>
 
         <!-- Set a different user role for pending affiliate users. -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_register_role_only_accept', 0, esc_html__( 'Set a different user role for pending affiliate users.', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_register_role_only_accept', 0, esc_html__( 'Set a different user role for pending affiliate users.', 'woo-coupon-usage' ), '0px'); ?>
         <i><?php echo esc_html__( 'With this enabled, the new user account created will be assigned to the default "Subscriber" role (or the custom role defined below) initially, and only when their affiliate application is accepted will they be assigned to the "coupon affiliate" user role instead.', 'woo-coupon-usage' ); ?></i><br/>
 
         <br/>
 
       </span>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_register_role_only_accept', '.wcu-field-section-registration-pending-role'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_register_role_only_accept', '.wcu-field-section-registration-pending-role'); // Show or Hide ?>
       <span class="wcu-field-section-registration-pending-role">
         <p>
 
@@ -375,7 +415,7 @@ function wcusage_field_cb_registration( $args )
         <br/>
 
         <!-- Remove the pending affiliate role from user when their affiliate application is accepted. -->
-        <?php echo wcusage_setting_toggle_option('wcusage_field_register_role_remove_pending', 1, esc_html__( 'Remove the pending affiliate role from user when their affiliate application is accepted.', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_register_role_remove_pending', 1, esc_html__( 'Remove the pending affiliate role from user when their affiliate application is accepted.', 'woo-coupon-usage' ), '0px'); ?>
         <i><?php echo esc_html__( 'With this enabled, the pending user role will be removed from the affiliate when the application is accepted.', 'woo-coupon-usage' ); ?></i><br/>
 
         <br/>
@@ -395,7 +435,7 @@ function wcusage_field_cb_registration( $args )
       <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Form CAPTCHA - Spam Protection', 'woo-coupon-usage' ); ?></h3>
 
       <!-- Enable HoneyPot Spam Protection -->
-      <?php echo wcusage_setting_toggle_option('wcusage_registration_enable_honeypot', 1, esc_html__( 'Enable HoneyPot Spam Prevention', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_registration_enable_honeypot', 1, esc_html__( 'Enable HoneyPot Spam Prevention', 'woo-coupon-usage' ), '0px'); ?>
       <i><?php echo esc_html__( 'With this enabled, a hidden field will be added to the registration form to help prevent spam.', 'woo-coupon-usage' ); ?></i><br/>
       <i><?php echo esc_html__( 'This is only a basic spam protection method, and is not as effective as CAPTCHA.', 'woo-coupon-usage' ); ?></i><br/>
 
@@ -457,10 +497,10 @@ function wcusage_field_cb_registration( $args )
           <p style="font-weight: bold;"><?php echo esc_html__( 'Currently only reCAPTCHA "v2" is supported.', 'woo-coupon-usage' ); ?></p>
           <br/>
           <!-- Site Key -->
-          <?php echo wcusage_setting_text_option('wcusage_registration_recaptcha_key', '', esc_html__( 'Site Key', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_text_option('wcusage_registration_recaptcha_key', '', esc_html__( 'Site Key', 'woo-coupon-usage' ), '0px'); ?>
           <br/>
           <!-- Secret Key -->
-          <?php echo wcusage_setting_text_option('wcusage_registration_recaptcha_secret', '', esc_html__( 'Secret Key', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_text_option('wcusage_registration_recaptcha_secret', '', esc_html__( 'Secret Key', 'woo-coupon-usage' ), '0px'); ?>
         </div>
 
         <div class="wcu-turnstile-help"><br/>
@@ -468,27 +508,99 @@ function wcusage_field_cb_registration( $args )
           <p><?php echo esc_html__( 'You can get your site key and secret key from here:', 'woo-coupon-usage' ); ?> <a href="https://dash.cloudflare.com/?to=/:account/turnstile" target="_blank">https://dash.cloudflare.com/?to=/:account/turnstile</a></p>
           <br/>
           <!-- Site Key -->
-          <?php echo wcusage_setting_text_option('wcusage_registration_turnstile_key', '', esc_html__( 'Site Key', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_text_option('wcusage_registration_turnstile_key', '', esc_html__( 'Site Key', 'woo-coupon-usage' ), '0px'); ?>
           <br/>
           <!-- Secret Key -->
-          <?php echo wcusage_setting_text_option('wcusage_registration_turnstile_secret', '', esc_html__( 'Secret Key', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_text_option('wcusage_registration_turnstile_secret', '', esc_html__( 'Secret Key', 'woo-coupon-usage' ), '0px'); ?>
         </div>
 
       </div>
 
       <br/><hr/>
 
-      <div id="pro-registration-settings" class="settings-area premium-only-settings" <?php
+      <div id="pro-registration-settings" class="settings-area<?php if ( !wcu_fs()->can_use_premium_code() ) { ?> premium-only-settings<?php } ?>" <?php
         if ( !wcu_fs()->can_use_premium_code() ) {
             ?>title="Available with Pro version." style="pointer-events:none; opacity: 0.4;"<?php
         }
         ?>>
 
-          <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'PRO Settings', 'woo-coupon-usage' ); ?></h3>
+          <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Auto-Accept Registrations', 'woo-coupon-usage' ); ?></h3>
 
           <!-- Automatically accept all affiliate registrations. -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_registration_auto_accept', 0, esc_html__( 'Automatically accept all affiliate registrations.', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_accept', 0, esc_html__( 'Automatically accept all affiliate registrations.', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
           <i><?php echo esc_html__( 'With this enabled, affiliate registrations will be automatically accepted (and coupon auto-created instantly), instead of manual approval.', 'woo-coupon-usage' ); ?></i><br/>
+
+
+          <?php wcusage_setting_toggle('.wcusage_field_registration_auto_accept', '.wcu-field-section-registration-auto-accept-roles-limit'); // Show or Hide ?>
+          <span class="wcu-field-section-registration-auto-accept-roles-limit">
+
+            <br/>
+
+            <!-- Limit auto-accept to certain roles/groups -->
+            <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_accept_limit', 0, esc_html__( 'Only auto-accept for certain user roles & groups?', 'woo-coupon-usage' ), '20px'); ?>
+            <i style="margin-left: 20px; display: inline-block;"><?php echo esc_html__( 'If enabled, only users with one of the selected roles/groups (or the role/group assigned to the selected template) will be auto-accepted.', 'woo-coupon-usage' ); ?></i><br/>
+
+            <?php wcusage_setting_toggle('.wcusage_field_registration_auto_accept_limit', '.wcu-field-section-registration-auto-accept-roles'); // Show or Hide ?>
+            <div class="wcu-field-section-registration-auto-accept-roles" style="margin-left: 40px;">
+              <span style="height: 120px; width: 250px; overflow-y: auto; display: block; border: 1px solid #ddd; padding: 10px;">
+
+              <?php
+              $options = get_option('wcusage_options');
+              $thisid = 'wcusage_field_registration_auto_accept_roles';
+
+              $current_selected_roles = array();
+              if (isset($options[$thisid]) && is_array($options[$thisid])) {
+                $current_selected_roles = $options[$thisid];
+              }
+
+              // Remove any saved roles that no longer exist.
+              foreach ($current_selected_roles as $key => $val) {
+                $rolesx = get_editable_roles();
+                if (!isset($rolesx[$key])) {
+                  // Only update on non-GET requests
+                  if ( $_SERVER['REQUEST_METHOD'] !== 'GET' ) {
+                    $options_new = get_option('wcusage_options');
+                    if ( ! is_array( $options_new ) ) {
+                      $options_new = array();
+                    }
+                    unset($options_new[$thisid][$key]);
+                    update_option('wcusage_options', $options_new);
+                  }
+                  unset($options[$thisid][$key]);
+                }
+              }
+
+              $roles = get_editable_roles();
+              // Re-order with all those containing "coupon_affiliate" at the start
+              $roles2 = array();
+              foreach ($roles as $key => $role) {
+                if (strpos($key, 'coupon_affiliate') !== false) {
+                  $roles2[$key] = $role;
+                  unset($roles[$key]);
+                }
+              }
+              $roles2 = array_merge($roles2, $roles);
+
+              foreach ($roles2 as $key => $role) {
+                $role_name = $role['name'];
+                if (strpos($key, 'coupon_affiliate') !== false) {
+                  $role_name = '(Group) ' . $role_name;
+                }
+                $checked = '';
+                if (isset($options[$thisid]) && is_array($options[$thisid]) && isset($options[$thisid][$key])) {
+                  $checked = 'checked';
+                }
+                echo '<span id="' . esc_attr($thisid) . '">' .
+                  '<input type="checkbox" class="wcusage_field_' . esc_attr($thisid) . '" name="wcusage_options[' . esc_attr($thisid) . '][' . esc_attr($key) . ']" value="1" ' . esc_attr($checked) . '> ' . esc_html($role_name) .
+                  '</span><br/>';
+              }
+              ?>
+
+              </span>
+              <i style="display:block; margin-top: 6px;"><?php echo esc_html__( 'If none are selected, auto-accept will apply to all registrations.', 'woo-coupon-usage' ); ?></i>
+            </div>
+
+          </span>
 
           <br/><hr/>
 
@@ -501,17 +613,17 @@ function wcusage_field_cb_registration( $args )
           <br/>
 
           <!-- Automatically generate coupon code? -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_registration_auto_coupon', 0, esc_html__( 'Generate a dynamic coupon name automatically.', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_coupon', 0, esc_html__( 'Generate a dynamic coupon name automatically.', 'woo-coupon-usage' ), '0px'); ?>
           <i><?php echo esc_html__( 'With this enabled, instead of the user entering their "preferred coupon code", a code will be generated for them automatically.', 'woo-coupon-usage' ); ?></i><br/>
           <i><?php echo esc_html__( 'You will still be able to review and edit the generated code before approving.', 'woo-coupon-usage' ); ?></i>
 
           <br/>
 
-          <?php echo wcusage_setting_toggle('.wcusage_field_registration_auto_coupon', '.wcu-field-section-registration-auto-coupon-text'); // Show or Hide ?>
+          <?php wcusage_setting_toggle('.wcusage_field_registration_auto_coupon', '.wcu-field-section-registration-auto-coupon-text'); // Show or Hide ?>
           <span class="wcu-field-section-registration-auto-coupon-text">
             <!-- Coupon Format Field -->
             <br/>
-            <?php echo wcusage_setting_text_option('wcusage_field_registration_auto_coupon_format', '{username}{amount}', esc_html__( 'Coupon Format', 'woo-coupon-usage' ), '0px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_registration_auto_coupon_format', '{username}{amount}', esc_html__( 'Coupon Format', 'woo-coupon-usage' ), '0px'); ?>
 
             <?php
             $template_coupon_code = wcusage_get_setting_value('wcusage_field_registration_coupon_template', '');
@@ -534,14 +646,24 @@ function wcusage_field_cb_registration( $args )
               var couponexample = couponexample.replace("{username}", "JOHN");
               var couponexample = couponexample.replace("{amount}", "<?php echo esc_html($template_coupon_amount); ?>");
               var couponexample = couponexample.replace("{random}", "KPQS9JY");
+              // New name-based merge tags
+              couponexample = couponexample.replace(/\{first_name\}/g, 'JOHN');
+              couponexample = couponexample.replace(/\{Last_name\}/g, 'DOE');
+              couponexample = couponexample.replace(/\{last_name\}/g, 'DOE');
+              couponexample = couponexample.replace(/\{first_name_initial\}/g, 'J');
+              couponexample = couponexample.replace(/\{last_name_initial\}/g, 'D');
               jQuery('#coupon_format_example').text(couponexample);
             }
             </script>
             <p><strong>Example code:</strong> <span id="coupon_format_example"></span></p>
             <br/>Merge tags:
-            <br/><strong>{username}</strong> - The affiliate's username, for example "JOHN".
+            <br/><strong>{username}</strong> - The affiliate's username.
             <br/><strong>{amount}</strong> - The discount amount the coupon gives for example "<?php echo esc_html($template_coupon_amount); ?>" (if it was a "<?php echo esc_html($template_coupon_amount); ?>% off" or "$<?php echo esc_html($template_coupon_amount); ?> off" discount code).
             <br/><strong>{random}</strong> - A randomly generated 7 letter/number phrase for example "KPQS9JY". Unique every time.
+            <br/><strong>{first_name}</strong> - The affiliate's first name, for example "JOHN".
+            <br/><strong>{last_name}</strong> - The affiliate's last name, for example "DOE".
+            <br/><strong>{first_name_initial}</strong> - First initial, for example "J".
+            <br/><strong>{last_name_initial}</strong> - Last initial, for example "D".
             <br/>You can also place your own custom text in the format before, after or inbetween the merge tags.
             <br/>
 
@@ -552,18 +674,18 @@ function wcusage_field_cb_registration( $args )
           <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Extra Fields', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?></h3>
 
           <!-- Show "Website" field on affiliate application form. -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_website', 0, esc_html__( '"Website" Field', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_website', 0, esc_html__( '"Website" Field', 'woo-coupon-usage' ), '0px'); ?>
 
-          <?php echo wcusage_setting_toggle('.wcusage_field_registration_enable_website', '.wcu-field-section-registration-website-text'); // Show or Hide ?>
+          <?php wcusage_setting_toggle('.wcusage_field_registration_enable_website', '.wcu-field-section-registration-website-text'); // Show or Hide ?>
           <span class="wcu-field-section-registration-website-text" style="margin-top: 7px; display: block;">
             <div style="display: inline-block;padding: 5px 10px 8px 10px;background: #fff;border: 2px solid #e3e3e3;border-radius: 10px;">
               <!-- Website field label -->
               <div style="width: auto; float: left; display: block;">
-                <?php echo wcusage_setting_text_option('wcusage_field_registration_website_text', 'Your Website', '<span class="reg-field-label">' . esc_html__( 'Field Label:', 'woo-coupon-usage' ) . '</span>', '0px'); ?>
+                <?php wcusage_setting_text_option('wcusage_field_registration_website_text', 'Your Website', '<span class="reg-field-label">' . esc_html__( 'Field Label:', 'woo-coupon-usage' ) . '</span>', '0px'); ?>
               </div>
               <div style="width: auto; float: left; display: block; margin-top: -5px;">
                 <strong style="display: block; margin: 5px 0 -5px 10px;"><label for="wcusage_field_registration_enable_website_req"><?php echo esc_html__( 'Required?', 'woo-coupon-usage' ); ?></label></strong>
-                <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_website_req', 1, '', '10px'); ?>
+                <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_website_req', 1, '', '10px'); ?>
               </div>
             </div>
           </span>
@@ -572,18 +694,18 @@ function wcusage_field_cb_registration( $args )
           <br/>
 
           <!-- Show "How will you promote us?" field on affiliate application form. -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_promote', 0, esc_html__( '"How will you promote us?" Field', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_promote', 0, esc_html__( '"How will you promote us?" Field', 'woo-coupon-usage' ), '0px'); ?>
 
-          <?php echo wcusage_setting_toggle('.wcusage_field_registration_enable_promote', '.wcu-field-section-registration-promote-text'); // Show or Hide ?>
+          <?php wcusage_setting_toggle('.wcusage_field_registration_enable_promote', '.wcu-field-section-registration-promote-text'); // Show or Hide ?>
           <span class="wcu-field-section-registration-promote-text" style="margin-top: 7px; display: block;">
             <div style="display: inline-block;padding: 5px 10px 8px 10px;background: #fff;border: 2px solid #e3e3e3;border-radius: 10px;">
               <!-- Promote field label -->
               <div style="width: auto; float: left; display: block;">
-                <?php echo wcusage_setting_text_option('wcusage_field_registration_promote_text', 'How will you promote us?', '<span class="reg-field-label">' . esc_html__( 'Field Label:', 'woo-coupon-usage' ) . '</span>', '0px'); ?>
+                <?php wcusage_setting_text_option('wcusage_field_registration_promote_text', 'How will you promote us?', '<span class="reg-field-label">' . esc_html__( 'Field Label:', 'woo-coupon-usage' ) . '</span>', '0px'); ?>
               </div>
               <div style="width: auto; float: left; display: block; margin-top: -5px;">
                 <strong style="display: block; margin: 5px 0 -5px 10px;"><label for="wcusage_field_registration_enable_promote_req"><?php echo esc_html__( 'Required?', 'woo-coupon-usage' ); ?></label></strong>
-                <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_promote_req', 1, '', '10px'); ?>
+                <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_promote_req', 1, '', '10px'); ?>
               </div>
             </div>
           </span>
@@ -592,18 +714,18 @@ function wcusage_field_cb_registration( $args )
           <br/>
 
           <!-- Show "How did you hear about us?" field on affiliate application form. -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_referrer', 0, esc_html__( '"How did you hear about us?" Field', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_referrer', 0, esc_html__( '"How did you hear about us?" Field', 'woo-coupon-usage' ), '0px'); ?>
 
-          <?php echo wcusage_setting_toggle('.wcusage_field_registration_enable_referrer', '.wcu-field-section-registration-referrer-text'); // Show or Hide ?>
+          <?php wcusage_setting_toggle('.wcusage_field_registration_enable_referrer', '.wcu-field-section-registration-referrer-text'); // Show or Hide ?>
           <span class="wcu-field-section-registration-referrer-text" style="margin-top: 7px; display: block;">
             <div style="display: inline-block;padding: 5px 10px 8px 10px;background: #fff;border: 2px solid #e3e3e3;border-radius: 10px;">
               <!-- Referrer field label -->
               <div style="width: auto; float: left; display: block;">
-                <?php echo wcusage_setting_text_option('wcusage_field_registration_referrer_text', 'How did you hear about us?', '<span class="reg-field-label">' . esc_html__( 'Field Label:', 'woo-coupon-usage' ) . '</span>', '0px'); ?>
+                <?php wcusage_setting_text_option('wcusage_field_registration_referrer_text', 'How did you hear about us?', '<span class="reg-field-label">' . esc_html__( 'Field Label:', 'woo-coupon-usage' ) . '</span>', '0px'); ?>
               </div>
               <div style="width: auto; float: left; display: block; margin-top: -5px;">
                 <strong style="display: block; margin: 5px 0 -5px 10px;"><label for="wcusage_field_registration_enable_referrer_req"><?php echo esc_html__( 'Required?', 'woo-coupon-usage' ); ?></label></strong>
-                <?php echo wcusage_setting_toggle_option('wcusage_field_registration_enable_referrer_req', 0, '', '10px'); ?>
+                <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_referrer_req', 0, '', '10px'); ?>
               </div>
             </div>
           </span>
@@ -613,7 +735,7 @@ function wcusage_field_cb_registration( $args )
 
           <hr/>
 
-          <h3 style="margin-bottom: 0px;"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Custom FormFields', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?></h3>
+          <h3 style="margin-bottom: 0px;"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Custom Form Fields', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?></h3>
 
           <?php
           $tiersnumber = wcusage_get_setting_value('wcusage_field_registration_custom_fields', '5');
@@ -634,14 +756,12 @@ function wcusage_field_cb_registration( $args )
             class="registration_custom_<?php echo esc_attr($x); ?>">
 
               <div style="width: auto; float: left; display: block; margin-bottom: 2px;" class="registration_custom_label_<?php echo esc_attr($x); ?>">
-                <?php echo wcusage_setting_text_option('wcusage_field_registration_custom_label_' . esc_html($x), '', '<span class="reg-field-label">' . esc_html__( 'Field Label:', 'woo-coupon-usage' ) . '</span>', '0px'); ?>
+                <?php wcusage_setting_text_option('wcusage_field_registration_custom_label_' . esc_html($x), '', '<span class="reg-field-label">' . esc_html__( 'Field Label:', 'woo-coupon-usage' ) . '</span>', '0px'); ?>
               </div>
 
               <div style="width: auto; float: left; display: block; margin-left: 10px;">
                 <p>
               		<?php $type = wcusage_get_setting_value('wcusage_field_registration_custom_type_' . esc_html($x), ''); ?>
-              		<input type="hidden" value="1" id="wcusage_field_registration_custom_type_<?php echo esc_attr($x); ?>" data-custom="custom"
-                  name="wcusage_options[wcusage_field_registration_custom_type_<?php echo esc_attr($x); ?>]" >
               		<strong><?php echo esc_html__( 'Type', 'woo-coupon-usage' ); ?>:</strong><br/>
               		<select name="wcusage_options[wcusage_field_registration_custom_type_<?php echo esc_attr($x); ?>]" id="wcusage_field_registration_custom_type_<?php echo esc_attr($x); ?>" class="wcusage_field_registration_custom_type_<?php echo esc_attr($x); ?>">
                     <option value="text" <?php if($type == "text") { ?>selected<?php } ?>><?php echo esc_html__( 'Text Field', 'woo-coupon-usage' ); ?></option>
@@ -658,80 +778,14 @@ function wcusage_field_cb_registration( $args )
               </div>
 
               <div style="width: auto; float: left; margin-left: 10px; margin-bottom: 0px;" class="registration_custom_options_<?php echo esc_attr($x); ?>">
-                <?php echo wcusage_setting_textarea_option('wcusage_field_registration_custom_options_' . esc_html($x), '', esc_html__( 'Options (One Per Line)', 'woo-coupon-usage' ), "0px"); ?>
+                <?php wcusage_setting_textarea_option('wcusage_field_registration_custom_options_' . esc_html($x), '', esc_html__( 'Options (One Per Line)', 'woo-coupon-usage' ), "0px"); ?>
               </div>
 
               <div style="width: auto; float: left; display: block; margin-left: 10px;" class="registration_custom_required_<?php echo esc_attr($x); ?>">
                 <strong style="display: block; margin-top: 5px; margin-bottom: -5px;"><label for="wcusage_field_registration_custom_required_<?php echo esc_attr($x); ?>"><?php echo esc_html__( 'Required?', 'woo-coupon-usage' ); ?></label></strong>
-                <?php echo wcusage_setting_toggle_option('wcusage_field_registration_custom_required_' . esc_html($x), '', '', '0px'); ?>
+                <?php wcusage_setting_toggle_option('wcusage_field_registration_custom_required_' . esc_html($x), '', '', '0px'); ?>
               </div>
 
-              <script>
-              jQuery(document).ready(function($){
-                  jQuery("#up-<?php echo esc_html($x); ?>").on("click", function() {
-
-                      var label = jQuery('#wcusage_field_registration_custom_label_<?php echo esc_html($x) - 1; ?>').val();
-                      var type = jQuery('#wcusage_field_registration_custom_type_<?php echo esc_html($x) - 1; ?> option').filter(':selected').val();
-                      var options = jQuery('#wcusage_field_registration_custom_options_<?php echo esc_html($x) - 1; ?>').val();
-                      if(jQuery('#wcusage_field_registration_custom_required_<?php echo esc_html($x) - 1; ?>').is(':checked')) {
-                        var required = 1;
-                      } else {
-                        var required = 0;
-                      }
-
-                      var label_this = jQuery('#wcusage_field_registration_custom_label_<?php echo esc_html($x); ?>').val();
-                      var type_this = jQuery('#wcusage_field_registration_custom_type_<?php echo esc_html($x); ?> option').filter(':selected').val();
-                      var options_this = jQuery('#wcusage_field_registration_custom_options_<?php echo esc_html($x); ?>').val();
-                      if(jQuery('#wcusage_field_registration_custom_required_<?php echo esc_html($x); ?>').is(':checked')) {
-                        var required_this = 1;
-                      } else {
-                        var required_this = 0;
-                      }
-
-                      var postData = {
-                          action: 'wcusage_update_custom_fields',
-                          _ajax_nonce: '<?php echo esc_html(wp_create_nonce( 'wcusage_custom_fields' )); ?>',
-                          label: label,
-                          type: type,
-                          options: options,
-                          required: required,
-                          label_this: label_this,
-                          type_this: type_this,
-                          options_this: options_this,
-                          required_this: required_this,
-                          current: '<?php echo esc_html($x); ?>',
-                          before: '<?php echo esc_html($x) - 1; ?>',
-                      }
-                      jQuery.ajax({
-                          type: 'POST',
-                          url: ajaxurl,
-                          data: postData,
-                          success: function(response) {
-
-                            jQuery('#wcusage_field_registration_custom_label_<?php echo esc_html($x) - 1; ?>').val(label_this);
-
-                            jQuery('#wcusage_field_registration_custom_type_<?php echo esc_html($x) - 1; ?> option[value="'+type_this+'"]').prop("selected", true).change();
-
-                            jQuery('#wcusage_field_registration_custom_options_<?php echo esc_html($x) - 1; ?>').val(options_this);
-
-                            jQuery('#wcusage_field_registration_custom_required_<?php echo esc_html($x) - 1; ?>').val(required_this);
-
-                            jQuery('#wcusage_field_registration_custom_label_<?php echo esc_html($x); ?>').val(label);
-
-                            jQuery('#wcusage_field_registration_custom_type_<?php echo esc_html($x); ?> option[value="'+type+'"]').prop("selected", true).change();
-
-                            jQuery('#wcusage_field_registration_custom_options_<?php echo esc_html($x); ?>').val(options).change();
-
-                            jQuery('#wcusage_field_registration_custom_required_<?php echo esc_html($x); ?>').val(required);
-
-                          }
-                      }).fail(function (data) {
-                          console.log(data);
-                      });
-
-                  });
-              });
-              </script>
               <?php if($x > 1) { ?>
               <div style="width: auto; float: left; display: block; margin-left: 10px; margin-top: 25px;">
                   <button id="up-<?php echo esc_html($x); ?>" type="button" title="Move Up"
@@ -749,7 +803,7 @@ function wcusage_field_cb_registration( $args )
               function registration_custom_fields_check_<?php echo esc_html($x); ?>() {
                 jQuery('.registration_custom_options_<?php echo esc_html($x); ?>').hide();
                 var selected_check_<?php echo esc_html($x); ?> = jQuery('.wcusage_field_registration_custom_type_<?php echo esc_html($x); ?> :selected').val();
-                if( selected_check_<?php echo esc_html($x); ?> == 'dropdown' || selected_check_<?php echo esc_html($x); ?> == 'checkbox' || selected_check_<?php echo esc_html($x); ?> == 'radio' ) {
+                if( selected_check_<?php echo esc_html($x); ?> == 'dropdown' || selected_check_<?php echo esc_html($x); ?> == 'radio' ) {
                   jQuery('.registration_custom_options_<?php echo esc_html($x); ?>').show();
                 } else {
                   jQuery('.registration_custom_options_<?php echo esc_html($x); ?>').hide();
@@ -788,7 +842,7 @@ function wcusage_field_cb_registration( $args )
           <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Automatic Affiliate Registration', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?></h3>
 
           <!-- Automatically register all new users as an affiliate. -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_registration_auto_new_user', 0, esc_html__( 'Automatically register all new users as an affiliate.', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_new_user', 0, esc_html__( 'Automatically register all new users as an affiliate.', 'woo-coupon-usage' ), '0px'); ?>
           <i><?php echo esc_html__( 'If enabled, whenever a new user is created (in any way), an affiliate registration will also be submitted for them automatically.', 'woo-coupon-usage' ); ?></i><br/>
           <i><?php echo esc_html__( 'The username will be used as the coupon code by default, unless you have the "Dynamic Code Generator" enabled.', 'woo-coupon-usage' ); ?></i><br/>
 
@@ -797,18 +851,18 @@ function wcusage_field_cb_registration( $args )
           <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Checkout Page: Join Affiliate Program', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?></h3>
 
           <!-- Join affiliate program checkbox -->
-          <?php echo wcusage_setting_toggle_option('wcusage_field_registration_checkout_checkbox', 0, esc_html__( 'Show a "join our affiliate program" checkbox on the store checkout.', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_checkout_checkbox', 0, esc_html__( 'Show a "join our affiliate program" checkbox on the store checkout.', 'woo-coupon-usage' ), '0px'); ?>
           <i><?php echo esc_html__( 'When enabled, a new checkbox will appear on store checkout, under order notes, for them to join the affiliate program. This will submit an affiliate registration application for the user.', 'woo-coupon-usage' ); ?></i><br/>
           <i><?php echo esc_html__( 'Note: This will only show for users that are not currently assigned to any affiliate coupons. They must also be logged in, or have selected "Create an account?" for it to show.', 'woo-coupon-usage' ); ?></i><br/>
 
-          <?php echo wcusage_setting_toggle('.wcusage_field_registration_checkout_checkbox', '.wcu-field-section-checkout-checkbox-text'); // Show or Hide ?>
+          <?php wcusage_setting_toggle('.wcusage_field_registration_checkout_checkbox', '.wcu-field-section-checkout-checkbox-text'); // Show or Hide ?>
           <span class="wcu-field-section-checkout-checkbox-text">
             <br/>
             <!-- Checkout checkbox label -->
-            <?php echo wcusage_setting_text_option('wcusage_field_registration_checkout_checkbox_text', 'Click here to join our affiliate program', esc_html__( 'Checkbox label', 'woo-coupon-usage' ), '0px'); ?>
+            <?php wcusage_setting_text_option('wcusage_field_registration_checkout_checkbox_text', 'Click here to join our affiliate program', esc_html__( 'Checkbox label', 'woo-coupon-usage' ), '0px'); ?>
             <br/>
             <!-- Join affiliate program checked by default? -->
-            <?php echo wcusage_setting_toggle_option('wcusage_field_registration_checkout_checkbox_checked', 0, esc_html__( 'Checkbox ticked by default?', 'woo-coupon-usage' ), '0px'); ?>
+            <?php wcusage_setting_toggle_option('wcusage_field_registration_checkout_checkbox_checked', 0, esc_html__( 'Checkbox ticked by default?', 'woo-coupon-usage' ), '0px'); ?>
             <i><?php echo esc_html__( 'When enabled, the checkbox to join the affiliate program will be checked automatically.', 'woo-coupon-usage' ); ?></i><br/>
           </span>
 
@@ -823,6 +877,7 @@ function wcusage_field_cb_registration( $args )
           ?>
           <select name="wcusage_options[wcusage_mailing_list]" id="wcusage_mailing_list" class="wcusage_mailing_list">
             <option value="0" <?php if($wcusage_mailing_list == "0") { ?>selected<?php } ?>><?php echo esc_html__( '- Disabled -', 'woo-coupon-usage' ); ?></option>
+            <option value="newsletter" <?php if($wcusage_mailing_list == "newsletter") { ?>selected<?php } ?>><?php echo esc_html__( 'Built-In Newsletter System', 'woo-coupon-usage' ); ?></option>
             <option value="mailpoet" <?php if($wcusage_mailing_list == "mailpoet") { ?>selected<?php } ?>><?php echo esc_html__( 'Mailpoet', 'woo-coupon-usage' ); ?></option>
             <option value="mailchimp" <?php if($wcusage_mailing_list == "mailchimp") { ?>selected<?php } ?>><?php echo esc_html__( 'Mailchimp', 'woo-coupon-usage' ); ?></option>
             <option value="convertkit" <?php if($wcusage_mailing_list == "convertkit") { ?>selected<?php } ?>><?php echo esc_html__( 'ConvertKit', 'woo-coupon-usage' ); ?></option>
@@ -831,13 +886,14 @@ function wcusage_field_cb_registration( $args )
             <option value="sendinblue" <?php if($wcusage_mailing_list == "sendinblue") { ?>selected<?php } ?>><?php echo esc_html__( 'Brevo (Sendinblue)', 'woo-coupon-usage' ); ?></option>
             <option value="klaviyo" <?php if($wcusage_mailing_list == "klaviyo") { ?>selected<?php } ?>><?php echo esc_html__( 'Klaviyo', 'woo-coupon-usage' ); ?></option>
             <option value="getresponse" <?php if($wcusage_mailing_list == "getresponse") { ?>selected<?php } ?>><?php echo esc_html__( 'GetResponse', 'woo-coupon-usage' ); ?></option>
+            <option value="mailjet" <?php if($wcusage_mailing_list == "mailjet") { ?>selected<?php } ?>><?php echo esc_html__( 'Mailjet', 'woo-coupon-usage' ); ?></option>
           </select>
 
           <script>
           jQuery(document).ready(function() {
 
               // Define a list of all possible mailing list types
-              var allMailingLists = ['mailpoet', 'mailchimp', 'convertkit', 'mailerlite', 'activecampaign', 'sendinblue', 'klaviyo', 'getresponse'];
+              var allMailingLists = ['newsletter', 'mailpoet', 'mailchimp', 'convertkit', 'mailerlite', 'activecampaign', 'sendinblue', 'klaviyo', 'getresponse', 'mailjet'];
 
               // Hide all sections initially
               allMailingLists.forEach(function(list) {
@@ -865,6 +921,20 @@ function wcusage_field_cb_registration( $args )
           </script>
 
           <div class="wcu-field-section-lists" id="wcu-setting-mailing-lists">
+
+            <div class="wcu-list-newsletter"><br/>
+              <p><?php echo esc_html__( 'Use the built-in newsletter system to send emails to your affiliates. No external service required.', 'woo-coupon-usage' ); ?></p>
+              <br/>
+              <p><?php echo esc_html__( 'All registered affiliates will be automatically included in your newsletter campaigns.', 'woo-coupon-usage' ); ?></p>
+              <br/>
+              <?php
+              wcusage_setting_toggle_option('wcusage_field_email_newsletter_enable', 1, esc_html__( 'Enable Built-In Newsletter System', 'woo-coupon-usage' ), '0px');
+              ?>
+              <br/>
+              <a href="#" onclick="wcusage_go_to_settings('#tab-newsletter', ''); return false;">
+                <?php echo esc_html__( 'Go to Newsletter Settings', 'woo-coupon-usage' ); ?>
+              </a>
+            </div>
 
             <div class="wcu-list-mailpoet"><br/>
               <?php if ( class_exists('MailPoet\API\API') ) { ?>
@@ -901,10 +971,10 @@ function wcusage_field_cb_registration( $args )
               <p><?php echo esc_html__( 'You can get your Audience ID from here:', 'woo-coupon-usage' ); ?> <a href="https://admin.mailchimp.com/lists/" target="_blank">https://admin.mailchimp.com/lists/</a> (Audience > Settings > Audience name and campaign defaults)</p>
               <br/>
               <!-- API Key -->
-              <?php echo wcusage_setting_text_option('wcusage_mailchimp_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_mailchimp_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
               <br/>
               <!-- List ID -->
-              <?php echo wcusage_setting_text_option('wcusage_mailchimp_list_id', '', esc_html__( 'Audience ID', 'woo-coupon-usage' ), '0px'); ?>              
+              <?php wcusage_setting_text_option('wcusage_mailchimp_list_id', '', esc_html__( 'Audience ID', 'woo-coupon-usage' ), '0px'); ?>              
             </div>
 
             <div class="wcu-list-convertkit"><br/>
@@ -913,10 +983,10 @@ function wcusage_field_cb_registration( $args )
               <p><?php echo esc_html__( 'You can get your Form ID from here:', 'woo-coupon-usage' ); ?> <a href="https://app.convertkit.com/forms" target="_blank">https://app.convertkit.com/forms</a></p>
               <br/>
               <!-- API Key -->
-              <?php echo wcusage_setting_text_option('wcusage_convertkit_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_convertkit_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
               <br/>
               <!-- Form ID -->
-              <?php echo wcusage_setting_text_option('wcusage_convertkit_form_id', '', esc_html__( 'Form ID', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_convertkit_form_id', '', esc_html__( 'Form ID', 'woo-coupon-usage' ), '0px'); ?>
             </div>
 
             <div class="wcu-list-mailerlite"><br/>
@@ -925,10 +995,10 @@ function wcusage_field_cb_registration( $args )
               <p><?php echo esc_html__( 'You can create groups here:', 'woo-coupon-usage' ); ?> <a href="https://dashboard.mailerlite.com/groups" target="_blank">https://dashboard.mailerlite.com/groups/</a> <?php echo esc_html__( 'and view the group ID here:', 'woo-coupon-usage' ); ?> <a href="https://dashboard.mailerlite.com/integrations/api" target="_blank">https://dashboard.mailerlite.com/integrations/api</a></p>
               <br/>
               <!-- API Key -->
-              <?php echo wcusage_setting_text_option('wcusage_mailerlite_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_mailerlite_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
               <br/>
               <!-- Group ID -->
-              <?php echo wcusage_setting_text_option('wcusage_mailerlite_group_id', '', esc_html__( 'Group ID', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_mailerlite_group_id', '', esc_html__( 'Group ID', 'woo-coupon-usage' ), '0px'); ?>
             </div>
 
             <div class="wcu-list-activecampaign"><br/>
@@ -937,13 +1007,13 @@ function wcusage_field_cb_registration( $args )
               <p><?php echo esc_html__( 'You can get your List ID from your ActiveCampaign dashboard: Contacts > Lists > Click on the list > View the ID in the URL ("listid").', 'woo-coupon-usage' ); ?></p>
               <br/>
               <!-- API URL -->
-              <?php echo wcusage_setting_text_option('wcusage_activecampaign_api_url', '', esc_html__( 'API URL', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_activecampaign_api_url', '', esc_html__( 'API URL', 'woo-coupon-usage' ), '0px'); ?>
               <br/>
               <!-- API Key -->
-              <?php echo wcusage_setting_text_option('wcusage_activecampaign_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_activecampaign_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
               <br/>
               <!-- List ID -->
-              <?php echo wcusage_setting_number_option('wcusage_activecampaign_list_id', '', esc_html__( 'List ID', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_number_option('wcusage_activecampaign_list_id', '', esc_html__( 'List ID', 'woo-coupon-usage' ), '0px'); ?>
             </div>
 
             <div class="wcu-list-sendinblue"><br/>
@@ -952,10 +1022,10 @@ function wcusage_field_cb_registration( $args )
               <p><?php echo esc_html__( 'You can get your List ID from here:', 'woo-coupon-usage' ); ?> <a href="https://app.brevo.com/contact/list-listing" target="_blank">https://app.brevo.com/contact/list-listing</a></p>
               <br/>
               <!-- API Key -->
-              <?php echo wcusage_setting_text_option('wcusage_sendinblue_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_sendinblue_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
               <br/>
               <!-- List ID -->
-              <?php echo wcusage_setting_number_option('wcusage_sendinblue_list_id', '', esc_html__( 'List ID', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_number_option('wcusage_sendinblue_list_id', '', esc_html__( 'List ID', 'woo-coupon-usage' ), '0px'); ?>
             </div>
 
             <div class="wcu-list-klaviyo"><br/>
@@ -964,10 +1034,10 @@ function wcusage_field_cb_registration( $args )
               <p><?php echo esc_html__( 'You can get your List ID from here:', 'woo-coupon-usage' ); ?> <a href="https://www.klaviyo.com/lists" target="_blank">https://www.klaviyo.com/lists</a></p>
               <br/>
               <!-- API Key -->
-              <?php echo wcusage_setting_text_option('wcusage_klaviyo_api_key', '', esc_html__( 'Private API Key', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_klaviyo_api_key', '', esc_html__( 'Private API Key', 'woo-coupon-usage' ), '0px'); ?>
               <br/>
               <!-- List ID -->
-              <?php echo wcusage_setting_text_option('wcusage_klaviyo_list_id', '', esc_html__( 'List ID', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_klaviyo_list_id', '', esc_html__( 'List ID', 'woo-coupon-usage' ), '0px'); ?>
             </div>
 
             <div class="wcu-list-getresponse"><br/>
@@ -976,17 +1046,32 @@ function wcusage_field_cb_registration( $args )
               <p><?php echo esc_html__( 'You can get your List Token from here:', 'woo-coupon-usage' ); ?> <a href="https://app.getresponse.com/lists" target="_blank">https://app.getresponse.com/lists</a> (List Options > Settings)</p>
               <br/>
               <!-- API Key -->
-              <?php echo wcusage_setting_text_option('wcusage_getresponse_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_getresponse_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
               <br/>
               <!-- Campaign ID -->
-              <?php echo wcusage_setting_text_option('wcusage_getresponse_list_token', '', esc_html__( 'List Token', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_getresponse_list_token', '', esc_html__( 'List Token', 'woo-coupon-usage' ), '0px'); ?>
+            </div>
+
+            <div class="wcu-list-mailjet"><br/>
+              <p><?php echo esc_html__( 'You can get your API key from here:', 'woo-coupon-usage' ); ?> <a href="https://app.mailjet.com/account/apikeys" target="_blank">https://app.mailjet.com/account/apikeys</a></p>
+              <br/>
+              <p><?php echo esc_html__( 'You can get your Contact List ID from here:', 'woo-coupon-usage' ); ?> <a href="https://app.mailjet.com/contacts/lists" target="_blank">https://app.mailjet.com/contacts/lists</a></p>
+              <br/>
+              <!-- API Key -->
+              <?php wcusage_setting_text_option('wcusage_mailjet_api_key', '', esc_html__( 'API Key', 'woo-coupon-usage' ), '0px'); ?>
+              <br/>
+              <!-- Secret Key -->
+              <?php wcusage_setting_text_option('wcusage_mailjet_secret_key', '', esc_html__( 'Secret Key', 'woo-coupon-usage' ), '0px'); ?>
+              <br/>
+              <!-- List ID -->
+              <?php wcusage_setting_number_option('wcusage_mailjet_list_id', '', esc_html__( 'Contact List ID', 'woo-coupon-usage' ), '0px'); ?>
             </div>
 
           </div>
 
       </div>
 
-      <?php echo do_action( 'wcusage_hook_setting_section_registration_end' ); ?>
+      <?php do_action( 'wcusage_hook_setting_section_registration_end' ); ?>
 
     </span>
 
@@ -1014,8 +1099,11 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
           $registrationpage = $options['wcusage_registration_page'];
       } else {
           $registrationpage = wcusage_get_registration_shortcode_page_id();
-          $options['wcusage_registration_page'] = $registrationpage;
-          update_option( 'wcusage_options', $options );
+          // Only update on non-GET requests
+          if ( $_SERVER['REQUEST_METHOD'] !== 'GET' && $registrationpage ) {
+            $options['wcusage_registration_page'] = $registrationpage;
+            update_option( 'wcusage_options', $options );
+          }
       }
 
       $dropdown_args = array(
@@ -1055,7 +1143,8 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
                       '<?php echo esc_url(admin_url("admin-ajax.php")); ?>',
                       {
                           'action': 'wcusage_get_permalink',
-                          'page_id': pageID
+                        'page_id': pageID,
+                        'nonce': '<?php echo esc_js( wp_create_nonce( 'wcusage_get_permalink_nonce' ) ); ?>'
                       },
                       function(response) {
                           $('#registration_link').attr('href', response).text(response);
@@ -1077,10 +1166,19 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
                   '<?php echo esc_url(admin_url("admin-ajax.php")); ?>',
                   {
                       'action': 'wcusage_check_registration_shortcode',
-                      'page_id': pageID
+                      'page_id': pageID,
+                    // Nonce for AJAX security check
+                    'nonce': '<?php echo esc_js( wp_create_nonce( 'wcusage_check_registration_shortcode' ) ); ?>'
                   },
                   function(response) {
-                      if (response == 1) {
+                    // Back-compat: older versions returned plain 1/0. New versions return JSON.
+                    var hasShortcode = false;
+                    if (typeof response === 'object' && response !== null && typeof response.success !== 'undefined') {
+                      hasShortcode = !!(response.success && response.data && response.data.has_shortcode);
+                    } else {
+                      hasShortcode = (response == 1);
+                    }
+                    if (hasShortcode) {
                           $('.registration_shortcode_check').hide();
                       } else {
                           $('.registration_shortcode_check').show();
@@ -1136,7 +1234,7 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
     <?php } else { ?>
 
       <!-- Showing number input if WPML installed -->
-      <?php echo wcusage_setting_number_option('wcusage_registration_page', '', esc_html__( 'Registration Form Page (ID):', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_number_option('wcusage_registration_page', '', esc_html__( 'Registration Form Page (ID):', 'woo-coupon-usage' ), '0px'); ?>
 
     <?php } ?>
 
@@ -1272,9 +1370,14 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
         update_post_meta($coupon_id, 'coupon_amount', $couponDiscount);
       }
       
-      $options = get_option( 'wcusage_options' );
-      $options['wcusage_field_registration_coupon_template'] = $couponName;
-      update_option( 'wcusage_options', $options );
+      // Use merge helper to preserve other settings
+      if ( function_exists( 'wcusage_update_options_merge' ) ) {
+        wcusage_update_options_merge( array( 'wcusage_field_registration_coupon_template' => $couponName ) );
+      } else {
+        $options = get_option( 'wcusage_options' );
+        $options['wcusage_field_registration_coupon_template'] = $couponName;
+        update_option( 'wcusage_options', $options );
+      }
       ?>
       <script>
       jQuery(document).ready(function() {
@@ -1286,7 +1389,7 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
       // remove parameters from URL except page and step
       $url = strtok($_SERVER["REQUEST_URI"],'?');
       $url .= '?page=wcusage_setup&step=2';
-      wp_redirect( $url );
+      wp_safe_redirect( $url );
       exit;
     }
     ?>
@@ -1295,7 +1398,7 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
     <?php } ?>
 
       <!-- Template coupon code for new affiliate coupon generation -->
-      <?php echo wcusage_setting_text_option('wcusage_field_registration_coupon_template', '', esc_html__( 'Template coupon code:', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_text_option('wcusage_field_registration_coupon_template', '', esc_html__( 'Template coupon code:', 'woo-coupon-usage' ), '0px'); ?>
       <p><div id="edit_link"></div></p>
       <i><?php echo esc_html__( 'Make sure this matches the exact name of an existing template coupon code (case sensitive).', 'woo-coupon-usage' ); ?></i>
       <script>
@@ -1312,7 +1415,8 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
                   ajaxurl, 
                   {
                       action: 'wcusage_ajax_get_coupon_id',
-                      coupon_name: couponName
+                      coupon_name: couponName,
+                      nonce: '<?php echo wp_create_nonce("wcusage_ajax_get_coupon_id_nonce"); ?>'
                   },
                   function(couponId) {
                       if (!couponId || !couponName) {
@@ -1367,7 +1471,7 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
       <br/>
 
       <!-- Multiple Template Coupons -->
-      <?php echo wcusage_setting_toggle_option('wcusage_field_registration_multiple_template', 0, esc_html__( 'Enable Multiple Templates', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_multiple_template', 0, esc_html__( 'Enable Multiple Templates', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
       <i><?php echo esc_html__( 'With this enabled, multiple template coupons will be available and the affiliate will be able to choose which type they want via the registration form.', 'woo-coupon-usage' ); ?></i>
 
       <script>
@@ -1385,17 +1489,17 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
       });
       </script>
 
-      <?php echo wcusage_setting_toggle('.wcusage_field_registration_multiple_template', '.wcu-field-section-registration-templates'); // Show or Hide ?>
+      <?php wcusage_setting_toggle('.wcusage_field_registration_multiple_template', '.wcu-field-section-registration-templates'); // Show or Hide ?>
       <span class="wcu-field-section-registration-templates">
 
         <br/><i><?php echo esc_html__( 'Make sure template codes match the exact name of an existing template coupon code, otherwise the coupon may not be created automatically.', 'woo-coupon-usage' ); ?></i>
         <br/><br/>
 
-        <?php echo wcusage_setting_text_option('wcusage_field_registration_coupon_template_field', 'What type of coupon would you like?', esc_html__( 'Select field label:', 'woo-coupon-usage' ), '0px'); ?>
+        <?php wcusage_setting_text_option('wcusage_field_registration_coupon_template_field', 'What type of coupon would you like?', esc_html__( 'Select field label:', 'woo-coupon-usage' ), '0px'); ?>
 
         <br/>
 
-        <?php echo wcusage_setting_toggle_option('wcusage_field_registration_multiple_template_roles', 0, esc_html__( 'Assign user roles (groups) to specific templates', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_registration_multiple_template_roles', 0, esc_html__( 'Assign user roles (groups) to specific templates', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
         <i><?php echo esc_html__( 'With this enabled, you will be able assign a user role to a template coupon, so when someone registers via that template option, they will also be assigned to this user role.', 'woo-coupon-usage' ); ?></i>
         
         <script>
@@ -1432,12 +1536,12 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
           <div style="width: 100%; display: inline-block;" class="registration_template_<?php echo esc_html($x); ?>">
             <br/><strong style="display: block; margin-bottom: 5px; text-decoration: underline;">Template option #<?php echo esc_html($x); ?></strong>
             <div style="width: auto; float: left; display: block;">
-              <?php echo wcusage_setting_text_option('wcusage_field_registration_coupon_template_label' . esc_html($template_num), $template_default, esc_html__( 'Option name:', 'woo-coupon-usage' ), '0px'); ?>
+              <?php wcusage_setting_text_option('wcusage_field_registration_coupon_template_label' . esc_html($template_num), $template_default, esc_html__( 'Option name:', 'woo-coupon-usage' ), '0px'); ?>
             </div>
             <div style="width: auto; float: left; display: block; margin-left: 10px;">
               <?php
-              echo wcusage_setting_text_option('wcusage_field_registration_coupon_template' . esc_html($template_num), '', esc_html__( 'Template coupon code:', 'woo-coupon-usage' ), '0px');
-              $get_code = $options['wcusage_field_registration_coupon_template' . esc_html($template_num)];
+              wcusage_setting_text_option('wcusage_field_registration_coupon_template' . esc_html($template_num), '', esc_html__( 'Template coupon code:', 'woo-coupon-usage' ), '0px');
+              $get_code = $options['wcusage_field_registration_coupon_template' . esc_html($template_num)] ?? '';
               // Check if coupon exists, if not, show error message
               $coupon_id = wc_get_coupon_id_by_code($get_code);
               if(!$coupon_id && $get_code) {
@@ -1513,17 +1617,21 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
  function wcusage_update_custom_fields() {
 
   check_ajax_referer( 'wcusage_custom_fields', '_ajax_nonce' );
+
+  if ( ! function_exists( 'wcusage_check_admin_access' ) || ! wcusage_check_admin_access() ) {
+    die();
+  }
   ?>
 
   <?php
   $label = sanitize_text_field($_POST["label"]);
   $type = sanitize_text_field($_POST["type"]);
-  $options = sanitize_text_field($_POST["options"]);
+  $options = sanitize_textarea_field($_POST["options"]);
   $required = sanitize_text_field($_POST["required"]);
 
   $label_this = sanitize_text_field($_POST["label_this"]);
   $type_this = sanitize_text_field($_POST["type_this"]);
-  $options_this = sanitize_text_field($_POST["options_this"]);
+  $options_this = sanitize_textarea_field($_POST["options_this"]);
   $required_this = sanitize_text_field($_POST["required_this"]);
 
   $current = sanitize_text_field($_POST["current"]);
@@ -1531,17 +1639,26 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
 
   $option_group = get_option('wcusage_options');
 
-  $option_group['wcusage_field_registration_custom_label_' . $current] = $label;
-  $option_group['wcusage_field_registration_custom_type_' . $current] = $type;
-  $option_group['wcusage_field_registration_custom_options_' . $current] = $options;
-  $option_group['wcusage_field_registration_custom_required_' . $current] = $required;
+  $updates = array(
+    'wcusage_field_registration_custom_label_' . $current => $label,
+    'wcusage_field_registration_custom_type_' . $current => $type,
+    'wcusage_field_registration_custom_options_' . $current => $options,
+    'wcusage_field_registration_custom_required_' . $current => $required,
+    'wcusage_field_registration_custom_label_' . $before => $label_this,
+    'wcusage_field_registration_custom_type_' . $before => $type_this,
+    'wcusage_field_registration_custom_options_' . $before => $options_this,
+    'wcusage_field_registration_custom_required_' . $before => $required_this
+  );
 
-  $option_group['wcusage_field_registration_custom_label_' . $before] = $label_this;
-  $option_group['wcusage_field_registration_custom_type_' . $before] = $type_this;
-  $option_group['wcusage_field_registration_custom_options_' . $before] = $options_this;
-  $option_group['wcusage_field_registration_custom_required_' . $before] = $required_this;
-
-  update_option( 'wcusage_options', $option_group );
+  // Use merge helper to preserve other settings
+  if ( function_exists( 'wcusage_update_options_merge' ) ) {
+    wcusage_update_options_merge( $updates );
+  } else {
+    foreach ( $updates as $key => $value ) {
+      $option_group[$key] = $value;
+    }
+    update_option( 'wcusage_options', $option_group );
+  }
 
   return true;
 
@@ -1556,13 +1673,22 @@ add_action( 'wp_ajax_wcusage_update_custom_fields', 'wcusage_update_custom_field
 function wcusage_update_custom_fields_count() {
   check_ajax_referer( 'wcusage_custom_fields', '_ajax_nonce' );
 
+  if ( ! function_exists( 'wcusage_check_admin_access' ) || ! wcusage_check_admin_access() ) {
+    wp_send_json_error( array( 'message' => __( 'Access denied.', 'woo-coupon-usage' ) ), 403 );
+  }
+
   $count = isset($_POST['count']) ? intval($_POST['count']) : 0;
   if ($count < 0) $count = 0;
   if ($count > 200) $count = 200; // hard upper bound safety
 
-  $option_group = get_option('wcusage_options');
-  $option_group['wcusage_field_registration_custom_fields'] = $count;
-  update_option( 'wcusage_options', $option_group );
+  // Use merge helper to preserve other settings
+  if ( function_exists( 'wcusage_update_options_merge' ) ) {
+    wcusage_update_options_merge( array( 'wcusage_field_registration_custom_fields' => $count ) );
+  } else {
+    $option_group = get_option('wcusage_options');
+    $option_group['wcusage_field_registration_custom_fields'] = $count;
+    update_option( 'wcusage_options', $option_group );
+  }
 
   wp_send_json_success( array( 'count' => $count ) );
 }
@@ -1571,19 +1697,32 @@ add_action( 'wp_ajax_wcusage_update_custom_fields_count', 'wcusage_update_custom
 // Function to check wcusage_check_registration_shortcode
 add_action( 'wp_ajax_wcusage_check_registration_shortcode', 'wcusage_check_registration_shortcode' );
 function wcusage_check_registration_shortcode() {
-  $page_id = intval($_POST['page_id']);
-  $page = get_post($page_id);
-  if ($page) {
-    $content = $page->post_content;
-    if (strpos($content, '[couponaffiliates-register]') !== false) {
-      echo 1; // Shortcode found
-    } else {
-      echo 0; // Shortcode not found
-    }
-  } else {
-    echo 0; // Page not found
+
+  // Capability check: restrict to plugin admin access
+  if ( ! function_exists( 'wcusage_check_admin_access' ) || ! wcusage_check_admin_access() ) {
+    wp_send_json_error( array( 'message' => __( 'Access denied.', 'woo-coupon-usage' ) ), 403 );
   }
-  wp_die();
+
+  // Nonce check (support both new and legacy action strings)
+  $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+  $nonce_ok = ( $nonce && ( wp_verify_nonce( $nonce, 'wcusage_check_registration_shortcode' ) || wp_verify_nonce( $nonce, 'wcusage_check_registration_shortcode_nonce' ) ) );
+  if ( ! $nonce_ok ) {
+    wp_send_json_error( array( 'message' => __( 'Security check failed.', 'woo-coupon-usage' ) ), 400 );
+  }
+
+  $page_id = isset( $_POST['page_id'] ) ? absint( $_POST['page_id'] ) : 0;
+  if ( ! $page_id ) {
+    wp_send_json_success( array( 'has_shortcode' => false ) );
+  }
+
+  $page = get_post( $page_id );
+  if ( ! $page ) {
+    wp_send_json_success( array( 'has_shortcode' => false ) );
+  }
+
+  $content = isset( $page->post_content ) ? (string) $page->post_content : '';
+  $has_shortcode = ( strpos( $content, '[couponaffiliates-register]' ) !== false );
+  wp_send_json_success( array( 'has_shortcode' => $has_shortcode ) );
 }
 
 /*
@@ -1605,6 +1744,17 @@ function wcusage_generate_registration_page() {
 
   $current_user_id = get_current_user_id();
 
+    // If /affiliate-registration/ page already exists, create a unique slug
+    $post_name = 'affiliate-registration';
+    $existing_page = get_page_by_path( $post_name );
+    if ( $existing_page ) {
+        $suffix = 2;
+        while ( get_page_by_path( $post_name . '-' . $suffix ) ) {
+            $suffix++;
+        }
+        $post_name = $post_name . '-' . $suffix;
+    }
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'posts';
     $wpdb->insert(
@@ -1612,7 +1762,7 @@ function wcusage_generate_registration_page() {
       array(
         'post_title'     => 'Affiliate Registration',
         'post_type'      => 'page',
-        'post_name'      => 'affiliate-registration',
+        'post_name'      => $post_name,
         'comment_status' => 'closed',
         'ping_status'    => 'closed',
         'post_content'   => '[couponaffiliates-register]',
@@ -1622,9 +1772,14 @@ function wcusage_generate_registration_page() {
     );
     $page_id = $wpdb->insert_id;
 
-    $option_group = get_option('wcusage_options');
-    $option_group['wcusage_registration_page'] = $page_id;
-    update_option( 'wcusage_options', $option_group );
+    // Use merge helper to preserve other settings
+    if ( function_exists( 'wcusage_update_options_merge' ) ) {
+      wcusage_update_options_merge( array( 'wcusage_registration_page' => $page_id ) );
+    } else {
+      $option_group = get_option('wcusage_options');
+      $option_group['wcusage_registration_page'] = $page_id;
+      update_option( 'wcusage_options', $option_group );
+    }
     
     if (!is_wp_error($page_id)) {
         // Get the page permalink

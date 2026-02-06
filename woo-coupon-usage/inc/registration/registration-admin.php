@@ -27,12 +27,13 @@ function wcusage_admin_registrations_page_html() {
                     $_POST['wcu-input-username'] = $username;
                 }
             }
-            echo wp_kses_post( wcusage_post_submit_application( 1 ) );
+            echo wcusage_post_submit_application( 1 );
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             // Redirect to admin.php?page=wcusage_affiliates
             $redirect_user = ( isset( $_POST['wcu-input-username'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-input-username'] ) ) : '' );
             $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . $redirect_user );
             // Redirect via PHP
-            wp_redirect( $redirect_url );
+            wp_safe_redirect( $redirect_url );
             exit;
         }
     }
@@ -58,6 +59,7 @@ function wcusage_admin_registrations_page_html() {
                         continue;
                     }
                     $row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_name} WHERE id = %d", $sel_id ), ARRAY_A );
+                    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
                     if ( !$row ) {
                         $skipped_count++;
                         continue;
@@ -119,7 +121,14 @@ function wcusage_admin_registrations_page_html() {
                     }
                     if ( empty( $coupon_code ) ) {
                         $username_for_code = ( $get_user && isset( $get_user->user_login ) ? $get_user->user_login : '' );
-                        $coupon_code = ( function_exists( 'wcusage_generate_auto_coupon' ) ? wcusage_generate_auto_coupon( $username_for_code ) : wcusage_url_shorten_random( 7 ) );
+                        // For bulk processing, try to get first/last name from the user object or registration row
+                        $first_name_bulk = '';
+                        $last_name_bulk = '';
+                        if ( $get_user && isset( $get_user->ID ) ) {
+                            $first_name_bulk = get_user_meta( $get_user->ID, 'first_name', true );
+                            $last_name_bulk = get_user_meta( $get_user->ID, 'last_name', true );
+                        }
+                        $coupon_code = ( function_exists( 'wcusage_generate_auto_coupon' ) ? wcusage_generate_auto_coupon( $username_for_code, $first_name_bulk, $last_name_bulk ) : wcusage_url_shorten_random( 7 ) );
                     }
                     $type_num = 1;
                     if ( isset( $type_overrides[$sel_id] ) && $type_overrides[$sel_id] > 0 ) {
@@ -192,8 +201,11 @@ function wcusage_admin_registrations_page_html() {
                 // Auto-generate coupon if empty
                 if ( empty( $coupon_code ) ) {
                     $username_for_code = ( $get_user && isset( $get_user->user_login ) ? $get_user->user_login : '' );
+                    // Get first/last name from POST if available
+                    $first_name_post = ( isset( $_POST['wcu-input-first-name'] ) ? sanitize_text_field( $_POST['wcu-input-first-name'] ) : '' );
+                    $last_name_post = ( isset( $_POST['wcu-input-last-name'] ) ? sanitize_text_field( $_POST['wcu-input-last-name'] ) : '' );
                     if ( function_exists( 'wcusage_generate_auto_coupon' ) ) {
-                        $coupon_code = wcusage_generate_auto_coupon( $username_for_code );
+                        $coupon_code = wcusage_generate_auto_coupon( $username_for_code, $first_name_post, $last_name_post );
                     } else {
                         $coupon_code = wcusage_url_shorten_random( 7 );
                     }
@@ -338,7 +350,8 @@ function wcusage_admin_registrations_page_html() {
 <div id="wcu-create-new-registration" class="wrap plugin-settings">
 
   <?php 
-    echo do_action( 'wcusage_hook_dashboard_page_header', '' );
+    do_action( 'wcusage_hook_dashboard_page_header', '' );
+    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     ?>
 
   <h1 class="wp-heading-inline"><?php 
@@ -348,14 +361,14 @@ function wcusage_admin_registrations_page_html() {
     echo esc_url( admin_url( 'admin.php?page=wcusage_add_affiliate' ) );
     ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">
       <?php 
-    echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
+    echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ) );
     ?>
     </a>
     <a href="<?php 
     echo esc_url( admin_url( 'admin.php?page=wcusage_affiliates' ) );
     ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">
         <?php 
-    echo sprintf( esc_html__( 'Manage %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliates', 'woo-coupon-usage' ), true ) );
+    echo sprintf( esc_html__( 'Manage %s', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'Affiliates', 'woo-coupon-usage' ), true ) ) );
     ?>
     </a>
   </h1>
@@ -662,9 +675,11 @@ function wcusage_set_registration_status(
     }
     if ( !$userid ) {
         $userid = $wpdb->get_var( $wpdb->prepare( "SELECT userid FROM {$table_name} WHERE id = %d", $id ) );
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
     }
     if ( !$coupon_code ) {
         $coupon_code = $wpdb->get_var( $wpdb->prepare( "SELECT couponcode FROM {$table_name} WHERE id = %d", $id ) );
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
     }
     $user_info = get_userdata( $userid );
     if ( is_object( $user_info ) ) {
@@ -802,12 +817,21 @@ function wcusage_delete_registration_entry(  $id  ) {
 /**
  * Generates auto coupon code for affiliate registration
  *
- * @param int $userid
- *
- * @return string
- *
+ * @param string $username Username or email to generate coupon for
+ * @param string $first_name First name from POST data (optional)
+ * @param string $last_name Last name from POST data (optional)
+ * @return string Generated coupon code
+ * 
+ * Supported merge tags:
+ * {username} - User's login name (sanitized)
+ * {amount} - Discount amount from template coupon
+ * {random} - Random 7-character string
+ * {first_name} - User's first name (sanitized)
+ * {last_name} / {Last_name} - User's last name (sanitized, case-insensitive)
+ * {first_name_initial} - First letter of first name
+ * {last_name_initial} - First letter of last name
  */
-function wcusage_generate_auto_coupon(  $username = ""  ) {
+function wcusage_generate_auto_coupon(  $username = "", $first_name = "", $last_name = ""  ) {
     return wcusage_url_shorten_random( 7 );
 }
 
@@ -848,14 +872,18 @@ function wcusage_admin_new_registration_page() {
                     $_POST['wcu-input-username'] = $username;
                 }
             }
-            echo wp_kses_post( wcusage_post_submit_application( 1 ) );
+            echo wcusage_post_submit_application( 1 );
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             // Redirect to admin.php?page=wcusage_affiliates
             $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . $_POST['wcu-input-username'] );
             // Redirect via PHP
-            wp_redirect( $redirect_url );
+            wp_safe_redirect( $redirect_url );
             exit;
         }
     }
+    ?>
+  <?php 
+    // (enqueue moved to separate hook defined after this function)
     ?>
 
   <link rel="stylesheet" href="<?php 
@@ -865,23 +893,24 @@ function wcusage_admin_new_registration_page() {
   <div class="wrap">
 
   <?php 
-    echo do_action( 'wcusage_hook_dashboard_page_header', '' );
+    do_action( 'wcusage_hook_dashboard_page_header', '' );
+    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     ?>
 
   <div class="wcusage-page">
 
     <h1 id="wcu-add-new-affiliate"><?php 
-    echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
+    echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ) );
     ?></h1>
 
     <p>
       <?php 
-    echo sprintf( esc_html__( 'Use this form to create a new %s registration.', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) );
+    echo sprintf( esc_html__( 'Use this form to create a new %s registration.', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
     ?>
     </p>
 
     <p><?php 
-    echo sprintf( esc_html__( 'When completing this form, it will automatically submit an approved %s registration for that user, automatically creating the coupon and assigning them to it.', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) );
+    echo sprintf( esc_html__( 'When completing this form, it will automatically submit an approved %s registration for that user, automatically creating the coupon and assigning them to it.', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
     ?></p>
     
     <p><?php 
@@ -957,6 +986,13 @@ function wcusage_admin_new_registration_page() {
           <td><input name="wcu-input-first-name" type="text" id="wcu-input-first-name" class="regular-text" value="">
           <br/><i style="font-size: 10px;">The first name of the new user account.</i></td>
         </tr>
+        <tr class="wcu-add-affiliate-last-name">
+          <th scope="row"><label for="wcu-input-last-name"><?php 
+        echo esc_html__( 'Last Name', 'woo-coupon-usage' );
+        ?></label></th>
+          <td><input name="wcu-input-last-name" type="text" id="wcu-input-last-name" class="regular-text" value="">
+          <br/><i style="font-size: 10px;">The last name of the new user account.</i></td>
+        </tr>
         <?php 
         if ( !$wcusage_field_registration_auto_coupon ) {
             ?>
@@ -984,7 +1020,7 @@ function wcusage_admin_new_registration_page() {
         
         <!-- Coupon Type -->
         <?php 
-        $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '0' );
+        $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
         ?>
 
         <!-- Affiliate Group -->
@@ -1013,9 +1049,9 @@ function wcusage_admin_new_registration_page() {
                 $role_name = $all_roles[$role]['name'];
                 ?>
                   <option value="<?php 
-                echo $role;
+                echo esc_html( $role );
                 ?>"><?php 
-                echo $role_name;
+                echo esc_html( $role_name );
                 ?></option>
                   <?php 
             }
@@ -1040,7 +1076,7 @@ function wcusage_admin_new_registration_page() {
 
       <p class="submit">
         <input type="submit" name="submitaffiliateapplication" id="wcu-register-button" class="button button-primary" value="<?php 
-        echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
+        echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ) );
         ?>">
       </p>
     </form>
@@ -1063,6 +1099,7 @@ function wcusage_admin_new_registration_page() {
       var usernameField = $('#wcu-input-username');
       var emailRow = $('.wcu-add-affiliate-email');
       var firstNameRow = $('.wcu-add-affiliate-first-name');
+      var lastNameRow = $('.wcu-add-affiliate-last-name');
 
       function checkUsername() {
           var username = usernameField.val().trim();
@@ -1070,6 +1107,7 @@ function wcusage_admin_new_registration_page() {
           if (username.length === 0) {
               emailRow.show();
               firstNameRow.show();
+              lastNameRow.show();
               return;
           }
 
@@ -1084,6 +1122,7 @@ function wcusage_admin_new_registration_page() {
                   if (response.success && response.data.exists) {
                       emailRow.hide();
                       firstNameRow.hide();
+                      lastNameRow.hide();
                       // Show a message saying the username exists
                       $('.username-exists-message').remove(); // Remove any existing message
                       usernameField.after('<p class="username-exists-message" style="color: green; font-size: 12px; margin: 0;"><span class="fa fa-check-circle" style="color: green;"></span> ' + '<?php 
@@ -1094,12 +1133,15 @@ function wcusage_admin_new_registration_page() {
                       // Make email and first name not required
                       emailRow.find('input').removeAttr('required');
                       firstNameRow.find('input').removeAttr('required');
+                      lastNameRow.find('input').removeAttr('required');
                       // Set to empty fields
                       $('#wcu-input-email').val('');
                       $('#wcu-input-first-name').val('');
+                      $('#wcu-input-last-name').val('');
                     } else {
                       emailRow.show();
                       firstNameRow.show();
+                      lastNameRow.show();
                       // Show a message saying the username does not exist
                       $('.username-exists-message').remove(); // Remove any existing message
                       usernameField.after('<p class="username-exists-message" style="color: orange; font-size: 12px; margin: 0;"><span class="fa fa-exclamation-circle" style="color: orange;"></span> ' + '<?php 
@@ -1110,12 +1152,14 @@ function wcusage_admin_new_registration_page() {
                       // Make email and first name required
                       emailRow.find('input').attr('required', true);
                       firstNameRow.find('input').attr('required', true);
+                      lastNameRow.find('input').attr('required', true);
                     }
                     // If field is empty, show email and first name rows
                   if( username.length === 0) {
                       // Handle error
                       emailRow.show();
                       firstNameRow.show();
+                      lastNameRow.show();
                       $('.username-exists-message').remove(); // Remove any existing message
                       usernameField.after('<p class="username-exists-message" style="color: red; font-size: 12px; margin: 0;"><span class="fa fa-times-circle" style="color: red;"></span> ' + '<?php 
     echo esc_js( __( 'Error checking username.', 'woo-coupon-usage' ) );
@@ -1247,10 +1291,62 @@ function wcusage_admin_new_registration_page() {
   <?php 
 }
 
+// Proper enqueue of username autocomplete assets
+add_action( 'admin_enqueue_scripts', 'wcusage_enqueue_add_affiliate_autocomplete' );
+function wcusage_enqueue_add_affiliate_autocomplete(  $hook  ) {
+    if ( isset( $_GET['page'] ) && $_GET['page'] === 'wcusage_add_affiliate' ) {
+        $script = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin-add-affiliate-autocomplete.js';
+        $ver = ( file_exists( $script ) ? filemtime( $script ) : '1.0.' . date( 'Ymd' ) );
+        wp_enqueue_script(
+            'wcusage-admin-add-affiliate-autocomplete',
+            WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-add-affiliate-autocomplete.js',
+            array('jquery'),
+            $ver,
+            true
+        );
+        wp_localize_script( 'wcusage-admin-add-affiliate-autocomplete', 'WCUsageAffiliateAutocomplete', array(
+            'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
+            'nonce'     => wp_create_nonce( 'wcusage_search_usernames' ),
+            'minChars'  => 2,
+            'noResults' => __( 'No matches found', 'woo-coupon-usage' ),
+        ) );
+    }
+}
+
+// AJAX: search usernames for autocomplete on Add New Affiliate page
+add_action( 'wp_ajax_wcusage_search_usernames', 'wcusage_search_usernames' );
+function wcusage_search_usernames() {
+    if ( !wcusage_check_admin_access() ) {
+        wp_send_json_error( array(
+            'message' => 'forbidden',
+        ), 403 );
+    }
+    check_ajax_referer( 'wcusage_search_usernames', 'nonce' );
+    global $wpdb;
+    $term = ( isset( $_POST['term'] ) ? sanitize_text_field( wp_unslash( $_POST['term'] ) ) : '' );
+    $results = array();
+    if ( strlen( $term ) >= 2 ) {
+        $like = '%' . $wpdb->esc_like( $term ) . '%';
+        $users = $wpdb->get_results( $wpdb->prepare( "SELECT user_login, user_email, ID FROM {$wpdb->users} WHERE user_login LIKE %s OR user_email LIKE %s ORDER BY user_login ASC LIMIT 15", $like, $like ) );
+        if ( $users ) {
+            foreach ( $users as $u ) {
+                $results[] = array(
+                    'login' => $u->user_login,
+                    'email' => $u->user_email,
+                    'id'    => (int) $u->ID,
+                );
+            }
+        }
+    }
+    wp_send_json_success( array(
+        'results' => $results,
+    ) );
+}
+
 // Check if username exists via AJAX
 add_action( 'wp_ajax_wcusage_check_username_exists', 'wcusage_check_username_exists' );
 function wcusage_check_username_exists() {
-    if ( !current_user_can( 'manage_options' ) ) {
+    if ( !wcusage_check_admin_access() ) {
         wp_send_json_error();
     }
     $username = ( isset( $_POST['username'] ) ? sanitize_user( wp_unslash( $_POST['username'] ) ) : '' );
@@ -1269,7 +1365,7 @@ function wcusage_check_username_exists() {
 // Check if coupon code exists via AJAX
 add_action( 'wp_ajax_wcusage_check_coupon_exists', 'wcusage_check_coupon_exists' );
 function wcusage_check_coupon_exists() {
-    if ( !current_user_can( 'manage_options' ) ) {
+    if ( !wcusage_check_admin_access() ) {
         wp_send_json_error();
     }
     $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( wp_unslash( $_POST['coupon_code'] ) ) : '' );
@@ -1288,7 +1384,7 @@ function wcusage_check_coupon_exists() {
 // Check if email exists via AJAX
 add_action( 'wp_ajax_wcusage_check_email_exists', 'wcusage_check_email_exists' );
 function wcusage_check_email_exists() {
-    if ( !current_user_can( 'manage_options' ) ) {
+    if ( !wcusage_check_admin_access() ) {
         wp_send_json_error();
     }
     $email = ( isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '' );

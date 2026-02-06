@@ -58,14 +58,17 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
         #wcu6 .woocommerce-EditAccountForm .woocommerce-Button, #ml-wcu4 .woocommerce-EditAccountForm .woocommerce-Button,
         #wcu-add-campaign-button, #wcu-add-directlink-button, #wcu-add-mlainvite-button,
         .wcu-save-settings-button, #wcu6 button, #wcu-register-button, .wcusage-login-form-col .woocommerce-button,
-        .wcusage_copylink, .wcusage_creativelink, .wcu-coupon-list-button, .product-rates-search, .product-rates-copy, #wcu-download-qr,
-		.login-registration-container .woocommerce-form-login__submit {
+        .wcusage_copylink, .wcusage_creativelink, .wcu-coupon-list-button, .product-rates-search, .product-rates-copy, #wcu-download-qr {
   				background: <?php echo esc_html($wcusage_color_button); ?> !important;
   				color: <?php echo esc_html($wcusage_color_button_font); ?> !important;
   				text-shadow: 0 0 2px #000;
 				padding: 5px 10px !important;
 				font-size: 16px !important;
   			}
+		.login-registration-container .woocommerce-form-login__submit {
+  			background: <?php echo esc_html($wcusage_color_button); ?> !important;
+  			color: <?php echo esc_html($wcusage_color_button_font); ?> !important;
+		}
 		#wcu-add-campaign-button {
 			max-width: 100px;
 		}
@@ -196,7 +199,7 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
 			$wcusage_custom_dashboard_css = strip_tags( $wcusage_custom_dashboard_css );
 			?>
 			/* Custom Dashboard CSS */
-			<?php echo $wcusage_custom_dashboard_css; ?>
+			<?php echo wp_strip_all_tags($wcusage_custom_dashboard_css); ?>
 			<?php
 		}
 		?>

@@ -16,7 +16,7 @@ function wusage_add_order_column_header(  $columns  ) {
     foreach ( $columns as $column_name => $column_info ) {
         $new_columns[$column_name] = $column_info;
         if ( 'order_total' === $column_name ) {
-            $new_columns['wcu_order_affiliate_coupon'] = sprintf( esc_html__( 'Coupon / %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
+            $new_columns['wcu_order_affiliate_coupon'] = sprintf( esc_html__( 'Coupon %s', 'woo-coupon-usage' ), wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) );
         }
     }
     return $new_columns;
@@ -127,46 +127,29 @@ function wcusage_output_affiliate_info_orders(  $coupon_code, $order_id, $thetyp
             $typetext = "";
             $typeicon = "";
         }
-        // Commission Paid Icon
-        $ispaid = wcusage_order_ispaid( $order_id );
-        // Commission
-        if ( $getinfo['thecommissionnum'] > 0 && $order->get_status() != "refunded" && !wcusage_coupon_disable_commission( $coupon_id ) ) {
-            $commissiontext = esc_html__( 'Commission', 'woo-coupon-usage' ) . ": " . $getinfo['thecommission'] . $ispaid . "<br/>";
+        $ispaid = "";
+        // Build inline: User, Coupon, then Commission
+        $affiliate_user_link = '';
+        if ( !empty( $getinfo['theuserid'] ) && !empty( $getinfo['theuser'] ) ) {
+            $affiliate_user_link = '<a href="' . esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . intval( $getinfo['theuserid'] ) ) ) . '">' . esc_html( $getinfo['theuser'] ) . '</a>';
+        } elseif ( !empty( $getinfo['theuser'] ) ) {
+            $affiliate_user_link = esc_html( $getinfo['theuser'] );
         } else {
-            $commissiontext = "";
+            $affiliate_user_link = '';
         }
-        // MLA Commission
-        $mla_text = "";
-        $wcusage_field_mla_enable = wcusage_get_setting_value( 'wcusage_field_mla_enable', '0' );
-        if ( $wcusage_field_mla_enable && wcu_fs()->can_use_premium_code() && !wcusage_coupon_disable_commission( $coupon_id ) ) {
-            $get_parents = get_user_meta( $getinfo['theuserid'], 'wcu_ml_affiliate_parents', true );
-            if ( !empty( $get_parents ) && is_array( $get_parents ) ) {
-                $mla_text .= "<br/><p style='margin: 0;'><strong>MLA Commission:</strong>";
-                foreach ( $get_parents as $key => $parent_id ) {
-                    $parent_user_info = get_user_by( 'ID', $parent_id );
-                    $parent_user_name = "";
-                    $parent_user_id = "";
-                    if ( $parent_user_info ) {
-                        $parent_user_name = $parent_user_info->user_login;
-                        $parent_user_id = $parent_user_info->ID;
-                    }
-                    $parent_commission = wcusage_mla_get_commission_from_tier(
-                        $getinfo['thecommissionnum'],
-                        $key,
-                        1,
-                        $order_id,
-                        $coupon_code
-                    );
-                    $mla_text .= "<br/>(" . $key . ") " . $parent_user_name . ": " . wcusage_format_price( $parent_commission );
-                }
-                $mla_text .= "</p>";
-            }
+        $coupon_link = '<a href="' . esc_url( $getinfo['uniqueurl'] ) . '" target="_blank">' . esc_html( $coupon_code ) . '</a>';
+        $coupon_code_linked = '<span class="wcusage-orders-affiliate-column">';
+        if ( $coupon_code ) {
+            $coupon_code_linked .= '<div class="wcusage-order-affiliate-inline">' . $typeicon . esc_html__( 'Coupon', 'woo-coupon-usage' ) . ': ' . $coupon_link . '</div>';
         }
-        // Message
-        $coupon_code_linked = '<span class="wcusage-orders-affiliate-column">' . $typeicon . '<a href="' . $getinfo['uniqueurl'] . '" target="_blank">' . $coupon_code . '</a>';
-        if ( !wcusage_coupon_disable_commission( $coupon_id ) ) {
-            $coupon_code_linked .= wc_help_tip( "<span style='font-size: 18px;'>" . $coupon_code . "</span>" . $typetext . "<p style='margin: 0;'>" . $getinfo['affililiateusertext'] . $commissiontext . $mla_text );
+        if ( $affiliate_user_link ) {
+            $coupon_code_linked .= '<div class="wcusage-order-affiliate-inline">' . wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) . ': ' . $affiliate_user_link . '</div>';
         }
+        // Inline commission display below coupon
+        if ( isset( $getinfo['thecommissionnum'] ) && $getinfo['thecommissionnum'] > 0 && $order->get_status() != "refunded" && !wcusage_coupon_disable_commission( $coupon_id ) ) {
+            $coupon_code_linked .= '<div class="wcusage-order-commission-inline">' . esc_html__( 'Commission:', 'woo-coupon-usage' ) . ' ' . wp_kses_post( $getinfo['thecommission'] ) . wp_kses_post( $ispaid ) . '</div>';
+        }
+        $coupon_code_linked .= '</span>';
         return $coupon_code_linked;
     } else {
         return "";
@@ -229,6 +212,10 @@ function wcusage_get_the_order_coupon_info(
             '.',
             ''
         );
+        // Check if pending commission needs to be added
+        if ( function_exists( 'wcusage_check_and_add_pending_commission' ) ) {
+            wcusage_check_and_add_pending_commission( $order_id );
+        }
         // User
         $theuserid = "";
         $couponuser = get_post_meta( $coupon_id, 'wcu_select_coupon_user', true );

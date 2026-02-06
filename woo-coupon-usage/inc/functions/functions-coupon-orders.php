@@ -19,7 +19,7 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  *
  */
 if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
-  function wcusage_wh_getOrderbyCouponCode( $coupon_code, $start_date, $end_date, $numberoforders = '', $refresh = 1, $update = 0 ) {
+  function wcusage_wh_getOrderbyCouponCode( $coupon_code, $start_date, $end_date, $numberoforders = '', $refresh = 1, $update = 0, $alltime = false ) {
 
     $coupon_code = sanitize_text_field($coupon_code);
     $get_start_date = sanitize_text_field($start_date);
@@ -158,7 +158,7 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 		
 		$query .= " ORDER BY order_date DESC $limit";		
 
-		$orders = $wpdb->get_results($query);
+		$orders = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 		if (!is_array($orders)) {
 			$orders = [];
 		}
@@ -171,14 +171,27 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
   		$wcusage_show_tax = wcusage_get_setting_value('wcusage_field_show_tax', '0');
 
   		if ( !empty($orders) ) {
-
 		$dp = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
 
 		// looping through all the order_id
 		foreach ( $orders as $key => $the_order ) {
+		
+
 
 		$order_id = $the_order->order_id;
 		$order = wc_get_order( $order_id );
+
+		if($refresh && $update && $alltime) {
+
+			// Clear existing pending meta
+			delete_post_meta($order_id, 'wcusage_pending_commission');
+
+			// Check and add if pending (this handles the logic)
+			if( function_exists('wcusage_check_and_add_pending_commission') ) {
+				wcusage_check_and_add_pending_commission($order_id, $coupon_code);
+			}
+
+		}
 
 		// if meta "lifetime_affiliate_coupon_referrer" is set, check if it's same as $coupon_code if not then skip
 		$lifetime_affiliate_coupon_referrer = get_post_meta( $order_id, 'lifetime_affiliate_coupon_referrer', true );

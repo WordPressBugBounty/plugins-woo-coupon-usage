@@ -37,7 +37,7 @@ function wcusage_check_for_csv_download() {
 // Create Page
 function wcusage_bulk_coupon_creator_page() {
     // Check if user is administrator
-    if ( !current_user_can( 'manage_options' ) ) {
+    if ( !wcusage_check_admin_access() ) {
         wp_die( 'Error: Permission denied.' );
     }
     // Nonce field for security
@@ -48,9 +48,13 @@ function wcusage_bulk_coupon_creator_page() {
 
     <div class="wrap wcusage-admin-page">
         <?php 
-    echo do_action( 'wcusage_hook_dashboard_page_header', '' );
+    do_action( 'wcusage_hook_dashboard_page_header', '' );
     ?>
     </div>
+
+    <link rel="stylesheet" href="<?php 
+    echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
+    ?>" crossorigin="anonymous">
 
     <div class="wrap wcusage-tools wcusage-page">
 
@@ -319,7 +323,7 @@ function wcusage_bulk_create_coupons() {
     $response = array();
     if ( $_POST['coupon_code'] ) {
         // Check nonce
-        if ( !current_user_can( 'manage_options' ) || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'create_bulk_coupons' ) ) {
+        if ( !wcusage_check_admin_access() || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'create_bulk_coupons' ) ) {
             $response['errors'][] = 'Security check failed';
             wp_send_json( $response );
             exit;

@@ -60,13 +60,13 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
                     source: function(request, response) {
                         $.ajax({
                             url: '<?php 
-        echo admin_url( 'admin-ajax.php' );
+        echo esc_url( admin_url( 'admin-ajax.php' ) );
         ?>',
                             type: 'POST',
                             dataType: 'json',
                             data: {
                                 search: request.term,
-                                label: 'username',
+                                label: '',
                                 action: 'wcusage_search_users',
                                 nonce: '<?php 
         echo esc_js( $nonce );
@@ -81,7 +81,7 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
                                 var results = data.data.map(function(item) {
                                     return {
                                         label: item.label,
-                                        value: item.label
+                                        value: item.value || item.label
                                     };
                                 });
                                 response(results);
@@ -252,7 +252,7 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields_limits' ) ) {
         <?php 
         $wcu_enable_first_order_only = get_post_meta( $coupon_get_id, 'wcu_enable_first_order_only', true );
         woocommerce_wp_checkbox( array(
-            'id'          => 'wcu_enable_first_order_only_' . rand( 1, 9999 ),
+            'id'          => 'wcu_enable_first_order_only_' . wp_rand( 1, 9999 ),
             'name'        => 'wcu_enable_first_order_only',
             'class'       => 'wcu_enable_first_order_only',
             'value'       => $wcu_enable_first_order_only,
@@ -528,7 +528,7 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
             ?>
 
             <h3 class="wcu-user-coupon-title"><?php 
-            echo esc_html__( "My Affiliate Coupons", "woo-coupon-usage" );
+            echo sprintf( esc_html__( 'My %s Coupons', 'woo-coupon-usage' ), esc_html( ( function_exists( 'wcusage_get_affiliate_text' ) ? wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) : __( 'Affiliate', 'woo-coupon-usage' ) ) ) );
             ?> <?php 
             if ( $is_admin_preview ) {
                 echo '<small>(Viewing as: ' . esc_html( $display_username ) . ')</small>';
@@ -538,7 +538,7 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
 
             <?php 
             if ( !is_user_logged_in() && !$is_admin_preview ) {
-                if ( $wcusage_loginform ) {
+                if ( $wcusage_loginform || $wcusage_registration_enable ) {
                     ob_start();
                     ?>
                     <style>.wcu-user-coupon-title { display: none; }</style>
@@ -546,7 +546,7 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                     <div class="wcusage-login-form-cols">
 
                     <?php 
-                    if ( $wcusage_registration_enable && $wcusage_registration_enable_login && $wcusage_registration_enable_logout ) {
+                    if ( $wcusage_loginform && $wcusage_registration_enable && $wcusage_registration_enable_login && $wcusage_registration_enable_logout ) {
                         ?>
                         <div class="wcusage-login-form-col wcu_form_style_<?php 
                         echo esc_attr( $wcusage_field_form_style );
@@ -558,27 +558,35 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                     }
                     ?>
 
+                    <?php 
+                    if ( $wcusage_loginform ) {
+                        ?>
+
                     <div class="wcu-form-section">
 
                         <p class="wcusage-login-form-title" style="font-size: 1.2em;"><strong><?php 
-                    echo esc_html__( 'Login', 'woo-coupon-usage' );
-                    ?>:</strong></p>
+                        echo esc_html__( 'Login', 'woo-coupon-usage' );
+                        ?>:</strong></p>
 
                         <div class="wcusage-login-form-section">
                         <?php 
-                    if ( function_exists( 'wc_print_notices' ) ) {
-                        woocommerce_output_all_notices();
-                    }
-                    if ( function_exists( 'woocommerce_login_form' ) ) {
-                        woocommerce_login_form();
-                    }
-                    ?>
+                        if ( function_exists( 'wc_print_notices' ) ) {
+                            woocommerce_output_all_notices();
+                        }
+                        if ( function_exists( 'woocommerce_login_form' ) ) {
+                            woocommerce_login_form();
+                        }
+                        ?>
                         </div>
 
                     </div>
 
                     <?php 
-                    if ( $wcusage_registration_enable && $wcusage_registration_enable_login && $wcusage_registration_enable_logout ) {
+                    }
+                    ?>
+
+                    <?php 
+                    if ( $wcusage_loginform && $wcusage_registration_enable && $wcusage_registration_enable_login && $wcusage_registration_enable_logout ) {
                         ?>
                     </div>
                     <?php 
@@ -607,7 +615,7 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                 }
             } else {
                 if ( !$numcoupons ) {
-                    echo "<p>" . esc_html__( "Sorry, you don't currently have any active affiliate coupons.", "woo-coupon-usage" ) . "</p>";
+                    echo '<p>' . sprintf( esc_html__( "You don't have any active %s coupons right now.", 'woo-coupon-usage' ), esc_html( ( function_exists( 'wcusage_get_affiliate_text' ) ? wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) : __( 'affiliate', 'woo-coupon-usage' ) ) ) ) . '</p>';
                     $wcusage_field_registration_enable_register_loggedin = wcusage_get_setting_value( 'wcusage_field_registration_enable_register_loggedin', '1' );
                     if ( $wcusage_field_registration_enable_register_loggedin || isset( $_POST['submitaffiliateapplication'] ) ) {
                         echo "<br/>";
@@ -819,7 +827,7 @@ if ( !function_exists( 'wcusage_coupon_meta_box_markup' ) ) {
                                 dataType: 'json',
                                 data: {
                                     search: request.term,
-                                    label: 'username',
+                                    label: '',
                                     action: 'wcusage_search_users',
                                     nonce: '<?php 
             echo esc_js( $nonce );
@@ -833,7 +841,7 @@ if ( !function_exists( 'wcusage_coupon_meta_box_markup' ) ) {
                                     var results = data.data.map(function(item) {
                                         return {
                                             label: item.label,
-                                            value: item.label
+                                            value: item.value || item.label
                                         };
                                     });
                                     response(results);

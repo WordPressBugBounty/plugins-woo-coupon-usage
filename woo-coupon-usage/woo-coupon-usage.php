@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
-* Version: 6.8.2
+* Version: 7.3.2
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -13,7 +13,7 @@
 * Requires Plugins: woocommerce
 *
 * WC requires at least: 3.7
-* WC tested up to: 10.1
+* WC tested up to: 10.4
 *
 */
 if ( !defined( 'ABSPATH' ) ) {
@@ -21,7 +21,7 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 // Define plugin version constant
 if ( !defined( 'WCUSAGE_VERSION' ) ) {
-    define( 'WCUSAGE_VERSION', '6.6.0' );
+    define( 'WCUSAGE_VERSION', '7.2.3' );
 }
 if ( function_exists( 'wcu_fs' ) ) {
     wcu_fs()->set_basename( false, __FILE__ );
@@ -108,39 +108,24 @@ if ( function_exists( 'wcu_fs' ) ) {
         if ( !function_exists( 'is_woocommerce' ) ) {
             return;
         }
-        global $post, $wpdb;
-        // determine whether this page contains a shortcode
+        global $post;
+        // Determine whether this page contains a shortcode
         $shortcode_found = false;
         if ( $post ) {
+            $post_id = get_the_ID();
+            $dashboard_page = wcusage_get_setting_value( 'wcusage_dashboard_page', '' );
+            $mla_dashboard_page = wcusage_get_setting_value( 'wcusage_mla_dashboard_page', '' );
+            if ( $post_id == $dashboard_page || $post_id == $mla_dashboard_page ) {
+                $shortcode_found = true;
+            }
             if ( has_shortcode( $post->post_content, 'couponusage' ) || has_shortcode( $post->post_content, 'couponaffiliates' ) || has_shortcode( $post->post_content, 'couponaffiliates-creatives' ) || has_shortcode( $post->post_content, 'couponaffiliates-leaderboard' ) || has_shortcode( $post->post_content, 'couponaffiliates-mla' ) ) {
                 $shortcode_found = true;
-            } else {
-                if ( isset( $post->ID ) ) {
-                    $result = $wpdb->get_var( $wpdb->prepare( "SELECT count(*) FROM {$wpdb->postmeta} " . "WHERE post_id = %d and meta_value LIKE ('%%couponusage%%' OR '%%couponaffiliates%%' OR '%%couponaffiliates-creatives%%' OR '%%couponaffiliates-leaderboard%%' OR '%%couponaffiliates-mla%%')", $post->ID ) );
-                    $shortcode_found = !empty( $result );
-                }
             }
         }
         $wcusage_field_account_tab_create = wcusage_get_setting_value( 'wcusage_field_account_tab_create', 0 );
         if ( $shortcode_found || is_account_page() && $wcusage_field_account_tab_create ) {
             if ( !is_admin() ) {
-                if ( !wp_script_is( 'jquery', 'registered' ) ) {
-                    // deregister the original version of jQuery
-                    wp_deregister_script( 'jquery' );
-                    // discover the correct protocol to use
-                    $protocol = 'http:';
-                    if ( $_SERVER['HTTPS'] == 'on' ) {
-                        $protocol = 'https:';
-                    }
-                    // register the Google CDN version
-                    wp_register_script(
-                        'jquery',
-                        $protocol . '//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js',
-                        array(),
-                        '3.5.1',
-                        true
-                    );
-                }
+                // Ensure core jQuery is available and enqueued (use WordPress bundled version only)
                 if ( !wp_script_is( 'jquery', 'enqueued' ) ) {
                     wp_enqueue_script( 'jquery' );
                 }
@@ -157,7 +142,7 @@ if ( function_exists( 'wcu_fs' ) ) {
                     'wcusage-tab-settings',
                     plugin_dir_url( __FILE__ ) . 'css/tab-settings.css',
                     array(),
-                    '1.0.0'
+                    '7.0.0'
                 );
                 // Localize script with necessary data
                 wp_localize_script( 'wcusage-tab-settings', 'wcusage_ajax', array(
@@ -202,7 +187,7 @@ if ( function_exists( 'wcu_fs' ) ) {
             'woo-coupon-usage-style',
             $plugin_url . 'css/style.css',
             array(),
-            '5.18.2'
+            '7.0.0'
         );
     }
 
@@ -214,11 +199,36 @@ if ( function_exists( 'wcu_fs' ) ) {
             'woo-coupon-usage-admin-style',
             $plugin_url . 'css/admin-style.css',
             array(),
-            '5.18.2'
+            '7.0.0'
         );
     }
 
     add_action( 'admin_enqueue_scripts', 'wcusage_include_admin_styles' );
+    /*** Enqueue Font Awesome on relevant admin pages (including Statements/Bonuses CPTs) ***/
+    function wcusage_enqueue_font_awesome_admin(  $hook  ) {
+        $should_enqueue = false;
+        // Load on specific plugin admin pages
+        if ( isset( $_GET['page'] ) && $_GET['page'] === 'wcusage-account' ) {
+            $should_enqueue = true;
+        }
+        // Also load on the Statements and Bonuses custom post type admin screens (list, add, edit)
+        if ( !$should_enqueue && function_exists( 'get_current_screen' ) ) {
+            $screen = get_current_screen();
+            if ( $screen && isset( $screen->post_type ) && ('wcu-statements' === $screen->post_type || 'wcu-bonuses' === $screen->post_type || 'wcu-creatives' === $screen->post_type) ) {
+                $should_enqueue = true;
+            }
+        }
+        if ( $should_enqueue ) {
+            wp_enqueue_style(
+                'wcusage-font-awesome',
+                WCUSAGE_UNIQUE_PLUGIN_URL . 'fonts/font-awesome/css/all.min.css',
+                array(),
+                null
+            );
+        }
+    }
+
+    add_action( 'admin_enqueue_scripts', 'wcusage_enqueue_font_awesome_admin' );
     /**
      * Enqueue custom JavaScript for confirming coupon title change.
      */
@@ -258,6 +268,7 @@ if ( function_exists( 'wcu_fs' ) ) {
             }
             $smtp_plugins = array(
                 'wp-mail-smtp/wp_mail_smtp.php',
+                'wp-mail-smtp-pro/wp_mail_smtp.php',
                 'post-smtp/postman-smtp.php',
                 'post-smtp/post-smtp.php',
                 'easy-wp-smtp/easy-wp-smtp.php',
@@ -318,6 +329,7 @@ if ( function_exists( 'wcu_fs' ) ) {
     include plugin_dir_path( __FILE__ ) . 'inc/admin/admin-view-affiliate-data.php';
     // Admin Files
     include plugin_dir_path( __FILE__ ) . 'inc/admin/admin-dashboard.php';
+    include plugin_dir_path( __FILE__ ) . 'inc/admin/admin-notification-bell.php';
     include plugin_dir_path( __FILE__ ) . 'inc/admin/admin-page.php';
     include plugin_dir_path( __FILE__ ) . 'inc/admin/admin-tools.php';
     include plugin_dir_path( __FILE__ ) . 'inc/admin/admin-list.php';
@@ -419,7 +431,7 @@ if ( function_exists( 'wcu_fs' ) ) {
     include plugin_dir_path( __FILE__ ) . 'inc/registration/functions-registration.php';
     include plugin_dir_path( __FILE__ ) . 'inc/registration/registration-landing-page.php';
     include plugin_dir_path( __FILE__ ) . 'inc/registration/registration-ajax.php';
-    $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '0' );
+    $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
     if ( $wcusage_field_registration_enable ) {
         // Classes
         include plugin_dir_path( __FILE__ ) . 'inc/registration/class-registrations-list-table.php';
@@ -484,14 +496,12 @@ if ( function_exists( 'wcu_fs' ) ) {
             if ( function_exists( 'wcu_fs' ) ) {
                 $fs = wcu_fs();
                 $optin_pending = false;
-                if ( method_exists( $fs, 'is_pending_activation' ) && $fs->is_pending_activation() ) {
-                    $optin_pending = true;
-                } elseif ( method_exists( $fs, 'is_registered' ) && method_exists( $fs, 'is_anonymous' ) ) {
+                if ( method_exists( $fs, 'is_registered' ) && method_exists( $fs, 'is_anonymous' ) ) {
                     // Treat as pending if not registered and not explicitly anonymous (opted-out).
                     $optin_pending = !$fs->is_registered( true ) && !$fs->is_anonymous();
                 }
                 if ( $optin_pending ) {
-                    wp_safe_redirect( admin_url( 'admin.php?page=wcusage' ) );
+                    wp_safe_redirect( admin_url( 'admin.php?page=wcusage_setup' ) );
                     exit;
                 }
             }
@@ -519,13 +529,10 @@ if ( function_exists( 'wcu_fs' ) ) {
         }
         $fs = wcu_fs();
         $optin_pending = false;
-        if ( method_exists( $fs, 'is_pending_activation' ) && $fs->is_pending_activation() ) {
-            $optin_pending = true;
-        } elseif ( method_exists( $fs, 'is_registered' ) && method_exists( $fs, 'is_anonymous' ) ) {
-            $optin_pending = !$fs->is_registered( true ) && !$fs->is_anonymous();
+        if ( method_exists( $fs, 'is_registered' ) && method_exists( $fs, 'is_anonymous' ) && method_exists( $fs, 'is_activation_mode' ) ) {
+            $optin_pending = !$fs->is_registered( true ) && !$fs->is_anonymous() && $fs->is_activation_mode();
         }
         if ( $optin_pending ) {
-            // Avoid loops by not redirecting if we're already on the top-level page.
             wp_safe_redirect( admin_url( 'admin.php?page=wcusage' ) );
             exit;
         }

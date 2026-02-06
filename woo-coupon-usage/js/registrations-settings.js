@@ -7,7 +7,7 @@
     var $requiredWrap = $('.registration_custom_required_' + idx);
     var $labelWrap = $('.registration_custom_label_' + idx + ' .reg-field-label');
 
-    if (selected === 'dropdown' || selected === 'checkbox' || selected === 'radio') {
+    if (selected === 'dropdown' || selected === 'radio') {
       $optionsWrap.show();
     } else {
       $optionsWrap.hide();

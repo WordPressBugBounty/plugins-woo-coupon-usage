@@ -62,21 +62,7 @@ td.column-action1 a.button-primary.disabled {
 }
 
 /* Two-up layout on wider screens */
-@media (min-width: 900px) {
-  /* Float buttons to avoid inline-block whitespace issues */
-  td.column-action1 a.button,
-  td.column-action1 button.payout-action {
-    float: left !important;
-    width: calc(50% - 6px) !important;
-  }
-  /* Space between sibling anchor buttons */
-  td.column-action1 a.button + a.button {
-    margin-left: 12px;
-  }
-  /* Space between action buttons on same row (pending Accept/Decline) */
-  td.column-action1 .payout-action + .payout-action {
-    margin-left: 12px;
-  }
+@media (min-width: 1750px) {
   /* Clear floats */
   td.column-action1::after {
     content: '';
@@ -86,7 +72,7 @@ td.column-action1 a.button-primary.disabled {
 }
 
 /* If there is only one action of a type, keep it full width on large screens */
-@media (min-width: 900px) {
+@media (min-width: 1750px) {
   .wp-list-table .column-action1 a.button:first-of-type:last-of-type,
   .wp-list-table .column-action1 button.payout-action:first-of-type:last-of-type {
     width: 100%;

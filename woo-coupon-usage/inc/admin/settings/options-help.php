@@ -55,13 +55,9 @@ function wcusage_field_cb_help( $args )
 
   <?php echo esc_html__( 'Need help? Have a suggestion?', 'woo-coupon-usage' ); ?> <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-contact')); ?>"><?php echo esc_html__( "Create a new support ticket", "woo-coupon-usage" ); ?> <span class='fas fa-arrow-circle-right'></span></a>
 
-  <br/><br/><br/>
+  <br/><br/>
 
-  <h1><?php echo esc_html__( 'Documentation', 'woo-coupon-usage' ); ?></h1>
-
-  <hr/>
-
-  <div id="couponaffiliates-support-widget" style="margin-top: 15px; padding: 20px; background: #fff; border: 1px solid #ddd; border-radius: 5px;">
+  <div id="couponaffiliates-support-widget" style="margin-top: 15px; padding: 10px 20px 10px 20px; background: #fff; border: 1px solid #ddd; border-radius: 5px;">
       <h2><?php echo esc_html__( 'Support Documentation', 'woo-coupon-usage' ); ?></h2>
       <p style="font-size: 16px; margin-bottom: 10px;"><?php echo esc_html__( 'Search our documentation for help with common questions and issues.', 'woo-coupon-usage' ); ?></p>
       <form id="couponaffiliates-docs-search-form" autocomplete="off" style="margin-bottom: 20px;">
@@ -264,7 +260,7 @@ function wcusage_field_cb_help( $args )
         <ul>
           <?php foreach ($section['links'] as $link) { ?>
             <li style="font-size: 18px; margin: 20px 0; display: block;">
-              <a href="<?php echo esc_url($link['url']); ?>?utm_campaign=plugin&utm_source=dashboard-link&utm_medium=documentation" target="_blank"><?php echo esc_html__( $link['text'], 'woo-coupon-usage' ); ?></a>
+              <a href="<?php echo esc_url($link['url']); ?>?utm_campaign=plugin&utm_source=dashboard-link&utm_medium=documentation" target="_blank"><?php echo esc_html( $link['text'] ); ?></a>
             </li>
           <?php } ?>
         </ul>
@@ -302,27 +298,23 @@ function wcusage_field_cb_help( $args )
 
     <hr/>
 
-    <h2><?php echo esc_html__( 'Setup Guide', 'woo-coupon-usage' ); ?></h2>
-    
-    <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/705963280?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Coupon Affiliates - Setup Guide"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
-    
-    <br/><hr/>
-
-    <h2><?php echo esc_html__( 'Registration System', 'woo-coupon-usage' ); ?></h2>
-
-    <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/713487822?badge=0&autopause=0&player_id=0&app_id=58479/embed" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>
+  <h2><?php echo esc_html__( 'Setup Guide', 'woo-coupon-usage' ); ?></h2>
+  <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/705963280?badge=0&autopause=0&player_id=0&app_id=58479/embed' ); ?>
     
     <br/><hr/>
 
-    <h2><?php echo esc_html__( 'Payouts (PRO)', 'woo-coupon-usage' ); ?></h2>
+  <h2><?php echo esc_html__( 'Registration System', 'woo-coupon-usage' ); ?></h2>
+  <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/713487822?badge=0&autopause=0&player_id=0&app_id=58479/embed' ); ?>
+    
+    <br/><hr/>
 
-    <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/837140385?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Commission Payouts"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+  <h2><?php echo esc_html__( 'Payouts (PRO)', 'woo-coupon-usage' ); ?></h2>
+  <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/837140385?badge=0&autopause=0&player_id=0&app_id=58479/embed' ); ?>
     
       <br/><hr/>
 
-    <h2><?php echo esc_html__( 'Multi-Level Affiliates (PRO)', 'woo-coupon-usage' ); ?></h2>
-
-    <div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/705963220?badge=0&autopause=0&player_id=0&app_id=58479/embed" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe></div>
+  <h2><?php echo esc_html__( 'Multi-Level Affiliates (PRO)', 'woo-coupon-usage' ); ?></h2>
+  <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/705963220?badge=0&autopause=0&player_id=0&app_id=58479/embed' ); ?>
     
   </div>
 

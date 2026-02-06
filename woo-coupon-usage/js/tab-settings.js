@@ -6,11 +6,23 @@ jQuery(document).ready(function($) {
     var current_payout_type = $('#wcu-payout-type').val();
 
     tabs.on('click', function(e) {
+    console.log('Tab clicked: scroll-to-top code running');
         e.preventDefault();
         tabs.parent().removeClass('active');
         panes.removeClass('active');
         $(this).parent().addClass('active');
         $($(this).attr('href')).addClass('active');
+        // Scroll to top of page when switching tabs
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            $('html, body').animate({ scrollTop: 0 }, 300);
+            // Try to scroll any scrollable parent of the active pane
+            var $activePane = $($(this).attr('href'));
+            $activePane.parents().each(function() {
+                var $parent = $(this);
+                if ($parent.css('overflow-y') === 'auto' || $parent.css('overflow-y') === 'scroll') {
+                    $parent.animate({ scrollTop: 0 }, 300);
+                }
+            });
     });
 
     // Payout type checker
@@ -23,6 +35,17 @@ jQuery(document).ready(function($) {
         var currentpayout = $('#wcu-payout-type').val();
         $('.wcu-payout-type-custom1, .wcu-payout-type-custom2, .wcu-payout-type-banktransfer, .wcu-payout-type-paypalapi, .wcu-payout-type-wisebank, .wcu-payout-type-stripeapi, .wcu-payout-type-credit').hide();
         
+        // Remove required from Wise Bank fields when not selected
+        var wiseStaticRequired = $('#wcu-wisebank-region, #wcu-wisebank-account-name, #wcu-wisebank-address, #wcu-wisebank-city, #wcu-wisebank-postcode, #wcu-wisebank-recipient-country');
+        var wiseDynamicFields = $('.wcu-wisebank-region-fields input, .wcu-wisebank-region-fields select');
+        var wiseState = $('#wcu-wisebank-state');
+
+        if(currentpayout !== "wisebank") {
+            wiseStaticRequired.removeAttr('required');
+            wiseDynamicFields.removeAttr('required');
+            wiseState.removeAttr('required');
+        }
+
         if(currentpayout === "custom1") $('.wcu-payout-type-custom1').show();
         if(currentpayout === "custom2") $('.wcu-payout-type-custom2').show();
         if(currentpayout === "banktransfer") $('.wcu-payout-type-banktransfer').show();
@@ -30,6 +53,8 @@ jQuery(document).ready(function($) {
         if(currentpayout === "wiseapi") $('.wcu-payout-type-wiseapi').show();
         if(currentpayout === "wisebank") {
             $('.wcu-payout-type-wisebank').show();
+            // Restore required
+            wiseStaticRequired.attr('required', 'required');
             wcusage_check_wisebank_region();
         }
         if(currentpayout === "stripeapi") $('.wcu-payout-type-stripeapi').show();
@@ -85,19 +110,6 @@ jQuery(document).ready(function($) {
             $('#wcu-wisebank-state').removeAttr('required');
         }
         
-        // Debug logging
-        console.log('Wise Bank Region changed to:', selectedRegion);
-        console.log('Country field value:', $('#wcu-wisebank-country').val());
-        console.log('Recipient Country field value:', $('#wcu-wisebank-recipient-country').val());
-        console.log('State field visibility:', $('.wcu-wisebank-state-field').is(':visible'));
-        
-        // Log all visible required fields for US
-        if (selectedRegion === 'us') {
-            console.log('US Region - Required fields:');
-            $('.wcu-wisebank-region-fields:visible input[required], .wcu-wisebank-region-fields:visible select[required]').each(function() {
-                console.log('  - ' + $(this).attr('name') + ': ' + $(this).val());
-            });
-        }
     }
     
     // Initialize on page load
@@ -127,9 +139,6 @@ jQuery(document).ready(function($) {
         } else if (selectedRegion === 'international') {
             accountNumber = $('#wcu-wisebank-account-number-intl').val() || '';
         }
-        
-        // Debug logging
-        console.log('Getting account number for region:', selectedRegion, 'value:', accountNumber);
         
         return accountNumber;
     }
@@ -201,24 +210,6 @@ jQuery(document).ready(function($) {
         } else if (selectedRegion === 'international') {
             formData.wisebank_account_number_intl = $('#wcu-wisebank-account-number-intl').val() || '';
         }
-
-        // Debug logging for Wise Bank fields
-        console.log('Wise Bank Form Data:', {
-            region: formData.wisebank_region,
-            account_name: formData.wisebank_account_name,
-            account_number: formData.wisebank_account_number,
-            routing_number: formData.wisebank_routing_number,
-            swift_code: formData.wisebank_swift_code,
-            iban: formData.wisebank_iban,
-            sort_code: formData.wisebank_sort_code,
-            bank_name: formData.wisebank_bank_name,
-            bank_address: formData.wisebank_bank_address,
-            country: formData.wisebank_country,
-            address: formData.wisebank_address,
-            city: formData.wisebank_city,
-            postcode: formData.wisebank_postcode,
-            recipient_country: formData.wisebank_recipient_country
-        });
 
         $.ajax({
             url: wcusage_ajax.ajax_url,

@@ -22,6 +22,44 @@ if( !function_exists( 'wcusage_get_cookie_value' ) ) {
 }
 
 /**
+ * Sets a cookie with proper attributes
+ *
+ */
+if( !function_exists( 'wcusage_set_cookie' ) ) {
+	function wcusage_set_cookie($name, $value, $expire, $secure = false, $httponly = false) {
+    
+    $path = '/';
+    $domain = '';
+    if ( defined( 'COOKIE_DOMAIN' ) ) {
+        $domain = COOKIE_DOMAIN;
+    }
+
+    if ( is_ssl() ) {
+        $secure = true;
+    }
+
+    if ( headers_sent() && ! $httponly && ! wp_doing_ajax() ) {
+        $script = "var date = new Date(" . ($expire * 1000) . ");
+        var expires = '; expires=' + date.toUTCString();
+        document.cookie = '" . $name . "=" . $value . "' + expires + '; path=" . $path . "; domain=" . $domain . "; samesite=Lax" . ($secure ? "; secure" : "") . "';";
+        wp_add_inline_script( 'jquery-core', $script );
+    } elseif ( PHP_VERSION_ID < 70300 ) {
+        setcookie( $name, $value, $expire, $path, $domain, $secure, $httponly );
+    } else {
+        $options = array(
+            'expires'  => $expire,
+            'path'     => $path,
+            'domain'   => $domain,
+            'secure'   => $secure,
+            'httponly' => $httponly,
+            'samesite' => 'Lax',
+        );
+        setcookie( $name, $value, $options );
+    }
+  }
+}
+
+/**
  * Gets referral URL coupon code parameter value
  *
  */
@@ -88,7 +126,7 @@ if( !function_exists( 'wcusage_url_cookie' ) ) {
 		if(!is_admin()) {
 
       if( isset($_SERVER['HTTP_REFERER']) ) {
-        $refpage = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
+        $refpage = wp_parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
         $refpage = strtok($refpage, '?');
         $refpage = preg_replace('/^www\./i', '', $refpage);
       } else {
@@ -119,6 +157,7 @@ if( !function_exists( 'wcusage_url_cookie' ) ) {
 	}
 }
 add_action('init', 'wcusage_url_cookie', 1);
+add_action('plugins_loaded', 'wcusage_url_cookie', 1);
 
 /**
  * Runs code to apply cookies, and click/campaign tracking when URL is clicked
@@ -137,7 +176,7 @@ add_action('init', 'wcusage_url_cookie', 1);
     $wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
 
     if( isset($_SERVER['HTTP_REFERER']) ) {
-      $refpage = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
+      $refpage = wp_parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
       $refpage = strtok($refpage, '?');
       $refpage = preg_replace('/^www\./i', '', $refpage);
     } else {
@@ -149,7 +188,7 @@ add_action('init', 'wcusage_url_cookie', 1);
     if( !wcusage_is_domain_blacklisted($refpage) || !$refpage ) {
 
   		$thereferral = sanitize_text_field($thereferral);
-      $campaign = sanitize_text_field($campaign);
+      $campaign = sanitize_text_field( $campaign );
   		$cookie = sanitize_text_field($cookie);
 
   		$wcusage_urls_cookie_days = wcusage_get_setting_value('wcusage_urls_cookie_days', '30');
@@ -190,12 +229,12 @@ add_action('init', 'wcusage_url_cookie', 1);
               if ( strtolower($existing_ref) !== strtolower($thereferral) ) {
                 $did_replace_referral = true;
               }
-        // Mark pending value for this request so removal hooks won't clear it.
-        $GLOBALS['wcusage_referral_cookie_pending'] = $thereferral;
-      		setcookie('wcusage_referral', $thereferral, $expiry, '/');
+              // Mark pending value for this request so removal hooks won't clear it.
+              $GLOBALS['wcusage_referral_cookie_pending'] = $thereferral;
+      		    wcusage_set_cookie('wcusage_referral', $thereferral, $expiry);
               // In last-click mode, clear wcusage_referral_code to prefer live referral.
               if( ! $first_click ) {
-                setcookie("wcusage_referral_code", "", 1);
+                wcusage_set_cookie("wcusage_referral_code", "", 1);
               }
             }
           }
@@ -208,7 +247,7 @@ add_action('init', 'wcusage_url_cookie', 1);
             // Get referring page
             $refpage = "";
             if(isset($_SERVER['HTTP_REFERER'])) {
-              $refpage = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
+              $refpage = wp_parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
               $refpage = strtok($refpage, '?'); // Remove Query
               $refpage = sanitize_text_field($refpage);
             }
@@ -231,8 +270,8 @@ add_action('init', 'wcusage_url_cookie', 1);
             if( $did_replace_referral || !$clickcookie || ($wcusage_field_track_all_clicks && !$clickcookie_recent) ) {
               $addclick = wcusage_install_clicks_data($coupon_id, $campaign, '', $refpage, 0, $ipaddress);
               if($wcusage_store_cookies) {
-                setcookie('wcusage_referral_click', $addclick, $expiry, '/'); // Updates click ID cookie
-                setcookie('wcusage_referral_click_recent', 'true', time() + 60, '/');
+                wcusage_set_cookie('wcusage_referral_click', $addclick, $expiry); // Updates click ID cookie
+                wcusage_set_cookie('wcusage_referral_click_recent', 'true', time() + 60);
               }
             }
 
@@ -244,7 +283,7 @@ add_action('init', 'wcusage_url_cookie', 1);
   			if($thereferral && $campaign) {
           if($wcusage_store_cookies) {
   				  $expiry = strtotime('+'.$wcusage_urls_cookie_days.' days');
-  				  setcookie('wcusage_referral_campaign', $campaign, $expiry, '/');
+  				  wcusage_set_cookie('wcusage_referral_campaign', $campaign, $expiry);
           }
   		  }
 
@@ -266,9 +305,9 @@ function wcusage_get_visitor_ip() {
   // Get IP Address of visitor
   $ipaddress = "";
   if($wcusage_field_track_click_ip) {
-    if(isset($_SERVER['REMOTE_ADDR'])) {
-      $ipaddress = $_SERVER['REMOTE_ADDR'];
-    }
+    
+    $ipaddress = wcusage_get_ip_only();
+
   } else {
     if ( isset( $_COOKIE['wcusage_referral_id'] ) ) {
       $ipaddress = wp_unslash( $_COOKIE['wcusage_referral_id'] );
@@ -276,7 +315,7 @@ function wcusage_get_visitor_ip() {
       $randomid = wcusage_url_shorten_random(20);
       $wcusage_urls_cookie_days = wcusage_get_setting_value('wcusage_urls_cookie_days', '30');
       $expiry = strtotime('+'.$wcusage_urls_cookie_days.' days');
-      setcookie('wcusage_referral_id', $randomid, $expiry, '/');
+      wcusage_set_cookie('wcusage_referral_id', $randomid, $expiry);
       $ipaddress = $randomid;
     }
   }
@@ -284,6 +323,27 @@ function wcusage_get_visitor_ip() {
 
   return $ipaddress;
 
+}
+
+/**
+ * Get IP Address of visitor (Cloudflare compatible)
+ *
+ */
+function wcusage_get_ip_only() {
+  $ipaddress = "";
+  if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
+      $ipaddress = $_SERVER["HTTP_CF_CONNECTING_IP"];
+  } elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+      $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+  } elseif(isset($_SERVER['REMOTE_ADDR'])) {
+      $ipaddress = $_SERVER['REMOTE_ADDR'];
+  }
+  
+  if (strpos($ipaddress, ',') !== false) {
+      $ip_parts = explode(',', $ipaddress);
+      $ipaddress = trim($ip_parts[0]);
+  }
+  return $ipaddress;
 }
 
 /**
@@ -382,7 +442,7 @@ function wcusage_set_link_tracking_cookie($refpage) {
         // Set Cookie
         $wcusage_urls_cookie_days = wcusage_get_setting_value('wcusage_urls_cookie_days', '30');
         $expiry = strtotime('+'.$wcusage_urls_cookie_days.' days');
-        setcookie('wcusage_referral_domain', $refpage, $expiry, '/');
+        wcusage_set_cookie('wcusage_referral_domain', $refpage, $expiry);
 
       }
 
@@ -428,9 +488,7 @@ if( !function_exists( 'wcusage_update_click_page_value' ) ) {
       // Get IP Address of visitor
       $ipaddress = "";
       if($wcusage_field_track_click_ip) {
-        if(isset($_SERVER['REMOTE_ADDR'])) {
-          $ipaddress = $_SERVER['REMOTE_ADDR'];
-        }
+        $ipaddress = wcusage_get_ip_only();
       } else {
   if ( isset( $_COOKIE['wcusage_referral_id'] ) ) {
 					$ipaddress = wp_unslash( $_COOKIE['wcusage_referral_id'] );
@@ -448,13 +506,13 @@ if( !function_exists( 'wcusage_update_click_page_value' ) ) {
 
       if($page) {
 
-        $coupon = new WC_Coupon($thecode);
+        $coupon = wcusage_get_coupon_object_safe($thecode);
         if($coupon) {
           $couponid = $coupon->get_id();
           if($couponid) {
             global $wpdb;
             $table_name = $wpdb->prefix . 'wcusage_clicks';
-            $clickid = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table_name WHERE couponid = %d AND ipaddress = %s ORDER BY id DESC LIMIT 1", $couponid, $ipaddress));
+            $clickid = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table_name WHERE couponid = %d AND ipaddress = %s ORDER BY id DESC LIMIT 1", $couponid, $ipaddress)); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results2 = $wpdb->update( $table_name, array( 'page' => $page ), array( 'id' => $clickid ) );
           }
         }
@@ -480,8 +538,8 @@ if( !function_exists( 'wcusage_auto_apply_discount_coupon' ) ) {
 
   		if ( WC()->cart->get_cart_contents_count() > 0 ) {
 
-  			$wc_coupon = new WC_Coupon($coupon); // get intance of wc_coupon
-  			if (!$wc_coupon || !$wc_coupon->is_valid()) {
+        $wc_coupon = wcusage_get_coupon_object_safe($coupon); // get intance of wc_coupon
+        if (!$wc_coupon || !$wc_coupon->is_valid()) {
   				return;
   			}
 
@@ -534,12 +592,12 @@ if( !function_exists( 'wcusage_action_woocommerce_removed_coupon' ) ) {
     $coupon_code = strtolower($coupon_code);
     if (isset($_COOKIE['wcusage_referral']) && $cookie == $coupon_code) {
       unset($_COOKIE['wcusage_referral']);
-  		setcookie("wcusage_referral", "", time() - 3600, '/');
+  		wcusage_set_cookie("wcusage_referral", "", time() - 3600);
       $wcusage_field_url_referrals = wcusage_get_setting_value('wcusage_field_url_referrals', '0');
       if($wcusage_field_url_referrals) {
         $wcusage_urls_cookie_days = wcusage_get_setting_value('wcusage_urls_cookie_days', '30');
         $expiry = strtotime('+'.$wcusage_urls_cookie_days.' days');
-        setcookie('wcusage_referral_code', $coupon_code, $expiry, '/');
+        wcusage_set_cookie('wcusage_referral_code', $coupon_code, $expiry);
       }
     }
     if (isset($wp_session["wcusage_referral"]) && $wp_session["wcusage_referral"] == $coupon_code) {
@@ -696,7 +754,7 @@ if( !function_exists( 'wcusage_clicks_log_converted' ) ) {
         }
 
         // remove cookie
-        setcookie('wcusage_referral_click', '', time() - 3600, '/');
+        wcusage_set_cookie('wcusage_referral_click', '', time() - 3600);
 
 			}
 
@@ -744,10 +802,10 @@ if( !function_exists( 'wcusage_get_referral_url_stats' ) ) {
         $params[] = sanitize_text_field( $campaign );
       }
 
-      $sql_clicks = "SELECT * FROM $table_name WHERE couponid = %d$where_campaign ORDER BY id ASC";
-      $sql_conv   = "SELECT * FROM $table_name WHERE couponid = %d$where_campaign AND converted = 1 ORDER BY id ASC";
-      $getclicks = $wpdb->get_results( $wpdb->prepare( $sql_clicks, $params ), ARRAY_A );
-      $getconversions = $wpdb->get_results( $wpdb->prepare( $sql_conv, $params ), ARRAY_A );
+      $sql_clicks = "SELECT * FROM $table_name WHERE couponid = %d$where_campaign ORDER BY id ASC"; // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+      $sql_conv   = "SELECT * FROM $table_name WHERE couponid = %d$where_campaign AND converted = 1 ORDER BY id ASC"; // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+      $getclicks = $wpdb->get_results( $wpdb->prepare( $sql_clicks, $params ), ARRAY_A ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+      $getconversions = $wpdb->get_results( $wpdb->prepare( $sql_conv, $params ), ARRAY_A ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
       
   $totalclicks = is_array($getclicks) ? count($getclicks) : 0;
       $totalclicksshow = $totalclicks;
@@ -782,16 +840,16 @@ if( !function_exists( 'wcusage_get_referral_url_stats' ) ) {
     			}
 
     			echo '<div class="wcusage-info-box wcusage-info-box-clicks">';
-    				echo  '<p><span class="wcusage-info-box-title">' . ucfirst( esc_html__( "Total Clicks", "woo-coupon-usage" ) ) . ':</span> <span id="wcu-total-usage-clicks-url">' . esc_html($totalclicksshow) . '</span></p>' ;
+    				echo  '<p><span class="wcusage-info-box-title">' . esc_html(ucfirst( esc_html__( "Total Clicks", "woo-coupon-usage" ) )) . ':</span> <span id="wcu-total-usage-clicks-url">' . esc_html($totalclicksshow) . '</span></p>' ;
     			echo '</div>';
 
     			if($totalclicks >= 0) {
     				echo '<div class="wcusage-info-box wcusage-info-box-usage">';
-    					echo  '<p><span class="wcusage-info-box-title">' . ucfirst( esc_html__( 'Total Conversions', 'woo-coupon-usage' ) ) . ':</span> <span id="wcu-total-usage-number-url">' . esc_html($usage) . '</span></p>' ;
+    					echo  '<p><span class="wcusage-info-box-title">' . esc_html(ucfirst( esc_html__( 'Total Conversions', 'woo-coupon-usage' ) )) . ':</span> <span id="wcu-total-usage-number-url">' . esc_html($usage) . '</span></p>' ;
     				echo '</div>';
 
     				echo '<div class="wcusage-info-box wcusage-info-box-percent">';
-    					echo  '<p><span class="wcusage-info-box-title">' . ucfirst( esc_html__( "Conversion Rate", "woo-coupon-usage" ) ) . ':</span> <span id="wcu-total-usage-clicks-conversion">' . esc_html($conversionrate) . '</span>%</p>' ;
+    					echo  '<p><span class="wcusage-info-box-title">' . esc_html(ucfirst( esc_html__( "Conversion Rate", "woo-coupon-usage" ) )) . ':</span> <span id="wcu-total-usage-clicks-conversion">' . esc_html($conversionrate) . '</span>%</p>' ;
     				echo '</div>';
     			}
 
@@ -835,7 +893,7 @@ if( !function_exists( 'wcusage_url_shorten_random' ) ) {
 	    $charactersLength = strlen($characters);
 	    $randomString = '';
 	    for ($i = 0; $i < $length; $i++) {
-	        $randomString .= $characters[rand(0, $charactersLength - 1)];
+          $randomString .= $characters[wp_rand(0, $charactersLength - 1)];
 	    }
 	    return $randomString;
 	}
@@ -859,8 +917,8 @@ if( !function_exists( 'wcusage_get_url_stats' ) ) {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'wcusage_clicks';
-    $query = $wpdb->prepare("SELECT * FROM $table_name WHERE couponid = %d AND date > %s AND date < %s ORDER BY id DESC", $postid, $date1, $date2);
-    $result2 = $wpdb->get_results($query);
+    $query = $wpdb->prepare("SELECT * FROM $table_name WHERE couponid = %d AND date > %s AND date < %s ORDER BY id DESC", $postid, $date1, $date2); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $result2 = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
     $clickcount = count($result2);    
 
     $convertedcount = 0;
@@ -902,14 +960,79 @@ add_filter( 'redirect_canonical', function( $redirect_url, $requested_url ) {
   }
 
   return $redirect_url;
-}, 10, 2 );
+}, 9999, 2 );
 
 /**
  * Redirect from 404 homepage with ?coupon= to actual homepage.
  */
 add_action( 'template_redirect', function() {
-    if ( is_404() && isset( $_GET['coupon'] ) && is_front_page() ) {
-        wp_redirect( home_url() );
-        exit;
+    $wcusage_field_urls_prefix = wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon');
+    if ( isset( $_GET[$wcusage_field_urls_prefix] ) ) {
+        
+        // Fix for when homepage loads posts page with query string
+        if ( ( is_home() || is_archive() || is_search() ) && 'page' === get_option( 'show_on_front' ) ) {
+          $request_path = wp_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+          $home_path = wp_parse_url( home_url(), PHP_URL_PATH );
+            if ( ! $home_path ) {
+                $home_path = '/';
+            }
+            if ( untrailingslashit( $request_path ) === untrailingslashit( $home_path ) ) {
+                wp_safe_redirect( home_url() );
+                exit;
+            }
+        }
+
+        // Fix for when homepage 404s with query string
+        if ( is_404() && is_front_page() ) {
+            wp_safe_redirect( home_url() );
+            exit;
+        }
+
     }
 });
+
+/**
+ * Gets the default referral URL, updates if wrong domain
+ */
+if( !function_exists( 'wcusage_get_default_ref_url' ) ) {
+  function wcusage_get_default_ref_url() {
+
+    // Get the default referral URL from the settings or use the home URL as a fallback.
+    $wcusage_field_default_ref_url = wcusage_get_setting_value('wcusage_field_default_ref_url', get_home_url());
+    
+    // Get the host/domain of the default referral URL.
+    $default_ref_domain = wp_parse_url($wcusage_field_default_ref_url, PHP_URL_HOST);
+
+    // Get the host/domain of the current WordPress site.
+    $site_domain = wp_parse_url(get_home_url(), PHP_URL_HOST);
+
+    // Get the path of the default referral URL.
+    $path = wp_parse_url($wcusage_field_default_ref_url, PHP_URL_PATH);
+
+    // Check if the domains match.
+    if ($default_ref_domain === $site_domain) {
+        return trailingslashit($wcusage_field_default_ref_url);
+    } else {
+        // Update the default referral URL with the home URL and get the path.
+        $options = get_option('wcusage_options');
+        $options['wcusage_field_default_ref_url'] = trailingslashit(get_home_url()) . ltrim($path, '/');
+        update_option('wcusage_options', $options);
+        return wcusage_get_setting_value('wcusage_field_default_ref_url', get_home_url());
+    }
+    
+  }
+}
+
+/**
+ * Gets the affiliate referral URL
+ */
+if( !function_exists( 'wcusage_get_affiliate_url' ) ) {
+  function wcusage_get_affiliate_url($coupon_code) {
+
+    $prefix = wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon');
+    $affiliate_url = wcusage_get_default_ref_url() . "?" . $prefix . "=" . rawurlencode($coupon_code);
+
+    return $affiliate_url;
+
+  }
+}

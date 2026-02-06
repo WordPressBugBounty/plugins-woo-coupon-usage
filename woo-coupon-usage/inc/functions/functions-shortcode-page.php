@@ -13,20 +13,30 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 if( !function_exists( 'wcusage_page_contain_shortcode' ) ) {
 	function wcusage_page_contain_shortcode($pageid) {
+		if ( empty( $pageid ) ) {
+			return false;
+		}
 
-		$options = get_option( 'wcusage_options' );
-		$structure = get_option( 'permalink_structure' );
+		$post = get_post( $pageid );
+		if ( ! $post || ( isset($post->post_status) && $post->post_status !== 'publish' ) ) {
+			return false;
+		}
 
-		global $wpdb;
-		$query = $wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE ID = %d AND (post_content LIKE %s OR post_content LIKE %s OR post_content LIKE %s) AND post_status = 'publish'", $pageid, '%[couponaffiliates]%', '%[couponusage]%', '%[couponaffiliates-mla]%');
-		$results = $wpdb->get_results($query);
-		$rowcount = $wpdb->num_rows;		
+		$content = isset( $post->post_content ) ? (string) $post->post_content : '';
+		$shortcodes = array( 'couponaffiliates', 'couponusage', 'couponaffiliates-mla' );
 
-		if($rowcount) {
-      return true;
-		} else {
-      return false;
-    }
+		if(!function_exists('has_shortcode')) {
+			return false;
+		}
+
+		// Directly use WordPress helper to detect shortcodes
+		foreach ( $shortcodes as $sc ) {
+			if ( has_shortcode( $content, $sc ) ) {
+				return true;
+			}
+		}
+
+		return false;
 
 	}
 }
@@ -63,7 +73,10 @@ if( !function_exists( 'wcusage_get_coupon_shortcode_page' ) ) {
     }
 
     if ( !get_post_status( $wcusage_dashboard_page ) ) {
-      $option_group = get_option('wcusage_options');
+			$option_group = get_option('wcusage_options');
+			if ( ! is_array( $option_group ) ) {
+				$option_group = array();
+			}
       $option_group['wcusage_dashboard_page'] = "";
       update_option( 'wcusage_options', $option_group );
     }
@@ -86,11 +99,11 @@ if( !function_exists( 'wcusage_get_coupon_shortcode_page' ) ) {
 
 		global $wpdb;
 		$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates]%' AND post_status = 'publish'";
-		$results = $wpdb->get_results($query);
+		$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		if(!$results) {
 			$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponusage]%' AND post_status = 'publish'";
-			$results = $wpdb->get_results($query);
+			$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 		}
 
 		$thepageurl = "";
@@ -141,11 +154,11 @@ if( !function_exists( 'wcusage_get_coupon_shortcode_page_id' ) ) {
 
 			global $wpdb;
 			$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates]%' AND post_status = 'publish'";
-			$results = $wpdb->get_results($query);
+			$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 			if(!$results) {
 				$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponusage]%' AND post_status = 'publish'";
-				$results = $wpdb->get_results($query);
+				$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 			}
 
 			$thepageid = "";
@@ -200,7 +213,7 @@ if( !function_exists( 'wcusage_get_registration_shortcode_page' ) ) {
 
 			global $wpdb;
 			$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates-register]%' AND post_status = 'publish'";
-			$results = $wpdb->get_results($query);
+			$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 			$thepageurl = "";
 
@@ -242,7 +255,7 @@ if( !function_exists( 'wcusage_get_registration_shortcode_page_id' ) ) {
 
 			global $wpdb;
 			$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates-register]%' AND post_status = 'publish'";
-			$results = $wpdb->get_results($query);
+			$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 			$thepageid = "";
 
@@ -287,7 +300,7 @@ if( !function_exists( 'wcusage_get_mla_shortcode_page_id' ) ) {
 
 			global $wpdb;
 			$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates-mla]%' AND post_status = 'publish'";
-			$results = $wpdb->get_results($query);
+			$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 			$thepageurl = "";
 
@@ -350,7 +363,7 @@ if( !function_exists( 'wcusage_get_coupon_register_shortcode_page_id' ) ) {
 
 		global $wpdb;
 		$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates-register]%' AND post_status = 'publish'";
-		$results = $wpdb->get_results($query);
+		$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		$thepageurl = "";
 

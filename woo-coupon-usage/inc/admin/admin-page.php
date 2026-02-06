@@ -268,7 +268,7 @@ h2 { font-size: 22px; }
 <div class="wrap plugin-settings">
 	
 	<div class="wcusage-admin-page-help-col" style="width: calc(100% - 76px);">
-	<img src="https://couponaffiliates.com/wp-content/uploads/2021/06/couponaffiliates-logo.png" style="display: block; width: 100%; max-width: 550px; text-align: center; margin: 10px auto 20px auto;">
+	<img src="<?php echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL . 'images/coupon-affiliates-logo.png' ); ?>" alt="Coupon Affiliates" style="display: block; width: 100%; max-width: 550px; text-align: center; margin: 10px auto 20px auto;">
 
 	<p style="text-align: center; font-weight: bold;"><?php echo esc_html__( "Create a coupon based affiliate program for your WooCommerce website, and view coupon usage statistics.", "woo-coupon-usage" ); ?></p>
 
@@ -560,7 +560,7 @@ function wcusage_how_to_use_content() {
 		<br/><br/>
 
 		<strong><?php echo esc_html__( 'Display Affiliate Registration Form', 'woo-coupon-usage' ); ?></strong><br/>
-		<br/><span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'The affiliate registration form will be shown as default for logged out users on the affiliate dashboard page, next to the login form.' ); ?>
+		<br/><span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'The affiliate registration form will be shown as default for logged out users on the affiliate dashboard page, next to the login form.', 'woo-coupon-usage' ); ?>
 		<br/>
 		<br/><span class="dashicons dashicons-arrow-right"></span> <?php echo esc_html__( 'To display the affiliate application form on a custom page, use the shortcode: ', 'woo-coupon-usage' ); ?> <span style="font-weight: bold; color: blue;">[couponaffiliates-register]</span>
 
