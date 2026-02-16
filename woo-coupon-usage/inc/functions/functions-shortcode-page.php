@@ -152,12 +152,18 @@ if( !function_exists( 'wcusage_get_coupon_shortcode_page_id' ) ) {
 
 		} else {
 
+			// Check transient cache first to avoid expensive post_content LIKE query
+			$cached_page_id = get_transient( 'wcusage_coupon_shortcode_page_id' );
+			if ( $cached_page_id !== false && get_post_status( $cached_page_id ) == 'publish' ) {
+				return $cached_page_id;
+			}
+
 			global $wpdb;
-			$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates]%' AND post_status = 'publish'";
+			$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates]%' AND post_status = 'publish' LIMIT 1";
 			$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 			if(!$results) {
-				$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponusage]%' AND post_status = 'publish'";
+				$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponusage]%' AND post_status = 'publish' LIMIT 1";
 				$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 			}
 
@@ -167,6 +173,11 @@ if( !function_exists( 'wcusage_get_coupon_shortcode_page_id' ) ) {
 
 				foreach ( $results as $result ) {
 					$thepageid = $result->ID;
+				}
+
+				// Cache the result for 24 hours
+				if ( $thepageid ) {
+					set_transient( 'wcusage_coupon_shortcode_page_id', $thepageid, DAY_IN_SECONDS );
 				}
 
 			}
@@ -253,8 +264,14 @@ if( !function_exists( 'wcusage_get_registration_shortcode_page_id' ) ) {
 
 		} else {
 
+			// Check transient cache first to avoid expensive post_content LIKE query
+			$cached_page_id = get_transient( 'wcusage_registration_shortcode_page_id' );
+			if ( $cached_page_id !== false && get_post_status( $cached_page_id ) == 'publish' ) {
+				return $cached_page_id;
+			}
+
 			global $wpdb;
-			$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates-register]%' AND post_status = 'publish'";
+			$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates-register]%' AND post_status = 'publish' LIMIT 1";
 			$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 			$thepageid = "";
@@ -263,6 +280,11 @@ if( !function_exists( 'wcusage_get_registration_shortcode_page_id' ) ) {
 
 				foreach ( $results as $result ) {
 					$thepageid = $result->ID;
+				}
+
+				// Cache the result for 24 hours
+				if ( $thepageid ) {
+					set_transient( 'wcusage_registration_shortcode_page_id', $thepageid, DAY_IN_SECONDS );
 				}
 
 			}
@@ -298,8 +320,14 @@ if( !function_exists( 'wcusage_get_mla_shortcode_page_id' ) ) {
 
 		} else {
 
+			// Check transient cache first to avoid expensive post_content LIKE query
+			$cached_page_id = get_transient( 'wcusage_mla_shortcode_page_id' );
+			if ( $cached_page_id !== false && get_post_status( $cached_page_id ) == 'publish' ) {
+				return $cached_page_id;
+			}
+
 			global $wpdb;
-			$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates-mla]%' AND post_status = 'publish'";
+			$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates-mla]%' AND post_status = 'publish' LIMIT 1";
 			$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 			$thepageurl = "";
@@ -308,6 +336,11 @@ if( !function_exists( 'wcusage_get_mla_shortcode_page_id' ) ) {
 
 				foreach ( $results as $result ) {
 					$thepageid =  $result->ID;
+				}
+
+				// Cache the result for 24 hours
+				if ( $thepageid ) {
+					set_transient( 'wcusage_mla_shortcode_page_id', $thepageid, DAY_IN_SECONDS );
 				}
 
 			}
@@ -361,14 +394,24 @@ if( !function_exists( 'wcusage_get_mla_shortcode_page' ) ) {
 if( !function_exists( 'wcusage_get_coupon_register_shortcode_page_id' ) ) {
 	function wcusage_get_coupon_register_shortcode_page_id() {
 
+		// Check transient cache first to avoid expensive post_content LIKE query
+		$cached_page_id = get_transient( 'wcusage_coupon_register_shortcode_page_id' );
+		if ( $cached_page_id !== false && get_post_status( $cached_page_id ) == 'publish' ) {
+			return $cached_page_id;
+		}
+
 		global $wpdb;
-		$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates-register]%' AND post_status = 'publish'";
+		$query = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_content LIKE '%[couponaffiliates-register]%' AND post_status = 'publish' LIMIT 1";
 		$results = $wpdb->get_results($query); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		$thepageurl = "";
 
 		if($results) {
 			foreach ( $results as $result ) {
+				// Cache the result for 24 hours
+				if ( $result->ID ) {
+					set_transient( 'wcusage_coupon_register_shortcode_page_id', $result->ID, DAY_IN_SECONDS );
+				}
 				return $result->ID;
 			}
 		} else {
@@ -377,3 +420,24 @@ if( !function_exists( 'wcusage_get_coupon_register_shortcode_page_id' ) ) {
 
 	}
 }
+
+/**
+ * Clear shortcode page caches when pages are saved or deleted
+ * This ensures the cache is refreshed when page content changes
+ */
+if( !function_exists( 'wcusage_clear_shortcode_page_caches' ) ) {
+	function wcusage_clear_shortcode_page_caches( $post_id ) {
+		// Only clear cache for pages
+		if ( get_post_type( $post_id ) !== 'page' ) {
+			return;
+		}
+
+		// Clear all shortcode page caches
+		delete_transient( 'wcusage_coupon_shortcode_page_id' );
+		delete_transient( 'wcusage_mla_shortcode_page_id' );
+		delete_transient( 'wcusage_registration_shortcode_page_id' );
+		delete_transient( 'wcusage_coupon_register_shortcode_page_id' );
+	}
+}
+add_action( 'save_post', 'wcusage_clear_shortcode_page_caches' );
+add_action( 'delete_post', 'wcusage_clear_shortcode_page_caches' );

@@ -680,6 +680,31 @@ function wcusage_field_cb_urls( $args )
 
           </span>
 
+          <br/><hr/>
+
+          <h3 id="wcu-setting-header-referral-popup"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Referral Popup', 'woo-coupon-usage' ); ?><?php if( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?>:</h3>
+
+          <p><?php echo esc_html__( 'Display a custom modal popup, bar notice, or small widget to customers when they visit your site via an affiliate referral link. This feature helps highlight the discount and encourage conversions.', 'woo-coupon-usage' ); ?></p>
+
+          <!-- Enable Referral Popup -->
+          <?php wcusage_setting_toggle_option('wcusage_field_referral_popup_enable', 0, esc_html__( 'Enable Referral Welcome Popups', 'woo-coupon-usage' ), '0px'); ?>
+
+          <br/>
+
+          <?php wcusage_setting_toggle('.wcusage_field_referral_popup_enable', '.wcu-field-section-referral-popup-settings'); // Show or Hide ?>
+          <span class="wcu-field-section-referral-popup-settings">
+
+            <br/>
+
+            <a href="#" onclick="wcusage_go_to_settings('#tab-referral-popup', '');"
+              class="wcu-addons-box-view-details" style="margin-left: 0px;">
+              <?php echo esc_html__( 'View "Referral Popup" Settings', 'woo-coupon-usage' ); ?>
+            </a>
+
+            <br/>
+
+          </span>
+
         </div>
 
     </span>

@@ -287,4 +287,24 @@ jQuery(document).ready(function($) {
             return false;
         }
     });
+
+    // Handle Enter key on filter inputs to trigger filter instead of bulk action
+    $(document).on('keypress', '.wcusage-admin-title-filters input[name="affiliate_user"], .wcusage-admin-title-filters input[name="coupon_code"]', function(e) {
+        if (e.which === 13) { // Enter key
+            e.preventDefault();
+            // Find and click the filter button
+            $(this).closest('.wcusage-admin-title-filters').find('button[type="submit"]').trigger('click');
+            return false;
+        }
+    });
+
+    // Handle Enter key on filter dropdowns to trigger filter instead of bulk action
+    $(document).on('keypress', '.wcusage-admin-title-filters select[name="coupon_status"], .wcusage-admin-title-filters select[name="affiliate_only"]', function(e) {
+        if (e.which === 13) { // Enter key
+            e.preventDefault();
+            // Find and click the filter button
+            $(this).closest('.wcusage-admin-title-filters').find('button[type="submit"]').trigger('click');
+            return false;
+        }
+    });
 });

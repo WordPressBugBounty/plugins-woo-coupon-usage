@@ -1,3 +1,27 @@
+/* Font Awesome Icon Fallback */
+/* Ensure Font Awesome icons display properly */
+.fa:not([style*="display: none"]), 
+.fas:not([style*="display: none"]), 
+.far:not([style*="display: none"]), 
+.fal:not([style*="display: none"]), 
+.fab:not([style*="display: none"]) {
+    font-family: 'Font Awesome 6 Free', 'Font Awesome 5 Free', 'FontAwesome' !important;
+    font-style: normal !important;
+    font-variant: normal !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+.fa, .fas, .fal {
+    font-weight: 900;
+}
+.far, .fab {
+    font-weight: 400;
+}
+.fab {
+    font-family: 'Font Awesome 6 Brands', 'Font Awesome 5 Brands' !important;
+}
+
 /* Define CSS Variables for Light and Dark Modes */
 :root {
     /* Light Mode Colors */
@@ -291,8 +315,17 @@ textarea {
 
 .wcu-loading-image {
     text-align: center;
-    padding-bottom: 20px;
+    padding: 30px 20px;
     color: var(--secondary-text-color); /* Use variable */
+}
+
+.wcu-loading-loader {
+    border-color: rgba(0, 0, 0, 0.08);
+    border-top-color: var(--accent-color);
+}
+
+.wcu-loading-loader-text {
+    color: var(--secondary-text-color);
 }
 #updated_total {
     text-align: left;

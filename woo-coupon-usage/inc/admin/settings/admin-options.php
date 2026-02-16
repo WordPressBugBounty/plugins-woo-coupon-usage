@@ -536,6 +536,9 @@ jQuery( document ).ready(function() {
     ?>
 
   <?php 
+    ?>
+
+  <?php 
     wcusage_admin_settings_tab_click( "#tab-subscriptions", ".wcusage_row_subscriptions", 1 );
     ?>
 
@@ -1654,6 +1657,26 @@ function wcu_admin_enqueue_scripts(  $hook_suffix  ) {
             ) );
             wp_enqueue_script( 'code-editor' );
             wp_enqueue_style( 'code-editor' );
+        }
+        // Affiliate users table styles and scripts
+        if ( isset( $_GET['page'] ) && $_GET['page'] == 'wcusage_affiliates' ) {
+            $css_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-affiliate-users-table.css';
+            $css_ver = ( file_exists( $css_path ) ? filemtime( $css_path ) : '1.0.0' );
+            wp_enqueue_style(
+                'wcusage-admin-affiliate-users-table',
+                WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-affiliate-users-table.css',
+                array(),
+                $css_ver
+            );
+            $js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin-affiliate-users-table.js';
+            $js_ver = ( file_exists( $js_path ) ? filemtime( $js_path ) : '1.0.0' );
+            wp_enqueue_script(
+                'wcusage-admin-affiliate-users-table',
+                WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-affiliate-users-table.js',
+                array('jquery'),
+                $js_ver,
+                true
+            );
         }
     }
     // Always: Registrations page styles (actions column layout/icons)

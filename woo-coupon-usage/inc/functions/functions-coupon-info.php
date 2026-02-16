@@ -14,6 +14,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 if( !function_exists( 'wcusage_get_coupon_info' ) ) {
 	function wcusage_get_coupon_info($coupon_code) {
 
+		// Static cache to reduce database queries
+		static $coupon_info_cache = array();
+
+		// Return cached result if available
+		if (isset($coupon_info_cache[$coupon_code])) {
+			return $coupon_info_cache[$coupon_code];
+		}
+
 		try {
 
 			if($coupon_code) {
@@ -25,17 +33,24 @@ if( !function_exists( 'wcusage_get_coupon_info' ) ) {
 
 				$coupon_user_id = get_post_meta( $couponid, 'wcu_select_coupon_user', true );
 
-				return array($coupon_commission_percent, $coupon_user_id, $couponid);
+				$result = array($coupon_commission_percent, $coupon_user_id, $couponid);
+				// Cache the result
+				$coupon_info_cache[$coupon_code] = $result;
+				return $result;
 
 			} else {
 
-				return array('', '', '');
+				$result = array('', '', '');
+				$coupon_info_cache[$coupon_code] = $result;
+				return $result;
 			
 			}
 
 		} catch (Exception $e) {
 
-			return array();
+			$result = array();
+			$coupon_info_cache[$coupon_code] = $result;
+			return $result;
 
 		}
 
@@ -53,17 +68,28 @@ add_action('wcusage_hook_get_coupon_info', 'wcusage_get_coupon_info', 10, 1);
  */
 function wcusage_get_coupon_id($coupon_code) {
 
+	// Static cache for coupon IDs
+	static $coupon_id_cache = array();
+
     if (!isset($coupon_code)) {
 		return "";
+	}
+
+	// Return cached ID if available
+	if (isset($coupon_id_cache[$coupon_code])) {
+		return $coupon_id_cache[$coupon_code];
 	}
 
     $coupon_id = wc_get_coupon_id_by_code(sanitize_text_field($coupon_code));
 
 	if(!$coupon_id)	{
+		$coupon_id_cache[$coupon_code] = 0;
 		return 0;
 	}
 
-    return esc_html($coupon_id);
+	$result = esc_html($coupon_id);
+	$coupon_id_cache[$coupon_code] = $result;
+    return $result;
 
 }
 

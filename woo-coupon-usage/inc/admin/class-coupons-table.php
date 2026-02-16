@@ -427,11 +427,12 @@ class wcusage_Coupons_Table extends WP_List_Table {
                 $paid_commission = $total_commission - $unpaid_commission;
                 if ( $paid_commission < 0 ) $paid_commission = 0;
                 
-                // Calculate actual pending payments for this coupon's affiliate
+                // Calculate actual pending payments for this specific coupon
                 $pending_payments = 0;
                 if ($coupon_user_id && $wpdb->get_var("SHOW TABLES LIKE '$payouts_table'") == $payouts_table) { // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
                     $pending_payouts = $wpdb->get_results($wpdb->prepare(
-                        "SELECT amount FROM $payouts_table WHERE userid = %d AND status IN ('pending', 'created')",
+                        "SELECT amount FROM $payouts_table WHERE couponid = %d AND userid = %d AND status IN ('pending', 'created')",
+                        $item->ID,
                         $coupon_user_id
                     )); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
                     foreach ($pending_payouts as $payout) {
@@ -786,6 +787,9 @@ function wcusage_save_coupon_data() {
     $coupon_id = intval( $_POST['coupon_id'] );
     $coupon = new WC_Coupon( $coupon_id );
     
+    // Get old user ID before update (for cache clearing)
+    $old_user_id = get_post_meta( $coupon_id, 'wcu_select_coupon_user', true );
+    
     // Update post data
     wp_update_post( array(
         'ID'         => $coupon_id,
@@ -847,6 +851,29 @@ function wcusage_save_coupon_data() {
 
         update_post_meta( $coupon_id, $key, $value );
         
+    }
+    
+    // Clear user caches for both old and new users (if user assignment changed)
+    if ( $old_user_id && $old_user_id != $user_id ) {
+        delete_transient( 'wcusage_user_affiliate_col_' . $old_user_id );
+        delete_transient( 'wcusage_is_affiliate_' . $old_user_id );
+        delete_transient( 'wcusage_user_coupon_ids_' . $old_user_id );
+        delete_transient( 'wcusage_user_coupon_names_' . $old_user_id );
+    }
+    if ( $user_id ) {
+        delete_transient( 'wcusage_user_affiliate_col_' . $user_id );
+        delete_transient( 'wcusage_is_affiliate_' . $user_id );
+        delete_transient( 'wcusage_user_coupon_ids_' . $user_id );
+        delete_transient( 'wcusage_user_coupon_names_' . $user_id );
+    }
+    
+    // Clear the is_coupon_users cache for this specific coupon + user combination
+    $coupon_code = get_the_title($coupon_id);
+    if ($old_user_id && $coupon_code) {
+        delete_transient('wcusage_is_coupon_users_' . md5($coupon_code . '_' . $old_user_id));
+    }
+    if ($user_id && $coupon_code) {
+        delete_transient('wcusage_is_coupon_users_' . md5($coupon_code . '_' . $user_id));
     }
     
     // Clear coupon cache

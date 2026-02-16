@@ -833,37 +833,32 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
                 ?>
 
         <div class="wcu-loading-image wcu-loading-stats wcu-loading-stats-main">
+          <div class="wcu-loading-loader"></div>
+          <p class="wcu-loading-loader-text"><?php 
+                echo esc_html__( "Loading statistics", "woo-coupon-usage" );
+                ?>...</p>
           <?php 
                 if ( $force_refresh_stats ) {
                     ?>
-          <br/><i class="fas fa-exclamation-circle"></i> <?php 
-                    echo esc_html__( "Calculating statistics for all referrals. Since this is your first visit, it will take a little longer than normal.", "woo-coupon-usage" );
-                    ?><br/>
+          <p class="wcu-loading-loader-subtext"><?php 
+                    echo esc_html__( "First visit - this will take a little longer than usual.", "woo-coupon-usage" );
+                    ?></p>
           <?php 
                 }
                 ?>
-          <div class="wcu-loading-loader">
-            <div class="loader"></div>
-          </div>
-          <p class="wcu-loading-loader-text"><br/><?php 
-                echo esc_html__( "Loading", "woo-coupon-usage" );
-                ?>...</p>
           <?php 
                 if ( current_user_can( 'administrator' ) ) {
                     ?>
-          <p class="stuck-loading-message" style="display:none;font-size:12px;color:#B2B2B2;font-weight: bold; margin-top: 20px;">
-          <br/><i class="fas fa-exclamation-circle"></i> <?php 
+          <p class="stuck-loading-message wcu-loading-loader-subtext" style="display:none; margin-top: 12px;">
+            <?php 
                     echo esc_html__( "Notice (admin only): Page constantly loading? Try refreshing the page.", "woo-coupon-usage" );
-                    ?> <a href='https://couponaffiliates.com/docs/affiliate-dashboard-is-not-showing' style='color:#B2B2B2;' target='_blank'><?php 
+                    ?> <a href='https://couponaffiliates.com/docs/affiliate-dashboard-is-not-showing' target='_blank'><?php 
                     echo esc_html__( "Or click here", "woo-coupon-usage" );
                     ?></a>.
-          <br/><i class="fas fa-exclamation-circle"></i> <?php 
-                    echo esc_html__( "If this is your first time loading this dashboard, and it's a large coupon, it may take a little while to load.", "woo-coupon-usage" );
-                    ?>
+          </p>
           <?php 
                 }
                 ?>
-          </p>
         </div>
 
         <?php 

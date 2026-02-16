@@ -1418,7 +1418,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
   </script>
 
   <?php 
-        if ( isset( $_POST['page-orders'] ) || $wcusage_page_load == false ) {
+        if ( isset( $_POST['page-orders'] ) || !isset( $_POST['load-page'] ) || $wcusage_page_load == false ) {
             ?>
 
     <?php 

@@ -171,7 +171,7 @@ wp_enqueue_script(
     false
 );
 wp_enqueue_style(
-    'font-awesome',
+    'wcusage-portal-font-awesome',
     WCUSAGE_UNIQUE_PLUGIN_URL . 'fonts/font-awesome/css/all.min.css',
     array(),
     '5.15.3'
@@ -200,7 +200,7 @@ wp_enqueue_script(
     'wcusage-tab-settings',
     WCUSAGE_UNIQUE_PLUGIN_URL . 'js/tab-settings.js',
     array('jquery'),
-    '1.0.0',
+    '1.0.3',
     true
 );
 // Enqueue custom settings styles
@@ -208,7 +208,7 @@ wp_enqueue_style(
     'wcusage-tab-settings',
     WCUSAGE_UNIQUE_PLUGIN_URL . 'css/tab-settings.css',
     array(),
-    '1.0.0'
+    '1.0.3'
 );
 // Localize custom settingsscript with necessary data
 wp_localize_script( 'wcusage-tab-settings', 'wcusage_ajax', array(
@@ -295,6 +295,10 @@ foreach ( $styles as $style ) {
     $style_handle = $style_obj->handle;
     $style_src = $style_obj->src;
     $style_src = strtolower( $style_src );
+    // Don't dequeue our Font Awesome or portal styles
+    if ( $style_handle === 'wcusage-portal-font-awesome' || $style_handle === 'wcusage-portal-css' || $style_handle === 'woo-coupon-usage-style' ) {
+        continue;
+    }
     if ( strpos( $style_src, $theme_name ) !== false || strpos( $style_src, 'woocommerce' ) !== false || strpos( $style_src, 'wc-' ) !== false || strpos( $style_src, 'global-styles' ) !== false || strpos( $style_src, 'global' ) !== false ) {
         wp_dequeue_style( $style_handle );
     }
@@ -781,31 +785,27 @@ if ( !$current_user_id ) {
         jQuery('#generate-short-url').css('opacity', '1');
         jQuery('#generate-short-url').prop('disabled', false);
     }
-    jQuery(document).on({
-        <?php 
+    <?php 
 if ( $wcusage_field_load_ajax ) {
     ?>
+    jQuery(document).on({
         ajaxStart: function(){
             jQuery(".wcu-loading-image").show();
             jQuery('.wcusage-refresh-data i').addClass('fa-spin wcusage-loading');
         },
         ajaxStop: function(){
-        <?php 
+            wcusage_update_complete_loading();
+        }
+    });
+    <?php 
 } else {
     ?>
-        jQuery( document ).ready(function() {
-        <?php 
-}
-?>
-            wcusage_update_complete_loading();
-        <?php 
-if ( $wcusage_field_load_ajax ) {
-    ?>
-        }
-        <?php 
-}
-?>
+    jQuery( document ).ready(function() {
+        wcusage_update_complete_loading();
     });
+    <?php 
+}
+?>
     </script>
 
     <?php 

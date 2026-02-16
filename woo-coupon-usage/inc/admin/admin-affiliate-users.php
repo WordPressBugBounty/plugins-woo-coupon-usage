@@ -77,6 +77,12 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
  */
  function wcusage_new_modify_user_table( $column ) {
 
+     // Check if affiliate column is disabled for performance on high-volume sites
+     $disable_affiliate_column = wcusage_get_setting_value('wcusage_field_disable_users_affiliate_column', '0');
+     if ($disable_affiliate_column) {
+         return $column;
+     }
+
      if( wcu_fs()->can_use_premium_code() ) {
        $credit_enable = wcusage_get_setting_value('wcusage_field_storecredit_enable', 0);
        $system = wcusage_get_setting_value('wcusage_field_storecredit_system', 'default');
@@ -102,10 +108,33 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
      $coupons = wcusage_get_users_coupons_ids( $user_id );
      switch ($column_name) {
          case 'affiliateinfo':
+             // Check cache first for performance
+             $cache_key = 'wcusage_user_affiliate_col_' . $user_id;
+             $cached_output = get_transient( $cache_key );
+             
+             if ( $cached_output !== false ) {
+                 return $cached_output;
+             }
+             
              $theoutput = "";
+             $max_coupons = 10; // Limit to first 10 coupons for performance
+             $coupon_count = 0;
+             
              foreach ($coupons as $coupon) {
+               if ( $coupon_count >= $max_coupons ) {
+                   $remaining = count($coupons) - $max_coupons;
+                   $theoutput .= '<span style="color:#666;font-style:italic;"> +' . $remaining . ' more</span>';
+                   break;
+               }
                $theoutput .= wcusage_output_affiliate_tooltip_users($coupon);
+               $coupon_count++;
             }
+            
+            // Cache for 1 hour
+            if ( ! empty( $theoutput ) ) {
+                set_transient( $cache_key, $theoutput, HOUR_IN_SECONDS );
+            }
+            
             return $theoutput;
          case 'affiliatemla':
             $wcusage_field_show_mla_private = wcusage_get_setting_value('wcusage_field_show_mla_private', '0');
@@ -228,6 +257,69 @@ $coupon_code_linked = "<span class='wcusage-users-affiliate-column'>"
 
  }
  add_action('wcusage_hook_output_affiliate_tooltip_users', 'wcusage_output_affiliate_tooltip_users');
+
+ /**
+  * Clear user affiliate column cache when coupon user assignment changes
+  *
+  */
+ function wcusage_clear_user_affiliate_column_cache( $post_id ) {
+     // Only for shop_coupon post type
+     if ( get_post_type( $post_id ) !== 'shop_coupon' ) {
+         return;
+     }
+     
+     // Get the OLD user ID (before save) from global variable if available
+     global $wcusage_old_coupon_user_id;
+     
+     // Get the NEW/current assigned user ID
+     $new_user_id = get_post_meta( $post_id, 'wcu_select_coupon_user', true );
+     
+     // Clear cache for new user
+     if ( $new_user_id ) {
+         delete_transient( 'wcusage_user_affiliate_col_' . $new_user_id );
+         delete_transient( 'wcusage_is_affiliate_' . $new_user_id );
+         delete_transient( 'wcusage_user_coupon_ids_' . $new_user_id );
+         delete_transient( 'wcusage_user_coupon_names_' . $new_user_id );
+     }
+     
+     // Clear cache for the old user (if there was one and it's different)
+     if ( ! empty( $wcusage_old_coupon_user_id ) && $wcusage_old_coupon_user_id != $new_user_id ) {
+         delete_transient( 'wcusage_user_affiliate_col_' . $wcusage_old_coupon_user_id );
+         delete_transient( 'wcusage_is_affiliate_' . $wcusage_old_coupon_user_id );
+         delete_transient( 'wcusage_user_coupon_ids_' . $wcusage_old_coupon_user_id );
+         delete_transient( 'wcusage_user_coupon_names_' . $wcusage_old_coupon_user_id );
+     }
+ }
+ add_action( 'save_post', 'wcusage_clear_user_affiliate_column_cache' );
+ add_action( 'delete_post', 'wcusage_clear_user_affiliate_column_cache' );
+ 
+ /**
+  * Store the old coupon user ID before saving
+  *
+  */
+ function wcusage_store_old_coupon_user_id( $post_id ) {
+     // Only for shop_coupon post type
+     if ( get_post_type( $post_id ) !== 'shop_coupon' ) {
+         return;
+     }
+     
+     // Store the old user ID in a global variable before the save happens
+     global $wcusage_old_coupon_user_id;
+     $wcusage_old_coupon_user_id = get_post_meta( $post_id, 'wcu_select_coupon_user', true );
+ }
+ add_action( 'pre_post_update', 'wcusage_store_old_coupon_user_id' );
+ 
+ /**
+  * Clear user affiliate column cache when user meta is updated
+  *
+  */
+ function wcusage_clear_user_affiliate_column_cache_on_meta_update( $meta_id, $user_id, $meta_key, $meta_value ) {
+     // Clear cache when commission-related meta is updated
+     if ( in_array( $meta_key, array( 'wcu_text_unpaid_commission', 'wcu_ml_unpaid_commission' ) ) ) {
+         delete_transient( 'wcusage_user_affiliate_col_' . $user_id );
+     }
+ }
+ add_action( 'update_user_meta', 'wcusage_clear_user_affiliate_column_cache_on_meta_update', 10, 4 );
 
  /**
   * Get Coupon Tooltip

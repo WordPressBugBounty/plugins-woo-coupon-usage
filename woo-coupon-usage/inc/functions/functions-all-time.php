@@ -485,7 +485,12 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
       }
       var progressBarFill = document.querySelector('.wcu-progress-bar-fill');
       progressBarFill.style.width = progress + '%';
-      progressBarFill.textContent = progress + '%';
+      var updatedTotal = document.getElementById('updated_total');
+      if(updatedTotal) {
+        updatedTotal.textContent = '<?php 
+    echo esc_html__( "Calculating statistics", "woo-coupon-usage" );
+    ?>... ' + Math.round(progress) + '%';
+      }
     }
 
     jQuery(document).ready(function() {
@@ -496,68 +501,52 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
   <style>
   .wcu-progress-bar {
     max-width: 500px;
-    height: 25px;
-    background-color: #f1f1f1;
-    border: 1px solid grey;
-    text-shadow: 0 0 2px #fff;
-    border-radius: 4px;
+    height: 8px;
+    background-color: rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
     overflow: hidden;
+    margin: 16px auto 0 auto;
   }
   .wcu-progress-bar-fill {
     height: 100%;
     width: 0;
-    background: linear-gradient(270deg, #4caf50, #4caf50 25%, #49A74D 25%, #49A74D 50%, #4caf50 50%, #4caf50 75%, #49A74D 75%);
-    background-size: 75px 75px;
-    line-height: 14px;
-    font-size: 14px;
-    padding: 4px 4px;
-    font-weight: bold;
-  }
-  #updated_total {
-    font-weight: bold;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 10px;
+    transition: width 0.4s ease;
+    font-size: 0;
   }
   </style>
 
   <div class="wcu-loading-image wcu-loading-stats">
-    <div class="wcu-loading-loader">
-      <div class="loader"></div>
-    </div>
-    <div style="margin: 0;font-weight: bold; margin-top: 0px; width: 250px;">
-      <br/>
-      <div id="updated_total">
-        <?php 
+    <div class="wcu-loading-loader"></div>
+    <p class="wcu-loading-loader-text" id="updated_total"><?php 
     echo esc_html__( "Calculating statistics", "woo-coupon-usage" );
-    ?>...
-      </div>
-    </div>
+    ?>...</p>
+    <p class="wcu-loading-loader-subtext"><?php 
+    echo esc_html__( "First visit - this will take a little longer than usual.", "woo-coupon-usage" );
+    ?></p>
     <?php 
     if ( current_user_can( 'administrator' ) ) {
         ?>
-    <p class="stuck-loading-message" style="display:none;font-size:12px;color:#B2B2B2;font-weight: bold; margin-top: 20px;">
-      <i class="fas fa-exclamation-circle"></i> <?php 
+    <p class="stuck-loading-message wcu-loading-loader-subtext" style="display:none; margin-top: 12px;">
+      <?php 
         echo esc_html__( "Notice (admin only): Page constantly loading? Try refreshing the page.", "woo-coupon-usage" );
-        ?> <a href='https://couponaffiliates.com/docs/affiliate-dashboard-is-not-showing' style='color:#B2B2B2;' target='_blank'><?php 
+        ?> <a href='https://couponaffiliates.com/docs/affiliate-dashboard-is-not-showing' target='_blank'><?php 
         echo esc_html__( "Or click here", "woo-coupon-usage" );
         ?></a>.
-      <br/><i class="fas fa-exclamation-circle"></i> <?php 
-        echo esc_html__( "If this is your first time loading this dashboard, and it's a large coupon, it may take a little while to load.", "woo-coupon-usage" );
-        ?>
     </p>
     <?php 
     }
     ?>
   </div>
-  <br/>
+
   <div class="wcu-progress-bar">
     <div class="wcu-progress-bar-fill"></div>
   </div>
 
-  <br/><i class="fas fa-exclamation-circle"></i> <?php 
-    echo esc_html__( "Since this is your first visit, it will take longer than normal.", "woo-coupon-usage" );
-    ?>
-  <br/><?php 
-    echo esc_html__( "Please do not reload the page until it is complete.", "woo-coupon-usage" );
-    ?>
+  <p class="wcu-loading-loader-subtext" style="text-align:center; margin-top: 8px;"><?php 
+    echo esc_html__( "The page will relaod automatically when it is complete.", "woo-coupon-usage" );
+    ?></p>
         
 <?php 
 }

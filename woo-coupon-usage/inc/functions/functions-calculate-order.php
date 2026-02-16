@@ -319,6 +319,14 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
         $use_saved = "0",
         $force_update = "0"
     ) {
+        // Use static cache for this request - no database writes
+        static $calculation_cache = array();
+        if ( !$force_update ) {
+            $cache_key = $orderid . '_' . md5( $coupon_code . $refresh . $use_saved );
+            if ( isset( $calculation_cache[$cache_key] ) ) {
+                return $calculation_cache[$cache_key];
+            }
+        }
         if ( isset( $coupon_code ) ) {
             $getcoupon = wcusage_get_coupon_info( $coupon_code );
             if ( isset( $getcoupon[1] ) ) {
@@ -624,6 +632,11 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                 $orderid,
                 $coupon_code
             );
+            // Store in static cache for this request
+            if ( !$force_update ) {
+                $cache_key = $orderid . '_' . md5( $coupon_code . $refresh . $use_saved );
+                $calculation_cache[$cache_key] = $return_array;
+            }
             return $return_array;
         } else {
             $return_array = [];

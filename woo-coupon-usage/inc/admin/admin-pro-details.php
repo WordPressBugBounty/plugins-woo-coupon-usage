@@ -90,6 +90,8 @@ function wcusage_field_cb_pro_details( $args )
 
 <h1 style="margin-bottom: 0px;">PRO <?php echo esc_html__( 'Modules & Features', 'woo-coupon-usage' ); ?>:</h1>
 
+<br/>
+
 <p><?php echo esc_html__( 'The below section includes a list of most of the modules and features included in the Pro plan. However other smaller features and customisations can be found throughout the settings page.', 'woo-coupon-usage' ); ?></p>
 
 <div style="flex-basis: 100%; height: 0;"></div>
@@ -573,6 +575,20 @@ __( 'Send a custom email newsletters to all your existing affiliates directly fr
 0,
 '',
 ''
+);
+?>
+
+<?php wcusage_output_addon_box(
+__( 'Referral Welcome Popups', 'woo-coupon-usage' ),
+"wcusage_field_referral_popup_enable",
+__( 'Display custom modal popups, bar notices, or floating widgets to customers when they visit via a referral link. Highlight discounts and boost conversions.', 'woo-coupon-usage' ),
+"https://couponaffiliates.com/docs/referral-popup",
+"fas fa-comment-dots",
+0,
+0,
+0,
+'tab-referral-popup',
+'referral-popup-settings'
 );
 ?>
 

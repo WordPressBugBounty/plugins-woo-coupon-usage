@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
-* Version: 7.3.2
+* Version: 7.4.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -134,7 +134,7 @@ if ( function_exists( 'wcu_fs' ) ) {
                     'wcusage-tab-settings',
                     plugin_dir_url( __FILE__ ) . 'js/tab-settings.js',
                     array('jquery'),
-                    '1.0.0',
+                    '1.0.3',
                     true
                 );
                 // Enqueue custom settings styles
@@ -150,6 +150,34 @@ if ( function_exists( 'wcu_fs' ) ) {
                     'saving_text' => __( 'Saving...', 'woo-coupon-usage' ),
                     'save_text'   => __( 'Save changes', 'woo-coupon-usage' ),
                 ) );
+                // Dark Mode - Enqueue styles and scripts if enabled (not for portal)
+                $wcusage_field_portal_enable = wcusage_get_setting_value( 'wcusage_field_portal_enable', '0' );
+                $wcusage_field_dark_mode_enable = wcusage_get_setting_value( 'wcusage_field_dark_mode_enable', 0 );
+                if ( $wcusage_field_dark_mode_enable && !$wcusage_field_portal_enable ) {
+                    // Enqueue dark mode CSS
+                    wp_enqueue_style(
+                        'wcusage-dark-mode',
+                        plugin_dir_url( __FILE__ ) . 'css/dark-mode.css',
+                        array(),
+                        '1.0.0'
+                    );
+                    // Enqueue dark mode JS
+                    wp_enqueue_script(
+                        'wcusage-dark-mode',
+                        plugin_dir_url( __FILE__ ) . 'js/dark-mode.js',
+                        array('jquery'),
+                        '1.0.0',
+                        true
+                    );
+                    // Localize dark mode script with settings
+                    $wcusage_field_dark_mode_default = wcusage_get_setting_value( 'wcusage_field_dark_mode_default', 0 );
+                    wp_localize_script( 'wcusage-dark-mode', 'wcusage_dark_mode', array(
+                        'enabled'         => '1',
+                        'default'         => ( $wcusage_field_dark_mode_default ? '1' : '0' ),
+                        'text_dark_mode'  => __( 'Dark Mode', 'woo-coupon-usage' ),
+                        'text_light_mode' => __( 'Light Mode', 'woo-coupon-usage' ),
+                    ) );
+                }
             }
             // Custom JS Only Loads on Page
             wp_register_script(
@@ -438,11 +466,7 @@ if ( function_exists( 'wcu_fs' ) ) {
     }
     add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'wcusage_add_action_links' );
     function wcusage_add_action_links(  $links  ) {
-        if ( wcu_fs()->can_use_premium_code() ) {
-            $support_link = admin_url( 'admin.php?page=wcusage-contact' );
-        } else {
-            $support_link = "https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0";
-        }
+        $support_link = "https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0";
         $mylinks = array('<a href="' . esc_url( admin_url( '/admin.php?page=wcusage_settings' ) ) . '">Settings</a>', '<a href="' . $support_link . '">Support</a>');
         return array_merge( $links, $mylinks );
     }

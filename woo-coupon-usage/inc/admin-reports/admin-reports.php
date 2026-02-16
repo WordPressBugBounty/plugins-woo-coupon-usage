@@ -608,22 +608,13 @@ if ( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
 
   <!-- Loader -->
   <div class="wcu-loading-image wcu-loading-stats" style="display: none;">
-    <div class="wcu-loading-loader">
-      <div class="wcu-loader"></div>
-    </div>
-    <p style="margin: 0;font-size:;font-weight: bold; margin-top: 40px; width: 200px;"><br/><?php 
+    <div class="wcu-loading-loader"></div>
+    <p class="wcu-loading-loader-text"><?php 
         echo esc_html__( "Generating Report", "woo-coupon-usage" );
         ?>...</p>
-    <br/>
-
-    <span style="margin-top: 25px; font-size: 12px; color: #909090;"><br/>
-      <?php 
-        echo esc_html__( "This may take a few seconds...", "woo-coupon-usage" );
-        ?><br/>
-      <?php 
-        echo esc_html__( "It will take longer if you select a large date range, or have lots of orders and coupons.", "woo-coupon-usage" );
-        ?>
-    </span>
+    <p class="wcu-loading-loader-subtext"><?php 
+        echo esc_html__( "This may take a few seconds. Larger date ranges may take longer.", "woo-coupon-usage" );
+        ?></p>
   </div>
 
   <div class="loaded-stats-wrapper" style="display: none;">

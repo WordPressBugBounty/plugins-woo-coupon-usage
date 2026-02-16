@@ -362,27 +362,24 @@ if ( !function_exists( 'wcusage_iscouponusers' ) ) {
         if ( !$current_user_id ) {
             return false;
         }
-        $args = array(
-            'post_type'      => 'shop_coupon',
-            'posts_per_page' => -1,
-        );
-        $obituary_query = new WP_Query($args);
-        while ( $obituary_query->have_posts() ) {
-            $obituary_query->the_post();
-            $postid = get_the_ID();
-            $wcu_select_coupon_user = get_post_meta( $postid, 'wcu_select_coupon_user', true );
-            // This is a user ID
-            $thiscoupon = get_the_title();
-            // Compare the stored user ID with the current user ID
-            if ( $current_user_id && $wcu_select_coupon_user == $current_user_id ) {
-                if ( strtolower( $coupon ) == strtolower( $thiscoupon ) ) {
-                    wp_reset_postdata();
-                    return true;
-                }
-            }
+        // Check cache first
+        $cache_key = 'wcusage_is_coupon_users_' . md5( $coupon . '_' . $current_user_id );
+        $cached = get_transient( $cache_key );
+        if ( $cached !== false ) {
+            return (bool) $cached;
         }
-        wp_reset_postdata();
-        return false;
+        // Get the coupon by name
+        $coupon_obj = new WC_Coupon($coupon);
+        if ( !$coupon_obj->get_id() ) {
+            set_transient( $cache_key, 0, HOUR_IN_SECONDS );
+            return false;
+        }
+        // Check if this specific coupon is assigned to the user
+        $assigned_user_id = get_post_meta( $coupon_obj->get_id(), 'wcu_select_coupon_user', true );
+        $is_users = $assigned_user_id && $assigned_user_id == $current_user_id;
+        // Cache the result
+        set_transient( $cache_key, ( $is_users ? 1 : 0 ), HOUR_IN_SECONDS );
+        return $is_users;
     }
 
 }
@@ -391,9 +388,21 @@ if ( !function_exists( 'wcusage_iscouponusers' ) ) {
  */
 if ( !function_exists( 'wcusage_is_user_affiliate' ) ) {
     function wcusage_is_user_affiliate(  $user_id  ) {
+        if ( !$user_id ) {
+            return false;
+        }
+        // Check transient cache first
+        $cache_key = 'wcusage_is_affiliate_' . $user_id;
+        $cached = get_transient( $cache_key );
+        if ( $cached !== false ) {
+            return (bool) $cached;
+        }
+        // Only need to find 1 coupon to confirm affiliate status
         $args = array(
             'post_type'      => 'shop_coupon',
-            'posts_per_page' => -1,
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'no_found_rows'  => true,
             'meta_query'     => array(array(
                 'key'     => 'wcu_select_coupon_user',
                 'value'   => $user_id,
@@ -401,17 +410,11 @@ if ( !function_exists( 'wcusage_is_user_affiliate' ) ) {
             )),
         );
         $query = new WP_Query($args);
-        while ( $query->have_posts() ) {
-            $query->the_post();
-            $wcu_select_coupon_user = get_post_meta( get_the_ID(), 'wcu_select_coupon_user', true );
-            // This is a user ID
-            if ( $user_id && $wcu_select_coupon_user == $user_id ) {
-                wp_reset_postdata();
-                return true;
-            }
-        }
+        $is_affiliate = $query->post_count > 0;
+        // Cache for 1 hour
+        set_transient( $cache_key, ( $is_affiliate ? 1 : 0 ), HOUR_IN_SECONDS );
         wp_reset_postdata();
-        return false;
+        return $is_affiliate;
     }
 
 }
@@ -420,27 +423,31 @@ if ( !function_exists( 'wcusage_is_user_affiliate' ) ) {
  */
 if ( !function_exists( 'wcusage_get_users_coupons_ids' ) ) {
     function wcusage_get_users_coupons_ids(  $user_id  ) {
+        if ( !$user_id ) {
+            return array();
+        }
+        // Check transient cache first
+        $cache_key = 'wcusage_user_coupon_ids_' . $user_id;
+        $cached = get_transient( $cache_key );
+        if ( $cached !== false ) {
+            return ( is_array( $cached ) ? $cached : array() );
+        }
+        // Use 'fields' => 'ids' for efficiency - only returns IDs, not full post objects
         $args = array(
             'post_type'      => 'shop_coupon',
             'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'no_found_rows'  => true,
             'meta_query'     => array(array(
                 'key'     => 'wcu_select_coupon_user',
                 'value'   => $user_id,
                 'compare' => '=',
             )),
         );
-        $obituary_query = new WP_Query($args);
-        $post_ids = array();
-        while ( $obituary_query->have_posts() ) {
-            $obituary_query->the_post();
-            $wcu_select_coupon_user = get_post_meta( get_the_ID(), 'wcu_select_coupon_user', true );
-            // This is a user ID
-            if ( $user_id && $wcu_select_coupon_user == $user_id ) {
-                $post_ids[] = get_the_ID();
-            }
-        }
-        wp_reset_postdata();
-        return $post_ids;
+        $post_ids = get_posts( $args );
+        // Cache for 1 hour
+        set_transient( $cache_key, $post_ids, HOUR_IN_SECONDS );
+        return ( is_array( $post_ids ) ? $post_ids : array() );
     }
 
 }
@@ -449,22 +456,26 @@ if ( !function_exists( 'wcusage_get_users_coupons_ids' ) ) {
  */
 if ( !function_exists( 'wcusage_get_users_coupons_names' ) ) {
     function wcusage_get_users_coupons_names(  $user_id  ) {
-        $args = array(
-            'post_type'      => 'shop_coupon',
-            'posts_per_page' => -1,
-        );
-        $obituary_query = new WP_Query($args);
+        if ( !$user_id ) {
+            return array();
+        }
+        // Check cache first
+        $cache_key = 'wcusage_user_coupon_names_' . $user_id;
+        $cached = get_transient( $cache_key );
+        if ( $cached !== false ) {
+            return $cached;
+        }
+        // Get coupon IDs efficiently (reuse existing optimized function)
+        $coupon_ids = wcusage_get_users_coupons_ids( $user_id );
         $coupons = array();
-        while ( $obituary_query->have_posts() ) {
-            $obituary_query->the_post();
-            $wcu_select_coupon_user = get_post_meta( get_the_ID(), 'wcu_select_coupon_user', true );
-            // This is a user ID
-            if ( $user_id && $wcu_select_coupon_user == $user_id ) {
-                $coupon = get_the_title( get_the_ID() );
-                $coupons[] = $coupon;
+        foreach ( $coupon_ids as $coupon_id ) {
+            $coupon_name = get_the_title( $coupon_id );
+            if ( $coupon_name ) {
+                $coupons[] = $coupon_name;
             }
         }
-        wp_reset_postdata();
+        // Cache the result for 1 hour
+        set_transient( $cache_key, $coupons, HOUR_IN_SECONDS );
         return $coupons;
     }
 
@@ -879,7 +890,17 @@ if ( !function_exists( 'wcusage_coupon_meta_box_markup' ) ) {
  */
 if ( !function_exists( 'wcusage_coupon_affiliate_unlink' ) ) {
     function wcusage_coupon_affiliate_unlink(  $coupon  ) {
+        // Get the current user ID before unlinking
+        $user_id = get_post_meta( $coupon, 'wcu_select_coupon_user', true );
+        // Unlink the coupon
         update_post_meta( $coupon, 'wcu_select_coupon_user', '' );
+        // Clear the user's affiliate column cache, affiliate status cache, and coupon IDs cache
+        if ( $user_id ) {
+            delete_transient( 'wcusage_user_affiliate_col_' . $user_id );
+            delete_transient( 'wcusage_is_affiliate_' . $user_id );
+            delete_transient( 'wcusage_user_coupon_ids_' . $user_id );
+            delete_transient( 'wcusage_user_coupon_names_' . $user_id );
+        }
         $coupon_name = get_the_title( $coupon );
         echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Coupon unlinked from user:', 'woo-coupon-usage' ) . esc_html( $coupon ) . '</p></div>';
     }

@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.9
-Stable tag: 7.3.2
+Stable tag: 7.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -274,6 +274,26 @@ Please report security bugs found in the source code of the undefined plugin thr
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 7.4.0 - 14th February 2026 =
+- New: Added new "referral welcome popups" functionality.
+- New: When using the regular shortcode dashboard page, added a new "dark mode" option to the design settings tab that can be enabled.
+- New: Added a "Clear Cache" button to the admin dashboard page to manually refresh all cached statistics and data on demand.
+- Improvement: When a payout method is not selected, the payouts tab now displays the payout settings form directly instead of just showing a message to go to the settings tab.
+- Tweak: Small chanages to the admin notifications.
+- Tweak: Improved reliability of affiliate registration form shortcode to prevent intermittent display issues caused by database/cache failures.
+- Tweak: Major performance improvements across the plugin with transient caching (dashboards/stats/leaderboards/admin pages) and optimized database queries to dramatically reduce load times on high-volume sites.
+- Tweak: Improved Affiliate Users List and Coupons List performance with optimized meta_query filters and transient caching.
+- Tweak: Added static in-memory caching to order commission calculations to prevent duplicate calculations within the same page load, significantly improving performance on admin dashboards and reports.
+- Tweak: Optimized admin notification bell with 5-minute transient caching and direct SQL queries, reducing database load by ~95%.
+- Tweak: Modernised the loading animation and text on the affiliate dashboard with a clean spinning ring spinner, improved typography, and proper dark mode support.
+- Fix: Fixed incorrect landing page tracking in referral URL clicks log.
+- Fix: Resolved duplicate click entries being created when referral links are visited.
+- Fix: Homepage visits via referral links now properly display as "Homepage" in the clicks log instead of showing empty or incorrect values.
+- Fix: Fixed fatal error on settings page caused by array_key_exists() receiving null instead of array in PHP 8+ when checking user role capabilities.
+- Fix: Fixed affiliate dashboard tabs not loading content when "Ajax Loading" is disabled and "Load tabs as separate pages" is enabled.
+- Fix: Resolved JavaScript errors preventing proper functionality in the portal when AJAX loading is disabled by fixing invalid jQuery syntax.
+- Fix: Fixed issue on the Coupons and Referrals pages where pressing Enter in filter inputs would trigger the bulk action form validation error instead of applying the filters.
 
 = Version 7.3.2 - 4th February 2026 =
 - Tweak: Update to the way settings are saved to be more reliable and sets defaults properly.

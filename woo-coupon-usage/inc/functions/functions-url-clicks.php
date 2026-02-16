@@ -214,7 +214,23 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
                     $convertedicon = '<i class="fas fa-times" title="' . esc_html__( "Not Converted", "woo-coupon-usage" ) . '"></i>';
                 }
                 echo "<td class='wcuTableCell' style='max-width: 100%;'>" . wp_kses_post( $convertedicon ) . "</td>";
-                echo "<td class='wcuTableCell wcuTableCell-ref-landing'><a href='" . esc_url( get_permalink( $result->page ) ) . "'>" . esc_html( get_the_title( $result->page ) ) . "</a></td>";
+                // Display landing page with proper handling for homepage/empty values
+                if ( $result->page && $result->page != '0' && $result->page != 0 ) {
+                    // Regular page/post
+                    $page_title = get_the_title( $result->page );
+                    $page_url = get_permalink( $result->page );
+                    if ( $page_title && $page_url ) {
+                        echo "<td class='wcuTableCell wcuTableCell-ref-landing'><a href='" . esc_url( $page_url ) . "'>" . esc_html( $page_title ) . "</a></td>";
+                    } else {
+                        echo "<td class='wcuTableCell wcuTableCell-ref-landing'>-</td>";
+                    }
+                } elseif ( $result->page === '0' || $result->page === 0 || $result->page == '0' ) {
+                    // Homepage (blog index)
+                    echo "<td class='wcuTableCell wcuTableCell-ref-landing'><a href='" . esc_url( home_url( '/' ) ) . "'>" . esc_html__( 'Homepage', 'woo-coupon-usage' ) . "</a></td>";
+                } else {
+                    // Empty/not set
+                    echo "<td class='wcuTableCell wcuTableCell-ref-landing'>-</td>";
+                }
                 if ( $result->referrer ) {
                     $referrerurl = "<span style='word-wrap: break-word !important;'>" . $result->referrer . "</span>";
                 } else {

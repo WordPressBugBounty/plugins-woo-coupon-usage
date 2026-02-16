@@ -256,6 +256,48 @@ function wcusage_field_cb_design( $args )
 
   <div style="clear: both;"></div>
 
+  <div class="affiliate-dashboard-page-settings">
+  
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Dark Mode', 'woo-coupon-usage' ); ?></h3>
+
+  <!-- Enable Dark Mode -->
+  <?php wcusage_setting_toggle_option('wcusage_field_dark_mode_enable', 0, esc_html__( 'Enable Dark Mode', 'woo-coupon-usage' ), '0px'); ?>
+  <i><?php echo esc_html__( 'When enabled, dark mode styling will be available for the affiliate dashboard.', 'woo-coupon-usage' ); ?></i><br/>
+
+  <br/>
+
+  <div id="wcusage_field_dark_mode_options" style="display: none;">
+    
+    <!-- Display Dark Mode Toggle -->
+    <?php wcusage_setting_toggle_option('wcusage_field_dark_mode_toggle', 1, esc_html__( 'Display Dark Mode Toggle', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( 'Show a toggle switch on the affiliate dashboard that allows users to switch between light and dark mode.', 'woo-coupon-usage' ); ?></i><br/>
+
+    <br/>
+
+    <!-- Enable Dark Mode as Default -->
+    <?php wcusage_setting_toggle_option('wcusage_field_dark_mode_default', 0, esc_html__( 'Enable Dark Mode as Default', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( 'When enabled, dark mode will be the default theme. Users can still toggle to light mode if the toggle is enabled.', 'woo-coupon-usage' ); ?></i><br/>
+
+  </div>
+
+  <script>
+  jQuery(document).ready(function($) {
+    // Show/hide dark mode options based on enable toggle
+    function toggleDarkModeOptions() {
+      if ($('.wcusage_field_dark_mode_enable').is(':checked')) {
+        $('#wcusage_field_dark_mode_options').slideDown();
+      } else {
+        $('#wcusage_field_dark_mode_options').slideUp();
+      }
+    }
+    
+    toggleDarkModeOptions();
+    $('.wcusage_field_dark_mode_enable').on('change', toggleDarkModeOptions);
+  });
+  </script>
+
+  </div>
+  
   <br/><hr/>
   
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Registration & Login Form', 'woo-coupon-usage' ); ?></h3>

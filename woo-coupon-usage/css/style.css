@@ -1250,35 +1250,51 @@ form.wcu_payout_button {
 /* Loading */
 
 .wcu-loading-loader {
-	margin: 25px 0 0 0;
-	width: 90px;
-	aspect-ratio: 2;
-	--_g: no-repeat radial-gradient(circle closest-side,#000 90%,#0000);
-	background: 
-		var(--_g) 0%   50%,
-		var(--_g) 50%  50%,
-		var(--_g) 100% 50%;
-	background-size: calc(100%/3) 50%;
-	animation: l3 1s infinite linear;
+	margin: 25px auto 0 auto;
+	width: 40px;
+	height: 40px;
+	border: 3px solid rgba(0, 0, 0, 0.08);
+	border-top-color: #3498db;
+	border-radius: 50%;
+	animation: wcu-spin 0.8s ease-in-out infinite;
+	box-sizing: border-box;
 }
-@keyframes l3 {
-	20%{background-position:0%   0%, 50%  50%,100%  50%}
-	40%{background-position:0% 100%, 50%   0%,100%  50%}
-	60%{background-position:0%  50%, 50% 100%,100%   0%}
-	80%{background-position:0%  50%, 50%  50%,100% 100%}
+
+@keyframes wcu-spin {
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 .wcu-loading-loader-text {
-    margin: 0;
-    font-weight: bold;
-	font-size: 15px;
-    margin-top: -5px;
+	margin: 14px auto 0 auto;
+	font-weight: 600;
+	font-size: 14px;
 	text-align: center;
-	width: 90px;
+	color: #7f8c8d;
+	letter-spacing: 0.3px;
+	width: auto;
 }
+
+.wcu-loading-loader-subtext {
+	margin: 6px auto 0 auto;
+	font-weight: 400;
+	font-size: 12.5px;
+	text-align: center;
+	color: #b0b0b0;
+	width: auto;
+	max-width: 400px;
+	line-height: 1.5;
+}
+
+.wcu-loading-loader-subtext a {
+	color: #b0b0b0;
+	text-decoration: underline;
+}
+
 @media only screen and (max-width: 720px) {
 	.wcu-loading-loader-text {
-		margin-top: 10px;
+		margin-top: 14px;
 	}
 }
 
@@ -1340,19 +1356,20 @@ form.wcu_payout_button {
 }
 
 .wcu-loading-image {
-	display: inline-block;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 30px 20px;
 }
 
 .wcusage-loading {
-	color: green;
+	color: #3498db;
 }
 
 @media only screen and (max-width: 820px) {
 	.wcu-loading-image {
-		display: inline;
-	}
-	.wcu-loading-loader {
-		margin: 0 auto;
+		padding: 20px 10px;
 	}
 	.wcu-loading-image p {
 		text-align: center;

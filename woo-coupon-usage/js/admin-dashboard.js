@@ -176,5 +176,39 @@ jQuery(document).ready(function($) {
         loadDashboardPage($pager, current + 1);
     });
 
+    // Clear cache button
+    $('#wcusage-clear-cache-btn').on('click', function(e) {
+        e.preventDefault();
+        var $btn = $(this);
+        var originalHtml = $btn.html();
+        
+        // Disable button and show loading
+        $btn.prop('disabled', true).html('<span class="fa-solid fa-spinner fa-spin"></span> ' + 'Clearing...');
+        
+        $.ajax({
+            url: WCUsageDashboard.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'wcusage_clear_dashboard_caches',
+                nonce: WCUsageDashboard.clearCacheNonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    $btn.html('<span class="fa-solid fa-check"></span> ' + 'Cleared!');
+                    setTimeout(function() {
+                        location.reload();
+                    }, 500);
+                } else {
+                    alert(response.data.message || 'Failed to clear cache.');
+                    $btn.prop('disabled', false).html(originalHtml);
+                }
+            },
+            error: function() {
+                alert('Error clearing cache. Please try again.');
+                $btn.prop('disabled', false).html(originalHtml);
+            }
+        });
+    });
+
     // Note: Removed auto-refresh functionality (previously 20s interval) per request
 });

@@ -206,6 +206,22 @@ function wcusage_couponusage(  $atts  ) {
 					<?php 
                             }
                             echo '<span class="wcusage-dash-top-links">';
+                            // Dark Mode Toggle (only if enabled and not portal)
+                            $wcusage_field_dark_mode_enable = wcusage_get_setting_value( 'wcusage_field_dark_mode_enable', 0 );
+                            $wcusage_field_dark_mode_toggle = wcusage_get_setting_value( 'wcusage_field_dark_mode_toggle', 1 );
+                            if ( $wcusage_field_dark_mode_enable && $wcusage_field_dark_mode_toggle ) {
+                                ?>
+				<span class="wcusage-dash-darkmode-toggle" style="float: right; text-align: right; margin-right: 20px;">
+					<button type="button" class="wcu-dark-mode-toggle" id="wcu-dark-mode-toggle" aria-label="<?php 
+                                echo esc_attr__( 'Toggle Dark Mode', 'woo-coupon-usage' );
+                                ?>" title="<?php 
+                                echo esc_attr__( 'Toggle Dark Mode', 'woo-coupon-usage' );
+                                ?>">
+						<i class="fas fa-moon"></i>
+					</button>
+				</span>
+				<?php 
+                            }
                             // Logout Link
                             $wcusage_field_show_logout_link = wcusage_get_setting_value( 'wcusage_field_show_logout_link', '1' );
                             if ( is_user_logged_in() && $wcusage_field_show_logout_link && !$is_admin_preview ) {

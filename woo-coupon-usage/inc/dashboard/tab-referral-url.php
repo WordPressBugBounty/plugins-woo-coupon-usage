@@ -312,14 +312,12 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_referral_url_stats' ) ) {
         ?>
 
   <?php 
-        if ( isset( $_POST['page-links'] ) || $wcusage_page_load == false ) {
+        if ( isset( $_POST['page-links'] ) || !isset( $_POST['load-page'] ) || $wcusage_page_load == false ) {
             ?>
 
     <?php 
             $wcusage_src_prefix = wcusage_get_setting_value( 'wcusage_field_src_prefix', 'src' );
-            ?>
-
-    <?php 
+            ?>    <?php 
             if ( isset( $_POST['page-links'] ) ) {
                 ?>
     <style>#wcu4 { display: block; }</style>

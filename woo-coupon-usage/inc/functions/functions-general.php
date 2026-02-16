@@ -52,7 +52,8 @@ if( !function_exists( 'wcusage_fix_defer_js' ) ) {
     if ( is_plugin_active( 'wp-rocket/wp-rocket.php' )
     || is_plugin_active( 'perfmatters/perfmatters.php' )
     || is_plugin_active( 'autoptimize/autoptimize.php' )
-    || is_plugin_active( 'flying-press/flying-press.php' ) ) {
+    || is_plugin_active( 'flying-press/flying-press.php' )
+    || is_plugin_active( 'wp-compress-image-optimizer/wp-compress.php' ) ) {
       $post_id = get_the_ID();
       $dashboard_page = wcusage_get_setting_value('wcusage_dashboard_page', '');
       $mla_dashboard_page = wcusage_get_setting_value('wcusage_mla_dashboard_page', '');
@@ -81,6 +82,37 @@ if( !function_exists( 'wcusage_fix_defer_js' ) ) {
             $exclude_keywords = array_merge($exclude_keywords, array('woo-coupon-usage'));
             return $exclude_keywords;
           });
+        }
+        // WP Compress
+        if ( is_plugin_active( 'wp-compress-image-optimizer/wp-compress.php' ) ) {
+          // Disable JavaScript optimization
+          add_filter('wpc_js_exclude', function($exclude_list) {
+            if (!is_array($exclude_list)) {
+              $exclude_list = array();
+            }
+            $exclude_list[] = 'woo-coupon-usage';
+            $exclude_list[] = 'wcusage';
+            $exclude_list[] = 'jquery.cookie';
+            $exclude_list[] = 'portal.js';
+            $exclude_list[] = 'tab-settings';
+            $exclude_list[] = 'dark-mode';
+            return $exclude_list;
+          });
+          // Disable CSS optimization
+          add_filter('wpc_css_exclude', function($exclude_list) {
+            if (!is_array($exclude_list)) {
+              $exclude_list = array();
+            }
+            $exclude_list[] = 'woo-coupon-usage';
+            $exclude_list[] = 'wcusage';
+            return $exclude_list;
+          });
+          // Disable page caching
+          add_filter('wpc_disable_caching', '__return_true');
+          // Disable minification
+          add_filter('wpc_disable_minify', '__return_true');
+          // Disable lazy load
+          add_filter('wpc_disable_lazyload', '__return_true');
         }
 
       }

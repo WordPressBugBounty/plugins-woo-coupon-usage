@@ -125,6 +125,13 @@ if( !function_exists( 'wcusage_url_cookie' ) ) {
 
 		if(!is_admin()) {
 
+      // Prevent duplicate execution on both init and plugins_loaded
+      static $wcusage_url_cookie_executed = false;
+      if ($wcusage_url_cookie_executed) {
+        return;
+      }
+      $wcusage_url_cookie_executed = true;
+
       if( isset($_SERVER['HTTP_REFERER']) ) {
         $refpage = wp_parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
         $refpage = strtok($refpage, '?');
@@ -498,13 +505,24 @@ if( !function_exists( 'wcusage_update_click_page_value' ) ) {
 
       global $wp_query;
 
-      if(!$wp_query || !isset($wp_query->post->ID)) {
-        return;
+      $page = 0;
+      
+      // Try to get the current page ID
+      if($wp_query && isset($wp_query->post->ID)) {
+        $page = $wp_query->post->ID;
+      } 
+      // If no post ID, check if this is the front page/homepage
+      elseif(is_front_page() || is_home()) {
+        // Get the homepage ID if set as a static page
+        $page = get_option('page_on_front');
+        // If homepage is set to show latest posts (not a static page), use 0 or a special identifier
+        if(!$page || $page == 0) {
+          // We can store -1 to indicate homepage/blog index, or just leave as 0
+          $page = 0;
+        }
       }
 
-      $page = $wp_query->post->ID;
-
-      if($page) {
+      if($page || $page === 0) {
 
         $coupon = wcusage_get_coupon_object_safe($thecode);
         if($coupon) {
@@ -512,8 +530,12 @@ if( !function_exists( 'wcusage_update_click_page_value' ) ) {
           if($couponid) {
             global $wpdb;
             $table_name = $wpdb->prefix . 'wcusage_clicks';
-            $clickid = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table_name WHERE couponid = %d AND ipaddress = %s ORDER BY id DESC LIMIT 1", $couponid, $ipaddress)); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-            $results2 = $wpdb->update( $table_name, array( 'page' => $page ), array( 'id' => $clickid ) );
+            // Get the most recent click for this coupon and IP
+            $click_record = $wpdb->get_row($wpdb->prepare("SELECT id, page FROM $table_name WHERE couponid = %d AND ipaddress = %s ORDER BY id DESC LIMIT 1", $couponid, $ipaddress)); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+            // Only update the page if it hasn't been set yet (empty or null, NOT 0 which represents homepage)
+            if($click_record && ($click_record->page === null || $click_record->page === '' || $click_record->page === '')) {
+              $results2 = $wpdb->update( $table_name, array( 'page' => $page ), array( 'id' => $click_record->id ) );
+            }
           }
         }
 

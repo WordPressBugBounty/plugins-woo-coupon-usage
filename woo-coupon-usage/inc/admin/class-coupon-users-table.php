@@ -412,9 +412,24 @@ class WC_Coupon_Users_Table extends WP_List_Table {
                 return ucwords( str_replace( '_', ' ', $item[ $column_name ] ) ); // Capitalize and separate with spaces
             case 'affiliateinfo':
                 $theoutput = "";
+                $coupon_count = count($coupons);
+                
+                // Add wrapper div for scrolling if more than 2 coupons
+                if ($coupon_count > 2) {
+                    $theoutput .= '<div class="wcusage-affiliate-coupons-wrapper">';
+                    $theoutput .= '<div class="wcusage-affiliate-coupons-scrollable">';
+                }
+                
                 foreach ($coupons as $coupon) {
                     $theoutput .= wcusage_output_affiliate_tooltip_users($coupon);
                 }
+                
+                // Close wrapper divs if they were added
+                if ($coupon_count > 2) {
+                    $theoutput .= '</div>'; // Close scrollable
+                    $theoutput .= '</div>'; // Close wrapper
+                }
+                
                 return $theoutput;
             case 'unpaidcommission':
                 // Check if PRO version and tracking is enabled
@@ -651,48 +666,6 @@ function wcusage_coupon_users_page() {
             <?php $coupon_users_table->display(); ?>
         </form>
 	</div>
-    <style>
-    .wp-list-table .column-cb {
-        width: 40px !important;
-    }
-    .wp-list-table .column-cb input, .check-column input {
-        margin-top: 1px !important;
-        margin-left: 0px !important;
-    }
-    .wp-list-table .column-ID {
-        width: 130px;
-        text-align: center;
-    }
-    .wp-list-table .column-email {
-        width: 50px;
-    }
-    .wp-list-table .column-unpaidcommission {
-        width: 150px;
-        text-align: center;
-    }
-    .wp-list-table .column-view_affiliate {
-        width: 120px;
-        text-align: center;
-    }
-    .wcusage-avatar { border-radius: 50%; width: 40px; height: 40px; object-fit: cover; display: inline-block; }
-    .wcusage-idcell { display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .wcusage-id-link { font-weight: 600; }
-    /* Add spacing between multiple affiliate coupon items */
-    .wp-list-table .column-affiliateinfo .wcusage-users-affiliate-column {
-        display:block;
-        margin: 4px 8px 4px 0;
-    }
-    /* Vertically center all table cell contents on this page */
-    .wp-list-table tbody td,
-    .wp-list-table thead th {
-        vertical-align: middle;
-    }
-    /* On smaller screens, stack avatar above the ID */
-    @media screen and (max-width: 1500px) {
-        .wcusage-idcell { flex-direction: column; gap: 4px; }
-        .wp-list-table .column-ID { width: 80px; }
-    }
-    </style>
     <script>
     jQuery(document).ready(function($) {
         $('#doaction, #doaction2').click(function(e) {
@@ -915,23 +888,44 @@ function wcusage_export_coupon_users_csv() {
  */
 if( !function_exists( 'wcusage_get_coupon_users' ) ) {
     function wcusage_get_coupon_users($search_query = '', $role = '', $sort_by = '') {
+        
+        // Check cache first (10 minutes)
+        $cache_key = 'wcusage_coupon_users_list_' . md5($search_query . $role . $sort_by);
+        $cached = get_transient($cache_key);
+        if (is_array($cached)) {
+            return $cached;
+        }
+        
+        // Optimized: Only fetch coupons with assigned users
         $args = array(
             'post_type'      => 'shop_coupon',
             'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => array(
+                array(
+                    'key'     => 'wcu_select_coupon_user',
+                    'compare' => 'EXISTS',
+                ),
+                array(
+                    'key'     => 'wcu_select_coupon_user',
+                    'value'   => '',
+                    'compare' => '!=',
+                ),
+            ),
         );
 
-        $coupons = get_posts($args);
+        $coupon_ids = get_posts($args);
         $user_ids = array();
 
-        foreach ($coupons as $coupon) {
-            $user_id = get_post_meta($coupon->ID, 'wcu_select_coupon_user', true);
+        foreach ($coupon_ids as $coupon_id) {
+            $user_id = get_post_meta($coupon_id, 'wcu_select_coupon_user', true);
             if ($user_id) {
                 if (!is_numeric($user_id) && is_string($user_id)) {
                     // If it's a username (legacy data), convert to ID
                     $user = get_user_by('login', $user_id);
                     if ($user) {
                         $user_id = $user->ID;
-                        update_post_meta($coupon->ID, 'wcu_select_coupon_user', $user_id);
+                        update_post_meta($coupon_id, 'wcu_select_coupon_user', $user_id);
                     } else {
                         $user_id = '';
                     }
@@ -947,7 +941,9 @@ if( !function_exists( 'wcusage_get_coupon_users' ) ) {
 
 
         if (empty($user_ids) || !is_array($user_ids)) {
-            return array();
+            $result = array();
+            set_transient($cache_key, $result, MINUTE_IN_SECONDS * 10);
+            return $result;
         }
 
         $filtered_user_ids = array_filter($user_ids, function($item) {
@@ -1067,6 +1063,85 @@ if( !function_exists( 'wcusage_get_coupon_users' ) ) {
             });
         }
 
+        // Cache for 10 minutes
+        set_transient($cache_key, $users, MINUTE_IN_SECONDS * 10);
+
         return $users;
+    }
+}
+
+/**
+ * Clear coupon users list cache when assignments change
+ */
+add_action('updated_post_meta', function($meta_id, $post_id, $meta_key, $meta_value) {
+    if ($meta_key === 'wcu_select_coupon_user') {
+        // Get old user ID to clear their cache too
+        $old_user_id = get_post_meta($post_id, 'wcu_select_coupon_user', true);
+        wcusage_clear_coupon_users_cache($meta_value);
+        if ($old_user_id && $old_user_id != $meta_value) {
+            wcusage_clear_coupon_users_cache($old_user_id);
+        }
+    }
+}, 10, 4);
+
+add_action('added_post_meta', function($meta_id, $post_id, $meta_key, $meta_value) {
+    if ($meta_key === 'wcu_select_coupon_user') {
+        wcusage_clear_coupon_users_cache($meta_value);
+    }
+}, 10, 4);
+
+add_action('deleted_post_meta', function($meta_ids, $post_id, $meta_key, $meta_value) {
+    if ($meta_key === 'wcu_select_coupon_user') {
+        wcusage_clear_coupon_users_cache($meta_value);
+    }
+}, 10, 4);
+
+// Also clear cache when a shop_coupon post is saved/published
+add_action('save_post_shop_coupon', function($post_id, $post, $update) {
+    // Check if this is an autosave or revision
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    if (wp_is_post_revision($post_id)) {
+        return;
+    }
+    
+    // Check if the coupon has an assigned user
+    $assigned_user = get_post_meta($post_id, 'wcu_select_coupon_user', true);
+    if ($assigned_user) {
+        wcusage_clear_coupon_users_cache();
+    }
+}, 20, 3);
+
+// Clear cache after WooCommerce coupon save action completes
+add_action('woocommerce_coupon_options_save', function($post_id) {
+    wcusage_clear_coupon_users_cache();
+}, 20);
+
+if (!function_exists('wcusage_clear_coupon_users_cache')) {
+    function wcusage_clear_coupon_users_cache($user_id = null) {
+        global $wpdb;
+        
+        // Delete all affiliate users list caches
+        $wpdb->query(
+            "DELETE FROM {$wpdb->options} 
+             WHERE option_name LIKE '_transient_wcusage_coupon_users_list_%' 
+             OR option_name LIKE '_transient_timeout_wcusage_coupon_users_list_%'"
+        );
+        
+        // If a specific user ID is provided, clear their per-user coupon cache
+        if ($user_id) {
+            delete_transient('wcusage_user_coupon_ids_' . $user_id);
+            delete_transient('wcusage_user_coupon_names_' . $user_id);
+        } else {
+            // Clear all per-user coupon caches
+            $wpdb->query(
+                "DELETE FROM {$wpdb->options} 
+                 WHERE option_name LIKE '_transient_wcusage_user_coupon_ids_%' 
+                 OR option_name LIKE '_transient_timeout_wcusage_user_coupon_ids_%'
+                 OR option_name LIKE '_transient_wcusage_user_coupon_names_%'
+                 OR option_name LIKE '_transient_timeout_wcusage_user_coupon_names_%'"
+            );
+        }
     }
 }

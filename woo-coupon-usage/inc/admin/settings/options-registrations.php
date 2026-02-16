@@ -359,7 +359,7 @@ function wcusage_field_cb_registration( $args )
             $r1 = "";
             $editable_roles = get_editable_roles();
               foreach ( $editable_roles as $role => $details ) {
-                  if($role != 'administrator' && $role != 'editor' && $role != 'author' && $role != 'shop_manager' && !array_key_exists( 'manage_options', $details['capabilities'] ) ) {
+                  if($role != 'administrator' && $role != 'editor' && $role != 'author' && $role != 'shop_manager' && (!is_array($details['capabilities']) || !array_key_exists( 'manage_options', $details['capabilities'] )) ) {
                     $name = translate_user_role( $details['name'] );
                     if ( $wcusage_field_registration_accepted_role === $role ) {
                         $r1 .= "\n\t<option selected='selected' value='" . esc_attr( $role ) . "'>$name</option>";
@@ -396,7 +396,7 @@ function wcusage_field_cb_registration( $args )
             $r2 = "";
             $editable_roles = array_reverse( get_editable_roles() );
               foreach ( $editable_roles as $role => $details ) {
-                  if($role != 'administrator' && $role != 'editor' && $role != 'author' && $role != 'shop_manager' && !array_key_exists( 'manage_options', $details['capabilities'] ) ) {
+                  if($role != 'administrator' && $role != 'editor' && $role != 'author' && $role != 'shop_manager' && (!is_array($details['capabilities']) || !array_key_exists( 'manage_options', $details['capabilities'] )) ) {
                     $name = translate_user_role( $details['name'] );
                     // Preselect specified role.
                     if ( $wcusage_field_registration_pending_role === $role ) {
@@ -1576,7 +1576,7 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
                     $role_name = "(Group) " . $role_name;
                   }
                   ?>
-                  <?php if($role != 'administrator' && $role != 'editor' && $role != 'author' && $role != 'shop_manager' && !array_key_exists( 'manage_options', $details['capabilities'] ) ) { ?>
+                  <?php if($role != 'administrator' && $role != 'editor' && $role != 'author' && $role != 'shop_manager' && (!is_array($details['capabilities']) || !array_key_exists( 'manage_options', $details['capabilities'] )) ) { ?>
                     <option value="<?php echo esc_html($role); ?>"
                     <?php if(isset($options['wcusage_field_registration_coupon_template_role' . esc_html($template_num)]) && $options['wcusage_field_registration_coupon_template_role' . esc_html($template_num)] == $role) { ?>selected<?php } ?>
                     ><?php echo esc_html($role_name);?></option>

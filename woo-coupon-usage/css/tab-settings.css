@@ -52,6 +52,27 @@
     display: block;
 }
 
+/* Payout type sections - hide by default, show with wcu-show class */
+.wcu-payout-type-custom1,
+.wcu-payout-type-custom2,
+.wcu-payout-type-banktransfer,
+.wcu-payout-type-paypalapi,
+.wcu-payout-type-wisebank,
+.wcu-payout-type-stripeapi,
+.wcu-payout-type-credit {
+    display: none !important;
+}
+
+.wcu-payout-type-custom1.wcu-show,
+.wcu-payout-type-custom2.wcu-show,
+.wcu-payout-type-banktransfer.wcu-show,
+.wcu-payout-type-paypalapi.wcu-show,
+.wcu-payout-type-wisebank.wcu-show,
+.wcu-payout-type-stripeapi.wcu-show,
+.wcu-payout-type-credit.wcu-show {
+    display: block !important;
+}
+
 .wcu-settings-tab-content .profile-picture img {
     border-radius: 50%;
     width: 96px;
@@ -62,6 +83,6 @@
     opacity: 0.5;
 }
 
-#wcu-settings-ajax-message {
+.wcu-settings-tab-content #wcu-settings-ajax-message {
     margin-bottom: 20px;
 }

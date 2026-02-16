@@ -319,7 +319,6 @@ if (!function_exists('wcusage_tab_settings')) {
                                 if($newsletters_enabled &&$global_unsub_enabled) { ?>
                                     <p><input type="checkbox" id="wcu_newsletter_subscribed" name="wcu_newsletter_subscribed" value="1" <?php if(!$is_unsub) { ?>checked<?php } ?>>
                                     <?php echo esc_html__("Subscribe to Affiliate Newsletters", "woo-coupon-usage"); ?>
-                                    <br/><span style="font-size:11px;color:#555;"><?php echo esc_html__("Uncheck to stop receiving affiliate newsletter emails.", "woo-coupon-usage"); ?></span></p>
                                 <?php } ?>
                             <?php } ?>
 
@@ -448,7 +447,6 @@ if (!function_exists('wcusage_tab_settings')) {
                         <?php } ?>
                     </div>
 
-                    <div id="wcu-settings-ajax-message"></div>
 
                     <p>
                         <button type="submit" id="wcu-settings-update-button" class="wcu-save-settings-button woocommerce-Button button" name="submitsettingsupdate">
@@ -479,7 +477,7 @@ if (!function_exists('wcusage_dashboard_tab_content_settings')) {
         $options = get_option('wcusage_options');
         $currentuserid = get_current_user_id();
 
-        if (isset($_POST['page-settings']) || isset($_POST['ml-page-settings']) || $wcusage_page_load == false) { ?>
+        if (isset($_POST['page-settings']) || isset($_POST['ml-page-settings']) || !isset($_POST['load-page']) || $wcusage_page_load == false) { ?>
             <div id="<?php echo $other_affiliate ? 'ml-wcu4' : 'wcu6'; ?>" <?php if (wcusage_get_setting_value('wcusage_field_show_tabs', '1')) { ?>class="wcutabcontent"<?php } ?>>
                 <?php
                 if ($coupon_user_id != $currentuserid && wcusage_check_admin_access()) {

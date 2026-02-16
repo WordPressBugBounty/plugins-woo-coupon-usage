@@ -753,6 +753,10 @@ function wcusage_set_registration_status(
         // Update defaults
         if ( is_numeric( $userid ) ) {
             update_post_meta( $new_post_id, 'wcu_select_coupon_user', $userid );
+            // Clear the affiliate users cache when a new coupon is assigned to a user
+            if ( function_exists( 'wcusage_clear_coupon_users_cache' ) ) {
+                wcusage_clear_coupon_users_cache( $userid );
+            }
         } else {
             error_log( "User ID is not numeric: " . $userid );
         }

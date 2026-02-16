@@ -6,6 +6,73 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Clear all dashboard transient caches
+ * Called when orders change status or commission data updates
+ */
+function wcusage_clear_dashboard_caches() {
+    global $wpdb;
+    $wpdb->query(
+        $wpdb->prepare(
+            "DELETE FROM {$wpdb->options} 
+             WHERE option_name LIKE %s 
+             OR option_name LIKE %s
+             OR option_name LIKE %s
+             OR option_name LIKE %s
+             OR option_name LIKE %s
+             OR option_name LIKE %s
+             OR option_name LIKE %s
+             OR option_name LIKE %s
+             OR option_name LIKE %s
+             OR option_name LIKE %s
+             OR option_name LIKE %s
+             OR option_name LIKE %s",
+            '_transient_wcusage_dashboard_top_affiliates_%',
+            '_transient_timeout_wcusage_dashboard_top_affiliates_%',
+            '_transient_wcusage_dashboard_latest_affiliates_%',
+            '_transient_timeout_wcusage_dashboard_latest_affiliates_%',
+            '_transient_wcusage_dashboard_sidebar_top_affiliates_%',
+            '_transient_timeout_wcusage_dashboard_sidebar_top_affiliates_%',
+            '_transient_wcusage_dashboard_program_stats%',
+            '_transient_timeout_wcusage_dashboard_program_stats%',
+            '_transient_wcusage_dashboard_activity_recent%',
+            '_transient_timeout_wcusage_dashboard_activity_recent%',
+            '_transient_wcusage_leaderboard_%',
+            '_transient_timeout_wcusage_leaderboard_%'
+        )
+    );
+}
+
+// Clear dashboard caches when order status changes
+add_action('woocommerce_order_status_changed', 'wcusage_clear_dashboard_caches', 999);
+
+// Clear dashboard caches when coupon is saved or deleted
+add_action('save_post_shop_coupon', 'wcusage_clear_dashboard_caches', 20);
+add_action('delete_post', function($post_id) {
+    if (get_post_type($post_id) === 'shop_coupon') {
+        wcusage_clear_dashboard_caches();
+    }
+}, 10);
+
+// Clear dashboard caches when affiliate user assignments change
+add_action('updated_post_meta', function($meta_id, $post_id, $meta_key, $meta_value) {
+    if ($meta_key === 'wcu_select_coupon_user') {
+        wcusage_clear_dashboard_caches();
+    }
+}, 10, 4);
+
+add_action('added_post_meta', function($meta_id, $post_id, $meta_key, $meta_value) {
+    if ($meta_key === 'wcu_select_coupon_user') {
+        wcusage_clear_dashboard_caches();
+    }
+}, 10, 4);
+
+add_action('deleted_post_meta', function($meta_ids, $post_id, $meta_key, $meta_value) {
+    if ($meta_key === 'wcu_select_coupon_user') {
+        wcusage_clear_dashboard_caches();
+    }
+}, 10, 4);
+
+/**
  * Displays header section on dashboard pages.
  */
 add_action( 'wcusage_hook_dashboard_page_header', 'wcusage_dashboard_page_header' );
@@ -32,6 +99,7 @@ function wcusage_dashboard_page_header() {
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce'   => wp_create_nonce('wcusage_dashboard_order'),
             'paginationNonce' => wp_create_nonce('wcusage_dashboard_paginate'),
+            'clearCacheNonce' => wp_create_nonce('wcusage_dashboard_clear_cache'),
         )
     );
     $rss_items = array();
@@ -48,48 +116,63 @@ function wcusage_dashboard_page_header() {
     // Enqueue admin header menu CSS
     wp_enqueue_style('wcusage-admin-header-menu', WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-header-menu.css', array(), null);
 
-    // Get affiliate orders and clicks for last 2 months
-    $wcusage_field_order_type_custom = wcusage_get_setting_value('wcusage_field_order_type_custom', '');
-    $statuses = !$wcusage_field_order_type_custom ? array_diff_key(wc_get_order_statuses(), ['wc-refunded' => '']) : $wcusage_field_order_type_custom;
+    // Get affiliate orders and clicks for last 2 months with caching
+    $stats_cache_key = 'wcusage_dashboard_program_stats';
+    $cached_stats = get_transient($stats_cache_key);
+    
+    if ($cached_stats !== false && isset($cached_stats['orders_data']) && isset($cached_stats['clicks_data'])) {
+        $orders_data = $cached_stats['orders_data'];
+        $clicks_data = $cached_stats['clicks_data'];
+    } else {
+        $wcusage_field_order_type_custom = wcusage_get_setting_value('wcusage_field_order_type_custom', '');
+        $statuses = !$wcusage_field_order_type_custom ? array_diff_key(wc_get_order_statuses(), ['wc-refunded' => '']) : $wcusage_field_order_type_custom;
 
-    $orders = wc_get_orders(array(
-        'limit' => -1,
-        'orderby' => 'date',
-        'order' => 'DESC',
-        'post_status' => array_keys($statuses),
-        'meta_key' => 'wcusage_affiliate_user',
-        'meta_compare' => 'EXISTS',
-        'date_query' => array(
-            array(
-                'after' => '2 months ago',
-                'inclusive' => true,
+        // Get ALL affiliate orders from last 2 months (no limit)
+        $orders = wc_get_orders(array(
+            'limit' => -1,
+            'orderby' => 'date',
+            'order' => 'DESC',
+            'post_status' => array_keys($statuses),
+            'meta_key' => 'wcusage_affiliate_user',
+            'meta_compare' => 'EXISTS',
+            'date_query' => array(
+                array(
+                    'after' => '2 months ago',
+                    'inclusive' => true,
+                ),
             ),
-        ),
-    ));
+        ));
 
-    $orders_data = array();
-    foreach ($orders as $order) {
-        $order_id = $order->get_id();
-        $calculateorder = wcusage_calculate_order_data($order_id, '', 0, 1);
-        $orders_data[] = array(
-            'date' => $order->get_date_created()->format('Y-m-d H:i:s'),
-            'total' => $calculateorder['totalordersexcl'],
-            'discounts' => $calculateorder['totaldiscounts'],
-            'commission' => $calculateorder['totalcommission'],
-            'subtotal' => $calculateorder['totalorders']
-        );
+        $orders_data = array();
+        foreach ($orders as $order) {
+            $order_id = $order->get_id();
+            $calculateorder = wcusage_calculate_order_data($order_id, '', 0, 1);
+            $orders_data[] = array(
+                'date' => $order->get_date_created()->format('Y-m-d H:i:s'),
+                'total' => $calculateorder['totalordersexcl'],
+                'discounts' => $calculateorder['totaldiscounts'],
+                'commission' => $calculateorder['totalcommission'],
+                'subtotal' => $calculateorder['totalorders']
+            );
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'wcusage_clicks';
+        $two_months_ago = gmdate("Y-m-d", strtotime('-2 months'));
+        $clicks = $wpdb->get_results($wpdb->prepare(
+            "SELECT date FROM $table_name WHERE date >= %s ORDER BY date DESC", // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+            $two_months_ago
+        ));
+        $clicks_data = array_map(function($click) {
+            return $click->date;
+        }, $clicks);
+        
+        // Cache for 1 hour
+        set_transient($stats_cache_key, array(
+            'orders_data' => $orders_data,
+            'clicks_data' => $clicks_data
+        ), HOUR_IN_SECONDS);
     }
-
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'wcusage_clicks';
-    $two_months_ago = gmdate("Y-m-d", strtotime('-2 months'));
-    $clicks = $wpdb->get_results($wpdb->prepare(
-        "SELECT date FROM $table_name WHERE date >= %s ORDER BY date DESC", // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-        $two_months_ago
-    ));
-    $clicks_data = array_map(function($click) {
-        return $click->date;
-    }, $clicks);
 ?>
 
 <script>
@@ -293,7 +376,8 @@ jQuery(document).ready(function($) {
         array('label' => 'Documentation', 'url' => 'https://couponaffiliates.com/docs?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button', 'icon' => 'fa-solid fa-book', 'external' => true),
         array('label' => 'Roadmap', 'url' => 'https://roadmap.couponaffiliates.com/roadmap', 'icon' => 'fa-solid fa-list', 'external' => true),
         array('label' => 'Updates', 'url' => '#', 'icon' => 'fa-solid fa-sync', 'external' => false, 'id' => 'show-changelog'),
-        array('label' => 'Support Ticket', 'url' => wcu_fs()->can_use_premium_code() ? admin_url('admin.php?page=wcusage-contact') : 'https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0', 'icon' => 'fa-solid fa-circle-question', 'external' => !wcu_fs()->can_use_premium_code()),
+        array('label' => 'Email Us', 'url' => admin_url('admin.php?page=wcusage-contact'), 'icon' => 'fa-solid fa-circle-question', 'external' => !wcu_fs()->can_use_premium_code()),
+        array('label' => 'Support Forum', 'url' => 'https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0', 'icon' => 'fa-solid fa-comments', 'external' => true),
     );
     ?>
     <div class="wcusage-admin-header-menu">
@@ -597,6 +681,22 @@ function wcusage_save_dashboard_order_ajax() {
 add_action('wp_ajax_wcusage_save_dashboard_order', 'wcusage_save_dashboard_order_ajax');
 
 /**
+ * AJAX: Clear dashboard caches
+ */
+function wcusage_clear_dashboard_caches_ajax() {
+    check_ajax_referer('wcusage_dashboard_clear_cache', 'nonce');
+
+    if (!is_user_logged_in() || !function_exists('wcusage_check_admin_access') || !wcusage_check_admin_access()) {
+        wp_send_json_error(array('message' => __('Not authorized.', 'woo-coupon-usage')), 403);
+    }
+
+    wcusage_clear_dashboard_caches();
+
+    wp_send_json_success(array('message' => __('Dashboard caches cleared successfully!', 'woo-coupon-usage')));
+}
+add_action('wp_ajax_wcusage_clear_dashboard_caches', 'wcusage_clear_dashboard_caches_ajax');
+
+/**
  * AJAX: Paginate dashboard section tables
  */
 function wcusage_dashboard_paginate_ajax() {
@@ -619,6 +719,16 @@ function wcusage_dashboard_paginate_ajax() {
 
     switch ($section) {
         case 'affiliates_latest':
+            // Check cache first for performance
+            $cache_key = 'wcusage_dashboard_latest_affiliates_' . $offset . '_' . $per_page;
+            $cached_data = get_transient($cache_key);
+            
+            if ($cached_data !== false && isset($cached_data['html']) && isset($cached_data['total'])) {
+                $html = $cached_data['html'];
+                $total = $cached_data['total'];
+                break;
+            }
+            
             // Total distinct affiliate users
             $statuses = array('publish', 'pending', 'draft');
             $status_placeholders = implode(',', array_fill(0, count($statuses), '%s'));
@@ -696,17 +806,35 @@ function wcusage_dashboard_paginate_ajax() {
                           . '</div></div></li>';
                 }
             }
+            
+            // Cache the results for 1 hour
+            set_transient($cache_key, array('html' => $html, 'total' => $total), HOUR_IN_SECONDS);
             break;
 
         case 'affiliates_top':
-            // Build totals across coupons, then sort by commission desc
+            // Check cache first for performance
+            $cache_key = 'wcusage_dashboard_top_affiliates_' . $offset . '_' . $per_page;
+            $cached_data = get_transient($cache_key);
+            
+            if ($cached_data !== false && isset($cached_data['html']) && isset($cached_data['total'])) {
+                $html = $cached_data['html'];
+                $total = $cached_data['total'];
+                break;
+            }
+            
+            // Build totals across coupons using batched approach to prevent memory issues
             $statuses = array('publish', 'pending', 'draft');
-            $coupon_ids = get_posts(array(
+            $batch_size = 100;
+            $batch_offset = 0;
+            $top_totals = array();
+            
+            // First, count total coupons to process
+            $count_query = new WP_Query(array(
                 'post_type' => 'shop_coupon',
-                'posts_per_page' => -1,
+                'posts_per_page' => 1,
                 'fields' => 'ids',
                 'post_status' => $statuses,
-                'no_found_rows' => true,
+                'no_found_rows' => false,
                 'suppress_filters' => true,
                 'meta_query' => array(
                     array(
@@ -715,28 +843,51 @@ function wcusage_dashboard_paginate_ajax() {
                     ),
                 ),
             ));
+            $total_coupons = $count_query->found_posts;
+            wp_reset_postdata();
+            
+            // Process in batches
+            while ($batch_offset < $total_coupons) {
+                $coupon_ids = get_posts(array(
+                    'post_type' => 'shop_coupon',
+                    'posts_per_page' => $batch_size,
+                    'offset' => $batch_offset,
+                    'fields' => 'ids',
+                    'post_status' => $statuses,
+                    'no_found_rows' => true,
+                    'suppress_filters' => true,
+                    'meta_query' => array(
+                        array(
+                            'key' => 'wcu_select_coupon_user',
+                            'compare' => 'EXISTS',
+                        ),
+                    ),
+                ));
 
-            $top_totals = array();
-            if (!empty($coupon_ids)) {
-                foreach ($coupon_ids as $cid) {
-                    $u = (int) get_post_meta($cid, 'wcu_select_coupon_user', true);
-                    if (!$u) { continue; }
-                    $stats = get_post_meta($cid, 'wcu_alltime_stats', true);
-                    if (empty($stats) || !is_array($stats)) { continue; }
-                    $t_comm = isset($stats['total_commission']) ? (float) $stats['total_commission'] : 0.0;
-                    $t_orders = isset($stats['total_orders']) ? (float) $stats['total_orders'] : 0.0;
-                    $t_count = isset($stats['total_count']) ? (int) $stats['total_count'] : 0;
-                    if (!isset($top_totals[$u])) {
-                        $top_totals[$u] = array(
-                            'total_commission' => 0.0,
-                            'total_orders' => 0.0,
-                            'total_count' => 0,
-                        );
+                if (!empty($coupon_ids)) {
+                    foreach ($coupon_ids as $cid) {
+                        $u = (int) get_post_meta($cid, 'wcu_select_coupon_user', true);
+                        if (!$u) { continue; }
+                        $stats = get_post_meta($cid, 'wcu_alltime_stats', true);
+                        if (empty($stats) || !is_array($stats)) { continue; }
+                        $t_comm = isset($stats['total_commission']) ? (float) $stats['total_commission'] : 0.0;
+                        $t_orders = isset($stats['total_orders']) ? (float) $stats['total_orders'] : 0.0;
+                        $t_count = isset($stats['total_count']) ? (int) $stats['total_count'] : 0;
+                        if (!isset($top_totals[$u])) {
+                            $top_totals[$u] = array(
+                                'total_commission' => 0.0,
+                                'total_orders' => 0.0,
+                                'total_count' => 0,
+                            );
+                        }
+                        $top_totals[$u]['total_commission'] += $t_comm;
+                        $top_totals[$u]['total_orders'] += $t_orders;
+                        $top_totals[$u]['total_count'] += $t_count;
                     }
-                    $top_totals[$u]['total_commission'] += $t_comm;
-                    $top_totals[$u]['total_orders'] += $t_orders;
-                    $top_totals[$u]['total_count'] += $t_count;
                 }
+                
+                $batch_offset += $batch_size;
+                wp_reset_postdata();
             }
 
             // Total count of affiliates with stats
@@ -778,6 +929,9 @@ function wcusage_dashboard_paginate_ajax() {
                     $rank++;
                 }
             }
+            
+            // Cache the results for 1 hour
+            set_transient($cache_key, array('html' => $html, 'total' => $total), HOUR_IN_SECONDS);
             break;
         case 'activity':
             $table = $wpdb->prefix . 'wcusage_activity';
@@ -1137,10 +1291,24 @@ function wcusage_dashboard_page_section_activity() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'wcusage_activity';
     $per_page = 5;
-    $get_activity = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$table_name} ORDER BY id DESC LIMIT %d", $per_page)); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-    // Total count for pagination
-    $total_count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table_name}"); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $has_next = ($total_count > $per_page);
+    
+    // Check cache first
+    $cache_key = 'wcusage_dashboard_activity_recent';
+    $cached_data = get_transient($cache_key);
+    
+    if ($cached_data !== false) {
+        $get_activity = $cached_data['activities'];
+        $has_next = $cached_data['has_next'];
+        $total_count = isset($cached_data['total_count']) ? $cached_data['total_count'] : 0;
+    } else {
+        $get_activity = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$table_name} ORDER BY id DESC LIMIT %d", $per_page)); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+        // Total count for pagination
+        $total_count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table_name}"); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $has_next = ($total_count > $per_page);
+        
+        // Cache for 5 minutes
+        set_transient($cache_key, array('activities' => $get_activity, 'has_next' => $has_next, 'total_count' => $total_count), 5 * MINUTE_IN_SECONDS);
+    }
 ?>
 
 <div>
@@ -1652,99 +1820,127 @@ function wcusage_dashboard_page_html() {
         }
 
         if ($affiliate_sidebar_top_enabled && !empty($affiliate_sidebar_statuses)) {
-            $top_affiliate_coupon_args = array(
-                'post_type'      => 'shop_coupon',
-                'posts_per_page' => -1,
-                'fields'         => 'ids',
-                'post_status'    => $affiliate_sidebar_statuses,
-                'no_found_rows'  => true,
-                'suppress_filters' => true,
-                'meta_query'     => array(
-                    array(
-                        'key'     => $affiliate_sidebar_meta_key,
-                        'compare' => 'EXISTS',
-                    ),
-                ),
-            );
-
-            $top_affiliate_coupon_ids = get_posts($top_affiliate_coupon_args);
-
-            if (!empty($top_affiliate_coupon_ids)) {
+            // Check cache first for performance
+            $sidebar_cache_key = 'wcusage_dashboard_sidebar_top_affiliates_' . $affiliate_sidebar_top_limit;
+            $cached_sidebar_data = get_transient($sidebar_cache_key);
+            
+            if ($cached_sidebar_data !== false && is_array($cached_sidebar_data)) {
+                $affiliate_sidebar_top_affiliates = $cached_sidebar_data['affiliates'];
+                $affiliate_sidebar_top_total_all = $cached_sidebar_data['total'];
+            } else {
+                // Use batched approach to prevent memory issues with large datasets
+                $batch_size = 100;
+                $offset = 0;
                 $top_affiliates_totals = array();
+            
+            do {
+                $top_affiliate_coupon_args = array(
+                    'post_type'      => 'shop_coupon',
+                    'posts_per_page' => $batch_size,
+                    'offset'         => $offset,
+                    'fields'         => 'ids',
+                    'post_status'    => $affiliate_sidebar_statuses,
+                    'no_found_rows'  => false,
+                    'suppress_filters' => true,
+                    'meta_query'     => array(
+                        array(
+                            'key'     => $affiliate_sidebar_meta_key,
+                            'compare' => 'EXISTS',
+                        ),
+                    ),
+                );
 
-                foreach ($top_affiliate_coupon_ids as $coupon_id) {
-                    $coupon_user_id = (int) get_post_meta($coupon_id, $affiliate_sidebar_meta_key, true);
-                    if (!$coupon_user_id) {
-                        continue;
-                    }
+                $top_affiliate_query = new WP_Query($top_affiliate_coupon_args);
+                $top_affiliate_coupon_ids = $top_affiliate_query->posts;
+                $total_coupons = $top_affiliate_query->found_posts;
 
-                    $all_time_stats = get_post_meta($coupon_id, 'wcu_alltime_stats', true);
-                    if (empty($all_time_stats) || !is_array($all_time_stats)) {
-                        continue;
-                    }
-
-                    $total_commission = isset($all_time_stats['total_commission']) ? (float) $all_time_stats['total_commission'] : 0.0;
-                    $total_orders = isset($all_time_stats['total_orders']) ? (float) $all_time_stats['total_orders'] : 0.0;
-                    $total_count = isset($all_time_stats['total_count']) ? (int) $all_time_stats['total_count'] : 0;
-
-                    if (!isset($top_affiliates_totals[$coupon_user_id])) {
-                        $top_affiliates_totals[$coupon_user_id] = array(
-                            'total_commission' => 0.0,
-                            'total_orders'     => 0.0,
-                            'total_count'      => 0,
-                        );
-                    }
-
-                    $top_affiliates_totals[$coupon_user_id]['total_commission'] += $total_commission;
-                    $top_affiliates_totals[$coupon_user_id]['total_orders'] += $total_orders;
-                    $top_affiliates_totals[$coupon_user_id]['total_count'] += $total_count;
-                }
-
-                if (!empty($top_affiliates_totals)) {
-                    // Save total count BEFORE slicing for sidebar pagination totals
-                    $affiliate_sidebar_top_total_all = count($top_affiliates_totals);
-                    uasort($top_affiliates_totals, function ($a, $b) {
-                        if ($a['total_commission'] === $b['total_commission']) {
-                            return 0;
-                        }
-                        return ($a['total_commission'] < $b['total_commission']) ? 1 : -1;
-                    });
-
-                    $top_affiliates_totals = array_slice($top_affiliates_totals, 0, $affiliate_sidebar_top_limit, true);
-
-                    foreach ($top_affiliates_totals as $user_id => $totals) {
-                        $user = get_userdata($user_id);
-                        if (!$user) {
+                if (!empty($top_affiliate_coupon_ids)) {
+                    foreach ($top_affiliate_coupon_ids as $coupon_id) {
+                        $coupon_user_id = (int) get_post_meta($coupon_id, $affiliate_sidebar_meta_key, true);
+                        if (!$coupon_user_id) {
                             continue;
                         }
 
-                        $display_name = trim($user->first_name . ' ' . $user->last_name);
-                        if ('' === $display_name) {
-                            $display_name = $user->display_name ?: $user->user_login;
+                        $all_time_stats = get_post_meta($coupon_id, 'wcu_alltime_stats', true);
+                        if (empty($all_time_stats) || !is_array($all_time_stats)) {
+                            continue;
                         }
 
-                        $formatted_commission = '';
-                        if (function_exists('wc_price')) {
-                            $formatted_commission = wc_price($totals['total_commission']);
-                        } elseif (function_exists('wcusage_format_price')) {
-                            $formatted_commission = wcusage_format_price(number_format((float) $totals['total_commission'], 2, '.', ''));
-                        } else {
-                            $formatted_commission = esc_html(number_format_i18n((float) $totals['total_commission'], 2));
+                        $total_commission = isset($all_time_stats['total_commission']) ? (float) $all_time_stats['total_commission'] : 0.0;
+                        $total_orders = isset($all_time_stats['total_orders']) ? (float) $all_time_stats['total_orders'] : 0.0;
+                        $total_count = isset($all_time_stats['total_count']) ? (int) $all_time_stats['total_count'] : 0;
+
+                        if (!isset($top_affiliates_totals[$coupon_user_id])) {
+                            $top_affiliates_totals[$coupon_user_id] = array(
+                                'total_commission' => 0.0,
+                                'total_orders'     => 0.0,
+                                'total_count'      => 0,
+                            );
                         }
 
-                        $affiliate_sidebar_top_affiliates[] = array(
-                            'user_id'             => $user_id,
-                            'name'                => $display_name,
-                            'total_commission'    => (float) $totals['total_commission'],
-                            'commission_formatted'=> $formatted_commission,
-                            'affiliate_url'       => admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $user_id),
-                        );
+                        $top_affiliates_totals[$coupon_user_id]['total_commission'] += $total_commission;
+                        $top_affiliates_totals[$coupon_user_id]['total_orders'] += $total_orders;
+                        $top_affiliates_totals[$coupon_user_id]['total_count'] += $total_count;
                     }
                 }
+
+                $offset += $batch_size;
+                wp_reset_postdata();
+            } while ($offset < $total_coupons);
+
+            if (!empty($top_affiliates_totals)) {
+                // Save total count BEFORE slicing for sidebar pagination totals
+                $affiliate_sidebar_top_total_all = count($top_affiliates_totals);
+                uasort($top_affiliates_totals, function ($a, $b) {
+                    if ($a['total_commission'] === $b['total_commission']) {
+                        return 0;
+                    }
+                    return ($a['total_commission'] < $b['total_commission']) ? 1 : -1;
+                });
+
+                $top_affiliates_totals = array_slice($top_affiliates_totals, 0, $affiliate_sidebar_top_limit, true);
+
+                foreach ($top_affiliates_totals as $user_id => $totals) {
+                    $user = get_userdata($user_id);
+                    if (!$user) {
+                        continue;
+                    }
+
+                    $display_name = trim($user->first_name . ' ' . $user->last_name);
+                    if ('' === $display_name) {
+                        $display_name = $user->display_name ?: $user->user_login;
+                    }
+
+                    $formatted_commission = '';
+                    if (function_exists('wc_price')) {
+                        $formatted_commission = wc_price($totals['total_commission']);
+                    } elseif (function_exists('wcusage_format_price')) {
+                        $formatted_commission = wcusage_format_price(number_format((float) $totals['total_commission'], 2, '.', ''));
+                    } else {
+                        $formatted_commission = esc_html(number_format_i18n((float) $totals['total_commission'], 2));
+                    }
+
+                    $affiliate_sidebar_top_affiliates[] = array(
+                        'user_id'             => $user_id,
+                        'name'                => $display_name,
+                        'total_commission'    => (float) $totals['total_commission'],
+                        'commission_formatted'=> $formatted_commission,
+                        'affiliate_url'       => admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $user_id),
+                    );
+                }
             }
-        } elseif (!$affiliate_sidebar_top_enabled) {
-            $affiliate_sidebar_top_notice = esc_html__('Enable "All Time Stats" in the plugin settings to view top affiliate performance.', 'woo-coupon-usage');
+            
+            // Cache the sidebar results for 1 hour
+            set_transient($sidebar_cache_key, array(
+                'affiliates' => $affiliate_sidebar_top_affiliates,
+                'total' => $affiliate_sidebar_top_total_all
+            ), HOUR_IN_SECONDS);
         }
+    }
+    
+    if (!$affiliate_sidebar_top_enabled) {
+        $affiliate_sidebar_top_notice = esc_html__('Enable "All Time Stats" in the plugin settings to view top affiliate performance.', 'woo-coupon-usage');
+    }
     ?>
 
         <div class="wcusage-admin-dashboard-layout">
@@ -1752,10 +1948,13 @@ function wcusage_dashboard_page_html() {
                 <div class="wcusage-admin-page-col-section" style="margin-top: -20px;">
                     <div class="wcusage-admin-page-col" style="width: 100%;">
                         <h2><?php printf(esc_html__('%s Program Statistics', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )))); ?>
-                        <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_admin_reports')); ?>" style="text-decoration: none; float: right; margin-top: -5px; font-size: 14px;"
+                        <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_admin_reports')); ?>" style="text-decoration: none; float: right; margin-top: -5px; margin-left: 8px; font-size: 14px;"
                         class="button button-secondary button-large">
                             <?php echo esc_html__('View Full Report', 'woo-coupon-usage'); ?> <i class="fa-solid fa-arrow-right"></i>
-                        </a></h2>
+                        </a>
+                        <button type="button" id="wcusage-clear-cache-btn" class="button button-secondary button-large" style="float: right; margin-top: -5px; font-size: 14px;" title="<?php echo esc_attr__('Clear all dashboard caches to refresh statistics', 'woo-coupon-usage'); ?>">
+                            <span class="fa-solid fa-sync"></span> <?php echo esc_html__('Clear Cache', 'woo-coupon-usage'); ?>
+                        </button></h2>
                         <?php do_action('wcusage_hook_dashboard_page_section_statistics', ''); ?>
                     </div>
 
@@ -1813,14 +2012,14 @@ function wcusage_dashboard_page_html() {
 
                     <a class="wcusage-affiliates-manage-link button button-secondary button-large"
                     style="text-decoration: none; margin-bottom: 18px; display: block; text-align: center; color: #333;
-                    font-size: 14px; border: 1px solid #c3c4c7; border-radius: 10px;"
+                    font-size: 14px; border: 1px solid #c3c4c7; border-radius: 2px;"
                     href="<?php echo esc_url(admin_url('admin.php?page=wcusage_affiliates')); ?>">
                         <span class="fa-solid fa-users" style="margin-right: 7px;"></span> <?php printf(esc_html__('Manage %s', 'woo-coupon-usage'), esc_html($affiliate_sidebar_plural_label)); ?> <i class="fa-solid fa-arrow-right"></i>
                     </a>
 
                     <a class="wcusage-affiliates-manage-link button button-secondary button-large"
                     style="text-decoration: none; display: block; text-align: center; color: #333;
-                    font-size: 14px; border: 1px solid #c3c4c7; border-radius: 10px;"
+                    font-size: 14px; border: 1px solid #c3c4c7; border-radius: 2px;"
                     href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>">
                         <span class="fa-solid fa-user-plus" style="margin-right: 7px;"></span> <?php printf(esc_html__('Add New %s', 'woo-coupon-usage'), esc_html($affiliate_sidebar_singular_label)); ?> <i class="fa-solid fa-arrow-right"></i>
                     </a>

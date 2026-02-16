@@ -1861,7 +1861,7 @@ if( !function_exists( 'wcusage_setting_section_ordersalestracking' ) ) {
 
         <br/><i><?php echo esc_html__( 'This will affect the coupon usage stats, orders list, commission, and monthly summary.', 'woo-coupon-usage' ); ?></i> <i><?php echo esc_html__( 'Affiliate stats will be automatically refreshed when changing these statuses.', 'woo-coupon-usage' ); ?></i>
 
-        <br/><i><?php echo esc_html__( 'For "commission payouts" in PRO, for "unpaid commission" to be granted, the order status must be "completed".', 'woo-coupon-usage' ); ?></i>
+        <br/><i><?php echo esc_html__( 'For "unpaid commission" to be granted (PRO), the order status must be "completed".', 'woo-coupon-usage' ); ?></i>
         
         <br/><i><?php echo esc_html__( 'Cancelled, Refunded, and Failed orders will show stats as "0.00".', 'woo-coupon-usage' ); ?></i>
 
