@@ -21,11 +21,13 @@
     text-align: center;
 }
 .wcusage-avatar { 
-    border-radius: 50%; 
-    width: 40px; 
-    height: 40px; 
-    object-fit: cover; 
-    display: inline-block; 
+    border-radius: 50% !important; 
+    width: 40px !important; 
+    height: 40px !important; 
+    object-fit: cover !important; 
+    display: inline-block !important;
+    vertical-align: middle;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
 }
 .wcusage-idcell { 
     display: flex; 
@@ -164,6 +166,10 @@
 .wp-list-table thead th {
     vertical-align: middle;
 }
+.wp-list-table.mlausers tbody td,
+.wp-list-table.mlausers thead th {
+    vertical-align: middle !important;
+}
 /* On smaller screens, stack avatar above the ID */
 @media screen and (max-width: 1500px) {
     .wcusage-idcell { 
@@ -173,4 +179,59 @@
     .wp-list-table .column-ID { 
         width: 80px; 
     }
+}
+
+/* =========================================================
+   MLA Users Table column widths
+   ========================================================= */
+.wp-list-table .column-mla_sub_affiliates {
+    width: 120px;
+    text-align: center;
+}
+.wp-list-table .column-mla_payouts {
+    width: 160px;
+    text-align: center;
+}
+.wp-list-table .column-mla_tiers {
+    width: 110px;
+    text-align: center;
+}
+.wp-list-table .column-view_mla_affiliate {
+    width: 160px;
+    text-align: center;
+}
+th.column-mla_sub_affiliates,
+th.column-mla_payouts,
+th.column-mla_tiers,
+th.column-view_mla_affiliate {
+    text-align: center;
+}
+
+/* =========================================================
+   MLA Users Table — ID cell & checkbox overrides
+   (must win over admin-style.css padding: 22px 5px !important)
+   ========================================================= */
+.wp-list-table.mlausers .column-cb {
+    width: 40px !important;
+}
+.wp-list-table.mlausers .column-ID {
+    vertical-align: middle !important;
+}
+.wp-list-table.mlausers td.column-ID {
+    vertical-align: middle !important;
+}
+.wp-list-table.mlausers .wcusage-idcell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.wp-list-table.mlausers .wcusage-avatar {
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    object-fit: cover !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    flex-shrink: 0;
 }

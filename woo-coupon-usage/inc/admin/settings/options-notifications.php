@@ -483,6 +483,56 @@ function wcusage_field_cb_notifications( $args )
 
         </div>
 
+        <div class="wcu-setting-email-notification-box">
+
+          <!--
+          ********************
+          ** [Parent Email] New Sub-Affiliate Registration
+          ********************
+          -->
+          <?php wcusage_setting_toggle_option('wcusage_field_email_mla_sub_reg_notify_enable', 1, esc_html__( 'New Sub-Affiliate Registration', 'woo-coupon-usage' ), '0px'); ?>
+
+          <i><?php echo esc_html__( 'Send an email to the MLA parent affiliate when a new sub-affiliate registers via their invite link, including the application details and a link to approve or decline from their MLA dashboard.', 'woo-coupon-usage' ); ?></i>
+
+          <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Parent Affiliate User', 'woo-coupon-usage' ); ?></p>
+
+          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_mla_sub_reg_notify_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+
+          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_mla_sub_reg_notify_customise", "wcu_email_mla_sub_reg_notify_customise", "Show", "Hide"); ?>
+          <div id="wcu_email_mla_sub_reg_notify_customise" style="display: none;">
+
+            <br/>
+
+            <!-- Email Notification Subject -->
+            <?php wcusage_setting_text_option('wcusage_field_email_mla_sub_reg_notify_subject', esc_html__( "New Sub-Affiliate Registration: {sub-affiliate-user}", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+
+            <br/>
+
+            <!-- Email Notification Message -->
+            <?php
+            $email_mla_sub_reg_notify_message = "Hello {name},"
+            . "<br/><br/>A new affiliate has registered via your invite link and is pending your approval:"
+            . "<br/><br/><strong>Username:</strong> {username}"
+            . "<br/><strong>Name:</strong> {sub-affiliate-name}"
+            . "<br/><strong>Email:</strong> {sub-affiliate-email}"
+            . "<br/><strong>Coupon:</strong> {coupon}"
+            . "<br/><strong>Website:</strong> {website}"
+            . "<br/><strong>Referrer:</strong> {referrer}"
+            . "<br/><strong>Promote:</strong> {promote}"
+            . "<br/>{custom-fields}"
+            . "<br/><br/>Review and approve or decline this registration from your MLA dashboard:"
+            . "<br/><br/>{dashboardurl}";
+            wcusage_setting_tinymce_option('wcusage_field_email_mla_sub_reg_notify_message', $email_mla_sub_reg_notify_message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+            ?>
+
+            <br/>
+
+            <?php echo wcusage_email_merge_tags(array("name", "username", "sub-affiliate-name", "sub-affiliate-email", "coupon", "website", "referrer", "promote", "custom-fields", "dashboardurl")); ?>
+
+          </div>
+
+        </div>
+
     </span>
 
     </div>
@@ -919,7 +969,13 @@ if( !function_exists( 'wcusage_email_merge_tags' ) ) {
               echo "<p>- <strong>{inviteurltext}</strong> ".esc_html__( 'to show the invite referral URL without hyperlink (to create your own link/button).', 'woo-coupon-usage' )."</p>";
               break;
           case "sub-affiliate-user":
-              echo "<p>- <strong>{sub-affiliate-user}</strong> ".esc_html__( 'to the sub-affiliate username.', 'woo-coupon-usage' )."</p>";
+              echo "<p>- <strong>{sub-affiliate-user}</strong> ".esc_html__( 'to show the sub-affiliate username.', 'woo-coupon-usage' )."</p>";
+              break;
+          case "sub-affiliate-email":
+              echo "<p>- <strong>{sub-affiliate-email}</strong> ".esc_html__( 'to show the sub-affiliate email address.', 'woo-coupon-usage' )."</p>";
+              break;
+          case "sub-affiliate-name":
+              echo "<p>- <strong>{sub-affiliate-name}</strong> ".esc_html__( 'to show the sub-affiliate display name.', 'woo-coupon-usage' )."</p>";
               break;
           case "custom-fields":
             echo "<p>- <strong>{custom-fields}</strong> ".esc_html__( 'to show the affiliate registration custom field values.', 'woo-coupon-usage' )."</p>";

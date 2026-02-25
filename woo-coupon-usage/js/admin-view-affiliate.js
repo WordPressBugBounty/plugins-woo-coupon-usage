@@ -3,6 +3,33 @@
  */
 
 jQuery(document).ready(function($) {
+    // Mobile tab dropdown — inject <select> before the tab bar
+    (function() {
+        var $tabs = $('.wcusage-tabs');
+        if (!$tabs.length) { return; }
+
+        // Build the select element from the existing nav-tab links
+        var $select = $('<select class="wcusage-tab-select" aria-label="Navigate tabs"></select>');
+        $tabs.find('.nav-tab').each(function() {
+            var $tab  = $(this);
+            var href  = $tab.attr('href');
+            var label = $tab.text().trim();
+            var $opt  = $('<option></option>').val(href).text(label);
+            if ($tab.hasClass('nav-tab-active')) { $opt.prop('selected', true); }
+            if ($tab.hasClass('wcusage-tab-disabled')) { $opt.prop('disabled', true); }
+            $select.append($opt);
+        });
+
+        var $wrapper = $('<div class="wcusage-tab-select-wrapper"></div>').append($select);
+        $tabs.before($wrapper);
+
+        $select.on('change', function() {
+            var href  = $(this).val();
+            var $link = $tabs.find('.nav-tab[href="' + href + '"]');
+            if ($link.length) { $link.trigger('click'); }
+        });
+    })();
+
     // Tab switching functionality
     $('.wcusage-tabs .nav-tab').on('click', function(e) {
         e.preventDefault();
@@ -25,6 +52,9 @@ jQuery(document).ready(function($) {
             try { window.WCU_MLA_draw(); } catch(e) {}
         }
 
+        // Sync mobile dropdown
+        $('.wcusage-tab-select').val('#' + tabId);
+
         // Update URL without page reload
         var tab = tabId.replace('tab-', '');
         var newUrl = window.location.pathname + window.location.search.replace(/([&?]tab=)[^&]*/, '$1' + tab);
@@ -42,6 +72,9 @@ jQuery(document).ready(function($) {
         $('.wcusage-tabs .nav-tab[href="#tab-' + tab + '"]').addClass('nav-tab-active');
         $('.wcusage-tab-content > div').removeClass('active');
         $('#tab-' + tab).addClass('active');
+
+        // Sync mobile dropdown
+        $('.wcusage-tab-select').val('#tab-' + tab);
 
         // If MLA tab is now active, ensure chart draws
         if (tab === 'mla' && typeof window.WCU_MLA_draw === 'function') {
@@ -275,3 +308,4 @@ jQuery(document).ready(function($) {
         .always(function(){ $spinner.removeClass('is-active'); });
     });
 });
+

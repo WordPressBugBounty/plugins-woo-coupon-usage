@@ -36,6 +36,77 @@
         }
     }
     
+    // Load captcha script dynamically for registration form in the widget
+    function loadCaptchaScript(captchaData) {
+        if (!captchaData || !captchaData.type) {
+            return;
+        }
+        
+        if (captchaData.type === 'recaptcha') {
+            // Check if reCAPTCHA script is already loaded
+            if (typeof grecaptcha !== 'undefined') {
+                // Script already loaded, just render the widget
+                renderRecaptcha();
+                return;
+            }
+            var script = document.createElement('script');
+            script.src = 'https://www.google.com/recaptcha/api.js?onload=wcusageRecaptchaCallback&render=explicit';
+            script.async = true;
+            script.defer = true;
+            window.wcusageRecaptchaCallback = function() {
+                renderRecaptcha();
+            };
+            document.head.appendChild(script);
+        } else if (captchaData.type === 'turnstile') {
+            // Check if Turnstile script is already loaded
+            if (typeof turnstile !== 'undefined') {
+                // Script already loaded, just render the widget
+                renderTurnstile(captchaData.site_key);
+                return;
+            }
+            var script = document.createElement('script');
+            script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=wcusageTurnstileCallback&render=explicit';
+            script.async = true;
+            script.defer = true;
+            window.wcusageTurnstileCallback = function() {
+                renderTurnstile(captchaData.site_key);
+            };
+            document.head.appendChild(script);
+        }
+    }
+    
+    // Render reCAPTCHA widgets in the popup
+    function renderRecaptcha() {
+        if (typeof grecaptcha === 'undefined') {
+            return;
+        }
+        $('.wcusage-floating-popup .g-recaptcha').each(function() {
+            var el = this;
+            // Only render if not already rendered
+            if ($(el).children().length === 0) {
+                grecaptcha.render(el, {
+                    'sitekey': $(el).data('sitekey')
+                });
+            }
+        });
+    }
+    
+    // Render Turnstile widgets in the popup
+    function renderTurnstile(siteKey) {
+        if (typeof turnstile === 'undefined') {
+            return;
+        }
+        $('.wcusage-floating-popup .cf-turnstile').each(function() {
+            var el = this;
+            // Only render if not already rendered
+            if ($(el).children().length === 0) {
+                turnstile.render(el, {
+                    sitekey: siteKey || $(el).data('sitekey')
+                });
+            }
+        });
+    }
+    
     // Load popup content via AJAX
     function loadPopupContent() {
 
@@ -74,6 +145,11 @@
                     
                     // Initialize premium features if available
                     initializePremiumFeatures();
+                    
+                    // Load captcha scripts if registration form is displayed
+                    if (response.data.captcha) {
+                        loadCaptchaScript(response.data.captcha);
+                    }
                 } else {
                     var errorMsg = response && response.data ? response.data : wcusage_floating_widget.error_text;
                     var errorHtml = '<div class="wcusage-popup-header">' +

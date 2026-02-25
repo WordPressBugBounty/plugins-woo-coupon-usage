@@ -471,13 +471,11 @@ function wcusage_couponusage_register(  $atts  ) {
             <?php 
                         if ( $enable_captcha == "1" && !empty( $wcusage_registration_recaptcha_key ) && $wcusage_registration_recaptcha_key != "" ) {
                             ?>
-            <p>
             <div class="captcha_wrapper">
                 <div class="g-recaptcha" data-sitekey="<?php 
                             echo esc_attr( $wcusage_registration_recaptcha_key );
                             ?>"></div>
             </div>
-            </p>
             <?php 
                         }
                         ?>
@@ -486,13 +484,11 @@ function wcusage_couponusage_register(  $atts  ) {
             <?php 
                         if ( $enable_captcha == "2" && !empty( $wcusage_registration_turnstile_key ) && $wcusage_registration_turnstile_key != "" ) {
                             ?>
-            <p>
             <div class="captcha_wrapper">
                 <div class="cf-turnstile" data-sitekey="<?php 
                             echo esc_attr( $wcusage_registration_turnstile_key );
                             ?>"></div>
             </div>
-            </p>
             <?php 
                         }
                         ?>
@@ -835,7 +831,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
                 } catch ( Exception $e ) {
                     $thiscoupon = false;
                 }
-                if ( $count <= 0 && !$thiscoupon->is_valid() ) {
+                if ( $count <= 0 && (!$thiscoupon || !$thiscoupon->is_valid()) ) {
                     if ( !isset( $_SESSION['wcu_registration_token'] ) || is_admin() ) {
                         // Add User If Admin Post
                         $user_id = "";
@@ -902,6 +898,13 @@ function wcusage_post_submit_application(  $adminpost  ) {
                                     1
                                 );
                             }
+                            // Notify MLA parent about the new sub-affiliate registration.
+                            do_action(
+                                'wcusage_hook_mla_sub_registration_new',
+                                $mla_user->ID,
+                                $this_user->ID,
+                                $couponcode
+                            );
                         }
                         $alreadyexists = 0;
                     } else {

@@ -79,7 +79,7 @@ if ( !function_exists( 'wcusage_update_order_meta' ) ) {
     function wcusage_update_order_meta(  $order_id, $item = '', $value = ''  ) {
         $never_update_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_never_update_commission_meta', '0' );
         if ( $never_update_commission_meta ) {
-            if ( $item == "wcusage_commission_summary" || $item == "wcusage_total_commission" || $item == "wcusage_product_commission" || $item == "wcusage_currency_conversion" ) {
+            if ( $item == "wcusage_commission_summary" || $item == "wcusage_total_commission" || $item == "wcusage_product_commission" || $item == "wcusage_currency_conversion" || $item == "wcu_mla_commission" ) {
                 if ( wcusage_order_meta( $order_id, $item ) ) {
                     return;
                 }
@@ -104,7 +104,7 @@ function wcusage_update_order_meta_bulk(  $order_id, $meta_data = []  ) {
         foreach ( $meta_data as $key => $value ) {
             $never_update_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_never_update_commission_meta', '0' );
             if ( $never_update_commission_meta ) {
-                if ( $key == "wcusage_commission_summary" || $key == "wcusage_total_commission" || $key == "wcusage_product_commission" || $key == "wcusage_currency_conversion" ) {
+                if ( $key == "wcusage_commission_summary" || $key == "wcusage_total_commission" || $key == "wcusage_product_commission" || $key == "wcusage_currency_conversion" || $key == "wcu_mla_commission" ) {
                     if ( wcusage_order_meta( $order_id, $key ) ) {
                         continue;
                     }
@@ -351,6 +351,7 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
             if ( !$save_order_commission_meta && !$never_update_commission_meta ) {
                 wcusage_delete_order_meta( $orderid, 'wcusage_commission_summary' );
                 wcusage_delete_order_meta( $orderid, 'wcusage_stats' );
+                wcusage_delete_order_meta( $orderid, 'wcu_mla_commission' );
             }
             $get_affstats = wcusage_order_meta( $orderid, 'wcusage_stats', true );
             if ( is_array( $get_affstats ) && !empty( $get_affstats ) && !empty( $get_affstats['order'] ) && $get_affstats['order'] > 0 && !empty( $get_affstats['commission'] ) && $get_affstats['commission'] > 0 && !$refresh && !$force_update && $use_saved && $save_order_commission_meta ) {
@@ -1231,6 +1232,15 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                                 }
                             }
                         }
+                        // Store fixed_order_commission separately so it is available when reading from meta-cache
+                        $meta_fixed_order_commission = wcusage_order_meta( $orderid, 'wcusage_fixed_order_commission', true );
+                        if ( $fixed_order_commission || $meta_fixed_order_commission !== '' ) {
+                            if ( $meta_fixed_order_commission === '' || !$never_update_commission_meta ) {
+                                if ( $save_order_commission_meta ) {
+                                    $meta_data['wcusage_fixed_order_commission'] = $fixed_order_commission;
+                                }
+                            }
+                        }
                         if ( $save_order_commission_meta ) {
                             $meta_data['wcusage_commission_summary'] = $commission_summary;
                         }
@@ -1246,10 +1256,17 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                     if ( $meta_product_commission && !$never_update_commission_meta ) {
                         wcusage_delete_order_meta( $orderid, 'wcusage_product_commission' );
                     }
+                    if ( !$never_update_commission_meta ) {
+                        wcusage_delete_order_meta( $orderid, 'wcusage_fixed_order_commission' );
+                    }
                 }
             } else {
                 $totalcommission = wcusage_order_meta( $orderid, 'wcusage_total_commission', true );
                 $fixed_product_commission_total = wcusage_order_meta( $orderid, 'wcusage_product_commission', true );
+                $fixed_order_commission = wcusage_order_meta( $orderid, 'wcusage_fixed_order_commission', true );
+                if ( $fixed_order_commission === '' ) {
+                    $fixed_order_commission = 0;
+                }
                 $commission_summary = wcusage_order_meta( $orderid, 'wcusage_commission_summary', true );
             }
             if ( $orderid ) {
@@ -1277,6 +1294,10 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
             }
             if ( $current_fixed_product_commission_total ) {
                 $fixed_product_commission_total = wcusage_order_meta( $orderid, 'wcusage_product_commission', true );
+            }
+            $current_fixed_order_commission = wcusage_order_meta( $orderid, 'wcusage_fixed_order_commission', true );
+            if ( $current_fixed_order_commission !== '' ) {
+                $fixed_order_commission = (float) $current_fixed_order_commission;
             }
             if ( $current_commission_summary ) {
                 $commission_summary = wcusage_order_meta( $orderid, 'wcusage_commission_summary', true );

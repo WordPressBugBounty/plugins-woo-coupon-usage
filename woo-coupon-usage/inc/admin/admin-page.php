@@ -667,3 +667,13 @@ function wcusage_view_affiliate_page() {
     require_once plugin_dir_path(__FILE__) . 'admin-view-affiliate.php';
 }
 
+/**
+ * MLA Users Admin Page
+ */
+function wcusage_mla_users_page_html() {
+    require_once plugin_dir_path(__FILE__) . 'class-mla-users-table.php';
+    wcusage_mla_users_page();
+}
+
+
+

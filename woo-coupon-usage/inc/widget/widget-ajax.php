@@ -8,6 +8,32 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Main AJAX handlers for popup content and interactions
  */
 
+/**
+ * Get captcha configuration data for the floating widget.
+ * Returns the captcha type and site key so the popup JS can load the appropriate script dynamically.
+ */
+function wcusage_get_widget_captcha_data() {
+    $enable_captcha = wcusage_get_setting_value('wcusage_registration_enable_captcha', '');
+    if ($enable_captcha == '1') {
+        $site_key = wcusage_get_setting_value('wcusage_registration_recaptcha_key', '');
+        if (!empty($site_key)) {
+            return array(
+                'type' => 'recaptcha',
+                'site_key' => $site_key
+            );
+        }
+    } elseif ($enable_captcha == '2') {
+        $site_key = wcusage_get_setting_value('wcusage_registration_turnstile_key', '');
+        if (!empty($site_key)) {
+            return array(
+                'type' => 'turnstile',
+                'site_key' => $site_key
+            );
+        }
+    }
+    return null;
+}
+
 // AJAX handler for popup content (updated to include settings)
 add_action('wp_ajax_wcusage_floating_widget_content', 'wcusage_floating_widget_ajax_content');
 add_action('wp_ajax_nopriv_wcusage_floating_widget_content', 'wcusage_floating_widget_ajax_content');
@@ -31,10 +57,16 @@ function wcusage_floating_widget_ajax_content() {
         if (!$user_id) {
             // Show registration form for non-logged in users
             $content = wcusage_widget_registration_form($settings);
-            wp_send_json_success(array(
+            $response_data = array(
                 'content' => $content,
                 'settings' => $settings
-            ));
+            );
+            // Include captcha data so the popup JS can load scripts dynamically
+            $captcha_data = wcusage_get_widget_captcha_data();
+            if ($captcha_data) {
+                $response_data['captcha'] = $captcha_data;
+            }
+            wp_send_json_success($response_data);
             return;
         }
         
@@ -49,10 +81,16 @@ function wcusage_floating_widget_ajax_content() {
         if (empty($user_coupons)) {
             // Show registration form for logged-in users without coupons
             $content = wcusage_widget_registration_form($settings);
-            wp_send_json_success(array(
+            $response_data = array(
                 'content' => $content,
                 'settings' => $settings
-            ));
+            );
+            // Include captcha data so the popup JS can load scripts dynamically
+            $captcha_data = wcusage_get_widget_captcha_data();
+            if ($captcha_data) {
+                $response_data['captcha'] = $captcha_data;
+            }
+            wp_send_json_success($response_data);
             return;
         }
         

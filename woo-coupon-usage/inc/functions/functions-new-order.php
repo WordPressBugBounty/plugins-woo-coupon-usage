@@ -100,7 +100,14 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
                     }
                     $coupon_info = wcusage_get_coupon_info( $lifetimeaffiliate );
                     $coupon_user_id = $coupon_info[1];
-                    $meta_data = wcusage_update_ml_affiliate_parents( $meta_data, $coupon_user_id, $order );
+                    $paidcommission = ( isset( $calculateorder['totalcommission'] ) ? $calculateorder['totalcommission'] : 0 );
+                    $meta_data = wcusage_update_ml_affiliate_parents(
+                        $meta_data,
+                        $coupon_user_id,
+                        $order,
+                        $lifetimeaffiliate,
+                        $paidcommission
+                    );
                 } elseif ( $affiliatereferrer ) {
                     $calculateorder = wcusage_calculate_order_data(
                         $order_id,
@@ -136,8 +143,15 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
                     }
                     $coupon_info = wcusage_get_coupon_info( $affiliatereferrer );
                     $coupon_user_id = $coupon_info[1];
+                    $paidcommission = ( isset( $calculateorder['totalcommission'] ) ? $calculateorder['totalcommission'] : 0 );
                     $user_parents = get_user_meta( $coupon_user_id, 'wcu_ml_affiliate_parents', true );
-                    $meta_data = wcusage_update_ml_affiliate_parents( $meta_data, $coupon_user_id, $order );
+                    $meta_data = wcusage_update_ml_affiliate_parents(
+                        $meta_data,
+                        $coupon_user_id,
+                        $order,
+                        $affiliatereferrer,
+                        $paidcommission
+                    );
                 } else {
                     // Coupons
                     if ( class_exists( 'WooCommerce' ) ) {
@@ -181,7 +195,14 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
                             }
                             $coupon_info = wcusage_get_coupon_info( $coupon_code );
                             $coupon_user_id = $coupon_info[1];
-                            $meta_data = wcusage_update_ml_affiliate_parents( $meta_data, $coupon_user_id, $order );
+                            $paidcommission = ( isset( $calculateorder['totalcommission'] ) ? $calculateorder['totalcommission'] : 0 );
+                            $meta_data = wcusage_update_ml_affiliate_parents(
+                                $meta_data,
+                                $coupon_user_id,
+                                $order,
+                                $coupon_code,
+                                $paidcommission
+                            );
                         }
                     }
                 }
@@ -217,24 +238,19 @@ add_action(
     10,
     3
 );
-/*
- * On order completed delete wcusage_all_updated
- *
- * @param int $order_id
- *
- */
-function wcusage_on_new_order_delete_all_updated_meta(  $order_id  ) {
-    wcusage_delete_order_meta( $order_id, 'wcusage_all_updated' );
-}
-
-add_action(
-    'woocommerce_order_status_completed',
-    'wcusage_on_new_order_delete_all_updated_meta',
-    10,
-    1
-);
+// NOTE: The wcusage_all_updated flag is intentionally NOT deleted on order completion.
+// Deleting it on 'woocommerce_order_status_completed' caused double-counting because
+// woocommerce_order_status_changed fires after that hook, sees no flag, and re-adds
+// the order to the all-time stats a second time. The flag is only cleared by the
+// $remove_order path when an order moves from a counted status to a non-counted one.
 /* Update MLA Parents When New Order Placed */
-function wcusage_update_ml_affiliate_parents(  $meta_data, $coupon_user_id, $order  ) {
+function wcusage_update_ml_affiliate_parents(
+    $meta_data,
+    $coupon_user_id,
+    $order,
+    $coupon_code = '',
+    $paidcommission = 0
+) {
 }
 
 /**

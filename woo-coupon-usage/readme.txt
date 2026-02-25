@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.9
-Stable tag: 7.4.0
+Stable tag: 7.5.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -275,12 +275,42 @@ Please report security bugs found in the source code of the undefined plugin thr
 
 == Changelog ==
 
+= Version 7.5.0 - 25th February 2026 =
+- New: (PRO) Added a new option to set per-group and per-user MLA commission rates, which will override the default MLA commission rates for that user.
+- New: (PRO) Added a new option to display a "Rates" tab on the MLA affiliate dashboard, which will show the commission rates for each tier of their MLA network, and also show any custom rates that have been set for that user.
+- New: (PRO) Added a new "MLA Users" admin page listing all users that are part of the multi-level affiliate system, with their affiliate details and stats.
+- New: (PRO) On the "View Affiliate" page, in the "MLA" tab, added lots more details and statistics about the affiliates sub-affiliates, including their total stats, recent orders, and more. Also added a way to easily remove sub-affiliates or add new sub-affiliates to the affiliate from this tab.
+- New: (PRO) If QR codes are enabled, it will now also show the QR code generator for the MLA invite referral links on the MLA dashboard.
+- New: (PRO) Added an option to show a "Sub-Affiliate Registrations" section on the MLA dashboard, that allows the parent affiliate to view and manage the affiliate applications from their sub-affiliates. They will also receive email notifications when they get new sub-affiliate applications, and can approve/reject them from the MLA dashboard.
+- New: (PRO) On the affiliate page, if the payout information totals (processing, unpaid, pending, paid) do not match the "total commission", added a "unaccounted commission" row with a message explaining why that may be the case.
+- Improvement: (PRO) Added extra columns to the Affiliate Groups admin page, showing each group's commission rates, assigned template coupon, and enabled payout methods.
+- Improvement: (PRO) Added a field when editing coupons to modify the "processing commission" amount.
+- Improvement: Added filters to the admin activity log page.
+- Improvement: (PRO) On the MLA affiliate dashboard, added pagination to the "Your latest invites" section.
+- Improvement: (PRO) Renamed "Pending Commission" to "Processing Commission" across the plugin for less confusion with the "Pending" status for payouts.
+- Tweak: (PRO) On the "View Affiliate" page, the "Payouts" tab and the "Unpaid" column in the coupons table are now only shown when the payout tracking setting is enabled.
+- Tweak: MLA unpaid commission changes are now added to the activity log.
+- Tweak: Updated the JS method for setting cookies when headers have already been sent, to be more reliable in some cases.
+- Tweak: reCAPTCHA and Turnstile now load on the floating widget registration form if enabled.
+- Tweak: Made some design improvements on mobile to the view affiliate page.
+- Tweak: Added a search field to the "PRO Modules" settings tab.
+- Fix: Fixed an issue where the affiliate registration form would incorrectly show a "coupon already exists" error when submitting with a new coupon code, due to a compatibility issue with newer versions of WooCommerce.
+- Fix: Fixed some issues with per-group fixed commission not showing visually in some cases.
+- Fix: Fixed Turnstile rendering twice in some cases.
+- Fix: Fixed PHP warnings for undefined variables in the mobile dropdown menu section of the affiliate dashboard.
+- Fix: Fixed a bug where referred orders could be counted twice in the coupon all-time statistics.
+- Fix: (PRO) Fixed payout request button not working in some cases when invoice uploads are not enabled, due to a missing JavaScript validation function.
+- Fix: (PRO) Fixed processing commission being added twice for some orders due to an HPOS compatibility issue.
+- Fix: Potential fix for issues with the WP Compress plugin.
+- Fix: (PRO) Fixed a bug where affiliate bonuses with a "Once Per Month" (or other period) trigger could become permanently locked if the reward date meta was missing, preventing the bonus from ever being awarded again.
+- Fix: (PRO) Fixed a bug where removing all affiliate group restrictions from a bonus would not clear the saved restriction, causing affiliates to be silently excluded from earning the bonus.
+
 = Version 7.4.0 - 14th February 2026 =
 - New: Added new "referral welcome popups" functionality.
 - New: When using the regular shortcode dashboard page, added a new "dark mode" option to the design settings tab that can be enabled.
 - New: Added a "Clear Cache" button to the admin dashboard page to manually refresh all cached statistics and data on demand.
 - Improvement: When a payout method is not selected, the payouts tab now displays the payout settings form directly instead of just showing a message to go to the settings tab.
-- Tweak: Small chanages to the admin notifications.
+- Tweak: Small changes to the admin notifications.
 - Tweak: Improved reliability of affiliate registration form shortcode to prevent intermittent display issues caused by database/cache failures.
 - Tweak: Major performance improvements across the plugin with transient caching (dashboards/stats/leaderboards/admin pages) and optimized database queries to dramatically reduce load times on high-volume sites.
 - Tweak: Improved Affiliate Users List and Coupons List performance with optimized meta_query filters and transient caching.

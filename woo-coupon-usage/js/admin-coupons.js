@@ -138,7 +138,8 @@ jQuery(document).ready(function($) {
             wcu_text_coupon_commission_fixed_order: $row.find('#wcu_text_coupon_commission_fixed_order_' + couponId).val(),
             wcu_text_coupon_commission_fixed_product: $row.find('#wcu_text_coupon_commission_fixed_product_' + couponId).val(),
             wcu_text_unpaid_commission: $row.find('#wcu_text_unpaid_commission_' + couponId).val(),
-            wcu_text_pending_payment_commission: $row.find('#wcu_text_pending_payment_commission_' + couponId).val()
+            wcu_text_pending_payment_commission: $row.find('#wcu_text_pending_payment_commission_' + couponId).val(),
+            wcu_text_pending_order_commission: $row.find('#wcu_text_pending_order_commission_' + couponId).val() || '0'
         };
 
         $.ajax({

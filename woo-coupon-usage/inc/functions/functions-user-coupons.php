@@ -338,12 +338,16 @@ if ( !function_exists( 'wcusage_save_coupon_settings' ) ) {
                     $wcu_text_unpaid_commission_confirm = sanitize_text_field( $_POST['wcu_text_unpaid_commission_confirm'] );
                     if ( $wcu_text_unpaid_commission_confirm ) {
                         if ( isset( $_POST['wcu_text_unpaid_commission'] ) ) {
-                            $wcu_text_unpaid_commission = sanitize_text_field( $_POST['wcu_text_unpaid_commission'] );
+                            $wcu_text_unpaid_commission = floatval( wp_unslash( $_POST['wcu_text_unpaid_commission'] ) );
                             update_post_meta( $post_id, 'wcu_text_unpaid_commission', $wcu_text_unpaid_commission );
                         }
                         if ( isset( $_POST['wcu_text_pending_payment_commission'] ) ) {
-                            $wcu_text_pending_payment_commission = sanitize_text_field( $_POST['wcu_text_pending_payment_commission'] );
+                            $wcu_text_pending_payment_commission = floatval( wp_unslash( $_POST['wcu_text_pending_payment_commission'] ) );
                             update_post_meta( $post_id, 'wcu_text_pending_payment_commission', $wcu_text_pending_payment_commission );
+                        }
+                        if ( isset( $_POST['wcu_text_pending_order_commission'] ) ) {
+                            $wcu_text_pending_order_commission = floatval( wp_unslash( $_POST['wcu_text_pending_order_commission'] ) );
+                            update_post_meta( $post_id, 'wcu_text_pending_order_commission', $wcu_text_pending_order_commission );
                         }
                         update_post_meta( $post_id, 'wcu_text_unpaid_commission_confirm', 0 );
                     }

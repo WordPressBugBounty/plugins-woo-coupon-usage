@@ -180,8 +180,14 @@ function wcusage_get_the_order_coupon_info(
         $commission = 0;
         $coupon_id = wcusage_get_coupon_id( $coupon_code );
         // Commission
+        // Prefer the saved stats meta (which stores the full combined commission including
+        // fixed-order and fixed-product amounts), falling back to a full recalculation.
+        $wcusage_stats = wcusage_order_meta( $order_id, 'wcusage_stats', true );
         $wcusage_total_commission = wcusage_order_meta( $order_id, 'wcusage_total_commission' );
-        if ( !$wcusage_total_commission || $update ) {
+        if ( !$update && is_array( $wcusage_stats ) && !empty( $wcusage_stats['commission'] ) ) {
+            // wcusage_stats['commission'] = full all_commission (percent + fixed_order + fixed_product)
+            $commission = (float) $wcusage_stats['commission'];
+        } elseif ( !$wcusage_total_commission || $update ) {
             if ( $update ) {
                 $order_data = wcusage_calculate_order_data(
                     $order_id,

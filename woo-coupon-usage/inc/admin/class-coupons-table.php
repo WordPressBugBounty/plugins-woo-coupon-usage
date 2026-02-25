@@ -783,6 +783,11 @@ function wcusage_coupons_page() {
  */
 function wcusage_save_coupon_data() {
     check_ajax_referer( 'wcusage_coupon_nonce', 'nonce' );
+
+    if ( ! current_user_can( 'manage_woocommerce' ) ) {
+        wp_send_json_error( array( 'message' => 'Permission denied.' ) );
+        return;
+    }
     
     $coupon_id = intval( $_POST['coupon_id'] );
     $coupon = new WC_Coupon( $coupon_id );
@@ -821,6 +826,7 @@ function wcusage_save_coupon_data() {
         'wcu_text_coupon_commission_fixed_product' => floatval( wp_unslash( $_POST['wcu_text_coupon_commission_fixed_product'] ) ),
         'wcu_text_unpaid_commission'            => floatval( wp_unslash( $_POST['wcu_text_unpaid_commission'] ) ),
         'wcu_text_pending_payment_commission'   => floatval( wp_unslash( $_POST['wcu_text_pending_payment_commission'] ) ),
+        'wcu_text_pending_order_commission'     => floatval( wp_unslash( $_POST['wcu_text_pending_order_commission'] ) ),
     );
 
     if(!isset($_POST['wcu_text_coupon_commission']) || $_POST['wcu_text_coupon_commission'] == '') {
@@ -838,6 +844,9 @@ function wcusage_save_coupon_data() {
     if(!isset($_POST['wcu_text_pending_payment_commission']) || $_POST['wcu_text_pending_payment_commission'] == '') {
         $meta['wcu_text_pending_payment_commission'] = "0";
     }
+    if(!isset($_POST['wcu_text_pending_order_commission']) || $_POST['wcu_text_pending_order_commission'] == '') {
+        $meta['wcu_text_pending_order_commission'] = "0";
+    }
 
     // Remove PRO fields if not using PRO
     if ( ! wcu_fs()->can_use_premium_code() ) {
@@ -845,6 +854,7 @@ function wcusage_save_coupon_data() {
         unset( $meta['wcu_text_coupon_commission_fixed_product'] );
         unset( $meta['wcu_text_unpaid_commission'] );
         unset( $meta['wcu_text_pending_payment_commission'] );
+        unset( $meta['wcu_text_pending_order_commission'] );
     }
     
     foreach ( $meta as $key => $value ) {

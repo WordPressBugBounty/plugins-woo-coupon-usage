@@ -545,7 +545,7 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
   </div>
 
   <p class="wcu-loading-loader-subtext" style="text-align:center; margin-top: 8px;"><?php 
-    echo esc_html__( "The page will relaod automatically when it is complete.", "woo-coupon-usage" );
+    echo esc_html__( "The page will reload automatically when it is complete.", "woo-coupon-usage" );
     ?></p>
         
 <?php 

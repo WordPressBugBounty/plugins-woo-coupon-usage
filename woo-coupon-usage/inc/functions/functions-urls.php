@@ -39,10 +39,25 @@ if( !function_exists( 'wcusage_set_cookie' ) ) {
     }
 
     if ( headers_sent() && ! $httponly && ! wp_doing_ajax() ) {
-        $script = "var date = new Date(" . ($expire * 1000) . ");
-        var expires = '; expires=' + date.toUTCString();
-        document.cookie = '" . $name . "=" . $value . "' + expires + '; path=" . $path . "; domain=" . $domain . "; samesite=Lax" . ($secure ? "; secure" : "") . "';";
-        wp_add_inline_script( 'jquery-core', $script );
+        // Headers already sent - use JavaScript fallback to set cookies.
+        // Outputting script directly in footer instead of using wp_add_inline_script which won't work at this timing.
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        // phpcs:ignore WordPress.Security.EscapeOutput.UnsafePrintingFunction
+        add_action(
+            'wp_footer',
+            function() use ( $name, $value, $expire, $path, $domain, $secure ) {
+                ?>
+                <script type="text/javascript">
+                (function() {
+                    var date = new Date(<?php echo absint( $expire * 1000 ); ?>);
+                    var expires = '; expires=' + date.toUTCString();
+                    document.cookie = '<?php echo esc_js( $name ); ?>=<?php echo esc_js( $value ); ?>' + expires + '; path=<?php echo esc_js( $path ); ?>; domain=<?php echo esc_js( $domain ); ?>; samesite=Lax<?php echo $secure ? '; secure' : ''; ?>';
+                })();
+                </script>
+                <?php
+            },
+            999
+        );
     } elseif ( PHP_VERSION_ID < 70300 ) {
         setcookie( $name, $value, $expire, $path, $domain, $secure, $httponly );
     } else {

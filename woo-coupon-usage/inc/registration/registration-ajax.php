@@ -134,6 +134,38 @@ function wcusage_ajax_submit_registration() {
         ) );
         error_log( 'CA: Failed to store registration data for user ID: ' . $userid );
     }
+    // MLA: Set parent affiliate relationship if the user registered via an MLA invite link.
+    $wcusage_field_mla_enable = wcusage_get_setting_value( 'wcusage_field_mla_enable', '0' );
+    if ( $wcusage_field_mla_enable ) {
+        $mla_cookie = wcusage_get_cookie_value( 'wcusage_referral_mla' );
+        $mla_cookie = str_replace( '%20', ' ', $mla_cookie );
+        $mla_referral = ( function_exists( 'wcusage_get_mla_referral_value' ) ? wcusage_get_mla_referral_value() : '' );
+        $mla_username = ( $mla_referral ? $mla_referral : $mla_cookie );
+        if ( $mla_username ) {
+            $mla_user = get_user_by( 'login', $mla_username );
+            $this_user = get_user_by( 'id', $userid );
+            if ( $mla_user && $this_user ) {
+                if ( function_exists( 'wcusage_mla_add_parent_to_user' ) ) {
+                    wcusage_mla_add_parent_to_user( $mla_user->ID, $this_user->ID );
+                }
+                if ( function_exists( 'wcusage_install_mlainvite_data' ) ) {
+                    wcusage_install_mlainvite_data(
+                        $mla_user->ID,
+                        $this_user->user_email,
+                        'pending',
+                        1
+                    );
+                }
+                // Notify MLA parent about the new sub-affiliate registration.
+                do_action(
+                    'wcusage_hook_mla_sub_registration_new',
+                    $mla_user->ID,
+                    $this_user->ID,
+                    $couponcode
+                );
+            }
+        }
+    }
     // Determine whether this submission should be auto-accepted.
     $wcusage_field_registration_auto_accept = wcusage_get_setting_value( 'wcusage_field_registration_auto_accept', '0' );
     $do_auto_accept = false;

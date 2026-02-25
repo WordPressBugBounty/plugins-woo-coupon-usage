@@ -237,6 +237,8 @@ function wcusage_custom_box_html_content(
         delete_post_meta( $order_id, 'wcusage_commission_summary' );
         delete_post_meta( $order_id, 'wcusage_stats' );
         delete_post_meta( $order_id, 'wcusage_total_commission' );
+        delete_post_meta( $order_id, 'wcusage_fixed_order_commission' );
+        delete_post_meta( $order_id, 'wcu_mla_commission' );
         $url = remove_query_arg( 'refresh_stats' );
         wp_safe_redirect( $url );
         exit;
@@ -285,27 +287,57 @@ function wcusage_custom_box_html_content(
     }
     echo "<a href='" . esc_url( $getinfo['uniqueurl'] ) . "' target='_blank' style='color: #07bbe3;' title='" . esc_html__( 'View the affiliate dashboard for this affiliate coupon.', 'woo-coupon-usage' ) . "'>" . esc_html__( 'View Dashboard', 'woo-coupon-usage' ) . "</a>";
     echo "</p>";
-    $wcusage_field_mla_enable = wcusage_get_setting_value( 'wcusage_field_mla_enable', '0' );
-    if ( $wcusage_field_mla_enable && wcu_fs()->can_use_premium_code() && !wcusage_coupon_disable_commission( $coupon_id ) ) {
-        $get_parents = get_user_meta( $getinfo['theuserid'], 'wcu_ml_affiliate_parents', true );
-        if ( !empty( $get_parents ) && is_array( $get_parents ) ) {
-            echo "<p><strong>MLA Commission:</strong>";
-            foreach ( $get_parents as $key => $parent_id ) {
-                $parent_user_info = get_user_by( 'ID', $parent_id );
-                $parent_user_name = $parent_user_info->user_login;
-                $parent_user_id = $parent_user_info->ID;
-                $coupon_info = wcusage_get_coupon_info( $coupon_code );
-                $coupon_id = $coupon_info[2];
-                $parent_commission = wcusage_mla_get_commission_from_tier(
-                    $getinfo['thecommissionnum'],
-                    $key,
-                    1,
-                    $order_id,
-                    $coupon_code
-                );
-                echo "<br/>(" . esc_html( $key ) . ") <a href='" . esc_url( admin_url( "admin.php?page=wcusage_view_affiliate&user_id=" . $parent_user_id ) ) . "' target='_blank' style='color: #07bbe3;'>" . esc_html( $parent_user_name ) . "</a>: " . wp_kses_post( wcusage_format_price( esc_html( $parent_commission ) ) );
+    if ( wcu_fs()->can_use_premium_code() ) {
+        $wcusage_field_mla_enable = wcusage_get_setting_value( 'wcusage_field_mla_enable', '0' );
+        if ( $wcusage_field_mla_enable && !wcusage_coupon_disable_commission( $coupon_id ) ) {
+            $get_parents = get_user_meta( $getinfo['theuserid'], 'wcu_ml_affiliate_parents', true );
+            if ( !empty( $get_parents ) && is_array( $get_parents ) ) {
+                // Try to read stored MLA commission from order meta (persisted at order time)
+                $order_obj = wc_get_order( $order_id );
+                $stored_mla_raw = ( $order_obj ? $order_obj->get_meta( 'wcu_mla_commission', true ) : '' );
+                $stored_mla = ( is_string( $stored_mla_raw ) ? json_decode( $stored_mla_raw, true ) : $stored_mla_raw );
+                $needs_mla_meta_save = false;
+                echo "<p><strong>MLA Commission:</strong>";
+                foreach ( $get_parents as $key => $parent_id ) {
+                    $parent_user_info = get_user_by( 'ID', $parent_id );
+                    $parent_user_name = ( $parent_user_info ? $parent_user_info->user_login : '#' . $parent_id );
+                    $parent_user_id = ( $parent_user_info ? $parent_user_info->ID : $parent_id );
+                    // Use stored commission if available, otherwise recalculate and flag for saving
+                    if ( is_array( $stored_mla ) && isset( $stored_mla[$key]['commission'] ) ) {
+                        $parent_commission = (float) $stored_mla[$key]['commission'];
+                    } else {
+                        $coupon_info = wcusage_get_coupon_info( $coupon_code );
+                        $coupon_id = $coupon_info[2];
+                        $parent_commission = wcusage_mla_get_commission_from_tier(
+                            $getinfo['thecommissionnum'],
+                            $key,
+                            1,
+                            $order_id,
+                            $coupon_code,
+                            0,
+                            $parent_user_id
+                        );
+                        // Collect recalculated data so we can persist it
+                        $tier_rates = ( function_exists( 'wcusage_mla_get_tier_rates' ) ? wcusage_mla_get_tier_rates( $key, $parent_user_id ) : array() );
+                        if ( !is_array( $stored_mla ) ) {
+                            $stored_mla = array();
+                        }
+                        $stored_mla[$key] = array(
+                            'parent_id'  => (int) $parent_user_id,
+                            'commission' => round( (float) $parent_commission, 2 ),
+                            'rates'      => $tier_rates,
+                        );
+                        $needs_mla_meta_save = true;
+                    }
+                    echo "<br/>(" . esc_html( $key ) . ") <a href='" . esc_url( admin_url( "admin.php?page=wcusage_view_affiliate&user_id=" . $parent_user_id ) ) . "' target='_blank' style='color: #07bbe3;'>" . esc_html( $parent_user_name ) . "</a>: " . wp_kses_post( wcusage_format_price( esc_html( $parent_commission ) ) );
+                }
+                echo "</p>";
+                // Persist recalculated MLA data for old orders so it won't recalculate again
+                if ( $needs_mla_meta_save && $order_obj && !empty( $stored_mla ) ) {
+                    $order_obj->update_meta_data( 'wcu_mla_commission', json_encode( $stored_mla ) );
+                    $order_obj->save_meta_data();
+                }
             }
-            echo "</p>";
         }
     }
 }

@@ -1,5 +1,4 @@
-<?php
-
+﻿<?php 
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
@@ -151,6 +150,32 @@ if ( isset( $_POST['add_new_coupon'] ) && isset( $_POST['add_coupon_nonce'] ) ) 
         }
     }
 }
+// Handle MLA per-user commission rates save
+$wcusage_field_mla_per_user_group_rates = wcusage_get_setting_value( 'wcusage_field_mla_per_user_group_rates', '0' );
+if ( $wcusage_field_mla_per_user_group_rates && isset( $_POST['wcusage_mla_user_rates_save'] ) && isset( $_POST['_wpnonce'] ) ) {
+    if ( wp_verify_nonce( $_POST['_wpnonce'], 'wcusage_save_mla_user_rates_' . $user_id ) ) {
+        // Save the enable toggle
+        $custom_enabled = ( isset( $_POST['wcu_mla_custom_rates_enabled'] ) ? '1' : '0' );
+        update_user_meta( $user_id, 'wcu_mla_custom_rates_enabled', $custom_enabled );
+        // Only save tier fields when enabled
+        $mla_tiersnumber = wcusage_get_setting_value( 'wcusage_field_mla_number_tiers', '5' );
+        for ($i = 1; $i <= $mla_tiersnumber; $i++) {
+            $tier_key = 'T' . $i;
+            $tier_fields = array('wcu_mla_tier_percent_' . $tier_key, 'wcu_mla_tier_order_percent_' . $tier_key, 'wcu_mla_tier_fixed_' . $tier_key);
+            foreach ( $tier_fields as $field ) {
+                if ( isset( $_POST[$field] ) ) {
+                    $value = sanitize_text_field( $_POST[$field] );
+                    if ( $value === '' || $value === null ) {
+                        delete_user_meta( $user_id, $field );
+                    } else {
+                        update_user_meta( $user_id, $field, $value );
+                    }
+                }
+            }
+        }
+        echo '<div class="notice notice-success"><p>' . esc_html__( 'MLA commission rates updated successfully.', 'woo-coupon-usage' ) . '</p></div>';
+    }
+}
 // Handle individual delete actions (same options as Coupon Affiliate Users page)
 if ( isset( $_POST['wcusage_delete_action'] ) && isset( $_POST['wcusage_user_id'] ) ) {
     $action = sanitize_text_field( $_POST['wcusage_delete_action'] );
@@ -212,8 +237,8 @@ if ( isset( $_POST['wcusage_delete_action'] ) && isset( $_POST['wcusage_user_id'
 $current_tab = ( isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'overview' );
 ?>
 
-    <!--- Font Awesome -->
-    <link rel="stylesheet" href="<?php 
+<!--- Font Awesome -->
+<link rel="stylesheet" href="<?php 
 echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
 ?>" crossorigin="anonymous">
 
@@ -266,15 +291,17 @@ wp_enqueue_script(
     true
 );
 wp_localize_script( 'wcusage-admin-view-affiliate', 'WCUAdminAffiliateView', array(
-    'ajax_url'        => admin_url( 'admin-ajax.php' ),
-    'user_id'         => $user_id,
-    'per_page'        => 20,
-    'coupon_nonce'    => wp_create_nonce( 'wcusage_coupon_nonce' ),
-    'currency_symbol' => get_woocommerce_currency_symbol(),
-    'nonce_referrals' => wp_create_nonce( 'wcusage_affiliate_referrals' ),
-    'nonce_visits'    => wp_create_nonce( 'wcusage_affiliate_visits' ),
-    'nonce_payouts'   => wp_create_nonce( 'wcusage_affiliate_payouts' ),
-    'nonce_activity'  => wp_create_nonce( 'wcusage_affiliate_activity' ),
+    'ajax_url'                   => admin_url( 'admin-ajax.php' ),
+    'user_id'                    => $user_id,
+    'per_page'                   => 20,
+    'coupon_nonce'               => wp_create_nonce( 'wcusage_coupon_nonce' ),
+    'currency_symbol'            => get_woocommerce_currency_symbol(),
+    'nonce_referrals'            => wp_create_nonce( 'wcusage_affiliate_referrals' ),
+    'nonce_visits'               => wp_create_nonce( 'wcusage_affiliate_visits' ),
+    'nonce_payouts'              => wp_create_nonce( 'wcusage_affiliate_payouts' ),
+    'nonce_activity'             => wp_create_nonce( 'wcusage_affiliate_activity' ),
+    'nonce_add_sub_affiliate'    => wp_create_nonce( 'wcusage_add_sub_affiliate_nonce' ),
+    'nonce_remove_sub_affiliate' => wp_create_nonce( 'wcusage_remove_sub_affiliate_nonce' ),
 ) );
 ?>
 
@@ -327,63 +354,68 @@ echo esc_url( home_url( '/' . $portal_slug . '/?userid=' . $user_id . '&preview_
             class="page-title-action wcusage-preview-button button-primary"
             style="margin-left: 15px; font-size: 12px; padding: 5px 10px;" target="_blank">
                 <?php 
-echo esc_html__( 'View affiliate dashboard as user', 'woo-coupon-usage' );
+echo esc_html__( 'View affiliate dashboard', 'woo-coupon-usage' );
 ?>
-                <i class="fas fa-external-link-alt" style="margin-left: 5px; font-size: 12px;"></i>
+                <i class="fas fa-external-link-alt" style="margin-left: 5px; font-size: 12px; height: 12px; margin-top: 5px;"></i>
             </a>
-        </h1>
-
-    <a href="<?php 
-echo esc_url( admin_url( 'admin.php?page=wcusage_affiliates' ) );
-?>" class="page-title-action wcusage-back-button"
-    style="float: right;">
-            <i class="fas fa-arrow-left" style="margin-right: 5px;"></i>
             <?php 
-echo esc_html__( 'Back to Affiliates', 'woo-coupon-usage' );
+$wcusage_tracking_enable = wcusage_get_setting_value( 'wcusage_field_tracking_enable', '0' );
 ?>
-        </a>
+            <?php 
+?>
+        </h1>
 
         <?php 
 // Delete dropdown actions for this affiliate (4 options)
 $delete_nonce = wp_create_nonce( 'wcusage_delete_user_' . $user_id );
 ?>
-        <div class="wcusage-delete-dropdown" style="">
-            <button type="button" class="wcusage-delete-btn" data-user-id="<?php 
+        <div class="wcusage-view-affiliate-header-actions" style="float: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+            <a href="<?php 
+echo esc_url( admin_url( 'admin.php?page=wcusage_affiliates' ) );
+?>" class="page-title-action wcusage-back-button">
+                <i class="fas fa-arrow-left" style="margin-right: 5px;"></i>
+                <?php 
+echo esc_html__( 'Back to Affiliates', 'woo-coupon-usage' );
+?>
+            </a>
+            <div class="wcusage-delete-dropdown" style="margin-top: 5px;">
+                <button type="button" class="wcusage-delete-btn" data-user-id="<?php 
 echo esc_attr( $user_id );
 ?>" title="<?php 
 echo esc_attr__( 'Delete Options', 'woo-coupon-usage' );
 ?>">
-                <span class="dashicons dashicons-trash"></span>
-            </button>
-            <div class="wcusage-delete-menu" style="display: none;">
-                <a href="#" class="wcusage-delete-option" data-action="delete_user" data-user-id="<?php 
+                    <span class="dashicons dashicons-trash"></span>
+                </button>
+                <div class="wcusage-delete-menu" style="display: none;">
+                    <a href="#" class="wcusage-delete-option" data-action="delete_user" data-user-id="<?php 
 echo esc_attr( $user_id );
 ?>" data-nonce="<?php 
 echo esc_attr( $delete_nonce );
 ?>"><?php 
 echo esc_html__( 'Delete User', 'woo-coupon-usage' );
 ?></a>
-                <a href="#" class="wcusage-delete-option" data-action="delete_user_coupons" data-user-id="<?php 
+                    <a href="#" class="wcusage-delete-option" data-action="delete_user_coupons" data-user-id="<?php 
 echo esc_attr( $user_id );
 ?>" data-nonce="<?php 
 echo esc_attr( $delete_nonce );
 ?>"><?php 
 echo esc_html__( 'Delete User & Coupons', 'woo-coupon-usage' );
 ?></a>
-                <a href="#" class="wcusage-delete-option" data-action="unassign_coupons" data-user-id="<?php 
+                    <a href="#" class="wcusage-delete-option" data-action="unassign_coupons" data-user-id="<?php 
 echo esc_attr( $user_id );
 ?>" data-nonce="<?php 
 echo esc_attr( $delete_nonce );
 ?>"><?php 
 echo esc_html__( 'Unassign Coupons', 'woo-coupon-usage' );
 ?></a>
-                <a href="#" class="wcusage-delete-option" data-action="delete_coupons" data-user-id="<?php 
+                    <a href="#" class="wcusage-delete-option" data-action="delete_coupons" data-user-id="<?php 
 echo esc_attr( $user_id );
 ?>" data-nonce="<?php 
 echo esc_attr( $delete_nonce );
 ?>"><?php 
 echo esc_html__( 'Delete Coupons', 'woo-coupon-usage' );
 ?></a>
+                </div>
             </div>
         </div>
 
@@ -406,7 +438,7 @@ echo ( $current_tab === 'referrals' ? 'nav-tab-active' : '' );
 ?>">
                         <i class="fas fa-shopping-cart" style="margin-right: 8px;"></i>
                         <?php 
-echo esc_html__( 'Referrals', 'woo-coupon-usage' );
+echo esc_html__( 'Referred Orders', 'woo-coupon-usage' );
 ?>
                     </a>
                     <a href="#tab-visits" class="nav-tab <?php 
@@ -476,7 +508,7 @@ echo ( $current_tab === 'referrals' ? 'active' : '' );
                         <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
                             <i class="fas fa-shopping-cart" style="color: #007cba; margin-right: 10px;"></i>
                             <?php 
-echo esc_html__( 'Latest Referrals', 'woo-coupon-usage' );
+echo esc_html__( 'Referred Orders', 'woo-coupon-usage' );
 ?>
                         </h3>
                         <div class="wcusage-filters" id="wcusage-referrals-filters" style="margin: 0 0 15px; display:flex; gap:8px; align-items: center;">
@@ -550,44 +582,50 @@ wcusage_display_affiliate_visits(
                     </div>
 
                     <!-- Payouts Tab -->
+                    <?php 
+if ( $wcusage_tracking_enable ) {
+    ?>
                     <div id="tab-payouts" class="tab-content <?php 
-echo ( $current_tab === 'payouts' ? 'active' : '' );
-?>">
+    echo ( $current_tab === 'payouts' ? 'active' : '' );
+    ?>">
                         <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
                             <i class="fas fa-dollar-sign" style="color: #007cba; margin-right: 10px;"></i>
                             <?php 
-echo esc_html__( 'Payout History', 'woo-coupon-usage' );
-?>
+    echo esc_html__( 'Payout History', 'woo-coupon-usage' );
+    ?>
                         </h3>
                         <div class="wcusage-filters" id="wcusage-payouts-filters" style="margin: 0 0 15px; display:flex; gap:8px; align-items: center;">
                             <label>
                                 <?php 
-echo esc_html__( 'From', 'woo-coupon-usage' );
-?>
+    echo esc_html__( 'From', 'woo-coupon-usage' );
+    ?>
                                 <input type="date" id="payouts-start-date" />
                             </label>
                             <label>
                                 <?php 
-echo esc_html__( 'To', 'woo-coupon-usage' );
-?>
+    echo esc_html__( 'To', 'woo-coupon-usage' );
+    ?>
                                 <input type="date" id="payouts-end-date" />
                             </label>
                             <button class="button" id="payouts-apply-filters"><?php 
-echo esc_html__( 'Filter', 'woo-coupon-usage' );
-?></button>
+    echo esc_html__( 'Filter', 'woo-coupon-usage' );
+    ?></button>
                         </div>
                         <div id="wcusage-payouts-table-container">
                             <?php 
-wcusage_display_affiliate_payouts(
-    $user_id,
-    1,
-    20,
-    '',
-    ''
-);
-?>
+    wcusage_display_affiliate_payouts(
+        $user_id,
+        1,
+        20,
+        '',
+        ''
+    );
+    ?>
                         </div>
                     </div>
+                    <?php 
+}
+?>
 
                     <!-- Activity Tab -->
                     <div id="tab-activity" class="tab-content <?php 
@@ -632,42 +670,387 @@ if ( function_exists( 'wcusage_affiliate_activity_table' ) ) {
                     </div>
 
                     <?php 
-if ( $wcusage_field_mla_enable && $wcusage_premium_active && function_exists( 'wcusage_get_ml_sub_affiliates' ) && function_exists( 'wcusage_get_network_chart_item' ) ) {
+if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable && function_exists( 'wcusage_get_ml_sub_affiliates' ) && function_exists( 'wcusage_get_network_chart_item' ) ) {
     ?>
                     <!-- MLA Tab -->
                     <div id="tab-mla" class="tab-content <?php 
     echo ( $current_tab === 'mla' ? 'active' : '' );
     ?>">
-                        <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
-                            <i class="fa-solid fa-network-wired" style="color: #007cba; margin-right: 10px;"></i>
+
+                        <?php 
+    // Get MLA data
+    $mla_sub_affiliates = wcusage_get_ml_sub_affiliates( $user_id );
+    $mla_total_commission = 0;
+    if ( function_exists( 'wcusage_mla_total_earnings' ) ) {
+        $mla_total_commission = wcusage_mla_total_earnings( $user_id );
+    }
+    $mla_unpaid = (float) get_user_meta( $user_id, 'wcu_ml_unpaid_commission', true );
+    // Get parent affiliates
+    $mla_get_parents = get_user_meta( $user_id, 'wcu_ml_affiliate_parents', true );
+    if ( !is_array( $mla_get_parents ) ) {
+        $mla_get_parents = array();
+    }
+    // Determine active MLA sub-tab
+    $mla_subtab = ( isset( $_GET['mla_subtab'] ) ? sanitize_text_field( $_GET['mla_subtab'] ) : 'mla-overview' );
+    ?>
+
+                        <!-- MLA Sub-tabs -->
+                        <h3 class="nav-tab-wrapper wcusage-mla-subtabs">
+                            <a href="#mla-subtab-overview" class="nav-tab <?php 
+    echo ( $mla_subtab === 'mla-overview' ? 'nav-tab-active' : '' );
+    ?>" data-mla-subtab="mla-overview">
+                                <i class="fas fa-chart-line" style="margin-right: 6px;"></i>
+                                <?php 
+    echo esc_html__( 'Overview', 'woo-coupon-usage' );
+    ?>
+                            </a>
+                            <a href="#mla-subtab-network" class="nav-tab <?php 
+    echo ( $mla_subtab === 'mla-network' ? 'nav-tab-active' : '' );
+    ?>" data-mla-subtab="mla-network">
+                                <i class="fa-solid fa-network-wired" style="margin-right: 6px;"></i>
+                                <?php 
+    echo esc_html__( 'Network Tree', 'woo-coupon-usage' );
+    ?>
+                            </a>
+                            <a href="#mla-subtab-tiers" class="nav-tab <?php 
+    echo ( $mla_subtab === 'mla-tiers' ? 'nav-tab-active' : '' );
+    ?>" data-mla-subtab="mla-tiers">
+                                <i class="fas fa-layer-group" style="margin-right: 6px;"></i>
+                                <?php 
+    echo esc_html__( 'Tiers', 'woo-coupon-usage' );
+    ?>
+                            </a>
                             <?php 
-    echo esc_html__( 'MLA Network', 'woo-coupon-usage' );
+    $wcusage_field_mla_per_user_group_rates_tab = wcusage_get_setting_value( 'wcusage_field_mla_per_user_group_rates', '0' );
+    if ( $wcusage_field_mla_per_user_group_rates_tab ) {
+        ?>
+                            <a href="#mla-subtab-rates" class="nav-tab <?php 
+        echo ( $mla_subtab === 'mla-rates' ? 'nav-tab-active' : '' );
+        ?>" data-mla-subtab="mla-rates">
+                                <i class="fas fa-sliders-h" style="margin-right: 6px;"></i>
+                                <?php 
+        echo esc_html__( 'Commission Rates', 'woo-coupon-usage' );
+        ?>
+                            </a>
+                            <?php 
+    }
     ?>
                         </h3>
-                        <?php 
-    // Build network for this affiliate similar to MLA dashboard
-    $sub_affiliates = wcusage_get_ml_sub_affiliates( $user_id );
-    if ( empty( $sub_affiliates ) ) {
-        echo '<p>' . esc_html__( "This affiliate doesn't currently have any sub-affiliates.", 'woo-coupon-usage' ) . '</p>';
+
+                        <!-- MLA Sub-tab Content -->
+                        <div class="wcusage-mla-subtab-content">
+
+                            <!-- MLA Overview Sub-tab -->
+                            <div id="mla-subtab-overview" class="mla-subtab-panel <?php 
+    echo ( $mla_subtab === 'mla-overview' ? 'active' : '' );
+    ?>">
+                                <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
+                                    <i class="fas fa-chart-line" style="color: #007cba; margin-right: 10px;"></i>
+                                    <?php 
+    echo esc_html__( 'MLA Statistics Overview', 'woo-coupon-usage' );
+    ?>
+                                </h3>
+
+                                <div class="wcusage-stats-grid">
+                                    <div class="wcusage-stat-box">
+                                        <div class="stat-value"><?php 
+    echo esc_html( count( $mla_sub_affiliates ) );
+    ?></div>
+                                        <div class="stat-label"><?php 
+    echo esc_html__( 'Sub-Affiliates', 'woo-coupon-usage' );
+    ?></div>
+                                    </div>
+                                    <div class="wcusage-stat-box">
+                                        <div class="stat-value"><?php 
+    echo wcusage_format_price( $mla_total_commission );
+    ?></div>
+                                        <div class="stat-label"><?php 
+    echo esc_html__( 'Total MLA Commission', 'woo-coupon-usage' );
+    ?></div>
+                                    </div>
+                                    <div class="wcusage-stat-box">
+                                        <div class="stat-value"><?php 
+    echo wcusage_format_price( $mla_unpaid );
+    ?></div>
+                                        <div class="stat-label"><?php 
+    echo esc_html__( 'Unpaid MLA Commission', 'woo-coupon-usage' );
+    ?></div>
+                                    </div>
+                                </div>
+
+                                <!-- Sub-Affiliates List -->
+                                <div class="wcusage-mla-section-header">
+                                    <h3><?php 
+    echo esc_html__( 'Sub-Affiliates', 'woo-coupon-usage' );
+    ?></h3>
+                                    <button type="button" id="wcusage-add-sub-affiliate-toggle" class="button">
+                                        <span class="dashicons dashicons-plus-alt2" style="vertical-align: middle; margin-right: 4px;"></span>
+                                        <?php 
+    echo esc_html__( 'Add New Sub-Affiliate', 'woo-coupon-usage' );
+    ?>
+                                    </button>
+                                </div>
+
+                                <!-- Add Sub-Affiliate Form (hidden by default) -->
+                                <div id="wcusage-add-sub-affiliate-form" class="wcusage-add-sub-affiliate-form" style="display:none;">
+                                    <p class="wcusage-add-sub-affiliate-desc">
+                                        <?php 
+    echo esc_html__( 'Search for an existing user who does not already have a parent affiliate. Select them and click Add.', 'woo-coupon-usage' );
+    ?>
+                                    </p>
+                                    <div class="wcusage-add-sub-affiliate-row">
+                                        <input
+                                            type="text"
+                                            id="wcusage-sub-affiliate-search"
+                                            class="regular-text"
+                                            placeholder="<?php 
+    echo esc_attr__( 'Search by username or email…', 'woo-coupon-usage' );
+    ?>"
+                                            autocomplete="off"
+                                        />
+                                        <input type="hidden" id="wcusage-sub-affiliate-id" value="" />
+                                        <button type="button" id="wcusage-add-sub-affiliate-submit" class="button button-primary" disabled>
+                                            <?php 
+    echo esc_html__( 'Add Sub-Affiliate', 'woo-coupon-usage' );
+    ?>
+                                        </button>
+                                        <span class="spinner wcusage-add-sub-spinner"></span>
+                                    </div>
+                                    <p id="wcusage-add-sub-affiliate-msg" class="wcusage-add-sub-msg" style="display:none;"></p>
+                                    <input type="hidden" id="wcusage-parent-affiliate-id" value="<?php 
+    echo esc_attr( $user_id );
+    ?>" />
+                                </div>
+
+                                <?php 
+    // Build a lookup: user_id => WP_User object + pre-fetched meta
+    $mla_sub_map = array();
+    // id => ['user' => obj, 'parents' => array, 'tier_num' => int]
+    foreach ( $mla_sub_affiliates as $sub_user ) {
+        $sub_parents = get_user_meta( $sub_user->ID, 'wcu_ml_affiliate_parents', true );
+        if ( !is_array( $sub_parents ) ) {
+            $sub_parents = array();
+        }
+        // tier_num relative to the viewed affiliate
+        $t_key = array_search( (string) $user_id, array_map( 'strval', $sub_parents ) );
+        $t_num = ( $t_key !== false ? (int) str_replace( 'T', '', $t_key ) : 0 );
+        $mla_sub_map[$sub_user->ID] = array(
+            'user'          => $sub_user,
+            'parents'       => $sub_parents,
+            'tier_num'      => $t_num,
+            'direct_parent' => ( isset( $sub_parents['T1'] ) ? (int) $sub_parents['T1'] : 0 ),
+        );
+    }
+    // Build children map: parent_id => [child_id, ...]
+    $mla_children_map = array();
+    foreach ( $mla_sub_map as $sid => $sdata ) {
+        $pid = $sdata['direct_parent'];
+        $mla_children_map[$pid][] = $sid;
+    }
+    // Recursive row renderer
+    function wcusage_render_mla_sub_rows(
+        $parent_id,
+        $mla_sub_map,
+        $mla_children_map,
+        $root_user_id,
+        $depth = 0
+    ) {
+        if ( empty( $mla_children_map[$parent_id] ) ) {
+            return;
+        }
+        foreach ( $mla_children_map[$parent_id] as $sid ) {
+            $sdata = $mla_sub_map[$sid];
+            $sub_user = $sdata['user'];
+            $sub_user_info = get_userdata( $sid );
+            $sub_parents = $sdata['parents'];
+            $t_num = $sdata['tier_num'];
+            // tier key relative to root_user_id
+            $sub_tier_key = array_search( (string) $root_user_id, array_map( 'strval', $sub_parents ) );
+            // Coupons & commission
+            $sub_coupons = wcusage_get_users_coupons_ids( $sid );
+            $sub_coupon_names = array();
+            $sub_commission = 0;
+            foreach ( $sub_coupons as $sub_coupon_id ) {
+                $sub_coupon_names[] = get_the_title( $sub_coupon_id );
+                if ( function_exists( 'wcusage_mla_get_total_commission_earned_tier' ) && $sub_tier_key !== false ) {
+                    $sub_commission += wcusage_mla_get_total_commission_earned_tier( $sub_coupon_id, $sub_tier_key );
+                }
+            }
+            $tier_colors = array(
+                1 => '#2271b1',
+                2 => '#6f42c1',
+                3 => '#0f7a6b',
+                4 => '#d63638',
+                5 => '#e87c0c',
+            );
+            $badge_color = ( isset( $tier_colors[$t_num] ) ? $tier_colors[$t_num] : '#50575e' );
+            $indent_px = $depth * 28;
+            ?>
+                                        <tr class="wcusage-mla-tree-row">
+                                            <td>
+                                                <div class="wcusage-mla-user-cell" style="padding-left:<?php 
+            echo esc_attr( $indent_px );
+            ?>px;">
+                                                    <?php 
+            if ( $depth > 0 ) {
+                ?>
+                                                        <span class="wcusage-mla-indent-connector"></span>
+                                                    <?php 
+            }
+            ?>
+                                                    <?php 
+            echo get_avatar(
+                $sid,
+                28,
+                'identicon',
+                '',
+                array(
+                    'style' => 'border-radius:50%;vertical-align:middle;margin-right:10px;flex-shrink:0;',
+                )
+            );
+            ?>
+                                                    <span class="wcusage-mla-user-info">
+                                                        <strong><?php 
+            echo esc_html( $sub_user_info->user_login );
+            ?></strong>
+                                                        <small><?php 
+            echo esc_html( $sub_user_info->user_email );
+            ?></small>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td style="text-align:center;">
+                                                <span class="wcusage-mla-tier-pill" style="background:<?php 
+            echo esc_attr( $badge_color );
+            ?>;"><?php 
+            echo esc_html( sprintf( __( 'T%s', 'woo-coupon-usage' ), $t_num ) );
+            ?></span>
+                                            </td>
+                                            <td><?php 
+            echo esc_html( implode( ', ', $sub_coupon_names ) );
+            ?></td>
+                                            <td><?php 
+            echo wcusage_format_price( $sub_commission );
+            ?></td>
+                                            <td>
+                                                <a href="<?php 
+            echo esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . $sid . '&tab=mla' ) );
+            ?>" class="button button-small"><?php 
+            echo esc_html__( 'View User', 'woo-coupon-usage' );
+            ?></a>
+                                                <?php 
+            if ( $sub_tier_key === 'T1' ) {
+                ?>
+                                                <button type="button"
+                                                    class="button button-small wcusage-remove-sub-affiliate"
+                                                    data-sub-id="<?php 
+                echo esc_attr( $sid );
+                ?>"
+                                                    data-sub-name="<?php 
+                echo esc_attr( $sub_user_info->user_login );
+                ?>"
+                                                    data-parent-id="<?php 
+                echo esc_attr( $root_user_id );
+                ?>"
+                                                ><?php 
+                echo esc_html__( 'Remove', 'woo-coupon-usage' );
+                ?></button>
+                                                <?php 
+            }
+            ?>
+                                            </td>
+                                        </tr>
+                                        <?php 
+            // Recurse into this sub's children
+            wcusage_render_mla_sub_rows(
+                $sid,
+                $mla_sub_map,
+                $mla_children_map,
+                $root_user_id,
+                $depth + 1
+            );
+        }
+    }
+
+    ?>
+                                <?php 
+    if ( empty( $mla_sub_affiliates ) ) {
+        ?>
+                                    <p><?php 
+        echo esc_html__( "This affiliate doesn't currently have any sub-affiliates.", 'woo-coupon-usage' );
+        ?></p>
+                                <?php 
     } else {
+        ?>
+                                    <table class="wp-list-table widefat fixed wcusage-mla-tiered-table">
+                                        <thead>
+                                            <tr>
+                                                <th><?php 
+        echo esc_html__( 'User', 'woo-coupon-usage' );
+        ?></th>
+                                                <th style="width:60px;text-align:center;"><?php 
+        echo esc_html__( 'Tier', 'woo-coupon-usage' );
+        ?></th>
+                                                <th style="width:120px;"><?php 
+        echo esc_html__( 'Coupons', 'woo-coupon-usage' );
+        ?></th>
+                                                <th style="width:160px;"><?php 
+        echo esc_html__( 'Earned', 'woo-coupon-usage' );
+        ?></th>
+                                                <th style="width:220px;"><?php 
+        echo esc_html__( 'Actions', 'woo-coupon-usage' );
+        ?></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php 
+        wcusage_render_mla_sub_rows(
+            $user_id,
+            $mla_sub_map,
+            $mla_children_map,
+            $user_id,
+            0
+        );
+        ?>
+                                        </tbody>
+                                    </table>
+                                <?php 
+    }
+    ?>
+                            </div>
+
+                            <!-- MLA Network Tree Sub-tab -->
+                            <div id="mla-subtab-network" class="mla-subtab-panel <?php 
+    echo ( $mla_subtab === 'mla-network' ? 'active' : '' );
+    ?>">
+                                <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
+                                    <i class="fa-solid fa-network-wired" style="color: #007cba; margin-right: 10px;"></i>
+                                    <?php 
+    echo esc_html__( 'MLA Network Tree', 'woo-coupon-usage' );
+    ?>
+                                </h3>
+                                <?php 
+    if ( empty( $mla_sub_affiliates ) ) {
+        echo '<p>' . esc_html__( "This affiliate doesn't currently have any sub-affiliates in their MLA network.", 'woo-coupon-usage' ) . '</p>';
+    } elseif ( function_exists( 'wcusage_get_network_chart_item' ) ) {
         $network_array = '';
         // Root node (self)
         $network_array .= wcusage_get_network_chart_item( $user_id, $user_id, $user_id );
         $coupon_ids = array();
-        foreach ( $sub_affiliates as $user ) {
-            $this_user_id = $user->ID;
-            $get_parents = get_user_meta( $this_user_id, 'wcu_ml_affiliate_parents', true );
-            if ( !$get_parents ) {
-                $get_parents = array();
+        foreach ( $mla_sub_affiliates as $mla_user ) {
+            $this_user_id = $mla_user->ID;
+            $mla_parents = get_user_meta( $this_user_id, 'wcu_ml_affiliate_parents', true );
+            if ( !$mla_parents ) {
+                $mla_parents = array();
             }
             $this_users_coupons = wcusage_get_users_coupons_ids( $this_user_id );
             foreach ( $this_users_coupons as $this_users_coupon_id ) {
                 $coupon_ids[] = $this_users_coupon_id;
             }
-            $super_affiliate = ( empty( $get_parents ) ? 1 : 0 );
-            if ( !empty( $this_users_coupons ) && is_array( $get_parents ) ) {
-                $get_parents = array_reverse( $get_parents );
-                $x = end( $get_parents );
+            $super_affiliate = ( empty( $mla_parents ) ? 1 : 0 );
+            if ( !empty( $this_users_coupons ) && is_array( $mla_parents ) ) {
+                $mla_parents = array_reverse( $mla_parents );
+                $x = end( $mla_parents );
                 // Link to top-most parent
                 if ( !$super_affiliate ) {
                     $network_array .= wcusage_get_network_chart_item( $this_user_id, $x, $user_id );
@@ -676,81 +1059,289 @@ if ( $wcusage_field_mla_enable && $wcusage_premium_active && function_exists( 'w
         }
         $network_array = rtrim( $network_array, ',' );
         $wcusage_color_tab = wcusage_get_setting_value( 'wcusage_field_color_tab', '#333' );
+        // Merge network data into existing WCUAdminAffiliateView object without overwriting other keys
+        wp_add_inline_script( 'wcusage-admin-view-affiliate', 'if(window.WCUAdminAffiliateView){WCUAdminAffiliateView.mla_network_array=' . wp_json_encode( $network_array ) . ';}', 'after' );
         $mla_network_text = wcusage_get_setting_value( 'wcusage_field_mla_network_text', '' );
         if ( $mla_network_text ) {
             echo '<p>' . wp_kses_post( $mla_network_text ) . '</p><br/>';
         }
         ?>
-                            <style>
-                                #mla_chart_div .google-visualization-orgchart-linebottom { border-bottom: 2px solid <?php 
-        echo esc_attr( $wcusage_color_tab );
-        ?> !important; }
-                                #mla_chart_div .google-visualization-orgchart-lineleft { border-left: 2px solid <?php 
-        echo esc_attr( $wcusage_color_tab );
-        ?> !important; }
-                                #mla_chart_div .google-visualization-orgchart-lineright { border-right: 2px solid <?php 
-        echo esc_attr( $wcusage_color_tab );
-        ?> !important; }
-                                #mla_chart_div .google-visualization-orgchart-linetop { border-top: 2px solid <?php 
-        echo esc_attr( $wcusage_color_tab );
-        ?> !important; }
-                                /* Remove blue faded background on org chart nodes */
-                                #mla_chart_div .google-visualization-orgchart-node,
-                                #mla_chart_div .google-visualization-orgchart-node > div {
-                                    background: transparent !important;
-                                    box-shadow: none !important;
-                                    -webkit-box-shadow: none !important;
-                                }
-                                #mla_chart_div .google-visualization-orgchart-node { border: 1px solid #dddddd !important; }
-                                #mla_chart_div { overflow: auto; white-space: nowrap; padding-bottom: 8px; }
-                            </style>
-                            <div id="mla_chart_div"></div>
-                            <script type="text/javascript">
-                                (function(){
-                                    var drawn = false;
-                                    window.WCU_MLA_draw = function(){
-                                        if (drawn) return; // draw only once per load
-                                        function _draw(){
-                                            try{
-                                                var data = new google.visualization.DataTable();
-                                                data.addColumn('string', 'Name');
-                                                data.addColumn('string', 'Manager');
-                                                data.addColumn('string', 'ToolTip');
-                                                data.addRows([ <?php 
-        echo $network_array;
-        ?> ]);
-                                                var chart = new google.visualization.OrgChart(document.getElementById('mla_chart_div'));
-                                                chart.draw(data, {allowHtml:true});
-                                                drawn = true;
-                                            }catch(e){ /* ignore until ready */ }
-                                        }
-                                        if (window.google && window.google.charts) {
-                                            if (google.visualization && google.visualization.OrgChart) {
-                                                _draw();
-                                            } else {
-                                                google.charts.load('current', {packages:["orgchart"]});
-                                                google.charts.setOnLoadCallback(_draw);
-                                            }
-                                        }
-                                    };
-                                })();
-
-                                // Enable click-drag horizontal scroll on the chart area
-                                jQuery(function(){
-                                    var slider = document.querySelector('#mla_chart_div');
-                                    if (!slider) return;
-                                    var mouseDown = false, startX = 0, scrollLeft = 0;
-                                    function startDragging(e){ mouseDown = true; startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; }
-                                    function stopDragging(){ mouseDown = false; }
-                                    slider.addEventListener('mousemove', function(e){ if(!mouseDown) return; e.preventDefault(); var x = e.pageX - slider.offsetLeft; var scroll = x - startX; slider.scrollLeft = scrollLeft - scroll; });
-                                    slider.addEventListener('mousedown', startDragging, false);
-                                    slider.addEventListener('mouseup', stopDragging, false);
-                                    slider.addEventListener('mouseleave', stopDragging, false);
-                                });
-                            </script>
-                            <?php 
+                                    <div id="mla_chart_div"></div>
+                                    <?php 
+    } else {
+        echo '<p>' . esc_html__( 'MLA network chart functions are not available.', 'woo-coupon-usage' ) . '</p>';
     }
     ?>
+                            </div>
+
+                            <!-- MLA Tiers Sub-tab -->
+                            <div id="mla-subtab-tiers" class="mla-subtab-panel <?php 
+    echo ( $mla_subtab === 'mla-tiers' ? 'active' : '' );
+    ?>">
+                                <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
+                                    <i class="fas fa-layer-group" style="color: #007cba; margin-right: 10px;"></i>
+                                    <?php 
+    echo esc_html__( 'Commission Per Tier', 'woo-coupon-usage' );
+    ?>
+                                </h3>
+
+                                <?php 
+    $tiersnumber = wcusage_get_setting_value( 'wcusage_field_mla_number_tiers', '5' );
+    ?>
+                                <table class="wp-list-table widefat fixed striped">
+                                    <thead>
+                                        <tr>
+                                            <th><?php 
+    echo esc_html__( 'Tier', 'woo-coupon-usage' );
+    ?></th>
+                                            <th><?php 
+    echo esc_html__( 'Sub-Affiliates', 'woo-coupon-usage' );
+    ?></th>
+                                            <th><?php 
+    echo esc_html__( 'Earned', 'woo-coupon-usage' );
+    ?></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php 
+    for ($i = 1; $i <= $tiersnumber; $i++) {
+        $tier_key = 'T' . $i;
+        // Count sub-affiliates in this tier
+        $tier_count = 0;
+        $tier_commission = 0;
+        foreach ( $mla_sub_affiliates as $sub ) {
+            $sub_parents = get_user_meta( $sub->ID, 'wcu_ml_affiliate_parents', true );
+            if ( is_array( $sub_parents ) ) {
+                $sub_tier = array_search( $user_id, $sub_parents );
+                if ( $sub_tier === $tier_key ) {
+                    $tier_count++;
+                    // Calculate commission from this sub-affiliate's coupons for this tier
+                    $sub_coupons = wcusage_get_users_coupons_ids( $sub->ID );
+                    foreach ( $sub_coupons as $sub_coupon_id ) {
+                        if ( function_exists( 'wcusage_mla_get_total_commission_earned_tier' ) ) {
+                            $tier_commission += wcusage_mla_get_total_commission_earned_tier( $sub_coupon_id, $tier_key );
+                        }
+                    }
+                }
+            }
+        }
+        ?>
+                                            <tr>
+                                                <td><strong><?php 
+        echo esc_html( sprintf( __( 'Tier %d', 'woo-coupon-usage' ), $i ) );
+        ?></strong></td>
+                                                <td><?php 
+        echo esc_html( $tier_count );
+        ?></td>
+                                                <td><?php 
+        echo wcusage_format_price( $tier_commission );
+        ?></td>
+                                            </tr>
+                                        <?php 
+    }
+    ?>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- MLA Commission Rates Sub-tab -->
+                            <?php 
+    if ( wcusage_get_setting_value( 'wcusage_field_mla_per_user_group_rates', '0' ) ) {
+        ?>
+                            <div id="mla-subtab-rates" class="mla-subtab-panel <?php 
+        echo ( $mla_subtab === 'mla-rates' ? 'active' : '' );
+        ?>">
+                                <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
+                                    <i class="fas fa-sliders-h" style="color: #007cba; margin-right: 10px;"></i>
+                                    <?php 
+        echo esc_html__( 'Per-User MLA Commission Rates', 'woo-coupon-usage' );
+        ?>
+                                </h3>
+
+                                <p style="background: #f0f6fc; border-left: 4px solid #72aee6; padding: 10px 14px; margin: 0 0 20px 0;">
+                                    <strong><?php 
+        echo esc_html__( 'Rate Override Priority:', 'woo-coupon-usage' );
+        ?></strong>
+                                    <?php 
+        echo esc_html__( 'Per User > Per Group > Global. Leave fields empty to use group or global rates.', 'woo-coupon-usage' );
+        ?>
+                                </p>
+
+                                <?php 
+        // Check if user has group rates
+        $user_data = get_userdata( $user_id );
+        $user_group_name = '';
+        if ( $user_data && !empty( $user_data->roles ) ) {
+            foreach ( $user_data->roles as $role ) {
+                if ( $role === 'coupon_affiliate' || strpos( $role, 'coupon_affiliate_' ) === 0 ) {
+                    global $wp_roles;
+                    $user_group_name = ( isset( $wp_roles->roles[$role]['name'] ) ? $wp_roles->roles[$role]['name'] : $role );
+                    break;
+                }
+            }
+        }
+        if ( $user_group_name ) {
+            echo '<p style="margin-bottom: 15px;"><span class="dashicons dashicons-groups" style="color: #646970;"></span> ';
+            echo sprintf( esc_html__( 'This user belongs to the group: %s', 'woo-coupon-usage' ), '<strong>' . esc_html( $user_group_name ) . '</strong>' );
+            echo '</p>';
+        }
+        $mla_tiersnumber = wcusage_get_setting_value( 'wcusage_field_mla_number_tiers', '5' );
+        $options_check = get_option( 'wcusage_options' );
+        ?>
+
+                                <form method="post" action="">
+                                    <?php 
+        wp_nonce_field( 'wcusage_save_mla_user_rates_' . $user_id );
+        ?>
+                                    <input type="hidden" name="wcusage_mla_user_rates_save" value="1" />
+
+                                    <?php 
+        $user_custom_rates_enabled = get_user_meta( $user_id, 'wcu_mla_custom_rates_enabled', true );
+        ?>
+                                    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 18px; font-weight: 600; font-size: 14px; cursor: pointer;">
+                                        <input type="checkbox" name="wcu_mla_custom_rates_enabled" id="wcu_mla_custom_rates_enabled_user" value="1" <?php 
+        checked( $user_custom_rates_enabled, '1' );
+        ?> style="width: 16px; height: 16px;" />
+                                        <?php 
+        echo esc_html__( 'Enable Custom MLA Commission Rates', 'woo-coupon-usage' );
+        ?>
+                                    </label>
+                                    <div id="wcu-mla-user-rates-table">
+                                    <table class="wp-list-table widefat fixed striped" style="max-width: 800px;">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 80px;"><?php 
+        echo esc_html__( 'Tier', 'woo-coupon-usage' );
+        ?></th>
+                                                <th><?php 
+        echo esc_html__( '% of Affiliate Earnings', 'woo-coupon-usage' );
+        ?></th>
+                                                <th><?php 
+        echo esc_html__( '% of Order Total', 'woo-coupon-usage' );
+        ?></th>
+                                                <th><?php 
+        echo sprintf( esc_html__( '%s Fixed Amount', 'woo-coupon-usage' ), ( function_exists( 'wcusage_get_currency_symbol' ) ? wcusage_get_currency_symbol() : '$' ) );
+        ?></th>
+                                                <th style="width: 120px;"><?php 
+        echo esc_html__( 'Source', 'woo-coupon-usage' );
+        ?></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        <?php 
+        for ($i = 1; $i <= $mla_tiersnumber; $i++) {
+            $tier_key = 'T' . $i;
+            $user_tier_percent = get_user_meta( $user_id, 'wcu_mla_tier_percent_' . $tier_key, true );
+            $user_tier_order_percent = get_user_meta( $user_id, 'wcu_mla_tier_order_percent_' . $tier_key, true );
+            $user_tier_fixed = get_user_meta( $user_id, 'wcu_mla_tier_fixed_' . $tier_key, true );
+            // Determine which source is active
+            $effective_rates = ( function_exists( 'wcusage_mla_get_tier_rates' ) ? wcusage_mla_get_tier_rates( $tier_key, $user_id ) : array(
+                'percent'       => 0,
+                'order_percent' => 0,
+                'fixed'         => 0,
+            ) );
+            // Determine Source label — must mirror wcusage_mla_get_tier_rates() priority logic
+            $source_label = '<span style="color: #646970;">' . esc_html__( 'Global', 'woo-coupon-usage' ) . '</span>';
+            // Check if group rates are active (priority 2)
+            if ( $user_data && !empty( $user_data->roles ) ) {
+                foreach ( $user_data->roles as $role ) {
+                    if ( $role === 'coupon_affiliate' || strpos( $role, 'coupon_affiliate_' ) === 0 ) {
+                        $gp = ( isset( $options_check['wcusage_field_mla_tier_percent_' . $tier_key . '_' . $role] ) ? $options_check['wcusage_field_mla_tier_percent_' . $tier_key . '_' . $role] : '' );
+                        $gop = ( isset( $options_check['wcusage_field_mla_tier_order_percent_' . $tier_key . '_' . $role] ) ? $options_check['wcusage_field_mla_tier_order_percent_' . $tier_key . '_' . $role] : '' );
+                        $gf = ( isset( $options_check['wcusage_field_mla_tier_fixed_' . $tier_key . '_' . $role] ) ? $options_check['wcusage_field_mla_tier_fixed_' . $tier_key . '_' . $role] : '' );
+                        $has_group_rates = $gp !== '' || $gop !== '' || $gf !== '';
+                        $group_flag_exists = isset( $options_check['wcusage_field_mla_custom_rates_enabled_' . $role] );
+                        $group_flag_enabled = $group_flag_exists && ($options_check['wcusage_field_mla_custom_rates_enabled_' . $role] === '1' || $options_check['wcusage_field_mla_custom_rates_enabled_' . $role] === 1);
+                        if ( $has_group_rates && (!$group_flag_exists || $group_flag_enabled) ) {
+                            $source_label = '<span style="color: #6f42c1; font-weight: 600;">' . esc_html__( 'Group', 'woo-coupon-usage' ) . '</span>';
+                            break;
+                        }
+                    }
+                }
+            }
+            // Check if user rates are active (priority 1 — overrides group)
+            $has_user_rate = $user_tier_percent !== '' || $user_tier_order_percent !== '' || $user_tier_fixed !== '';
+            if ( $has_user_rate ) {
+                $user_flag_exists = metadata_exists( 'user', $user_id, 'wcu_mla_custom_rates_enabled' );
+                $user_flag_val = get_user_meta( $user_id, 'wcu_mla_custom_rates_enabled', true );
+                $user_flag_enabled = $user_flag_val === '1' || $user_flag_val === 1 || $user_flag_val === true;
+                if ( !$user_flag_exists || $user_flag_enabled ) {
+                    $source_label = '<span style="color: #2271b1; font-weight: 600;">' . esc_html__( 'User', 'woo-coupon-usage' ) . '</span>';
+                }
+            }
+            ?>
+                                            <tr>
+                                                <td><strong><?php 
+            echo sprintf( esc_html__( 'Tier %d', 'woo-coupon-usage' ), $i );
+            ?></strong></td>
+                                                <td>
+                                                    <input type="number" step="0.1" name="wcu_mla_tier_percent_<?php 
+            echo esc_attr( $tier_key );
+            ?>" value="<?php 
+            echo esc_attr( $user_tier_percent );
+            ?>" class="small-text" placeholder="<?php 
+            echo esc_attr( $effective_rates['percent'] );
+            ?>" style="width: 80px;" />
+                                                </td>
+                                                <td>
+                                                    <input type="number" step="0.1" name="wcu_mla_tier_order_percent_<?php 
+            echo esc_attr( $tier_key );
+            ?>" value="<?php 
+            echo esc_attr( $user_tier_order_percent );
+            ?>" class="small-text" placeholder="<?php 
+            echo esc_attr( $effective_rates['order_percent'] );
+            ?>" style="width: 80px;" />
+                                                </td>
+                                                <td>
+                                                    <input type="number" step="0.01" name="wcu_mla_tier_fixed_<?php 
+            echo esc_attr( $tier_key );
+            ?>" value="<?php 
+            echo esc_attr( $user_tier_fixed );
+            ?>" class="small-text" placeholder="<?php 
+            echo esc_attr( $effective_rates['fixed'] );
+            ?>" style="width: 80px;" />
+                                                </td>
+                                                <td><?php 
+            echo wp_kses_post( $source_label );
+            ?></td>
+                                            </tr>
+                                        <?php 
+        }
+        ?>
+                                        </tbody>
+                                    </table>
+
+                                    <p style="margin-top: 10px; color: #646970; font-size: 12px;">
+                                        <span class="dashicons dashicons-info" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                                        <?php 
+        echo esc_html__( 'Placeholder values show the currently active rate from either group or global settings. Clear a field to revert to the inherited rate.', 'woo-coupon-usage' );
+        ?>
+                                    </p>
+                                    </div><!-- #wcu-mla-user-rates-table -->
+                                    <script>
+                                    (function(){
+                                        var cb = document.getElementById('wcu_mla_custom_rates_enabled_user');
+                                        var tbl = document.getElementById('wcu-mla-user-rates-table');
+                                        function toggle(){ tbl.style.display = cb.checked ? '' : 'none'; }
+                                        cb.addEventListener('change', toggle);
+                                        toggle();
+                                    })();
+                                    </script>
+
+                                    <p class="submit" style="margin-top: 15px;">
+                                        <input type="submit" class="button button-primary" value="<?php 
+        echo esc_attr__( 'Save Commission Rates', 'woo-coupon-usage' );
+        ?>" />
+                                    </p>
+                                </form>
+                            </div>
+                            <?php 
+    }
+    // end per-user/per-group rates check
+    ?>
+
+                        </div><!-- .wcusage-mla-subtab-content -->
+
                     </div>
                     <?php 
 }
@@ -1183,6 +1774,7 @@ function wcusage_display_affiliate_stats(  $user_id, $coupon_id = 'all'  ) {
         ?>
     <?php 
         $wcusage_field_payout_pending_enable = wcusage_get_setting_value( 'wcusage_field_payout_pending_enable', '1' );
+        $wcusage_tracking_enable = wcusage_get_setting_value( 'wcusage_field_tracking_enable', '0' );
         ?>
     <h3><?php 
         echo esc_html__( 'Affiliates Coupons', 'woo-coupon-usage' );
@@ -1641,8 +2233,32 @@ function wcusage_display_affiliate_referrals(
         echo wcusage_format_price( $commission );
         ?></td>
                     <td><?php 
-        echo esc_html( wc_get_order_status_name( $order->get_status() ) );
-        ?></td>
+        $order_status = $order->get_status();
+        $order_status_class = '';
+        switch ( $order_status ) {
+            case 'completed':
+                $order_status_class = 'status-completed';
+                break;
+            case 'processing':
+                $order_status_class = 'status-processing';
+                break;
+            case 'on-hold':
+                $order_status_class = 'status-on-hold';
+                break;
+            case 'cancelled':
+            case 'refunded':
+            case 'failed':
+                $order_status_class = 'status-cancelled';
+                break;
+            default:
+                $order_status_class = 'status-processing';
+                break;
+        }
+        ?><span class="order-status <?php 
+        echo esc_attr( $order_status_class );
+        ?>"><?php 
+        echo esc_html( wc_get_order_status_name( $order_status ) );
+        ?></span></td>
                 </tr>
             <?php 
     }
@@ -2036,7 +2652,8 @@ function wcusage_display_affiliate_payouts(
         }
         // Get coupon title
         $coupon_title = '';
-        if ( $payout->couponid ) {
+        $is_mla_payout = empty( $payout->couponid ) || intval( $payout->couponid ) === 0;
+        if ( !$is_mla_payout ) {
             $coupon_title = get_the_title( $payout->couponid );
         }
         // Build files column content similar to admin payouts list
@@ -2060,9 +2677,23 @@ function wcusage_display_affiliate_payouts(
                     <td><?php 
         echo esc_html( $payout->id );
         ?></td>
-                    <td><?php 
-        echo esc_html( $coupon_title );
-        ?></td>
+                    <td>
+                        <?php 
+        if ( $is_mla_payout ) {
+            ?>
+                            <span class="order-status" style="background:#e8d5f5;color:#5b2c8d;"><?php 
+            echo esc_html__( 'MLA', 'woo-coupon-usage' );
+            ?></span>
+                        <?php 
+        } else {
+            ?>
+                            <?php 
+            echo esc_html( $coupon_title );
+            ?>
+                        <?php 
+        }
+        ?>
+                    </td>
                     <td><?php 
         echo wcusage_format_price( $payout->amount );
         ?></td>

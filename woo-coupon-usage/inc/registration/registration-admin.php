@@ -453,6 +453,16 @@ function wcusage_admin_registrations_page_html() {
     ?></a>
     &#xb7;
     <a href="<?php 
+    echo esc_url( admin_url( 'admin.php?page=wcusage_registrations&status=parent_approved' ) );
+    ?>" style="<?php 
+    if ( $statussearch == 'parent_approved' ) {
+        ?>font-weight: bold;<?php 
+    }
+    ?>"><?php 
+    echo esc_html__( 'MLA Parent Approved', 'woo-coupon-usage' );
+    ?></a>
+    &#xb7;
+    <a href="<?php 
     echo esc_url( admin_url( 'admin.php?page=wcusage_registrations&status=declined' ) );
     ?>" style="<?php 
     if ( $statussearch == 'declined' ) {

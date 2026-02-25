@@ -61,6 +61,7 @@ if( !function_exists( 'wcusage_fix_defer_js' ) ) {
       if( $post_id == $dashboard_page
       || $post_id == $mla_dashboard_page
       || is_account_page()
+      || get_query_var( 'affiliate_portal' )
       || ( !is_admin() && isset($_SERVER['REQUEST_URI']) && strpos( $_SERVER['REQUEST_URI'], $wcusage_portal_slug ) !== false ) ) {
 
         // WP Rocket
@@ -83,40 +84,72 @@ if( !function_exists( 'wcusage_fix_defer_js' ) ) {
             return $exclude_keywords;
           });
         }
-        // WP Compress
-        if ( is_plugin_active( 'wp-compress-image-optimizer/wp-compress.php' ) ) {
-          // Disable JavaScript optimization
-          add_filter('wpc_js_exclude', function($exclude_list) {
-            if (!is_array($exclude_list)) {
-              $exclude_list = array();
-            }
-            $exclude_list[] = 'woo-coupon-usage';
-            $exclude_list[] = 'wcusage';
-            $exclude_list[] = 'jquery.cookie';
-            $exclude_list[] = 'portal.js';
-            $exclude_list[] = 'tab-settings';
-            $exclude_list[] = 'dark-mode';
-            return $exclude_list;
-          });
-          // Disable CSS optimization
-          add_filter('wpc_css_exclude', function($exclude_list) {
-            if (!is_array($exclude_list)) {
-              $exclude_list = array();
-            }
-            $exclude_list[] = 'woo-coupon-usage';
-            $exclude_list[] = 'wcusage';
-            return $exclude_list;
-          });
-          // Disable page caching
-          add_filter('wpc_disable_caching', '__return_true');
-          // Disable minification
-          add_filter('wpc_disable_minify', '__return_true');
-          // Disable lazy load
-          add_filter('wpc_disable_lazyload', '__return_true');
-        }
 
       }
     }
+  }
+}
+
+/**
+ * Fix WP Compress conflicts on affiliate dashboard and portal pages.
+ * Hooked on template_redirect (earlier than wp_head) so WP Compress
+ * filters are registered before it processes the page.
+ */
+add_action( 'template_redirect', 'wcusage_fix_wp_compress', 1 );
+if( !function_exists( 'wcusage_fix_wp_compress' ) ) {
+  function wcusage_fix_wp_compress() {
+    if ( ! is_plugin_active( 'wp-compress-image-optimizer/wp-compress.php' ) ) {
+      return;
+    }
+    if ( is_admin() ) {
+      return;
+    }
+
+    $post_id = get_the_ID();
+    $dashboard_page = wcusage_get_setting_value('wcusage_dashboard_page', '');
+    $mla_dashboard_page = wcusage_get_setting_value('wcusage_mla_dashboard_page', '');
+    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+
+    $is_affiliate_page = (
+      get_query_var( 'affiliate_portal' )
+      || $post_id == $dashboard_page
+      || $post_id == $mla_dashboard_page
+      || is_account_page()
+      || ( isset($_SERVER['REQUEST_URI']) && strpos( $_SERVER['REQUEST_URI'], $wcusage_portal_slug ) !== false )
+    );
+
+    if ( ! $is_affiliate_page ) {
+      return;
+    }
+
+    // Disable JavaScript optimization
+    add_filter('wpc_js_exclude', function($exclude_list) {
+      if (!is_array($exclude_list)) {
+        $exclude_list = array();
+      }
+      $exclude_list[] = 'woo-coupon-usage';
+      $exclude_list[] = 'wcusage';
+      $exclude_list[] = 'jquery.cookie';
+      $exclude_list[] = 'portal.js';
+      $exclude_list[] = 'tab-settings';
+      $exclude_list[] = 'dark-mode';
+      return $exclude_list;
+    });
+    // Disable CSS optimization
+    add_filter('wpc_css_exclude', function($exclude_list) {
+      if (!is_array($exclude_list)) {
+        $exclude_list = array();
+      }
+      $exclude_list[] = 'woo-coupon-usage';
+      $exclude_list[] = 'wcusage';
+      return $exclude_list;
+    });
+    // Disable page caching
+    add_filter('wpc_disable_caching', '__return_true');
+    // Disable minification
+    add_filter('wpc_disable_minify', '__return_true');
+    // Disable lazy load
+    add_filter('wpc_disable_lazyload', '__return_true');
   }
 }
 

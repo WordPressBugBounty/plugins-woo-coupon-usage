@@ -1659,7 +1659,7 @@ function wcu_admin_enqueue_scripts(  $hook_suffix  ) {
             wp_enqueue_style( 'code-editor' );
         }
         // Affiliate users table styles and scripts
-        if ( isset( $_GET['page'] ) && $_GET['page'] == 'wcusage_affiliates' ) {
+        if ( isset( $_GET['page'] ) && in_array( $_GET['page'], array('wcusage_affiliates', 'wcusage_mla_users'), true ) ) {
             $css_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-affiliate-users-table.css';
             $css_ver = ( file_exists( $css_path ) ? filemtime( $css_path ) : '1.0.0' );
             wp_enqueue_style(
@@ -1667,6 +1667,14 @@ function wcu_admin_enqueue_scripts(  $hook_suffix  ) {
                 WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-affiliate-users-table.css',
                 array(),
                 $css_ver
+            );
+            $users_css_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-affiliate-users.css';
+            $users_css_ver = ( file_exists( $users_css_path ) ? filemtime( $users_css_path ) : '1.0.0' );
+            wp_enqueue_style(
+                'wcusage-admin-affiliate-users',
+                WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-affiliate-users.css',
+                array('wcusage-admin-affiliate-users-table'),
+                $users_css_ver
             );
             $js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin-affiliate-users-table.js';
             $js_ver = ( file_exists( $js_path ) ? filemtime( $js_path ) : '1.0.0' );

@@ -1634,7 +1634,8 @@ form.wcu_payout_button {
 /* MLA */
 
 .wcu-mla-network-button {
-	margin: 2px 0 7px 0 !important;
+	font-size: 12px !important;
+	margin: 4px 0 7px 0 !important;
 	padding: 2px 5px 2px 5px !important;
 	text-decoration: none !important;
 }

@@ -186,6 +186,12 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 			// Clear existing pending meta
 			delete_post_meta($order_id, 'wcusage_pending_commission');
 
+			// Clear MLA commission so it gets recalculated fresh (unless "Never update saved commission" is enabled)
+			$never_update_commission_meta = wcusage_get_setting_value('wcusage_field_enable_never_update_commission_meta', '0');
+			if ( ! $never_update_commission_meta ) {
+				wcusage_delete_order_meta( $order_id, 'wcu_mla_commission' );
+			}
+
 			// Check and add if pending (this handles the logic)
 			if( function_exists('wcusage_check_and_add_pending_commission') ) {
 				wcusage_check_and_add_pending_commission($order_id, $coupon_code);

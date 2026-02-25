@@ -251,9 +251,9 @@ function wcusage_admin_submenu_filter(  $submenu_file  ) {
 }
 
 add_filter( 'submenu_file', 'wcusage_admin_submenu_filter' );
-// JavaScript solution to highlight parent menu on view affiliate page
+// JavaScript solution to highlight parent menu on view affiliate page and MLA pages
 function wcusage_admin_menu_highlight_script() {
-    if ( isset( $_GET['page'] ) && $_GET['page'] === 'wcusage_view_affiliate' ) {
+    if ( isset( $_GET['page'] ) && in_array( $_GET['page'], array('wcusage_view_affiliate'), true ) ) {
         ?>
     <script type="text/javascript">
     jQuery(document).ready(function($) {

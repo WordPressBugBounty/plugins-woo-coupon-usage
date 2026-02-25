@@ -69,6 +69,7 @@ function wcusage_order_update_stats_refund_delete($refund_id, $order_id) {
   wcusage_delete_order_meta($order_id, 'wcusage_stats');
   wcusage_delete_order_meta($order_id, 'wcusage_commission_summary');
   wcusage_delete_order_meta($order_id, 'wcusage_total_commission');
+  wcusage_delete_order_meta($order_id, 'wcu_mla_commission');
 
 }
 add_action( 'woocommerce_refund_deleted', 'wcusage_order_update_stats_refund_delete', 5, 2 );

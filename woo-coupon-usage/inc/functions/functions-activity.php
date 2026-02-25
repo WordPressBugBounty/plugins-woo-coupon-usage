@@ -201,6 +201,28 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
       }
       $event_message = "Unpaid commission removed from '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
       break;
+    case 'mla_commission_added':
+      $coupon_info = wcusage_get_coupon_info_by_id($event_id);
+      $coupon_name = $coupon_info[3];
+      $info = html_entity_decode($info, ENT_QUOTES, 'UTF-8');
+      if (preg_match('/#(\d+)/', $info, $matches)) {
+        $order_id = $matches[1];
+        $order_link = '<a href="'.esc_url(get_edit_post_link($order_id)).'" target="_blank">#'.$order_id.'</a>';
+        $info = str_replace('#'.$order_id, $order_link, $info);
+      }
+      $event_message = "MLA unpaid commission added to '" . esc_html($coupon_name) . "':" . " " . wp_kses_post($info);
+      break;
+    case 'mla_commission_removed':
+      $coupon_info = wcusage_get_coupon_info_by_id($event_id);
+      $coupon_name = $coupon_info[3];
+      $info = html_entity_decode($info, ENT_QUOTES, 'UTF-8');
+      if (preg_match('/#(\d+)/', $info, $matches)) {
+        $order_id = $matches[1];
+        $order_link = '<a href="'.esc_url(get_edit_post_link($order_id)).'" target="_blank">#'.$order_id.'</a>';
+        $info = str_replace('#'.$order_id, $order_link, $info);
+      }
+      $event_message = "MLA unpaid commission removed from '" . esc_html($coupon_name) . "':" . " " . wp_kses_post($info);
+      break;
     case 'manual_unpaid_commission_edit':
       $coupon_info = wcusage_get_coupon_info_by_id($event_id);
       $coupon_name = $coupon_info[3];
@@ -210,6 +232,11 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
       $coupon_info = wcusage_get_coupon_info_by_id($event_id);
       $coupon_name = $coupon_info[3];
       $event_message = "Pending commission edited for coupon '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
+      break;
+    case 'manual_processing_commission_edit':
+      $coupon_info = wcusage_get_coupon_info_by_id($event_id);
+      $coupon_name = $coupon_info[3];
+      $event_message = "Processing commission edited for coupon '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
       break;
     case 'manual_coupon_commission_edit':
       $coupon_info = wcusage_get_coupon_info_by_id($event_id);
@@ -278,6 +305,7 @@ add_filter('update_postmeta', function($check, $object_id, $meta_key, $meta_valu
   $meta_configs = [
       'wcu_text_unpaid_commission' => 'manual_unpaid_commission_edit',
       'wcu_text_pending_commission' => 'manual_pending_commission_edit',
+      'wcu_text_pending_order_commission' => 'manual_processing_commission_edit',
       'wcu_text_coupon_commission' => 'manual_coupon_commission_edit',
       'wcu_text_coupon_commission_fixed_order' => 'manual_coupon_commission_fixed_order_edit',
       'wcu_text_coupon_commission_fixed_product' => 'manual_coupon_commission_fixed_product_edit',
@@ -297,6 +325,7 @@ function wcusage_after_update_function($meta_id, $post_id, $meta_key, $meta_valu
   $meta_configs = [
       'wcu_text_unpaid_commission' => 'manual_unpaid_commission_edit',
       'wcu_text_pending_commission' => 'manual_pending_commission_edit',
+      'wcu_text_pending_order_commission' => 'manual_processing_commission_edit',
       'wcu_text_coupon_commission' => 'manual_coupon_commission_edit',
       'wcu_text_coupon_commission_fixed_order' => 'manual_coupon_commission_fixed_order_edit',
       'wcu_text_coupon_commission_fixed_product' => 'manual_coupon_commission_fixed_product_edit',
@@ -316,6 +345,7 @@ function wcusage_after_update_function($meta_id, $post_id, $meta_key, $meta_valu
 
               if($meta_key == 'wcu_text_unpaid_commission'
               || $meta_key == 'wcu_text_pending_commission'
+              || $meta_key == 'wcu_text_pending_order_commission'
               || $meta_key == 'wcu_text_coupon_commission_fixed_order'
               || $meta_key == 'wcu_text_coupon_commission_fixed_product')
               {

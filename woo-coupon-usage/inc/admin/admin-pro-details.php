@@ -28,8 +28,6 @@ function wcusage_field_cb_pro_details( $args )
   });
   </script>
 
-<div id="pro-details" class="pro-details">
-
   <?php if(!$ispro) { ?>
 
   <div class="wcu-pro-details-col-1">
@@ -88,11 +86,22 @@ function wcusage_field_cb_pro_details( $args )
 
   <?php } ?>
 
-<h1 style="margin-bottom: 0px;">PRO <?php echo esc_html__( 'Modules & Features', 'woo-coupon-usage' ); ?>:</h1>
+<h1 style="margin-bottom: 0px; width: 100%;">PRO <?php echo esc_html__( 'Modules & Features', 'woo-coupon-usage' ); ?>:</h1>
+
+<div style="clear: both;"></div>
 
 <br/>
 
 <p><?php echo esc_html__( 'The below section includes a list of most of the modules and features included in the Pro plan. However other smaller features and customisations can be found throughout the settings page.', 'woo-coupon-usage' ); ?></p>
+
+<br/>
+
+<div class="wcu-pro-modules-search-wrap">
+  <input type="text" id="wcu-pro-modules-search" placeholder="<?php echo esc_attr__( 'Search modules...', 'woo-coupon-usage' ); ?>" autocomplete="off" />
+</div>
+<p id="wcu-pro-modules-no-results" style="display:none;"><?php echo esc_html__( 'No modules found matching your search.', 'woo-coupon-usage' ); ?></p>
+
+<div id="pro-details" class="pro-details">
 
 <div style="flex-basis: 100%; height: 0;"></div>
 
@@ -670,6 +679,34 @@ function wcusage_go_to_settings(settings1, settings2) {
 }
 </script>
 
+<!-- Module Search Filter -->
+<script>
+jQuery(document).ready(function($) {
+  var $search = $('#wcu-pro-modules-search');
+  if (!$search.length) return;
+  $search.on('input', function() {
+    var term = $.trim($(this).val()).toLowerCase();
+    var $boxes = $('.pro-details .wcu-addons-box');
+    var visible = 0;
+    $boxes.each(function() {
+      var title = $(this).data('module-title') || '';
+      var desc  = $(this).data('module-desc')  || '';
+      if (!term || title.indexOf(term) !== -1 || desc.indexOf(term) !== -1) {
+        $(this).show();
+        visible++;
+      } else {
+        $(this).hide();
+      }
+    });
+    if (visible === 0 && term) {
+      $('#wcu-pro-modules-no-results').show();
+    } else {
+      $('#wcu-pro-modules-no-results').hide();
+    }
+  });
+});
+</script>
+
 <!-- Break the flexbox -->
 <div style="flex-basis: 100%; height: 0;"></div>
 
@@ -721,7 +758,7 @@ $color2 = wcusage_random_color();
   });
   </script>
 <?php } ?>
-  <div class="wcu-addons-box wcu-addons-box-<?php echo esc_attr($id); ?>">
+  <div class="wcu-addons-box wcu-addons-box-<?php echo esc_attr($id); ?>" data-module-title="<?php echo esc_attr(strtolower($title)); ?>" data-module-desc="<?php echo esc_attr(strtolower(wp_strip_all_tags($text))); ?>">
 
     <span><i class="<?php echo esc_html($icon); ?>"
       style="text-align: center; font-size: 25px; display: block; margin: 5px auto 15px auto; background: linear-gradient(#<?php echo esc_attr($color1); ?>, #<?php echo esc_attr($color2); ?>);

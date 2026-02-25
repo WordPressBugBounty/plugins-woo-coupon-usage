@@ -282,18 +282,18 @@ function wcusage_field_cb_payouts( $args )
 
        <br/><br/><hr/>
 
-       <h3 id="wcu-setting-header-payouts-scheduled"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Pending Commission', 'woo-coupon-usage' ); ?>:</h3>
+       <h3 id="wcu-setting-header-payouts-scheduled"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Processing Commission', 'woo-coupon-usage' ); ?>:</h3>
 
-       <p><?php echo esc_html__( 'Pending Commission allows affiliates to track commission from orders that are not yet completed, but displayed on the dashboard.', 'woo-coupon-usage' ); ?></p>
+       <p><?php echo esc_html__( 'Processing Commission allows affiliates to track commission from orders that are not yet completed, but displayed on the dashboard.', 'woo-coupon-usage' ); ?></p>
        
        <p><?php echo esc_html__( 'This is useful for showing withheld commission, which would convert it to "unpaid commission" once the order is completed, which they can then request payouts for.', 'woo-coupon-usage' ); ?></p>
 
-       <p><?php echo esc_html__( 'The "Pending Commission" will be displayed in the "Payouts" tab as a small notice just above the "Unpaid Commission" amount.', 'woo-coupon-usage' ); ?></p>
+       <p><?php echo esc_html__( 'The "Processing Commission" will be displayed in the "Payouts" tab as a small notice just above the "Unpaid Commission" amount.', 'woo-coupon-usage' ); ?></p>
 
        <br/>
 
-        <?php wcusage_setting_toggle_option('wcusage_field_payout_pending_enable', 1, esc_html__( 'Enable "Pending Commission" tracking.', 'woo-coupon-usage' ), '0px'); ?>
-        <i><?php echo esc_html__( 'When enabled, "Pending Commission" will be tracked and shown on the payouts tab for statuses that are set to show on the dashboard but not completed yet (not granted unpaid commission).', 'woo-coupon-usage' ); ?></i><br/>
+        <?php wcusage_setting_toggle_option('wcusage_field_payout_pending_enable', 1, esc_html__( 'Enable "Processing Commission" tracking.', 'woo-coupon-usage' ), '0px'); ?>
+        <i><?php echo esc_html__( 'When enabled, "Processing Commission" will be tracked and shown on the payouts tab for statuses that are set to show on the dashboard but not completed yet (not granted unpaid commission).', 'woo-coupon-usage' ); ?></i><br/>
         
        <br/><hr/>
 

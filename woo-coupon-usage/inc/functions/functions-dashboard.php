@@ -333,6 +333,17 @@ document.addEventListener('DOMContentLoaded', function(){
         echo esc_html( ucfirst( esc_html__( "Statistics", "woo-coupon-usage" ) ) );
         ?></option>
   <?php 
+        $wcusage_show_months_table = ( isset( $wcusage_show_months_table ) ? $wcusage_show_months_table : wcusage_get_setting_value( 'wcusage_field_show_months_table', '1' ) );
+        $wcusage_field_show_order_tab = ( isset( $wcusage_field_show_order_tab ) ? $wcusage_field_show_order_tab : wcusage_get_setting_value( 'wcusage_field_show_order_tab', '1' ) );
+        $wcusage_field_urls_enable = ( isset( $wcusage_field_urls_enable ) ? $wcusage_field_urls_enable : wcusage_get_setting_value( 'wcusage_field_urls_enable', '1' ) );
+        $wcusage_field_urls_tab_enable = ( isset( $wcusage_field_urls_tab_enable ) ? $wcusage_field_urls_tab_enable : wcusage_get_setting_value( 'wcusage_field_urls_tab_enable', '1' ) );
+        $wcusage_field_creatives_enable = ( isset( $wcusage_field_creatives_enable ) ? $wcusage_field_creatives_enable : wcusage_get_setting_value( 'wcusage_field_creatives_enable', '1' ) );
+        $wcusage_field_payouts_enable = ( isset( $wcusage_field_payouts_enable ) ? $wcusage_field_payouts_enable : wcusage_get_setting_value( 'wcusage_field_payouts_enable', '1' ) );
+        $wcusage_field_rates_enable = ( isset( $wcusage_field_rates_enable ) ? $wcusage_field_rates_enable : wcusage_get_setting_value( 'wcusage_field_rates_enable', '0' ) );
+        $wcusage_field_bonuses_enable = ( isset( $wcusage_field_bonuses_enable ) ? $wcusage_field_bonuses_enable : wcusage_get_setting_value( 'wcusage_field_bonuses_enable', '0' ) );
+        $wcusage_field_bonuses_tab_enable = ( isset( $wcusage_field_bonuses_tab_enable ) ? $wcusage_field_bonuses_tab_enable : wcusage_get_setting_value( 'wcusage_field_bonuses_tab_enable', '1' ) );
+        $wcusage_field_show_settings_tab_show = ( isset( $wcusage_field_show_settings_tab_show ) ? $wcusage_field_show_settings_tab_show : wcusage_get_setting_value( 'wcusage_field_show_settings_tab_show', '1' ) );
+        $option_coupon_orders = ( isset( $option_coupon_orders ) ? $option_coupon_orders : wcusage_get_setting_value( 'wcusage_field_orders', '10' ) );
         if ( $wcusage_show_months_table == '1' ) {
             ?>
   <option value="page-monthly" <?php 

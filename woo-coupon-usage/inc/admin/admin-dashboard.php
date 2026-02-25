@@ -373,11 +373,10 @@ jQuery(document).ready(function($) {
         );
     }
     $support_items = array(
+        array('label' => 'Support Forum', 'url' => 'https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0', 'icon' => 'fa-solid fa-comments', 'external' => true),
         array('label' => 'Documentation', 'url' => 'https://couponaffiliates.com/docs?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button', 'icon' => 'fa-solid fa-book', 'external' => true),
         array('label' => 'Roadmap', 'url' => 'https://roadmap.couponaffiliates.com/roadmap', 'icon' => 'fa-solid fa-list', 'external' => true),
         array('label' => 'Updates', 'url' => '#', 'icon' => 'fa-solid fa-sync', 'external' => false, 'id' => 'show-changelog'),
-        array('label' => 'Email Us', 'url' => admin_url('admin.php?page=wcusage-contact'), 'icon' => 'fa-solid fa-circle-question', 'external' => !wcu_fs()->can_use_premium_code()),
-        array('label' => 'Support Forum', 'url' => 'https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0', 'icon' => 'fa-solid fa-comments', 'external' => true),
     );
     ?>
     <div class="wcusage-admin-header-menu">

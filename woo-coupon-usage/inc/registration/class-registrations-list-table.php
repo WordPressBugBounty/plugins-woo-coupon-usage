@@ -161,6 +161,15 @@ class wcusage_registrations_List_Table extends WP_List_Table {
   				if($status == "pending") {
   					return '<span class="dashicons dashicons-warning" style="color: orange;"></span> ' . esc_html__( 'Pending', 'woo-coupon-usage' );
   				}
+          if($status == "parent_approved") {
+            $parent_approver_id = get_user_meta( absint($item['userid']), 'wcu_mla_parent_approver_id', true );
+            $parent_approver_name = '';
+            if ( $parent_approver_id ) {
+              $parent_approver = get_userdata( absint($parent_approver_id) );
+              $parent_approver_name = $parent_approver ? ' (' . esc_html( $parent_approver->user_login ) . ')' : '';
+            }
+            return '<span class="dashicons dashicons-thumbs-up" style="color: #2271b1;"></span> ' . esc_html__( 'MLA Parent Approved', 'woo-coupon-usage' ) . esc_html( $parent_approver_name );
+          }
           if($status == "declined") {
   					return '<span class="dashicons dashicons-dismiss" style="color: red;"></span> ' . esc_html__( 'Declined', 'woo-coupon-usage' );
   				}
@@ -175,13 +184,17 @@ class wcusage_registrations_List_Table extends WP_List_Table {
 					}
 					?>
 
-          <?php	if($status == "pending") { ?>
+          <?php	if($status == "pending" || $status == "parent_approved") { ?>
 
 					<form method="post" id="submitregister">
 
   					<?php echo $inputfields; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
             <?php wp_nonce_field( 'admin_affiliate_register_form' ); ?>
+
+            <?php if ( $status === 'parent_approved' ) : ?>
+              <p style="color: #2271b1; font-size: 12px; margin: 0 0 4px 0;"><span class="dashicons dashicons-thumbs-up" style="font-size:14px;vertical-align:middle;"></span> <?php echo esc_html__( 'MLA parent has approved this application.', 'woo-coupon-usage' ); ?></p>
+            <?php endif; ?>
 
   					<button	type="submit" name="submitregisteraccept" class="payout-action payout-action-accepted" title="<?php echo esc_html__( 'Accept Application', 'woo-coupon-usage' ); ?>">
   						<?php echo esc_html__( 'Accept', 'woo-coupon-usage' ); ?> <span class="dashicons dashicons-arrow-right-alt" style="font-size: 19px;"></span>

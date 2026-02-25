@@ -134,6 +134,15 @@ if ( ! function_exists( 'wcusage_render_quick_edit_row' ) ) {
                                     <input type="number" id="wcu_text_pending_payment_commission_<?php echo esc_attr( $coupon_id ); ?>" step="0.01" value="<?php echo esc_attr( get_post_meta( $coupon_id, 'wcu_text_pending_payment_commission', true ) ); ?>">
                                 </div>
                             </div>
+                            <?php $wcu_processing_commission = (float) get_post_meta( $coupon_id, 'wcu_text_pending_order_commission', true ); ?>
+                            <?php if ( $wcu_processing_commission > 0 ) : ?>
+                            <div class="form-row">
+                                <div class="form-field" <?php if ( ! wcu_fs()->can_use_premium_code() ) { ?>style="opacity: 0.5; pointer-events: none;"<?php } ?>>
+                                    <label for="wcu_text_pending_order_commission_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Processing Commission', 'woo-coupon-usage' ); ?><?php if ( ! wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?></label>
+                                    <input type="number" id="wcu_text_pending_order_commission_<?php echo esc_attr( $coupon_id ); ?>" step="0.01" value="<?php echo esc_attr( $wcu_processing_commission ); ?>">
+                                </div>
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <p class="submit inline-edit-save">

@@ -187,6 +187,10 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
         if ( $disable_commission ) {
             $wcusage_show_commission = 0;
         }
+        // Always show commission column on MLA dashboard (it shows what the parent earned)
+        if ( $type == "mla" ) {
+            $wcusage_show_commission = 1;
+        }
         $wcusage_show_orders_table_status_totals = wcusage_get_setting_value( 'wcusage_field_show_orders_table_status_totals', '1' );
         $option_coupon_orders = wcusage_get_setting_value( 'wcusage_field_orders', '15' );
         $option_coupon_max_orders = wcusage_get_setting_value( 'wcusage_field_max_orders', '250' );
@@ -438,8 +442,6 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
       <?php 
         }
         ?>
-
-      }
 
     }
     </style>
@@ -754,14 +756,39 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         $combined_total_discount += (float) $totaldiscounts;
                         $totalordersexcl = $calculateorder['totalordersexcl'];
                         $totalcommission = $calculateorder['totalcommission'];
-                        if ( $type == "mla" ) {
-                            $totalcommission = wcusage_mla_get_commission_from_tier(
-                                $totalcommission,
-                                $tier,
-                                '1',
-                                $orderid,
-                                $coupon_code
-                            );
+                        $wcusage_field_mla_enable = wcusage_get_setting_value( 'wcusage_field_mla_enable', '0' );
+                        if ( $wcusage_field_mla_enable && $type == "mla" ) {
+                            // Try stored MLA commission from order meta (persisted at order time)
+                            $stored_mla = wcusage_order_meta( $orderid, 'wcu_mla_commission', true );
+                            if ( is_array( $stored_mla ) && isset( $stored_mla[$tier]['commission'] ) ) {
+                                $totalcommission = (float) $stored_mla[$tier]['commission'];
+                            } else {
+                                // Fallback: recalculate (for orders before this feature was added)
+                                $totalcommission = wcusage_mla_get_commission_from_tier(
+                                    $totalcommission,
+                                    $tier,
+                                    '1',
+                                    $orderid,
+                                    $coupon_code,
+                                    0,
+                                    $user_id
+                                );
+                                // Persist the recalculated value so it won't recalculate again next time
+                                $tier_rates = ( function_exists( 'wcusage_mla_get_tier_rates' ) ? wcusage_mla_get_tier_rates( $tier, $user_id ) : array() );
+                                if ( !is_array( $stored_mla ) ) {
+                                    $stored_mla = array();
+                                }
+                                $stored_mla[$tier] = array(
+                                    'parent_id'  => (int) $user_id,
+                                    'commission' => round( (float) $totalcommission, 2 ),
+                                    'rates'      => $tier_rates,
+                                );
+                                $mla_order_obj = wc_get_order( $orderid );
+                                if ( $mla_order_obj ) {
+                                    $mla_order_obj->update_meta_data( 'wcu_mla_commission', json_encode( $stored_mla ) );
+                                    $mla_order_obj->save_meta_data();
+                                }
+                            }
                         }
                         $combined_totalcommission += (float) $totalcommission;
                         $affiliatecommission = "";
