@@ -1121,6 +1121,40 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
 
       </div>
 
+      <?php 
+        // Simple Points and Rewards Ad — show only on PRO, and only if neither variant of the plugin is active
+        $spr_plugins = array('simple-points-and-rewards/simple-points-and-rewards.php', 'simple-points-and-rewards-pro/simple-points-and-rewards.php');
+        $spr_active = false;
+        foreach ( $spr_plugins as $spr_plugin ) {
+            if ( is_plugin_active( $spr_plugin ) ) {
+                $spr_active = true;
+                break;
+            }
+        }
+        if ( wcu_fs()->can_use_premium_code() && !$spr_active ) {
+            ?>
+      <!-- Simple Points and Rewards Ad -->
+      <div style="margin-top: 25px; padding: 10px 14px; background: linear-gradient(145deg, #f8fbff, #ffffff); border: 2px solid #eaeff6; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,100,200,0.05); display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <span style="font-size: 14px; color: #1a2a4a; font-weight: 600; flex-shrink: 0;"><?php 
+            echo esc_html__( 'Try our other new plugin!', 'woo-coupon-usage' );
+            ?></span>
+        &#160;
+        <span style="font-size: 14px; color: #c5247fff; font-weight: 600; flex-shrink: 0;"><a style="color: #c5247fff" href="https://relywp.com/plugins/simple-points-rewards-woocommerce/?utm_source=coupon-affiliates&utm_medium=settings-ad&utm_campaign=cross-promote" target="_blank">Simple Points &amp; Rewards</a></span>
+        &#160;
+        <span style="font-size: 14px; color: #4a6a8a; flex: 1; min-width: 120px;"><?php 
+            echo esc_html__( 'Boost customer loyalty with a powerful WooCommerce points and rewards plugin.', 'woo-coupon-usage' );
+            ?></span>
+        <a href="https://relywp.com/plugins/simple-points-rewards-woocommerce/?utm_source=coupon-affiliates&utm_medium=settings-ad&utm_campaign=cross-promote"
+        target="_blank" style="flex-shrink: 0; padding: 5px 12px; background: linear-gradient(145deg, #c5247fff, #a81e6fff); color: #fff; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; white-space: nowrap;">
+          <?php 
+            echo esc_html__( 'Get 25% Off + Free Trial', 'woo-coupon-usage' );
+            ?> <span class="dashicons dashicons-external" style="font-size: 12px; width: 12px; height: 12px; vertical-align: middle; margin-top: -1px;"></span>
+        </a>
+      </div>
+      <?php 
+        }
+        ?>
+
   	</form>
     
     </div> <!-- Close wcu-admin-content -->
@@ -1150,7 +1184,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
           <a href="https://couponaffiliates.com/pricing?utm_campaign=plugin&utm_source=dashboard-sidebar&utm_medium=pro-upgrade" target="_blank" style="text-decoration: none;">
           <p class="wcu-settings-sidebar-pro-upgrade-button">FREE 7 DAY TRIAL <span class="fas fa-arrow-right"></span></p>
           </a>
-          <p style="font-size: 10px; line-height: 20px; margin-top: 15px;">After your trial, just $12.99 per month.</p>
+          <p style="font-size: 10px; line-height: 20px; margin-top: 15px;">After your trial, just $14.99 per month.</p>
           <?php 
                 // Black Friday Deal
                 $todayDate = strtotime( 'now' );

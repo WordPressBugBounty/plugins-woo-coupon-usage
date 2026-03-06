@@ -236,7 +236,7 @@ jQuery(document).ready(function($) {
                 $settingsForm.find('#wcu-settings-update-button')
                     .prop('disabled', true)
                     .text(wcusage_ajax.saving_text);
-                $settingsForm.find('#wcu-settings-ajax-message').empty();
+                $settingsForm.find('#wcu-settings-ajax-message').stop(true, true).empty().show();
             },
             success: function(response) {
                 if (response.success) {
@@ -264,15 +264,15 @@ jQuery(document).ready(function($) {
                         .text(wcusage_ajax.save_text);
                     $settingsForm.find("#tab-page-settings").trigger('click');
                 } else {
-                    $settingsForm.find('#wcu-settings-ajax-message').html(
+                    $settingsForm.find('#wcu-settings-ajax-message').stop(true, true).html(
                         '<p style="color: red;">Error: ' + (response.data || 'Unknown error') + '</p>'
-                    );
+                    ).show();
                 }
             },
             error: function(xhr, status, error) {
-                $settingsForm.find('#wcu-settings-ajax-message').html(
+                $settingsForm.find('#wcu-settings-ajax-message').stop(true, true).html(
                     '<p style="color: red;">AJAX Error: ' + error + '</p>'
-                );
+                ).show();
             },
             complete: function() {
                 $settingsForm.find('#wcu-settings-update-button')
@@ -433,7 +433,7 @@ jQuery(document).ready(function($) {
                     $payoutsForm.find('#wcu-settings-update-button')
                         .prop('disabled', true)
                         .text(wcusage_ajax.saving_text);
-                    $payoutsForm.find('#wcu-settings-ajax-message').empty();
+                    $payoutsForm.find('#wcu-settings-ajax-message').stop(true, true).empty().show();
                 },
                 success: function (response) {
                     if (response.success) {
@@ -452,15 +452,15 @@ jQuery(document).ready(function($) {
                             .prop('disabled', false)
                             .text(wcusage_ajax.save_text);
                     } else {
-                        $payoutsForm.find('#wcu-settings-ajax-message').html(
+                        $payoutsForm.find('#wcu-settings-ajax-message').stop(true, true).html(
                             '<p style="color: red;">Error: ' + (response.data || 'Unknown error') + '</p>'
-                        );
+                        ).show();
                     }
                 },
                 error: function (xhr, status, error) {
-                    $payoutsForm.find('#wcu-settings-ajax-message').html(
+                    $payoutsForm.find('#wcu-settings-ajax-message').stop(true, true).html(
                         '<p style="color: red;">AJAX Error: ' + error + '</p>'
-                    );
+                    ).show();
                 },
                 complete: function () {
                     $payoutsForm.find('#wcu-settings-update-button')

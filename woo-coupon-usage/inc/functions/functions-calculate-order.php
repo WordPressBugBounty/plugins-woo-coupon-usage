@@ -50,8 +50,13 @@ if ( !function_exists( 'wcusage_edit_order_meta' ) ) {
         if ( empty( $order_id ) || empty( $meta_key ) ) {
             return;
         }
-        // Get current value
-        $current_value = get_post_meta( $order_id, $meta_key, true );
+        // Get order object
+        $order = wc_get_order( $order_id );
+        if ( !$order ) {
+            return;
+        }
+        // Get current value (HPOS compatible)
+        $current_value = $order->get_meta( $meta_key, true );
         if ( $current_value === $meta_value ) {
             return;
         }
@@ -61,12 +66,9 @@ if ( !function_exists( 'wcusage_edit_order_meta' ) ) {
         }
         // Make lowercase if certain meta
         $meta_value = wcusage_order_meta_lowercase( $meta_key, $meta_value );
-        // Update meta
-        $order = wc_get_order( $order_id );
-        if ( $order ) {
-            $order->update_meta_data( $meta_key, $meta_value );
-            $order->save_meta_data();
-        }
+        // Update meta (HPOS compatible)
+        $order->update_meta_data( $meta_key, $meta_value );
+        $order->save_meta_data();
     }
 
 }
@@ -1055,7 +1057,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                             $this_product_id = $item_data['product_id'];
                         }
                         if ( $this_quantity2 > 0 ) {
-                            $this_product_total_combined_commission = $this_line_total_commission + $fixed_product_commission * $this_quantity2;
+                            $this_product_total_combined_commission = $this_line_total_commission + (float) $fixed_product_commission * (int) $this_quantity2;
                             if ( !is_array( $commission_summary ) || empty( $commission_summary ) ) {
                                 $commission_summary = array();
                             }

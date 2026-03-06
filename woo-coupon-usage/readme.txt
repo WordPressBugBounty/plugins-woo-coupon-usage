@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.9
-Stable tag: 7.5.0
+Stable tag: 7.5.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,6 +170,7 @@ Coupon Affiliates PRO is a paid upgrade which provides a whole bunch of exciting
 * <a href="https://couponaffiliates.com/docs/commission-tracking-and-payouts">Commission Payout Requests</a> - Affiliates can request payouts for their pending commission. You can set a payment threshold for commission, and set a delay before commission can be claimed.
 * <a href="https://couponaffiliates.com/docs/pro-stripe-payouts">Stripe Payouts</a> - Automatically pay your affiliates in one-click with Stripe!
 * <a href="https://couponaffiliates.com/docs/pro-paypal-payouts">PayPal Payouts</a> - Automatically pay your affiliates in one-click with PayPal Payouts!
+* <a href="https://couponaffiliates.com/docs/pro-wise-payouts">Wise Bank Transfer Payouts</a> - Automatically pay your affiliates in one-click with Wise Bank Transfer Payouts!
 * <a href="https://couponaffiliates.com/docs/pro-store-credit">Store Credit Payouts</a> - Automatically pay your affiliates into a wallet, in one-click, with Store Credit Payouts! Addons are available to integrate with wallet plugins such as TeraWallet or YITH Account Funds.
 * <a href="https://couponaffiliates.com/docs/pro-monthly-summary-table">Monthly Summary Table</a> - Show a table with a summary of monthly orders, and total statistics for that coupon for each month in the past 12 months (can be filtered to other months / previous years).
 * <a href="https://couponaffiliates.com/docs/line-graphs">Line Graphs</a> - Line graphs on the "Statistics" tab to show commission earned, on a day by day bases, for past 90 days, 30 days, or 7 days.
@@ -178,6 +179,7 @@ Coupon Affiliates PRO is a paid upgrade which provides a whole bunch of exciting
 * <a href="https://couponaffiliates.com/docs/flexible-commission-settings">Custom Product Commission</a> - Set custom flexible commission amounts for individual products.
 * <a href="https://couponaffiliates.com/docs/flexible-commission-settings">Custom User Role Commission</a> - Set custom flexible commission amounts for individual user roles.
 * <a href="https://couponaffiliates.com/docs/pro-product-rates-table">Product Rates Table</a> - Show a table with all the products and their commission rates, so affiliates can see which products earn them the most commission.
+* <a href="https://couponaffiliates.com/docs/referral-popup">Referral Welcome Popups</a> - Show a referral welcome popup to customers that have been referred by an affiliate, to welcome them and encourage them to use the coupon code.
 * <a href="https://couponaffiliates.com/docs/pro-campaigns">Campaigns (Referral URL)</a> - Allow your affiliates to create referral "campaigns" and then create custom URLs to track clicks/conversions per campaign.
 * <a href="https://couponaffiliates.com/docs/pro-direct-link-tracking">Direct Link Tracking (Referral URL)</a> - Affiliates can link directly to your website via their website without needing an affiliate link.
 * <a href="https://couponaffiliates.com/docs/pro-social-sharing">Social Sharing (Referral URL)</a> - Add social sharing buttons to the referral URL tab, so affiliates can instantly share their generated referral link.
@@ -274,6 +276,14 @@ Please report security bugs found in the source code of the undefined plugin thr
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 7.5.1 - 6th March 2026 =
+- Tweak: Made a few small tweaks to the admin settings page.
+- Fix: Fixed the "Account Details" form on the affiliate dashboard and portal page not saving when clicking "Save changes".
+- Fix: Fixed error messages (e.g. "Email already exists") not displaying under the settings form on the affiliate dashboard and portal page.
+- Fix: Fixed a fatal error ("Unsupported operand types: string * int") on the orders panel when a per-product commission was not set, causing the page to break.
+- Fix: Fixed the referral popup/bar/widget title showing raw HTML instead of the formatted discount amount (e.g. "$10.00").
+- Fix: (PRO) Fixed dynamic landing page URLs (e.g. /page-slug/affiliate-code/) returning a 404 error.
 
 = Version 7.5.0 - 25th February 2026 =
 - New: (PRO) Added a new option to set per-group and per-user MLA commission rates, which will override the default MLA commission rates for that user.

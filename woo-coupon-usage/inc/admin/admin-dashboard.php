@@ -527,8 +527,8 @@ jQuery(document).ready(function($) {
             <?php if (!wcu_fs()->can_use_premium_code()): ?>
             <!-- Upgrade to PRO button -->
             <li style="position: relative;">
-                <a href="https://couponaffiliates.com/pricing/?utm_source=plugin&utm_medium=upgrade-menu" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 8px; text-decoration: none; color: #fff; font-weight: 600; background: linear-gradient(270deg,#28a745,#218838,#28a745); background-size: 400% 400%; animation: wcusage-upgrade-anim 2s ease infinite; box-shadow: 0 2px 8px rgba(40,167,69,0.15);">
-                    <span class="fa-solid fa-star" style="color: #ffd700; font-size: 18px;"></span> Upgrade to PRO
+                <a href="https://couponaffiliates.com/pricing/?utm_source=plugin&utm_medium=upgrade-menu" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 8px; text-decoration: none; color: #fff; font-weight: 600; background: linear-gradient(270deg,#28a745,#218838,#28a745); box-shadow: 0 2px 8px rgba(40,167,69,0.15);">
+                    Upgrade to PRO
                 </a>
             </li>
             <style>
@@ -1947,11 +1947,11 @@ function wcusage_dashboard_page_html() {
                 <div class="wcusage-admin-page-col-section" style="margin-top: -20px;">
                     <div class="wcusage-admin-page-col" style="width: 100%;">
                         <h2><?php printf(esc_html__('%s Program Statistics', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )))); ?>
-                        <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_admin_reports')); ?>" style="text-decoration: none; float: right; margin-top: -5px; margin-left: 8px; font-size: 14px;"
+                        <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_admin_reports')); ?>" style="text-decoration: none; float: right; font-size: 14px;"
                         class="button button-secondary button-large">
                             <?php echo esc_html__('View Full Report', 'woo-coupon-usage'); ?> <i class="fa-solid fa-arrow-right"></i>
                         </a>
-                        <button type="button" id="wcusage-clear-cache-btn" class="button button-secondary button-large" style="float: right; margin-top: -5px; font-size: 14px;" title="<?php echo esc_attr__('Clear all dashboard caches to refresh statistics', 'woo-coupon-usage'); ?>">
+                        <button type="button" id="wcusage-clear-cache-btn" class="button button-secondary button-large" style="float: right; margin-top: 0px; margin-right: 5px; font-size: 14px;" title="<?php echo esc_attr__('Clear all dashboard caches to refresh statistics', 'woo-coupon-usage'); ?>">
                             <span class="fa-solid fa-sync"></span> <?php echo esc_html__('Clear Cache', 'woo-coupon-usage'); ?>
                         </button></h2>
                         <?php do_action('wcusage_hook_dashboard_page_section_statistics', ''); ?>

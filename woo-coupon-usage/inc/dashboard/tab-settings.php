@@ -170,7 +170,7 @@ function wcusage_ajax_update_settings() {
     $user_data = ['ID' => $couponuserid];
 
     // If $couponuserid matches current user ID
-    if($couponuserid === get_current_user_id()) {
+    if($couponuserid == get_current_user_id()) {
         foreach($account_fields as $post_key => $meta_key) {
             if($meta_key === 'user_email') {
                 // Check the email is not empty
@@ -183,8 +183,9 @@ function wcusage_ajax_update_settings() {
                     wp_send_json_error(esc_html__('Invalid account email address.', 'woo-coupon-usage'));
                     wp_die();
                 }
-                // Check email does not already exist
-                if(email_exists($_POST[$post_key])) {
+                // Check email does not already exist (for a different user)
+                $existing_email_user_id = email_exists($_POST[$post_key]);
+                if($existing_email_user_id && $existing_email_user_id != $couponuserid) {
                     wp_send_json_error(esc_html__('Email already exists.', 'woo-coupon-usage'));
                     wp_die();
                 }
@@ -199,6 +200,10 @@ function wcusage_ajax_update_settings() {
                 $updated_account_fields[$post_key] = $value;
             }
         }
+    } else {
+        // Error message
+        wp_send_json_error('Permission denied: You can only update your own account details.');
+        wp_die();
     }
 
     // Handle state field for US bank accounts
@@ -447,12 +452,13 @@ if (!function_exists('wcusage_tab_settings')) {
                         <?php } ?>
                     </div>
 
-
                     <p>
                         <button type="submit" id="wcu-settings-update-button" class="wcu-save-settings-button woocommerce-Button button" name="submitsettingsupdate">
                             <?php echo esc_html__('Save changes', 'woo-coupon-usage'); ?>
                         </button>
                     </p>
+
+                    <div id="wcu-settings-ajax-message"></div>
                 </div>
             </form>
 

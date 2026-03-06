@@ -44,7 +44,7 @@ function wcusage_field_cb_pro_details( $args )
 
     <br/><br/>
 
-    <p style="font-size: 20px; margin-bottom: 0px;">Upgrade for just $12.99 per month.</p><br/>
+    <p style="font-size: 20px; margin-bottom: 0px;">Upgrade for just $14.99 per month.</p><br/>
 
     <a href="<?php echo esc_url(admin_url('admin.php?billing_cycle=annual&page=wcusage-pricing&trial=true')); ?>" class="button button-primary" style="background: green; padding: 5px 20px;">
         <?php echo esc_html__( 'Start your FREE 7 Day Trial', 'woo-coupon-usage' ); ?> <i class="fas fa-arrow-right" style="background: transparent; color: #fff;"></i>
