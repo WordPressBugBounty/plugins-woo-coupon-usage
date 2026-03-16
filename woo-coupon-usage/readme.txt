@@ -277,6 +277,9 @@ Please report security bugs found in the source code of the undefined plugin thr
 
 == Changelog ==
 
+= Version 7.5.3 =
+- Fix: Fixed a fatal error on the admin settings page since the last update.
+
 = Version 7.5.2 =
 - New: (PRO) Added a new option in the "Rates" tab settings to hide products with their catalog visibility set to "Hidden" from the product rates table on the affiliate dashboard.
 - Fix: (PRO) Fixed a fatal error ("Cannot access offset of type array on array") on the Affiliate Groups admin page.

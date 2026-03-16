@@ -982,10 +982,8 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
       <?php 
         }
         ?>
-
-    <?php 
-        wcusage_test_report_form();
-        ?>
+		
+<?php if( function_exists( 'wcusage_test_report_form' ) ) { wcusage_test_report_form(); } ?>
 
     <?php 
         if ( !class_exists( 'WooCommerce' ) ) {

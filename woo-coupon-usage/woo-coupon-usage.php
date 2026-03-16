@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
-* Version: 7.5.2
+* Version: 7.5.3
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
