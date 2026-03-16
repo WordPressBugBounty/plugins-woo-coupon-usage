@@ -816,6 +816,13 @@ function wcusage_field_cb( $args ) {
           <br/>
 
           <p>
+            <?php wcusage_setting_toggle_option('wcusage_field_rates_hide_hidden_products', 0, esc_html__( 'Hide "Hidden" Products', 'woo-coupon-usage' ), '0px'); ?>
+            <i><?php echo esc_html__( 'If enabled, products with their catalog visibility set to "Hidden" will not be shown in the rates table.', 'woo-coupon-usage' ); ?></i>
+          </p>
+
+          <br/>
+
+          <p>
             <?php wcusage_setting_toggle_option('wcusage_field_rates_show_search', 1, esc_html__( 'Show Search Field', 'woo-coupon-usage' ), '0px'); ?>
           </p>
 

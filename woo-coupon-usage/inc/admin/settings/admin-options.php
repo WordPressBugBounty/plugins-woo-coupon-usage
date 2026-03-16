@@ -522,6 +522,10 @@ jQuery( document ).ready(function() {
     ?>
 
   <?php 
+    wcusage_admin_settings_tab_click( "#tab-reports", ".wcusage_row_reports", 1 );
+    ?>
+
+  <?php 
     ?>
 
   <?php 

@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.9
-Stable tag: 7.5.1
+Stable tag: 7.5.2s
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -276,6 +276,12 @@ Please report security bugs found in the source code of the undefined plugin thr
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 7.5.2 =
+- New: (PRO) Added a new option in the "Rates" tab settings to hide products with their catalog visibility set to "Hidden" from the product rates table on the affiliate dashboard.
+- Fix: (PRO) Fixed a fatal error ("Cannot access offset of type array on array") on the Affiliate Groups admin page.
+- Fix: (PRO) Fixed a fatal error ("Unsupported operand types: float * string") in the payouts cron job caused by the coupon commission percent not being cast to a float.
+- Fix: Fixed a fatal error ("Call to undefined function wp_get_current_user()") caused by the free plugin deactivation check in some cases.
 
 = Version 7.5.1 - 6th March 2026 =
 - Tweak: Made a few small tweaks to the admin settings page.
