@@ -360,11 +360,18 @@ function wcusage_get_ip_only() {
   } elseif(isset($_SERVER['REMOTE_ADDR'])) {
       $ipaddress = $_SERVER['REMOTE_ADDR'];
   }
-  
+
+  // Take the first IP from a comma-separated list (e.g. X-Forwarded-For chains).
   if (strpos($ipaddress, ',') !== false) {
       $ip_parts = explode(',', $ipaddress);
       $ipaddress = trim($ip_parts[0]);
   }
+
+  // Validate that the value is actually an IP address before storing it.
+  if (!filter_var($ipaddress, FILTER_VALIDATE_IP)) {
+      $ipaddress = '';
+  }
+
   return $ipaddress;
 }
 
@@ -1037,6 +1044,11 @@ if( !function_exists( 'wcusage_get_default_ref_url' ) ) {
     // Get the default referral URL from the settings or use the home URL as a fallback.
     $wcusage_field_default_ref_url = wcusage_get_setting_value('wcusage_field_default_ref_url', get_home_url());
     
+    // If the saved value is empty, return the home URL.
+    if ( empty( $wcusage_field_default_ref_url ) ) {
+        return trailingslashit( get_home_url() );
+    }
+
     // Get the host/domain of the default referral URL.
     $default_ref_domain = wp_parse_url($wcusage_field_default_ref_url, PHP_URL_HOST);
 
@@ -1046,15 +1058,19 @@ if( !function_exists( 'wcusage_get_default_ref_url' ) ) {
     // Get the path of the default referral URL.
     $path = wp_parse_url($wcusage_field_default_ref_url, PHP_URL_PATH);
 
-    // Check if the domains match.
-    if ($default_ref_domain === $site_domain) {
+    // Normalize domains for comparison: strip www prefix and compare case-insensitively.
+    $normalized_default = strtolower( preg_replace( '/^www\./', '', $default_ref_domain ? $default_ref_domain : '' ) );
+    $normalized_site    = strtolower( preg_replace( '/^www\./', '', $site_domain ? $site_domain : '' ) );
+
+    // Check if the domains match (ignoring www prefix).
+    if ( $normalized_default === $normalized_site ) {
         return trailingslashit($wcusage_field_default_ref_url);
     } else {
-        // Update the default referral URL with the home URL and get the path.
-        $options = get_option('wcusage_options');
-        $options['wcusage_field_default_ref_url'] = trailingslashit(get_home_url()) . ltrim($path, '/');
-        update_option('wcusage_options', $options);
-        return wcusage_get_setting_value('wcusage_field_default_ref_url', get_home_url());
+        // Only update if the path is not empty (domain migration scenario).
+        // Rebuild the URL using the current home URL and the saved path.
+        $new_url = trailingslashit(get_home_url()) . ltrim($path, '/');
+        wcusage_update_options_merge( array( 'wcusage_field_default_ref_url' => $new_url ) );
+        return trailingslashit( $new_url );
     }
     
   }

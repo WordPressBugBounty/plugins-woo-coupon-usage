@@ -1,4 +1,18 @@
 jQuery(document).ready(function($) {
+
+    // If the page was loaded after a successful AJAX registration (PRG redirect),
+    // show the stored success message instead of the form.
+    if (window.location.search.indexOf('wcusage_registered=1') !== -1) {
+        var storedMessage = sessionStorage.getItem('wcusage_registration_message');
+        if (storedMessage) {
+            sessionStorage.removeItem('wcusage_registration_message');
+            var $form = $('#wcu_form_affiliate_register');
+            if ($form.length) {
+                $form.replaceWith('<div class="success-message">' + storedMessage + '</div>');
+            }
+        }
+    }
+
     $('#wcu_form_affiliate_register').on('submit', function(e) {
 
         // Set wcu-register-button to disabled
@@ -25,13 +39,18 @@ jQuery(document).ready(function($) {
                         window.location.href = response.data.redirect;
                         return;
                     }
-                    $('#wcu_form_affiliate_register').replaceWith('<div class="success-message">' + response.data.message + '</div>');
+                    // Store the message in sessionStorage and redirect to the current URL
+                    // with a query param so that a page refresh shows the message without
+                    // re-submitting the form (Post/Redirect/Get pattern).
+                    sessionStorage.setItem('wcusage_registration_message', response.data.message);
+                    var redirectUrl = window.location.href.split('?')[0] + '?wcusage_registered=1';
+                    window.location.href = redirectUrl;
                 } else {
                     alert('Error: ' + response.data.message); // Show error message
+                    // Set wcu-register-button to enabled
+                    $('#wcu-register-button').show();
+                    $('.register-spinner').css('display', 'none'); // Hide spinner
                 }
-                // Set wcu-register-button to enabled
-                $('#wcu-register-button').show();
-                $('.register-spinner').css('display', 'none'); // Hide spinner
             },
             error: function() {
                 $('#wcu-register-button').show();

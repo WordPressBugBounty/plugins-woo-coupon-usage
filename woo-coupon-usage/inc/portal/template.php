@@ -33,7 +33,7 @@ if ( isset( $_GET['userid'] ) && isset( $_GET['preview_nonce'] ) && wcusage_chec
     }
 }
 if ( isset( $_GET['couponid'] ) ) {
-    $coupon_code = strtolower( $_GET['couponid'] );
+    $coupon_code = strtolower( sanitize_text_field( wp_unslash( $_GET['couponid'] ) ) );
     $coupon_code = preg_replace( '/-\\d+$/', '', $coupon_code );
     $coupon_code = str_replace( "%20", " ", $coupon_code );
     // Get the coupon ID
@@ -85,7 +85,7 @@ $other_view = 0;
 $user_info = get_userdata( $preview_user_id );
 if ( isset( $_GET['couponid'] ) ) {
     $other_view = 1;
-    $couponinfo = wcusage_get_coupon_info( $_GET['couponid'] );
+    $couponinfo = wcusage_get_coupon_info( sanitize_text_field( wp_unslash( $_GET['couponid'] ) ) );
     $couponuser = $couponinfo[1];
     $user_info = get_userdata( $couponuser );
 } elseif ( $is_admin_preview ) {

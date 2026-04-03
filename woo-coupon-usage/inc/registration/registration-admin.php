@@ -658,7 +658,8 @@ function wcusage_set_registration_status(
     $userid,
     $coupon_code,
     $message = "",
-    $type = ""
+    $type = "",
+    $send_email = true
 ) {
     if ( !$coupon_code ) {
         return;
@@ -713,13 +714,15 @@ function wcusage_set_registration_status(
             $status
         );
         $activity_log = wcusage_add_activity( $id, 'registration_accept', $username );
-        wcusage_email_affiliate_register_accepted(
-            $user_email,
-            $coupon_code,
-            $message,
-            $username,
-            $name
-        );
+        if ( $send_email ) {
+            wcusage_email_affiliate_register_accepted(
+                $user_email,
+                $coupon_code,
+                $message,
+                $username,
+                $name
+            );
+        }
         $wcusage_coupon_multiple = wcusage_get_setting_value( 'wcusage_field_registration_multiple_template', '0' );
         if ( !$type || !$wcusage_coupon_multiple ) {
             $template_coupon_code = wcusage_get_setting_value( 'wcusage_field_registration_coupon_template', '' );
@@ -1079,14 +1082,38 @@ function wcusage_admin_new_registration_page() {
         ?>
 
         <tr>
+          <?php 
+        $wcusage_field_email_registration_accept_enable = wcusage_get_setting_value( 'wcusage_field_email_registration_accept_enable', '1' );
+        if ( $wcusage_field_email_registration_accept_enable ) {
+            ?>
+          <th scope="row"><label for="wcu-send-email"><?php 
+            echo esc_html__( 'Send Notification Email', 'woo-coupon-usage' );
+            ?></label></th>
+          <td>
+            <input type="checkbox" name="wcu-send-email" id="wcu-send-email" value="1" checked onchange="wcuToggleMessageRow(this)">
+            <label for="wcu-send-email"><?php 
+            echo esc_html__( 'Send the "Affiliate Application Accepted" email to this affiliate.', 'woo-coupon-usage' );
+            ?></label>
+          </td>
+        </tr>
+        <tr id="wcu-message-row">
           <th scope="row"><label for="wcu-message"><?php 
-        echo esc_html__( 'Custom Message', 'woo-coupon-usage' );
-        ?></label></th>
+            echo esc_html__( 'Custom Message', 'woo-coupon-usage' );
+            ?></label></th>
           <td><input name="wcu-message" type="text" id="wcu-message" class="regular-text" value="">
           <br/><i style="font-size: 10px;">A custom message sent to the affiliate in the welcome/accepted email.</i></td>
         </tr>
+          <?php 
+        }
+        ?>
 
       </table>
+      <script>
+      function wcuToggleMessageRow(checkbox) {
+        var row = document.getElementById('wcu-message-row');
+        if (row) row.style.display = checkbox.checked ? '' : 'none';
+      }
+      </script>
 
       <p class="submit">
         <input type="submit" name="submitaffiliateapplication" id="wcu-register-button" class="button button-primary" value="<?php 

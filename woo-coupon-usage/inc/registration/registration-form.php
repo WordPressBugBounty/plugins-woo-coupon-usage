@@ -106,7 +106,19 @@ function wcusage_couponusage_register(  $atts  ) {
     $auto_coupon_format = "";
     // Handle form submission
     $form_response = '';
-    if ( isset( $_POST['wcusage_submit_registration_form1'] ) && isset( $_POST['submitaffiliateapplication'] ) ) {
+    // Post/Redirect/Get: if this is the redirected GET after a successful non-AJAX submission,
+    // retrieve the stored success message from the session and show it instead of the form.
+    if ( isset( $_GET['wcusage_registered'] ) && $_GET['wcusage_registered'] == '1' ) {
+        if ( session_status() === PHP_SESSION_NONE ) {
+            @session_start();
+        }
+        if ( !empty( $_SESSION['wcusage_registration_success_message'] ) ) {
+            $form_response = '<p style="margin-top: 20px;">' . wp_kses_post( $_SESSION['wcusage_registration_success_message'] ) . '</p>';
+            unset($_SESSION['wcusage_registration_success_message']);
+            $GLOBALS['wcusage_registration_hide_form'] = true;
+        }
+    }
+    if ( empty( $form_response ) && isset( $_POST['wcusage_submit_registration_form1'] ) && isset( $_POST['submitaffiliateapplication'] ) ) {
         // Skip widget submissions that should redirect
         if ( !(isset( $_POST['wcu-form-type'] ) && $_POST['wcu-form-type'] == 'widget') ) {
             if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wcusage_submit_registration_form1'] ) ), 'wcusage_verify_submit_registration_form1' ) || is_user_logged_in() ) {
@@ -635,7 +647,8 @@ function wcusage_create_new_registration(
     $type = "",
     $info = "",
     $message = "",
-    $role = ""
+    $role = "",
+    $send_email = true
 ) {
     $the_user = get_user_by( 'login', $username );
     if ( $the_user ) {
@@ -666,7 +679,8 @@ function wcusage_create_new_registration(
                 $userid,
                 $couponcode,
                 $message,
-                $type
+                $type,
+                $send_email
             );
             // Custom Action
             do_action(
@@ -859,6 +873,10 @@ function wcusage_post_submit_application(  $adminpost  ) {
                         } else {
                             $accept = 0;
                         }
+                        $send_email = true;
+                        if ( $adminpost ) {
+                            $send_email = isset( $_POST['wcu-send-email'] ) && $_POST['wcu-send-email'] === '1';
+                        }
                         $createregistration = wcusage_create_new_registration(
                             $couponcode,
                             $username,
@@ -869,7 +887,8 @@ function wcusage_post_submit_application(  $adminpost  ) {
                             $type,
                             $info,
                             $message,
-                            $role
+                            $role,
+                            $send_email
                         );
                         // Get MLA fields
                         $mla = "";
@@ -943,6 +962,18 @@ function wcusage_post_submit_application(  $adminpost  ) {
                             } else {
                                 $acceptmessage = sprintf( esc_html__( 'Your %s application has been submitted.', 'woo-coupon-usage' ), strtolower( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
                             }
+                            // Post/Redirect/Get: store the message in the session and redirect to the
+                            // current page with a success flag. This prevents a page refresh from
+                            // re-submitting the form and creating a duplicate registration.
+                            $acceptmessage = str_replace( "{username}", $username, $acceptmessage );
+                            $acceptmessage = str_replace( "{coupon}", $couponcode, $acceptmessage );
+                            if ( session_status() === PHP_SESSION_NONE ) {
+                                @session_start();
+                            }
+                            $_SESSION['wcusage_registration_success_message'] = $acceptmessage;
+                            $current_url = (( is_ssl() ? 'https' : 'http' )) . '://' . $_SERVER['HTTP_HOST'] . strtok( $_SERVER['REQUEST_URI'], '?' );
+                            wp_safe_redirect( add_query_arg( 'wcusage_registered', '1', $current_url ) );
+                            exit;
                         } else {
                             $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
                             if ( $wcusage_field_registration_enable ) {
@@ -1098,6 +1129,11 @@ function wcusage_login_after_registration() {
     }
     // if wordpress user not logged in
     if ( !is_user_logged_in() ) {
+        // Only proceed if this is an actual form submission — avoids running coupon
+        // generation (and its DB queries) on every page load.
+        if ( !isset( $_POST['submitaffiliateapplication'] ) ) {
+            return;
+        }
         $captchaverify = wcusage_registration_form_verify_captcha( 0 );
         $post_field_values = wcusage_registration_form_post_get_fields( 0 );
         if ( $captchaverify && isset( $_POST['wcusage_submit_registration_form2'] ) && isset( $_POST['submitaffiliateapplication'] ) ) {
@@ -1253,6 +1289,12 @@ function wcusage_add_new_affiliate_user(
             update_user_meta( $userid, 'wcu_referrer', $referrer );
         }
     }
+    if ( isset( $_POST['wcu-input-phone'] ) ) {
+        $phone = sanitize_text_field( $_POST['wcu-input-phone'] );
+        if ( $phone ) {
+            update_user_meta( $userid, 'wcu_phone', $phone );
+        }
+    }
     // Send New Account Email
     $wcusage_email_registration_new_enable = wcusage_get_setting_value( 'wcusage_field_email_registration_new_enable', '1' );
     if ( $userid && $wcusage_email_registration_new_enable ) {
@@ -1339,12 +1381,21 @@ function wcusage_registration_form_post_get_fields(  $adminpost = 0  ) {
     } else {
         $couponcode = "";
     }
-    if ( $couponcode == "" ) {
-        $first_name_for_coupon = ( isset( $firstname ) ? $firstname : '' );
-        $last_name_for_coupon = ( isset( $lastname ) ? $lastname : '' );
-        $couponcode = wcusage_generate_auto_coupon( $username, $first_name_for_coupon, $last_name_for_coupon );
+    // Dynamic coupon code generation.
+    // Only generate when there is an actual form submission — prevents the
+    // wcusage_generate_auto_coupon() DB query (and its {random} variant) from
+    // firing on every page load via the init hook or other non-POST contexts.
+    if ( isset( $_POST['submitaffiliateapplication'] ) ) {
+        if ( $couponcode == "" ) {
+            $first_name_for_coupon = ( isset( $firstname ) ? $firstname : '' );
+            $last_name_for_coupon = ( isset( $lastname ) ? $lastname : '' );
+            $couponcode = wcusage_generate_auto_coupon( $username, $first_name_for_coupon, $last_name_for_coupon );
+        }
     }
     $info = json_encode( $info );
+    if ( !isset( $phone ) ) {
+        $phone = '';
+    }
     $return_array = [];
     $return_array['username'] = $username;
     $return_array['password'] = $password;
@@ -1356,6 +1407,7 @@ function wcusage_registration_form_post_get_fields(  $adminpost = 0  ) {
     $return_array['referrer'] = $referrer;
     $return_array['promote'] = $promote;
     $return_array['website'] = $website;
+    $return_array['phone'] = $phone;
     $return_array['type'] = $type;
     $return_array['info'] = $info;
     $return_array['role'] = $role;

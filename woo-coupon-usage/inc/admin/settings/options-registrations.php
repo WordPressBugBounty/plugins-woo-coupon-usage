@@ -733,6 +733,26 @@ function wcusage_field_cb_registration( $args )
           <div style="clear: both;"></div>
           <br/>
 
+          <!-- Show "Phone Number" field on affiliate application form. -->
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_phone', 0, esc_html__( '"Phone Number" Field', 'woo-coupon-usage' ), '0px'); ?>
+
+          <?php wcusage_setting_toggle('.wcusage_field_registration_enable_phone', '.wcu-field-section-registration-phone-text'); // Show or Hide ?>
+          <span class="wcu-field-section-registration-phone-text" style="margin-top: 7px; display: block;">
+            <div style="display: inline-block;padding: 5px 10px 8px 10px;background: #fff;border: 2px solid #e3e3e3;border-radius: 10px;">
+              <!-- Phone field label -->
+              <div style="width: auto; float: left; display: block;">
+                <?php wcusage_setting_text_option('wcusage_field_registration_phone_text', 'Phone Number', '<span class="reg-field-label">' . esc_html__( 'Field Label:', 'woo-coupon-usage' ) . '</span>', '0px'); ?>
+              </div>
+              <div style="width: auto; float: left; display: block; margin-top: -5px;">
+                <strong style="display: block; margin: 5px 0 -5px 10px;"><label for="wcusage_field_registration_enable_phone_req"><?php echo esc_html__( 'Required?', 'woo-coupon-usage' ); ?></label></strong>
+                <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_phone_req', 0, '', '10px'); ?>
+              </div>
+            </div>
+          </span>
+
+          <div style="clear: both;"></div>
+          <br/>
+
           <hr/>
 
           <h3 style="margin-bottom: 0px;"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Custom Form Fields', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?></h3>

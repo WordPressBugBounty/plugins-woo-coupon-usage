@@ -108,7 +108,7 @@ if(isset($_POST['_wpnonce'])) {
   $ListTable->prepare_items();
 	?>
 	<div style="margin-top: -30px;">
-		<input type="hidden" name="page" value="<?php echo esc_html( $_GET['page'] ) ?>" />
+		<input type="hidden" name="page" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ); ?>" />
 		<?php $ListTable->display() ?>
 	</div>
 </div>

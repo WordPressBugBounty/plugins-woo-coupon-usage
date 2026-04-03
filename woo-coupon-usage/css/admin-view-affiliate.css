@@ -534,19 +534,6 @@
     padding: 10px 12px !important;
 }
 
-/* Compact View Dashboard button inside the table (independent of column order) */
-#tab-overview table.wp-list-table a.wcusage-view-dashboard-btn {
-    font-size: 12px !important;
-    padding: 4px 8px !important;
-    line-height: 1.6 !important;
-}
-/* Fallback: if Dashboard is the last column, still compact generic large buttons */
-#tab-overview table.wp-list-table td:last-child a.button.button-large {
-    font-size: 12px !important;
-    padding: 4px 8px !important;
-    line-height: 1.6 !important;
-}
-
 /* Inline actions: Quick Edit | Edit | Delete on one line */
 .wcusage-actions-inline {
     display: flex;

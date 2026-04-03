@@ -602,6 +602,20 @@ __( 'Display custom modal popups, bar notices, or floating widgets to customers 
 ?>
 
 <?php wcusage_output_addon_box(
+__( 'SMS Notifications', 'woo-coupon-usage' ),
+"wcusage_sms_enable",
+__( 'Send automated SMS text messages to affiliates when key events occur, such as earning new commission or receiving a payout. Powered by Twilio.', 'woo-coupon-usage' ),
+"https://couponaffiliates.com/docs/sms-notifications",
+"fas fa-comment-sms",
+0,
+0,
+0,
+'tab-sms',
+'sms-settings'
+);
+?>
+
+<?php wcusage_output_addon_box(
 __( 'Affiliate Groups', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
 __( 'Assign affiliates to groups and then configure a variety of settings for that whole group.', 'woo-coupon-usage' ),

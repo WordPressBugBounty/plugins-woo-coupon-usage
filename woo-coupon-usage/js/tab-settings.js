@@ -215,7 +215,9 @@ jQuery(document).ready(function($) {
             wcu_display_name: $settingsForm.find('#wcu_display_name').val() || '',
             wcu_email: $settingsForm.find('#wcu_email').val() || '',
             wcu_phone: $settingsForm.find('#wcu_phone').val() || '',
-            wcu_website: $settingsForm.find('#wcu_website').val() || ''
+            wcu_website: $settingsForm.find('#wcu_website').val() || '',
+            wcusage_sms_phone: $settingsForm.find('#wcusage_sms_phone').val() || '',
+            wcusage_sms_opted_out: $settingsForm.find('#wcusage_sms_opted_out').is(':checked') ? '1' : '0'
         };
 
         // Add region-specific account number fields for debugging/backup

@@ -3,6 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+if ( !function_exists( 'wcusage_field_cb_notifications' ) ) {
 function wcusage_field_cb_notifications( $args )
 {
   $options = get_option( 'wcusage_options' );
@@ -1005,3 +1006,4 @@ if( !function_exists( 'wcusage_email_merge_tags' ) ) {
 
   }
 }
+} // end function_exists wcusage_field_cb_notifications

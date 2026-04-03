@@ -48,6 +48,24 @@ function wcusage_ajax_update_settings() {
     $wcu_notifications_extra = isset($_POST['wcu_notifications_extra']) ? sanitize_text_field($_POST['wcu_notifications_extra']) : '';
     update_post_meta($postid, 'wcu_notifications_extra', $wcu_notifications_extra);
 
+    // Update SMS notification settings (PRO)
+    if (wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code()) {
+        if (wcusage_get_setting_value('wcusage_sms_enable', 0) && wcusage_get_setting_value('wcusage_sms_affiliate_phone_enable', 1)) {
+            if (isset($_POST['wcusage_sms_phone'])) {
+                $sms_phone = sanitize_text_field($_POST['wcusage_sms_phone']);
+                update_user_meta($couponuserid, 'wcusage_sms_phone', $sms_phone);
+            }
+        }
+        if (wcusage_get_setting_value('wcusage_sms_enable', 0) && wcusage_get_setting_value('wcusage_sms_affiliate_optout_enable', 1)) {
+            $sms_opted_out = (isset($_POST['wcusage_sms_opted_out']) && $_POST['wcusage_sms_opted_out'] === '1') ? 1 : 0;
+            if ($sms_opted_out) {
+                update_user_meta($couponuserid, 'wcusage_sms_opted_out', 1);
+            } else {
+                delete_user_meta($couponuserid, 'wcusage_sms_opted_out');
+            }
+        }
+    }
+
     // Update payout settings
     $payout_fields = [
         'payouttype' => 'wcu_payout_type',
@@ -173,6 +191,10 @@ function wcusage_ajax_update_settings() {
     if($couponuserid == get_current_user_id()) {
         foreach($account_fields as $post_key => $meta_key) {
             if($meta_key === 'user_email') {
+                // Only validate email if the field was actually submitted
+                if(!isset($_POST[$post_key])) {
+                    continue;
+                }
                 // Check the email is not empty
                 if(empty($_POST[$post_key])) {
                     wp_send_json_error(esc_html__('Email is required.', 'woo-coupon-usage'));
@@ -258,6 +280,17 @@ if (!function_exists('wcusage_tab_settings')) {
         $wcu_notifications_extra = get_post_meta($postid, 'wcu_notifications_extra', true);
         $wcusage_email_enable_extra = wcusage_get_setting_value('wcusage_field_email_enable_extra', 1);
 
+        // SMS
+        $wcusage_sms_enable               = wcusage_get_setting_value('wcusage_sms_enable', 0);
+        $wcusage_sms_affiliate_phone_show  = wcusage_get_setting_value('wcusage_sms_affiliate_phone_enable', 1);
+        $wcusage_sms_affiliate_optout_show = wcusage_get_setting_value('wcusage_sms_affiliate_optout_enable', 1);
+        $wcu_sms_phone    = get_user_meta($couponuserid, 'wcusage_sms_phone', true);
+        // Fall back to general phone field if no dedicated SMS phone set yet
+        if (!$wcu_sms_phone) {
+            $wcu_sms_phone = get_user_meta($couponuserid, 'wcu_phone', true);
+        }
+        $wcu_sms_opted_out = get_user_meta($couponuserid, 'wcusage_sms_opted_out', true) ? true : false;
+
         // Account details
         $user = get_userdata($couponuserid);
         if($couponuserid) {
@@ -301,7 +334,7 @@ if (!function_exists('wcusage_tab_settings')) {
                             <li><a href="#tab-statement-settings"><?php echo esc_html__("Statement Settings", "woo-coupon-usage"); ?></a></li>
                             <?php } ?>
                         <?php } ?>
-                        <li <?php if(!$active) { ?>class="active"<?php } ?>><a href="#tab-email-notifications"><?php echo esc_html__("Email Notifications", "woo-coupon-usage"); ?></a></li>
+                        <li <?php if(!$active) { ?>class="active"<?php } ?>><a href="#tab-email-notifications"><?php echo esc_html__("Notifications", "woo-coupon-usage"); ?></a></li>
                         <?php if (wcusage_get_setting_value('wcusage_field_show_settings_tab_account', '1')) { ?>
                             <li><a href="#tab-account-details"><?php echo esc_html__("Account Details", "woo-coupon-usage"); ?></a></li>
                         <?php } ?>
@@ -349,6 +382,36 @@ if (!function_exists('wcusage_tab_settings')) {
                                     <input type="text" id="wcu_notifications_extra" name="wcu_notifications_extra"
                                         value="<?php echo esc_html($wcu_notifications_extra); ?>" style="width: 400px; max-width: 100%;"
                                         placeholder="example@email.com,another@email.com"></p>
+                            <?php } ?>
+
+                            <?php
+                            // SMS Notifications (PRO) — phone number + opt-out fields
+                            if (
+                                wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code()
+                                && $wcusage_sms_enable
+                                && ($wcusage_sms_affiliate_phone_show || $wcusage_sms_affiliate_optout_show)
+                            ) { ?>
+                                <hr style="margin: 15px 0;"/>
+                                <p><strong><?php echo esc_html__("SMS Notifications", "woo-coupon-usage"); ?></strong></p>
+
+                                <?php if ($wcusage_sms_affiliate_phone_show) { ?>
+                                <p>
+                                    <label for="wcusage_sms_phone"><?php echo esc_html__("Phone Number for SMS Notifications:", "woo-coupon-usage"); ?></label><br/>
+                                    <input type="tel" id="wcusage_sms_phone" name="wcusage_sms_phone"
+                                        value="<?php echo esc_attr($wcu_sms_phone); ?>"
+                                        placeholder=""
+                                        style="width: 300px; max-width: 100%;">
+                                    <br/><small><?php echo esc_html__("Enter in international format, e.g. +447911123456. Leave blank to disable SMS notifications.", "woo-coupon-usage"); ?></small>
+                                </p>
+                                <?php } ?>
+
+                                <?php if ($wcusage_sms_affiliate_optout_show) { ?>
+                                <p>
+                                    <input type="checkbox" id="wcusage_sms_opted_out" name="wcusage_sms_opted_out" value="1"
+                                        <?php if ($wcu_sms_opted_out) { ?>checked<?php } ?>>
+                                    <label for="wcusage_sms_opted_out"><?php echo esc_html__("Opt out of SMS notifications", "woo-coupon-usage"); ?></label>
+                                </p>
+                                <?php } ?>
                             <?php } ?>
                         </div>
 

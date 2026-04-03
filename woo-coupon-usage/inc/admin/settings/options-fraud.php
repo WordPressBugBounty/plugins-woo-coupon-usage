@@ -3,6 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+if ( !function_exists( 'wcusage_field_cb_fraud' ) ) {
 function wcusage_field_cb_fraud( $args )
 {
   $options = get_option( 'wcusage_options' );
@@ -148,3 +149,4 @@ function wcusage_field_cb_fraud( $args )
 
  <?php
 }
+} // end function_exists wcusage_field_cb_fraud

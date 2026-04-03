@@ -3,6 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+if ( !function_exists( 'wcusage_field_cb_subscriptions' ) ) {
 function wcusage_field_cb_subscriptions( $args )
 {
   $options = get_option( 'wcusage_options' );
@@ -57,3 +58,4 @@ function wcusage_field_cb_subscriptions( $args )
 
  <?php
 }
+} // end function_exists wcusage_field_cb_subscriptions

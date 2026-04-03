@@ -28,7 +28,7 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
         $options = get_option( 'wcusage_options' );
         $wcusage_lifetime = wcusage_get_setting_value( 'wcusage_field_lifetime', '0' );
         $wcusage_field_lifetime_all = wcusage_get_setting_value( 'wcusage_field_lifetime_all', '0' );
-        $post_id = ( isset( $_GET['post'] ) ? $_GET['post'] : '' );
+        $post_id = ( isset( $_GET['post'] ) ? absint( $_GET['post'] ) : '' );
         $getcurrentcouponuser = ( $post_id ? get_post_meta( $post_id, 'wcu_select_coupon_user', true ) : '' );
         $currentselecteduserlogin = '';
         // Convert stored user ID to username for display
@@ -759,7 +759,7 @@ add_action( "add_meta_boxes", "wcusage_add_coupon_meta_box" );
 if ( !function_exists( 'wcusage_coupon_meta_box_markup' ) ) {
     function wcusage_coupon_meta_box_markup() {
         if ( isset( $_GET['post'] ) ) {
-            $post_id = $_GET['post'];
+            $post_id = absint( $_GET['post'] );
             $coupon_info = wcusage_get_coupon_info_by_id( $post_id );
             $uniqueurl = $coupon_info[4];
             $coupon_user = get_post_meta( $post_id, 'wcu_select_coupon_user', true );

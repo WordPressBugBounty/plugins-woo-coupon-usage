@@ -3,6 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+if ( !function_exists( 'wcusage_field_cb_custom_tabs' ) ) {
 function wcusage_field_cb_custom_tabs( $args )
 {
     $options = get_option( 'wcusage_options' );
@@ -253,3 +254,4 @@ function wcusage_field_cb_custom_tabs( $args )
 
  <?php
 }
+} // end function_exists wcusage_field_cb_custom_tabs

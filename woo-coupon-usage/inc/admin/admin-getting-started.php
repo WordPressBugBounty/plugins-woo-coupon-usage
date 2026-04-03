@@ -8,6 +8,18 @@ function wcusage_getting_started_create() {
 
     if ( isset( $_POST['submitnewpage'] ) || isset( $_POST['submitnewpage2'] ) || isset( $_GET['create_new_dashboard'] ) ) {
 
+    // Verify nonce for security
+    if ( isset( $_POST['submitnewpage'] ) || isset( $_POST['submitnewpage2'] ) ) {
+        if ( ! isset( $_POST['_wpnonce_getting_started'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce_getting_started'] ) ), 'wcusage_getting_started_action' ) ) {
+            return;
+        }
+    }
+    if ( isset( $_GET['create_new_dashboard'] ) ) {
+        if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'wcusage_create_dashboard' ) ) {
+            return;
+        }
+    }
+
     $current_user_id = get_current_user_id();
 
     global $wpdb;
@@ -57,7 +69,7 @@ function wcusage_getting_started_create() {
 
     // Remove GET variable from URL
     if(isset($_GET['create_new_dashboard'])) {
-      $url = remove_query_arg('create_new_dashboard');
+      $url = remove_query_arg( array( 'create_new_dashboard', '_wpnonce' ) );
       wp_safe_redirect($url);
       exit;
     }
@@ -111,6 +123,7 @@ add_action( 'wcusage_hook_getting_started', 'wcusage_getting_started' );
 function wcusage_getting_started() {
 ?>
 	<form method="post" class="wcusage-get-started" action="" style="margin-top: 35px;">
+    <?php wp_nonce_field( 'wcusage_getting_started_action', '_wpnonce_getting_started' ); ?>
 
     <div style="height: 220px; width: 55%; display: inline-block;">
   		<strong style="font-size: 1.3em;">Getting Started</strong>
@@ -151,6 +164,7 @@ function wcusage_getting_started2() {
 <h2 style="font-size: 20px; margin: 8px 0 35px -12px;"> <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_setup')); ?>" class="wcusage-settings-button">Start Setup Wizard <span class="fa-solid fa-circle-arrow-right"></span></a></h2>
 
 	<form method="post" class="wcusage-get-started" action="">
+    <?php wp_nonce_field( 'wcusage_getting_started_action', '_wpnonce_getting_started' ); ?>
 
     <p><strong>Quick Guide:</strong></p>
 
@@ -188,6 +202,7 @@ add_action( 'wcusage_hook_getting_started3', 'wcusage_getting_started3' );
 function wcusage_getting_started3() {
 ?>
 	<form method="post" action="" style="margin-bottom: 10px;">
+		<?php wp_nonce_field( 'wcusage_getting_started_action', '_wpnonce_getting_started' ); ?>
 		<button type="submit" name="submitnewpage2" class="submit-generate-page"><?php echo esc_html__( "Generate Dashboard Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-arrow-right"></span></button>
 	</form>
 <?php

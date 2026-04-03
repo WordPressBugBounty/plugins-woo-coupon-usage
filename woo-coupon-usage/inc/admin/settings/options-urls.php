@@ -3,6 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+if ( !function_exists( 'wcusage_field_cb_urls' ) ) {
 function wcusage_field_cb_urls( $args )
 {
     $options = get_option( 'wcusage_options' );
@@ -157,41 +158,55 @@ function wcusage_field_cb_urls( $args )
 
               var defaultURL = "<?php echo esc_url(home_url()); ?>";
 
-              jQuery('#wcusage_field_default_ref_url').on('change', function() {
+              // Helper to extract domain without www prefix and without port
+              function wcuGetDomain(urlStr) {
+                  try {
+                      var a = document.createElement('a');
+                      a.href = urlStr;
+                      return a.hostname.replace(/^www\./, '').toLowerCase();
+                  } catch(e) {
+                      return '';
+                  }
+              }
+
+              var siteDomain = wcuGetDomain(defaultURL);
+
+              jQuery('#wcusage_field_default_ref_url').on('change', function(e) {
                   var url = jQuery(this).val();
+
+                  // If the field is empty, reset to default
+                  if( !url || url.trim() === '' ) {
+                      jQuery(this).val(defaultURL);
+                      return;
+                  }
 
                   // Add https:// if not already
                   if( url.indexOf('http://') === -1 && url.indexOf('https://') === -1 ) {
                       url = 'https://' + url;
                   }
 
-                  // Regex pattern for URL validation
-                  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-                      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name and extension
-                      '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-                      '(\\:\\d+)?'+ // port
-                      '(\\/[-a-z\\d%_.~+]*)*'+ // path
-                      '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-                      '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-
-                  if(!pattern.test(url)) {
-                      jQuery(this).val(defaultURL);
-                      return;
-                  }
-
-                  // Should contain the sites domain
-                  if( url.indexOf(defaultURL) === -1 ) {
-                      alert('The URL must be on this website only.');
-                      jQuery(this).val(defaultURL);
-                      return;
-                  }
-
-                  // Create an anchor tag to easily parse the URL
+                  // Use anchor tag to parse and validate the URL
                   var a = document.createElement('a');
                   a.href = url;
 
+                  // Check we got a valid hostname
+                  if( !a.hostname || a.hostname === '' ) {
+                      jQuery(this).val(defaultURL);
+                      e.stopImmediatePropagation();
+                      return;
+                  }
+
+                  // Compare domains (ignore www prefix and port differences)
+                  var enteredDomain = a.hostname.replace(/^www\./, '').toLowerCase();
+                  if( enteredDomain !== siteDomain ) {
+                      alert('The URL must be on this website only.');
+                      jQuery(this).val(defaultURL);
+                      e.stopImmediatePropagation();
+                      return;
+                  }
+
                   // Remove URL parameters if any
-                  url = a.protocol + "//" + a.hostname + a.pathname;
+                  url = a.protocol + "//" + a.hostname + (a.port && a.port !== '' && a.port !== '80' && a.port !== '443' ? ':' + a.port : '') + a.pathname;
                   jQuery(this).val(url);
 
                   // Remove slash if at the end
@@ -715,3 +730,4 @@ function wcusage_field_cb_urls( $args )
 
  <?php
 }
+} // end function_exists wcusage_field_cb_urls

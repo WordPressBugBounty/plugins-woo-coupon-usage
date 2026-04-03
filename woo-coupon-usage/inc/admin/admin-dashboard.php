@@ -289,6 +289,7 @@ jQuery(document).ready(function($) {
             )),
         );
         $other_items = array(
+            array('label' => 'Admin Tools', 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
             array(
                 'label' => 'View Admin Reports',
                 'url' => admin_url('admin.php?page=wcusage_admin_reports'),
@@ -337,7 +338,6 @@ jQuery(document).ready(function($) {
                 'icon' => 'fa-solid fa-image',
                 'disabled' => !wcusage_get_setting_value('wcusage_field_creatives_enable', '1')
             ),
-            array('label' => 'Admin Tools', 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
         );
     } else {
         $menu_items = array(
@@ -359,17 +359,17 @@ jQuery(document).ready(function($) {
             )),
         );
         $other_items = array(
-            array('label' => 'View Admin Reports', 'url' => admin_url('admin.php?page=wcusage_admin_reports'), 'icon' => 'fa-solid fa-chart-bar'),
-            array('label' => 'Manage Payouts', 'url' => admin_url('admin.php?page=wcusage_payouts'), 'icon' => 'fa-solid fa-money-bill'),
-            array('label' => 'PDF Statements', 'url' => admin_url('admin.php?page=wcusage_statements'), 'icon' => 'fa-solid fa-file-invoice-dollar'),
-            array('label' => 'Email Newsletters', 'url' => admin_url('admin.php?page=wcusage_email_newsletters'), 'icon' => 'fa-solid fa-envelope'),
-            array('label' => 'Leaderboards', 'url' => admin_url('admin.php?page=wcusage_leaderboard'), 'icon' => 'fa-solid fa-trophy'),
-            array('label' => 'Affiliate Groups', 'url' => admin_url('admin.php?page=wcusage_groups'), 'icon' => 'fa-solid fa-users'),
-            array('label' => 'Performance Bonuses', 'url' => admin_url('edit.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-bolt'),
-            array('label' => 'Direct Link Domains', 'url' => admin_url('admin.php?page=wcusage_domains'), 'icon' => 'fa-solid fa-globe'),
-            array('label' => 'View Short URLs', 'url' => admin_url('edit.php?post_type=wcu-short-urls'), 'icon' => 'fa-solid fa-link'),
-            array('label' => 'Manage Creatives', 'url' => admin_url('admin.php?page=wcusage_creatives'), 'icon' => 'fa-solid fa-image'),
-            array('label' => 'Admin Tools', 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench'),
+            array('label' => 'Admin Tools', 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
+            array('label' => 'View Admin Reports', 'url' => admin_url('admin.php?page=wcusage_admin_reports'), 'icon' => 'fa-solid fa-chart-bar', 'disabled' => false),
+            array('label' => 'Manage Payouts', 'url' => admin_url('admin.php?page=wcusage_payouts'), 'icon' => 'fa-solid fa-money-bill', 'disabled' => true),
+            array('label' => 'PDF Statements', 'url' => admin_url('admin.php?page=wcusage_statements'), 'icon' => 'fa-solid fa-file-invoice-dollar', 'disabled' => true),
+            array('label' => 'Email Newsletters', 'url' => admin_url('admin.php?page=wcusage_email_newsletters'), 'icon' => 'fa-solid fa-envelope', 'disabled' => true),
+            array('label' => 'Leaderboards', 'url' => admin_url('admin.php?page=wcusage_leaderboard'), 'icon' => 'fa-solid fa-trophy', 'disabled' => true),
+            array('label' => 'Affiliate Groups', 'url' => admin_url('admin.php?page=wcusage_groups'), 'icon' => 'fa-solid fa-users', 'disabled' => true),
+            array('label' => 'Performance Bonuses', 'url' => admin_url('edit.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-bolt', 'disabled' => true),
+            array('label' => 'Direct Link Domains', 'url' => admin_url('admin.php?page=wcusage_domains'), 'icon' => 'fa-solid fa-globe', 'disabled' => true),
+            array('label' => 'View Short URLs', 'url' => admin_url('edit.php?post_type=wcu-short-urls'), 'icon' => 'fa-solid fa-link', 'disabled' => true),
+            array('label' => 'Manage Creatives', 'url' => admin_url('admin.php?page=wcusage_creatives'), 'icon' => 'fa-solid fa-image', 'disabled' => true),
         );
     }
     $support_items = array(
@@ -489,16 +489,19 @@ jQuery(document).ready(function($) {
                             <?php
                         }
                     } else {
-                        // Free version: disabled links with PRO icon
+                        // Free version: show free items as normal links, disabled items with PRO icon
                         foreach ($other_items as $item) {
                             preg_match('/[?&]page=([^&]+)/', $item['url'], $other_matches);
                             $other_page = isset($other_matches[1]) ? $other_matches[1] : '';
                             $other_active = ($other_page === $current_page);
+                            $is_pro_only = isset($item['pro_only']) ? $item['pro_only'] : false;
+                            $is_disabled = isset($item['disabled']) && $item['disabled'];
+                            $show_as_disabled = $is_pro_only || $is_disabled;
                             ?>
                             <li>
-                                <a href="javascript:void(0);" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; color: #aaa; text-decoration: none; cursor: not-allowed;<?php echo $other_active ? ' background: #f3f3f3;' : ''; ?>">
+                                <a href="<?php echo $show_as_disabled ? 'javascript:void(0);' : esc_url($item['url']); ?>" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px;<?php echo $show_as_disabled ? ' color: #aaa; text-decoration: none; cursor: not-allowed;' : ' color: #333; text-decoration: none;'; ?><?php echo $other_active ? ' background: #f3f3f3;' : ''; ?>">
                                     <?php if (!empty($item['icon'])): ?><span class="<?php echo esc_attr($item['icon']); ?>"></span> <?php endif; ?><?php echo esc_html($item['label']); ?>
-                                    <span style="margin-left: auto; color: #d9534f; font-size: 13px; font-weight: bold;">(PRO)</span>
+                                    <?php if ($show_as_disabled): ?><span style="margin-left: auto; color: #d9534f; font-size: 13px; font-weight: bold;">(PRO)</span><?php endif; ?>
                                 </a>
                             </li>
                             <?php
@@ -1952,7 +1955,7 @@ function wcusage_dashboard_page_html() {
                             <?php echo esc_html__('View Full Report', 'woo-coupon-usage'); ?> <i class="fa-solid fa-arrow-right"></i>
                         </a>
                         <button type="button" id="wcusage-clear-cache-btn" class="button button-secondary button-large" style="float: right; margin-top: 0px; margin-right: 5px; font-size: 14px;" title="<?php echo esc_attr__('Clear all dashboard caches to refresh statistics', 'woo-coupon-usage'); ?>">
-                            <span class="fa-solid fa-sync"></span> <?php echo esc_html__('Clear Cache', 'woo-coupon-usage'); ?>
+                            <?php echo esc_html__('Clear Cache', 'woo-coupon-usage'); ?> <span class="fa-solid fa-rotate" style="margin-left: 2px;"></span>
                         </button></h2>
                         <?php do_action('wcusage_hook_dashboard_page_section_statistics', ''); ?>
                     </div>

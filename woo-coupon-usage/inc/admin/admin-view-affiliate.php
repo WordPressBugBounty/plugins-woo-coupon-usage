@@ -784,7 +784,7 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
     echo esc_html__( 'Sub-Affiliates', 'woo-coupon-usage' );
     ?></h3>
                                     <button type="button" id="wcusage-add-sub-affiliate-toggle" class="button">
-                                        <span class="dashicons dashicons-plus-alt2" style="vertical-align: middle; margin-right: 4px;"></span>
+                                        <span class="dashicons dashicons-plus-alt2"></span>
                                         <?php 
     echo esc_html__( 'Add New Sub-Affiliate', 'woo-coupon-usage' );
     ?>

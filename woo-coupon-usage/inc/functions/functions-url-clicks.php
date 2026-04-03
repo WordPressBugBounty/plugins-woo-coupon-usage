@@ -66,28 +66,32 @@ if ( !function_exists( 'wcusage_install_clicks_data' ) ) {
         global $wpdb;
         // Check the table exists, if not, create it
         wcusage_install_clicks_tables();
-        // Sanitize all inputs in bulk.
-        $data = array_map( 'sanitize_text_field', [
-            'coupon_id' => $coupon_id,
-            'campaign'  => $campaign,
-            'page'      => $page,
-            'refpage'   => $refpage,
-            'converted' => $converted,
-            'ipaddress' => $ipaddress,
-        ] );
-        // Check for critical data validity.
-        if ( empty( $data['coupon_id'] ) || empty( $data['ipaddress'] ) ) {
-            // Return false if critical data is missing.
+        // Sanitize each value according to its expected type.
+        $coupon_id = absint( $coupon_id );
+        $campaign = sanitize_text_field( wp_unslash( (string) $campaign ) );
+        $page = absint( $page );
+        $refpage = sanitize_text_field( wp_unslash( (string) $refpage ) );
+        $converted = (int) (bool) $converted;
+        // IP/ID: accept a valid IP address or an alphanumeric random ID (cookie-based tracking).
+        $ipaddress = sanitize_text_field( wp_unslash( (string) $ipaddress ) );
+        if ( filter_var( $ipaddress, FILTER_VALIDATE_IP ) === false ) {
+            // Not a valid IP — only allow the alphanumeric random-ID format used by cookie tracking.
+            if ( !preg_match( '/^[a-zA-Z0-9_\\-]{1,64}$/', $ipaddress ) ) {
+                $ipaddress = '';
+            }
+        }
+        // A coupon ID is required; an empty ipaddress is allowed (tracking may be disabled).
+        if ( empty( $coupon_id ) ) {
             return false;
         }
         $table_name = $wpdb->prefix . 'wcusage_clicks';
         $insert_data = [
-            'couponid'  => $data['coupon_id'],
-            'campaign'  => $data['campaign'],
-            'page'      => $data['page'],
-            'referrer'  => $data['refpage'],
-            'converted' => $data['converted'],
-            'ipaddress' => $data['ipaddress'],
+            'couponid'  => $coupon_id,
+            'campaign'  => $campaign,
+            'page'      => $page,
+            'referrer'  => $refpage,
+            'converted' => $converted,
+            'ipaddress' => $ipaddress,
             'orderid'   => '',
             'date'      => current_time( 'mysql' ),
         ];
@@ -232,7 +236,7 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
                     echo "<td class='wcuTableCell wcuTableCell-ref-landing'>-</td>";
                 }
                 if ( $result->referrer ) {
-                    $referrerurl = "<span style='word-wrap: break-word !important;'>" . $result->referrer . "</span>";
+                    $referrerurl = "<span style='word-wrap: break-word !important;'>" . esc_html( $result->referrer ) . "</span>";
                 } else {
                     $referrerurl = 'Direct Traffic';
                 }

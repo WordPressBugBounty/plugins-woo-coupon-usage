@@ -32,39 +32,39 @@ class wcusage_clicks_List_Table extends WP_List_Table {
         default:
             return $item[$column_name]; //Show the whole array for troubleshooting purposes
         case 'id':
-          return $item[$column_name];
+          return absint( $item[$column_name] );
         case 'couponid':
           if (isset($item[$column_name]) && $item[$column_name] != 0) {
               $coupon_info = wcusage_get_coupon_info_by_id($item[$column_name]);
               $uniqueurl = $coupon_info[4];
-              return "<a href='" . esc_url($uniqueurl) . "' target='_blank' title='" . sprintf(__('View %s Dashboard', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))) . "'>"
-                  . get_the_title($item[$column_name])
-                  . "</a> <a href='" . esc_url(admin_url('post.php?post=' . $item[$column_name] . '&action=edit&classic-editor')) . "' target='_blank' title='" . __('Edit Coupon', 'woo-coupon-usage') . "'>"
+              return "<a href='" . esc_url($uniqueurl) . "' target='_blank' title='" . esc_attr( sprintf(__('View %s Dashboard', 'woo-coupon-usage'), wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))) ) . "'>"
+                  . esc_html( get_the_title($item[$column_name]) )
+                  . "</a> <a href='" . esc_url(admin_url('post.php?post=' . absint($item[$column_name]) . '&action=edit&classic-editor')) . "' target='_blank' title='" . esc_attr( __('Edit Coupon', 'woo-coupon-usage') ) . "'>"
                   . "<span class='dashicons dashicons-edit-page' style='font-size: 12px; margin-top: 5px; display: inline-block; width: 12px;'></span></a>"
-                  . "<a href='" . esc_url(admin_url('admin.php?page=wcusage_clicks&coupon=' . get_the_title($item[$column_name]))) . "' title='" . __('View all visits for this coupon.', 'woo-coupon-usage') . "'>"
+                  . "<a href='" . esc_url(admin_url('admin.php?page=wcusage_clicks&coupon=' . rawurlencode( get_the_title($item[$column_name]) ))) . "' title='" . esc_attr( __('View all visits for this coupon.', 'woo-coupon-usage') ) . "'>"
                   . "<span class='dashicons dashicons-search' style='font-size: 12px; margin-top: 5px;'></span></a>";
           } else {
               return "";
           }
         case 'campaign':
           if (!empty($item[$column_name])) {
-              return ucfirst($item[$column_name])
-                  . "<a href='" . esc_url(admin_url('admin.php?page=wcusage_clicks&campaign=' . $item[$column_name])) . "' title='" . __('View all visits for this campaign name.', 'woo-coupon-usage') . "'>"
+              return esc_html( ucfirst($item[$column_name]) )
+                  . "<a href='" . esc_url(admin_url('admin.php?page=wcusage_clicks&campaign=' . rawurlencode( $item[$column_name] ))) . "' title='" . esc_attr( __('View all visits for this campaign name.', 'woo-coupon-usage') ) . "'>"
                   . "<span class='dashicons dashicons-search' style='font-size: 12px; margin-top: 5px;'></span></a>";
           } else {
               return "---";
           }
         case 'page':
   				if(isset($item[$column_name])) {
-            return "<a href='".esc_url(get_permalink($item[$column_name]))."' target='_blank' title='".__( 'View Landing Page', 'woo-coupon-usage' )."'>"
-            . get_the_title($item[$column_name]) . "</a>";
+            return "<a href='".esc_url(get_permalink($item[$column_name]))."' target='_blank' title='".esc_attr( __( 'View Landing Page', 'woo-coupon-usage' ) )."'>"
+            . esc_html( get_the_title($item[$column_name]) ) . "</a>";
           } else {
             return "";
           }
         case 'referrer':
           if (!empty($item[$column_name])) {
-              return $item[$column_name]
-                  . "<a href='".esc_url(admin_url('admin.php?page=wcusage_clicks&referrer=' . $item[$column_name]))."' title='" . __('View all visits for this referrer.', 'woo-coupon-usage') . "'>"
+              return esc_html( $item[$column_name] )
+                  . "<a href='".esc_url(admin_url('admin.php?page=wcusage_clicks&referrer=' . rawurlencode( $item[$column_name] )))."' title='" . esc_attr( __('View all visits for this referrer.', 'woo-coupon-usage') ) . "'>"
                   . "<span class='dashicons dashicons-search' style='font-size: 12px; margin-top: 5px;'></span></a>";
           } else {
               return "";
@@ -73,11 +73,11 @@ class wcusage_clicks_List_Table extends WP_List_Table {
   				if(isset($item[$column_name])) {
 
             if( wcusage_is_customer_blacklisted($item[$column_name]) ) {
-              $blacklist_button_part1 = '<input type="text" id="wcu-blacklist-ipaddress-remove" name="wcu-blacklist-ipaddress-remove" value="'.$item['ipaddress'].'" style="display: none;">';
+              $blacklist_button_part1 = '<input type="text" id="wcu-blacklist-ipaddress-remove" name="wcu-blacklist-ipaddress-remove" value="'.esc_attr($item['ipaddress']).'" style="display: none;">';
               $blacklist_button_part2 = '<span class="fa-solid fa-shield icon-blacklist-remove"></span>';
               $blacklist_button_part3 = esc_html__( 'Remove from Blacklist', 'woo-coupon-usage' );
             } else {
-              $blacklist_button_part1 = '<input type="text" id="wcu-blacklist-ipaddress" name="wcu-blacklist-ipaddress" value="'.$item['ipaddress'].'" style="display: none;">';
+              $blacklist_button_part1 = '<input type="text" id="wcu-blacklist-ipaddress" name="wcu-blacklist-ipaddress" value="'.esc_attr($item['ipaddress']).'" style="display: none;">';
               $blacklist_button_part2 = '<span class="fa-solid fa-ban icon-blacklist-add"></span>';
               $blacklist_button_part3 = esc_html__( 'Add to Blacklist', 'woo-coupon-usage' );
             }
@@ -92,11 +92,11 @@ class wcusage_clicks_List_Table extends WP_List_Table {
 
             if( wcusage_is_customer_blacklisted($item[$column_name]) ) {
 
-              return '<span style="color: red;" title="This visitor is blacklisted from using affiliate coupons.">' . $item[$column_name] . " " . $blacklist_button . '</span>';
+              return '<span style="color: red;" title="This visitor is blacklisted from using affiliate coupons.">' . esc_html($item[$column_name]) . " " . $blacklist_button . '</span>';
 
             } else {
 
-              return $item[$column_name] . " " . $blacklist_button;
+              return esc_html($item[$column_name]) . " " . $blacklist_button;
             }
 
           } else {
@@ -111,7 +111,7 @@ class wcusage_clicks_List_Table extends WP_List_Table {
               if($theorder) {
                 $theordertotal = $theorder->get_formatted_order_total($item['orderid']);
               }
-              $orderinfo = "<br/><a href='".get_edit_post_link($item['orderid'])."'>#" . $item['orderid'] . "</a> (" . $theordertotal . ")";
+              $orderinfo = "<br/><a href='".esc_url( get_edit_post_link($item['orderid']) )."'>#" . absint( $item['orderid'] ) . "</a> (" . wp_kses_post( $theordertotal ) . ")";
             }
   					return '<span class="dashicons dashicons-yes-alt" style="color: green;"></span> ' . esc_html__( 'Yes', 'woo-coupon-usage' ) . $orderinfo;
   				} else {
@@ -142,13 +142,13 @@ class wcusage_clicks_List_Table extends WP_List_Table {
 
         //Build row actions
         $actions = array(
-          'delete'    => sprintf('<a href="?page=%s&action=%s&click=%s">%s</a>', sanitize_text_field( $_GET['page'] ), 'delete', $item['ID'], esc_html__( 'Delete', 'woo-coupon-usage' )),
+          'delete'    => sprintf('<a href="%s">%s</a>', esc_url( add_query_arg( array( 'page' => sanitize_text_field( wp_unslash( $_GET['page'] ) ), 'action' => 'delete', 'click' => $item['ID'] ), admin_url( 'admin.php' ) ) ), esc_html__( 'Delete', 'woo-coupon-usage' )),
         );
 
         //Return the title contents
         return sprintf('%1$s <span style="color:silver">(id:%2$s)</span>%3$s',
-            /*$1%s*/ $item['title'],
-            /*$2%s*/ $item['ID'],
+            /*$1%s*/ esc_html( $item['title'] ),
+            /*$2%s*/ absint( $item['ID'] ),
             /*$3%s*/ $this->row_actions($actions)
         );
     }
@@ -217,7 +217,7 @@ class wcusage_clicks_List_Table extends WP_List_Table {
             $params[] = sanitize_text_field($_GET['referrer']);
         }
         if (isset($_GET['coupon']) && !empty($_GET['coupon'])) {
-            $coupon = wcusage_get_coupon_info($_GET['coupon']);
+            $coupon = wcusage_get_coupon_info( sanitize_text_field( wp_unslash( $_GET['coupon'] ) ) );
             if (!empty($coupon) && isset($coupon[2])) {
                 $where_clauses[] = "couponid = %s";
                 $params[] = sanitize_text_field($coupon[2]);

@@ -423,23 +423,14 @@ class wcusage_Coupons_Table extends WP_List_Table {
                 
                 // Calculate commission breakdown for this individual coupon
                 $unpaid_commission = (float) get_post_meta( $item->ID, 'wcu_text_unpaid_commission', true );
+                $pending_payments = (float) get_post_meta( $item->ID, 'wcu_text_pending_payment_commission', true );
                 $total_commission = $wcu_alltime_stats && isset( $wcu_alltime_stats['total_commission'] ) ? (float) $wcu_alltime_stats['total_commission'] : 0;
-                $paid_commission = $total_commission - $unpaid_commission;
-                if ( $paid_commission < 0 ) $paid_commission = 0;
                 
-                // Calculate actual pending payments for this specific coupon
-                $pending_payments = 0;
-                if ($coupon_user_id && $wpdb->get_var("SHOW TABLES LIKE '$payouts_table'") == $payouts_table) { // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-                    $pending_payouts = $wpdb->get_results($wpdb->prepare(
-                        "SELECT amount FROM $payouts_table WHERE couponid = %d AND userid = %d AND status IN ('pending', 'created')",
-                        $item->ID,
-                        $coupon_user_id
-                    )); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-                    foreach ($pending_payouts as $payout) {
-                        $pending_payments += (float)$payout->amount;
-                    }
-                }
-                
+                $paid_commission = (float) $wpdb->get_var($wpdb->prepare(
+                    "SELECT COALESCE(SUM(amount), 0) FROM {$payouts_table} WHERE couponid = %d AND status = 'paid'",
+                    $item->ID
+                )); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+
                 $output = '<div style="line-height: 1.4;">';
                 $output .= '<div><strong>Unpaid:</strong> ' . wcusage_format_price( $unpaid_commission ) . '</div>';
                 $output .= '<hr style="margin: 2px 0; border: 0; border-top: 1px solid #ddd;">';

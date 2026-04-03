@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 6.9
-Stable tag: 7.5.2s
+Stable tag: 7.6.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -97,13 +97,11 @@ With this plugin you can give your affiliates access to a user-friendly affiliat
 
 **-- WooCommerce Subscriptions --**
 
-* The Coupon Affiliates plugin for WooCommerce includes free integration with the official "WooCommerce Subscriptions" plugin. This means you can offer affiliates referring commission for subscription renewals, or optionally toggle this off to only reward commission for the first order.
+* The Coupon Affiliates plugin for WooCommerce includes free integration with the official "WooCommerce Subscriptions" plugin.
 
 **-- Multi-Currency Support --**
 
-* With Coupon Affiliates, you can enable multi-currency support and easily set conversion rates for all your store currencies.
-
-* This will then automatically convert the order totals, total stats, and commission earned, in the affiliate dashboard to your base store currency, no matter which currency each of the orders were made in.
+* With Coupon Affiliates, you can enable multi-currency support and easily set conversion rates for all your store currencies to be used when calculating commissions and statistics.
 
 ## 🎨 Admin Management & Customisation
 
@@ -144,8 +142,6 @@ Coupon Affiliates for WooCommerce makes it easy to manage and customise your aff
 **-- Ready to increase sales with your new affiliate program? --**
 
 Setup your own affiliate WooCommerce system in minutes. Then launch your coupon affiliate marketing program to help increase your sales!
-
-To get started, simply add the shortcode [couponaffiliates] to a new page. This will assign it as the dashboard parent for generating the unique dashboard page links, which you can share with affiliates.
 
 Upon installation, a small setup wizard will help you get started and automatically generate the affiliate dashboard page for you.
 
@@ -203,13 +199,9 @@ Learn more about Pro and upgrade at <a href="https://couponaffiliates.com">www.c
 
 Coupon Affiliates was built exclusively as a WooCommerce Affiliate Plugin, however it can also be integrated with other popular eCommerce plugins such as LifterLMS, LearnDash, TutorLMS, MemberPress, and Paid Memberships Pro. <a href="https://couponaffiliates.com/docs-category/integrations">Click here</a> to learn more. It also integrates well with other coupon plugins such as Smart Coupons, and Advanced Coupons.
 
-## 📅 Roadmap
-
-Want to know what new features we're working on releasing in the future? Check out our <a href="https://couponaffiliates.com/roadmap">roadmap</a>.
-
 ## 👍 Suggestions and Support
 
-If you have any suggestions for additional functionality, need any help, or have found a bug, please <a href="https://couponaffiliates.com/contact">get in touch</a>!
+If you have any suggestions for additional functionality, need any help, or have found a bug, please <a href="https://wordpress.org/support/plugin/woo-coupon-usage/">get in touch</a>!
 
 == Installation ==
 
@@ -277,10 +269,30 @@ Please report security bugs found in the source code of the undefined plugin thr
 
 == Changelog ==
 
-= Version 7.5.3 =
+= Version 7.6.0 - 3rd April 2026 =
+- New: (PRO) Added a new SMS Notifications feature, to automatically send SMS notifications to affiliates and admins for various events like new referrals, and payout updates. You can customise the SMS messages with your own text.
+- New: (PRO) Added a "Send Notification Email" checkbox to the Add New Affiliate and Add New Coupon admin forms, allowing admins to choose whether to send the "Affiliate Application Accepted" email when creating a new affiliate or coupon. The custom message field is now only shown when the checkbox is checked.
+- Improvement: Made a few performance improvements to the affiliate dashboard for coupons with lots of orders.
+- Improvement: (PRO) Optimised the "Paid" commission query on the Coupons admin table to use a single SUM query instead of fetching all rows and summing in PHP.
+- Fix: Fixed an issue where refreshing the page after submitting the affiliate registration form would re-submit the form and create a duplicate registration request.
+- Fix: (PRO) Fixed a fatal error ("Cannot access offset of type array on array") on the Affiliate Groups admin page.
+- Fix: (PRO) Fixed payment status text on payout statements not being translatable due to an incorrect text domain.
+- Fix: Fixed an issue on some websites with the "Default Referral URL Page" setting reverting back to the home page.
+- Fix: (PRO) Fixed an issue where affiliates would see an "Email is required" error when saving their payout details (e.g. custom payout username) if the account details fields were not included in the form submission.
+- Fix: (PRO) Fixed an issue where the "Affiliate Application Accepted" email was not being sent when an admin manually adds a new coupon for an existing affiliate via the View Affiliate page.
+- Fix: Fixed an issue in the free version where some settings tabs where showing empty in some cases since a recent update.
+- Fix: (PRO) Fixed an issue where the password reset URL in registration emails did not work on some websites, caused by passing the user ID instead of the username as the login parameter and using an unreliable WooCommerce endpoint URL construction.
+- Fix: (PRO) Fixed an issue where using {random} in the coupon format template would cause continuous database queries for non-existent coupon codes on every page load, potentially causing site slowdowns or timeouts. The coupon generation is now correctly skipped on non-submission page loads, and the redundant uniqueness check is bypassed when {random} is present in the template (since the random component already ensures uniqueness).
+- Fix: (PRO) Fixed the "Paid" commission amount on the Coupons admin table "Payouts" column showing incorrectly in some cases.
+- Fix: (PRO) Fixed an issue where processing/pending commission would disappear from the affiliate's view when an order status changed to "Completed" with delayed commission (payout days) enabled.
+- Security: Fixed a potential XSS vulnerability via the visitor IP value logged in referral click (reported by "Nguyen Ba Khanh" via Patchstack).
+- Security: Improved sanitisation and escaping in various places across the plugin.
+- Other: Tested with WooCommerce 10.6
+
+= Version 7.5.3 - 16th March 2026 =
 - Fix: Fixed a fatal error on the admin settings page since the last update.
 
-= Version 7.5.2 =
+= Version 7.5.2 - 16th March 2026 =
 - New: (PRO) Added a new option in the "Rates" tab settings to hide products with their catalog visibility set to "Hidden" from the product rates table on the affiliate dashboard.
 - Fix: (PRO) Fixed a fatal error ("Cannot access offset of type array on array") on the Affiliate Groups admin page.
 - Fix: (PRO) Fixed a fatal error ("Unsupported operand types: float * string") in the payouts cron job caused by the coupon commission percent not being cast to a float.
@@ -503,7 +515,7 @@ Please report security bugs found in the source code of the undefined plugin thr
 = Version 6.8.1 - 18th September 2025 =
 - Tweak: Removed the blue outline on the affiliate portal login form and registration form fields.
 - Tweak: New installs will now automatically save the default settings on the setup wizard even if they do not visit the settings page.
-- Security Fix: Fixed a potential small "Broken Access Control" vulnerability bug (reported by "Legion Hunter" via Patchstack).
+- Security: Fixed a potential small "Broken Access Control" vulnerability bug (reported by "Legion Hunter" via Patchstack).
 
 = Version 6.8.0 - 15th September 2025 =
 - New: Added a new "Email Newsletter" feature to the plugin. This allows you to send custom email newsletters to all your affiliates, or specific groups of affiliates. You can create and send newsletters directly from the WordPress admin area, and view a log of all sent newsletters.
@@ -601,7 +613,7 @@ Please report security bugs found in the source code of the undefined plugin thr
 - Fix: (PRO) Fixed an issue with the copy button on the "Rates" table not working in some cases.
 
 = Version 6.3.8 - 28th May 2025 =
-- Security Fix: Fixed a potential CSRF vulnerability bug (reported by "lucky_buddy" via Patchstack).
+- Security: Fixed a potential CSRF vulnerability bug (reported by "lucky_buddy" via Patchstack).
 
 = Version 6.3.7 - 23rd May 2025 =
 - Tweak: Made a few small styling improvements to the mobile version of the affiliate dashboard.
@@ -638,7 +650,7 @@ Please report security bugs found in the source code of the undefined plugin thr
 - Fix: Fixed a potential PHP fatal error if both the free and pro versions are activated at the same time.
 
 = Version 6.3.1 - 14th April 2025 =
-- Security Fix: Fixed a small XSS vulnerability bug (reported by "wesley" via WordFence).
+- Security: Fixed a small XSS vulnerability bug (reported by "wesley" via WordFence).
 - Fix: Fixed some potential PHP warnings.
 
 = Version 6.3.0 - 14th April 2025 =
@@ -745,66 +757,5 @@ Please report security bugs found in the source code of the undefined plugin thr
 - Fix: (PRO) Fixed an issue with the "Assign to role" option for "multiple templates" not showing the currently selected option in the settings.
 - Fix: Fixed an issue with the affiliate registration form not working on the affiliate dashboard page with this option disabled: Show registration form on affiliate dashboard page (logged in users).
 - Other: Tested with WooCommerce 9.7.1
-
-= Version 5.19.2 - 12th February 2025 =
-- Fix: Fixed the multi-currency option causing issues with calculations on the "monthly summary" tab in some cases.
-- Fix: Fixed a possible "Attempt to read property 'X' on false" PHP error in some cases on the settings tab of the affiliate dashboard.
-
-= Version 5.19.1 - 12th February 2025 =
-- Improvement: Modified the admin reports to generate in batches to help prevent timeouts on large sites.
-- Tweak: Added a solution to prevent issues/confusion when setting up the affiliate dashboard page in the settings.
-- Fix: Fixed an issue with the custom text for "Coupon" on checkout for affiliate coupons, applying to all coupons rather than just the affiliate coupons.
-- Fix: Fixed alignment of the "Recent Orders" table footer on the affiliate dashboard since the last update.
-- Fix: (PRO) Fixed the export feature on the recent orders tab of the affiliate dashboard not taking into account filters, and tidied up the export file too.
-- Fix: Fixed an issue with the "New Customers Only" global setting being applied to all coupons, rather than just the affiliate coupons.
-- Fix: Fixed a undefined array key "wcu_enable_reports" PHP warning.
-- Dev: Added a filter to modify the wcusage_check_if_renewal_allowed() function.
-- Other: Tested with WordPress 6.7.2
-- Other: Tested with WooCommerce 9.6.1
-
-= Version 5.19.0 - 27th January 2025 =
-- New: (PRO) Added new option to set commission rates on a "per product category" basis.
-- New: (PRO) Added new option to set commission rates on a "per product variation" basis.
-- Tweak: (PRO) The "product rates" tab will now show each of the individual product variations, if the variation has a different commission rate. There is also a new option to display all product variations always (even with the same commission rates as parent) in the settings.
-- Tweak: (PRO) The "product rates" tab will now show a "No products found." message when searching but no products are found for the search term.
-- Tweak: Added an option to show the order tax on the "Recent Orders" tab of the affiliate dashboard.
-- Tweak: On the "recent orders" tab of the affiliate dashboard, in the order summary ("MORE") it will now show the product variations next to the product name if there are any.
-- Tweak: Small tweak to the styling of the toggles on the admin settings page in some cases.
-- Tweak: On the admin pages, admin notices will now be aligned better at the top of the page.
-- Fix: (PRO) Fixed a PHP warning when saving products.
-- Fix: (PRO) Fixed an issue with the "MLA Dashboard" link on the affiliate dashboad when viewing a sub-affiliate dashboard.
-- Fix: (PRO) Fixed an issue with saving the "assign to a new user role or affiliate group" option "New User Role" field for performance bonuses.
-- Fix: Fixed an issue with the "New customers only?" option when set for individual coupons and no affiliate is assigned to the coupon.
-- Fix: Fixed an issue in some cases where the name fields were not clickable on the affiliate registration form.
-- Other: Updated to Freemius SDK 2.11.0
-- Other: Tested with WooCommerce 9.6.0
-
-= Version 5.18.2 - 17th January 2025 =
-- Fix: (PRO) Fixed an issue with the new dynamic landing pages feature causing other link rewrites not to work, like the my account page menu links.
-
-= Version 5.18.1 - 17th January 2025 =
-- New: Added an option to the "Emails" settings tab to enable/disable the "Affiliate Information" in the admin "New Order" email.
-- Tweak: (PRO) Decimal numbers can now be entered for the per-product commission fields.
-- Tweak: Cancelled orders will now show as "0.00" values if displayed on the affiliate dashboard.
-- Tweak: In the "Coupon Affiliate" meta box for the admin edit orders page, added links to the referral code and affiliate user.
-- Tweak: Small tweak to the loading animation on the affiliate dashboard.
-- Fix: (PRO) Fixed an error on the MLA dashboard in some cases.
-- Fix: (PRO) Fixed the dates for scheduling monthly email reports to be localised.
-- Fix: (PRO) Fixed an issue with the new dynamic landing pages feature causing other link rewrites not to work, like the my account page menu links.
-- Fix: Fixed issue with "Enable legacy (bulk) saving for settings page" toggle not showing in some cases.
-- Fix: Fixed undefined array key "wcusage_field_paypal_enable" error in some cases.
-- Fix: Fixed a "headers already sent" error on the cart page in some cases.
-- Fix: On the admin dashboard, in the "Latest Referrals" section, fixed the "Affiliate" column sometimes being empty.
-- Fix: Fixed a rare fatal error on the affiliate dashboard when viewing a MLA sub-affiliates dashboard as the parent affiliate.
-- Fix: Fixed some localisation issues.
-- Other: Updated translations.
-- Other: Tested with WooCommerce 9.5.2
-
-= Version 5.18.0 - 7th January 2025 =
-- New: (PRO) Added dynamic landing pages functionality.
-- New: Added a new "Affiliate Information" section to the WooCommerce admin new order emails.
-- Tweak: Added a warning and confirmation message when trying to delete a coupon on the admin affiliate coupons page.
-- Fix: (PRO) Fixed an issue with generating QR codes for landing page URLs.
-- Other: Tested with WooCommerce 9.5.1
 
 <a href="https://roadmap.couponaffiliates.com/updates/">View the full changelog</a>

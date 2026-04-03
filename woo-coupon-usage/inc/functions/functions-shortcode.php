@@ -90,7 +90,7 @@ function wcusage_couponusage(  $atts  ) {
                 }
             }
             if ( isset( $_GET['couponid'] ) ) {
-                $urlid = strtolower( $_GET['couponid'] );
+                $urlid = strtolower( sanitize_text_field( wp_unslash( $_GET['couponid'] ) ) );
             }
             // Get coupon name
             $show_coupon = "";

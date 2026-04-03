@@ -100,17 +100,6 @@ function wcusage_settings_init() {
             'class' => 'wcusage_row wcusage_row_payouts',
         ]
     );
-    // register pdf reports
-    add_settings_field(
-        'wcusage_field_reports',
-        esc_html__( 'Affiliate Reports Settings', 'woo-coupon-usage' ),
-        'wcusage_field_cb_reports',
-        'wcusage',
-        'wcusage_section_developers',
-        [
-            'class' => 'wcusage_row wcusage_row_reports',
-        ]
-    );
     // register custom tabs section
     add_settings_field(
         'wcusage_field_custom_tabs',
@@ -518,6 +507,9 @@ jQuery( document ).ready(function() {
     ?>
 
   <?php 
+    ?>
+
+  <?php 
     wcusage_admin_settings_tab_click( "#tab-payouts", ".wcusage_row_payouts", 1 );
     ?>
 
@@ -656,13 +648,15 @@ jQuery( document ).ready(function() {
           <?php 
     wcusage_admin_settings_sidebar_button(
         "tab-notifications",
-        esc_html__( "Emails", "woo-coupon-usage" ),
+        esc_html__( "Email Notifications", "woo-coupon-usage" ),
         "fas fa-envelope",
         0,
         ''
     );
     ?>
         </li>
+        <?php 
+    ?>
         <?php 
     ?>
         <li class="wcu-sidebar-menu-item">
@@ -982,8 +976,12 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
       <?php 
         }
         ?>
-		
-<?php if( function_exists( 'wcusage_test_report_form' ) ) { wcusage_test_report_form(); } ?>
+
+    <?php 
+        if ( function_exists( 'wcusage_test_report_form' ) ) {
+            wcusage_test_report_form();
+        }
+        ?>
 
     <?php 
         if ( !class_exists( 'WooCommerce' ) ) {
@@ -1087,14 +1085,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
       <p style="display: block; font-size: 15px; margin-top: 0px; margin-bottom: 0px; font-weight: bold;">
       <?php 
         echo esc_html__( 'Need help? Have a suggestion? Found a bug?', 'woo-coupon-usage' );
-        ?> <?php 
-        if ( wcu_fs()->can_use_premium_code() ) {
-            ?><a href="<?php 
-            echo esc_url( admin_url( 'admin.php?page=wcusage-contact' ) );
-            ?>"><?php 
-        } else {
-            ?><a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank"><?php 
-        }
+        ?> <a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank"><?php 
         echo esc_html__( 'Create a support ticket.', 'woo-coupon-usage' );
         ?></a>
       </p>

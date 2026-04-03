@@ -124,35 +124,44 @@ function wcusage_email_affiliate_register_new($user_email, $coupon_code, $firstn
 
 // Create password reset URL
 function wcusage_generate_password_reset_url($user_id) {
-  
+
     $user = get_user_by('id', $user_id);
-    
-    if (is_wp_error($user)) {
-    return false;
+
+    if (!$user || is_wp_error($user)) {
+        return false;
     }
-    
+
     $user_data = get_userdata($user_id);
-    $user_login = stripslashes($user->user_login);
+    $user_login = $user->user_login;
     $key = get_password_reset_key($user_data);
-    
+
     if (is_wp_error($key)) {
-    return false;
+        return false;
     }
-    
-    // Get the URL of your account page
+
+    // Try WooCommerce my account lost-password endpoint first, fall back to wp-login.php
     $account_page_url = wc_get_page_permalink('myaccount');
-    
-    // Construct the password reset URL
-    $rp_link = add_query_arg(
-    array(
-    'key' => $key,
-    'id' => $user_id
-    ),
-    wc_get_endpoint_url('lost-password', '', $account_page_url)
-    );
-    
+    if ($account_page_url && !is_wp_error($account_page_url)) {
+        $rp_link = add_query_arg(
+            array(
+                'key'   => $key,
+                'login' => rawurlencode($user_login),
+            ),
+            wc_get_endpoint_url('lost-password', '', $account_page_url)
+        );
+    } else {
+        $rp_link = add_query_arg(
+            array(
+                'action' => 'rp',
+                'key'    => $key,
+                'login'  => rawurlencode($user_login),
+            ),
+            wp_login_url()
+        );
+    }
+
     return $rp_link;
-  
+
 }
 
 // Email to admin on affiliate application
@@ -237,14 +246,14 @@ function wcusage_email_admin_affiliate_register($username, $coupon_code, $referr
 }
 
 // Email to affiliate on registration accepted
-function wcusage_email_affiliate_register_accepted($user_email, $coupon_code, $message, $username, $name) {
+function wcusage_email_affiliate_register_accepted($user_email, $coupon_code, $message, $username, $name, $skip_registration_check = false) {
 
   $options = get_option( 'wcusage_options' );
 
   $wcusage_field_registration_enable = wcusage_get_setting_value('wcusage_field_registration_enable', '1');
   $wcusage_field_email_registration_accept_enable = wcusage_get_setting_value('wcusage_field_email_registration_accept_enable', '1');
 
-  if($wcusage_field_registration_enable && $wcusage_field_email_registration_accept_enable) {
+  if(($wcusage_field_registration_enable || $skip_registration_check) && $wcusage_field_email_registration_accept_enable) {
 
     if(!empty($options['wcusage_field_email_registration_accept_subject']) && !empty($options['wcusage_field_email_registration_accept_message'])) {
 

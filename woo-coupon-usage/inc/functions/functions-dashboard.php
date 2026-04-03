@@ -57,9 +57,10 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
         if ( $wcusage_page_load ) {
             ?><form method="post"><?php 
         }
-        ?><input type="text" name="<?php 
+        ?>
+    <input type="hidden" name="<?php 
         echo esc_attr( $page_key );
-        ?>" value="1" style="display:none;" />
+        ?>" value="1" style="display: none !important;" />
     <button id="<?php 
         echo esc_attr( $id );
         ?>" name="load-page" class="wcutablinks <?php 

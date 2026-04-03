@@ -3,8 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-function wcusage_field_cb_payouts( $args )
-{
+function wcusage_field_cb_payouts( $args ) {
     $options = get_option( 'wcusage_options' );
     ?>
 

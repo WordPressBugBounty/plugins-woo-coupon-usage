@@ -33,6 +33,7 @@ function wcusage_ajax_submit_registration() {
     $lastname = ( isset( $_POST['wcu-input-last-name'] ) ? sanitize_text_field( $_POST['wcu-input-last-name'] ) : '' );
     $couponcode = ( isset( $_POST['wcu-input-coupon'] ) ? wc_sanitize_coupon_code( $_POST['wcu-input-coupon'] ) : '' );
     $website = ( isset( $_POST['wcu-input-website'] ) ? sanitize_text_field( $_POST['wcu-input-website'] ) : '' );
+    $phone = ( isset( $_POST['wcu-input-phone'] ) ? sanitize_text_field( $_POST['wcu-input-phone'] ) : '' );
     $type = ( isset( $_POST['wcu-input-type'] ) ? sanitize_text_field( $_POST['wcu-input-type'] ) : '' );
     $promote = ( isset( $_POST['wcu-input-promote'] ) ? sanitize_text_field( $_POST['wcu-input-promote'] ) : '' );
     $referrer = ( isset( $_POST['wcu-input-referrer'] ) ? sanitize_text_field( $_POST['wcu-input-referrer'] ) : '' );

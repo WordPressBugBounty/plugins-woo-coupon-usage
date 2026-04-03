@@ -198,6 +198,8 @@ function wcusage_reset_order_stats_month(  $order, $coupon_id  ) {
         $wcusage_monthly_summary_data_orders[strtotime( $order_date )] = "";
         update_post_meta( $coupon_id, 'wcusage_monthly_summary_data_orders', $wcusage_monthly_summary_data_orders );
     }
+    // Clear the current month cache TTL so statistics tab re-queries fresh data
+    delete_post_meta( $coupon_id, 'wcusage_monthly_cache_time_current' );
 }
 
 add_action(
@@ -274,6 +276,7 @@ function wcusage_update_all_stats_data() {
     update_post_meta( $coupon_id, 'wcu_last_refreshed', time() );
     delete_post_meta( $coupon_id, 'wcusage_monthly_summary_data' );
     delete_post_meta( $coupon_id, 'wcusage_monthly_summary_data_orders' );
+    delete_post_meta( $coupon_id, 'wcusage_monthly_cache_time_current' );
     echo json_encode( $allstats );
     wp_die();
 }

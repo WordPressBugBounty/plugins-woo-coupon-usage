@@ -962,10 +962,10 @@ function wcusage_field_cb( $args ) {
           $header_style = 'display:flex;align-items:center;gap:10px;padding:15px;background:#e9e9e9;border-bottom:1px solid #ddd;';
         }
         
-        echo '<div id="'.esc_attr($tab_key).'" class="wcusage-tab-item" style="'.$box_style.'">';
+        echo '<div id="'.esc_attr($tab_key).'" class="wcusage-tab-item" style="'.esc_attr($box_style).'">';
         
         // Header with drag handle, toggle, label, and show/hide button
-        echo '<div style="'.$header_style.'">';
+        echo '<div style="'.esc_attr($header_style).'">';
         echo '<span class="dashicons dashicons-move" style="cursor:move;opacity:0.7;" title="'.esc_html__('Drag to reorder','woo-coupon-usage').'"></span>';
 
         if(strpos($tab_key,'tab-custom-') === 0) {
@@ -973,7 +973,7 @@ function wcusage_field_cb( $args ) {
           echo '<strong style="flex:1;font-size:15px;">'.esc_html($label).'</strong>';
           echo '<span style="font-size:11px;opacity:0.7;margin-right:auto;">('.esc_html__('custom','woo-coupon-usage').')</span>';
           $settings_button_disabled = !$is_enabled ? 'disabled' : '';
-          echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')" style="font-size:14px;padding:6px 12px;" '.$settings_button_disabled.'>'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
+          echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')" style="font-size:14px;padding:6px 12px;" '.esc_attr($settings_button_disabled).'>'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
         } elseif(!$linked_option) {
           echo '<input type="checkbox" checked disabled style="margin:0;" />';
           echo '<strong style="flex:1;font-size:15px;">'.esc_html($label).'</strong>';
@@ -986,7 +986,7 @@ function wcusage_field_cb( $args ) {
           echo '<div style="display:flex;align-items:center;gap:6px;">'.$toggle_html.'</div>';
           echo '<strong style="flex:1;font-size:15px;">'.esc_html($label).'</strong>';
           $settings_button_disabled = !$is_enabled ? 'disabled' : '';
-          echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')" style="font-size:14px;padding:6px 12px;" '.$settings_button_disabled.'>'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
+          echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')" style="font-size:14px;padding:6px 12px;" '.esc_attr($settings_button_disabled).'>'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
         }
         echo '</div>';
         
@@ -1866,7 +1866,9 @@ if( !function_exists( 'wcusage_setting_section_ordersalestracking' ) ) {
         update_option( 'wcusage_field_order_type_custom_isset', 1 );
         ?>
 
-        <br/><i><?php echo esc_html__( 'This will affect the coupon usage stats, orders list, commission, and monthly summary.', 'woo-coupon-usage' ); ?></i> <i><?php echo esc_html__( 'Affiliate stats will be automatically refreshed when changing these statuses.', 'woo-coupon-usage' ); ?></i>
+        <br/><i><?php echo esc_html__( 'This will affect the coupon usage stats, orders list, commission, and monthly summary.', 'woo-coupon-usage' ); ?></i>
+        
+        <br/><i><?php echo esc_html__( 'Affiliate stats will be automatically refreshed when changing these statuses.', 'woo-coupon-usage' ); ?></i>
 
         <br/><i><?php echo esc_html__( 'For "unpaid commission" to be granted (PRO), the order status must be "completed".', 'woo-coupon-usage' ); ?></i>
         

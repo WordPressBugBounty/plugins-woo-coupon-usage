@@ -170,6 +170,8 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 
   		$wcusage_show_tax = wcusage_get_setting_value('wcusage_field_show_tax', '0');
 
+  		$save_order_commission_meta = wcusage_get_setting_value('wcusage_field_enable_order_commission_meta', '1');
+
   		if ( !empty($orders) ) {
 		$dp = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
 
@@ -179,6 +181,78 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 
 
 		$order_id = $the_order->order_id;
+
+		// Performance optimization: When not doing a full refresh/update, try to use
+		// saved order meta to avoid loading full WC_Order objects and recalculating.
+		// This dramatically improves performance for affiliates with many orders.
+		if (!$update && !$alltime && $save_order_commission_meta) {
+			$cached_stats = get_post_meta($order_id, 'wcusage_stats', true);
+			if (is_array($cached_stats) && !empty($cached_stats)
+				&& isset($cached_stats['order']) && $cached_stats['order'] > 0
+				&& isset($cached_stats['commission'])) {
+
+				// Quick meta checks for coupon ownership (without loading WC_Order)
+				$lifetime_affiliate_coupon_referrer = get_post_meta($order_id, 'lifetime_affiliate_coupon_referrer', true);
+				if ($lifetime_affiliate_coupon_referrer && $lifetime_affiliate_coupon_referrer != $coupon_code) {
+					continue;
+				}
+				$wcusage_referrer_coupon = get_post_meta($order_id, 'wcusage_referrer_coupon', true);
+				if (!$lifetime_affiliate_coupon_referrer && $wcusage_referrer_coupon && $wcusage_referrer_coupon != $coupon_code) {
+					continue;
+				}
+
+				$renewalcheck = wcusage_check_if_renewal_allowed($order_id);
+				if (!$renewalcheck) {
+					continue;
+				}
+
+				// Use cached values directly
+				$cached_order_total = isset($cached_stats['order']) ? (float)$cached_stats['order'] : 0;
+				$cached_discount = isset($cached_stats['discount']) ? (float)$cached_stats['discount'] : 0;
+				$cached_commission = isset($cached_stats['commission']) ? (float)$cached_stats['commission'] : 0;
+
+				$return_array[$key]['order_id'] = $order_id;
+				$return_array[$key]['total'] = $cached_order_total;
+				$return_array[$key]['total_discount'] = $cached_discount;
+				$return_array[$key]['total_shipping'] = 0; // Shipping not stored in cached stats
+
+				$total_discount += $cached_discount;
+				$total_orders += $cached_order_total;
+				$total_count++;
+				$total_commission += $cached_commission;
+
+				// Get commission summary from cached meta
+				if ($start_date != "0001-01-01") {
+					$cached_commission_summary = get_post_meta($order_id, 'wcusage_commission_summary', true);
+					if (!empty($cached_commission_summary)) {
+						$a2 = $cached_commission_summary;
+						if (!is_array($a2)) { $a2 = maybe_unserialize($a2); }
+						if (!is_array($a2)) { $a2 = array(); }
+						$a1 = $commission_summary;
+						foreach (array_keys($a1 + $a2) as $cskey) {
+							$a1_total = isset($a1[$cskey]['total']) && is_numeric($a1[$cskey]['total']) ? $a1[$cskey]['total'] : 0;
+							$a2_total = isset($a2[$cskey]['total']) && is_numeric($a2[$cskey]['total']) ? $a2[$cskey]['total'] : 0;
+							$commission_summary[$cskey]['total'] = $a1_total + $a2_total;
+
+							$a1_subtotal = isset($a1[$cskey]['subtotal']) && is_numeric($a1[$cskey]['subtotal']) ? $a1[$cskey]['subtotal'] : 0;
+							$a2_subtotal = isset($a2[$cskey]['subtotal']) && is_numeric($a2[$cskey]['subtotal']) ? $a2[$cskey]['subtotal'] : 0;
+							$commission_summary[$cskey]['subtotal'] = $a1_subtotal + $a2_subtotal;
+
+							$a1_commission = isset($a1[$cskey]['commission']) && is_numeric($a1[$cskey]['commission']) ? $a1[$cskey]['commission'] : 0;
+							$a2_commission = isset($a2[$cskey]['commission']) && is_numeric($a2[$cskey]['commission']) ? $a2[$cskey]['commission'] : 0;
+							$commission_summary[$cskey]['commission'] = $a1_commission + $a2_commission;
+
+							$a1_number = isset($a1[$cskey]['number']) && is_numeric($a1[$cskey]['number']) ? $a1[$cskey]['number'] : 0;
+							$a2_number = isset($a2[$cskey]['number']) && is_numeric($a2[$cskey]['number']) ? $a2[$cskey]['number'] : 0;
+							$commission_summary[$cskey]['number'] = $a1_number + $a2_number;
+						}
+					}
+				}
+
+				continue; // Skip the expensive full order loading below
+			}
+		}
+
 		$order = wc_get_order( $order_id );
 
 		if($refresh && $update && $alltime) {

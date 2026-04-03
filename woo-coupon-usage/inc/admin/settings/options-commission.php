@@ -4,6 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Commission Settings
+if ( !function_exists( 'wcusage_field_cb_commission' ) ) {
 function wcusage_field_cb_commission( $args )
 {
   $options = get_option( 'wcusage_options' );
@@ -381,3 +382,4 @@ if( !function_exists( 'wcusage_setting_section_tax' ) ) {
   <?php
   }
 }
+} // end function_exists wcusage_field_cb_commission

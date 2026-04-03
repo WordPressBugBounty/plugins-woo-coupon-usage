@@ -40,6 +40,7 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
         $update_stats = "";
         if ( $force_refresh_stats ) {
             delete_post_meta( $postid, 'wcusage_monthly_summary_data_orders' );
+            delete_post_meta( $postid, 'wcusage_monthly_cache_time_current' );
             $update_stats = wcusage_update_all_stats( $coupon_code, 1 );
         }
         $is_mla_parent = "";
@@ -154,8 +155,12 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                         }
                     }
                 }
-                // This Month
-                if ( empty( $wcusage_monthly_summary_data_orders[strtotime( $date1month )] ) ) {
+                // This Month - use a short TTL cache (10 minutes) since current month data changes
+                $current_month_cache = $wcusage_monthly_summary_data_orders[strtotime( $date1month )] ?? null;
+                $current_month_cache_time = get_post_meta( $postid, 'wcusage_monthly_cache_time_current', true );
+                $current_month_cache_expired = !$current_month_cache_time || time() - (int) $current_month_cache_time > 600;
+                // 10 min TTL
+                if ( empty( $current_month_cache ) || $current_month_cache_expired ) {
                     $thismonthorders = wcusage_wh_getOrderbyCouponCode(
                         $coupon_code,
                         $date1month,
@@ -165,13 +170,11 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                         0
                     );
                     $wcusage_monthly_summary_data_orders[strtotime( $date1month )] = $thismonthorders;
-                    //echo "a1: " . $date1month . "<br/>";
+                    update_post_meta( $postid, 'wcusage_monthly_cache_time_current', time() );
                 } else {
-                    $monthly_summary_data1 = $wcusage_monthly_summary_data_orders[strtotime( $date1month )];
-                    $thismonthorders = $monthly_summary_data1;
-                    //echo "a2: " . $date1month . "<br/>";
+                    $thismonthorders = $current_month_cache;
                 }
-                // Last Month
+                // Last Month - cache permanently (past months don't change)
                 if ( empty( $wcusage_monthly_summary_data_orders[strtotime( $date2month )] ) ) {
                     $pastmonthorders = wcusage_wh_getOrderbyCouponCode(
                         $coupon_code,
@@ -182,13 +185,10 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                         0
                     );
                     $wcusage_monthly_summary_data_orders[strtotime( $date2month )] = $pastmonthorders;
-                    //echo "b1: " . $date2month . "<br/>";
                 } else {
-                    $monthly_summary_data2 = $wcusage_monthly_summary_data_orders[strtotime( $date2month )];
-                    $pastmonthorders = $monthly_summary_data2;
-                    //echo "b2: " . $date2month . "<br/>";
+                    $pastmonthorders = $wcusage_monthly_summary_data_orders[strtotime( $date2month )];
                 }
-                // 2 Months Ago
+                // 2 Months Ago - cache permanently (past months don't change)
                 if ( empty( $wcusage_monthly_summary_data_orders[strtotime( $date3month )] ) ) {
                     $pastoldmonthorders = wcusage_wh_getOrderbyCouponCode(
                         $coupon_code,
@@ -199,12 +199,11 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                         0
                     );
                     $wcusage_monthly_summary_data_orders[strtotime( $date3month )] = $pastoldmonthorders;
-                    //echo "c1: " . $date3month . "<br/>";
                 } else {
-                    $monthly_summary_data3 = $wcusage_monthly_summary_data_orders[strtotime( $date3month )];
-                    $pastoldmonthorders = $monthly_summary_data3;
-                    //echo "c2: " . $date3month . "<br/>";
+                    $pastoldmonthorders = $wcusage_monthly_summary_data_orders[strtotime( $date3month )];
                 }
+                // Persist the monthly summary data to post meta so it survives across requests
+                update_post_meta( $postid, 'wcusage_monthly_summary_data_orders', $wcusage_monthly_summary_data_orders );
                 $this7orders = $pastmonthorders;
                 $past14orders = $pastoldmonthorders;
                 $this30orders = $thismonthorders;
@@ -395,11 +394,13 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                         </script>';
                             echo '<style>.wcu-statistics-orders .wcuOrdersStatuses { display: none; }</style>';
                             echo '<div class="wcu-statistics-orders" div style="margin: 0 auto; width: calc(100% - 10px);">';
+                            // Use a recent start date to avoid querying ALL orders (we only show 5)
+                            $latest_referrals_start = date( 'Y-m-d', strtotime( '-90 days' ) );
                             do_action(
                                 'wcusage_hook_tab_latest_orders',
                                 $postid,
                                 $coupon_code,
-                                "",
+                                $latest_referrals_start,
                                 date( "Y-m-d" ),
                                 false,
                                 "",
@@ -422,7 +423,7 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                             $table_name = $wpdb->prefix . 'wcusage_payouts';
                             $unpaid_commission = $couponinfo[2];
                             $pendingpayments = get_post_meta( $postid, 'wcu_text_pending_payment_commission', true );
-                            $result2 = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_name} WHERE couponid = %d AND status = 'paid' ORDER BY id DESC LIMIT 50", $postid ) );
+                            $result2 = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_name} WHERE couponid = %d AND status = 'paid' ORDER BY id DESC", $postid ) );
                             // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
                             $paid_amount = 0;
                             foreach ( $result2 as $row2 ) {
