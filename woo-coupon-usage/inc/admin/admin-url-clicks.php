@@ -72,11 +72,14 @@ if(isset($_POST['_wpnonce'])) {
 </style>
 
 <!-- Output Page -->
-<div class="wrap plugin-settings">
+<div class="wrap wcusage-admin-page">
 
   <?php do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
 
-	<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+	<div class="wcu-page-header">
+		<h1><i class="fas fa-mouse-pointer" style="color: #2271b1; margin-right: 8px;"></i><?php echo esc_html( get_admin_page_title() ); ?></h1>
+		<p class="wcu-page-subtitle"><?php echo esc_html__( 'Track and manage all affiliate referral URL visits.', 'woo-coupon-usage' ); ?></p>
+	</div>
 
   <?php
   $input_coupon = (isset($_REQUEST['coupon'])) ? $_REQUEST['coupon'] : "";
@@ -85,23 +88,25 @@ if(isset($_POST['_wpnonce'])) {
   $input_converted = (isset($_REQUEST['converted'])) ? $_REQUEST['converted'] : "";
   ?>
 
-  <form method="get" style="margin-top: 10px;">
-    <label>Search:</label>
+  <div class="wcu-search-filter-bar" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+  <form method="get" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+    <label style="font-size: 12px; font-weight: 600; color: #50575e; text-transform: uppercase; letter-spacing: 0.4px;"><i class="fas fa-search" style="color: #2271b1; margin-right: 4px;"></i>Search:</label>
     <input type="hidden" name="page" value="wcusage_clicks">
-    <input type="search" id="user-search-input1" name="coupon" value="<?php esc_attr($input_coupon) ?>" placeholder="<?php echo esc_html__( 'Coupon Code', 'woo-coupon-usage' ); ?>..." title="<?php echo esc_html__( 'Coupon Code', 'woo-coupon-usage' ); ?>" style="max-width: 140px;">
+    <input type="search" id="user-search-input1" name="coupon" value="<?php esc_attr($input_coupon) ?>" placeholder="<?php echo esc_html__( 'Coupon Code', 'woo-coupon-usage' ); ?>..." title="<?php echo esc_html__( 'Coupon Code', 'woo-coupon-usage' ); ?>" style="padding: 6px 10px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; min-height: 36px; max-width: 140px;">
     <?php if( wcu_fs()->can_use_premium_code() ) { ?>
-    <input type="search" id="user-search-input2" name="campaign" value="<?php esc_attr($input_campaign) ?>" placeholder="<?php echo esc_html__( 'Campaign', 'woo-coupon-usage' ); ?>..." title="<?php echo esc_html__( 'Campaign', 'woo-coupon-usage' ); ?>" style="max-width: 140px;">
+    <input type="search" id="user-search-input2" name="campaign" value="<?php esc_attr($input_campaign) ?>" placeholder="<?php echo esc_html__( 'Campaign', 'woo-coupon-usage' ); ?>..." title="<?php echo esc_html__( 'Campaign', 'woo-coupon-usage' ); ?>" style="padding: 6px 10px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; min-height: 36px; max-width: 140px;">
     <?php } ?>
-    <input type="search" id="user-search-input3" name="referrer" value="<?php esc_attr($input_referrer) ?>" placeholder="<?php echo esc_html__( 'Referrer URL', 'woo-coupon-usage' ); ?>..." title="<?php echo esc_html__( 'Referrer URL', 'woo-coupon-usage' ); ?>" style="max-width: 140px;">
+    <input type="search" id="user-search-input3" name="referrer" value="<?php esc_attr($input_referrer) ?>" placeholder="<?php echo esc_html__( 'Referrer URL', 'woo-coupon-usage' ); ?>..." title="<?php echo esc_html__( 'Referrer URL', 'woo-coupon-usage' ); ?>" style="padding: 6px 10px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; min-height: 36px; max-width: 140px;">
     <select id="user-search-input4" name="converted" value="<?php esc_attr($input_converted) ?>"
       placeholder="<?php echo esc_html__( 'Converted', 'woo-coupon-usage' ); ?>..."
-      title="<?php echo esc_html__( 'Converted', 'woo-coupon-usage' ); ?>" style="max-width: 140px; margin-top: -4px;">
+      title="<?php echo esc_html__( 'Converted', 'woo-coupon-usage' ); ?>" style="padding: 6px 10px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; min-height: 36px; max-width: 140px;">
       <option value="">Converted...</option>
       <option value="1" <?php if($input_converted == "1") { echo "selected"; } ?>>Yes</option>
       <option value="0" <?php if($input_converted == "0") { echo "selected"; } ?>>No</option>
     </select>
-    <input type="submit" id="search-submit" class="button" value="Search Visits">
+    <input type="submit" id="search-submit" class="button" value="Search Visits" style="padding: 8px 18px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; background: #fff; color: #374151; transition: all 0.15s ease;">
 	</form>
+  </div>
 
 	<?php
   $ListTable = new WCUsage_Clicks_List_Table();

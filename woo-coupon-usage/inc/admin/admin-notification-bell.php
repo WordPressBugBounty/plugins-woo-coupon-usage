@@ -74,8 +74,8 @@ function wcusage_admin_bell_data_ajax() {
         // Generate simple dropdown with toggle
         ob_start();
         ?>
-        <div id="wcusage-admin-bell-dropdown" style="display: none; position: absolute; margin-top: 10px; left: 50%; top: 32px; background: #fff; border: 1px solid #ddd; border-radius: 8px; width: 300px; transform: translateX(-50%); box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 99999;">
-            <div style="padding: 12px 16px; border-bottom: 1px solid #eee; font-weight: 600; color: #333; text-align: center;"><?php 
+        <div id="wcusage-admin-bell-dropdown" style="display: none; position: absolute; margin-top: 10px; left: 50%; top: 32px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; width: 300px; transform: translateX(-50%); box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 99999;">
+            <div style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #1d2327; text-align: center;"><?php 
         echo esc_html__( 'Notifications Disabled', 'woo-coupon-usage' );
         ?></div>
             <div style="padding: 12px 16px; text-align: center;">
@@ -90,12 +90,12 @@ function wcusage_admin_bell_data_ajax() {
         // Generate dropdown HTML
         ob_start();
         ?>
-        <div id="wcusage-admin-bell-dropdown" style="display: none; position: absolute; margin-top: 10px; left: 50%; top: 32px; background: #fff; border: 1px solid #ddd; border-radius: 8px; width: 300px; transform: translateX(-50%); box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 99999;">
+        <div id="wcusage-admin-bell-dropdown" style="display: none; position: absolute; margin-top: 10px; left: 50%; top: 32px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; width: 300px; transform: translateX(-50%); box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 99999;">
             <?php 
         if ( $referral_count > 0 ) {
             ?>
             <div id="wcusage-admin-bell-referral-section" style="display:block;">
-                <div style="padding: 12px 16px; border-bottom: 1px solid #eee; font-weight: 600; color: #333; text-align: center;"><?php 
+                <div style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #1d2327; text-align: center;"><?php 
             echo esc_html__( 'Notifications', 'woo-coupon-usage' );
             ?></div>
                 <div id="wcusage-admin-bell-referral-message" style="padding:10px 16px; border-bottom: 1px solid #f3f3f3;">
@@ -113,7 +113,7 @@ function wcusage_admin_bell_data_ajax() {
             <?php 
         }
         ?>
-            <div style="padding: 12px 16px; border-bottom: 1px solid #eee; font-weight: 600; color: #333; text-align: center;"><?php 
+            <div style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #1d2327; text-align: center;"><?php 
         echo esc_html__( 'Pending Admin Tasks', 'woo-coupon-usage' );
         ?></div>
             <ul style="list-style: none; margin: 0; padding: 0;" id="wcusage-admin-bell-referral-list">

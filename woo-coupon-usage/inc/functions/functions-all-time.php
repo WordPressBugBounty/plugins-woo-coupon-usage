@@ -325,11 +325,12 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
         $coupon_code,
         $coupon_code
     );
-    // Get the oldest order date
-    $results = $wpdb->get_results( $wpdb->prepare( $query . " ORDER BY order_date ASC LIMIT %d", 1 ) );
+    // Get the oldest and newest order dates in a single query
+    $date_range_query = "SELECT MIN(sub.order_date) AS first_date, MAX(sub.order_date) AS last_date FROM (" . $query . ") AS sub";
+    $date_range = $wpdb->get_row( $date_range_query );
     // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-    if ( !empty( $results ) ) {
-        $first_order_date = $results[0]->order_date;
+    if ( $date_range && $date_range->first_date ) {
+        $first_order_date = $date_range->first_date;
         $wcusage_hide_all_time = wcusage_get_setting_value( 'wcusage_field_hide_all_time', '0' );
         if ( $wcusage_hide_all_time ) {
             $first_order_date = date( "Y-m-d" );
@@ -337,11 +338,8 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
     } else {
         $first_order_date = date( "Y-m-d" );
     }
-    // Get the newest order date
-    $results2 = $wpdb->get_results( $wpdb->prepare( $query . " ORDER BY order_date DESC LIMIT %d", 1 ) );
-    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-    if ( !empty( $results2 ) ) {
-        $last_order_date = $results2[0]->order_date;
+    if ( $date_range && $date_range->last_date ) {
+        $last_order_date = $date_range->last_date;
     } else {
         $last_order_date = date( "Y-m-d" );
     }

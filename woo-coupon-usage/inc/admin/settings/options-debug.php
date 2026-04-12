@@ -143,6 +143,26 @@ function wcusage_field_cb_debug( $args )
 
   <br/>
 
+	<p>
+    <!-- Auto-check statistics on affiliate dashboard. -->
+    <?php wcusage_setting_toggle_option('wcusage_field_show_refresh_stats', 1, esc_html__( 'Soft re-calculate all-time statistics when affiliates visit their dashboard.', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( 'When enabled, all-time statistics will be automatically soft recalculated (only all-time totals, does not recalculate order totals) in the background (max once per hour) when an affiliate visits their dashboard, and silently updated if needed.', 'woo-coupon-usage' ); ?></i><br/>
+	</p>
+
+  <?php wcusage_setting_toggle('.wcusage_field_show_refresh_stats', '.wcu-field-section-show-refresh-button'); // Show or Hide ?>
+  <span class="wcu-field-section-show-refresh-button">
+
+  <br/>
+
+  <p>
+    <?php wcusage_setting_toggle_option('wcusage_field_show_refresh_stats_button', 1, esc_html__( 'Show manual "Refresh" button on the affiliate dashboard statistics.', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( 'When enabled, a clickable refresh icon will be shown next to the statistics toggle buttons, allowing affiliates to manually refresh their cached stats.', 'woo-coupon-usage' ); ?></i><br/>
+  </p>
+
+  </span>
+
+  <br/>
+
   <?php $wcusage_field_user_list_affiliates = wcusage_get_setting_value('wcusage_field_user_list_affiliates', '0'); ?>
   <?php if($wcusage_field_user_list_affiliates) { ?>
     <?php  wcusage_setting_toggle_option('wcusage_field_user_list_affiliates', 0, esc_html__( 'Only show users with the "coupon affiliate" role when manually assigning users to coupons.', 'woo-coupon-usage' ), '0px'); ?>

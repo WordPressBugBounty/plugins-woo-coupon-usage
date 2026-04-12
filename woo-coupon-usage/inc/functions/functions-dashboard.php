@@ -87,12 +87,24 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
         return ob_get_clean();
     };
     $tab_html = array();
+    // Custom tab name settings map (setting key => tab ID)
+    $tab_custom_names = array(
+        'tab-page-stats'     => wcusage_get_setting_value( 'wcusage_field_tab_name_stats', '' ),
+        'tab-page-monthly'   => wcusage_get_setting_value( 'wcusage_field_tab_name_monthly', '' ),
+        'tab-page-orders'    => wcusage_get_setting_value( 'wcusage_field_tab_name_orders', '' ),
+        'tab-page-links'     => wcusage_get_setting_value( 'wcusage_field_tab_name_links', '' ),
+        'tab-page-creatives' => wcusage_get_setting_value( 'wcusage_field_tab_name_creatives', '' ),
+        'tab-page-payouts'   => wcusage_get_setting_value( 'wcusage_field_tab_name_payouts', '' ),
+        'tab-page-rates'     => wcusage_get_setting_value( 'wcusage_field_rates_name', '' ),
+        'tab-page-bonuses'   => wcusage_get_setting_value( 'wcusage_field_tab_name_bonuses', '' ),
+        'tab-page-settings'  => wcusage_get_setting_value( 'wcusage_field_tab_name_settings', '' ),
+    );
     // Core & conditional tabs via a unified definitions array then loop
     $definitions = array();
     $definitions[] = array(
         'id'         => 'tab-page-stats',
         'page_key'   => 'page-stats',
-        'label'      => ucfirst( esc_html__( 'Statistics', 'woo-coupon-usage' ) ),
+        'label'      => ( !empty( $tab_custom_names['tab-page-stats'] ) ? esc_html( $tab_custom_names['tab-page-stats'] ) : ucfirst( esc_html__( 'Statistics', 'woo-coupon-usage' ) ) ),
         'content_id' => 'wcu1',
         'icon'       => '<i class="fas fa-chart-line fa-xs"></i>',
         'extra'      => '',
@@ -101,7 +113,7 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
     $definitions[] = array(
         'id'         => 'tab-page-monthly',
         'page_key'   => 'page-monthly',
-        'label'      => esc_html__( 'Monthly Summary', 'woo-coupon-usage' ),
+        'label'      => ( !empty( $tab_custom_names['tab-page-monthly'] ) ? esc_html( $tab_custom_names['tab-page-monthly'] ) : esc_html__( 'Monthly Summary', 'woo-coupon-usage' ) ),
         'content_id' => 'wcu2',
         'icon'       => '<i class="fas fa-calendar-alt fa-xs"></i>',
         'extra'      => 'tabmonthlyorders',
@@ -110,7 +122,7 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
     $definitions[] = array(
         'id'         => 'tab-page-orders',
         'page_key'   => 'page-orders',
-        'label'      => esc_html__( 'Recent Orders', 'woo-coupon-usage' ),
+        'label'      => ( !empty( $tab_custom_names['tab-page-orders'] ) ? esc_html( $tab_custom_names['tab-page-orders'] ) : esc_html__( 'Referred Orders', 'woo-coupon-usage' ) ),
         'content_id' => 'wcu3',
         'icon'       => '<i class="fas fa-shopping-cart fa-xs"></i>',
         'extra'      => 'tabrecentorders',
@@ -119,7 +131,7 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
     $definitions[] = array(
         'id'         => 'tab-page-links',
         'page_key'   => 'page-links',
-        'label'      => esc_html__( 'Referral URL', 'woo-coupon-usage' ),
+        'label'      => ( !empty( $tab_custom_names['tab-page-links'] ) ? esc_html( $tab_custom_names['tab-page-links'] ) : esc_html__( 'Referral URL', 'woo-coupon-usage' ) ),
         'content_id' => 'wcu4',
         'icon'       => '<i class="fas fa-link fa-xs"></i>',
         'extra'      => 'tablinks',
@@ -128,7 +140,7 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
     $definitions[] = array(
         'id'         => 'tab-page-creatives',
         'page_key'   => 'page-creatives',
-        'label'      => esc_html__( 'Creatives', 'woo-coupon-usage' ),
+        'label'      => ( !empty( $tab_custom_names['tab-page-creatives'] ) ? esc_html( $tab_custom_names['tab-page-creatives'] ) : esc_html__( 'Creatives', 'woo-coupon-usage' ) ),
         'content_id' => 'wcu7',
         'icon'       => '<i class="fas fa-photo-video fa-xs"></i>',
         'extra'      => 'tabcreatives',
@@ -137,7 +149,7 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
     $definitions[] = array(
         'id'         => 'tab-page-payouts',
         'page_key'   => 'page-payouts',
-        'label'      => esc_html__( 'Payouts', 'woo-coupon-usage' ),
+        'label'      => ( !empty( $tab_custom_names['tab-page-payouts'] ) ? esc_html( $tab_custom_names['tab-page-payouts'] ) : esc_html__( 'Payouts', 'woo-coupon-usage' ) ),
         'content_id' => 'wcu5',
         'icon'       => '<i class="fas fa-money-bill-wave fa-xs"></i>',
         'extra'      => 'tabpayouts',
@@ -146,7 +158,7 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
     $definitions[] = array(
         'id'         => 'tab-page-rates',
         'page_key'   => 'page-rates',
-        'label'      => esc_html__( 'Rates', 'woo-coupon-usage' ),
+        'label'      => ( !empty( $tab_custom_names['tab-page-rates'] ) ? esc_html( $tab_custom_names['tab-page-rates'] ) : esc_html__( 'Rates', 'woo-coupon-usage' ) ),
         'content_id' => 'wcu-rates',
         'icon'       => '<i class="fa-solid fa-percent"></i>',
         'extra'      => 'tabrates',
@@ -155,7 +167,7 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
     $definitions[] = array(
         'id'         => 'tab-page-bonuses',
         'page_key'   => 'page-bonuses',
-        'label'      => esc_html__( 'Bonuses', 'woo-coupon-usage' ),
+        'label'      => ( !empty( $tab_custom_names['tab-page-bonuses'] ) ? esc_html( $tab_custom_names['tab-page-bonuses'] ) : esc_html__( 'Bonuses', 'woo-coupon-usage' ) ),
         'content_id' => 'wcubonuses',
         'icon'       => '<i class="fas fa-gift fa-xs"></i>',
         'extra'      => 'tabbonuses',
@@ -164,7 +176,7 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
     $definitions[] = array(
         'id'         => 'tab-page-settings',
         'page_key'   => 'page-settings',
-        'label'      => esc_html__( 'Settings', 'woo-coupon-usage' ),
+        'label'      => ( !empty( $tab_custom_names['tab-page-settings'] ) ? esc_html( $tab_custom_names['tab-page-settings'] ) : esc_html__( 'Settings', 'woo-coupon-usage' ) ),
         'content_id' => 'wcu6',
         'icon'       => '<i class="fas fa-cog fa-xs"></i>',
         'extra'      => 'tabsettings',

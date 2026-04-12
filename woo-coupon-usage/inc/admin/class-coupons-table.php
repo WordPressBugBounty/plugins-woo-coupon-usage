@@ -181,20 +181,12 @@ class wcusage_Coupons_Table extends WP_List_Table {
         $per_page     = 20; // Keep modest for performance; could be made user-configurable
         $current_page = max( 1, $this->get_pagenum() );
 
-        // Build query args
+        // Build base query args (shared by both sort paths)
         $args = array(
             'post_type'      => 'shop_coupon',
-            'posts_per_page' => $per_page,
-            'paged'          => $current_page,
             's'              => $search,
             'no_found_rows'  => false, // we need total for pagination
         );
-
-        // Default sorting by ID (newest first) without computing metrics for all records
-        if ( 'id' === $orderby_coupon || empty( $orderby_coupon ) ) {
-            $args['orderby'] = 'ID';
-            $args['order']   = 'DESC';
-        }
 
         // Apply filters
         $this->apply_coupon_filters_to_query_args( $args, $filters );
@@ -210,13 +202,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
             $args['meta_query'] = $meta_query;
         }
 
-        // Determine the correct valid offset to avoid duplicates across pages
-        $desired_valid_offset = ( $current_page - 1 ) * $per_page;
-        $skipped_valid        = 0;
-        $items                = array();
-        $filtered_out_total   = 0;
-
-        // Helper: validate a batch
+        // Helper: validate a batch of posts (remove invalid/orphaned coupons)
         $validate_batch = function( $posts ) {
             $valid = array();
             foreach ( (array) $posts as $item ) {
@@ -231,68 +217,25 @@ class wcusage_Coupons_Table extends WP_List_Table {
             return $valid;
         };
 
-        // First page query (capture totals)
-        $args_first = $args;
-        $args_first['paged'] = 1;
-        $args_first['no_found_rows'] = false;
-        $q_first = new WP_Query( $args_first );
-        $max_pages = max( 1, (int) $q_first->max_num_pages );
-        $found_posts = (int) $q_first->found_posts;
+        // ------------------------------------------------------------------
+        // Sorting by derived metrics (usage, sales, commission) requires
+        // fetching ALL matching coupons so we can sort globally, then paginate.
+        // ------------------------------------------------------------------
+        $is_metric_sort = in_array( $orderby_coupon, array( 'usage', 'sales', 'commission' ), true );
 
-        $batch_valid = $validate_batch( $q_first->posts );
-        $filtered_out_total += max( 0, (int) $q_first->post_count - count( $batch_valid ) );
+        if ( $is_metric_sort ) {
+            // Fetch ALL matching coupons (no per-page limit) so we can sort globally
+            $args_all = $args;
+            $args_all['posts_per_page'] = -1;
+            $args_all['no_found_rows']  = true;
+            $args_all['orderby']        = 'ID';
+            $args_all['order']          = 'DESC';
+            $q_all = new WP_Query( $args_all );
+            $all_valid = $validate_batch( $q_all->posts );
 
-        $scan_page = 1;
-        // Skip valid items until we reach desired offset
-        while ( $skipped_valid < $desired_valid_offset && $scan_page <= $max_pages ) {
-            if ( $scan_page > 1 ) {
-                $args_page = $args;
-                $args_page['paged'] = $scan_page;
-                $args_page['no_found_rows'] = true;
-                $q_page = new WP_Query( $args_page );
-                $batch_valid = $validate_batch( $q_page->posts );
-                $filtered_out_total += max( 0, (int) $q_page->post_count - count( $batch_valid ) );
-            }
-
-            $need_to_skip = $desired_valid_offset - $skipped_valid;
-            if ( $need_to_skip >= count( $batch_valid ) ) {
-                $skipped_valid += count( $batch_valid );
-                $scan_page++;
-                continue;
-            }
-
-            // We reached the offset within this batch; take the remainder for current page
-            $remainder = array_slice( $batch_valid, $need_to_skip );
-            foreach ( $remainder as $post_obj ) {
-                $items[] = $post_obj;
-                if ( count( $items ) >= $per_page ) { break; }
-            }
-            $skipped_valid = $desired_valid_offset; // offset satisfied
-            $scan_page++;
-            break;
-        }
-
-        // If offset already satisfied and we still don't have enough items, continue scanning next pages
-        while ( count( $items ) < $per_page && $scan_page <= $max_pages ) {
-            $args_page = $args;
-            $args_page['paged'] = $scan_page;
-            $args_page['no_found_rows'] = true;
-            $q_page = new WP_Query( $args_page );
-            if ( empty( $q_page->posts ) ) { break; }
-            $batch_valid = $validate_batch( $q_page->posts );
-            $filtered_out_total += max( 0, (int) $q_page->post_count - count( $batch_valid ) );
-            foreach ( $batch_valid as $post_obj ) {
-                $items[] = $post_obj;
-                if ( count( $items ) >= $per_page ) { break 2; }
-            }
-            $scan_page++;
-        }
-
-        // Optional in-page sorting for derived metrics (usage, sales, commission) –
-        // performed on the compiled items for this page only
-        if ( in_array( $orderby_coupon, array( 'usage', 'sales', 'commission' ), true ) ) {
+            // Compute metrics and sort all valid items globally
             $all_stats_enabled = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_meta', '1' );
-            usort( $items, function( $a, $b ) use ( $orderby_coupon, $all_stats_enabled ) {
+            usort( $all_valid, function( $a, $b ) use ( $orderby_coupon, $all_stats_enabled ) {
                 $get_metrics = function( $it ) use ( $all_stats_enabled ) {
                     $id   = isset( $it->ID ) ? (int) $it->ID : 0;
                     $code = isset( $it->post_title ) ? $it->post_title : '';
@@ -321,13 +264,88 @@ class wcusage_Coupons_Table extends WP_List_Table {
                 }
                 return $mb[ $orderby_coupon ] <=> $ma[ $orderby_coupon ]; // Desc
             } );
+
+            // Paginate the globally-sorted results
+            $total_items = count( $all_valid );
+            $offset = ( $current_page - 1 ) * $per_page;
+            $items  = array_slice( $all_valid, $offset, $per_page );
+
+        } else {
+            // Default sorting by ID (newest first) — use paginated WP_Query
+            $args['posts_per_page'] = $per_page;
+            $args['paged']          = $current_page;
+            $args['orderby']        = 'ID';
+            $args['order']          = 'DESC';
+
+            // Determine the correct valid offset to avoid duplicates across pages
+            $desired_valid_offset = ( $current_page - 1 ) * $per_page;
+            $skipped_valid        = 0;
+            $items                = array();
+            $filtered_out_total   = 0;
+
+            // First page query (capture totals)
+            $args_first = $args;
+            $args_first['paged'] = 1;
+            $args_first['no_found_rows'] = false;
+            $q_first = new WP_Query( $args_first );
+            $max_pages = max( 1, (int) $q_first->max_num_pages );
+            $found_posts = (int) $q_first->found_posts;
+
+            $batch_valid = $validate_batch( $q_first->posts );
+            $filtered_out_total += max( 0, (int) $q_first->post_count - count( $batch_valid ) );
+
+            $scan_page = 1;
+            // Skip valid items until we reach desired offset
+            while ( $skipped_valid < $desired_valid_offset && $scan_page <= $max_pages ) {
+                if ( $scan_page > 1 ) {
+                    $args_page = $args;
+                    $args_page['paged'] = $scan_page;
+                    $args_page['no_found_rows'] = true;
+                    $q_page = new WP_Query( $args_page );
+                    $batch_valid = $validate_batch( $q_page->posts );
+                    $filtered_out_total += max( 0, (int) $q_page->post_count - count( $batch_valid ) );
+                }
+
+                $need_to_skip = $desired_valid_offset - $skipped_valid;
+                if ( $need_to_skip >= count( $batch_valid ) ) {
+                    $skipped_valid += count( $batch_valid );
+                    $scan_page++;
+                    continue;
+                }
+
+                // We reached the offset within this batch; take the remainder for current page
+                $remainder = array_slice( $batch_valid, $need_to_skip );
+                foreach ( $remainder as $post_obj ) {
+                    $items[] = $post_obj;
+                    if ( count( $items ) >= $per_page ) { break; }
+                }
+                $skipped_valid = $desired_valid_offset; // offset satisfied
+                $scan_page++;
+                break;
+            }
+
+            // If offset already satisfied and we still don't have enough items, continue scanning next pages
+            while ( count( $items ) < $per_page && $scan_page <= $max_pages ) {
+                $args_page = $args;
+                $args_page['paged'] = $scan_page;
+                $args_page['no_found_rows'] = true;
+                $q_page = new WP_Query( $args_page );
+                if ( empty( $q_page->posts ) ) { break; }
+                $batch_valid = $validate_batch( $q_page->posts );
+                $filtered_out_total += max( 0, (int) $q_page->post_count - count( $batch_valid ) );
+                foreach ( $batch_valid as $post_obj ) {
+                    $items[] = $post_obj;
+                    if ( count( $items ) >= $per_page ) { break 2; }
+                }
+                $scan_page++;
+            }
+
+            // Adjust totals by subtracting the number of items we filtered out in the pages we scanned.
+            $total_items = max( 0, (int) $found_posts - (int) $filtered_out_total );
         }
 
         // Assign and paginate
-    $this->items = $items;
-    // Adjust totals by subtracting the number of items we filtered out in the pages we scanned.
-    // Note: This reflects exact removals for scanned pages; items filtered in unseen pages are not deducted.
-    $total_items = max( 0, (int) $found_posts - (int) $filtered_out_total );
+        $this->items = $items;
 
         $this->set_pagination_args( array(
             'total_items' => $total_items,
@@ -719,10 +737,10 @@ function wcusage_coupons_page() {
         <h1 class="wp-heading-inline wcusage-admin-title wcusage-admin-title-coupons">
             <?php esc_html_e( 'Coupons', 'woo-coupon-usage' ); ?>
             <span class="wcusage-admin-title-buttons">
-                <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=shop_coupon' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Add Coupon', 'woo-coupon-usage' ); ?></a>
-                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage_add_affiliate' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Add Affiliate Coupon', 'woo-coupon-usage' ); ?></a>
-                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage-bulk-coupon-creator' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Bulk Create Coupons', 'woo-coupon-usage' ); ?></a>
-                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage-bulk-edit-coupon' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Bulk Edit Coupons', 'woo-coupon-usage' ); ?></a>
+                <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=shop_coupon' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Add Coupon', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage_add_affiliate' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Add Affiliate Coupon', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage-bulk-coupon-creator' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Bulk Create Coupons', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage-bulk-edit-coupon' ) ); ?>" class="wcusage-settings-button"><?php esc_html_e( 'Bulk Edit Coupons', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
             </span>
             <br/>
             

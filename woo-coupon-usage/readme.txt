@@ -4,8 +4,8 @@ Tags: affiliate, affiliate program, affiliates, woocommerce affiliate, affiliate
 Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
-Tested up to: 6.9
-Stable tag: 7.6.0
+Tested up to: 7.0
+Stable tag: 7.7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -247,7 +247,7 @@ Yes. If you need any help setting up the affiliate plugin, please free to <a hre
 You can report feature bugs by creating a <a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0">support ticket</a>. Please provide as much information as possible to make it easier for us to find a solution for you.
 
 = Where do I report security bugs found in this plugin? =
-Please report security bugs found in the source code of the undefined plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/9e5fb610-859b-44d5-95a4-697c049fa837). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+Please report security bugs found in the source code of the plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/9e5fb610-859b-44d5-95a4-697c049fa837). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
 == Screenshots ==
 
@@ -269,6 +269,31 @@ Please report security bugs found in the source code of the undefined plugin thr
 
 == Changelog ==
 
+= Version 7.7.0 - 12th April 2026 =
+- New: Completely rebuilt the Admin Reports & Analytics page with a more modern design.
+- New: Admin reports now includes additional statistics such as a trends chart, traffic sources, top performers, activity log events, and more.
+- New: Added a PDF download option for the admin reports that generates a PDF version of the report.
+- New: Added a new affiliate group filter to the admin reports to only include statistics for affiliates in a specific group.
+- Improvement: Added an option to the Add New Affiliate form to assign a user to an existing coupon code if the coupon already exists, instead of showing an error.
+- Improvement: Added an "assign existing coupon" checkbox to the Bulk Coupon Creator page, allowing bulk imports to assign users to existing coupons instead of failing on duplicates.
+- Improvement: Admin reports now auto-generate on page load, with the last report filters that were used.
+- Improvement: Added a new small button on the "Statistics" tab of the affiliate dashboard to quickly refresh the statistics without reloading the page.
+- Improvement: All-time stats will automatically soft recalculate (only the all-time stats, not individual order stats) in the background when visiting the affiliate dashboard, maximum once per hour, to ensure stats are always up to date even if certain manual changes were made to orders, coupons, etc that might affect the stats without it being reflected in the stats immediately.
+- Improvement: Made a variety of improvements to the "recent orders" tab on the affiliate dashboard, including new statistics boxes for custom date ranges, date range preset options, better performance when filtering, CSV export improvements, improved pagination with ajax "show more" and "show all" buttons.
+- Improvement: (Free) The admin reports in the free version now offers a larger date range and a few extra features.
+- Improvement: The affiliate dashboard tab names can now be customised in the "Affiliate Dashboard Customisation" settings section.
+- Tweak: Changed the "Recent Orders" default tab name to "Referred Orders".
+- Tweak: Added "Reports" as a top level item in the plugins header area, instead of being under "Other".
+- Tweak: Made a few styling tweaks to the main admin dashboard page, and other admin pages to have a slightly more modern and consistent design.
+- Tweak: Added some additional caching and performance enhancements to the affiliate dashboard when calculating statistics.
+- Tweak: (PRO) Added the "Reverse this payout" option for "Manual" payouts on the admin payouts page.
+- Tweak: (PRO) Increased the limit for the PDF invoices upload file field to 1MB.
+- Fix: Fixed an issue where affiliate users were not being created when adding individual affiliates or importing via CSV due to output being sent before redirect.
+- Fix: Fixed a niche case where in a specific scenario where custom/lifetime assigned orders might not have been included in the dashboards all-time stats in certain cases (case-sensitive).
+- Fix: (PRO) Fixed scheduled payout dates drifting over time, so monthly payouts now always fire on the 1st of each month.
+- Fix: (PRO) Fixed an issue where toggling the "Enable Scheduled Payout Requests" setting off and back on would not recreate the cron event until the schedule settings were changed.
+- Fix: Fixed an issue where submitting an affiliate application with a new coupon code would sometimes incorrectly display a "coupon already exists" error instead of the success confirmation message.
+
 = Version 7.6.0 - 3rd April 2026 =
 - New: (PRO) Added a new SMS Notifications feature, to automatically send SMS notifications to affiliates and admins for various events like new referrals, and payout updates. You can customise the SMS messages with your own text.
 - New: (PRO) Added a "Send Notification Email" checkbox to the Add New Affiliate and Add New Coupon admin forms, allowing admins to choose whether to send the "Affiliate Application Accepted" email when creating a new affiliate or coupon. The custom message field is now only shown when the checkbox is checked.
@@ -282,7 +307,7 @@ Please report security bugs found in the source code of the undefined plugin thr
 - Fix: (PRO) Fixed an issue where the "Affiliate Application Accepted" email was not being sent when an admin manually adds a new coupon for an existing affiliate via the View Affiliate page.
 - Fix: Fixed an issue in the free version where some settings tabs where showing empty in some cases since a recent update.
 - Fix: (PRO) Fixed an issue where the password reset URL in registration emails did not work on some websites, caused by passing the user ID instead of the username as the login parameter and using an unreliable WooCommerce endpoint URL construction.
-- Fix: (PRO) Fixed an issue where using {random} in the coupon format template would cause continuous database queries for non-existent coupon codes on every page load, potentially causing site slowdowns or timeouts. The coupon generation is now correctly skipped on non-submission page loads, and the redundant uniqueness check is bypassed when {random} is present in the template (since the random component already ensures uniqueness).
+- Fix: (PRO) Fixed an issue where using {random} in the coupon format template would cause continuous database queries for non-existent coupon codes on every page load, potentially causing site slowdowns or timeouts.
 - Fix: (PRO) Fixed the "Paid" commission amount on the Coupons admin table "Payouts" column showing incorrectly in some cases.
 - Fix: (PRO) Fixed an issue where processing/pending commission would disappear from the affiliate's view when an order status changed to "Completed" with delayed commission (payout days) enabled.
 - Security: Fixed a potential XSS vulnerability via the visitor IP value logged in referral click (reported by "Nguyen Ba Khanh" via Patchstack).

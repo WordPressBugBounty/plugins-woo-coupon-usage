@@ -287,15 +287,10 @@ jQuery(document).ready(function($) {
                 array('label' => 'PDF Invoices', 'url' => admin_url('admin.php?post_type=wcu-statements'), 'icon' => 'fa-solid fa-file-invoice-dollar',
                 'disabled' => wcusage_get_setting_value('wcusage_field_payouts_enable_statements', '0')),
             )),
+            array('label' => 'Reports', 'icon' => 'fa-solid fa-chart-bar', 'url' => admin_url('admin.php?page=wcusage_admin_reports')),
         );
         $other_items = array(
             array('label' => 'Admin Tools', 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
-            array(
-                'label' => 'View Admin Reports',
-                'url' => admin_url('admin.php?page=wcusage_admin_reports'),
-                'icon' => 'fa-solid fa-chart-bar',
-                'disabled' => false
-            ),
             array(
                 'label' => 'Email Newsletters',
                 'url' => admin_url('admin.php?page=wcusage_email_newsletters'),
@@ -439,7 +434,7 @@ jQuery(document).ready(function($) {
                         <a href="<?php echo esc_url($item['url']); ?>" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: #333;<?php echo $is_active ? ' background: #f3f3f3;' : ''; ?> font-weight: 500;">
                             <span class="<?php echo esc_attr($item['icon']); ?>"></span> <?php echo esc_html($item['label']); ?> <span style="margin-left: 4px;" class="fa-solid fa-caret-down"></span>
                         </a>
-                        <ul class="wcusage-admin-menu-dropdown-list" style="display: none; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); background: #fff; border: 1px solid #ddd; border-radius: 8px; min-width: 200px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 9999;">
+                        <ul class="wcusage-admin-menu-dropdown-list" style="display: none; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; min-width: 200px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 9999;">
                             <?php foreach ($item['dropdown'] as $subitem):
                                 preg_match('/[?&]page=([^&]+)/', $subitem['url'], $submatches);
                                 $sub_page = isset($submatches[1]) ? $submatches[1] : '';
@@ -470,7 +465,7 @@ jQuery(document).ready(function($) {
                 <a href="#" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: #333; font-weight: 500;">
                     <span class="fa-solid fa-ellipsis-h"></span> Other <span style="margin-left: 4px;" class="fa-solid fa-caret-down"></span>
                 </a>
-                <ul class="wcusage-admin-menu-dropdown-list" style="display: none; position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #ddd; border-radius: 8px; min-width: 200px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 9999;">
+                <ul class="wcusage-admin-menu-dropdown-list" style="display: none; position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; min-width: 200px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 9999;">
                     <?php
                     if (wcu_fs()->can_use_premium_code()) {
                         // PRO version: normal links, no PRO icon
@@ -515,7 +510,7 @@ jQuery(document).ready(function($) {
                 <a href="#" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: #333; font-weight: 500;">
                     <span class="fa-solid fa-life-ring"></span> Support <span style="margin-left: 4px;" class="fa-solid fa-caret-down"></span>
                 </a>
-                <ul class="wcusage-admin-menu-dropdown-list" style="display: none; position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #ddd; border-radius: 8px; min-width: 200px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 9999;">
+                <ul class="wcusage-admin-menu-dropdown-list" style="display: none; position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; min-width: 200px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 9999;">
                     <?php foreach ($support_items as $item):
                         preg_match('/[?&]page=([^&]+)/', $item['url'], $support_matches);
                         $support_page = isset($support_matches[1]) ? $support_matches[1] : '';
@@ -530,8 +525,8 @@ jQuery(document).ready(function($) {
             <?php if (!wcu_fs()->can_use_premium_code()): ?>
             <!-- Upgrade to PRO button -->
             <li style="position: relative;">
-                <a href="https://couponaffiliates.com/pricing/?utm_source=plugin&utm_medium=upgrade-menu" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 8px; text-decoration: none; color: #fff; font-weight: 600; background: linear-gradient(270deg,#28a745,#218838,#28a745); box-shadow: 0 2px 8px rgba(40,167,69,0.15);">
-                    Upgrade to PRO
+                <a href="https://couponaffiliates.com/pricing/?discount=SAVE25&utm_source=plugin&utm_medium=upgrade-menu" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 8px; text-decoration: none; color: #fff; font-weight: 600; background: linear-gradient(270deg,#00a32a,#008a20,#00a32a); box-shadow: 0 2px 8px rgba(0,163,42,0.15);">
+                    Get 25% off PRO
                 </a>
             </li>
             <style>
@@ -1173,40 +1168,47 @@ function wcusage_render_dashboard_section($key) {
     }
 
     echo '<div class="wcusage-admin-page-col wcusage-dashboard-section-item" data-section-key="' . esc_attr($key) . '">';
-    echo '<span class="wcusage-drag-handle fa-solid fa-grip-vertical" title="' . esc_attr__('Drag to reorder', 'woo-coupon-usage') . '"></span>';
 
     $title = '';
     $view_url = '';
+    $icon = '';
     switch ($key) {
         case 'activity':
             $title = esc_html__('Recent Activity', 'woo-coupon-usage');
             $view_url = admin_url('admin.php?page=wcusage_activity');
+            $icon = 'fas fa-history';
             break;
         case 'referrals':
             $title = esc_html__('Latest Referrals', 'woo-coupon-usage');
             $view_url = admin_url('admin.php?page=wcusage_referrals');
+            $icon = 'fas fa-link';
             break;
         case 'visits':
             $title = esc_html__('Latest Referral Visits', 'woo-coupon-usage');
             $view_url = admin_url('admin.php?page=wcusage_clicks');
+            $icon = 'fas fa-mouse-pointer';
             break;
         case 'coupons':
             $title = sprintf(esc_html__('Newest %s Coupons', 'woo-coupon-usage'), wcusage_get_affiliate_text(__('Affiliate', 'woo-coupon-usage')));
             $view_url = admin_url('admin.php?page=wcusage_coupons');
+            $icon = 'fas fa-tags';
             break;
         case 'registrations':
             $title = sprintf(esc_html__('Pending %s Registrations', 'woo-coupon-usage'), wcusage_get_affiliate_text(__('Affiliate', 'woo-coupon-usage')));
             $view_url = admin_url('admin.php?page=wcusage_registrations');
+            $icon = 'fas fa-user-plus';
             break;
         case 'payouts':
             $title = esc_html__('Pending Payout Requests', 'woo-coupon-usage');
             $view_url = admin_url('admin.php?page=wcusage_payouts');
+            $icon = 'fas fa-hand-holding-usd';
             break;
     }
 
-    // Output section title with small "View All" button on the right
-    echo '<h2 class="wcusage-section-title">' . esc_html($title) .
-        ' <a href="' . esc_url($view_url) . '" class="button button-secondary button-small">' . esc_html__('View All', 'woo-coupon-usage') . ' <i class="fa-solid fa-arrow-right"></i></a>' .
+    // Output section title with icon and small "View All" button on the right
+    echo '<h2 class="wcu-section-title"><i class="' . esc_attr($icon) . '"></i> ' . esc_html($title) .
+        ' <a href="' . esc_url($view_url) . '" class="wcu-btn-view-all">' . esc_html__('View All', 'woo-coupon-usage') . ' <i class="fa-solid fa-arrow-right"></i></a>' .
+        ' <span class="wcusage-drag-handle fa-solid fa-grip-vertical" title="' . esc_attr__('Drag to reorder', 'woo-coupon-usage') . '"></span>' .
         '</h2>';
 
     // Render the section content via hooks
@@ -1256,26 +1258,46 @@ function wcusage_dashboard_page_section_statistics() {
         <?php endforeach; ?>
     </div>
 
-    <div class="wcusage-stats-boxes-container">
+    <div class="wcu-cards-row wcu-dashboard-stats-row">
 
-        <div class="wcusage-info-box2 wcusage-info-box-usage">
-            <p><span class="wcusage-info-box-title">Referrals:</span><span class="total-usage">0</span></p>
+        <div class="wcu-card">
+            <div class="wcu-card-icon wcu-icon-usage"><i class="fas fa-users"></i></div>
+            <div class="wcu-card-data">
+                <span class="wcu-card-value total-usage">0</span>
+                <span class="wcu-card-label">Referrals</span>
+            </div>
         </div>
 
-        <div class="wcusage-info-box2 wcusage-info-box-sales">
-            <p><span class="wcusage-info-box-title">Sales:</span><span class="total-sales">0</span></p>
+        <div class="wcu-card">
+            <div class="wcu-card-icon wcu-icon-sales"><i class="fas fa-shopping-cart"></i></div>
+            <div class="wcu-card-data">
+                <span class="wcu-card-value total-sales">0</span>
+                <span class="wcu-card-label">Sales</span>
+            </div>
         </div>
 
-        <div class="wcusage-info-box2 wcusage-info-box-discounts">
-            <p><span class="wcusage-info-box-title">Discounts:</span><span class="total-discounts">0</span></p>
+        <div class="wcu-card">
+            <div class="wcu-card-icon wcu-icon-discounts"><i class="fas fa-tags"></i></div>
+            <div class="wcu-card-data">
+                <span class="wcu-card-value total-discounts">0</span>
+                <span class="wcu-card-label">Discounts</span>
+            </div>
         </div>
 
-        <div class="wcusage-info-box2 wcusage-info-box-dollar">
-            <p><span class="wcusage-info-box-title">Commission:</span><span class="total-commission">0</span></p>
+        <div class="wcu-card">
+            <div class="wcu-card-icon wcu-icon-commission"><i class="fas fa-hand-holding-usd"></i></div>
+            <div class="wcu-card-data">
+                <span class="wcu-card-value total-commission">0</span>
+                <span class="wcu-card-label">Commission</span>
+            </div>
         </div>
 
-        <div class="wcusage-info-box2 wcusage-info-box-clicks">
-            <p><span class="wcusage-info-box-title">Clicks:</span><span class="total-clicks">0</span></p>
+        <div class="wcu-card">
+            <div class="wcu-card-icon wcu-icon-clicks"><i class="fas fa-mouse-pointer"></i></div>
+            <div class="wcu-card-data">
+                <span class="wcu-card-value total-clicks">0</span>
+                <span class="wcu-card-label">Clicks</span>
+            </div>
         </div>
 
     </div>
@@ -1730,7 +1752,7 @@ function wcusage_dashboard_page_html() {
 
 <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
 
-<div class="wrap wcusage-admin-page">
+<div class="wrap wcusage-admin-page wcusage-dashboard-modern">
 
     <?php do_action('wcusage_hook_dashboard_page_header', ''); ?>
 
@@ -1949,14 +1971,17 @@ function wcusage_dashboard_page_html() {
             <div class="wcusage-admin-dashboard-main">
                 <div class="wcusage-admin-page-col-section" style="margin-top: -20px;">
                     <div class="wcusage-admin-page-col" style="width: 100%;">
-                        <h2><?php printf(esc_html__('%s Program Statistics', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )))); ?>
-                        <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_admin_reports')); ?>" style="text-decoration: none; float: right; font-size: 14px;"
-                        class="button button-secondary button-large">
-                            <?php echo esc_html__('View Full Report', 'woo-coupon-usage'); ?> <i class="fa-solid fa-arrow-right"></i>
-                        </a>
-                        <button type="button" id="wcusage-clear-cache-btn" class="button button-secondary button-large" style="float: right; margin-top: 0px; margin-right: 5px; font-size: 14px;" title="<?php echo esc_attr__('Clear all dashboard caches to refresh statistics', 'woo-coupon-usage'); ?>">
-                            <?php echo esc_html__('Clear Cache', 'woo-coupon-usage'); ?> <span class="fa-solid fa-rotate" style="margin-left: 2px;"></span>
-                        </button></h2>
+                        <div class="wcu-stats-header">
+                            <h2 class="wcu-section-title" style="margin-bottom: 0;"><i class="fas fa-chart-pie"></i> <?php printf(esc_html__('%s Program Statistics', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )))); ?></h2>
+                            <div class="wcu-stats-header-actions">
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_admin_reports')); ?>" class="wcu-btn-dashboard-action">
+                                    <?php echo esc_html__('View Full Report', 'woo-coupon-usage'); ?> <i class="fa-solid fa-chart-bar"></i>
+                                </a>
+                                <button type="button" id="wcusage-clear-cache-btn" class="wcu-btn-dashboard-action wcu-btn-dashboard-secondary" title="<?php echo esc_attr__('Clear all dashboard caches to refresh statistics', 'woo-coupon-usage'); ?>">
+                                    <?php echo esc_html__('Clear Cache', 'woo-coupon-usage'); ?> <i class="fa-solid fa-rotate"></i>
+                                </button>
+                            </div>
+                        </div>
                         <?php do_action('wcusage_hook_dashboard_page_section_statistics', ''); ?>
                     </div>
 
@@ -1983,45 +2008,33 @@ function wcusage_dashboard_page_html() {
 
                     <?php if (!empty($affiliate_sidebar_latest)) { ?>
 
-                    <div class="wcusage-affiliates-total-card"
-                    style="display: flex; align-items: center; justify-content: center; gap: 18px;
-                    border-radius: 12px; box-shadow: 0 2px 12px rgba(40,167,69,0.08); padding: 22px 0; margin-bottom: 18px;">
-                        <span class="wcusage-affiliates-total-icon" style="display: flex; align-items: center; justify-content: center; background: #333; color: #fff; border-radius: 50%; width: 54px; height: 54px; font-size: 2.1em; box-shadow: 0 2px 8px rgba(40,167,69,0.12);">
-                            <span class="fa-solid fa-user-group"></span>
-                        </span>
-                        <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                            <span class="wcusage-affiliates-total-label" style="font-size: 16px; line-height: 28px; color: #333; font-weight: 500;">
-                                <?php printf(esc_html__('Total %s', 'woo-coupon-usage'), esc_html($affiliate_sidebar_plural_label)); ?>:
-                            </span>
-                            <span class="wcusage-affiliates-total-number" style="font-size: 32px; color: #333; margin-bottom: 2px; line-height: 1;">
-                                <?php echo esc_html(number_format_i18n($affiliate_sidebar_total)); ?>
-                            </span>
+                    <div class="wcusage-affiliates-total-card wcu-card">
+                        <div class="wcu-card-icon wcu-icon-affiliates"><i class="fa-solid fa-user-group"></i></div>
+                        <div class="wcu-card-data">
+                            <span class="wcu-card-value"><?php echo esc_html(number_format_i18n($affiliate_sidebar_total)); ?></span>
+                            <span class="wcu-card-label"><?php printf(esc_html__('Total %s', 'woo-coupon-usage'), esc_html($affiliate_sidebar_plural_label)); ?></span>
                         </div>
                     </div>
 
                     <?php } else { ?>
 
-                        <div class="wcusage-affiliates-no-affiliates" style="margin-top: 22px; margin-bottom: 18px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 18px 22px; text-align: center;">
-                            <span class="fa-solid fa-user-plus" style="font-size: 22px; color: #f39c12; margin-bottom: 8px;"></span><br>
+                        <div class="wcusage-affiliates-no-affiliates">
+                            <span class="fa-solid fa-user-plus" style="font-size: 22px; color: #d97706; margin-bottom: 8px;"></span><br>
                             <strong><?php echo esc_html(str_replace('%s', esc_html($affiliate_sidebar_plural_label), esc_html__('You have no %s yet.', 'woo-coupon-usage'))); ?></strong><br>
                             <br/>
-                            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="button button-primary" style="font-size: 15px; padding: 8px 22px; border-radius: 6px;">
-                                <span class="fa-solid fa-user-plus" style="margin-right: 7px;"></span> <?php echo esc_html(str_replace('%s', esc_html($affiliate_sidebar_singular_label), esc_html__('Add New %s', 'woo-coupon-usage'))); ?>
+                            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcu-btn-dashboard-action" style="font-size: 13px; padding: 8px 18px;">
+                                <span class="fa-solid fa-user-plus"></span> <?php echo esc_html(str_replace('%s', esc_html($affiliate_sidebar_singular_label), esc_html__('Add New %s', 'woo-coupon-usage'))); ?>
                             </a>
                         </div>
 
                     <?php } ?>
 
                     <a class="wcusage-affiliates-manage-link button button-secondary button-large"
-                    style="text-decoration: none; margin-bottom: 18px; display: block; text-align: center; color: #333;
-                    font-size: 14px; border: 1px solid #c3c4c7; border-radius: 2px;"
                     href="<?php echo esc_url(admin_url('admin.php?page=wcusage_affiliates')); ?>">
                         <span class="fa-solid fa-users" style="margin-right: 7px;"></span> <?php printf(esc_html__('Manage %s', 'woo-coupon-usage'), esc_html($affiliate_sidebar_plural_label)); ?> <i class="fa-solid fa-arrow-right"></i>
                     </a>
 
                     <a class="wcusage-affiliates-manage-link button button-secondary button-large"
-                    style="text-decoration: none; display: block; text-align: center; color: #333;
-                    font-size: 14px; border: 1px solid #c3c4c7; border-radius: 2px;"
                     href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>">
                         <span class="fa-solid fa-user-plus" style="margin-right: 7px;"></span> <?php printf(esc_html__('Add New %s', 'woo-coupon-usage'), esc_html($affiliate_sidebar_singular_label)); ?> <i class="fa-solid fa-arrow-right"></i>
                     </a>

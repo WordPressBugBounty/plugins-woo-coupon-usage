@@ -370,12 +370,12 @@ function wcusage_orders_page() {
     echo esc_url( 'post-new.php?post_type=shop_order' );
     ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link"><?php 
     echo esc_html__( 'Add New Order', 'woo-coupon-usage' );
-    ?></a>
+    ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
         <a href="<?php 
     echo esc_url( admin_url( 'admin.php?page=wcusage-bulk-assign-coupons' ) );
     ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link"><?php 
     echo sprintf( esc_html__( 'Assign Orders to %s', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'Affiliates', 'woo-coupon-usage' ), true ) ) );
-    ?></a>
+    ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
         <?php 
     ?>
             <span class="wcusage-settings-button" id="wcu-admin-export-csv" style="float: right; opacity: 0.6; cursor: not-allowed;" title="<?php 
@@ -383,7 +383,7 @@ function wcusage_orders_page() {
     ?>">
                 <?php 
     echo esc_html__( 'Export Orders (PRO)', 'woo-coupon-usage' );
-    ?> <span class="fa-solid fa-download"></span>
+    ?> <span class="fa-solid fa-circle-arrow-right"></span>
             </span>
         <?php 
     ?>

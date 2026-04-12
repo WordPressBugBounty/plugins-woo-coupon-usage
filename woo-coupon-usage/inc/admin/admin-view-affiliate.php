@@ -323,7 +323,7 @@ do_action( 'wcusage_hook_dashboard_page_header', '' );
 ?>
 
         <h1 class="wp-heading-inline"
-        style="color: #23282d; font-size: 28px; font-weight: 600; margin-bottom: 10px; align-items: center; gap: 10px;">
+        style="color: #1d2327; font-size: 28px; font-weight: 600; margin-bottom: 10px; align-items: center; gap: 10px;">
             <?php 
 echo get_avatar(
     $user_id,
@@ -351,12 +351,12 @@ $preview_nonce = wp_create_nonce( 'wcusage_preview_affiliate_' . $user_id );
             <a href="<?php 
 echo esc_url( home_url( '/' . $portal_slug . '/?userid=' . $user_id . '&preview_nonce=' . $preview_nonce ) );
 ?>"
-            class="page-title-action wcusage-preview-button button-primary"
-            style="margin-left: 15px; font-size: 12px; padding: 5px 10px;" target="_blank">
+            class="wcu-btn-dashboard-action"
+            style="margin-left: 15px; font-size: 12px; padding: 8px 16px;" target="_blank">
                 <?php 
 echo esc_html__( 'View affiliate dashboard', 'woo-coupon-usage' );
 ?>
-                <i class="fas fa-external-link-alt" style="margin-left: 5px; font-size: 12px; height: 12px; margin-top: 5px;"></i>
+                <i class="fas fa-external-link-alt" style="margin-left: 5px; font-size: 12px;"></i>
             </a>
             <?php 
 $wcusage_tracking_enable = wcusage_get_setting_value( 'wcusage_field_tracking_enable', '0' );
@@ -372,7 +372,7 @@ $delete_nonce = wp_create_nonce( 'wcusage_delete_user_' . $user_id );
         <div class="wcusage-view-affiliate-header-actions" style="float: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
             <a href="<?php 
 echo esc_url( admin_url( 'admin.php?page=wcusage_affiliates' ) );
-?>" class="page-title-action wcusage-back-button">
+?>" class="wcu-btn-dashboard-action wcu-btn-dashboard-secondary">
                 <i class="fas fa-arrow-left" style="margin-right: 5px;"></i>
                 <?php 
 echo esc_html__( 'Back to Affiliates', 'woo-coupon-usage' );
@@ -489,8 +489,8 @@ echo esc_html__( 'Edit User', 'woo-coupon-usage' );
                     <div id="tab-overview" class="tab-content <?php 
 echo ( $current_tab === 'overview' ? 'active' : '' );
 ?>">
-                        <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
-                            <i class="fas fa-chart-line" style="color: #007cba; margin-right: 10px;"></i>
+                        <h3 style="color: #1d2327; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #2271b1; padding-bottom: 10px;">
+                            <i class="fas fa-chart-line" style="color: #2271b1; margin-right: 10px;"></i>
                             <?php 
 echo esc_html__( 'Statistics Overview', 'woo-coupon-usage' );
 ?>
@@ -505,8 +505,8 @@ wcusage_display_affiliate_stats( $user_id, 'all' );
                     <div id="tab-referrals" class="tab-content <?php 
 echo ( $current_tab === 'referrals' ? 'active' : '' );
 ?>">
-                        <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
-                            <i class="fas fa-shopping-cart" style="color: #007cba; margin-right: 10px;"></i>
+                        <h3 style="color: #1d2327; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #2271b1; padding-bottom: 10px;">
+                            <i class="fas fa-shopping-cart" style="color: #2271b1; margin-right: 10px;"></i>
                             <?php 
 echo esc_html__( 'Referred Orders', 'woo-coupon-usage' );
 ?>
@@ -1719,7 +1719,7 @@ function wcusage_display_affiliate_stats(  $user_id, $coupon_id = 'all'  ) {
     <?php 
     if ( $show_dashboard_message ) {
         ?>
-    <div style="margin-top: -20px; margin-bottom: 40px; padding: 10px 15px; border: 1px solid #000000ff; border-radius: 4px; background-color: #ffd2d2ff; display: flex; flex-wrap: wrap; align-items: center; gap: 15px;">
+    <div style="margin-top: -20px; margin-bottom: 40px; padding: 10px 15px; border: 1px solid #000000ff; border-radius: 6px; background-color: #ffd2d2ff; display: flex; flex-wrap: wrap; align-items: center; gap: 15px;">
         <p style="flex: 1 1 260px; margin: 0;"><strong><?php 
         echo esc_html__( 'Note:', 'woo-coupon-usage' );
         ?></strong> <?php 
@@ -2025,7 +2025,7 @@ function wcusage_display_affiliate_stats(  $user_id, $coupon_id = 'all'  ) {
             <i class="fa-solid fa-plus" style="margin-left: 5px;"></i>
         </button>
 
-        <div id="add-coupon-form-container" style="display: none; margin-top: 15px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px;">
+        <div id="add-coupon-form-container" style="display: none; margin-top: 15px; padding: 15px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px;">
             <h3><?php 
         echo esc_html__( 'Add New Coupon for Affiliate', 'woo-coupon-usage' );
         ?></h3>
@@ -2463,7 +2463,7 @@ function wcusage_display_affiliate_visits(
         echo wp_kses_post( $referrer_display );
         ?></td>
                     <td>
-                        <code style="background: #f8f9fa; padding: 2px 4px; border-radius: 3px; font-size: 12px;">
+                        <code style="background: #f9fafb; padding: 2px 4px; border-radius: 3px; font-size: 12px;">
                             <?php 
         echo esc_html( $click->ipaddress );
         ?>

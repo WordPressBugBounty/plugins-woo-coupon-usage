@@ -367,22 +367,23 @@ function wcusage_setup_page_html() {
             }
             .step-box {
               flex: 1 1 calc(33.333% - 14px);
-              background: #f8f9fa;
-              border: 1px solid #e0e0e0;
-              border-radius: 8px;
+              background: #f9fafb;
+              border: 1px solid #e5e7eb;
+              border-radius: 10px;
               padding: 20px;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-              transition: transform 0.2s;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+              transition: all 0.2s ease;
               min-width: 250px;
             }
             .step-box:hover {
-              transform: translateY(-5px);
-              box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+              transform: translateY(-2px);
+              box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+              border-color: #d0d5dd;
             }
             .step-box h3 {
               margin: 0 0 10px;
               font-size: 16px;
-              color: #333;
+              color: #1d2327;
             }
             .step-box p {
               margin: 0;
@@ -391,7 +392,7 @@ function wcusage_setup_page_html() {
             }
             .step-number {
               font-weight: bold;
-              color: #0073aa;
+              color: #2271b1;
             }
           </style>
 

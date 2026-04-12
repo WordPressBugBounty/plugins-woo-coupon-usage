@@ -760,73 +760,107 @@ form.wcu_payout_button {
 
 .wcu-filters-col1,
 .wcu-filters-col2 {
-	display: table;
-	height: 70px;
+	display: block;
 }
 
 .wcu-filters-inner {
-	display: table-cell;
-	vertical-align: middle;
+	display: block;
+}
+
+.wcu-order-filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 10px;
+}
+
+.wcu-order-filters form {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 10px;
+	width: 100%;
 }
 
 .wcu-order-filters-space {
-	min-width: 15px;
-	display: inline-block;
+	display: none;
 }
 
-@media only screen and (min-width: 940px) {
-	.wcu-filters-col1 {
-		width: 80%;
-		float: left;
-	}
-
-	.wcu-filters-col2 {
-		width: 20%;
-		float: left;
-	}
-
-	.wcu-button-export {
-		float: right;
-	}
-}
-
-@media only screen and (max-width: 939px) {
-	#wcusage_settings_form_orders, .wcu-filters-col1, .wcu-filters-col2, .wcu-filters-inner {
-		max-width: 100% !important;
-	}
+.wcu-order-filters-field {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	white-space: nowrap;
 }
 
 .ordersfilterbutton,
 .summaryfilterbutton {
-	display: block;
-	margin: 4px auto;
 	max-width: 150px !important;
 }
 
-@media only screen and (max-width: 939px) {
-
+@media only screen and (min-width: 940px) {
 	.wcu-filters-col1 {
-		margin: 20px 0;
-		width: 100vw;
-		text-align: center;
-
+		float: left;
+		width: 80%;
+		min-height: 70px;
+		display: flex;
+		align-items: center;
 	}
 
 	.wcu-filters-col2 {
-		width: 100vw;
-		text-align: center;
+		float: left;
+		width: 20%;
+		min-height: 70px;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+	}
+}
+
+@media only screen and (max-width: 939px) {
+	.wcu-filters-col1,
+	.wcu-filters-col2 {
+		width: 100%;
+	}
+
+	.wcu-filters-col2 {
+		margin-top: 10px;
+	}
+
+	.wcu-order-filters,
+	.wcu-order-filters form {
+		justify-content: center;
+	}
+}
+
+@media only screen and (max-width: 600px) {
+	.wcu-order-filters,
+	.wcu-order-filters form {
+		flex-direction: column;
+		align-items: stretch;
 	}
 
 	.wcu-order-filters-field {
-		width: calc(100% - 20px);
-		display: block;
-		margin-bottom: 4px;
+		width: 100%;
+		justify-content: center;
 	}
 
-	.wcu-order-filters-space {
-		display: none;
+	.wcu-order-filters-field input[type="date"],
+	.wcu-order-filters-field input[type="month"] {
+		flex: 1;
+		min-width: 0;
+		max-width: 100% !important;
 	}
-	
+
+	.wcu-order-filters-field select {
+		width: 100%;
+	}
+
+	.ordersfilterbutton,
+	.summaryfilterbutton {
+		width: 100%;
+		max-width: 100% !important;
+	}
 }
 
 .wcu-order-filters-field input {
@@ -1176,6 +1210,44 @@ form.wcu_payout_button {
 	margin-bottom: 10px;
 	color: #333;
 	padding: 0 !important;
+}
+
+/* Refresh Stats Icon (auto-check) */
+.wcusage-refresh-stats-icon {
+	margin-left: 6px !important;
+	font-size: 13px !important;
+	color: #a6a6a6 !important;
+	cursor: default;
+}
+/* Refresh Stats Button (manual) */
+.wcusage-refresh-stats-btn {
+	margin-left: 6px !important;
+	font-size: 13px !important;
+	color: #a6a6a6 !important;
+	cursor: pointer;
+	transition: color 0.2s ease;
+	text-decoration: none !important;
+}
+.wcusage-refresh-stats-btn:hover {
+	color: #333 !important;
+}
+.wcusage-refresh-stats-btn.wcusage-refreshing {
+	pointer-events: none;
+	opacity: 0.7;
+}
+.wcusage-stats-loading {
+	color: #a6a6a6;
+	font-style: italic;
+}
+.wcusage-stats-loading::after {
+	content: '';
+	animation: wcusageDots 1.2s steps(4, end) infinite;
+}
+@keyframes wcusageDots {
+	0%   { content: '.'; }
+	33%  { content: '..'; }
+	66%  { content: '...'; }
+	100% { content: '.'; }
 }
 
 .show_statistics .wcusage-stats-title {
@@ -1994,4 +2066,70 @@ body.dark-mode .wcu-bank-details-display {
 
 body.dark-mode .wcu-bank-details-display strong {
 	color: var(--text-color) !important;
+}
+
+/* Orders Date Range Stats */
+.wcusage-orders-date-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0;
+}
+
+.wcusage-orders-date-stats .wcusage-info-box {
+	flex: 1 1 0;
+	min-width: 150px;
+	width: auto;
+	padding: 15px 10px 15px 70px;
+	box-sizing: border-box;
+}
+
+.wcusage-orders-date-stats .wcusage-info-box:before {
+	left: 15px;
+	font-size: 30px;
+	top: 28px;
+}
+
+.wcusage-orders-status-totals {
+	flex: 0 0 100%;
+	text-align: center;
+	padding: 8px 0 0;
+	font-size: 13px;
+	color: #555;
+}
+
+/* Orders Pagination */
+.wcusage-orders-pagination {
+	padding: 10px 0;
+}
+
+.wcusage-orders-pagination .wcusage-orders-page-btn {
+	display: inline-block;
+	padding: 6px 14px;
+	background: #f0f0f0;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	text-decoration: none;
+	color: #333;
+	font-size: 13px;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.wcusage-orders-pagination .wcusage-orders-page-btn:hover {
+	background: #e0e0e0;
+	text-decoration: none;
+}
+
+@media only screen and (max-width: 900px) {
+	.wcusage-orders-date-stats .wcusage-info-box {
+		flex: 1 1 calc(50% - 1%);
+		min-width: calc(50% - 1%);
+	}
+}
+
+@media only screen and (max-width: 520px) {
+	.wcusage-orders-date-stats .wcusage-info-box {
+		flex: 1 1 100%;
+		min-width: 100%;
+	}
 }

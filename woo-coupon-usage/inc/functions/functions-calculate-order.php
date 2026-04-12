@@ -195,6 +195,11 @@ function wcusage_coupon_disable_commission(  $coupon_id  ) {
  */
 if ( !function_exists( 'wcusage_get_order_totals' ) ) {
     function wcusage_get_order_totals(  $orderid  ) {
+        // Static cache to avoid recalculating totals for the same order
+        static $order_totals_cache = array();
+        if ( isset( $order_totals_cache[$orderid] ) ) {
+            return $order_totals_cache[$orderid];
+        }
         // Check if order ID is valid
         if ( !is_numeric( $orderid ) ) {
             return [
@@ -292,12 +297,14 @@ if ( !function_exists( 'wcusage_get_order_totals' ) ) {
             ''
         );
         // Return totals
-        return [
+        $result = [
             'total_discount'       => $total_discount,
             'ordertotal'           => $ordertotal,
             'ordertotaldiscounted' => $ordertotaldiscounted,
             'total_shipping'       => $shipping,
         ];
+        $order_totals_cache[$orderid] = $result;
+        return $result;
     }
 
 }
@@ -1554,13 +1561,18 @@ function wcusage_format_price_plain(  $price  ) {
 }
 
 /**
- * Gets  the total fees for order to add to affiliate dashboard and calculations, if certain certains enabled/disabled.
+ * Gets the total fees for order to add to affiliate dashboard and calculations, if certain certains enabled/disabled.
  *
  * @return array
  *
  */
 if ( !function_exists( 'wcusage_get_order_tax_percent' ) ) {
     function wcusage_get_order_tax_percent(  $orderid  ) {
+        // Static cache to avoid redundant wc_get_order() calls for the same order
+        static $tax_percent_cache = array();
+        if ( isset( $tax_percent_cache[$orderid] ) ) {
+            return $tax_percent_cache[$orderid];
+        }
         $order = wc_get_order( $orderid );
         if ( $order ) {
             $theordertotal = $order->get_total();
@@ -1573,6 +1585,7 @@ if ( !function_exists( 'wcusage_get_order_tax_percent' ) ) {
         } else {
             $taxpercent = 0;
         }
+        $tax_percent_cache[$orderid] = $taxpercent;
         return $taxpercent;
     }
 
@@ -1585,6 +1598,11 @@ if ( !function_exists( 'wcusage_get_order_tax_percent' ) ) {
  */
 if ( !function_exists( 'wcusage_get_total_fees' ) ) {
     function wcusage_get_total_fees(  $orderid  ) {
+        // Static cache to avoid redundant wc_get_order() and fee iteration
+        static $fees_cache = array();
+        if ( isset( $fees_cache[$orderid] ) ) {
+            return $fees_cache[$orderid];
+        }
         $order = wc_get_order( $orderid );
         $taxpercent = wcusage_get_order_tax_percent( $orderid );
         $fee_total_remove = 0;
@@ -1606,6 +1624,7 @@ if ( !function_exists( 'wcusage_get_total_fees' ) ) {
         $return_array = [];
         $return_array['fee_total_remove'] = $fee_total_remove;
         $return_array['fee_total_add'] = $fee_total_add;
+        $fees_cache[$orderid] = $return_array;
         return $return_array;
     }
 

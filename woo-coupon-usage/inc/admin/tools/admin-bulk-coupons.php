@@ -30,6 +30,9 @@ function wcusage_bulk_coupon_creator_fields() {
 add_action( 'admin_init', 'wcusage_check_for_csv_download' );
 function wcusage_check_for_csv_download() {
     if ( isset( $_GET['page'] ) && $_GET['page'] == 'wcusage-bulk-coupon-creator' && isset( $_GET['download'] ) ) {
+        if ( !wcusage_check_admin_access() ) {
+            wp_die( 'Error: Permission denied.' );
+        }
         wcusage_bulk_coupon_creator_page_downloadCSV();
     }
 }
@@ -103,6 +106,15 @@ function wcusage_bulk_coupon_creator_page() {
                 <button type="button" id="add-row">Add New +</button>
             </div>
             <br /><br />
+            <div style="margin-bottom: 10px;">
+                <label style="cursor: pointer;">
+                    <input type="checkbox" name="assign_existing" id="wcu-assign-existing" value="1" style="margin-right: 4px;">
+                    <?php 
+    echo esc_html__( 'Override existing coupons with new user', 'woo-coupon-usage' );
+    ?>
+                </label>
+            </div>
+            <br/>
             <input type="submit" value="Create Coupons" id="wcusage-submit" class="button button-primary">
             <br/><br/>
             <p><a href="<?php 
@@ -274,7 +286,12 @@ function wcusage_admin_footer_script_coupon_creator() {
                             if (response.success) {
                                 // Display success messages for each row without errors
                                 response.success_rows.forEach(function(row) {
-                                    var message = '<p style="font-weight: bold;">Coupon created successfully!</p>';
+                                    var message = '';
+                                    if (row.assigned) {
+                                        message = '<p style="font-weight: bold;">User assigned to existing coupon!</p>';
+                                    } else {
+                                        message = '<p style="font-weight: bold;">Coupon created successfully!</p>';
+                                    }
                                     if (row.new) message += '<p>(New user was created.)</p>';
                                     message += '<p>Username: ' + row.data.username + '<br/>';
                                     message += 'Email: ' + row.data.email + '<br/>';
@@ -318,16 +335,15 @@ function wcusage_admin_footer_script_coupon_creator() {
 
 // Handle form submission
 add_action( 'wp_ajax_create_coupons', 'wcusage_bulk_create_coupons' );
-add_action( 'wp_ajax_nopriv_create_coupons', 'wcusage_bulk_create_coupons' );
 function wcusage_bulk_create_coupons() {
     $response = array();
-    if ( $_POST['coupon_code'] ) {
-        // Check nonce
-        if ( !wcusage_check_admin_access() || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'create_bulk_coupons' ) ) {
-            $response['errors'][] = 'Security check failed';
-            wp_send_json( $response );
-            exit;
-        }
+    // Check nonce and admin access first
+    if ( !wcusage_check_admin_access() || !isset( $_POST['_wpnonce'] ) || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'create_bulk_coupons' ) ) {
+        $response['errors'][] = 'Security check failed';
+        wp_send_json( $response );
+        exit;
+    }
+    if ( isset( $_POST['coupon_code'] ) && is_array( $_POST['coupon_code'] ) ) {
         $row_errors = array();
         // Store errors for each row/item
         $success_rows = array();
@@ -384,7 +400,9 @@ function wcusage_bulk_create_coupons() {
                 continue;
             }
             // Coupon code exists
-            if ( wc_get_coupon_id_by_code( $coupon_code ) ) {
+            $assign_existing = isset( $_POST['assign_existing'] ) && $_POST['assign_existing'] === '1';
+            $existing_coupon_id = wc_get_coupon_id_by_code( $coupon_code );
+            if ( $existing_coupon_id && !$assign_existing ) {
                 $row_errors[] = array(
                     'data'    => $row_data,
                     'message' => 'Coupon Code already exists.',
@@ -428,6 +446,13 @@ function wcusage_bulk_create_coupons() {
                     continue;
                 }
                 $user_id = wp_create_user( $username, wp_generate_password(), $email );
+                if ( is_wp_error( $user_id ) ) {
+                    $row_errors[] = array(
+                        'data'    => $row_data,
+                        'message' => 'Failed to create user: ' . $user_id->get_error_message(),
+                    );
+                    continue;
+                }
                 if ( $user_id ) {
                     wp_update_user( [
                         'ID'         => $user_id,
@@ -449,6 +474,19 @@ function wcusage_bulk_create_coupons() {
             } else {
                 $user_id = $user->ID;
                 $new_user = false;
+            }
+            // If coupon already exists and assign_existing is checked, assign user to existing coupon
+            if ( $existing_coupon_id && $assign_existing ) {
+                update_post_meta( $existing_coupon_id, 'wcu_select_coupon_user', $user_id );
+                if ( function_exists( 'wcusage_clear_coupon_users_cache' ) ) {
+                    wcusage_clear_coupon_users_cache( $user_id );
+                }
+                $success_rows[] = array(
+                    'data'     => $row_data,
+                    'new'      => $new_user,
+                    'assigned' => true,
+                );
+                continue;
             }
             // Create the coupon
             $coupon_id = wp_insert_post( [

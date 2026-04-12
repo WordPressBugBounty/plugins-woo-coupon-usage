@@ -470,7 +470,7 @@ if( !function_exists( 'wcusage_check_admin_access' ) ) {
  */
 if( !function_exists( 'wcusage_check_lifetime_or_coupon' ) ) {
   function wcusage_check_lifetime_or_coupon($order_id, $coupon_code) {
-  	$wcu_lifetime_referrer = wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer', true );
+  	$wcu_lifetime_referrer = strtolower(wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer', true ));
   	if($wcu_lifetime_referrer) {
   		if($wcu_lifetime_referrer != $coupon_code) {
   			$lifetimecheck = false;

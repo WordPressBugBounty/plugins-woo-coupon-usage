@@ -143,7 +143,7 @@ function wcusage_options_page() {
             add_submenu_page(
                 'wcusage',
                 esc_html__( 'Admin Reports & Analytics', 'woo-coupon-usage' ),
-                esc_html__( 'Admin Reports', 'woo-coupon-usage' ),
+                esc_html__( 'Reports & Analytics', 'woo-coupon-usage' ),
                 $admin_perms,
                 'wcusage_admin_reports',
                 'wcusage_admin_reports_page_html'

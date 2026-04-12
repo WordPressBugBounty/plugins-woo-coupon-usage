@@ -95,10 +95,14 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 
   		$wcusage_field_order_type_custom = wcusage_get_setting_value('wcusage_field_order_type_custom', '');
   		if(!$wcusage_field_order_type_custom) {
-  			$statuses = wc_get_order_statuses();
-  			if( isset( $statuses['wc-refunded'] ) ){
-  	        	unset( $statuses['wc-refunded'] );
-  	    	}
+  			// Match the statuses that check_status_show() allows to avoid
+  			// fetching orders that will be filtered out in rendering.
+  			$wcusage_field_order_type = wcusage_get_setting_value('wcusage_field_order_type', '');
+  			if($wcusage_field_order_type == 'completed') {
+  				$statuses = array('wc-completed' => 'Completed');
+  			} else {
+  				$statuses = array('wc-completed' => 'Completed', 'wc-processing' => 'Processing');
+  			}
   		} else {
   			$statuses = $wcusage_field_order_type_custom;
   		}
@@ -124,7 +128,7 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 
 		// Query to get orders
 		$query = $wpdb->prepare(
-			"SELECT DISTINCT p.$id AS order_id, p.$post_date AS order_date
+			"SELECT DISTINCT p.$id AS order_id, p.$post_date AS order_date, p.$post_status AS order_status
 			FROM {$wpdb->prefix}$posts AS p
 			LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS woi
 				ON p.$id = woi.order_id AND woi.order_item_type = 'coupon' AND woi.order_item_name = %s
@@ -167,10 +171,14 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 		
   		$list_of_products = array();
       	$commission_summary = array();
+		$status_counts = array();
 
   		$wcusage_show_tax = wcusage_get_setting_value('wcusage_field_show_tax', '0');
 
   		$save_order_commission_meta = wcusage_get_setting_value('wcusage_field_enable_order_commission_meta', '1');
+
+		// Suspend cache addition during batch processing to reduce memory pressure
+		$previous_cache_state = wp_suspend_cache_addition( true );
 
   		if ( !empty($orders) ) {
 		$dp = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
@@ -178,8 +186,6 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 		// looping through all the order_id
 		foreach ( $orders as $key => $the_order ) {
 		
-
-
 		$order_id = $the_order->order_id;
 
 		// Performance optimization: When not doing a full refresh/update, try to use
@@ -192,11 +198,11 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 				&& isset($cached_stats['commission'])) {
 
 				// Quick meta checks for coupon ownership (without loading WC_Order)
-				$lifetime_affiliate_coupon_referrer = get_post_meta($order_id, 'lifetime_affiliate_coupon_referrer', true);
+				$lifetime_affiliate_coupon_referrer = strtolower(get_post_meta($order_id, 'lifetime_affiliate_coupon_referrer', true));
 				if ($lifetime_affiliate_coupon_referrer && $lifetime_affiliate_coupon_referrer != $coupon_code) {
 					continue;
 				}
-				$wcusage_referrer_coupon = get_post_meta($order_id, 'wcusage_referrer_coupon', true);
+				$wcusage_referrer_coupon = strtolower(get_post_meta($order_id, 'wcusage_referrer_coupon', true));
 				if (!$lifetime_affiliate_coupon_referrer && $wcusage_referrer_coupon && $wcusage_referrer_coupon != $coupon_code) {
 					continue;
 				}
@@ -220,6 +226,16 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 				$total_orders += $cached_order_total;
 				$total_count++;
 				$total_commission += $cached_commission;
+
+				// Count status from SQL result
+				if (isset($the_order->order_status)) {
+					$raw_status = str_replace('wc-', '', $the_order->order_status);
+					$status_label = ucfirst(wc_get_order_status_name($raw_status));
+					if (!isset($status_counts[$status_label])) {
+						$status_counts[$status_label] = 0;
+					}
+					$status_counts[$status_label]++;
+				}
 
 				// Get commission summary from cached meta
 				if ($start_date != "0001-01-01") {
@@ -274,13 +290,13 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 		}
 
 		// if meta "lifetime_affiliate_coupon_referrer" is set, check if it's same as $coupon_code if not then skip
-		$lifetime_affiliate_coupon_referrer = get_post_meta( $order_id, 'lifetime_affiliate_coupon_referrer', true );
+		$lifetime_affiliate_coupon_referrer = strtolower(get_post_meta( $order_id, 'lifetime_affiliate_coupon_referrer', true ));
 		if( $lifetime_affiliate_coupon_referrer && $lifetime_affiliate_coupon_referrer != $coupon_code ) {
 			continue;
 		}
 
 		// if meta "wcusage_referrer_coupon" is set, check if it's same as $coupon_code if not then skip
-		$wcusage_referrer_coupon = get_post_meta( $order_id, 'wcusage_referrer_coupon', true );
+		$wcusage_referrer_coupon = strtolower(get_post_meta( $order_id, 'wcusage_referrer_coupon', true ));
 		if( !$lifetime_affiliate_coupon_referrer && $wcusage_referrer_coupon && $wcusage_referrer_coupon != $coupon_code ) {
 			continue;
 		}
@@ -308,6 +324,13 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 			$renewalcheck = wcusage_check_if_renewal_allowed($order_id);
 
 			if ( ($theorderstatus == "completed" || $check_status_show) && $renewalcheck && $lifetimecheck ) {
+
+				// Count status for aggregate totals
+				$status_label = ucfirst(wc_get_order_status_name($theorderstatus));
+				if (!isset($status_counts[$status_label])) {
+					$status_counts[$status_label] = 0;
+				}
+				$status_counts[$status_label]++;
 
 				if($update) {
 					$calculateorder = wcusage_calculate_order_data( $order_id, $coupon_code, 1, 0 );
@@ -418,6 +441,9 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 
   		}
 
+		// Restore cache addition state
+		wp_suspend_cache_addition( $previous_cache_state );
+
 		$allstats = array();
 		$allstats['total_orders'] = $total_orders;
 		$allstats['full_discount'] = $total_discount;
@@ -490,6 +516,7 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
   	$return_array['total_orders'] = $total_orders;
   	$return_array['total_commission'] = $total_commission;
     $return_array['commission_summary'] = $commission_summary;
+	$return_array['status_counts'] = isset($status_counts) ? $status_counts : array();
 	$return_array['allstats'] = $allstats;
   	return $return_array;
 

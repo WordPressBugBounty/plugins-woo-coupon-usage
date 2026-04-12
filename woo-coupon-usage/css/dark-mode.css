@@ -330,6 +330,35 @@
     color: #e0e0e0 !important;
 }
 
+.wcu-dash-coupon-area.wcu-dark-mode .wcusage-orders-status-totals {
+    color: #ccc !important;
+}
+
+.wcu-dash-coupon-area.wcu-dark-mode .wcusage-refresh-stats-icon {
+    color: #8ab4f8 !important;
+}
+.wcu-dash-coupon-area.wcu-dark-mode .wcusage-refresh-stats-btn {
+    color: #8ab4f8 !important;
+}
+.wcu-dash-coupon-area.wcu-dark-mode .wcusage-refresh-stats-btn:hover {
+    color: #e0e0e0 !important;
+}
+
+/* === Orders Pagination Dark Mode === */
+.wcu-dash-coupon-area.wcu-dark-mode .wcusage-orders-pagination .wcusage-orders-page-btn {
+    background: #3a3a3a !important;
+    border-color: #555 !important;
+    color: #e0e0e0 !important;
+}
+
+.wcu-dash-coupon-area.wcu-dark-mode .wcusage-orders-pagination .wcusage-orders-page-btn:hover {
+    background: #4a4a4a !important;
+}
+
+.wcu-dash-coupon-area.wcu-dark-mode .wcusage-orders-pagination span {
+    color: #aaa !important;
+}
+
 /* === Commission Graph === */
 .wcu-dash-coupon-area.wcu-dark-mode .wcusage-graph-container,
 .wcu-dash-coupon-area.wcu-dark-mode .wcusage-chart-container,

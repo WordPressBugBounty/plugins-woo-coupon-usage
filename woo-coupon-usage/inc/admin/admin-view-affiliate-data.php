@@ -258,7 +258,7 @@ function wcusage_affiliate_visits_table($user_id, $page = 1, $per_page = 20, $st
                     </td>
                     <td><?php echo wp_kses_post($referrer_display); ?></td>
                     <td>
-                        <code style="background: #f8f9fa; padding: 2px 4px; border-radius: 3px; font-size: 12px;">
+                        <code style="background: #f9fafb; padding: 2px 4px; border-radius: 3px; font-size: 12px;">
                             <?php echo esc_html($click->ipaddress); ?>
                         </code>
                     </td>

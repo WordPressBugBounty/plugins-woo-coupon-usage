@@ -630,15 +630,15 @@ function wcusage_coupon_users_page() {
         .wcusage_users_page_desc { display: inline-block; }
     }
     </style>
-	<div class="wrap wcusage_users_page_header">
+	<div class="wrap wcusage-admin-page wcusage_users_page_header">
 
         <?php do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
 
 		<h2 class="wp-heading-inline wcusage-admin-title">
         <?php echo sprintf(esc_html__('Coupon %s Users', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )))); ?>
         <span class="wcusage-admin-title-buttons">
-            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New <?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?></a>
-            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-bulk-coupon-creator')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Bulk Create <?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliates', 'woo-coupon-usage' ), true)); ?></a>
+            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New <?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
+            <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-bulk-coupon-creator')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Bulk Create <?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliates', 'woo-coupon-usage' ), true)); ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
             <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wcusage_affiliates&action=export_csv'), 'wcusage_export_users_csv')); ?>" class="wcusage-settings-button" id="wcu-admin-export-csv" style="float: right;">
                 <?php echo sprintf(esc_html__('Export %s Users', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )))); ?> <span class="fa-solid fa-download"></span>
             </a>

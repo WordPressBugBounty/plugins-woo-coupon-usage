@@ -27,14 +27,102 @@ function wcusage_admin_registrations_page_html() {
                     $_POST['wcu-input-username'] = $username;
                 }
             }
-            echo wcusage_post_submit_application( 1 );
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-            // Redirect to admin.php?page=wcusage_affiliates
-            $redirect_user = ( isset( $_POST['wcu-input-username'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-input-username'] ) ) : '' );
-            $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . $redirect_user );
-            // Redirect via PHP
-            wp_safe_redirect( $redirect_url );
-            exit;
+            // Resolve the coupon code (manual or auto-generated) and check for duplicates before processing
+            $couponcode = sanitize_text_field( $post_field_values['couponcode'] );
+            $coupon_exists = false;
+            if ( !empty( $couponcode ) && function_exists( 'wc_get_coupon_id_by_code' ) && wc_get_coupon_id_by_code( $couponcode ) ) {
+                $coupon_exists = true;
+            }
+            // Also check the registrations table for pending/accepted entries with this coupon code
+            if ( !$coupon_exists && !empty( $couponcode ) ) {
+                global $wpdb;
+                $reg_table = $wpdb->prefix . 'wcusage_register';
+                $reg_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$reg_table} WHERE couponcode = %s AND status != 'declined'", $couponcode ) );
+                // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+                if ( $reg_count > 0 ) {
+                    $coupon_exists = true;
+                }
+            }
+            // Allow override: assign user to existing coupon if checkbox was checked
+            $assign_existing = isset( $_POST['wcu-assign-existing-coupon'] ) && $_POST['wcu-assign-existing-coupon'] === '1';
+            if ( $coupon_exists && !$assign_existing ) {
+                // Store error notice so the page can display it
+                $GLOBALS['wcusage_admin_registration_error'] = sprintf( esc_html__( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ), esc_html( $couponcode ) );
+            } elseif ( $coupon_exists && $assign_existing ) {
+                // Assign the user to the existing coupon instead of creating a new one
+                $existing_coupon_id = wc_get_coupon_id_by_code( $couponcode );
+                if ( $existing_coupon_id ) {
+                    // Resolve the user ID
+                    $assign_user = get_user_by( 'login', $username );
+                    if ( !$assign_user && !empty( $email ) ) {
+                        $assign_user = get_user_by( 'email', $email );
+                    }
+                    // Create the user if they don't exist
+                    if ( !$assign_user && !empty( $email ) ) {
+                        $password = ( isset( $post_field_values['password'] ) ? sanitize_text_field( $post_field_values['password'] ) : '' );
+                        $firstname = ( isset( $post_field_values['firstname'] ) ? sanitize_text_field( $post_field_values['firstname'] ) : '' );
+                        $lastname = ( isset( $post_field_values['lastname'] ) ? sanitize_text_field( $post_field_values['lastname'] ) : '' );
+                        $role = ( isset( $post_field_values['role'] ) ? sanitize_text_field( $post_field_values['role'] ) : '' );
+                        $info = ( isset( $post_field_values['info'] ) ? sanitize_text_field( $post_field_values['info'] ) : '' );
+                        $new_affiliate_user = wcusage_add_new_affiliate_user(
+                            $username,
+                            $password,
+                            $email,
+                            $firstname,
+                            $lastname,
+                            $couponcode,
+                            '',
+                            $info,
+                            $role
+                        );
+                        if ( isset( $new_affiliate_user['userid'] ) ) {
+                            $assign_user = get_user_by( 'id', $new_affiliate_user['userid'] );
+                        }
+                    }
+                    if ( $assign_user ) {
+                        update_post_meta( $existing_coupon_id, 'wcu_select_coupon_user', $assign_user->ID );
+                        if ( function_exists( 'wcusage_clear_coupon_users_cache' ) ) {
+                            wcusage_clear_coupon_users_cache( $assign_user->ID );
+                        }
+                        // Create a registration record
+                        $referrer = ( isset( $post_field_values['referrer'] ) ? sanitize_text_field( $post_field_values['referrer'] ) : '' );
+                        $promote = ( isset( $post_field_values['promote'] ) ? sanitize_text_field( $post_field_values['promote'] ) : '' );
+                        $website = ( isset( $post_field_values['website'] ) ? sanitize_text_field( $post_field_values['website'] ) : '' );
+                        $type = ( isset( $post_field_values['type'] ) ? sanitize_text_field( $post_field_values['type'] ) : '' );
+                        $info = ( isset( $post_field_values['info'] ) ? sanitize_text_field( $post_field_values['info'] ) : '' );
+                        $message = ( isset( $post_field_values['message'] ) ? sanitize_text_field( $post_field_values['message'] ) : '' );
+                        $role = ( isset( $post_field_values['role'] ) ? sanitize_text_field( $post_field_values['role'] ) : '' );
+                        $send_email = isset( $_POST['wcu-send-email'] ) && $_POST['wcu-send-email'] === '1';
+                        wcusage_create_new_registration(
+                            $couponcode,
+                            $username,
+                            $referrer,
+                            $promote,
+                            $website,
+                            1,
+                            $type,
+                            $info,
+                            $message,
+                            $role,
+                            $send_email
+                        );
+                    }
+                }
+                $redirect_user = ( isset( $_POST['wcu-input-username'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-input-username'] ) ) : '' );
+                $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . urlencode( $redirect_user ) );
+                wp_safe_redirect( $redirect_url );
+                exit;
+            } else {
+                ob_start();
+                wcusage_post_submit_application( 1 );
+                ob_end_clean();
+                // Redirect to admin.php?page=wcusage_affiliates
+                $redirect_user = ( isset( $_POST['wcu-input-username'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-input-username'] ) ) : '' );
+                $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . urlencode( $redirect_user ) );
+                // Redirect via PHP
+                wp_safe_redirect( $redirect_url );
+                exit;
+            }
         }
     }
     // Get POST requests
@@ -347,7 +435,7 @@ function wcusage_admin_registrations_page_html() {
     echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
     ?>" crossorigin="anonymous">
 
-<div id="wcu-create-new-registration" class="wrap plugin-settings">
+<div id="wcu-create-new-registration" class="wrap wcusage-admin-page plugin-settings">
 
   <?php 
     do_action( 'wcusage_hook_dashboard_page_header', '' );
@@ -362,14 +450,14 @@ function wcusage_admin_registrations_page_html() {
     ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">
       <?php 
     echo sprintf( esc_html__( 'Add New %s', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) ) );
-    ?>
+    ?> <span class="fa-solid fa-circle-arrow-right"></span>
     </a>
     <a href="<?php 
     echo esc_url( admin_url( 'admin.php?page=wcusage_affiliates' ) );
     ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">
         <?php 
     echo sprintf( esc_html__( 'Manage %s', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'Affiliates', 'woo-coupon-usage' ), true ) ) );
-    ?>
+    ?> <span class="fa-solid fa-circle-arrow-right"></span>
     </a>
   </h1>
 
@@ -378,6 +466,17 @@ function wcusage_admin_registrations_page_html() {
     // "Create New Registration" button action
     ?>
 
+  <?php 
+    if ( !empty( $GLOBALS['wcusage_admin_registration_error'] ) ) {
+        ?>
+    <div class="notice notice-error is-dismissible" style="margin-top: 10px;">
+      <p><strong><?php 
+        echo wp_kses_post( $GLOBALS['wcusage_admin_registration_error'] );
+        ?></strong></p>
+    </div>
+  <?php 
+    }
+    ?>
 
   <?php 
     if ( isset( $_POST['submitregisteraccept'] ) ) {
@@ -418,60 +517,7 @@ function wcusage_admin_registrations_page_html() {
     }
     ?>
 
-  <div class="wcu-payout-filters" style="margin-bottom: -30px;">
-    <br/><?php 
-    echo esc_html__( 'Filter by', 'woo-coupon-usage' );
-    ?>:
-    <a href="<?php 
-    echo esc_url( admin_url( 'admin.php?page=wcusage_registrations' ) );
-    ?>" style="<?php 
-    if ( $statussearch == '' ) {
-        ?>font-weight: bold;<?php 
-    }
-    ?>"><?php 
-    echo esc_html__( 'All', 'woo-coupon-usage' );
-    ?></a>
-    &#xb7
-    <a href="<?php 
-    echo esc_url( admin_url( 'admin.php?page=wcusage_registrations&status=accepted' ) );
-    ?>" style="<?php 
-    if ( $statussearch == 'accepted' ) {
-        ?>font-weight: bold;<?php 
-    }
-    ?>"><?php 
-    echo esc_html__( 'Accepted', 'woo-coupon-usage' );
-    ?></a>
-    &#xb7
-    <a href="<?php 
-    echo esc_url( admin_url( 'admin.php?page=wcusage_registrations&status=pending' ) );
-    ?>" style="<?php 
-    if ( $statussearch == 'pending' ) {
-        ?>font-weight: bold;<?php 
-    }
-    ?>"><?php 
-    echo esc_html__( 'Pending', 'woo-coupon-usage' );
-    ?></a>
-    &#xb7;
-    <a href="<?php 
-    echo esc_url( admin_url( 'admin.php?page=wcusage_registrations&status=parent_approved' ) );
-    ?>" style="<?php 
-    if ( $statussearch == 'parent_approved' ) {
-        ?>font-weight: bold;<?php 
-    }
-    ?>"><?php 
-    echo esc_html__( 'MLA Parent Approved', 'woo-coupon-usage' );
-    ?></a>
-    &#xb7;
-    <a href="<?php 
-    echo esc_url( admin_url( 'admin.php?page=wcusage_registrations&status=declined' ) );
-    ?>" style="<?php 
-    if ( $statussearch == 'declined' ) {
-        ?>font-weight: bold;<?php 
-    }
-    ?>"><?php 
-    echo esc_html__( 'Declined', 'woo-coupon-usage' );
-    ?></a>
-  </div>
+
 
 	<?php 
     if ( class_exists( 'wcusage_registrations_List_Table' ) ) {
@@ -479,32 +525,6 @@ function wcusage_admin_registrations_page_html() {
         $testListTable->prepare_items();
     }
     ?>
-
-  <!-- Bulk actions toolbar (Apply via proxy form) -->
-  <div class="tablenav top" style="margin: 55px 0 -40px 0; display:flex; gap:10px; align-items:center;">
-    <div style="display:flex; gap:6px; align-items:center;">
-      <label for="wcusage-bulk-select" class="screen-reader-text"><?php 
-    echo esc_html__( 'Bulk actions', 'woo-coupon-usage' );
-    ?></label>
-      <select id="wcusage-bulk-select" class="bulk-actions">
-        <option value="-1"><?php 
-    echo esc_html__( 'Bulk actions', 'woo-coupon-usage' );
-    ?></option>
-        <option value="accept"><?php 
-    echo esc_html__( 'Accept selected', 'woo-coupon-usage' );
-    ?></option>
-        <option value="decline"><?php 
-    echo esc_html__( 'Decline selected', 'woo-coupon-usage' );
-    ?></option>
-        <option value="delete"><?php 
-    echo esc_html__( 'Delete selected', 'woo-coupon-usage' );
-    ?></option>
-      </select>
-      <button type="button" id="wcusage-bulk-apply" class="button action"><?php 
-    echo esc_html__( 'Apply', 'woo-coupon-usage' );
-    ?></button>
-    </div>
-  </div>
 
 	<div id="icon-users" class="icon32"><br/></div>
 	<?php 
@@ -889,13 +909,102 @@ function wcusage_admin_new_registration_page() {
                     $_POST['wcu-input-username'] = $username;
                 }
             }
-            echo wcusage_post_submit_application( 1 );
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-            // Redirect to admin.php?page=wcusage_affiliates
-            $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . $_POST['wcu-input-username'] );
-            // Redirect via PHP
-            wp_safe_redirect( $redirect_url );
-            exit;
+            // Resolve the coupon code (manual or auto-generated) and check for duplicates before processing
+            $couponcode = sanitize_text_field( $post_field_values['couponcode'] );
+            $coupon_exists = false;
+            if ( !empty( $couponcode ) && function_exists( 'wc_get_coupon_id_by_code' ) && wc_get_coupon_id_by_code( $couponcode ) ) {
+                $coupon_exists = true;
+            }
+            // Also check the registrations table for pending/accepted entries with this coupon code
+            if ( !$coupon_exists && !empty( $couponcode ) ) {
+                global $wpdb;
+                $reg_table = $wpdb->prefix . 'wcusage_register';
+                $reg_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$reg_table} WHERE couponcode = %s AND status != 'declined'", $couponcode ) );
+                // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+                if ( $reg_count > 0 ) {
+                    $coupon_exists = true;
+                }
+            }
+            // Allow override: assign user to existing coupon if checkbox was checked
+            $assign_existing = isset( $_POST['wcu-assign-existing-coupon'] ) && $_POST['wcu-assign-existing-coupon'] === '1';
+            if ( $coupon_exists && !$assign_existing ) {
+                // Store error notice so the form page can display it below
+                $GLOBALS['wcusage_admin_registration_error'] = sprintf( esc_html__( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ), esc_html( $couponcode ) );
+            } elseif ( $coupon_exists && $assign_existing ) {
+                // Assign the user to the existing coupon instead of creating a new one
+                $existing_coupon_id = wc_get_coupon_id_by_code( $couponcode );
+                if ( $existing_coupon_id ) {
+                    // Resolve the user ID
+                    $assign_user = get_user_by( 'login', $username );
+                    if ( !$assign_user && !empty( $email ) ) {
+                        $assign_user = get_user_by( 'email', $email );
+                    }
+                    // Create the user if they don't exist
+                    if ( !$assign_user && !empty( $email ) ) {
+                        $password = ( isset( $post_field_values['password'] ) ? sanitize_text_field( $post_field_values['password'] ) : '' );
+                        $firstname = ( isset( $post_field_values['firstname'] ) ? sanitize_text_field( $post_field_values['firstname'] ) : '' );
+                        $lastname = ( isset( $post_field_values['lastname'] ) ? sanitize_text_field( $post_field_values['lastname'] ) : '' );
+                        $role = ( isset( $post_field_values['role'] ) ? sanitize_text_field( $post_field_values['role'] ) : '' );
+                        $info = ( isset( $post_field_values['info'] ) ? sanitize_text_field( $post_field_values['info'] ) : '' );
+                        $new_affiliate_user = wcusage_add_new_affiliate_user(
+                            $username,
+                            $password,
+                            $email,
+                            $firstname,
+                            $lastname,
+                            $couponcode,
+                            '',
+                            $info,
+                            $role
+                        );
+                        if ( isset( $new_affiliate_user['userid'] ) ) {
+                            $assign_user = get_user_by( 'id', $new_affiliate_user['userid'] );
+                        }
+                    }
+                    if ( $assign_user ) {
+                        update_post_meta( $existing_coupon_id, 'wcu_select_coupon_user', $assign_user->ID );
+                        if ( function_exists( 'wcusage_clear_coupon_users_cache' ) ) {
+                            wcusage_clear_coupon_users_cache( $assign_user->ID );
+                        }
+                        // Create a registration record
+                        $referrer = ( isset( $post_field_values['referrer'] ) ? sanitize_text_field( $post_field_values['referrer'] ) : '' );
+                        $promote = ( isset( $post_field_values['promote'] ) ? sanitize_text_field( $post_field_values['promote'] ) : '' );
+                        $website = ( isset( $post_field_values['website'] ) ? sanitize_text_field( $post_field_values['website'] ) : '' );
+                        $type = ( isset( $post_field_values['type'] ) ? sanitize_text_field( $post_field_values['type'] ) : '' );
+                        $info = ( isset( $post_field_values['info'] ) ? sanitize_text_field( $post_field_values['info'] ) : '' );
+                        $message = ( isset( $post_field_values['message'] ) ? sanitize_text_field( $post_field_values['message'] ) : '' );
+                        $role = ( isset( $post_field_values['role'] ) ? sanitize_text_field( $post_field_values['role'] ) : '' );
+                        $send_email = isset( $_POST['wcu-send-email'] ) && $_POST['wcu-send-email'] === '1';
+                        wcusage_create_new_registration(
+                            $couponcode,
+                            $username,
+                            $referrer,
+                            $promote,
+                            $website,
+                            1,
+                            $type,
+                            $info,
+                            $message,
+                            $role,
+                            $send_email
+                        );
+                    }
+                }
+                $redirect_user = ( isset( $_POST['wcu-input-username'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-input-username'] ) ) : '' );
+                $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . urlencode( $redirect_user ) );
+                wp_safe_redirect( $redirect_url );
+                exit;
+            } else {
+                ob_start();
+                wcusage_post_submit_application( 1 );
+                ob_end_clean();
+                // Redirect to admin.php?page=wcusage_affiliates
+                $redirect_user = ( isset( $_POST['wcu-input-username'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-input-username'] ) ) : '' );
+                $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . urlencode( $redirect_user ) );
+                // Redirect via PHP
+                wp_safe_redirect( $redirect_url );
+                exit;
+            }
         }
     }
     ?>
@@ -907,7 +1016,7 @@ function wcusage_admin_new_registration_page() {
     echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
     ?>" crossorigin="anonymous">
   
-  <div class="wrap">
+  <div class="wrap wcusage-admin-page">
 
   <?php 
     do_action( 'wcusage_hook_dashboard_page_header', '' );
@@ -935,6 +1044,18 @@ function wcusage_admin_new_registration_page() {
     ?></p>
 
     <!-- Notices -->
+
+    <?php 
+    if ( !empty( $GLOBALS['wcusage_admin_registration_error'] ) ) {
+        ?>
+      <div class="notice notice-error is-dismissible" style="margin-top: 20px;">
+        <p><strong><?php 
+        echo wp_kses_post( $GLOBALS['wcusage_admin_registration_error'] );
+        ?></strong></p>
+      </div>
+    <?php 
+    }
+    ?>
 
     <?php 
     if ( !$template_coupon_code ) {
@@ -1288,7 +1409,12 @@ function wcusage_admin_new_registration_page() {
       function checkCoupon() {
           var couponCode = couponField.val().trim();
 
+          // Clean up previous messages
+          $('.coupon-exists-message').remove();
+          $('input[name="wcu-assign-existing-coupon"]').closest('.coupon-assign-existing-wrap').remove();
+
           if (couponCode.length === 0) {
+              $('#wcu-register-button').prop('disabled', false);
               return;
           }
 
@@ -1300,18 +1426,34 @@ function wcusage_admin_new_registration_page() {
                   coupon_code: couponCode
               },
               success: function(response) {
+                  // Clean up again in case of rapid calls
+                  $('.coupon-exists-message').remove();
+                  $('input[name="wcu-assign-existing-coupon"]').closest('.coupon-assign-existing-wrap').remove();
+
                   if (response.success && response.data.exists) {
-                      // Show a message saying the coupon code exists
-                      $('.coupon-exists-message').remove(); // Remove any existing message
+                      // Show error message
                       couponField.after('<p class="coupon-exists-message" style="color: red; font-size: 12px; margin: 0;"><span class="fa fa-times-circle" style="color: red;"></span> ' + '<?php 
     echo esc_js( __( 'This coupon code already exists.', 'woo-coupon-usage' ) );
     ?>' + '</p>');
-                      // Disable the submit button
+                      // Show checkbox to assign user to existing coupon
+                      $('.coupon-exists-message').after(
+                        '<div class="coupon-assign-existing-wrap" style="margin: 6px 0 0 0;">'
+                        + '<label style="font-size: 12px; cursor: pointer;">'
+                        + '<input type="checkbox" name="wcu-assign-existing-coupon" value="1" style="margin-right: 4px;"/>'
+                        + '<?php 
+    echo esc_js( __( 'Assign this user to the existing coupon (overrides current user).', 'woo-coupon-usage' ) );
+    ?>'
+                        + '</label>'
+                        + '</div>'
+                      );
+                      // Disable submit until checkbox is checked
                       $('#wcu-register-button').prop('disabled', true);
+                      // Toggle submit button on checkbox change
+                      $(document).on('change', 'input[name="wcu-assign-existing-coupon"]', function() {
+                          $('#wcu-register-button').prop('disabled', !$(this).is(':checked'));
+                      });
                     } else {
-                      // Show a message saying the coupon code does not exist
-                      $('.coupon-exists-message').remove(); // Remove any existing message
-                      // Enable the submit button
+                      // Coupon does not exist — enable submit
                       $('#wcu-register-button').prop('disabled', false);
                     }
               }

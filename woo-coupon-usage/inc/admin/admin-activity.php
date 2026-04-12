@@ -13,13 +13,14 @@ return;
 <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
 
 <!-- Output Page -->
-<div class="wrap plugin-settings">
+<div class="wrap wcusage-admin-page">
 
 	<?php do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
 
-	<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-
-	<br/><br/>
+	<div class="wcu-page-header">
+		<h1><i class="fas fa-history" style="color: #2271b1; margin-right: 8px;"></i><?php echo esc_html( get_admin_page_title() ); ?></h1>
+		<p class="wcu-page-subtitle"><?php echo esc_html__( 'View a log of all activity in your affiliate program.', 'woo-coupon-usage' ); ?></p>
+	</div>
 
 	<?php
 	if(isset($_POST['submit_days'])){
@@ -55,12 +56,12 @@ return;
 
 	<!-- Add form for days input -->
 	<form method="post" onsubmit="return confirm('Are you sure you want to delete logs? This action cannot be undone.')"
-	style="margin-top: 10px;">
-		<label for="days">Delete logs older than </label>
-		<input type="number" id="days" name="days" min="0" value="90" placeholder="0" style="width: 50px;">
-		days:
+	style="margin-top: 16px; padding: 16px 20px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+		<label for="days" style="font-size: 13px; color: #50575e; font-weight: 500;">Delete logs older than </label>
+		<input type="number" id="days" name="days" min="0" value="90" placeholder="0" style="width: 60px; padding: 6px 10px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; min-height: 36px;">
+		<span style="font-size: 13px; color: #50575e;">days:</span>
 		<?php wp_nonce_field('delete_logs_nonce'); ?>
-		<input type="submit" name="submit_days" value="Delete Logs">
+		<input type="submit" name="submit_days" value="Delete Logs" class="button" style="padding: 8px 18px; border-radius: 6px; font-size: 13px; cursor: pointer;">
 	</form>
 
 </div>

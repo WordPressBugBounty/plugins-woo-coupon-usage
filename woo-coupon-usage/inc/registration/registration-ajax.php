@@ -96,6 +96,12 @@ function wcusage_ajax_submit_registration() {
             'message' => 'Captcha verification failed. Please try again.',
         ) );
     }
+    // Check if the coupon code is available (not already taken by another registration or existing WooCommerce coupon)
+    if ( !empty( $couponcode ) && function_exists( 'wcusage_registration_coupon_available' ) && !wcusage_registration_coupon_available( $couponcode ) ) {
+        wp_send_json_error( array(
+            'message' => sprintf( esc_html__( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ), $couponcode ),
+        ) );
+    }
     // Create a new user if the user is not logged in
     if ( !is_user_logged_in() ) {
         $new_affiliate_user = wcusage_add_new_affiliate_user(

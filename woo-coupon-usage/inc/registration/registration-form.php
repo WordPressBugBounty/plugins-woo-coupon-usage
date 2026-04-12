@@ -840,12 +840,11 @@ function wcusage_post_submit_application(  $adminpost  ) {
                         }
                     }
                 }
-                try {
-                    $thiscoupon = new WC_Coupon($couponcode);
-                } catch ( Exception $e ) {
-                    $thiscoupon = false;
+                $coupon_exists = false;
+                if ( function_exists( 'wc_get_coupon_id_by_code' ) ) {
+                    $coupon_exists = (bool) wc_get_coupon_id_by_code( $couponcode );
                 }
-                if ( $count <= 0 && (!$thiscoupon || !$thiscoupon->is_valid()) ) {
+                if ( $count <= 0 && !$coupon_exists ) {
                     if ( !isset( $_SESSION['wcu_registration_token'] ) || is_admin() ) {
                         // Add User If Admin Post
                         $user_id = "";
@@ -862,8 +861,8 @@ function wcusage_post_submit_application(  $adminpost  ) {
                                     $info,
                                     $role
                                 );
-                                if ( isset( $new_affiliate_user['user_id'] ) ) {
-                                    $user_id = $new_affiliate_user['user_id'];
+                                if ( isset( $new_affiliate_user['userid'] ) ) {
+                                    $user_id = $new_affiliate_user['userid'];
                                 }
                             }
                         }
@@ -1274,6 +1273,9 @@ function wcusage_add_new_affiliate_user(
     );
     // Add The User
     $userid = wp_insert_user( $userdata );
+    if ( is_wp_error( $userid ) ) {
+        return;
+    }
     if ( $info ) {
         update_user_meta( $userid, 'wcu_info', $info );
     }
@@ -1494,12 +1496,11 @@ function wcusage_registration_coupon_available(  $couponcode  ) {
             }
         }
     }
-    try {
-        $thiscoupon = new WC_Coupon($couponcode);
-    } catch ( Exception $e ) {
-        $thiscoupon = false;
+    $coupon_exists = false;
+    if ( function_exists( 'wc_get_coupon_id_by_code' ) ) {
+        $coupon_exists = (bool) wc_get_coupon_id_by_code( $couponcode );
     }
-    if ( $count <= 0 && (!$thiscoupon || !$thiscoupon->is_valid()) ) {
+    if ( $count <= 0 && !$coupon_exists ) {
         return true;
     }
     return false;

@@ -1172,6 +1172,18 @@ body.dark-mode .wcusage-info-box span {
     color: var(--text-color) !important;
 }
 
+body.dark-mode .wcusage-orders-pagination .wcusage-orders-page-btn {
+    background: var(--content-bg2);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+body.dark-mode .wcusage-orders-pagination .wcusage-orders-page-btn:hover {
+    background: var(--content-bg);
+}
+body.dark-mode .wcusage-orders-pagination span {
+    color: var(--text-color);
+}
+
 body.dark-mode .wcusage-sales-stats-toggles {
     color: var(--text-color) !important;
 }
@@ -1216,6 +1228,15 @@ body.dark-mode .wcusage-tab-section .wcusage-last-days a {
     color: var(--accent-color) !important;
 }
 body.dark-mode .wcusage-tab-section .wcusage-last-days a.wcutab-active {
+    color: var(--text-color) !important;
+}
+body.dark-mode .wcusage-refresh-stats-icon {
+    color: var(--accent-color) !important;
+}
+body.dark-mode .wcusage-refresh-stats-btn {
+    color: var(--accent-color) !important;
+}
+body.dark-mode .wcusage-refresh-stats-btn:hover {
     color: var(--text-color) !important;
 }
 

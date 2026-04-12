@@ -844,69 +844,88 @@ function wcusage_portal_tabs(
     $tab_hover_font_color = wcusage_get_setting_value( 'wcusage_field_color_tab_hover_font', 'white' );
     $tabs = [
         [
-            'tab-id'     => 'tab-page-stats',
-            'content-id' => 'wcu1',
-            'label'      => __( 'Statistics', 'woo-coupon-usage' ),
-            'icon'       => 'fas fa-chart-line',
-            'condition'  => $wcusage_field_show_statistics_tab,
+            'tab-id'          => 'tab-page-stats',
+            'content-id'      => 'wcu1',
+            'label'           => __( 'Statistics', 'woo-coupon-usage' ),
+            'icon'            => 'fas fa-chart-line',
+            'condition'       => $wcusage_field_show_statistics_tab,
+            'custom_name_key' => 'wcusage_field_tab_name_stats',
         ],
         [
-            'tab-id'     => 'tab-page-monthly',
-            'content-id' => 'wcu2',
-            'label'      => __( 'Monthly Summary', 'woo-coupon-usage' ),
-            'icon'       => 'fas fa-calendar-alt',
-            'condition'  => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && wcusage_get_setting_value( 'wcusage_field_show_months_table', '1' ),
+            'tab-id'          => 'tab-page-monthly',
+            'content-id'      => 'wcu2',
+            'label'           => __( 'Monthly Summary', 'woo-coupon-usage' ),
+            'icon'            => 'fas fa-calendar-alt',
+            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && wcusage_get_setting_value( 'wcusage_field_show_months_table', '1' ),
+            'custom_name_key' => 'wcusage_field_tab_name_monthly',
         ],
         [
-            'tab-id'     => 'tab-page-orders',
-            'content-id' => 'wcu3',
-            'label'      => __( 'Recent Orders', 'woo-coupon-usage' ),
-            'icon'       => 'fas fa-shopping-cart',
-            'condition'  => $wcusage_field_show_order_tab && ($option_coupon_orders > 0 || $option_coupon_orders == ''),
+            'tab-id'          => 'tab-page-orders',
+            'content-id'      => 'wcu3',
+            'label'           => __( 'Referred Orders', 'woo-coupon-usage' ),
+            'icon'            => 'fas fa-shopping-cart',
+            'condition'       => $wcusage_field_show_order_tab && ($option_coupon_orders > 0 || $option_coupon_orders == ''),
+            'custom_name_key' => 'wcusage_field_tab_name_orders',
         ],
         [
-            'tab-id'     => 'tab-page-links',
-            'content-id' => 'wcu4',
-            'label'      => __( 'Referral URL', 'woo-coupon-usage' ),
-            'icon'       => 'fas fa-link',
-            'condition'  => $wcusage_field_urls_enable && $wcusage_field_urls_tab_enable,
+            'tab-id'          => 'tab-page-links',
+            'content-id'      => 'wcu4',
+            'label'           => __( 'Referral URL', 'woo-coupon-usage' ),
+            'icon'            => 'fas fa-link',
+            'condition'       => $wcusage_field_urls_enable && $wcusage_field_urls_tab_enable,
+            'custom_name_key' => 'wcusage_field_tab_name_links',
         ],
         [
-            'tab-id'     => 'tab-page-creatives',
-            'content-id' => 'wcu7',
-            'label'      => __( 'Creatives', 'woo-coupon-usage' ),
-            'icon'       => 'fas fa-photo-video',
-            'condition'  => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_creatives_enable && wp_count_posts( 'wcu-creatives' )->publish > 0,
+            'tab-id'          => 'tab-page-creatives',
+            'content-id'      => 'wcu7',
+            'label'           => __( 'Creatives', 'woo-coupon-usage' ),
+            'icon'            => 'fas fa-photo-video',
+            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_creatives_enable && wp_count_posts( 'wcu-creatives' )->publish > 0,
+            'custom_name_key' => 'wcusage_field_tab_name_creatives',
         ],
         [
-            'tab-id'     => 'tab-page-rates',
-            'content-id' => 'wcu-rates',
-            'label'      => __( 'Rates', 'woo-coupon-usage' ),
-            'icon'       => 'fa-solid fa-percent',
-            'condition'  => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_rates_enable,
+            'tab-id'          => 'tab-page-rates',
+            'content-id'      => 'wcu-rates',
+            'label'           => __( 'Rates', 'woo-coupon-usage' ),
+            'icon'            => 'fa-solid fa-percent',
+            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_rates_enable,
+            'custom_name_key' => 'wcusage_field_rates_name',
         ],
         [
-            'tab-id'     => 'tab-page-payouts',
-            'content-id' => 'wcu5',
-            'label'      => __( 'Payouts', 'woo-coupon-usage' ),
-            'icon'       => 'fas fa-money-bill-wave',
-            'condition'  => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_payouts_enable && (!$is_mla_parent || wcusage_check_admin_access()),
+            'tab-id'          => 'tab-page-payouts',
+            'content-id'      => 'wcu5',
+            'label'           => __( 'Payouts', 'woo-coupon-usage' ),
+            'icon'            => 'fas fa-money-bill-wave',
+            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_payouts_enable && (!$is_mla_parent || wcusage_check_admin_access()),
+            'custom_name_key' => 'wcusage_field_tab_name_payouts',
         ],
         [
-            'tab-id'     => 'tab-page-bonuses',
-            'content-id' => 'wcubonuses',
-            'label'      => __( 'Bonuses', 'woo-coupon-usage' ),
-            'icon'       => 'fas fa-gift',
-            'condition'  => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_bonuses_enable && $wcusage_field_bonuses_tab_enable,
+            'tab-id'          => 'tab-page-bonuses',
+            'content-id'      => 'wcubonuses',
+            'label'           => __( 'Bonuses', 'woo-coupon-usage' ),
+            'icon'            => 'fas fa-gift',
+            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_bonuses_enable && $wcusage_field_bonuses_tab_enable,
+            'custom_name_key' => 'wcusage_field_tab_name_bonuses',
         ],
         [
-            'tab-id'     => 'tab-page-settings',
-            'content-id' => 'wcu6',
-            'label'      => __( 'Settings', 'woo-coupon-usage' ),
-            'icon'       => 'fas fa-cog',
-            'condition'  => is_user_logged_in() && $wcusage_field_show_settings_tab_show && (!$is_mla_parent || wcusage_check_admin_access()),
+            'tab-id'          => 'tab-page-settings',
+            'content-id'      => 'wcu6',
+            'label'           => __( 'Settings', 'woo-coupon-usage' ),
+            'icon'            => 'fas fa-cog',
+            'condition'       => is_user_logged_in() && $wcusage_field_show_settings_tab_show && (!$is_mla_parent || wcusage_check_admin_access()),
+            'custom_name_key' => 'wcusage_field_tab_name_settings',
         ]
     ];
+    // Apply custom tab names from settings (if set)
+    foreach ( $tabs as &$tab ) {
+        if ( !empty( $tab['custom_name_key'] ) ) {
+            $custom_name = wcusage_get_setting_value( $tab['custom_name_key'], '' );
+            if ( !empty( $custom_name ) ) {
+                $tab['label'] = esc_html( $custom_name );
+            }
+        }
+    }
+    unset($tab);
     // Custom Tabs (Premium Only)
     if ( wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() ) {
         $tabsnumber = wcusage_get_setting_value( 'wcusage_field_custom_tabs_number', '2' );

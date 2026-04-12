@@ -57,17 +57,17 @@ function wcusage_field_cb_help( $args )
 
   <br/><br/>
 
-  <div id="couponaffiliates-support-widget" style="margin-top: 15px; padding: 10px 20px 10px 20px; background: #fff; border: 1px solid #ddd; border-radius: 5px;">
+  <div id="couponaffiliates-support-widget" style="margin-top: 15px; padding: 10px 20px 10px 20px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;">
       <h2><?php echo esc_html__( 'Support Documentation', 'woo-coupon-usage' ); ?></h2>
       <p style="font-size: 16px; margin-bottom: 10px;"><?php echo esc_html__( 'Search our documentation for help with common questions and issues.', 'woo-coupon-usage' ); ?></p>
       <form id="couponaffiliates-docs-search-form" autocomplete="off" style="margin-bottom: 20px;">
           <input class="docs-search-input"
           placeholder="Search documentation..."
-          style="width: 100%; max-width: 400px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+          style="width: 100%; max-width: 400px; padding: 10px; border: 1px solid #d0d5dd; border-radius: 6px;">
       </form>
       <br/>
       <a href="https://couponaffiliates.com/docs/?utm_campaign=plugin&utm_source=dashboard-link&utm_medium=documentation"
-      target="_blank" style="text-decoration: none; color: #0073aa; margin-top: 10px; display: inline-block;">
+      target="_blank" style="text-decoration: none; color: #2271b1; margin-top: 10px; display: inline-block;">
           <strong style="font-size: 12px !important;"><?php echo esc_html__( 'View All Documentation', 'woo-coupon-usage' ); ?></strong> <span class="dashicons dashicons-external"
           style="font-size: 12px; margin-top: 4px; height: 12px; width: 12px;"></span>
       </a>
@@ -112,7 +112,7 @@ function wcusage_field_cb_help( $args )
           'title' => esc_html__( 'Affiliate Dashboard', 'woo-coupon-usage' ),
           'links' => array(
               array('text' => esc_html__( 'Affiliate Dashboard Statistics', 'woo-coupon-usage' ), 'url' => 'https://couponaffiliates.com/docs/affiliate-dashboard-statistics/'),
-              array('text' => esc_html__( 'Recent Orders Table', 'woo-coupon-usage' ), 'url' => 'https://couponaffiliates.com/docs/recent-orders-table/'),
+              array('text' => esc_html__( 'Referred Orders Table', 'woo-coupon-usage' ), 'url' => 'https://couponaffiliates.com/docs/recent-orders-table/'),
               array('text' => esc_html__( '(PRO) Monthly Summary Table', 'woo-coupon-usage' ), 'url' => 'https://couponaffiliates.com/docs/pro-monthly-summary-table/'),
               array('text' => esc_html__( '(PRO) Export to Excel', 'woo-coupon-usage' ), 'url' => 'https://couponaffiliates.com/docs/export-to-excel/'),
               array('text' => esc_html__( '(PRO) Line Graphs', 'woo-coupon-usage' ), 'url' => 'https://couponaffiliates.com/docs/line-graphs/'),
@@ -232,15 +232,18 @@ function wcusage_field_cb_help( $args )
 
   <style>
   .helpaccordion {
-    border: 1px solid #ccc;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
     margin-bottom: 20px;
+    overflow: hidden;
   }
 
   .helpaccordion-header {
     font-size: 20px;
-    background-color: #f9f9f9;
-    padding: 10px;
+    background-color: #f9fafb;
+    padding: 10px 15px;
     cursor: pointer;
+    transition: background-color 0.15s ease;
   }
 
   .helpaccordion-content {
@@ -330,21 +333,21 @@ function couponaffiliates_enqueue_admin_scripts($hook) {
   // Add custom CSS
   $css = "
       .docs-result-box {
-          background: #f9f9f9;
-          border: 1px solid #ddd;
-          border-radius: 5px;
+          background: #fff;
+          border: 1px solid #e5e7eb;
+          border-radius: 10px;
           padding: 15px;
           margin-bottom: 15px;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-          transition: transform 0.2s;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+          transition: transform 0.2s, box-shadow 0.2s;
       }
       .docs-result-box:hover {
           transform: translateY(-2px);
-          box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       }
       .docs-result-box h4 {
           margin: 0 0 10px 0;
-          color: #0073aa;
+          color: #2271b1;
       }
       .docs-result-box p {
           margin: 0;

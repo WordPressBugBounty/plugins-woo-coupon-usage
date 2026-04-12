@@ -14,8 +14,10 @@ function wcusage_tools_page() {
 
             <?php do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
             
-            <h1>Coupon Affiliates - Admin Tools</h1>
-            <br/>
+            <div class="wcu-page-header">
+                <h1><i class="fas fa-wrench" style="color: #2271b1; margin-right: 8px;"></i><?php esc_html_e('Admin Tools', 'woo-coupon-usage'); ?></h1>
+                <p class="wcu-page-subtitle"><?php esc_html_e('Access tools for bulk editing, importing, exporting, and managing your affiliate program.', 'woo-coupon-usage'); ?></p>
+            </div>
         
             <div class="wcusage-tools-container">
 

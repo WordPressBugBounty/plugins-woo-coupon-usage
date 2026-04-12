@@ -525,11 +525,11 @@
 #wcu-settings-search-right .wcu-search-prompt-arrow::before { content: ""; position: absolute; left: 0; top: 50%; width: 20px; height: 2px; background: #888; transform: translateY(-50%); border-radius: 1px; opacity: 0.9; }
 #wcu-settings-search-right .wcu-search-prompt-arrow::after { content: ""; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 7px solid #888; opacity: 0.9; }
 #wcu-settings-search { min-width: 230px; max-width: 100%; padding: 6px 10px; }
-#wcu-settings-search-results { position: absolute; right: 0; width: min(520px, 90vw); margin-top: 6px; display: none; border: 1px solid #ddd; border-radius: 6px; background: #fff; max-height: 280px; overflow: auto; z-index: 1000; }
+#wcu-settings-search-results { position: absolute; right: 0; width: min(520px, 90vw); margin-top: 6px; display: none; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; max-height: 280px; overflow: auto; z-index: 1000; }
 #wcu-settings-search-results ul { margin: 0; padding: 6px 0; list-style: none; }
 #wcu-settings-search-results li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-bottom: 1px solid #f0f0f0; }
 #wcu-settings-search-results li:last-child { border-bottom: 0; }
-.wcu-settings-header #wcu-settings-search-empty { position: absolute; right: 0; width: min(520px, 90vw); margin-top: 6px; border: 1px solid #ddd; border-radius: 6px; background: #fff; max-height: 280px; overflow: auto; z-index: 1000; }
+.wcu-settings-header #wcu-settings-search-empty { position: absolute; right: 0; width: min(520px, 90vw); margin-top: 6px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; max-height: 280px; overflow: auto; z-index: 1000; }
 .wcu-search-no-results { color: #888; font-size: 15px; justify-content: center; border-bottom: 0 !important; }
 .wcu-search-item-label { font-weight: 600; }
 .wcu-search-item-meta { color: #666; font-size: 12px; }
@@ -620,19 +620,23 @@
 }
 
 .wcusage-settings-button {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     text-decoration: none;
-    font-weight: bold;
-    border: 2px solid #f3f3f3;
-    border-radius: 5px;
+    font-weight: 600;
+    border: 1px solid #2271b1;
+    border-radius: 8px;
     margin-top: -5px;
     margin-left: 15px;
-    padding: 7px 15px 7px 15px;
-    font-size: 15px;
+    padding: 10px 20px;
+    font-size: 13px;
     line-height: 20px;
-    background: linear-gradient(#fefefe, #fff);
-    box-shadow: 0px 0px 4px #dbdada;
-    border: 1px solid #f3f3f3;
+    background: #f6f7f7;
+    color: #2271b1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
 @media only screen and (max-width: 720px) {
     .wcusage-settings-button {
@@ -644,7 +648,12 @@
 }
 
 .wcusage-settings-button:hover {
-    transform: scale(1.02);
+    background: #e8f0f8;
+    border-color: #135e96;
+    color: #135e96;
+    box-shadow: 0 2px 4px rgba(34,113,177,0.15);
+    transform: translateY(-1px);
+    text-decoration: none;
 }
 
 .plugin-setup-settings .bar-container {
@@ -798,17 +807,64 @@
 
 .wcusage-admin-page, .plugin-settings, .wcusage-settings, .wcusage-tools {
     margin: 10px 20px 0 12px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* ===== SHARED PAGE HEADER PATTERN ===== */
+.wcu-page-header {
+    margin-bottom: 24px;
+}
+
+.wcu-page-header h1 {
+    font-size: 26px;
+    color: #1d2327;
+    margin: 0 0 4px 0;
+    font-weight: 400;
+}
+
+.wcu-page-header h1 i {
+    color: #2271b1;
+    margin-right: 8px;
+}
+
+.wcu-page-subtitle {
+    color: #646970;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* ===== SHARED SECTION TITLE ===== */
+.wcu-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d2327;
+    margin: 0 0 14px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wcu-section-title i {
+    color: #2271b1;
+    font-size: 15px;
 }
 
 .wcusage-admin-page-col {
     width: 100%;
     margin: 10px 0;
-    padding: 5px 25px 15px 25px;
+    padding: 18px 22px 16px 22px;
     background: #fff;
     float: left;
-    border: 2px solid #e3e3e3;
+    border: 1px solid #e5e7eb;
     border-radius: 10px;
     box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.wcusage-admin-page-col:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-color: #d0d5dd;
 }
 
 .wcusage-admin-page-col3 {
@@ -816,13 +872,13 @@
     max-width: none;
     margin: 0 auto;
     padding: 15px 42px 15px 42px;
-    background: #FFF;
+    background: #fff;
     margin-top: 20px;
     margin-bottom: 25px;
-    border-bottom: 2px solid #e3e3e3;
+    border: 1px solid #e5e7eb;
     overflow: hidden;
-    border-radius: 10px;
-    box-shadow: 0px 0px 4px #e3e3e3;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     box-sizing: border-box;
 }
 
@@ -852,15 +908,20 @@
 
 .wcusage-admin-table-col-head th,
 .wcusage-admin-table-col-footer td {
-    background: #fbfbfb;
+    background: #f9fafb;
+    font-size: 12px;
+    font-weight: 600;
+    color: #50575e;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
 }
 
 .wcusage-admin-table-col-head th,
 .wcusage-admin-table-col-row td,
 .wcusage-admin-table-col-footer td {
-    padding: 14px 5px;
-    border: 1px solid #f3f3f3;
-    font-size: 1.2em;
+    padding: 12px 10px;
+    border: 1px solid #f0f0f1;
+    font-size: 13px;
 }
 
 /* Account Page */
@@ -924,75 +985,82 @@
 
 .payout-action {
     color: #fff;
-    font-weight: bold;
-    background: #333;
+    font-weight: 600;
+    background: #374151;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     display: block;
-    margin: 8px auto;
-    padding: 4px 7px 5px 7px;
-    font-size: 14px;
+    margin: 6px auto;
+    padding: 6px 12px;
+    font-size: 13px;
     min-width: 148px;
+    transition: all 0.15s ease;
+}
+
+.payout-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
 .payout-action-accepted {
-    border: 2px solid #015F13;
+    background: #00a32a;
+    border: none;
 }
 
 
 .payoutaction-accepted:hover {
-    background: #015F13;
-    border: 2px solid #333;
+    background: #008a22;
 }
 
 .payout-action-paid {
-    border: 2px solid #015F13;
+    background: #00a32a;
+    border: none;
 }
 
 .payout-action-paid:hover {
-    background: #015F13;
-    border: 2px solid #333;
+    background: #008a22;
 }
 
 .payout-action-paid2 {
-    border: 2px solid #054A8C;
+    background: #2271b1;
+    border: none;
 }
 
 .payout-action-paid2:hover {
-    background: #054A8C;
-    border: 2px solid #333;
+    background: #135e96;
 }
 
 .payout-action-pending {
-    border: 2px solid #A57100;
+    background: #d97706;
+    border: none;
 }
 
 .payout-action-pending:hover {
-    background: #A57100;
-    border: 2px solid #333;
+    background: #b45309;
 }
 
 .payout-action-cancel,
 .payout-action-declined,
 .payout-action-delete {
-    border: 2px solid #872222;
+    background: #dc2626;
+    border: none;
 }
 
 .payout-action-cancel:hover,
 .payout-action-declined:hover,
 .payout-action-delete:hover {
-    background: #872222;
-    border: 2px solid #333;
+    background: #b91c1c;
 }
 
 .payout-action-created {
-    border: 2px solid #0073aa;
+    background: #2271b1;
+    border: none;
 }
 
 .payout-action-created:hover {
-    background: #0073aa;
-    border: 2px solid #333;
+    background: #135e96;
+    border: none;
 }
 
 .payout-action-delete {
@@ -1003,13 +1071,13 @@
 .payout-action-manual {
     background-color: #c97925;
     color: white;
-    border: 2px solid #c97925;
+    border: none;
 }
 
 .payout-action-manual:hover {
     background-color: #a66420;
     color: white;
-    border: 2px solid #a66420;
+    border: none;
 }
 
 #submitclick button:hover,
@@ -1156,8 +1224,8 @@
     margin-left: 0px;
     padding: 20px 0;
     margin-right: 0;
-    border-top: 2px solid #e4e4e4;
-    border-bottom: 2px solid #e4e4e4;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
     margin-bottom: 10px;
 }
 
@@ -1485,9 +1553,9 @@
     flex: 1 1 calc(33.333% - 24px);
     box-sizing: border-box;
     padding: 10px;
-    background: linear-gradient(#fefefe, #fff);
+    background: #fff;
     border-radius: 10px;
-    border: 1px solid #c3c4c7;
+    border: 1px solid #e5e7eb;
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -1495,6 +1563,13 @@
     padding-bottom: 60px;
     min-height: 180px;
     align-items: stretch;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.wcu-addons-box:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-color: #d0d5dd;
 }
 
 @media only screen and (max-width: 1200px) {
@@ -1518,7 +1593,7 @@
 
 .wcu-addons-box-bottom {
     min-height: 39px;
-    background: #eaecef;
+    background: #f9fafb;
     display: inline-block;
     padding-top: 5px;
     width: 100%;
@@ -1528,25 +1603,28 @@
     bottom: 0px;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
+    border-top: 1px solid #e5e7eb;
 }
 
 .wcu-addons-box-view-details {
     font-size: 12px;
-    font-weight: bold;
-    padding: 4px 10px;
-    border: 1px solid #c3c4c7;
-    border-radius: 10px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
     text-decoration: none;
     background: #fff;
-    color: #333;
+    color: #374151;
     display: inline-block;
     margin-top: 4px;
     margin-left: 12px;
+    transition: all 0.15s ease;
 }
 
 .wcu-addons-box-view-details:hover {
-    background: #333;
-    color: #fff !important;
+    background: #f9fafb;
+    border-color: #2271b1;
+    color: #2271b1 !important;
 }
 
 .wcusage-addon-button {
@@ -1625,37 +1703,165 @@ td.column-wcu_order_affiliate_coupon {
     margin-right: -5px;
 }
 
-/* Tables */
+/* ===== TABLES (Modern Rounded Style) ===== */
+
+/* Rounded table wrapper — applies to all plugin list tables */
+.wcusage-admin-page .wp-list-table.payout,
+.wcusage-admin-page .wp-list-table.registrations,
+.wcusage-admin-page .wp-list-table.click,
+.wcusage-admin-page .wp-list-table.directlink,
+.wcusage-admin-page .wp-list-table.referrals,
+.wcusage-admin-page .wp-list-table.affiliateusers,
+.wcusage-admin-page .wp-list-table.mlausers,
+.wcusage-admin-page .wp-list-table.affiliatecoupons,
+.wcusage-admin-page .wp-list-table.groups,
+.wcusage-admin-page .widefat {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* Shrink checkbox column on all plugin list tables */
+.wcusage-admin-page .wp-list-table .column-cb,
+.wcusage-admin-page .wp-list-table .check-column {
+    width: 36px !important;
+    min-width: 36px;
+    max-width: 36px;
+    padding: 0 !important;
+    vertical-align: middle;
+    text-align: center;
+}
+.wcusage-admin-page .wp-list-table .check-column input[type="checkbox"] {
+    margin: 0 auto !important;
+}
+
+/* Remove double borders on first/last cells inside rounded tables */
+.wcusage-admin-page .wp-list-table.payout tr:last-child td,
+.wcusage-admin-page .wp-list-table.registrations tr:last-child td,
+.wcusage-admin-page .wp-list-table.click tr:last-child td,
+.wcusage-admin-page .wp-list-table.directlink tr:last-child td,
+.wcusage-admin-page .wp-list-table.referrals tr:last-child td,
+.wcusage-admin-page .wp-list-table.affiliateusers tr:last-child td,
+.wcusage-admin-page .wp-list-table.mlausers tr:last-child td,
+.wcusage-admin-page .wp-list-table.affiliatecoupons tr:last-child td,
+.wcusage-admin-page .wp-list-table.groups tr:last-child td,
+.wcusage-admin-page .widefat tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== MODERN ADMIN BUTTONS ===== */
+/* Primary action button — used on admin pages */
+.wcusage-admin-page .button-primary,
+.wcusage-admin-page input[type="submit"].button-primary {
+    background: linear-gradient(135deg, #2271b1, #135e96);
+    border-color: #135e96;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.wcusage-admin-page .button-primary:hover,
+.wcusage-admin-page input[type="submit"].button-primary:hover {
+    background: linear-gradient(135deg, #135e96, #0a4b78);
+    border-color: #0a4b78;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+/* Secondary button — standard WP .button */
+.wcusage-admin-page .button:not(.button-primary),
+.wcusage-admin-page input[type="submit"].button:not(.button-primary) {
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    color: #374151;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.15s ease;
+}
+
+.wcusage-admin-page .button:not(.button-primary):hover,
+.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
+    border-color: #2271b1;
+    color: #2271b1;
+    background: #f9fafb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* Filter bar inputs — modern look for all filter/search inputs inside tables */
+.wcusage-admin-page .wcusage-admin-title-filters input[type="text"],
+.wcusage-admin-page .wcusage-admin-title-filters input[type="date"],
+.wcusage-admin-page .wcusage-admin-title-filters input[type="number"],
+.wcusage-admin-page .wcusage-admin-title-filters select {
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    color: #1d2327;
+    min-height: 36px;
+    background: #fff;
+    transition: border-color 0.2s ease;
+}
+
+.wcusage-admin-page .wcusage-admin-title-filters input[type="text"]:focus,
+.wcusage-admin-page .wcusage-admin-title-filters input[type="date"]:focus,
+.wcusage-admin-page .wcusage-admin-title-filters input[type="number"]:focus,
+.wcusage-admin-page .wcusage-admin-title-filters select:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+/* Admin page tablenav actions button styling */
+.wcusage-admin-page .tablenav .actions select {
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    min-height: 32px;
+    font-size: 13px;
+}
+
+.wcusage-admin-page .tablenav .tablenav-pages .button {
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+}
 
 .wp-list-table.payout {
     table-layout: fixed;
 }
 
 .wp-list-table.payout th,
-.wp-list-table.registration th,
+.wp-list-table.registrations th,
 .wp-list-table.click th,
 .wp-list-table.directlink th,
 .wp-list-table.referrals th,
 .wp-list-table.affiliateusers th,
 .wp-list-table.mlausers th,
-.wp-list-table.affiliatecoupons th {
+.wp-list-table.affiliatecoupons th,
+.wp-list-table.groups th,
+.wcusage-admin-page .widefat th {
     text-align: center;
+    background: #f9fafb;
+    font-size: 12px;
+    font-weight: 600;
+    color: #50575e;
 }
 
 .wp-list-table.payout th a,
-.wp-list-table.registration th a,
+.wp-list-table.registrations th a,
 .wp-list-table.click th a,
 .wp-list-table.directlink th a,
 .wp-list-table.referrals th a,
 .wp-list-table.affiliateusers th a,
 .wp-list-table.mlausers th a,
-.wp-list-table.affiliatecoupons td a {
+.wp-list-table.affiliatecoupons td a,
+.wp-list-table.groups th a,
+.wcusage-admin-page .widefat th a {
     display: inline-block;
     margin: 0 auto;
 }
 
 .wp-list-table.payout th.sortable span,
-.wp-list-table.registration th.sortable span,
+.wp-list-table.registrations th.sortable span,
 .wp-list-table.click th.sortable span,
 .wp-list-table.directlink th.sortable span {
     display: inline;
@@ -1663,58 +1869,58 @@ td.column-wcu_order_affiliate_coupon {
 }
 
 .wp-list-table.payout th.sortable span.sorting-indicator:before,
-.wp-list-table.registration th.sortable span.sorting-indicator:before,
+.wp-list-table.registrations th.sortable span.sorting-indicator:before,
 .wp-list-table.click th.sortable span.sorting-indicator:before,
 .wp-list-table.directlink th.sortable span.sorting-indicator:before {
     display: none;
 }
 
 .wp-list-table.payout tr:hover,
-.wp-list-table.registration tr:hover,
+.wp-list-table.registrations tr:hover,
 .wp-list-table.click tr:hover,
 .wp-list-table.directlink tr:hover,
 .wp-list-table.referrals tr:hover,
 .wp-list-table.affiliateusers tr:hover,
 .wp-list-table.mlausers tr:hover,
-.wp-list-table.affiliatecoupons tr:hover {
-    background: #f4fcfc;
-    outline: 2px solid #e2e2e2;
+.wp-list-table.affiliatecoupons tr:hover,
+.wp-list-table.groups tr:hover,
+.wcusage-admin-page .widefat tr:hover {
+    background: #f9fafb;
 }
 
 .wp-list-table.payout td,
-.wp-list-table.registration td,
+.wp-list-table.registrations td,
 .wp-list-table.click td,
 .wp-list-table.directlink td,
 .wp-list-table.referrals td,
 .wp-list-table.affiliateusers td, .wp-list-table.affiliateusers th,
 .wp-list-table.mlausers td, .wp-list-table.mlausers th,
-.wp-list-table.affiliatecoupons td {
+.wp-list-table.affiliatecoupons td,
+.wp-list-table.groups td,
+.wcusage-admin-page .widefat td {
     width: auto;
-    padding: 14px 10px 14px 10px;
-    border-right: 1px solid #EFEFEF;
+    padding: 12px 10px;
+    border-right: 1px solid #f0f0f1;
     text-align: center;
+    font-size: 13px;
 }
 
 .wp-list-table.affiliatecoupons tr td,
 .wp-list-table.referrals tr td,
 .wp-list-table.affiliateusers tr td, .wp-list-table.affiliateusers tr th,
 .wp-list-table.mlausers tr td, .wp-list-table.mlausers tr th,
-.wp-list-table.registration tr td {
-    border-bottom: 1px solid #cfcfcf;
+.wp-list-table.registrations tr td,
+.wp-list-table.groups tr td,
+.wcusage-admin-page .widefat tr td {
+    border-bottom: 1px solid #e5e7eb;
     padding: 22px 5px !important;
 }
 
-.wp-list-table.mlausers tr td.check-column,
-.wp-list-table.mlausers tr th.check-column {
-    width: 40px !important;
-    padding: 6px 0 6px 8px !important;
-    vertical-align: middle !important;
-}
 .wp-list-table.mlausers tr td.column-ID {
     vertical-align: middle !important;
 }
 
-.wp-list-table.registration .action1.column-action1 {
+.wp-list-table.registrations .action1.column-action1 {
     padding: 10px;
 }
 
@@ -1779,7 +1985,7 @@ td.column-wcu_order_affiliate_coupon {
     width: 200px;
 }
 
-.registration .manage-column.column-action1 {
+.registrations .manage-column.column-action1 {
     text-align: center;
     width: 200px;
 }
@@ -1793,7 +1999,7 @@ td.column-wcu_order_affiliate_coupon {
 }
 
 @media screen and (max-width: 782px) {
-    .wp-list-table.registration .is-expanded td,
+    .wp-list-table.registrations .is-expanded td,
     .wp-list-table.payout .is-expanded td {
         margin: 15px 0;
     }
@@ -1820,7 +2026,7 @@ td.column-wcu_order_affiliate_coupon {
 #wcu-pro-modules-search {
     padding: 7px 12px 7px 34px !important;
     font-size: 14px !important;
-    border: 1px solid #c3c4c7 !important;
+    border: 1px solid #d0d5dd !important;
     border-radius: 6px !important;
     width: 280px !important;
     max-width: 100% !important;
@@ -1990,9 +2196,9 @@ td.column-wcu_order_affiliate_coupon {
 
 .dynamic-creative-line {
     padding: 5px 20px 10px 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background: #f9f9f9;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: #f9fafb;
     margin-bottom: 20px;
     width: 400px;
 }
@@ -2013,9 +2219,9 @@ td.column-wcu_order_affiliate_coupon {
 .dynamic-creative-image {
     padding: 0px 20px 10px 20px;
     padding-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background: #f9f9f9;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: #f9fafb;
     margin-bottom: 20px;
     max-width: 575px;
     width: 100%;
@@ -2083,12 +2289,12 @@ td.column-wcu_order_affiliate_coupon {
 .wcu-admin-sidebar {
     width: 200px;
     min-width: 200px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
 }
 
 .wcu-admin-sidebar-header {
-    background: #23282d;
+    background: #1d2327;
     color: #fff;
     padding: 20px;
     border-radius: 8px 0 0 0;
@@ -2114,9 +2320,9 @@ td.column-wcu_order_affiliate_coupon {
 .wcu-sidebar-menu-group {
     margin-bottom: 20px;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
 }
 
 .wcu-sidebar-group-title {
@@ -2155,7 +2361,7 @@ td.column-wcu_order_affiliate_coupon {
 }
 
 .wcu-sidebar-menu-group .wcu-sidebar-menu-item {
-    border-bottom: 1px solid #f1f3f4;
+    border-bottom: 1px solid #f0f0f1;
     margin: 0;
 }
 
@@ -2171,22 +2377,22 @@ td.column-wcu_order_affiliate_coupon {
 }
 
 .wcu-sidebar-menu-group .wcu-sidebar-link:hover {
-    background: #f8f9fa;
-    border-left-color: #667eea;
+    background: #f9fafb;
+    border-left-color: #2271b1;
     padding-left: 19px;
     color: #1e1e1e;
     text-decoration: none;
 }
 
 .wcu-sidebar-menu-group .wcu-sidebar-link.active {
-    background: #e3f2fd;
-    border-left-color: #2196f3;
-    color: #1976d2 !important;
+    background: #f0f6fc;
+    border-left-color: #2271b1;
+    color: #2271b1 !important;
     font-weight: 500;
 }
 
 .wcu-sidebar-menu-group .wcu-sidebar-link.active:hover {
-    background: #e3f2fd;
+    background: #f0f6fc;
 }
 
 .wcu-sidebar-menu-item {
@@ -2213,16 +2419,16 @@ td.column-wcu_order_affiliate_coupon {
 }
 
 .wcu-sidebar-link:hover {
-    background: #f8f9fa;
-    color: #0073aa;
+    background: #f9fafb;
+    color: #2271b1;
     text-decoration: none;
     cursor: pointer;
 }
 
 .wcu-sidebar-link.active {
-    background: #0073aa;
+    background: #2271b1;
     color: #fff;
-    border-left: 4px solid #005a87;
+    border-left: 4px solid #135e96;
     position: relative;
 }
 
@@ -2262,7 +2468,7 @@ td.column-wcu_order_affiliate_coupon {
 
 /* Pro Badge */
 .wcu-sidebar-link .wcu-settings-pro-icon {
-    background: #28a745;
+    background: #00a32a;
     color: #fff;
     font-size: 10px;
     padding: 2px 6px;
@@ -2306,7 +2512,7 @@ td.column-wcu_order_affiliate_coupon {
     }
     
     .wcu-admin-content {
-        border-left: 1px solid #ddd;
+        border-left: 1px solid #e5e7eb;
         border-top: none;
         border-radius: 0 0 8px 8px;
     }
@@ -2407,7 +2613,7 @@ td.column-wcu_order_affiliate_coupon {
     
     .wcu-admin-content {
         border-radius: 6px;
-        border-left: 1px solid #ddd;
+        border-left: 1px solid #e5e7eb;
     }
     
     .wcu-admin-content .wcusage-settings-form {
@@ -2448,8 +2654,8 @@ td.column-wcu_order_affiliate_coupon {
 /* Settings Form Adjustments */
 .wcu-admin-content .wcusage-settings-form h3 {
     margin-top: 0;
-    color: #23282d;
-    border-bottom: 2px solid #f1f1f1;
+    color: #1d2327;
+    border-bottom: 1px solid #e5e7eb;
     padding-bottom: 10px;
 }
 
@@ -3162,7 +3368,7 @@ p label {
     width: 40px;
     height: 40px;
     border: 3px solid rgba(0, 0, 0, 0.08);
-    border-top-color: #3498db;
+    border-top-color: #2271b1;
     border-radius: 50%;
     animation: wcu-spin 0.8s ease-in-out infinite;
     box-sizing: border-box;
@@ -3230,25 +3436,41 @@ p label {
     padding: 25px 15px 25px 100px;
     color: #000;
     display: block;
-    border-radius: 12px;
+    border-radius: 10px;
     margin: 0.5%;
-    border: 2px solid #eee;
+    border: 1px solid #e5e7eb;
     width: 99%;
     position: relative;
     background: linear-gradient(145deg, #f8fbff, #ffffff);
-    transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.wcusage-info-box:hover,
+.wcusage-info-box2:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-color: #d0d5dd;
 }
 
 .wcusage-admin-page-col .button {
-    background: #f7f7f7;
-    border: 1px solid #c3c4c7;
-    color: #000000;
-    border-radius: 2px;
+    background: #fff;
+    border: 1px solid #d0d5dd;
+    color: #374151;
+    border-radius: 6px;
     margin: 0px;
-    padding: 5px 0;
+    padding: 8px 16px;
     display: block;
     text-align: center;
     text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+
+.wcusage-admin-page-col .button:hover {
+    background: #eef3ff;
+    border-color: #2271b1;
+    color: #2271b1;
 }
 
 .wcusage-info-box:before,
@@ -3320,7 +3542,7 @@ p label {
 
 .wcusage-info-box-title { margin-top: 5px; margin-bottom: 0px !important; }
 .stats-range-toggle { margin: 10px 0; font-size: 1.2em; }
-.stats-range-toggle a { margin-right: 10px; text-decoration: none; color: #0073aa; cursor: pointer; }
+.stats-range-toggle a { margin-right: 10px; text-decoration: none; color: #2271b1; cursor: pointer; }
 .stats-range-toggle a.active { color: #000; font-weight: bold; }
 .wcusage-stats-boxes-container { max-width: 100%; overflow: hidden; }
 
@@ -3637,12 +3859,12 @@ p label {
     left: 50% !important;
     bottom: 100% !important;
     width: 200px !important;
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-    color: #ecf0f1 !important;
+    background: #1d2327 !important;
+    color: #f0f0f1 !important;
     transform: translateX(-50%) !important;
     padding: 14px 18px 14px 18px !important;
     border: none !important;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     z-index: 99999 !important;
     white-space: normal;
     overflow: visible;
@@ -3659,7 +3881,7 @@ p label {
 }
 
 .custom-tooltip .tooltip-content p {
-    color: #ecf0f1 !important;
+    color: #f0f0f1 !important;
     margin: 0 0 12px 0;
     font-size: 12px;
     line-height: 1.5;
@@ -3680,7 +3902,7 @@ p label {
     display: block;
     margin-bottom: 2px;
     font-size: 11px;
-    color: #bdc3c7;
+    color: #9ca3af;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -3702,7 +3924,7 @@ p label {
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     border-radius: 4px !important;
     background: rgba(255, 255, 255, 0.1) !important;
-    color: #ecf0f1 !important;
+    color: #f0f0f1 !important;
     text-align: left !important;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
     margin-bottom: 0 !important;
@@ -3713,7 +3935,7 @@ p label {
     min-height: 28px !important;
     max-height: 28px !important;
     padding: 4px 8px !important;
-    background: #3498db !important;
+    background: #2271b1 !important;
     border: none !important;
     border-radius: 4px !important;
     color: white !important;
@@ -3728,13 +3950,13 @@ p label {
 }
 
 .custom-tooltip .tooltip-content .wcusage-copy-link-button:hover {
-    background: #2980b9 !important;
+    background: #135e96 !important;
     transform: translateY(-1px) !important;
-    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3) !important;
+    box-shadow: 0 2px 8px rgba(34, 113, 177, 0.3) !important;
 }
 
 .custom-tooltip .tooltip-content .wcusage-info-label {
-    color: #bdc3c7 !important;
+    color: #9ca3af !important;
     font-weight: 600 !important;
     font-size: 11px !important;
     text-transform: uppercase !important;
@@ -3743,7 +3965,7 @@ p label {
 }
 
 .custom-tooltip .tooltip-content a:not(.wcusage-copy-link-button) {
-    color: #3498db !important;
+    color: #72aee6 !important;
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s ease;
@@ -3752,7 +3974,7 @@ p label {
 }
 
 .custom-tooltip .tooltip-content a:not(.wcusage-copy-link-button):hover {
-    color: #2980b9;
+    color: #a7d4f2;
     text-decoration: underline;
 }
 
@@ -3870,29 +4092,61 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
 /* Tools */
 
 .wcusage-tools-container {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: 800px;
-}
-
-.wcusage-tools-container {
     display: grid;
-    gap: 25px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 900px;
 }
 
 .wcusage-tools-box {
-    padding: 20px 10%;
-    border: 1px solid #c3c4c7;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+    padding: 22px 24px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     background: #fff;
-    border-radius: 4px;
+    border-radius: 10px;
     text-align: center;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.wcusage-tools-box:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-color: #d0d5dd;
 }
 
 .wcusage-tools-box h2 {
-    margin: 0;
-    font-size: 1.2em;
+    margin: 0 0 8px 0;
+    font-size: 15px;
     font-weight: 600;
-    margin-bottom: 10px;
+    color: #1d2327;
+}
+
+.wcusage-tools-box p {
+    font-size: 13px;
+    color: #646970;
+    margin: 0 0 14px 0;
+    line-height: 1.5;
+}
+
+.wcusage-tools-box .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    background: #fff;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.wcusage-tools-box .button:hover {
+    background: #eef3ff;
+    border-color: #2271b1;
+    color: #2271b1;
 }
 
 #wcusage-tools-rows td,
@@ -3905,7 +4159,7 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
     width: 100%;
     max-height: 50vh;
     overflow-y: auto;
-    border: 1px solid #ddd;
+    border: 1px solid #e5e7eb;
     margin-bottom: 20px;
     display: inline-block;
     padding: 5px;
@@ -3955,8 +4209,8 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
 #wcusage-section-order li, #wcusage-dashboard-tabs-order li {
     margin-bottom: 10px;
     padding: 10px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
     cursor: move;
     display: block;
     max-width: 100%;
@@ -4016,11 +4270,12 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
 .wcusage-page, .wcusage-tools, .affiliate-page-generator-wrap {
     max-width: 1200px;
     margin: 20px auto;
-    padding: 20px;
+    padding: 24px;
     background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
 .wcusage-page .bulkactions {
@@ -4225,8 +4480,8 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
     margin-left: 0px;
     margin-right: 0;
     padding: 20px 0;
-    border-top: 2px solid #e4e4e4;
-    border-bottom: 2px solid #e4e4e4;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
     margin-bottom: 10px;
 }
 .coupon-affiliates_page_wcusage_payouts .wcusage-admin-title-filters::before {

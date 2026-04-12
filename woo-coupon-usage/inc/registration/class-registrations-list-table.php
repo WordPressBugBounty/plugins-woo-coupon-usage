@@ -308,6 +308,48 @@ class wcusage_registrations_List_Table extends WP_List_Table {
       return $sortable_columns;
     }
 
+    // Status filter dropdown (matches affiliate users page pattern)
+    function extra_tablenav( $which ) {
+        if ( $which === 'top' ) {
+            $current_status = '';
+            if ( isset($_POST['filter_status']) ) {
+                $current_status = sanitize_text_field( $_POST['reg_status'] );
+            } elseif ( isset($_GET['status']) ) {
+                $current_status = sanitize_text_field( wp_unslash( $_GET['status'] ) );
+            }
+            ?>
+            <div class="alignleft actions">
+                <label for="wcusage-bulk-select" class="screen-reader-text"><?php esc_html_e('Bulk actions', 'woo-coupon-usage'); ?></label>
+                <select id="wcusage-bulk-select" class="bulk-actions">
+                    <option value="-1"><?php esc_html_e('Bulk actions', 'woo-coupon-usage'); ?></option>
+                    <option value="accept"><?php esc_html_e('Accept selected', 'woo-coupon-usage'); ?></option>
+                    <option value="decline"><?php esc_html_e('Decline selected', 'woo-coupon-usage'); ?></option>
+                    <option value="delete"><?php esc_html_e('Delete selected', 'woo-coupon-usage'); ?></option>
+                </select>
+                <button type="button" id="wcusage-bulk-apply" class="button action"><?php esc_html_e('Apply', 'woo-coupon-usage'); ?></button>
+            </div>
+            <div class="alignleft actions" style="margin-left: 8px;">
+                <?php
+                // Retain other $_GET parameters in the form submission
+                foreach ($_GET as $key => $value) {
+                    if ($key !== 'status' && $key !== 'filter_status') {
+                        echo '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr( is_array($value) ? '' : wp_unslash( $value ) ) . '">';
+                    }
+                }
+                ?>
+                <select name="reg_status">
+                    <option value=""><?php esc_html_e('All Statuses', 'woo-coupon-usage'); ?></option>
+                    <option value="accepted" <?php selected('accepted', $current_status); ?>><?php esc_html_e('Accepted', 'woo-coupon-usage'); ?></option>
+                    <option value="pending" <?php selected('pending', $current_status); ?>><?php esc_html_e('Pending', 'woo-coupon-usage'); ?></option>
+                    <option value="parent_approved" <?php selected('parent_approved', $current_status); ?>><?php esc_html_e('MLA Parent Approved', 'woo-coupon-usage'); ?></option>
+                    <option value="declined" <?php selected('declined', $current_status); ?>><?php esc_html_e('Declined', 'woo-coupon-usage'); ?></option>
+                </select>
+                <input type="submit" name="filter_status" id="post-query-submit" class="button" value="<?php esc_html_e('Filter', 'woo-coupon-usage'); ?>">
+            </div>
+            <?php
+        }
+    }
+
     function prepare_items() {
 
         global $wpdb; //This is used only if making any database queries
@@ -322,8 +364,16 @@ class wcusage_registrations_List_Table extends WP_List_Table {
 
         $table_name = $wpdb->prefix . 'wcusage_register';
 
-    if ( isset($_GET['status']) ) {
-      $sql = $wpdb->prepare("SELECT * FROM $table_name WHERE status = %s ORDER BY id DESC", sanitize_text_field( wp_unslash( $_GET['status'] ) ) ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+        // Determine status filter from POST (dropdown) or GET (URL)
+        $filter_status = '';
+        if ( isset($_POST['filter_status']) ) {
+            $filter_status = sanitize_text_field( $_POST['reg_status'] );
+        } elseif ( isset($_GET['status']) ) {
+            $filter_status = sanitize_text_field( wp_unslash( $_GET['status'] ) );
+        }
+
+        if ( !empty($filter_status) ) {
+            $sql = $wpdb->prepare("SELECT * FROM $table_name WHERE status = %s ORDER BY id DESC", $filter_status ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         } else {
             $sql = "SELECT * FROM $table_name ORDER BY id DESC"; // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         }

@@ -324,8 +324,16 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                             if ( !$wcusage_hide_all_time ) {
                                 echo '<a href="javascript:void(0);" id="wcusage-last-days-all">' . esc_html__( "All-time", "woo-coupon-usage" ) . '</a> <span style="color: #f3f3f3;">|</span> ';
                             }
-                            echo '<a href="javascript:void(0);" id="wcusage-last-days30" style="color: #a6a6a6;">' . esc_html( $this30text ) . '</a> <span style="color: #f3f3f3;">|</span> <a href="javascript:void(0);" id="wcusage-last-days7" style="color: #a6a6a6;">' . esc_html( $this7text ) . '</a>
-                          </p>';
+                            echo '<a href="javascript:void(0);" id="wcusage-last-days30" style="color: #a6a6a6;">' . esc_html( $this30text ) . '</a> <span style="color: #f3f3f3;">|</span> <a href="javascript:void(0);" id="wcusage-last-days7" style="color: #a6a6a6;">' . esc_html( $this7text ) . '</a>';
+                            $wcusage_show_refresh_stats = wcusage_get_setting_value( 'wcusage_field_show_refresh_stats', '1' );
+                            $wcusage_show_refresh_button = wcusage_get_setting_value( 'wcusage_field_show_refresh_stats_button', '1' );
+                            if ( $wcusage_show_refresh_stats ) {
+                                echo ' <span id="wcusage-refresh-stats-check" class="wcusage-refresh-stats-icon" style="display:none;" title="' . esc_attr__( 'Checking statistics...', 'woo-coupon-usage' ) . '"><i class="fa-solid fa-arrows-rotate fa-spin"></i></span>';
+                                if ( $wcusage_show_refresh_button ) {
+                                    echo ' <a href="javascript:void(0);" id="wcusage-refresh-stats" class="wcusage-refresh-stats-btn" title="' . esc_attr__( 'Refresh Statistics', 'woo-coupon-usage' ) . '"><i class="fa-solid fa-arrows-rotate"></i></a>';
+                                }
+                            }
+                            echo '</p>';
                             echo '</div>';
                             echo '<div class="wcusage-sales-stats">';
                             if ( !$wcusage_hide_all_time ) {
@@ -362,6 +370,113 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                             );
                             echo '</div>';
                             echo '</div>';
+                            // Background stats check + manual refresh inline script
+                            if ( $wcusage_show_refresh_stats ) {
+                                ?>
+                          <script>
+                          jQuery(document).ready(function($) {
+                              var $checkIcon = $('#wcusage-refresh-stats-check');
+                              var $refreshBtn = $('#wcusage-refresh-stats');
+                              var $statsContainer = $('.wcusage-sales-stats-toggles').next('.wcusage-sales-stats');
+
+                              // === Background auto-check (once per hour, on page load) ===
+                              if ($checkIcon.length) {
+                                  $refreshBtn.hide();
+                                  $checkIcon.show();
+                                  $.ajax({
+                                      type: 'POST',
+                                      url: '<?php 
+                                echo esc_url( admin_url( 'admin-ajax.php' ) );
+                                ?>',
+                                      data: {
+                                          action: 'wcusage_refresh_dashboard_stats',
+                                          _ajax_nonce: '<?php 
+                                echo esc_js( wp_create_nonce( 'wcusage_dashboard_ajax_nonce' ) );
+                                ?>',
+                                          postid: '<?php 
+                                echo esc_js( $postid );
+                                ?>',
+                                          couponcode: '<?php 
+                                echo esc_js( $coupon_code );
+                                ?>'
+                                      },
+                                      dataType: 'json',
+                                      success: function(response) {
+                                          if (response.success && !response.data.rate_limited) {
+                                              var d = response.data;
+                                              var $alltime = $statsContainer.find('.wcusage-show-last-all');
+                                              if ($alltime.length && d.html_alltime) $alltime.html(d.html_alltime);
+                                              var $thismonth = $statsContainer.find('.wcusage-show-last-30');
+                                              if ($thismonth.length && d.html_thismonth) $thismonth.html(d.html_thismonth);
+                                              var $lastmonth = $statsContainer.find('.wcusage-show-last-7');
+                                              if ($lastmonth.length && d.html_lastmonth) $lastmonth.html(d.html_lastmonth);
+                                              if (d.total_count !== undefined) $('#wcu-total-usage-number').text(d.total_count);
+                                          }
+                                          $checkIcon.hide();
+                                          $refreshBtn.show();
+                                      },
+                                      error: function() {
+                                          $checkIcon.hide();
+                                          $refreshBtn.show();
+                                      }
+                                  });
+                              }
+
+                              // === Manual refresh button (reads cached meta only — instant) ===
+                              $refreshBtn.on('click', function(e) {
+                                  e.preventDefault();
+                                  var $btn = $(this);
+                                  var $icon = $btn.find('i');
+                                  if ($btn.hasClass('wcusage-refreshing')) return;
+                                  $btn.addClass('wcusage-refreshing');
+                                  $icon.addClass('fa-spin');
+                                  $.ajax({
+                                      type: 'POST',
+                                      url: '<?php 
+                                echo esc_url( admin_url( 'admin-ajax.php' ) );
+                                ?>',
+                                      data: {
+                                          action: 'wcusage_reload_dashboard_stats',
+                                          _ajax_nonce: '<?php 
+                                echo esc_js( wp_create_nonce( 'wcusage_dashboard_ajax_nonce' ) );
+                                ?>',
+                                          postid: '<?php 
+                                echo esc_js( $postid );
+                                ?>',
+                                          couponcode: '<?php 
+                                echo esc_js( $coupon_code );
+                                ?>'
+                                      },
+                                      dataType: 'json',
+                                      success: function(response) {
+                                          if (response.success) {
+                                              var d = response.data;
+                                              var $alltime = $statsContainer.find('.wcusage-show-last-all');
+                                              if ($alltime.length && d.html_alltime) $alltime.html(d.html_alltime);
+                                              var $thismonth = $statsContainer.find('.wcusage-show-last-30');
+                                              if ($thismonth.length && d.html_thismonth) $thismonth.html(d.html_thismonth);
+                                              var $lastmonth = $statsContainer.find('.wcusage-show-last-7');
+                                              if ($lastmonth.length && d.html_lastmonth) $lastmonth.html(d.html_lastmonth);
+                                              if (d.total_count !== undefined) $('#wcu-total-usage-number').text(d.total_count);
+                                              // Update Latest Referrals
+                                              if (d.html_latest_referrals) {
+                                                  var $referrals = $('.wcu-statistics-orders');
+                                                  if ($referrals.length) $referrals.html(d.html_latest_referrals);
+                                              }
+                                          }
+                                          $btn.removeClass('wcusage-refreshing');
+                                          $icon.removeClass('fa-spin');
+                                      },
+                                      error: function() {
+                                          $btn.removeClass('wcusage-refreshing');
+                                          $icon.removeClass('fa-spin');
+                                      }
+                                  });
+                              });
+                          });
+                          </script>
+                          <?php 
+                            }
                         }
                         break;
                     case 'section_commissiongraphs':

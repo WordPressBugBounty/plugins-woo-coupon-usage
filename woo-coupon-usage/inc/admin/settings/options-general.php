@@ -104,7 +104,7 @@ function wcusage_field_cb( $args ) {
           height: 60px !important;
           margin: 10px 0 !important;
           background: #f0f8ff !important;
-          border: 2px dashed #007cba !important;
+          border: 2px dashed #2271b1 !important;
           border-radius: 4px !important;
           display: flex !important;
           align-items: center !important;
@@ -113,7 +113,7 @@ function wcusage_field_cb( $args ) {
       }
       .wcusage-sortable-placeholder:before {
           content: "Drop here";
-          color: #007cba;
+          color: #2271b1;
           font-weight: 500;
           font-size: 14px;
       }
@@ -121,6 +121,21 @@ function wcusage_field_cb( $args ) {
           transform: rotate(1deg);
           box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
           z-index: 1000 !important;
+      }
+      /* Inline tab name editing */
+      .wcu-tab-name-wrap:hover .wcu-tab-name-edit-icon {
+          opacity: 0.7 !important;
+      }
+      .wcu-tab-name-edit-icon:hover {
+          opacity: 1 !important;
+          color: #2271b1;
+      }
+      .wcu-tab-name-input:focus {
+          outline: none;
+          box-shadow: 0 0 0 1px #2271b1;
+      }
+      .wcu-tab-name-display {
+          min-height: 1em;
       }
       </style>
       <script>
@@ -169,8 +184,8 @@ function wcusage_field_cb( $args ) {
         if( wcu_fs()->can_use_premium_code() ) {
           $candidate_tabs['tab-page-monthly'] = esc_html__('Monthly Summary', 'woo-coupon-usage');
         }
-      // Recent Orders
-      $candidate_tabs['tab-page-orders'] = esc_html__('Recent Orders', 'woo-coupon-usage');
+      // Referred Orders
+      $candidate_tabs['tab-page-orders'] = esc_html__('Referred Orders', 'woo-coupon-usage');
       // Referral URL
       $candidate_tabs['tab-page-links'] = esc_html__('Referral URL', 'woo-coupon-usage');
       // Creatives (Pro)
@@ -240,7 +255,7 @@ function wcusage_field_cb( $args ) {
                 height: 50px !important;
                 margin: 5px 0 !important;
                 background: #f0f8ff !important;
-                border: 2px dashed #007cba !important;
+                border: 2px dashed #2271b1 !important;
                 border-radius: 4px !important;
                 display: flex !important;
                 align-items: center !important;
@@ -249,7 +264,7 @@ function wcusage_field_cb( $args ) {
             }
             .wcusage-section-sortable-placeholder:before {
                 content: "Drop section here";
-                color: #007cba;
+                color: #2271b1;
                 font-weight: 500;
                 font-size: 12px;
             }
@@ -358,7 +373,7 @@ function wcusage_field_cb( $args ) {
           </div>
           
           <div style="display: block; float: left; width: 50%;">
-            
+
             <!-- Show Coupon Info -->
             <?php wcusage_setting_toggle_option('wcusage_field_statistics_couponinfo', 1, esc_html__( 'Show "Coupon Info" summary.', 'woo-coupon-usage' ), '0px'); ?>
             
@@ -728,12 +743,6 @@ function wcusage_field_cb( $args ) {
           ob_start();
           ?>
           <p>
-            <?php wcusage_setting_text_option("wcusage_field_rates_name", "", esc_html__( 'Custom Tab Name', 'woo-coupon-usage' ) . " ('Rates')", "0px"); ?>
-          </p>
-
-          <br/>
-
-          <p>
             <?php wcusage_setting_text_option("wcusage_field_rates_header", "", esc_html__( 'Custom Tab Header', 'woo-coupon-usage' ) . " ('Product Commission Rates')", "0px"); ?>
           </p>
 
@@ -938,11 +947,27 @@ function wcusage_field_cb( $args ) {
         'tab-page-settings' => 'wcusage_field_show_settings_tab_show'
       );
 
+      // Map tab IDs to their custom name options (for inline editing in accordion headers)
+      $tab_custom_name_map = array(
+        'tab-page-stats'     => 'wcusage_field_tab_name_stats',
+        'tab-page-monthly'   => 'wcusage_field_tab_name_monthly',
+        'tab-page-orders'    => 'wcusage_field_tab_name_orders',
+        'tab-page-links'     => 'wcusage_field_tab_name_links',
+        'tab-page-creatives' => 'wcusage_field_tab_name_creatives',
+        'tab-page-rates'     => 'wcusage_field_rates_name',
+        'tab-page-payouts'   => 'wcusage_field_tab_name_payouts',
+        'tab-page-bonuses'   => 'wcusage_field_tab_name_bonuses',
+        'tab-page-settings'  => 'wcusage_field_tab_name_settings',
+      );
+
       echo '<div id="wcusage-dashboard-tabs-order" class="wcusage-sortable wcusage-tabs-order-list" style="max-width:100%;">';
       foreach($stored_tabs_array as $tab_key) {
         if(!isset($candidate_tabs[$tab_key])) { continue; }
         $label = $candidate_tabs[$tab_key];
         $linked_option = isset($tab_option_map[$tab_key]) ? $tab_option_map[$tab_key] : null;
+        $custom_name_option = isset($tab_custom_name_map[$tab_key]) ? $tab_custom_name_map[$tab_key] : null;
+        $custom_name_value = $custom_name_option ? wcusage_get_setting_value($custom_name_option, '') : '';
+        $display_label = !empty($custom_name_value) ? esc_html($custom_name_value) : esc_html($label);
         
         // Check if tab is enabled
         $is_enabled = true;
@@ -965,18 +990,28 @@ function wcusage_field_cb( $args ) {
         echo '<div id="'.esc_attr($tab_key).'" class="wcusage-tab-item" style="'.esc_attr($box_style).'">';
         
         // Header with drag handle, toggle, label, and show/hide button
-        echo '<div style="'.esc_attr($header_style).'">';
+        echo '<div class="wcusage-tab-header" style="'.esc_attr($header_style).'">';
         echo '<span class="dashicons dashicons-move" style="cursor:move;opacity:0.7;" title="'.esc_html__('Drag to reorder','woo-coupon-usage').'"></span>';
+
+        // Build inline-editable tab name HTML
+        $tab_name_html = '<span class="wcu-tab-name-wrap" style="flex:1;display:flex;align-items:center;gap:6px;">';
+        $tab_name_html .= '<strong class="wcu-tab-name-display" style="font-size:15px;cursor:default;">'.$display_label.'</strong>';
+        if($custom_name_option) {
+          $tab_name_html .= '<span class="wcu-tab-name-edit-icon dashicons dashicons-edit" title="'.esc_html__('Edit tab name','woo-coupon-usage').'" style="font-size:14px;width:14px;height:14px;cursor:pointer;opacity:0.4;transition:opacity 0.15s;"></span>';
+          $tab_name_html .= '<input type="text" class="wcu-tab-name-input" value="'.esc_attr($custom_name_value).'" placeholder="'.esc_attr($label).'" style="display:none;font-size:14px;font-weight:600;padding:2px 8px;border:1px solid #2271b1;border-radius:3px;width:200px;max-width:100%;" />';
+          $tab_name_html .= '<input type="text" id="'.esc_attr($custom_name_option).'" name="wcusage_options['.esc_attr($custom_name_option).']" value="'.esc_attr($custom_name_value).'" class="wcu-tab-name-hidden" style="display:none !important;" />';
+        }
+        $tab_name_html .= '</span>';
 
         if(strpos($tab_key,'tab-custom-') === 0) {
           echo '<input type="checkbox" checked disabled style="margin:0;" />';
-          echo '<strong style="flex:1;font-size:15px;">'.esc_html($label).'</strong>';
+          echo $tab_name_html;
           echo '<span style="font-size:11px;opacity:0.7;margin-right:auto;">('.esc_html__('custom','woo-coupon-usage').')</span>';
           $settings_button_disabled = !$is_enabled ? 'disabled' : '';
           echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')" style="font-size:14px;padding:6px 12px;" '.esc_attr($settings_button_disabled).'>'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
         } elseif(!$linked_option) {
           echo '<input type="checkbox" checked disabled style="margin:0;" />';
-          echo '<strong style="flex:1;font-size:15px;">'.esc_html($label).'</strong>';
+          echo $tab_name_html;
           echo '<span style="font-size:11px;opacity:0.7;margin-right:auto;">('.esc_html__('always on','woo-coupon-usage').')</span>';
           echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')" style="font-size:14px;padding:6px 12px;">'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
         } else {
@@ -984,7 +1019,7 @@ function wcusage_field_cb( $args ) {
           // Add onchange event to handle toggle changes
           $toggle_html = str_replace('<input', '<input onchange="wcusage_handle_tab_toggle(this, \''.esc_attr($tab_key).'\')"', $toggle_html);
           echo '<div style="display:flex;align-items:center;gap:6px;">'.$toggle_html.'</div>';
-          echo '<strong style="flex:1;font-size:15px;">'.esc_html($label).'</strong>';
+          echo $tab_name_html;
           $settings_button_disabled = !$is_enabled ? 'disabled' : '';
           echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')" style="font-size:14px;padding:6px 12px;" '.esc_attr($settings_button_disabled).'>'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
         }
@@ -1102,6 +1137,72 @@ function wcusage_field_cb( $args ) {
           }, 500);
         }, 100);
       }
+
+      // Inline tab name editing
+      (function($) {
+        $(document).ready(function() {
+
+          // Click on edit icon to enter edit mode
+          $(document).on("click", ".wcu-tab-name-edit-icon", function(e) {
+            e.stopPropagation();
+            var $wrap = $(this).closest(".wcu-tab-name-wrap");
+            var $display = $wrap.find(".wcu-tab-name-display");
+            var $input = $wrap.find(".wcu-tab-name-input");
+            var $icon = $wrap.find(".wcu-tab-name-edit-icon");
+
+            $display.hide();
+            $icon.hide();
+            $input.show().focus().select();
+          });
+
+          // Save on blur
+          $(document).on("blur", ".wcu-tab-name-input", function() {
+            wcusage_finish_tab_name_edit($(this));
+          });
+
+          // Save on Enter, cancel on Escape
+          $(document).on("keydown", ".wcu-tab-name-input", function(e) {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              $(this).blur();
+            } else if (e.key === "Escape") {
+              e.preventDefault();
+              // Revert to hidden input value (the last saved value)
+              var $wrap = $(this).closest(".wcu-tab-name-wrap");
+              var $hidden = $wrap.find(".wcu-tab-name-hidden");
+              $(this).val($hidden.val());
+              $(this).blur();
+            }
+          });
+
+          // Prevent sortable drag from triggering when clicking inside the input
+          $(document).on("mousedown", ".wcu-tab-name-input", function(e) {
+            e.stopPropagation();
+          });
+
+          function wcusage_finish_tab_name_edit($input) {
+            var $wrap = $input.closest(".wcu-tab-name-wrap");
+            var $display = $wrap.find(".wcu-tab-name-display");
+            var $icon = $wrap.find(".wcu-tab-name-edit-icon");
+            var $hidden = $wrap.find(".wcu-tab-name-hidden");
+            var newVal = $.trim($input.val());
+            var placeholder = $input.attr("placeholder") || "";
+
+            // Update hidden input for form submission and trigger change for AJAX auto-save
+            $hidden.val(newVal);
+            $hidden[0].dispatchEvent(new Event("change", { bubbles: true }));
+
+            // Update the display text
+            $display.text(newVal || placeholder);
+
+            // Switch back to display mode
+            $input.hide();
+            $display.show();
+            $icon.show();
+          }
+
+        });
+      })(jQuery);
       </script>';
       ?>
       <div style="display:none;">

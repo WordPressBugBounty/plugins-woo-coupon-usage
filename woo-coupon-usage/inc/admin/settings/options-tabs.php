@@ -13,7 +13,7 @@ function wcusage_field_cb_custom_tabs( $args )
     if ( !wcu_fs()->can_use_premium_code() ) {
         ?>title="Available with Pro version." style="pointer-events:none; opacity: 0.6;"<?php
     }
-    ?>>
+    ?> style="display: none;">
 
 	<?php
     if ( !wcu_fs()->can_use_premium_code() ) {

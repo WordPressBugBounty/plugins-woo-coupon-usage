@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
-* Version: 7.6.0
+* Version: 7.7.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -232,6 +232,42 @@ if ( function_exists( 'wcu_fs' ) ) {
     }
 
     add_action( 'admin_enqueue_scripts', 'wcusage_include_admin_styles' );
+    /*** Enqueue Reports CSS & JS on admin reports page ***/
+    function wcusage_enqueue_admin_reports_assets(  $hook  ) {
+        if ( !isset( $_GET['page'] ) || $_GET['page'] !== 'wcusage_admin_reports' ) {
+            return;
+        }
+        $plugin_url = plugin_dir_url( __FILE__ );
+        wp_enqueue_style(
+            'woo-coupon-usage-admin-reports',
+            $plugin_url . 'css/admin-reports.css',
+            array(),
+            WCUSAGE_VERSION
+        );
+        wp_enqueue_script(
+            'html2canvas',
+            'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+            array(),
+            '1.4.1',
+            true
+        );
+        wp_enqueue_script(
+            'jspdf',
+            'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+            array(),
+            '2.5.1',
+            true
+        );
+        wp_enqueue_script(
+            'woo-coupon-usage-admin-reports',
+            $plugin_url . 'js/admin-reports.js',
+            array('jquery', 'html2canvas', 'jspdf'),
+            WCUSAGE_VERSION,
+            true
+        );
+    }
+
+    add_action( 'admin_enqueue_scripts', 'wcusage_enqueue_admin_reports_assets' );
     /*** Enqueue Font Awesome on relevant admin pages (including Statements/Bonuses CPTs) ***/
     function wcusage_enqueue_font_awesome_admin(  $hook  ) {
         $should_enqueue = false;

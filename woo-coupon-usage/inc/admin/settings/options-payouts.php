@@ -1187,7 +1187,7 @@ function wcusage_field_cb_payouts( $args ) {
         } else {
           // Fallback static display if function not available
           ?>
-          <div style="margin-left: 40px; padding: 15px; background: #f9f9f9; border-left: 4px solid #0073aa; margin-bottom: 20px;">
+          <div style="margin-left: 40px; padding: 15px; background: #f9fafb; border-left: 4px solid #2271b1; margin-bottom: 20px;">
             <strong><?php echo esc_html__( 'Bank Data Encryption', 'woo-coupon-usage' ); ?></strong><br/>
             <p style="margin: 10px 0;">
               <?php echo esc_html__( 'Sensitive bank details are automatically encrypted when you define an encryption key in wp-config.php:', 'woo-coupon-usage' ); ?>

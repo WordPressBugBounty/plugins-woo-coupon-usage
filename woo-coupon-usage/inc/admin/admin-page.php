@@ -16,25 +16,35 @@ $registration_shortcode_page = wcusage_get_registration_shortcode_page('0');
 <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
 
 <style>
-.wcusage-admin-page-help-col { width: calc(50% - 80px); margin: 10px; padding: 15px 30px; background: #fff; float: left; border: 2px solid #e3e3e3; }
+.wcusage-admin-page-help-col { width: calc(50% - 80px); margin: 10px; padding: 20px 30px; background: #fff; float: left; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.2s ease, border-color 0.2s ease; }
+.wcusage-admin-page-help-col:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-color: #d0d5dd; }
 .wcusage-admin-page-help-col2 { width: calc(50% - 80px); float: left; }
-.wcusage-admin-page-help-col3 { width: 100%; margin: 10px; padding: 15px 30px; background: #fff; float: left; border: 2px solid #e3e3e3; }
+.wcusage-admin-page-help-col3 { width: 100%; margin: 10px; padding: 20px 30px; background: #fff; float: left; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.2s ease, border-color 0.2s ease; }
+.wcusage-admin-page-help-col3:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-color: #d0d5dd; }
 @media screen and (max-width: 1040px) { .wcusage-admin-page-help-col, .wcusage-admin-page-help-col2 { width: calc(100% - 76px); } }
-strong { color: green; font-size: 16px; }
+strong { color: #00a32a; font-size: 16px; }
 .wcusage-quicklink {
 	display: block;
 	width: calc(50% - 12px);
 	padding: 20px 0;
 	margin: 5px;
-	background: #fafafa;
+	background: #fff;
 	float: left;
 	border-radius: 10px;
 	text-align: center;
-	color: #333;
-	font-size: 26px;
-	font-weight: bold;
+	color: #1d2327;
+	font-size: 24px;
+	font-weight: 600;
 	text-decoration: none;
-	border: 1px solid #333;
+	border: 1px solid #e5e7eb;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+	transition: all 0.2s ease;
+}
+.wcusage-quicklink:hover {
+	border-color: #2271b1;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+	color: #2271b1;
+	transform: translateY(-1px);
 }
 @media screen and (max-width: 1690px) {
 	.wcusage-quicklink {
@@ -51,10 +61,10 @@ h2 { font-size: 22px; }
 /* Modern styling for affiliate view */
 .wcusage-tabs {
     margin-bottom: 30px;
-    border-bottom: 2px solid #e1e5e9;
-    background: #f8f9fa;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
     padding: 0 20px;
-    border-radius: 8px 8px 0 0;
+    border-radius: 10px 10px 0 0;
 }
 .wcusage-tabs .nav-tab {
     background: transparent;
@@ -63,30 +73,30 @@ h2 { font-size: 22px; }
     padding: 15px 25px;
     margin-right: 5px;
     text-decoration: none;
-    color: #6c757d;
+    color: #646970;
     border-radius: 0;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     font-weight: 500;
     font-size: 14px;
 }
 .wcusage-tabs .nav-tab:hover {
-    background: rgba(0, 123, 255, 0.1);
-    color: #0056b3;
+    background: rgba(34, 113, 177, 0.06);
+    color: #135e96;
 }
 .wcusage-tabs .nav-tab-active {
     background: #fff;
-    border-bottom: 3px solid #007cba;
-    color: #007cba;
+    border-bottom: 3px solid #2271b1;
+    color: #2271b1;
     margin-bottom: -1px;
     font-weight: 600;
 }
 .wcusage-tab-content {
     background: #fff;
-    border: 1px solid #e1e5e9;
+    border: 1px solid #e5e7eb;
     border-top: none;
     padding: 30px;
-    border-radius: 0 0 8px 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 .tab-content {
     display: none;
@@ -97,77 +107,79 @@ h2 { font-size: 22px; }
 .tab-content h3 {
     margin-top: 0;
     margin-bottom: 25px;
-    color: #2c3e50;
+    color: #1d2327;
     font-size: 1.5em;
     font-weight: 600;
-    border-bottom: 2px solid #ecf0f1;
+    border-bottom: 1px solid #e5e7eb;
     padding-bottom: 10px;
 }
 .wcusage-coupon-dropdown {
     margin-bottom: 25px;
-    background: #f8f9fa;
+    background: #f9fafb;
     padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
 }
 .wcusage-coupon-dropdown label {
     font-weight: 600;
     margin-right: 15px;
-    color: #495057;
-    font-size: 14px;
+    color: #50575e;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 .wcusage-coupon-dropdown select {
-    padding: 8px 12px;
-    border: 1px solid #ced4da;
+    padding: 6px 10px;
+    border: 1px solid #d0d5dd;
     border-radius: 6px;
     background: #fff;
-    font-size: 14px;
+    font-size: 13px;
     min-width: 200px;
-    transition: border-color 0.3s ease;
+    min-height: 36px;
+    transition: border-color 0.2s ease;
 }
 .wcusage-coupon-dropdown select:focus {
     outline: none;
-    border-color: #007cba;
-    box-shadow: 0 0 0 2px rgba(0, 123, 186, 0.25);
+    border-color: #2271b1;
+    box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.25);
 }
 
 /* Modern table styling */
 .wp-list-table {
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     width: 100%;
     margin-top: 25px;
     background: #fff;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e1e5e9;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e5e7eb;
 }
 .wp-list-table th,
 .wp-list-table td {
-    padding: 15px 20px;
+    padding: 12px 16px;
     text-align: left;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid #f0f0f1;
 }
 .wp-list-table th {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
+    background: #f9fafb;
+    color: #50575e;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
     border: none;
+    border-bottom: 1px solid #e5e7eb;
 }
 .wp-list-table tr:hover {
-    background: #f8f9fa;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
+    background: #f9fafb;
 }
 .wp-list-table .striped > tbody > tr:nth-child(odd) {
     background: #fafbfc;
 }
 .wp-list-table .striped > tbody > tr:nth-child(odd):hover {
-    background: #f1f3f4;
+    background: #f9fafb;
 }
 
 /* Enhanced visits table styling */
@@ -176,73 +188,73 @@ h2 { font-size: 22px; }
     margin-right: 8px;
 }
 .wcusage-visits-table code {
-    background: #e9ecef;
+    background: #f9fafb;
     padding: 4px 8px;
     border-radius: 4px;
     font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 12px;
-    color: #495057;
-    border: 1px solid #ced4da;
+    color: #374151;
+    border: 1px solid #e5e7eb;
 }
 .wcusage-visits-table .button-small {
     padding: 6px 12px;
     font-size: 12px;
     line-height: 1.4;
-    border-radius: 4px;
-    border: 1px solid #007cba;
-    background: #007cba;
+    border-radius: 6px;
+    border: 1px solid #2271b1;
+    background: linear-gradient(135deg, #2271b1, #135e96);
     color: #fff;
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: all 0.15s ease;
 }
 .wcusage-visits-table .button-small:hover {
-    background: #0056b3;
-    border-color: #0056b3;
+    background: linear-gradient(135deg, #135e96, #0a4b78);
+    border-color: #0a4b78;
     text-decoration: none;
 }
 .wcusage-visits-table em {
-    color: #6c757d;
+    color: #646970;
     font-style: italic;
 }
 .wcusage-visits-table a {
     text-decoration: none;
-    color: #007cba;
+    color: #2271b1;
     transition: color 0.3s ease;
 }
 .wcusage-visits-table a:hover {
     text-decoration: underline;
-    color: #0056b3;
+    color: #135e96;
 }
 
 /* Action buttons styling */
 .wcusage-visits-table .payout-action-blacklistip {
-    background: #dc3545;
-    border-color: #dc3545;
+    background: #dc2626;
+    border-color: #dc2626;
     color: #fff;
 }
 .wcusage-visits-table .payout-action-blacklistip:hover {
-    background: #c82333;
-    border-color: #bd2130;
+    background: #b91c1c;
+    border-color: #b91c1c;
 }
 
 /* Notice styling */
 .notice {
-    border-radius: 8px;
-    border-left: 4px solid #007cba;
-    background: #d1ecf1;
-    color: #0c5460;
+    border-radius: 10px;
+    border-left: 4px solid #2271b1;
+    background: #f0f6fc;
+    color: #1d2327;
     padding: 15px 20px;
     margin: 20px 0;
 }
 .notice-success {
-    border-left-color: #28a745;
-    background: #d4edda;
-    color: #155724;
+    border-left-color: #00a32a;
+    background: #edfaef;
+    color: #1d2327;
 }
 .notice-error {
-    border-left-color: #dc3545;
-    background: #f8d7da;
-    color: #721c24;
+    border-left-color: #dc2626;
+    background: #fef2f2;
+    color: #1d2327;
 }
 
 /* Responsive improvements */

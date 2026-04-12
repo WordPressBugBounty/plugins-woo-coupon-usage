@@ -6,7 +6,7 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #e5e7eb;
     display: flex;
     padding-left: 0 !important;
     margin-bottom: 0 !important;
@@ -24,13 +24,13 @@
     display: block;
     padding: 10px 20px;
     text-decoration: none;
-    color: #0073aa;
+    color: #2271b1;
     border-bottom: 2px solid transparent;
 }
 
 .wcu-settings-tab-nav li.active a {
-    color: #000;
-    border-bottom: 2px solid #0073aa;
+    color: #1d2327;
+    border-bottom: 2px solid #2271b1;
 }
 
 #wcu-settings-update-button {
@@ -39,7 +39,7 @@
 
 .wcu-settings-tab-content {
     padding: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid #e5e7eb;
     border-top: none;
     background: #fff;
 }
