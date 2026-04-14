@@ -121,7 +121,7 @@ if ( !function_exists( 'wcusage_load_page_statistics' ) ) {
         if ( !$resolved_postid ) {
             exit;
         }
-        $combinedcommission = ( isset( $_POST["combinedcommission"] ) ? $_POST["combinedcommission"] : '' );
+        $combinedcommission = ( isset( $_POST["combinedcommission"] ) ? sanitize_text_field( $_POST["combinedcommission"] ) : '' );
         $refresh = ( isset( $_POST["refresh"] ) ? sanitize_text_field( $_POST["refresh"] ) : '' );
         do_action(
             'wcusage_hook_tab_statistics',

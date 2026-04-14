@@ -219,12 +219,18 @@ function wcusage_admin_footer_script_assign_coupons()
 
 // Handle form submission
 add_action('wp_ajax_assign_coupons', 'wcusage_bulk_assign_coupons');
-add_action('wp_ajax_nopriv_assign_coupons', 'wcusage_bulk_assign_coupons');
 function wcusage_bulk_assign_coupons()
 {
     $response = array();
 
-    if ($_POST['coupon_code']) {
+    // Check admin access first
+    if ( ! wcusage_check_admin_access() ) {
+        $response['errors'][] = 'Permission denied';
+        wp_send_json($response);
+        exit;
+    }
+
+    if ( isset($_POST['coupon_code']) && $_POST['coupon_code'] ) {
 
         // Check nonce
         if (!wp_verify_nonce(sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'bulk_assign_coupons')) {

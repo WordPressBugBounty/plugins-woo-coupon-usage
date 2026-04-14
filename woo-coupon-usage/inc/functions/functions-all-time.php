@@ -213,9 +213,13 @@ add_action(
  */
 function wcusage_get_orders_by_coupon_ajax() {
     check_ajax_referer( 'wcusage_update_stats_nonce', 'security' );
-    $coupon_code = $_POST['coupon_code'];
-    $startdate = $_POST['start'];
-    $enddate = $_POST['end'];
+    // Require logged-in user
+    if ( !is_user_logged_in() ) {
+        wp_send_json_error( esc_html__( 'You must be logged in.', 'woo-coupon-usage' ) );
+    }
+    $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( $_POST['coupon_code'] ) : '' );
+    $startdate = ( isset( $_POST['start'] ) ? sanitize_text_field( $_POST['start'] ) : '' );
+    $enddate = ( isset( $_POST['end'] ) ? sanitize_text_field( $_POST['end'] ) : '' );
     $fullorders = wcusage_wh_getOrderbyCouponCode(
         $coupon_code,
         $startdate,
@@ -230,23 +234,26 @@ function wcusage_get_orders_by_coupon_ajax() {
 }
 
 add_action( 'wp_ajax_wcusage_get_orders_by_coupon_ajax', 'wcusage_get_orders_by_coupon_ajax' );
-add_action( 'wp_ajax_nopriv_wcusage_get_orders_by_coupon_ajax', 'wcusage_get_orders_by_coupon_ajax' );
 /**
  * Updates all stats for a coupon
  */
 function wcusage_update_all_stats_data() {
     check_ajax_referer( 'wcusage_update_stats_nonce', 'security' );
+    // Require logged-in user
+    if ( !is_user_logged_in() ) {
+        wp_send_json_error( esc_html__( 'You must be logged in.', 'woo-coupon-usage' ) );
+    }
     $options = get_option( 'wcusage_options' );
-    $stats = $_POST['stats'];
-    $coupon_code = $_POST['coupon_code'];
+    $stats = ( isset( $_POST['stats'] ) ? $_POST['stats'] : array() );
+    $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( $_POST['coupon_code'] ) : '' );
     $coupon = wcusage_get_coupon_info( $coupon_code );
-    $coupon_user_id = $coupon[1];
+    $coupon_user_id = intval( $coupon[1] );
     $coupon_id = $coupon[2];
     $currentuserid = get_current_user_id();
     // Check MLA sub-affiliate
     $sub_affiliate = false;
-    // Check access
-    if ( $coupon_user_id != $currentuserid && !$sub_affiliate && !wcusage_check_admin_access() ) {
+    // Check access (strict comparison to prevent type juggling)
+    if ( $coupon_user_id !== $currentuserid && !$sub_affiliate && !wcusage_check_admin_access() ) {
         wp_send_json_error( esc_html__( 'You do not have permission to access this data.', 'woo-coupon-usage' ) );
         wp_die();
     }
@@ -282,7 +289,6 @@ function wcusage_update_all_stats_data() {
 }
 
 add_action( 'wp_ajax_wcusage_update_all_stats_data', 'wcusage_update_all_stats_data' );
-add_action( 'wp_ajax_nopriv_wcusage_update_all_stats_data', 'wcusage_update_all_stats_data' );
 /**
  * Updates all stats for a coupon in batches via ajax
  */

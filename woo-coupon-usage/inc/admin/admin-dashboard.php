@@ -265,29 +265,32 @@ jQuery(document).ready(function($) {
         <?php
     if (wcu_fs()->can_use_premium_code()) {
         $menu_items = array(
-            array('label' => 'Settings', 'icon' => 'fa-solid fa-cog', 'url' => admin_url('admin.php?page=wcusage_settings')),
-            array('label' => 'Coupons', 'icon' => 'fa-solid fa-ticket', 'url' => admin_url('admin.php?page=wcusage_coupons'), 'dropdown' => array(
+            array('label' => 'Settings', 'icon' => 'fa-solid fa-cog', 'url' => ''),
+            array('label' => 'Coupons', 'icon' => 'fa-solid fa-ticket', 'url' => '#', 'dropdown' => array(
                 array('label' => 'View Affiliate Coupons', 'url' => admin_url('admin.php?page=wcusage_coupons'), 'icon' => 'fa-solid fa-tags'),
                 array('label' => 'Add New Affiliate Coupon', 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-plus'),
                 array('label' => 'Bulk Create Affiliate Coupons', 'url' => admin_url('admin.php?page=wcusage-bulk-coupon-creator'), 'icon' => 'fa-solid fa-layer-group'),
             )),
             // Affiliates with dropdown
-            array('label' => 'Affiliates', 'icon' => 'fa-solid fa-user-group', 'url' => admin_url('admin.php?page=wcusage_affiliates'), 'dropdown' => array(
+            array('label' => 'Affiliates', 'icon' => 'fa-solid fa-user-group', 'url' => '#', 'dropdown' => array(
                 array('label' => 'View Affiliates', 'url' => admin_url('admin.php?page=wcusage_affiliates'), 'icon' => 'fa-solid fa-users'),
                 array('label' => 'Manage Registrations', 'url' => admin_url('admin.php?page=wcusage_registrations'), 'icon' => 'fa-solid fa-users-gear'),
                 array('label' => 'Add New Affiliate', 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-user-plus'),
             )),
-            array('label' => 'Referrals', 'icon' => 'fa-solid fa-arrow-right-arrow-left', 'url' => admin_url('admin.php?page=wcusage_referrals'), 'dropdown' => array(
+            array('label' => 'Referrals', 'icon' => 'fa-solid fa-arrow-right-arrow-left', 'url' => '#', 'dropdown' => array(
                 array('label' => 'View Referred Orders', 'url' => admin_url('admin.php?page=wcusage_referrals'), 'icon' => 'fa-solid fa-arrow-right-arrow-left'),
-                array('label' => 'View URL Visits Log', 'url' => admin_url('admin.php?page=wcusage_clicks'), 'icon' => 'fa-solid fa-eye'),
+                array('label' => 'View Visits Log', 'url' => admin_url('admin.php?page=wcusage_clicks'), 'icon' => 'fa-solid fa-eye'),
             )),
-            array('label' => 'Payouts', 'icon' => 'fa-solid fa-money-bill', 'url' => admin_url('admin.php?page=wcusage_payouts'), 'dropdown' => array(
+            array('label' => 'Payouts', 'icon' => 'fa-solid fa-money-bill', 'url' => '#', 'dropdown' => array(
                 array('label' => 'View Payouts', 'url' => admin_url('admin.php?page=wcusage_payouts'), 'icon' => 'fa-solid fa-money-bill'),
                 array('label' => 'Create New Payout', 'url' => admin_url('admin.php?page=wcusage_payouts_create'), 'icon' => 'fa-solid fa-plus'),
                 array('label' => 'PDF Invoices', 'url' => admin_url('admin.php?post_type=wcu-statements'), 'icon' => 'fa-solid fa-file-invoice-dollar',
                 'disabled' => wcusage_get_setting_value('wcusage_field_payouts_enable_statements', '0')),
             )),
-            array('label' => 'Reports', 'icon' => 'fa-solid fa-chart-bar', 'url' => admin_url('admin.php?page=wcusage_admin_reports')),
+            array('label' => 'Reports', 'icon' => 'fa-solid fa-chart-bar', 'url' => '#', 'dropdown' => array(
+                array('label' => 'Admin Reports & Analytics', 'url' => admin_url('admin.php?page=wcusage_admin_reports'), 'icon' => 'fa-solid fa-chart-bar'),
+                array('label' => 'Affiliate Email Reports', 'url' => admin_url('admin.php?page=wcusage_settings&section=tab-reports'), 'icon' => 'fa-solid fa-file-pdf', 'pro_only' => true, 'disabled' => !wcusage_get_setting_value('wcusage_field_enable_reports', '0')),
+            )),
         );
         $other_items = array(
             array('label' => 'Admin Tools', 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
@@ -337,18 +340,18 @@ jQuery(document).ready(function($) {
     } else {
         $menu_items = array(
             array('label' => 'Settings', 'icon' => 'fa-solid fa-cog', 'url' => admin_url('admin.php?page=wcusage_settings')),
-            array('label' => 'Coupons', 'icon' => 'fa-solid fa-ticket', 'url' => admin_url('admin.php?page=wcusage_coupons'), 'dropdown' => array(
+            array('label' => 'Coupons', 'icon' => 'fa-solid fa-ticket', 'url' => '#', 'dropdown' => array(
                 array('label' => 'View Coupons', 'url' => admin_url('admin.php?page=wcusage_coupons'), 'icon' => 'fa-solid fa-ticket'),
                 array('label' => 'Add New Affiliate Coupon', 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-plus'),
                 array('label' => 'Bulk Create Affiliate Coupons', 'url' => admin_url('admin.php?page=wcusage-bulk-coupon-creator'), 'icon' => 'fa-solid fa-layer-group'),
             )),
             // Affiliates with dropdown
-            array('label' => 'Affiliates', 'icon' => 'fa-solid fa-user-group', 'url' => admin_url('admin.php?page=wcusage_affiliates'), 'dropdown' => array(
+            array('label' => 'Affiliates', 'icon' => 'fa-solid fa-user-group', 'url' => '#', 'dropdown' => array(
                 array('label' => 'View Affiliates', 'url' => admin_url('admin.php?page=wcusage_affiliates'), 'icon' => 'fa-solid fa-users'),
                 array('label' => 'Manage Registrations', 'url' => admin_url('admin.php?page=wcusage_registrations'), 'icon' => 'fa-solid fa-user-plus'),
                 array('label' => 'Add New Affiliate', 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-user-plus'),
             )),
-            array('label' => 'Referrals', 'icon' => 'fa-solid fa-arrow-right-arrow-left', 'url' => admin_url('admin.php?page=wcusage_referrals'), 'dropdown' => array(
+            array('label' => 'Referrals', 'icon' => 'fa-solid fa-arrow-right-arrow-left', 'url' => '#', 'dropdown' => array(
                 array('label' => 'View Referred Orders', 'url' => admin_url('admin.php?page=wcusage_referrals'), 'icon' => 'fa-solid fa-arrow-right-arrow-left'),
                 array('label' => 'View URL Visits Log', 'url' => admin_url('admin.php?page=wcusage_clicks'), 'icon' => 'fa-solid fa-eye'),
             )),
@@ -440,13 +443,18 @@ jQuery(document).ready(function($) {
                                 $sub_page = isset($submatches[1]) ? $submatches[1] : '';
                                 $sub_active = ($sub_page === $current_page);
                             ?>
-                                <?php $is_disabled = isset($subitem['disabled']) && $subitem['disabled']; ?>
+                                <?php
+                                $is_disabled = isset($subitem['disabled']) && $subitem['disabled'];
+                                $is_pro_only = isset($subitem['pro_only']) && $subitem['pro_only'];
+                                $show_as_disabled = $is_disabled || ($is_pro_only && !wcu_fs()->can_use_premium_code());
+                                ?>
                                 <li>
-                                    <a href="<?php echo $is_disabled ? 'javascript:void(0);' : esc_url($subitem['url']); ?>"
-                                       style="display: flex; align-items: center; gap: 6px; padding: 8px 16px;<?php echo $is_disabled ? ' color: #aaa; cursor: not-allowed;' : ' color: #333;'; ?> text-decoration: none;<?php echo $sub_active ? ' background: #f3f3f3;' : ''; ?>"
-                                       <?php echo $is_disabled ? 'aria-disabled="true" tabindex="-1"' : ''; ?>>
+                                    <a href="<?php echo $show_as_disabled ? 'javascript:void(0);' : esc_url($subitem['url']); ?>"
+                                       style="display: flex; align-items: center; gap: 6px; padding: 8px 16px;<?php echo $show_as_disabled ? ' color: #aaa; cursor: not-allowed;' : ' color: #333;'; ?> text-decoration: none;<?php echo $sub_active ? ' background: #f3f3f3;' : ''; ?>"
+                                       <?php echo $show_as_disabled ? 'aria-disabled="true" tabindex="-1"' : ''; ?>>
                                         <span class="<?php echo esc_attr($subitem['icon']); ?>"></span> <?php echo esc_html($subitem['label']); ?>
                                         <?php if ($is_disabled): ?><span style="margin-left: auto; color: #d9534f; font-size: 13px; font-weight: bold;">(Disabled)</span><?php endif; ?>
+                                        <?php if ($is_pro_only && !wcu_fs()->can_use_premium_code()): ?><span style="margin-left: auto; color: #d9534f; font-size: 13px; font-weight: bold;">(PRO)</span><?php endif; ?>
                                     </a>
                                 </li>
                             <?php endforeach; ?>

@@ -197,12 +197,12 @@ class wcusage_registrations_List_Table extends WP_List_Table {
             <?php endif; ?>
 
   					<button	type="submit" name="submitregisteraccept" class="payout-action payout-action-accepted" title="<?php echo esc_html__( 'Accept Application', 'woo-coupon-usage' ); ?>">
-  						<?php echo esc_html__( 'Accept', 'woo-coupon-usage' ); ?> <span class="dashicons dashicons-arrow-right-alt" style="font-size: 19px;"></span>
+  						<?php echo esc_html__( 'Accept', 'woo-coupon-usage' ); ?> <span class="dashicons dashicons-arrow-right-alt"></span>
   					</button>
 
   					<button onClick="return confirm('\nMark this affiliate application as declined? \n\n<?php echo esc_html__( 'User', 'woo-coupon-usage' ) . ": " . esc_html($usernamelogin); ?>\n<?php echo esc_html__( 'Coupon', 'woo-coupon-usage' ) . ": " . esc_html($item['couponcode']); ?> \n\n');"
   					type="submit" name="submitregisterdecline" class="payout-action payout-action-declined" title="<?php echo esc_html__( 'Decline Application', 'woo-coupon-usage' ); ?>">
-  						<?php echo esc_html__( 'Decline', 'woo-coupon-usage' ); ?> <span class="dashicons dashicons-dismiss" style="font-size: 19px;"></span>
+  						<?php echo esc_html__( 'Decline', 'woo-coupon-usage' ); ?> <span class="dashicons dashicons-dismiss"></span>
   					</button>
 
           </form>

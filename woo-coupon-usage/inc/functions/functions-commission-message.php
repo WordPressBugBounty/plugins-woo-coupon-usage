@@ -24,7 +24,7 @@ if ( !function_exists( 'wcusage_commission_message' ) ) {
         $apply_role_commission = $affiliate_per_user;
         if ( wcu_fs()->is__premium_only() && $apply_role_commission ) {
             $done = 0;
-            if ( $affiliate_per_user ) {
+            if ( $affiliate_per_user && $user && isset( $user->roles ) && is_array( $user->roles ) ) {
                 $user_roles = $user->roles;
                 foreach ( $user_roles as $role ) {
                     $fixed_order_role = wcusage_get_setting_value( 'wcusage_field_affiliate_percent_role_' . $role, '' );

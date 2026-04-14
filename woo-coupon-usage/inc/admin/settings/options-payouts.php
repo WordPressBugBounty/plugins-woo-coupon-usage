@@ -890,13 +890,6 @@ function wcusage_field_cb_payouts( $args ) {
         <?php wcusage_setting_toggle_option('wcusage_field_wise_enable', 0, esc_html__( 'Wise Bank Transfer Payouts', 'woo-coupon-usage' ), '0px'); ?>
       </span>
 
-      <!-- Beta Message -->
-      <span style="color: orange; font-weight: bold; font-size: 12px; margin-left: 40px;">
-        <p>
-          (BETA) <?php echo esc_html__( 'This feature is currently in beta. Please consider testing your settings and payments. If you experience any issues, please contact plugin support.', 'woo-coupon-usage' ); ?>
-        </p>
-      </span>
-
       <br/>
 
       <i><?php echo esc_html__( 'Wise Bank Transfer Payouts allows you to one-click pay your affiliates directly to their bank account through Wise with low transfer fees.', 'woo-coupon-usage' ); ?></i><br/>
@@ -940,7 +933,7 @@ function wcusage_field_cb_payouts( $args ) {
 
           <a href="https://couponaffiliates.com/docs/pro-wise-payouts" target="_blank" class="button button-primary" style="margin-top: 10px;"><?php echo esc_html__( 'View Documentation', 'woo-coupon-usage' ); ?> <span class="fas fa-external-link-alt"></span></a>
 
-          <br/>
+          <br/><br/>
           
           <strong><?php echo esc_html__( 'For more information, watch the video:', 'woo-coupon-usage' ); ?></strong>
           <br/>

@@ -204,9 +204,13 @@ function wcusage_admin_footer_script_assign_rates()
 }
 
 add_action('wp_ajax_assign_rates', 'wcusage_ajax_assign_rates');
-add_action('wp_ajax_nopriv_assign_rates', 'wcusage_ajax_assign_rates');
 
 function wcusage_ajax_assign_rates() {
+    // Check admin access
+    if ( ! wcusage_check_admin_access() ) {
+        wp_send_json_error(array('message' => 'Permission denied.'));
+    }
+
     // Verify nonce
     if (!isset($_POST['_wpnonce']) || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'bulk_assign_rates')) {
         wp_send_json_error(array('message' => 'Nonce verification failed.'));

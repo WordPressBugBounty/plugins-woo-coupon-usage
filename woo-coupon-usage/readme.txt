@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 7.0
-Stable tag: 7.7.0
+Stable tag: 7.7.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -268,6 +268,12 @@ Please report security bugs found in the source code of the plugin through the [
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 7.7.1 - 14th April 2026 =
+- Tweak: Made a few styling tweaks to the admin registrations page.
+- Fix: Fixed a fatal error when using WooCommerce HPOS on some admin pages in certain cases, caused by a WC_Order object being passed.
+- Fix: (PRO) Fixed a permission issue where the Email Newsletters page could appear blank or inaccessible.
+- Fix: Fixed a few small PHP errors and issues.
 
 = Version 7.7.0 - 12th April 2026 =
 - New: Completely rebuilt the Admin Reports & Analytics page with a more modern design.

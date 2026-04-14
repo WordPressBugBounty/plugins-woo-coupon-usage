@@ -328,6 +328,10 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
         $use_saved = "0",
         $force_update = "0"
     ) {
+        // Ensure $orderid is an integer ID, not a WC_Order object
+        if ( $orderid instanceof WC_Order ) {
+            $orderid = $orderid->get_id();
+        }
         // Use static cache for this request - no database writes
         static $calculation_cache = array();
         if ( !$force_update ) {
@@ -705,6 +709,10 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         $refresh,
         $force_update = "0"
     ) {
+        // Ensure $orderid is an integer ID, not a WC_Order object
+        if ( $orderid instanceof WC_Order ) {
+            $orderid = $orderid->get_id();
+        }
         if ( $refresh != "0" ) {
             $refresh = true;
         }
@@ -1568,6 +1576,10 @@ function wcusage_format_price_plain(  $price  ) {
  */
 if ( !function_exists( 'wcusage_get_order_tax_percent' ) ) {
     function wcusage_get_order_tax_percent(  $orderid  ) {
+        // Ensure $orderid is an integer ID, not a WC_Order object
+        if ( $orderid instanceof WC_Order ) {
+            $orderid = $orderid->get_id();
+        }
         // Static cache to avoid redundant wc_get_order() calls for the same order
         static $tax_percent_cache = array();
         if ( isset( $tax_percent_cache[$orderid] ) ) {

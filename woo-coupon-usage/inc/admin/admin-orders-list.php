@@ -36,6 +36,10 @@ add_action(
     2
 );
 function wcusage_add_order_column_content(  $column, $order_id  ) {
+    // Under HPOS, WooCommerce passes a WC_Order object instead of an integer order ID
+    if ( $order_id instanceof WC_Order ) {
+        $order_id = $order_id->get_id();
+    }
     if ( $column !== 'wcu_order_affiliate_coupon' ) {
         return;
     }

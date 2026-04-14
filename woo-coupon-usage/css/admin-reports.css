@@ -1,0 +1,1998 @@
+/**
+ * Modern Admin Reports & Analytics Styles
+ * Coupon Affiliates Plugin
+ */
+
+/* ===== PAGE LAYOUT ===== */
+.wcusage-reports-modern {
+    max-width: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.wcusage-reports-modern *,
+.wcusage-reports-modern *::before,
+.wcusage-reports-modern *::after {
+    box-sizing: border-box;
+}
+
+/* ===== HEADER ===== */
+.wcu-reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.wcu-reports-header h1 {
+    font-size: 26px;
+    color: #1d2327;
+    margin: 0 0 4px 0;
+}
+
+.wcu-reports-header h1 i {
+    color: #2271b1;
+    margin-right: 8px;
+}
+
+.wcu-reports-subtitle {
+    color: #646970;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* ===== FILTER BAR ===== */
+.wcu-reports-filter-bar {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* Show Sections – standalone row below the filter bar */
+.wcu-filter-row-sections {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.wcu-filter-row-sections > label:first-child {
+    font-size: 12px;
+    font-weight: 600;
+    color: #50575e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    margin: 0;
+}
+
+.wcu-filter-row-sections > label:first-child i {
+    margin-right: 4px;
+    color: #2271b1;
+}
+
+.wcu-filter-bar-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Primary row: 2-column grid — Date | Options + Generate */
+.wcu-filter-row-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    align-items: start;
+}
+
+.wcu-filter-row-main > .wcu-filter-group {
+    padding: 0;
+}
+
+.wcu-filter-row-main > .wcu-filter-group:first-child {
+    padding-right: 24px;
+    border-right: 1px solid #f0f0f1;
+}
+
+.wcu-filter-row-main > .wcu-filter-group:last-child {
+    padding-left: 24px;
+}
+
+/* Right column layout */
+.wcu-filter-right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Inline options row — checkbox + select + compare in one row */
+.wcu-filter-inline-options {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.wcu-filter-inline-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.wcu-filter-inline-item .wcu-checkbox-label {
+    font-size: 12px;
+}
+
+/* Compact group select */
+.wcu-select-compact {
+    padding: 5px 10px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #1d2327;
+    background: #fff;
+    min-height: 32px;
+    cursor: pointer;
+    max-width: 160px;
+}
+
+.wcu-select-compact:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+/* Generate button row — centered below all filters */
+.wcu-filter-row-generate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px solid #f0f0f1;
+}
+
+/* Advanced filters toggle button */
+.wcu-btn-advanced-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #50575e;
+    background: #f6f7f7;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.wcu-btn-advanced-toggle:hover {
+    background: #f0f0f1;
+    border-color: #2271b1;
+    color: #2271b1;
+}
+
+.wcu-btn-advanced-toggle.wcu-adv-open {
+    background: #eef3ff;
+    border-color: #2271b1;
+    color: #2271b1;
+}
+
+.wcu-btn-advanced-toggle .wcu-adv-arrow {
+    font-size: 10px;
+    transition: transform 0.2s ease;
+}
+
+.wcu-btn-advanced-toggle.wcu-adv-open .wcu-adv-arrow {
+    transform: rotate(180deg);
+}
+
+
+.wcu-filter-group {
+    min-width: 0;
+    flex-shrink: 0;
+}
+
+.wcu-filter-group > label:first-child {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #50575e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.wcu-filter-group > label:first-child i {
+    margin-right: 4px;
+    color: #2271b1;
+}
+
+/* Date inputs */
+.wcu-filter-date-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.wcu-filter-date-inputs input[type="date"] {
+    flex: 1 1 0;
+    padding: 6px 10px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #1d2327;
+    background: #fff;
+    min-height: 36px;
+    min-width: 0;
+}
+
+.wcu-filter-date-inputs input[type="date"]:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.wcu-filter-date-sep {
+    color: #999;
+    font-size: 14px;
+}
+
+/* Date preset dropdown */
+.wcu-date-preset-select {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #1d2327;
+    background: #fff;
+    min-height: 36px;
+    cursor: pointer;
+    max-width: 160px;
+}
+
+.wcu-date-preset-select:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.wcu-free-note {
+    font-size: 11px;
+    color: #999;
+    margin: 6px 0 0 0;
+}
+
+.wcu-free-note a {
+    color: #00a32a;
+    font-weight: 600;
+}
+
+/* Toggle pills */
+.wcu-toggle-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.wcu-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #d0d5dd;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background: #f9fafb;
+    color: #50575e;
+    user-select: none;
+}
+
+.wcu-pill input[type="checkbox"] {
+    display: none;
+}
+
+.wcu-pill.wcu-pill-active {
+    background: #eef3ff;
+    border-color: #2271b1;
+    color: #2271b1;
+}
+
+.wcu-pill:hover {
+    border-color: #2271b1;
+}
+
+.wcu-pill i {
+    font-size: 11px;
+}
+
+/* Affiliate filter */
+.wcu-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.wcu-checkbox-label input[type="checkbox"] {
+    margin: 0;
+}
+
+/* Collapsible Advanced Filters panel */
+.wcu-filter-advanced-panel {
+    padding: 16px 0 0;
+    margin-top: 16px;
+    border-top: 1px solid #f0f0f1;
+}
+
+/* When advanced panel is inside the right column */
+.wcu-filter-advanced-panel.wcu-adv-panel-inline {
+    padding: 12px 0 0;
+    margin-top: 12px;
+    border-top: 1px dashed #e0e0e0;
+}
+
+.wcu-filter-advanced-panel.wcu-adv-panel-inline .wcu-advanced-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.wcu-advanced-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.wcu-adv-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+
+.wcu-adv-filter strong {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #50575e;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.wcu-adv-than {
+    font-size: 11.5px;
+    color: #8c8f94;
+    flex-shrink: 0;
+}
+
+/* Select + number input sit side by side */
+.wcu-adv-filter .wcu-adv-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wcu-adv-filter select {
+    flex: 1;
+    padding: 5px 8px;
+    border: 1px solid #d0d5dd;
+    border-radius: 5px;
+    font-size: 12px;
+    min-height: 32px;
+    min-width: 0;
+}
+
+.wcu-adv-filter input[type="number"] {
+    width: 68px;
+    flex-shrink: 0;
+    padding: 5px 6px;
+    border: 1px solid #d0d5dd;
+    border-radius: 5px;
+    font-size: 12px;
+    min-height: 32px;
+}
+
+.wcu-adv-input-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.wcu-compare-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.wcu-compare-disabled input[type="checkbox"] {
+    cursor: not-allowed;
+}
+
+.wcu-filter-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.wcu-filter-disabled select {
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.wcu-pro-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    background: #2271b1;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-left: 6px;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    vertical-align: middle;
+}
+
+.wcu-pro-badge i {
+    color: #fff;
+    font-size: 9px;
+}
+
+.wcu-pro-badge:hover {
+    background: #135e96;
+    color: #fff;
+    text-decoration: none;
+}
+
+.wcu-compare-dates {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #e0e0e0;
+}
+
+.wcu-compare-dates > label:first-child {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #50575e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.wcu-compare-dates > label:first-child i {
+    margin-right: 4px;
+    color: #2271b1;
+}
+
+.wcu-compare-options {
+    margin-top: 8px;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.wcu-compare-options-label {
+    color: #50575e;
+}
+
+.wcu-compare-options-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.wcu-compare-options select,
+.wcu-compare-options input {
+    font-size: 12px;
+    padding: 4px 8px;
+    border: 1px solid #d0d5dd;
+    border-radius: 5px;
+    min-height: 30px;
+}
+
+#wcu-compare-filter-type {
+    min-width: 200px;
+}
+
+/* Generate Button */
+.wcu-btn-generate {
+    display: inline-flex;
+    align-items: center;
+    flex-direction: row;
+    gap: 10px;
+    padding: 12px 32px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #2271b1, #135e96);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(34,113,177,0.3);
+    white-space: nowrap;
+}
+
+.wcu-btn-generate:hover {
+    background: linear-gradient(135deg, #135e96, #0a4b78);
+    box-shadow: 0 4px 8px rgba(34,113,177,0.4);
+    transform: translateY(-1px);
+}
+
+.wcu-btn-generate:active {
+    transform: translateY(0);
+}
+
+.wcu-btn-generate i {
+    font-size: 14px;
+}
+
+/* ===== LOADING ===== */
+.wcu-reports-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+}
+
+/* ===== REPORT CONTENT ===== */
+
+/* Info Bar */
+.wcu-report-info-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #f0f6fc;
+    border: 1px solid #c5d9ed;
+    border-left: 4px solid #2271b1;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: #2c3338;
+    line-height: 1.6;
+}
+
+.wcu-report-info-bar .wcu-info-bar-text {
+    flex: 1 1 auto;
+}
+
+.wcu-report-info-bar i {
+    color: #2271b1;
+    margin-right: 4px;
+}
+
+.wcu-report-info-bar #wcu-download-pdf {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.wcu-report-info-bar #wcu-download-pdf:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ===== SUMMARY CARDS ===== */
+.wcu-section-cards {
+    margin-bottom: 24px;
+}
+
+.wcu-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d2327;
+    margin: 0 0 14px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wcu-section-title i {
+    color: #2271b1;
+    font-size: 15px;
+}
+
+.wcu-cards-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+}
+
+.wcu-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 18px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.wcu-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-color: #d0d5dd;
+}
+
+.wcu-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+}
+
+.wcu-icon-usage { background: #eef3ff; color: #2271b1; }
+.wcu-icon-sales { background: #e6f7ee; color: #00a32a; }
+.wcu-icon-discounts { background: #fef3e6; color: #d97706; }
+.wcu-icon-avg { background: #f0e6ff; color: #7c3aed; }
+.wcu-icon-commission { background: #e6f7ee; color: #00a32a; }
+.wcu-icon-unpaid { background: #fff3e6; color: #d97706; }
+.wcu-icon-pending { background: #fef2f2; color: #dc2626; }
+.wcu-icon-rate { background: #ecfdf5; color: #059669; }
+.wcu-icon-clicks { background: #eef3ff; color: #2271b1; }
+.wcu-icon-conversions { background: #e6f7ee; color: #00a32a; }
+.wcu-icon-convrate { background: #f5f3ff; color: #7c3aed; }
+
+/* Activity log icon colors */
+.wcu-icon-activity-registrations { background: #eef3ff; color: #2271b1; }
+.wcu-icon-activity-payouts { background: #ecfdf5; color: #059669; }
+.wcu-icon-activity-payout-requests { background: #fef2f2; color: #dc2626; }
+.wcu-icon-activity-rewards { background: #f5f3ff; color: #7c3aed; }
+.wcu-icon-activity-campaigns { background: #fff7ed; color: #c2410c; }
+.wcu-icon-activity-mla { background: #f0fdf4; color: #15803d; }
+
+.wcu-card-data {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.wcu-card-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1d2327;
+    line-height: 1.2;
+}
+
+.wcu-card-label {
+    font-size: 12px;
+    color: #646970;
+    margin-top: 2px;
+}
+
+.wcu-card-change {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 500;
+    margin-top: 3px;
+}
+
+.wcu-card-change:empty {
+    display: none;
+}
+
+/* ===== SPARKLINE TRENDS ===== */
+.wcu-card-has-sparkline {
+    position: relative;
+    overflow: hidden;
+}
+.wcu-sparkline {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 55%;
+    height: 95%;
+    pointer-events: none;
+    opacity: 0.10;
+}
+.wcu-sparkline-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.wcu-card-has-sparkline .wcu-card-data {
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== TRENDS CHART ===== */
+.wcu-section-trends {
+    margin-bottom: 28px;
+}
+
+.wcu-trends-row {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 18px;
+    align-items: stretch;
+}
+
+@media (max-width: 1100px) {
+    .wcu-trends-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.wcu-trends-wrap {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 18px 20px 12px 20px;
+}
+
+/* ===== TREND INSIGHTS PANEL ===== */
+.wcu-trends-insights-col {
+    display: flex;
+    flex-direction: column;
+    padding: 18px 18px 14px 18px;
+    overflow-y: auto;
+}
+
+.wcu-insights-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 8px;
+}
+
+.wcu-insights-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.wcu-insights-title i {
+    color: #d97706;
+    margin-right: 4px;
+}
+
+.wcu-insights-toggle {
+    display: flex;
+    background: #f3f4f6;
+    border-radius: 6px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.wcu-insights-toggle-btn {
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border: none;
+    border-radius: 5px;
+    background: transparent;
+    color: #9ca3af;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    line-height: 1.4;
+}
+
+.wcu-insights-toggle-btn:hover {
+    color: #6b7280;
+}
+
+.wcu-insights-toggle-btn.active {
+    background: #fff;
+    color: #374151;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.wcu-insights-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+}
+
+.wcu-insights-empty {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 13px;
+    padding: 40px 10px;
+}
+
+.wcu-insights-empty i {
+    display: block;
+    font-size: 28px;
+    margin-bottom: 8px;
+    opacity: 0.4;
+}
+
+/* Insight block */
+.wcu-insight-block {
+    border-top: 1px solid #f3f4f6;
+    padding-top: 12px;
+}
+
+.wcu-insight-block:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+.wcu-insight-block-title {
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #9ca3af;
+    margin-bottom: 8px;
+}
+
+/* Day-of-week bar chart */
+.wcu-dow-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.wcu-dow-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+}
+
+.wcu-dow-label {
+    width: 30px;
+    flex-shrink: 0;
+    color: #6b7280;
+    font-weight: 500;
+    text-align: right;
+}
+
+.wcu-dow-bar-wrap {
+    flex: 1;
+    height: 14px;
+    background: #f3f4f6;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+
+.wcu-dow-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    min-width: 0;
+}
+
+.wcu-dow-val {
+    width: 52px;
+    flex-shrink: 0;
+    text-align: right;
+    font-size: 11px;
+    color: #374151;
+    font-weight: 600;
+}
+
+.wcu-dow-row.wcu-dow-peak .wcu-dow-label {
+    color: #00a32a;
+    font-weight: 700;
+}
+
+.wcu-dow-row.wcu-dow-peak .wcu-dow-bar {
+    background: #00a32a;
+}
+
+.wcu-dow-row:not(.wcu-dow-peak) .wcu-dow-bar {
+    background: #2271b1;
+    opacity: 0.6;
+}
+
+/* Stat highlights */
+.wcu-insight-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.wcu-insight-stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #4b5563;
+}
+
+.wcu-insight-stat-row i {
+    width: 16px;
+    text-align: center;
+    font-size: 11px;
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+
+.wcu-insight-stat-row strong {
+    color: #1d2327;
+}
+
+.wcu-insight-stat-row .wcu-insight-value {
+    font-weight: 700;
+    color: #00a32a;
+}
+
+/* Activity indicator */
+.wcu-activity-meter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.wcu-activity-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.wcu-activity-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #2271b1, #00a32a);
+    transition: width 0.4s ease;
+}
+
+.wcu-activity-pct {
+    font-weight: 600;
+    color: #374151;
+    font-size: 12px;
+    min-width: 34px;
+    text-align: right;
+}
+
+.wcu-trends-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.wcu-trend-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #9ca3af;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.wcu-trend-toggle:hover {
+    border-color: #d0d5dd;
+    background: #f3f4f6;
+}
+
+.wcu-trend-toggle.wcu-trend-active {
+    color: #374151;
+    background: #fff;
+    border-color: #d0d5dd;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.wcu-trend-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0.4;
+    transition: opacity 0.15s ease;
+}
+
+.wcu-trend-toggle.wcu-trend-active .wcu-trend-swatch {
+    opacity: 1;
+}
+
+.wcu-trends-line-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.wcu-trends-line-col .wcu-trends-legend {
+    flex-shrink: 0;
+}
+
+.wcu-trends-canvas-wrap {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    min-height: 280px;
+}
+
+.wcu-trends-canvas-wrap canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+}
+
+/* Tooltip */
+.wcu-trends-tooltip {
+    display: none;
+    position: absolute;
+    z-index: 50;
+    background: #1d2327;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    min-width: 140px;
+    white-space: nowrap;
+}
+
+.wcu-tt-date {
+    font-weight: 600;
+    font-size: 12.5px;
+    margin-bottom: 6px;
+    color: #e5e7eb;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 5px;
+}
+
+.wcu-tt-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.wcu-tt-swatch {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.wcu-tt-label {
+    flex: 1;
+    font-weight: 400;
+    color: #d1d5db;
+}
+
+.wcu-tt-value {
+    font-weight: 600;
+    color: #fff;
+}
+
+@media (max-width: 600px) {
+    .wcu-trends-wrap {
+        padding: 12px;
+    }
+    .wcu-trends-canvas-wrap {
+        min-height: 220px;
+    }
+}
+
+/* ===== TRAFFIC SOURCES ===== */
+.wcu-section-traffic {
+    margin-bottom: 28px;
+}
+.wcu-traffic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+@media (max-width: 1100px) {
+    .wcu-traffic-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.wcu-traffic-box {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+.wcu-traffic-box h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.wcu-traffic-box h4 i {
+    color: #2271b1;
+    font-size: 12px;
+}
+.wcu-traffic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+.wcu-traffic-row {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.wcu-traffic-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background: #eef3ff;
+    border-radius: 6px;
+    min-width: 2px;
+    transition: width 0.3s ease;
+}
+.wcu-traffic-row-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 10px;
+    gap: 8px;
+}
+.wcu-traffic-label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #1d2327;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 1;
+}
+.wcu-traffic-stats {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+    align-items: center;
+}
+.wcu-traffic-clicks,
+.wcu-traffic-conv {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+}
+.wcu-traffic-clicks small,
+.wcu-traffic-conv small {
+    font-weight: 400;
+    color: #9ca3af;
+    font-size: 10.5px;
+}
+.wcu-traffic-rate {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #059669;
+    min-width: 42px;
+    text-align: right;
+}
+.wcu-traffic-empty {
+    font-size: 12.5px;
+    color: #9ca3af;
+    padding: 12px 0;
+}
+.wcu-traffic-empty i {
+    margin-right: 4px;
+}
+
+.wcu-traffic-list > .wcu-paginate-controls {
+    margin-top: auto;
+}
+
+/* ===== PAGINATION CONTROLS (Traffic Sources + Top Performers) ===== */
+.wcu-paginate-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 0 2px;
+    flex-wrap: wrap;
+}
+
+.wcu-page-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #2271b1;
+    background: none;
+    border: 1px solid #d0d5dd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    line-height: 1.4;
+}
+
+.wcu-page-btn:hover:not([disabled]):not(.wcu-page-active) {
+    background: #f0f6fc;
+    border-color: #2271b1;
+}
+
+.wcu-page-btn[disabled] {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.wcu-page-btn.wcu-page-active {
+    background: #2271b1;
+    color: #fff;
+    border-color: #2271b1;
+    cursor: default;
+}
+
+.wcu-page-btn i {
+    font-size: 9px;
+}
+
+.wcu-page-numbers {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.wcu-page-num {
+    min-width: 28px;
+    justify-content: center;
+}
+
+.wcu-page-ellipsis {
+    padding: 0 4px;
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.wcu-page-prev,
+.wcu-page-next {
+    margin: 0 2px;
+}
+
+.wcu-paginate-count {
+    font-weight: 400;
+    color: #9ca3af;
+    font-size: 10.5px;
+    margin-left: 6px;
+}
+
+/* Top performers paginate row */
+.wcu-top-paginate {
+    display: block !important;
+    counter-increment: none !important;
+    margin-top: auto !important;
+    padding: 6px 0 0 !important;
+    border-bottom: none !important;
+}
+
+.wcu-top-paginate::before {
+    display: none !important;
+}
+
+.wcu-top-paginate .wcu-paginate-controls {
+    padding: 0;
+}
+
+/* ===== TOP PERFORMERS ===== */
+.wcu-top-performers {
+    margin-bottom: 28px;
+}
+
+.wcu-top-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+@media (max-width: 1100px) {
+    .wcu-top-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .wcu-top-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.wcu-top-box {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.wcu-top-box h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wcu-top-box h4 i {
+    color: #2271b1;
+    font-size: 12px;
+}
+
+.wcu-top-box ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: top-counter;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.wcu-top-box ol li {
+    counter-increment: top-counter;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.wcu-top-box ol li:last-child {
+    border-bottom: none;
+}
+
+.wcu-top-box ol li::before {
+    content: counter(top-counter) ".";
+    font-weight: 600;
+    color: #9ca3af;
+    min-width: 24px;
+}
+
+.wcu-top-box ol li .wcu-top-name {
+    flex: 1;
+    font-weight: 500;
+    color: #1d2327;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.wcu-top-user-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.wcu-top-affiliate-link {
+    color: #2271b1;
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.wcu-top-affiliate-link:hover {
+    color: #135e96;
+    text-decoration: underline;
+}
+
+.wcu-top-coupon {
+    font-size: 11px;
+    color: #8c8f94;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wcu-top-box ol li .wcu-top-value {
+    font-weight: 600;
+    color: #374151;
+    font-size: 13px;
+}
+
+/* ===== COUPON TABLE ===== */
+.wcu-coupon-table-section {
+    margin-bottom: 40px;
+}
+
+.wcu-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.wcu-table-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.wcu-table-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.wcu-table-search i {
+    position: absolute;
+    left: 10px;
+    color: #9ca3af;
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.wcu-table-search input {
+    padding: 7px 12px 7px 32px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    font-size: 13px;
+    min-width: 200px;
+    min-height: 36px;
+}
+
+.wcu-table-search input:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.wcu-table-sort select {
+    padding: 7px 10px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    font-size: 12px;
+    min-height: 36px;
+    background: #fff;
+}
+
+.wcu-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    background: #fff;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    min-height: 36px;
+}
+
+.wcu-btn-secondary:hover {
+    background: #f9fafb;
+    border-color: #2271b1;
+    color: #2271b1;
+}
+
+.wcu-btn-secondary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Table */
+.wcu-table-wrap {
+    overflow-x: auto;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.wcu-report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+/* Group header row */
+.wcu-report-table .wcu-thead-groups th {
+    background: #f3f4f6;
+    padding: 7px 12px 6px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #374151;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.wcu-report-table .wcu-thead-groups th i {
+    margin-right: 4px;
+    font-size: 10px;
+}
+
+/* Group headers – uniform style */
+.wcu-report-table .wcu-group-header { border-top: 3px solid transparent; color: #374151; }
+
+/* Section dividers — subtle left border between column groups */
+.wcu-report-table th.wcu-group-header.wcu-col-sales,
+.wcu-report-table th.wcu-col-usage,
+.wcu-report-table td.wcu-col-usage,
+.wcu-report-table th.wcu-group-header.wcu-col-comm,
+.wcu-report-table th.wcu-col-commission,
+.wcu-report-table td.wcu-col-commission,
+.wcu-report-table th.wcu-group-header.wcu-col-ref,
+.wcu-report-table th.wcu-col-clicks,
+.wcu-report-table td.wcu-col-clicks,
+.wcu-report-table th.wcu-group-header.wcu-col-products,
+.wcu-report-table .wcu-thead-cols th.wcu-col-prod,
+.wcu-report-table td.wcu-col-products {
+    border-left: 2px solid #e5e7eb;
+}
+
+/* Column sub-header row */
+.wcu-report-table .wcu-thead-cols th {
+    background: #f9fafb;
+    padding: 6px 12px 8px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
+    border-bottom: 2px solid #e5e7eb;
+    white-space: nowrap;
+    position: sticky;
+    top: 29px; /* height of the group row */
+    z-index: 1;
+}
+
+.wcu-report-table tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.1s ease;
+}
+
+.wcu-report-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.wcu-report-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.wcu-report-table tbody td {
+    padding: 10px 12px;
+    color: #374151;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.wcu-report-table .wcu-col-name {
+    min-width: 160px;
+}
+
+.wcu-report-table .wcu-col-name a {
+    font-weight: 600;
+    color: #1d2327;
+    text-decoration: none;
+}
+
+.wcu-report-table .wcu-col-name a:hover {
+    color: #2271b1;
+}
+
+.wcu-report-table .wcu-coupon-actions {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.wcu-report-table .wcu-coupon-actions a {
+    font-size: 11px;
+    color: #9ca3af;
+    text-decoration: none;
+}
+
+.wcu-report-table .wcu-coupon-actions a:hover {
+    color: #2271b1;
+}
+
+.wcu-report-table td.wcu-col-products {
+    font-size: 11px;
+    color: #6b7280;
+    max-width: 200px;
+}
+
+.wcu-report-table .wcu-product-item {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Compare change indicators */
+.wcu-change-up {
+    color: #00a32a;
+    font-size: 10px;
+    font-weight: 600;
+    display: block;
+    margin-top: 1px;
+}
+
+.wcu-change-down {
+    color: #dc2626;
+    font-size: 10px;
+    font-weight: 600;
+    display: block;
+    margin-top: 1px;
+}
+
+.wcu-change-neutral {
+    color: #9ca3af;
+    font-size: 10px;
+    font-weight: 600;
+    display: block;
+    margin-top: 1px;
+}
+
+/* ===== NO RESULTS ===== */
+.wcu-no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9ca3af;
+}
+
+.wcu-no-results i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+    color: #d1d5db;
+}
+
+.wcu-no-results h3 {
+    font-size: 18px;
+    color: #6b7280;
+    margin: 0 0 8px 0;
+}
+
+.wcu-no-results p {
+    font-size: 14px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Small screens: stack to single column */
+@media (max-width: 782px) {
+    .wcu-filter-row-main {
+        grid-template-columns: 1fr;
+    }
+
+    .wcu-filter-row-main > .wcu-filter-group:first-child {
+        padding-right: 0;
+        border-right: none;
+        border-bottom: 1px solid #f0f0f1;
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+    }
+
+    .wcu-filter-row-main > .wcu-filter-group:last-child {
+        padding-left: 0;
+    }
+
+    .wcu-filter-inline-options {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .wcu-btn-generate {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .wcu-filter-row-sections {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .wcu-cards-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .wcu-table-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .wcu-table-controls {
+        width: 100%;
+    }
+
+    .wcu-table-search input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .wcu-top-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .wcu-cards-row {
+        grid-template-columns: 1fr;
+    }
+
+    .wcu-card-value {
+        font-size: 18px;
+    }
+
+    .wcu-sparkline {
+        display: none;
+    }
+
+    .wcu-reports-filter-bar {
+        padding: 14px;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes wcu-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes wcu-fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.wcu-reports-content {
+    animation: wcu-fadeIn 0.3s ease;
+}
+
+.wcu-section-cards {
+    animation: wcu-fadeIn 0.4s ease;
+}
+
+.wcu-section-trends {
+    animation: wcu-fadeIn 0.4s ease;
+}
+
+/* Loading state shimmer */
+.wcu-reports-loader .wcu-loading-loader {
+    margin: 0 auto 16px auto;
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 0, 0, 0.08);
+    border-top-color: #2271b1;
+    border-radius: 50%;
+    animation: wcu-spin 0.8s ease-in-out infinite;
+}
+
+.wcu-reports-loader .wcu-loading-loader-text {
+    font-weight: 600;
+    font-size: 15px;
+    color: #374151;
+    text-align: center;
+    margin: 0 0 6px 0;
+}
+
+.wcu-reports-loader .wcu-loading-loader-subtext {
+    font-size: 13px;
+    color: #9ca3af;
+    text-align: center;
+    margin: 0 0 10px 0;
+}
+
+.wcu-loader-details {
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+
+.wcu-loader-details i {
+    color: #2271b1;
+    margin-right: 3px;
+}
+
+.wcu-loader-sep {
+    color: #d1d5db;
+    font-size: 14px;
+    line-height: 1;
+}
+
+/* Column visibility classes – section level (toggled by filter bar pills) */
+.wcu-hide-sales .wcu-col-sales,
+.wcu-hide-sales .wcu-section-sales { display: none !important; }
+
+.wcu-hide-commission .wcu-col-comm,
+.wcu-hide-commission .wcu-section-commission { display: none !important; }
+
+.wcu-hide-referrals .wcu-col-ref,
+.wcu-hide-referrals .wcu-section-referrals { display: none !important; }
+
+.wcu-hide-products .wcu-col-prod,
+.wcu-hide-products .wcu-col-products,
+.wcu-hide-products .wcu-top-products { display: none !important; }
+
+.wcu-hide-activity .wcu-section-activity { display: none !important; }
+
+.wcu-hide-trends .wcu-section-trends { display: none !important; }
+
+.wcu-hide-top-performers .wcu-top-performers { display: none !important; }
+
+.wcu-hide-coupons .wcu-coupon-table-section { display: none !important; }
+
+/* Column visibility – individual columns (toggled by column chooser)
+   Scoped to sub-header row, body rows and footer – NOT group header row */
+.wcu-hide-col-affiliate .wcu-thead-cols .wcu-col-affiliate,
+.wcu-hide-col-affiliate tbody .wcu-col-affiliate,
+.wcu-hide-col-affiliate tfoot .wcu-col-affiliate { display: none !important; }
+.wcu-hide-col-usage .wcu-thead-cols .wcu-col-usage,
+.wcu-hide-col-usage tbody .wcu-col-usage,
+.wcu-hide-col-usage tfoot .wcu-col-usage { display: none !important; }
+.wcu-hide-col-orders .wcu-thead-cols .wcu-col-orders,
+.wcu-hide-col-orders tbody .wcu-col-orders,
+.wcu-hide-col-orders tfoot .wcu-col-orders { display: none !important; }
+.wcu-hide-col-discounts .wcu-thead-cols .wcu-col-discounts,
+.wcu-hide-col-discounts tbody .wcu-col-discounts,
+.wcu-hide-col-discounts tfoot .wcu-col-discounts { display: none !important; }
+.wcu-hide-col-commission .wcu-thead-cols .wcu-col-commission,
+.wcu-hide-col-commission tbody .wcu-col-commission,
+.wcu-hide-col-commission tfoot .wcu-col-commission { display: none !important; }
+.wcu-hide-col-unpaid .wcu-thead-cols .wcu-col-unpaid,
+.wcu-hide-col-unpaid tbody .wcu-col-unpaid,
+.wcu-hide-col-unpaid tfoot .wcu-col-unpaid { display: none !important; }
+.wcu-hide-col-pending .wcu-thead-cols .wcu-col-pending,
+.wcu-hide-col-pending tbody .wcu-col-pending,
+.wcu-hide-col-pending tfoot .wcu-col-pending { display: none !important; }
+.wcu-hide-col-clicks .wcu-thead-cols .wcu-col-clicks,
+.wcu-hide-col-clicks tbody .wcu-col-clicks,
+.wcu-hide-col-clicks tfoot .wcu-col-clicks { display: none !important; }
+.wcu-hide-col-conversions .wcu-thead-cols .wcu-col-conversions,
+.wcu-hide-col-conversions tbody .wcu-col-conversions,
+.wcu-hide-col-conversions tfoot .wcu-col-conversions { display: none !important; }
+.wcu-hide-col-convrate .wcu-thead-cols .wcu-col-convrate,
+.wcu-hide-col-convrate tbody .wcu-col-convrate,
+.wcu-hide-col-convrate tfoot .wcu-col-convrate { display: none !important; }
+.wcu-hide-col-products .wcu-thead-cols .wcu-col-products,
+.wcu-hide-col-products tbody .wcu-col-products,
+.wcu-hide-col-products tfoot .wcu-col-products { display: none !important; }
+
+/* Group header visibility – hide group header when ALL child columns are hidden */
+.wcu-hide-group-affiliate .wcu-thead-groups .wcu-group-header.wcu-col-affiliate { display: none !important; }
+
+/* Affiliate link in table */
+.wcu-avatar-sm {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+.wcu-affiliate-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wcu-affiliate-link {
+    color: #2271b1;
+    text-decoration: none;
+    font-weight: 500;
+}
+.wcu-affiliate-link:hover {
+    color: #135e96;
+    text-decoration: underline;
+}
+
+.wcu-hide-group-sales .wcu-thead-groups .wcu-group-header.wcu-col-sales { display: none !important; }
+.wcu-hide-group-comm .wcu-thead-groups .wcu-group-header.wcu-col-comm { display: none !important; }
+.wcu-hide-group-ref .wcu-thead-groups .wcu-group-header.wcu-col-ref { display: none !important; }
+.wcu-hide-group-products .wcu-thead-groups .wcu-group-header.wcu-col-prod { display: none !important; }
+
+/* ===== COLUMN CHOOSER DROPDOWN ===== */
+.wcu-col-chooser-wrap {
+    position: relative;
+}
+
+.wcu-col-chooser-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 100;
+    background: #fff;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    padding: 8px 0;
+    min-width: 180px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.wcu-col-chooser-dropdown.wcu-open {
+    display: block;
+}
+
+.wcu-col-chooser-dropdown label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.1s ease;
+}
+
+.wcu-col-chooser-dropdown label:hover {
+    background: #f3f4f6;
+}
+
+.wcu-col-chooser-dropdown label input[type="checkbox"] {
+    margin: 0;
+    accent-color: #2271b1;
+}
+
+.wcu-col-chooser-dropdown label input[type="checkbox"]:disabled {
+    opacity: 0.5;
+}

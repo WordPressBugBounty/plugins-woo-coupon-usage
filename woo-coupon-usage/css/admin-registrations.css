@@ -12,29 +12,21 @@ td.column-action1 button[name="submitregisterdelete"] {
   font-size: 13px; /* reset in case parent is adjusted */
 }
 
-/* Icon vertical alignment */
-/* Slight nudge only for anchor buttons (View Affiliate/Dashboard) */
+/* Icon vertical alignment — nudge icons to sit on the text baseline */
 td.column-action1 a.button .dashicons,
 td.column-action1 a.button .fa,
 td.column-action1 a.button .fa-solid,
-td.column-action1 a.button .fa-regular {
-  line-height: 1;
-  position: relative;
-  top: 3px;
-}
-/* Reset nudge for Accept/Decline buttons */
-td.column-action1 button.payout-action .dashicons {
-  line-height: 1;
-  position: relative;
-  top: 0;
-}
-/* Reset nudge for Delete icon */
+td.column-action1 a.button .fa-regular,
+td.column-action1 button.payout-action .dashicons,
+td.column-action1 button.payout-action .fa,
+td.column-action1 button.payout-action .fa-solid,
+td.column-action1 button.payout-action .fa-regular,
 td.column-action1 button[name="submitregisterdelete"] .fa,
 td.column-action1 button[name="submitregisterdelete"] .fa-solid,
 td.column-action1 button[name="submitregisterdelete"] .fa-regular {
+  vertical-align: text-bottom;
+  position: static;
   line-height: 1;
-  position: relative;
-  top: 0;
 }
 
 /* Extra spacing above delete button */
