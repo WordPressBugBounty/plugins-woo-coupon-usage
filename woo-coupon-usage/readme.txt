@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 7.0
-Stable tag: 7.7.1
+Stable tag: 7.7.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -268,6 +268,10 @@ Please report security bugs found in the source code of the plugin through the [
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 7.7.2 - 15th April 2026 =
+- New: (PRO) Added "Limit to certain user roles & groups?" option to all built-in tab settings in "Affiliate Dashboard Customisation", allowing each tab to be restricted to specific user roles or affiliate groups.
+- Fix: Fixed a fatal error on the admin orders list when using WooCommerce HPOS.
 
 = Version 7.7.1 - 14th April 2026 =
 - Tweak: Made a few styling tweaks to the admin registrations page.

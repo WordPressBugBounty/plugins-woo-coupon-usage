@@ -453,8 +453,8 @@ function wcusage_setup_page_html() {
 
           </div>
 
-          <p><strong><?php echo sprintf( wp_kses_post( __('Be sure to watch the setup guide video below, for a detailed walkthrough.', 'woo-coupon-usage') ), esc_url(admin_url('admin.php?page=wcusage_contact'))); ?>
-          <?php echo wp_kses_post(__('Need help?', 'woo-coupon-usage')); ?> <?php if ( wcu_fs()->can_use_premium_code() ) { ?><a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage-contact" target="_blank"><?php } else { ?><a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank" style="text-decoration: none;"><?php } ?><?php echo esc_html__('Create a new support ticket', 'woo-coupon-usage'); ?></a>.</strong><br/></p>
+          <p><strong><?php echo wp_kses_post( __('Be sure to watch the setup guide video below, for a detailed walkthrough.', 'woo-coupon-usage') ); ?>
+          <?php echo wp_kses_post(__('Need help?', 'woo-coupon-usage')); ?> <a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank" style="text-decoration: none;"><?php echo esc_html__('Create a new support ticket', 'woo-coupon-usage'); ?></a>.</strong><br/></p>
 
           <br/>
 

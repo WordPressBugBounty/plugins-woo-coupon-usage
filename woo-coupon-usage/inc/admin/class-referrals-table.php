@@ -383,7 +383,7 @@ function wcusage_orders_page() {
     ?>">
                 <?php 
     echo esc_html__( 'Export Orders (PRO)', 'woo-coupon-usage' );
-    ?> <span class="fa-solid fa-circle-arrow-right"></span>
+    ?> <span class="fa-solid fa-download"></span>
             </span>
         <?php 
     ?>

@@ -827,6 +827,20 @@ function wcusage_portal_tabs(
     $options = get_option( 'wcusage_options' );
     $custom_order = ( isset( $options['wcusage_dashboard_tabs_layout'] ) ? $options['wcusage_dashboard_tabs_layout'] : '' );
     $show_tabs_icons = wcusage_get_setting_value( 'wcusage_field_show_tabs_icons', '1' );
+    // Helper: check whether the current user passes the role restriction for a built-in tab.
+    // Returns true (show tab) when no roles are selected, or when the user has at least one of the selected roles.
+    $wcusage_check_tab_roles = function ( $option_key ) use($options) {
+        if ( empty( $options[$option_key] ) ) {
+            return true;
+        }
+        $roles = wp_roles()->roles;
+        foreach ( $roles as $key => $role ) {
+            if ( isset( $options[$option_key][$key] ) && user_can( get_current_user_id(), $key ) ) {
+                return true;
+            }
+        }
+        return false;
+    };
     $wcusage_field_show_statistics_tab = wcusage_get_setting_value( 'wcusage_field_show_statistics_tab', '1' );
     $wcusage_field_show_order_tab = wcusage_get_setting_value( 'wcusage_field_show_order_tab', '1' );
     $option_coupon_orders = wcusage_get_setting_value( 'wcusage_field_orders', '10' );
@@ -848,7 +862,7 @@ function wcusage_portal_tabs(
             'content-id'      => 'wcu1',
             'label'           => __( 'Statistics', 'woo-coupon-usage' ),
             'icon'            => 'fas fa-chart-line',
-            'condition'       => $wcusage_field_show_statistics_tab,
+            'condition'       => $wcusage_field_show_statistics_tab && $wcusage_check_tab_roles( 'wcusage_field_tab_roles_stats' ),
             'custom_name_key' => 'wcusage_field_tab_name_stats',
         ],
         [
@@ -856,7 +870,7 @@ function wcusage_portal_tabs(
             'content-id'      => 'wcu2',
             'label'           => __( 'Monthly Summary', 'woo-coupon-usage' ),
             'icon'            => 'fas fa-calendar-alt',
-            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && wcusage_get_setting_value( 'wcusage_field_show_months_table', '1' ),
+            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && wcusage_get_setting_value( 'wcusage_field_show_months_table', '1' ) && $wcusage_check_tab_roles( 'wcusage_field_tab_roles_monthly' ),
             'custom_name_key' => 'wcusage_field_tab_name_monthly',
         ],
         [
@@ -864,7 +878,7 @@ function wcusage_portal_tabs(
             'content-id'      => 'wcu3',
             'label'           => __( 'Referred Orders', 'woo-coupon-usage' ),
             'icon'            => 'fas fa-shopping-cart',
-            'condition'       => $wcusage_field_show_order_tab && ($option_coupon_orders > 0 || $option_coupon_orders == ''),
+            'condition'       => $wcusage_field_show_order_tab && ($option_coupon_orders > 0 || $option_coupon_orders == '') && $wcusage_check_tab_roles( 'wcusage_field_tab_roles_orders' ),
             'custom_name_key' => 'wcusage_field_tab_name_orders',
         ],
         [
@@ -872,7 +886,7 @@ function wcusage_portal_tabs(
             'content-id'      => 'wcu4',
             'label'           => __( 'Referral URL', 'woo-coupon-usage' ),
             'icon'            => 'fas fa-link',
-            'condition'       => $wcusage_field_urls_enable && $wcusage_field_urls_tab_enable,
+            'condition'       => $wcusage_field_urls_enable && $wcusage_field_urls_tab_enable && $wcusage_check_tab_roles( 'wcusage_field_tab_roles_links' ),
             'custom_name_key' => 'wcusage_field_tab_name_links',
         ],
         [
@@ -880,7 +894,7 @@ function wcusage_portal_tabs(
             'content-id'      => 'wcu7',
             'label'           => __( 'Creatives', 'woo-coupon-usage' ),
             'icon'            => 'fas fa-photo-video',
-            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_creatives_enable && wp_count_posts( 'wcu-creatives' )->publish > 0,
+            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_creatives_enable && wp_count_posts( 'wcu-creatives' )->publish > 0 && $wcusage_check_tab_roles( 'wcusage_field_tab_roles_creatives' ),
             'custom_name_key' => 'wcusage_field_tab_name_creatives',
         ],
         [
@@ -888,7 +902,7 @@ function wcusage_portal_tabs(
             'content-id'      => 'wcu-rates',
             'label'           => __( 'Rates', 'woo-coupon-usage' ),
             'icon'            => 'fa-solid fa-percent',
-            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_rates_enable,
+            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_rates_enable && $wcusage_check_tab_roles( 'wcusage_field_tab_roles_rates' ),
             'custom_name_key' => 'wcusage_field_rates_name',
         ],
         [
@@ -896,7 +910,7 @@ function wcusage_portal_tabs(
             'content-id'      => 'wcu5',
             'label'           => __( 'Payouts', 'woo-coupon-usage' ),
             'icon'            => 'fas fa-money-bill-wave',
-            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_payouts_enable && (!$is_mla_parent || wcusage_check_admin_access()),
+            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_payouts_enable && (!$is_mla_parent || wcusage_check_admin_access()) && $wcusage_check_tab_roles( 'wcusage_field_tab_roles_payouts' ),
             'custom_name_key' => 'wcusage_field_tab_name_payouts',
         ],
         [
@@ -904,7 +918,7 @@ function wcusage_portal_tabs(
             'content-id'      => 'wcubonuses',
             'label'           => __( 'Bonuses', 'woo-coupon-usage' ),
             'icon'            => 'fas fa-gift',
-            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_bonuses_enable && $wcusage_field_bonuses_tab_enable,
+            'condition'       => wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_bonuses_enable && $wcusage_field_bonuses_tab_enable && $wcusage_check_tab_roles( 'wcusage_field_tab_roles_bonuses' ),
             'custom_name_key' => 'wcusage_field_tab_name_bonuses',
         ],
         [
@@ -912,7 +926,7 @@ function wcusage_portal_tabs(
             'content-id'      => 'wcu6',
             'label'           => __( 'Settings', 'woo-coupon-usage' ),
             'icon'            => 'fas fa-cog',
-            'condition'       => is_user_logged_in() && $wcusage_field_show_settings_tab_show && (!$is_mla_parent || wcusage_check_admin_access()),
+            'condition'       => is_user_logged_in() && $wcusage_field_show_settings_tab_show && (!$is_mla_parent || wcusage_check_admin_access()) && $wcusage_check_tab_roles( 'wcusage_field_tab_roles_settings' ),
             'custom_name_key' => 'wcusage_field_tab_name_settings',
         ]
     ];

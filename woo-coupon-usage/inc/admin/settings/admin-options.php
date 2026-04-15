@@ -1192,7 +1192,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
           <?php 
                 if ( !$specialsale ) {
                     ?>
-            <p style="font-size: 12px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;">20% discount code: DASH20</p>
+            <p style="font-size: 12px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;">25% discount code: DASH25</p>
           <?php 
                 } else {
                     ?>

@@ -195,6 +195,10 @@ function wcusage_coupon_disable_commission(  $coupon_id  ) {
  */
 if ( !function_exists( 'wcusage_get_order_totals' ) ) {
     function wcusage_get_order_totals(  $orderid  ) {
+        // Ensure $orderid is an integer ID, not a WC_Order object
+        if ( $orderid instanceof WC_Order ) {
+            $orderid = $orderid->get_id();
+        }
         // Static cache to avoid recalculating totals for the same order
         static $order_totals_cache = array();
         if ( isset( $order_totals_cache[$orderid] ) ) {
@@ -1610,6 +1614,10 @@ if ( !function_exists( 'wcusage_get_order_tax_percent' ) ) {
  */
 if ( !function_exists( 'wcusage_get_total_fees' ) ) {
     function wcusage_get_total_fees(  $orderid  ) {
+        // Ensure $orderid is an integer ID, not a WC_Order object
+        if ( $orderid instanceof WC_Order ) {
+            $orderid = $orderid->get_id();
+        }
         // Static cache to avoid redundant wc_get_order() and fee iteration
         static $fees_cache = array();
         if ( isset( $fees_cache[$orderid] ) ) {
@@ -1649,6 +1657,10 @@ if ( !function_exists( 'wcusage_get_total_fees' ) ) {
  */
 if ( !function_exists( 'wcusage_get_tax_to_remove' ) ) {
     function wcusage_get_tax_to_remove(  $orderid  ) {
+        // Ensure $orderid is an integer ID, not a WC_Order object
+        if ( $orderid instanceof WC_Order ) {
+            $orderid = $orderid->get_id();
+        }
         $order = wc_get_order( $orderid );
         $wcusage_show_tax = wcusage_get_setting_value( 'wcusage_field_show_tax', '0' );
         $taxpercent = wcusage_get_order_tax_percent( $orderid );

@@ -9,11 +9,7 @@ function wcusage_field_cb_custom_tabs( $args )
     $options = get_option( 'wcusage_options' );
     ?>
 
-	<div id="custom-tabs-settings" class="settings-area" <?php
-    if ( !wcu_fs()->can_use_premium_code() ) {
-        ?>title="Available with Pro version." style="pointer-events:none; opacity: 0.6;"<?php
-    }
-    ?> style="display: none;">
+	<div id="custom-tabs-settings" class="settings-area"<?php if ( !wcu_fs()->can_use_premium_code() ) { ?> title="Available with Pro version." style="pointer-events:none; opacity: 0.6;"<?php } ?>>
 
 	<?php
     if ( !wcu_fs()->can_use_premium_code() ) {

@@ -241,6 +241,74 @@ function wcusage_field_cb( $args ) {
         }
       }
 
+      // Helper function to render the "Limit to certain user roles & groups?" UI for a built-in tab
+      if(!function_exists('wcusage_render_tab_role_selector')) {
+        function wcusage_render_tab_role_selector($option_key) {
+          $options = get_option('wcusage_options');
+          ?>
+          <br/>
+          <p class="creative-type-user-role">
+            <label><strong><?php echo esc_html__('Limit to certain user roles & groups?', 'woo-coupon-usage'); ?></strong></label>
+            <br/>
+            <span class="payouts-role-select-wrapper">
+              <span style="height: 50px; width: 250px; overflow-y: auto; display: block; border: 1px solid #ddd; padding: 10px;">
+              <?php
+              $thisid = $option_key;
+              $roles = get_editable_roles();
+              // Re-order: coupon_affiliate roles first
+              $roles2 = array();
+              foreach ($roles as $key => $role) {
+                if (strpos($key, 'coupon_affiliate') !== false) {
+                  $roles2[$key] = $role;
+                  unset($roles[$key]);
+                }
+              }
+              if (isset($options[$thisid])) {
+                $current_selected_roles = $options[$thisid];
+              } else {
+                $current_selected_roles = array();
+              }
+              // Remove any stale roles
+              foreach ($current_selected_roles as $key => $role) {
+                $rolesx = get_editable_roles();
+                if (!isset($rolesx[$key])) {
+                  if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+                    $options_new = get_option('wcusage_options');
+                    if (!is_array($options_new)) { $options_new = array(); }
+                    unset($options_new[$thisid][$key]);
+                    update_option('wcusage_options', $options_new);
+                  }
+                  unset($options[$thisid][$key]);
+                }
+              }
+              $roles2 = array_merge($roles2, $roles);
+              foreach ($roles2 as $key => $role) {
+                $role_name = $role['name'];
+                if (strpos($key, 'coupon_affiliate') !== false) {
+                  $role_name = '(Group) ' . $role_name;
+                }
+                $checked = '';
+                if (isset($options[$thisid][$key])) {
+                  $checked = 'checked';
+                }
+                echo '<span id="' . esc_attr($thisid) . '">
+                <input type="checkbox" checktype="multi"
+                checktypekey="' . esc_attr($key) . '"
+                customid="' . esc_attr($thisid) . '"
+                name="wcusage_options[' . esc_attr($thisid) . '][' . esc_attr($key) . ']"
+                ' . esc_attr($checked) . '> ' . esc_html($role_name) . '</span><br/>';
+              }
+              ?>
+              </span>
+            </span>
+            <i><?php echo esc_html__('The tab will only be visible to affiliates with any of the selected user roles.', 'woo-coupon-usage'); ?></i>
+            <br/>
+            <i><?php echo esc_html__('If no roles are selected, the tab will be visible to all affiliates.', 'woo-coupon-usage'); ?></i>
+          </p>
+          <?php
+        }
+      }
+
       // Helper functions to get settings content for each tab
       if(!function_exists('wcusage_get_statistics_tab_settings')) {
         function wcusage_get_statistics_tab_settings() {
@@ -519,6 +587,7 @@ function wcusage_field_cb( $args ) {
           </div>
           <div style="clear:both;"></div>
           <?php
+          wcusage_render_tab_role_selector('wcusage_field_tab_roles_stats');
           return ob_get_clean();
         }
       }
@@ -627,6 +696,7 @@ function wcusage_field_cb( $args ) {
           <?php wcusage_setting_toggle_option('wcusage_field_show_orders_table_totals', 1, esc_html__( 'Show the combined totals for all orders within the selected date range.', 'woo-coupon-usage' ), '0px'); ?>
           <i><?php echo esc_html__( 'When selected, the totals for all orders within the selected date range will be shown in a new row at the bottom of the recent orders and monthly summary table.', 'woo-coupon-usage' ); ?></i><br/>
           <?php
+          wcusage_render_tab_role_selector('wcusage_field_tab_roles_orders');
           return ob_get_clean();
         }
       }
@@ -651,6 +721,7 @@ function wcusage_field_cb( $args ) {
           </p>
 
           <?php
+          wcusage_render_tab_role_selector('wcusage_field_tab_roles_links');
           return ob_get_clean();
         }
       }
@@ -668,6 +739,7 @@ function wcusage_field_cb( $args ) {
           <?php wcusage_setting_toggle_option('wcusage_field_show_settings_tab_gravatar', 1, esc_html__( 'Show Gravatar in the "Settings" tab.', 'woo-coupon-usage' ), '0px'); ?>
           <i><?php echo esc_html__( 'This will show the Gravatar image and link to edit their gravatar in the "Settings" tab on the affiliate dashboard.', 'woo-coupon-usage' ); ?></i>
           <?php
+          wcusage_render_tab_role_selector('wcusage_field_tab_roles_settings');
           return ob_get_clean();
         }
       }
@@ -711,6 +783,7 @@ function wcusage_field_cb( $args ) {
 
           <?php } ?>
           <?php
+          wcusage_render_tab_role_selector('wcusage_field_tab_roles_monthly');
           return ob_get_clean();
         }
       }
@@ -734,6 +807,7 @@ function wcusage_field_cb( $args ) {
 
           </span>
           <?php
+          wcusage_render_tab_role_selector('wcusage_field_tab_roles_creatives');
           return ob_get_clean();
         }
       }
@@ -895,6 +969,7 @@ function wcusage_field_cb( $args ) {
             <?php wcusage_setting_toggle_option('wcusage_field_rates_show_link', 1, esc_html__( 'Show "Referral Link" Column', 'woo-coupon-usage' ), '0px'); ?>
           </p>
           <?php
+          wcusage_render_tab_role_selector('wcusage_field_tab_roles_rates');
           return ob_get_clean();
         }
       }
@@ -916,6 +991,7 @@ function wcusage_field_cb( $args ) {
           </p>
 
           <?php
+          wcusage_render_tab_role_selector('wcusage_field_tab_roles_bonuses');
           return ob_get_clean();
         }
       }
@@ -930,6 +1006,7 @@ function wcusage_field_cb( $args ) {
             <button class="button" onclick="wcusage_go_to_settings('#tab-payouts', '');"><?php esc_html_e( 'Go to Payouts Settings', 'woo-coupon-usage' ); ?></button>
           </p>
           <?php
+          wcusage_render_tab_role_selector('wcusage_field_tab_roles_payouts');
           return ob_get_clean();
         }
       }

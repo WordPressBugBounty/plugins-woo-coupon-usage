@@ -355,10 +355,13 @@ jQuery(document).ready(function($) {
                 array('label' => 'View Referred Orders', 'url' => admin_url('admin.php?page=wcusage_referrals'), 'icon' => 'fa-solid fa-arrow-right-arrow-left'),
                 array('label' => 'View URL Visits Log', 'url' => admin_url('admin.php?page=wcusage_clicks'), 'icon' => 'fa-solid fa-eye'),
             )),
+            array('label' => 'Reports', 'icon' => 'fa-solid fa-chart-bar', 'url' => '#', 'dropdown' => array(
+                array('label' => 'Admin Reports & Analytics', 'url' => admin_url('admin.php?page=wcusage_admin_reports'), 'icon' => 'fa-solid fa-chart-bar'),
+                array('label' => 'Affiliate Email Reports', 'url' => admin_url('admin.php?page=wcusage_settings&section=tab-reports'), 'icon' => 'fa-solid fa-file-pdf', 'pro_only' => true, 'disabled' => !wcusage_get_setting_value('wcusage_field_enable_reports', '0')),
+            )),
         );
         $other_items = array(
             array('label' => 'Admin Tools', 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
-            array('label' => 'View Admin Reports', 'url' => admin_url('admin.php?page=wcusage_admin_reports'), 'icon' => 'fa-solid fa-chart-bar', 'disabled' => false),
             array('label' => 'Manage Payouts', 'url' => admin_url('admin.php?page=wcusage_payouts'), 'icon' => 'fa-solid fa-money-bill', 'disabled' => true),
             array('label' => 'PDF Statements', 'url' => admin_url('admin.php?page=wcusage_statements'), 'icon' => 'fa-solid fa-file-invoice-dollar', 'disabled' => true),
             array('label' => 'Email Newsletters', 'url' => admin_url('admin.php?page=wcusage_email_newsletters'), 'icon' => 'fa-solid fa-envelope', 'disabled' => true),
