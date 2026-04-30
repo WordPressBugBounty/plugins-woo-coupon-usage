@@ -9,7 +9,7 @@
     max-width: 36px;
     padding: 0;
     vertical-align: middle;
-    text-align: center;
+    text-align: center !important;
 }
 .wcusage-admin-page .wp-list-table .check-column input[type="checkbox"] {
     margin: 0 auto !important;

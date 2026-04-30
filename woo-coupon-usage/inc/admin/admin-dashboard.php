@@ -316,7 +316,12 @@ jQuery(document).ready(function($) {
                 'label' => 'Performance Bonuses',
                 'url' => admin_url('edit.php?post_type=wcu-bonuses'),
                 'icon' => 'fa-solid fa-bolt',
-                'disabled' => !(wcusage_get_setting_value('wcusage_field_bonuses_enable', '0') && wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_meta', '1'))
+                'disabled' => !(wcusage_get_setting_value('wcusage_field_bonuses_enable', '0') && wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_meta', '1')),
+                'dropdown' => array(
+                    array('label' => 'View Bonuses / Rewards', 'url' => admin_url('edit.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-bolt'),
+                    array('label' => 'Add New Bonus / Reward', 'url' => admin_url('post-new.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-plus'),
+                    array('label' => 'Rewards Log', 'url' => admin_url('admin.php?page=wcusage_rewards_log'), 'icon' => 'fa-solid fa-clock-rotate-left'),
+                ),
             ),
             array(
                 'label' => 'Direct Link Domains',
@@ -385,6 +390,7 @@ jQuery(document).ready(function($) {
             <?php
             // Get current page for active menu styling
             $current_page = isset($_GET['page']) ? sanitize_text_field($_GET['page']) : '';
+            $current_post_type = isset($_GET['post_type']) ? sanitize_text_field($_GET['post_type']) : '';
             // Map pages that should force a specific top-level parent to be highlighted
             // Key = current page slug, Value = parent top-level page slug to highlight
             // Example: On "Add New Affiliate" page, only "Affiliates" should be active (not "Coupons").
@@ -398,41 +404,48 @@ jQuery(document).ready(function($) {
                 // Extract ?page= value from menu item url
                 preg_match('/[?&]page=([^&]+)/', $item['url'], $matches);
                 $item_page = isset($matches[1]) ? $matches[1] : '';
+                // Extract ?post_type= value from menu item url
+                preg_match('/[?&]post_type=([^&]+)/', $item['url'], $pt_matches);
+                $item_post_type = isset($pt_matches[1]) ? $pt_matches[1] : '';
+                // Helper: does this item (or one of its dropdown children) match the current page?
+                $item_matches_current = false;
+                if ( !empty($item_page) && $item_page === $current_page ) {
+                    $item_matches_current = true;
+                } elseif ( !empty($item_post_type) && $item_post_type === $current_post_type && empty($current_page) ) {
+                    $item_matches_current = true;
+                }
+                $sub_matches_current = false;
+                if ( !empty($item['dropdown']) ) {
+                    foreach ( $item['dropdown'] as $subitem ) {
+                        preg_match('/[?&]page=([^&]+)/', $subitem['url'], $submatches);
+                        $sub_page = isset($submatches[1]) ? $submatches[1] : '';
+                        preg_match('/[?&]post_type=([^&]+)/', $subitem['url'], $sub_pt_matches);
+                        $sub_post_type = isset($sub_pt_matches[1]) ? $sub_pt_matches[1] : '';
+                        if ( !empty($sub_page) && $sub_page === $current_page ) {
+                            $sub_matches_current = $sub_page;
+                            break;
+                        } elseif ( !empty($sub_post_type) && $sub_post_type === $current_post_type && empty($current_page) ) {
+                            $sub_matches_current = $sub_post_type;
+                            break;
+                        }
+                    }
+                }
                 // If a forced parent is defined for the current page, only that parent should be highlighted
                 if (!empty($forced_parent)) {
                     if ($item_page === $forced_parent) {
-                        // Highlight if the parent itself or any of its dropdown items match current page
-                        if ($item_page === $current_page) {
+                        if ($item_matches_current || $sub_matches_current) {
                             $is_active = true;
-                        } elseif (!empty($item['dropdown'])) {
-                            foreach ($item['dropdown'] as $subitem) {
-                                preg_match('/[?&]page=([^&]+)/', $subitem['url'], $submatches);
-                                $sub_page = isset($submatches[1]) ? $submatches[1] : '';
-                                if ($sub_page === $current_page) {
-                                    $is_active = true;
-                                    $active_sub = $sub_page;
-                                    break;
-                                }
-                            }
+                            $active_sub = $sub_matches_current ?: false;
                         }
                     } else {
-                        // Different parent: never mark active even if a dropdown contains the current page
                         $is_active = false;
                     }
                 } else {
-                    // Default behaviour: mark active on exact match or if any dropdown item matches
-                    if ($item_page === $current_page) {
+                    if ($item_matches_current) {
                         $is_active = true;
-                    } elseif (!empty($item['dropdown'])) {
-                        foreach ($item['dropdown'] as $subitem) {
-                            preg_match('/[?&]page=([^&]+)/', $subitem['url'], $submatches);
-                            $sub_page = isset($submatches[1]) ? $submatches[1] : '';
-                            if ($sub_page === $current_page) {
-                                $is_active = true;
-                                $active_sub = $sub_page;
-                                break;
-                            }
-                        }
+                    } elseif ($sub_matches_current) {
+                        $is_active = true;
+                        $active_sub = $sub_matches_current;
                     }
                 }
                 if (!empty($item['dropdown'])): ?>

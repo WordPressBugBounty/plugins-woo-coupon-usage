@@ -9,7 +9,7 @@ td.column-action1 button[name="submitregisterdelete"] {
   box-sizing: border-box;
   margin-bottom: 8px;
   text-align: center;
-  font-size: 13px; /* reset in case parent is adjusted */
+  font-size: 14px; /* reset in case parent is adjusted */
 }
 
 /* Icon vertical alignment — nudge icons to sit on the text baseline */

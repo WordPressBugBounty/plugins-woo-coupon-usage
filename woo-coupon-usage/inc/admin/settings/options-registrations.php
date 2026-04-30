@@ -1362,7 +1362,7 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
     </script>
 
     <?php
-    $nonce = $_GET['_wpnonce'];
+    $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
     if(isset($_GET['coupon_type']) && isset($_GET['coupon_discount']) && wp_verify_nonce($nonce, 'generate_coupon')) {
 
       // Get coupon code and discount from the URL parameters

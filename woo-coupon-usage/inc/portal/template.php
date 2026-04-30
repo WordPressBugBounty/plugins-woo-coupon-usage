@@ -244,6 +244,9 @@ $tab_hover_color = wcusage_get_setting_value( 'wcusage_field_color_tab_hover', '
 $tab_hover_font_color = wcusage_get_setting_value( 'wcusage_field_color_tab_hover_font', 'white' );
 // Get portal title and footer text
 $wcusage_portal_title = wcusage_get_setting_value( 'wcusage_portal_title', __( 'Affiliate Portal', 'woo-coupon-usage' ) );
+$wcusage_portal_meta_description = apply_filters( 'wcusage_portal_meta_description', __( 'Access your affiliate portal to view your referral statistics, commission, payouts, and affiliate resources.', 'woo-coupon-usage' ), $wcusage_portal_title );
+$wcusage_portal_meta_description = wp_strip_all_tags( htmlspecialchars_decode( $wcusage_portal_meta_description ) );
+$wcusage_portal_url = home_url( '/' . wcusage_get_setting_value( 'wcusage_portal_slug', 'affiliate-portal' ) . '/' );
 $portal_footer_text = wcusage_get_setting_value( 'wcusage_portal_footer_text', '' );
 // Convert to html entities
 $portal_footer_text = htmlspecialchars_decode( $portal_footer_text );
@@ -266,10 +269,26 @@ do_action( 'wcusage_portal_hook_before_head' );
     <title><?php 
 echo esc_html( $wcusage_portal_title );
 ?></title>
-    <?php 
-wp_head();
-// Include necessary WordPress head scripts
-?>
+    <meta name="description" content="<?php 
+echo esc_attr( $wcusage_portal_meta_description );
+?>">
+    <meta property="og:title" content="<?php 
+echo esc_attr( $wcusage_portal_title );
+?>">
+    <meta property="og:description" content="<?php 
+echo esc_attr( $wcusage_portal_meta_description );
+?>">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?php 
+echo esc_url( $wcusage_portal_url );
+?>">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="<?php 
+echo esc_attr( $wcusage_portal_title );
+?>">
+    <meta name="twitter:description" content="<?php 
+echo esc_attr( $wcusage_portal_meta_description );
+?>">
 
     <?php 
 // Apply selected primary font to the portal via CSS variable
@@ -283,26 +302,31 @@ if ( !empty( $wcusage_portal_font_family ) ) {
         echo '<style id="wcusage-portal-font">:root{--primary-font: ' . esc_html( $safe_font_family ) . ';}</style>';
     }
 }
-// Unenqueue any stylesheets from the sites theme
+// Unenqueue any stylesheets from the site's theme before wp_head() prints them.
 $theme = wp_get_theme();
-$theme_name = $theme->get( 'Name' );
-$theme_name = strtolower( $theme_name );
-// Get all enqueued styles
+$theme_name = strtolower( $theme->get( 'Name' ) );
+$theme_template_uri = strtolower( get_template_directory_uri() );
+$theme_stylesheet_uri = strtolower( get_stylesheet_directory_uri() );
 global $wp_styles;
-$styles = $wp_styles->queue;
+$styles = ( isset( $wp_styles->queue ) ? $wp_styles->queue : array() );
 foreach ( $styles as $style ) {
-    $style_obj = $wp_styles->registered[$style];
-    $style_handle = $style_obj->handle;
-    $style_src = $style_obj->src;
-    $style_src = strtolower( $style_src );
-    // Don't dequeue our Font Awesome or portal styles
-    if ( $style_handle === 'wcusage-portal-font-awesome' || $style_handle === 'wcusage-portal-css' || $style_handle === 'woo-coupon-usage-style' ) {
+    if ( empty( $wp_styles->registered[$style] ) ) {
         continue;
     }
-    if ( strpos( $style_src, $theme_name ) !== false || strpos( $style_src, 'woocommerce' ) !== false || strpos( $style_src, 'wc-' ) !== false || strpos( $style_src, 'global-styles' ) !== false || strpos( $style_src, 'global' ) !== false ) {
+    $style_obj = $wp_styles->registered[$style];
+    $style_handle = $style_obj->handle;
+    $style_src = strtolower( (string) $style_obj->src );
+    if ( $style_handle === 'wcusage-portal-font-awesome' || $style_handle === 'wcusage-portal-css' || $style_handle === 'woo-coupon-usage-style' || strpos( $style_handle, 'wcusage' ) === 0 || strpos( $style_handle, 'woo-coupon-usage' ) === 0 ) {
+        continue;
+    }
+    if ( strpos( $style_src, $theme_name ) !== false || strpos( $style_src, $theme_template_uri ) !== false || strpos( $style_src, $theme_stylesheet_uri ) !== false || strpos( $style_src, '/themes/' ) !== false || strpos( $style_src, 'woocommerce' ) !== false || strpos( $style_src, 'wc-' ) !== false || strpos( $style_src, 'global-styles' ) !== false || strpos( $style_src, 'global' ) !== false ) {
         wp_dequeue_style( $style_handle );
     }
 }
+?>
+    <?php 
+wp_head();
+// Include necessary WordPress head scripts
 ?>
 </head>
 <?php 
@@ -824,7 +848,8 @@ function wcusage_portal_tabs(
     $is_mla_parent,
     $force_refresh_stats
 ) {
-    $options = get_option( 'wcusage_options' );
+    $options = get_option( 'wcusage_options', array() );
+    $options = ( is_array( $options ) ? $options : array() );
     $custom_order = ( isset( $options['wcusage_dashboard_tabs_layout'] ) ? $options['wcusage_dashboard_tabs_layout'] : '' );
     $show_tabs_icons = wcusage_get_setting_value( 'wcusage_field_show_tabs_icons', '1' );
     // Helper: check whether the current user passes the role restriction for a built-in tab.
@@ -959,8 +984,15 @@ function wcusage_portal_tabs(
             if ( isset( $options['wcusage_field_custom_tabs'][$i]['name'] ) ) {
                 $custom_tab_name = $options['wcusage_field_custom_tabs'][$i]['name'];
                 if ( !$hide && $custom_tab_name ) {
-                    $custom_icon = $options['wcusage_field_custom_tabs_icon_' . $i];
-                    $custom_icon = ( $custom_icon ? 'fas fa-' . $custom_icon : '' );
+                    $legacy_icon = ( isset( $options['wcusage_field_custom_tabs'][$i]['icon'] ) ? $options['wcusage_field_custom_tabs'][$i]['icon'] : '' );
+                    $custom_icon = ( isset( $options['wcusage_field_custom_tabs_icon_' . $i] ) ? $options['wcusage_field_custom_tabs_icon_' . $i] : $legacy_icon );
+                    $custom_icon = trim( $custom_icon );
+                    $custom_icon = preg_replace( '/[^a-zA-Z0-9\\-\\_\\s]/', '', $custom_icon );
+                    if ( $custom_icon && strpos( $custom_icon, 'fa-' ) === false ) {
+                        $custom_icon = 'fas fa-' . $custom_icon;
+                    } elseif ( $custom_icon && strpos( $custom_icon, ' fa-' ) === false ) {
+                        $custom_icon = 'fas ' . $custom_icon;
+                    }
                     $legacy_external = ( isset( $options['wcusage_field_custom_tabs'][$i]['external'] ) ? $options['wcusage_field_custom_tabs'][$i]['external'] : '' );
                     $custom_external = wcusage_get_setting_value( 'wcusage_field_custom_tabs_external_' . $i, $legacy_external );
                     $legacy_external_url = ( isset( $options['wcusage_field_custom_tabs'][$i]['external_url'] ) ? $options['wcusage_field_custom_tabs'][$i]['external_url'] : '' );

@@ -135,6 +135,40 @@ if( !function_exists( 'wcusage_get_coupon_shortcode_page' ) ) {
 }
 
 /**
+ * Get admin preview URL for an affiliate dashboard.
+ *
+ * @param int $user_id
+ *
+ * @return string
+ */
+if( !function_exists( 'wcusage_get_affiliate_dashboard_preview_url' ) ) {
+	function wcusage_get_affiliate_dashboard_preview_url($user_id) {
+
+		$user_id = intval($user_id);
+		if(!$user_id) {
+			return '';
+		}
+
+		$preview_nonce = wp_create_nonce('wcusage_preview_affiliate_' . $user_id);
+		$dashboard_url = wcusage_get_coupon_shortcode_page(1, 0);
+
+		if(!$dashboard_url) {
+			$portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+			$dashboard_url = home_url('/' . $portal_slug . '/?');
+		}
+
+		return add_query_arg(
+			array(
+				'userid' => $user_id,
+				'preview_nonce' => $preview_nonce,
+			),
+			$dashboard_url
+		);
+
+	}
+}
+
+/**
  * Get Coupon Shortcode Page ID
  *
  * @return int

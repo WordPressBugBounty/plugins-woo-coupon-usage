@@ -89,6 +89,13 @@ function wcusage_ajax_submit_registration() {
             'message' => 'This email address is already registered. Please try again or login.',
         ) );
     }
+    // External validation hook
+    $external_errors = apply_filters( 'wcusage_register_form_validation_errors', array(), $_POST );
+    if ( !empty( $external_errors ) ) {
+        wp_send_json_error( array(
+            'message' => sanitize_text_field( $external_errors[0] ),
+        ) );
+    }
     // Captcha validation (if applicable)
     $captchaverify = wcusage_registration_form_verify_captcha( 0 );
     if ( !$captchaverify ) {
@@ -117,6 +124,11 @@ function wcusage_ajax_submit_registration() {
         if ( is_wp_error( $new_affiliate_user ) ) {
             wp_send_json_error( array(
                 'message' => 'Failed to create user: ' . $new_affiliate_user->get_error_message(),
+            ) );
+        }
+        if ( empty( $new_affiliate_user ) || !isset( $new_affiliate_user['userid'] ) || !$new_affiliate_user['userid'] ) {
+            wp_send_json_error( array(
+                'message' => esc_html__( 'Failed to create user account. Please try again.', 'woo-coupon-usage' ),
             ) );
         }
         $userid = $new_affiliate_user['userid'];

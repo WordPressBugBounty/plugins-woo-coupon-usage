@@ -64,14 +64,14 @@ function wcusage_is_affiliate_page_quick() {
     }
 
     $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
-    // If page URL slug matches portal slug
-    if ($page_slug === $wcusage_portal_slug) {
+    // If page URL slug matches portal slug (case-insensitive)
+    if ( strtolower( $page_slug ) === strtolower( $wcusage_portal_slug ) ) {
         return true;
     }
 
     $wcusage_mla_portal_slug = wcusage_get_setting_value('wcusage_mla_portal_slug', 'mla-affiliate-portal');
-    // If page URL slug matches MLA portal slug
-    if ($page_slug === $wcusage_mla_portal_slug) {
+    // If page URL slug matches MLA portal slug (case-insensitive)
+    if ( strtolower( $page_slug ) === strtolower( $wcusage_mla_portal_slug ) ) {
         return true;
     }
 

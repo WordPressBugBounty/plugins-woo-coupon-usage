@@ -32,8 +32,6 @@ function wcusage_render_pagination($type, $page, $per_page, $total) {
 // Referrals table
 if (!function_exists('wcusage_affiliate_referrals_table')) {
 function wcusage_affiliate_referrals_table($user_id, $page = 1, $per_page = 20, $start_date = '', $end_date = '') {
-    global $wpdb;
-
     $coupons = wcusage_get_users_coupons_ids($user_id);
     if (empty($coupons)) {
         echo '<p>' . esc_html__('No coupons assigned to this affiliate.', 'woo-coupon-usage') . '</p>';
@@ -52,51 +50,39 @@ function wcusage_affiliate_referrals_table($user_id, $page = 1, $per_page = 20, 
         return;
     }
 
-    $placeholders = array_fill(0, count($coupon_codes), '%s');
-    $in_clause = '(' . implode(',', $placeholders) . ')';
-
-    $statuses = wc_get_order_statuses();
-    if (isset($statuses['wc-refunded'])) {
-        unset($statuses['wc-refunded']);
-    }
-
-    $where_date = '';
-    $params = $coupon_codes;
-    if (!empty($start_date)) {
-        $where_date .= " AND p.post_date >= %s";
-        $params[] = $start_date . ' 00:00:00';
-    }
-    if (!empty($end_date)) {
-        $where_date .= " AND p.post_date <= %s";
-        $params[] = $end_date . ' 23:59:59';
-    }
-
     $page = max(1, intval($page));
     $per_page = max(1, intval($per_page));
     $offset = ($page - 1) * $per_page;
 
-    $count_sql = $wpdb->prepare(
-        "SELECT COUNT(DISTINCT p.ID)
-         FROM {$wpdb->prefix}posts AS p
-         INNER JOIN {$wpdb->prefix}woocommerce_order_items AS woi
-            ON p.ID = woi.order_id AND woi.order_item_type = 'coupon' AND woi.order_item_name IN $in_clause
-         WHERE p.post_type = 'shop_order'
-           AND p.post_status IN ('" . implode("','", array_keys($statuses)) . "')" . $where_date,
-        $params
-    ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $total = intval($wpdb->get_var($count_sql)); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $orders_by_id = array();
+    foreach ($coupon_codes as $coupon_code) {
+        $coupon_orders = wcusage_wh_getOrderbyCouponCode($coupon_code, $start_date, $end_date ? $end_date : date('Y-m-d'), '', 1);
+        if (!is_array($coupon_orders)) {
+            continue;
+        }
+        foreach ($coupon_orders as $coupon_order) {
+            if (is_array($coupon_order) && !empty($coupon_order['order_id'])) {
+                $orders_by_id[$coupon_order['order_id']] = $coupon_order['order_id'];
+            }
+        }
+    }
 
-    $list_sql = $wpdb->prepare(
-        "SELECT DISTINCT p.ID AS order_id, p.post_date AS order_date
-        FROM {$wpdb->prefix}posts AS p
-        INNER JOIN {$wpdb->prefix}woocommerce_order_items AS woi
-            ON p.ID = woi.order_id AND woi.order_item_type = 'coupon' AND woi.order_item_name IN $in_clause
-        WHERE p.post_type = 'shop_order'
-        AND p.post_status IN ('" . implode("','", array_keys($statuses)) . "')" . $where_date .
-        " ORDER BY p.post_date DESC LIMIT %d OFFSET %d",
-        array_merge($params, array($per_page, $offset))
-    ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $orders = $wpdb->get_results($list_sql); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $all_orders = array();
+    foreach ($orders_by_id as $order_id) {
+        $order = wc_get_order($order_id);
+        if ($order) {
+            $all_orders[] = $order;
+        }
+    }
+
+    usort($all_orders, function($a, $b) {
+        $a_date = $a->get_date_created() ? $a->get_date_created()->getTimestamp() : 0;
+        $b_date = $b->get_date_created() ? $b->get_date_created()->getTimestamp() : 0;
+        return $b_date - $a_date;
+    });
+
+    $total = count($all_orders);
+    $orders = array_slice($all_orders, $offset, $per_page);
 
     if (empty($orders)) {
         echo '<p>' . esc_html__('No recent referrals found for this affiliate\'s coupons. This could mean that the assigned coupons have not been used in any orders yet, or the orders are still pending.', 'woo-coupon-usage') . '</p>';
@@ -116,19 +102,25 @@ function wcusage_affiliate_referrals_table($user_id, $page = 1, $per_page = 20, 
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($orders as $order_data): ?>
+            <?php foreach ($orders as $order): ?>
                 <?php
-                $order_id = $order_data->order_id;
-                $order = wc_get_order($order_id);
-                if (!$order) continue;
+                $order_id = $order->get_id();
                 $commission = wcusage_order_meta($order_id, 'wcusage_total_commission');
                 $billing_first_name = $order->get_billing_first_name();
                 $billing_last_name = $order->get_billing_last_name();
                 $customer_name = trim($billing_first_name . ' ' . $billing_last_name);
                 if (empty($customer_name)) { $customer_name = esc_html__('Guest', 'woo-coupon-usage'); }
                 $coupon_code = '';
+                $lifetime_coupon = wcusage_order_meta($order_id, 'lifetime_affiliate_coupon_referrer');
+                $referrer_coupon = wcusage_order_meta($order_id, 'wcusage_referrer_coupon');
                 $used_coupons = $order->get_coupon_codes();
-                if (!empty($used_coupons)) { $coupon_code = $used_coupons[0]; }
+                if ($lifetime_coupon) {
+                    $coupon_code = $lifetime_coupon;
+                } elseif ($referrer_coupon) {
+                    $coupon_code = $referrer_coupon;
+                } elseif (!empty($used_coupons)) {
+                    $coupon_code = $used_coupons[0];
+                }
                 ?>
                 <tr>
                     <td><a href="<?php echo esc_url(admin_url('post.php?post=' . $order_id . '&action=edit')); ?>">#<?php echo esc_html($order_id); ?></a></td>
@@ -137,7 +129,19 @@ function wcusage_affiliate_referrals_table($user_id, $page = 1, $per_page = 20, 
                     <td><?php echo esc_html($coupon_code); ?></td>
                     <td><?php echo wp_kses_post(wcusage_format_price($order->get_total())); ?></td>
                     <td><?php echo wp_kses_post(wcusage_format_price($commission)); ?></td>
-                    <td><?php echo esc_html(wc_get_order_status_name($order->get_status())); ?></td>
+                    <td><?php
+                        $order_status = $order->get_status();
+                        $order_status_class = '';
+                        switch ( $order_status ) {
+                            case 'completed': $order_status_class = 'status-completed'; break;
+                            case 'processing': $order_status_class = 'status-processing'; break;
+                            case 'on-hold': $order_status_class = 'status-on-hold'; break;
+                            case 'cancelled':
+                            case 'refunded':
+                            case 'failed': $order_status_class = 'status-cancelled'; break;
+                            default: $order_status_class = 'status-processing'; break;
+                        }
+                        ?><span class="order-status <?php echo esc_attr($order_status_class); ?>"><?php echo esc_html(wc_get_order_status_name($order_status)); ?></span></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>

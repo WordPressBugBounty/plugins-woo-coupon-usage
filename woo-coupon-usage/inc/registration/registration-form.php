@@ -508,6 +508,10 @@ function wcusage_couponusage_register(  $atts  ) {
             <div style="clear: both;"></div>
 
             <?php 
+                        do_action( 'wcusage_register_form_before_submit' );
+                        ?>
+
+            <?php 
                         $submit_button_text = wcusage_get_setting_value( 'wcusage_field_registration_submit_button_text', '' );
                         if ( !$submit_button_text ) {
                             $submit_button_text = esc_html__( 'Submit Application', 'woo-coupon-usage' );
@@ -805,6 +809,12 @@ function wcusage_post_submit_application(  $adminpost  ) {
     $captchaverify = wcusage_registration_form_verify_captcha( $adminpost );
     if ( isset( $_POST['submitaffiliateapplication'] ) ) {
         do_action( 'wcusage_hook_registration_form_submitted' );
+    }
+    // External validation hook
+    $external_errors = apply_filters( 'wcusage_register_form_validation_errors', array(), $_POST );
+    if ( !empty( $external_errors ) ) {
+        echo "<p style='color: red; font-weight: bold;'>" . esc_html( $external_errors[0] ) . "</p>";
+        return;
     }
     if ( !$enable_captcha || ($captcha_checked || $captchaverify) ) {
         // clear the session
@@ -1111,6 +1121,8 @@ function wcusage_register_verify(  $post_field_values  ) {
         $output = "<p style='color: red; font-weight: bold;'>" . esc_html__( 'This user does not exist, please enter a valid user, or enter an email address to create a new account.', 'woo-coupon-usage' ) . "</p>";
     } elseif ( $field_password_confirm && $password != $password_confirm ) {
         $output = "<p style='color: red; font-weight: bold;'>" . esc_html__( 'The passwords do not match. Please try again.', 'woo-coupon-usage' ) . "</p>";
+    } elseif ( !is_admin() && !wcusage_registration_coupon_available( $couponcode ) ) {
+        $output = "<p style='color: red; font-weight: bold;'>" . sprintf( esc_html__( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ), esc_html( $couponcode ) ) . "</p>";
     } else {
         $output = "";
     }

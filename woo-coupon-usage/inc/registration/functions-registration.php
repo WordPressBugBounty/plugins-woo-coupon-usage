@@ -17,7 +17,7 @@ function wcusage_install_register_tables() {
     }
     if ( !$installed_ver || $installed_ver != $wcusage_register_db_version ) {
         $table_name = $wpdb->prefix . 'wcusage_register';
-        $sql = "CREATE TABLE {$table_name} (\r\n\t\t\tid bigint NOT NULL AUTO_INCREMENT,\r\n\t\t\tuserid bigint NOT NULL,\r\n      couponcode text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      promote text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      referrer text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      website text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      status text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      type text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      info text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n\t\t\tdate datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\r\n\t\t\tdateaccepted datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\r\n\t\t\tPRIMARY KEY  (id)\r\n\t\t);";
+        $sql = "CREATE TABLE {$table_name} (\r\n\t\t\tid bigint NOT NULL AUTO_INCREMENT,\r\n\t\t\tuserid bigint NOT NULL,\r\n      couponcode text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      promote text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      referrer text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      website text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      status text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      type text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      info text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n\t\t\tdate datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\r\n\t\t\tdateaccepted datetime DEFAULT NULL,\r\n\t\t\tPRIMARY KEY  (id)\r\n\t\t);";
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta( $sql );
         update_option( "wcusage_register_db_version", $wcusage_register_db_version );
@@ -33,9 +33,29 @@ function wcusage_update_register_db_check() {
     if ( get_site_option( 'wcusage_register_db_version' ) != $wcusage_register_db_version ) {
         wcusage_install_register_tables();
     }
+    wcusage_migrate_register_dateaccepted_column();
 }
 
 add_action( 'plugins_loaded', 'wcusage_update_register_db_check' );
+/**
+ * One-time migration: ensure the dateaccepted column allows NULL.
+ * dbDelta() cannot remove NOT NULL constraints on existing columns, so we
+ * use an explicit ALTER TABLE guarded by a flag option.
+ */
+function wcusage_migrate_register_dateaccepted_column() {
+    if ( get_option( 'wcusage_register_dateaccepted_nullable' ) ) {
+        return;
+    }
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'wcusage_register';
+    if ( $wpdb->get_var( "SHOW TABLES LIKE '{$table_name}'" ) !== $table_name ) {
+        return;
+    }
+    $wpdb->query( "ALTER TABLE {$table_name} MODIFY COLUMN dateaccepted datetime DEFAULT NULL" );
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    update_option( 'wcusage_register_dateaccepted_nullable', '1' );
+}
+
 /**
  * Install data into registration table
  *
@@ -84,7 +104,7 @@ function wcusage_install_register_data(
         return $last_id;
     }
     // Insert data
-    $wpdb->insert( $table_name, array(
+    $insert_result = $wpdb->insert( $table_name, array(
         'userid'       => $userid,
         'couponcode'   => $couponcode,
         'promote'      => $promote,
@@ -94,8 +114,12 @@ function wcusage_install_register_data(
         'info'         => $info,
         'status'       => 'pending',
         'date'         => current_time( 'mysql' ),
-        'dateaccepted' => '',
+        'dateaccepted' => null,
     ) );
+    if ( $insert_result === false ) {
+        error_log( 'CA: wcusage_install_register_data() DB insert failed for user ID ' . $userid . ': ' . $wpdb->last_error );
+        return false;
+    }
     $last_id = $wpdb->insert_id;
     // Activity Log
     $user_info = get_userdata( $userid );

@@ -656,6 +656,33 @@
     text-decoration: none;
 }
 
+/* Style the native WP "Add New" page-title-action button on plugin CPT pages to match .wcusage-settings-button */
+body.wcusage-admin-page .page-title-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid #2271b1;
+    border-radius: 8px;
+    padding: 6px 16px;
+    font-size: 13px;
+    line-height: 20px;
+    background: #f6f7f7;
+    color: #2271b1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+body.wcusage-admin-page .page-title-action:hover {
+    background: #e8f0f8;
+    border-color: #135e96;
+    color: #135e96;
+    box-shadow: 0 2px 4px rgba(34,113,177,0.15);
+    text-decoration: none;
+}
+
 .plugin-setup-settings .bar-container {
     width: fit-content;
     margin: 20px auto 90px auto;
@@ -808,6 +835,11 @@
 .wcusage-admin-page, .plugin-settings, .wcusage-settings, .wcusage-tools {
     margin: 10px 20px 0 12px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Remove the extra margin on CPT pages where wcusage-admin-page is on <body> */
+body.wcusage-admin-page {
+    margin: 0;
 }
 
 /* ===== SHARED PAGE HEADER PATTERN ===== */
@@ -991,9 +1023,10 @@
     border-radius: 6px;
     cursor: pointer;
     display: block;
-    margin: 6px auto;
-    padding: 6px 12px;
-    font-size: 13px;
+    margin: 7px auto;
+    padding: 7px 12px;
+    font-size: 14px;
+    line-height: 24px;
     min-width: 148px;
     transition: all 0.15s ease;
 }
@@ -1731,7 +1764,7 @@ td.column-wcu_order_affiliate_coupon {
     max-width: 36px;
     padding: 0 !important;
     vertical-align: middle;
-    text-align: center;
+    text-align: center !important;
 }
 .wcusage-admin-page .wp-list-table .check-column input[type="checkbox"] {
     margin: 0 auto !important;
@@ -1753,8 +1786,11 @@ td.column-wcu_order_affiliate_coupon {
 
 /* ===== MODERN ADMIN BUTTONS ===== */
 /* Primary action button — used on admin pages */
+/* body.wcusage-admin-page variant has higher specificity (type selector) to beat .wp-core-ui rules when the class is on <body> (CPT pages) */
 .wcusage-admin-page .button-primary,
-.wcusage-admin-page input[type="submit"].button-primary {
+.wcusage-admin-page input[type="submit"].button-primary,
+body.wcusage-admin-page .button-primary,
+body.wcusage-admin-page input[type="submit"].button-primary {
     background: linear-gradient(135deg, #2271b1, #135e96);
     border-color: #135e96;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
@@ -1763,7 +1799,9 @@ td.column-wcu_order_affiliate_coupon {
 }
 
 .wcusage-admin-page .button-primary:hover,
-.wcusage-admin-page input[type="submit"].button-primary:hover {
+.wcusage-admin-page input[type="submit"].button-primary:hover,
+body.wcusage-admin-page .button-primary:hover,
+body.wcusage-admin-page input[type="submit"].button-primary:hover {
     background: linear-gradient(135deg, #135e96, #0a4b78);
     border-color: #0a4b78;
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
@@ -1771,7 +1809,9 @@ td.column-wcu_order_affiliate_coupon {
 
 /* Secondary button — standard WP .button */
 .wcusage-admin-page .button:not(.button-primary),
-.wcusage-admin-page input[type="submit"].button:not(.button-primary) {
+.wcusage-admin-page input[type="submit"].button:not(.button-primary),
+body.wcusage-admin-page .button:not(.button-primary),
+body.wcusage-admin-page input[type="submit"].button:not(.button-primary) {
     border: 1px solid #d0d5dd;
     border-radius: 6px;
     color: #374151;
@@ -1780,7 +1820,9 @@ td.column-wcu_order_affiliate_coupon {
 }
 
 .wcusage-admin-page .button:not(.button-primary):hover,
-.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
+.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover,
+body.wcusage-admin-page .button:not(.button-primary):hover,
+body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
     border-color: #2271b1;
     color: #2271b1;
     background: #f9fafb;

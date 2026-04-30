@@ -400,7 +400,7 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                     $refresh,
                     $force_update
                 );
-                if ( $order instanceof WC_Order && !empty( $order->get_refunds() ) && is_numeric( $order->get_refunds() ) && sizeof( $order->get_refunds() ) > 0 ) {
+                if ( $order instanceof WC_Order && !empty( $order->get_refunds() ) && is_array( $order->get_refunds() ) && sizeof( $order->get_refunds() ) > 0 ) {
                     $wcusage_get_order_calculate_data_refunds = wcusage_get_order_calculate_data(
                         $orderid,
                         $coupon_code,

@@ -56,6 +56,17 @@ function wcusage_add_affiliate_portal_query_var($vars) {
     return $vars;
 }
 
+// Prevent WordPress from treating the virtual affiliate portal URL as a 404 page.
+add_filter('pre_handle_404', 'wcusage_prevent_affiliate_portal_404', 10, 2);
+function wcusage_prevent_affiliate_portal_404($preempt, $wp_query) {
+    if($wp_query->get('affiliate_portal')) {
+        status_header(200);
+        $wp_query->is_404 = false;
+        return true;
+    }
+    return $preempt;
+}
+
 // Flush rewrite rules on plugin activation
 register_activation_hook(__FILE__, 'wcusage_flush_rewrite_rules1');
 function wcusage_flush_rewrite_rules1() {
@@ -79,17 +90,3 @@ function wcusage_load_affiliate_portal_template($template) {
     }
     return $template;
 }
-
-// Debug final template and override if necessary
-add_action('wp', function () {
-    if (get_query_var('affiliate_portal')) {
-        global $wp_query;
-        $current_template = get_template();
-        // If template isn’t ours, force it
-        $custom_template = plugin_dir_path(__FILE__) . 'template.php';
-        if (file_exists($custom_template) && $current_template !== $custom_template) {
-            include $custom_template;
-            exit; // Stop further processing
-        }
-    }
-}, PHP_INT_MAX);

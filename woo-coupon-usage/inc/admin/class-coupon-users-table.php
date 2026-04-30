@@ -634,7 +634,7 @@ function wcusage_coupon_users_page() {
 
         <?php do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
 
-		<h2 class="wp-heading-inline wcusage-admin-title">
+		<h1 class="wp-heading-inline wcusage-admin-title">
         <?php echo sprintf(esc_html__('Coupon %s Users', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )))); ?>
         <span class="wcusage-admin-title-buttons">
             <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New <?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?> <span class="fa-solid fa-circle-arrow-right"></span></a>

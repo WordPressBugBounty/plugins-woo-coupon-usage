@@ -141,7 +141,7 @@ if ( !function_exists( 'wcusage_tab_latest_orders' ) ) {
                 $sql_start_date = ( $is_alltime ? '' : $wcu_orders_start );
                 // For paginated date-range requests (page 2+), try cached orders first
                 if ( $wcu_orders_start && $page > 1 ) {
-                    $cache_key = 'wcu_orders_' . md5( $coupon_code . $wcu_orders_start . $wcu_orders_end . $option_coupon_orders );
+                    $cache_key = 'wcu_orders_' . md5( $coupon_code . $wcu_orders_start . $wcu_orders_end . $option_coupon_orders . $show_status );
                     $orders = get_transient( $cache_key );
                 }
                 if ( !$orders || !is_array( $orders ) ) {
@@ -150,12 +150,15 @@ if ( !function_exists( 'wcusage_tab_latest_orders' ) ) {
                         $sql_start_date,
                         $wcu_orders_end,
                         $query_limit,
-                        1
+                        1,
+                        0,
+                        false,
+                        $show_status
                     );
                     $orders = array_reverse( $orders );
                     // Cache the result for 5 minutes so subsequent page clicks are instant
                     if ( $wcu_orders_start ) {
-                        $cache_key = 'wcu_orders_' . md5( $coupon_code . $wcu_orders_start . $wcu_orders_end . $option_coupon_orders );
+                        $cache_key = 'wcu_orders_' . md5( $coupon_code . $wcu_orders_start . $wcu_orders_end . $option_coupon_orders . $show_status );
                         set_transient( $cache_key, $orders, 5 * MINUTE_IN_SECONDS );
                     }
                 }
@@ -239,6 +242,38 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
             $wcusage_show_commission = 1;
         }
         $wcusage_show_orders_table_status_totals = wcusage_get_setting_value( 'wcusage_field_show_orders_table_status_totals', '1' );
+        $custom_columns = apply_filters(
+            'wcusage_filter_referred_orders_custom_columns',
+            array(),
+            $type,
+            $postid,
+            $user_id
+        );
+        if ( !is_array( $custom_columns ) ) {
+            $custom_columns = array();
+        }
+        $normalised_custom_columns = array();
+        foreach ( $custom_columns as $custom_column_key => $custom_column ) {
+            $custom_column_key = sanitize_key( $custom_column_key );
+            if ( !$custom_column_key ) {
+                continue;
+            }
+            if ( is_array( $custom_column ) ) {
+                $custom_column_label = ( isset( $custom_column['label'] ) ? $custom_column['label'] : '' );
+                $custom_column_class = ( isset( $custom_column['class'] ) ? $custom_column['class'] : '' );
+            } else {
+                $custom_column_label = $custom_column;
+                $custom_column_class = '';
+            }
+            if ( !$custom_column_label ) {
+                continue;
+            }
+            $normalised_custom_columns[$custom_column_key] = array(
+                'label' => sanitize_text_field( $custom_column_label ),
+                'class' => sanitize_html_class( $custom_column_class ),
+            );
+        }
+        $custom_columns = $normalised_custom_columns;
         $option_coupon_orders = wcusage_get_setting_value( 'wcusage_field_orders', '15' );
         $customdaterange = false;
         $per_page = intval( $option_coupon_orders );
@@ -555,6 +590,21 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
         ?>
 
       <?php 
+        foreach ( $custom_columns as $custom_column_key => $custom_column ) {
+            ?>
+        .wcu-table-recent-orders td:nth-of-type(<?php 
+            echo esc_html( $wcusage_ro_label_count );
+            ?>):before { content: "<?php 
+            echo esc_html( $custom_column['label'] );
+            ?>"; }
+        <?php 
+            $wcusage_ro_label_count++;
+            ?>
+      <?php 
+        }
+        ?>
+
+      <?php 
         if ( $option_show_list_products ) {
             ?>
         .wcu-table-recent-orders td:nth-of-type(<?php 
@@ -717,6 +767,22 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
             ?>
 
         <?php 
+            foreach ( $custom_columns as $custom_column_key => $custom_column ) {
+                ?>
+          <th class='wcuTableHead wcuTableHead-custom wcuTableHead-custom-<?php 
+                echo esc_attr( $custom_column_key );
+                if ( $custom_column['class'] ) {
+                    ?> <?php 
+                    echo esc_attr( $custom_column['class'] );
+                }
+                ?>'><?php 
+                echo esc_html( $custom_column['label'] );
+                ?></th>
+        <?php 
+            }
+            ?>
+
+        <?php 
             if ( $option_show_list_products == "1" ) {
                 ?>
           <th class='wcuTableHead'> </th>
@@ -812,9 +878,8 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                     continue;
                 }
                 $orderinfo = wc_get_order( $orderid );
+                $i++;
                 if ( $orderinfo ) {
-                    // Count
-                    $i++;
                     // Check if order can be shown by current status
                     $status = $orderinfo->get_status();
                     $check_status_show = wcusage_check_status_show( $status );
@@ -1141,6 +1206,25 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                             echo "</td>";
                             $col10 = true;
                         }
+                        foreach ( $custom_columns as $custom_column_key => $custom_column ) {
+                            $custom_column_value = apply_filters(
+                                'wcusage_filter_referred_orders_custom_column_value',
+                                '',
+                                $custom_column_key,
+                                $orderinfo,
+                                $orderid,
+                                $type,
+                                $postid
+                            );
+                            if ( is_array( $custom_column_value ) || is_object( $custom_column_value ) ) {
+                                $custom_column_value = '';
+                            }
+                            echo "<td class='wcuTableCell wcuTableCell-custom wcuTableCell-custom-" . esc_attr( $custom_column_key );
+                            if ( $custom_column['class'] ) {
+                                echo " " . esc_attr( $custom_column['class'] );
+                            }
+                            echo "'>" . wp_kses_post( $custom_column_value ) . "</td>";
+                        }
                         /* Show the "MORE" products list column / toggle on table */
                         if ( $option_show_list_products == "1" ) {
                             if ( $orderinfo->get_items() && $orderinfo->get_status() != "refunded" && $orderinfo->get_status() != "cancelled" && $orderinfo->get_status() != "failed" ) {
@@ -1326,6 +1410,9 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                     echo "<td class='wcuTableFoot'></td>";
                 }
                 if ( $col10 ) {
+                    echo "<td class='wcuTableFoot'></td>";
+                }
+                foreach ( $custom_columns as $custom_column_key => $custom_column ) {
                     echo "<td class='wcuTableFoot'></td>";
                 }
                 if ( $col7 ) {

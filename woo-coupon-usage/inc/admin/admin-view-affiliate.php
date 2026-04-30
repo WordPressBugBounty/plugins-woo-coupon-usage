@@ -343,13 +343,10 @@ echo esc_html( sprintf( __( '%s: %s', 'woo-coupon-usage' ), $affiliate_label, $u
 ?>
             </span>
             <?php 
-$portal_slug = wcusage_get_setting_value( 'wcusage_portal_slug', 'affiliate-portal' );
-?>
-            <?php 
-$preview_nonce = wp_create_nonce( 'wcusage_preview_affiliate_' . $user_id );
+$dashboard_preview_url = ( function_exists( 'wcusage_get_affiliate_dashboard_preview_url' ) ? wcusage_get_affiliate_dashboard_preview_url( $user_id ) : '' );
 ?>
             <a href="<?php 
-echo esc_url( home_url( '/' . $portal_slug . '/?userid=' . $user_id . '&preview_nonce=' . $preview_nonce ) );
+echo esc_url( $dashboard_preview_url );
 ?>"
             class="wcu-btn-dashboard-action"
             style="margin-left: 15px; font-size: 12px; padding: 8px 16px;" target="_blank">
@@ -2104,7 +2101,6 @@ function wcusage_display_affiliate_referrals(
     $start_date = '',
     $end_date = ''
 ) {
-    global $wpdb;
     // Get all coupons assigned to this affiliate
     $coupons = wcusage_get_users_coupons_ids( $user_id );
     if ( empty( $coupons ) ) {
@@ -2123,38 +2119,42 @@ function wcusage_display_affiliate_referrals(
         echo '<p>' . esc_html__( 'No valid coupon codes found for this affiliate.', 'woo-coupon-usage' ) . '</p>';
         return;
     }
-    // Build query to find orders that used any of these coupon codes
-    $placeholders = array_fill( 0, count( $coupon_codes ), '%s' );
-    $in_clause = '(' . implode( ',', $placeholders ) . ')';
-    $statuses = wc_get_order_statuses();
-    if ( isset( $statuses['wc-refunded'] ) ) {
-        unset($statuses['wc-refunded']);
-    }
-    // Date filtering
-    $where_date = '';
-    $params = $coupon_codes;
-    if ( !empty( $start_date ) ) {
-        $where_date .= " AND p.post_date >= %s";
-        $params[] = $start_date . ' 00:00:00';
-    }
-    if ( !empty( $end_date ) ) {
-        $where_date .= " AND p.post_date <= %s";
-        $params[] = $end_date . ' 23:59:59';
-    }
     // Pagination
     $page = max( 1, intval( $page ) );
     $per_page = max( 1, intval( $per_page ) );
     $offset = ($page - 1) * $per_page;
-    // Count total
-    $count_sql = $wpdb->prepare( "SELECT COUNT(DISTINCT p.ID)\r\n         FROM {$wpdb->prefix}posts AS p\r\n         INNER JOIN {$wpdb->prefix}woocommerce_order_items AS woi\r\n            ON p.ID = woi.order_id AND woi.order_item_type = 'coupon' AND woi.order_item_name IN {$in_clause}\r\n         WHERE p.post_type = 'shop_order'\r\n           AND p.post_status IN ('" . implode( "','", array_keys( $statuses ) ) . "')" . $where_date, $params );
-    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $total = intval( $wpdb->get_var( $count_sql ) );
-    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-    // Query to get orders that used any of the affiliate's coupons
-    $list_sql = $wpdb->prepare( "SELECT DISTINCT p.ID AS order_id, p.post_date AS order_date\r\n        FROM {$wpdb->prefix}posts AS p\r\n        INNER JOIN {$wpdb->prefix}woocommerce_order_items AS woi\r\n            ON p.ID = woi.order_id AND woi.order_item_type = 'coupon' AND woi.order_item_name IN {$in_clause}\r\n        WHERE p.post_type = 'shop_order'\r\n        AND p.post_status IN ('" . implode( "','", array_keys( $statuses ) ) . "')" . $where_date . " ORDER BY p.post_date DESC LIMIT %d OFFSET %d", array_merge( $params, array($per_page, $offset) ) );
-    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $orders = $wpdb->get_results( $list_sql );
-    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $orders_by_id = array();
+    foreach ( $coupon_codes as $coupon_code ) {
+        $coupon_orders = wcusage_wh_getOrderbyCouponCode(
+            $coupon_code,
+            $start_date,
+            ( $end_date ? $end_date : date( 'Y-m-d' ) ),
+            '',
+            1
+        );
+        if ( !is_array( $coupon_orders ) ) {
+            continue;
+        }
+        foreach ( $coupon_orders as $coupon_order ) {
+            if ( is_array( $coupon_order ) && !empty( $coupon_order['order_id'] ) ) {
+                $orders_by_id[$coupon_order['order_id']] = $coupon_order['order_id'];
+            }
+        }
+    }
+    $all_orders = array();
+    foreach ( $orders_by_id as $order_id ) {
+        $order = wc_get_order( $order_id );
+        if ( $order ) {
+            $all_orders[] = $order;
+        }
+    }
+    usort( $all_orders, function ( $a, $b ) {
+        $a_date = ( $a->get_date_created() ? $a->get_date_created()->getTimestamp() : 0 );
+        $b_date = ( $b->get_date_created() ? $b->get_date_created()->getTimestamp() : 0 );
+        return $b_date - $a_date;
+    } );
+    $total = count( $all_orders );
+    $orders = array_slice( $all_orders, $offset, $per_page );
     if ( empty( $orders ) ) {
         echo '<p>' . esc_html__( 'No recent referrals found for this affiliate\'s coupons. This could mean that the assigned coupons have not been used in any orders yet, or the orders are still pending.', 'woo-coupon-usage' ) . '</p>';
         return;
@@ -2188,14 +2188,10 @@ function wcusage_display_affiliate_referrals(
         </thead>
         <tbody>
             <?php 
-    foreach ( $orders as $order_data ) {
+    foreach ( $orders as $order ) {
         ?>
                 <?php 
-        $order_id = $order_data->order_id;
-        $order = wc_get_order( $order_id );
-        if ( !$order ) {
-            continue;
-        }
+        $order_id = $order->get_id();
         $commission = wcusage_order_meta( $order_id, 'wcusage_total_commission' );
         $billing_first_name = $order->get_billing_first_name();
         $billing_last_name = $order->get_billing_last_name();
@@ -2205,8 +2201,14 @@ function wcusage_display_affiliate_referrals(
         }
         // Get coupon code used in this order
         $coupon_code = '';
+        $lifetime_coupon = wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer' );
+        $referrer_coupon = wcusage_order_meta( $order_id, 'wcusage_referrer_coupon' );
         $used_coupons = $order->get_coupon_codes();
-        if ( !empty( $used_coupons ) ) {
+        if ( $lifetime_coupon ) {
+            $coupon_code = $lifetime_coupon;
+        } elseif ( $referrer_coupon ) {
+            $coupon_code = $referrer_coupon;
+        } elseif ( !empty( $used_coupons ) ) {
             $coupon_code = $used_coupons[0];
             // Get first coupon code
         }

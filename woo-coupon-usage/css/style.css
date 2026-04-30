@@ -697,7 +697,6 @@ form.wcu_payout_button {
 
 .wcu-orders-search,
 .wcu-summary-search {
-	float: right;
 	max-width: 150px;
 	margin-right: 10px;
 }

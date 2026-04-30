@@ -62,7 +62,7 @@ if( !function_exists( 'wcusage_fix_defer_js' ) ) {
       || $post_id == $mla_dashboard_page
       || is_account_page()
       || get_query_var( 'affiliate_portal' )
-      || ( !is_admin() && isset($_SERVER['REQUEST_URI']) && strpos( $_SERVER['REQUEST_URI'], $wcusage_portal_slug ) !== false ) ) {
+      || ( !is_admin() && isset($_SERVER['REQUEST_URI']) && stripos( $_SERVER['REQUEST_URI'], $wcusage_portal_slug ) !== false ) ) {
 
         // WP Rocket
         if ( is_plugin_active( 'wp-rocket/wp-rocket.php' ) ) {

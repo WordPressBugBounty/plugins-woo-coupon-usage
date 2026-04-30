@@ -125,6 +125,23 @@ function wcusage_field_cb_commission( $args )
 
     <br/><br/>
 
+    <!-- Allow applied affiliate coupons to override lifetime commission. -->
+    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_coupon_priority', 0, esc_html__( 'Allow applied affiliate coupons to override lifetime commission for that order.', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( 'When enabled, if a customer already has a lifetime affiliate but uses another affiliate coupon at checkout, the applied coupon will receive commission for that specific order. The saved lifetime customer link will remain unchanged for future orders unless the option below is enabled.', 'woo-coupon-usage' ); ?></i>
+
+    <?php wcusage_setting_toggle('.wcusage_field_lifetime_coupon_priority', '.wcu-field-section-lifetime-coupon-priority'); // Show or Hide ?>
+    <span class="wcu-field-section-lifetime-coupon-priority">
+      
+    <br/><br/>
+
+    <!-- Replace lifetime referrer when an applied affiliate coupon overrides lifetime commission. -->
+    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_coupon_priority_replace', 0, esc_html__( 'Also replace the customer lifetime referrer with the new affiliate coupon.', 'woo-coupon-usage' ), '40px'); ?>
+    <i><?php echo esc_html__( 'When enabled, the customer will be linked to the new affiliate coupon for future lifetime commission orders too.', 'woo-coupon-usage' ); ?></i>
+
+    </span>
+
+    <br/><br/>
+
     <!-- Track user registrations as a lifetime referral. -->
     <?php wcusage_setting_toggle_option('wcusage_field_lifetime_track_register', 0, esc_html__( 'Track user registrations as a lifetime referral.', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'With this enabled, if someone follows a referral link and registers (creates an account), they will then be linked to that affiliate, even without initially placing an order.', 'woo-coupon-usage' ); ?></i>

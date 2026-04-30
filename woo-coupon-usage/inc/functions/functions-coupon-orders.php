@@ -14,16 +14,20 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  * @param int $numberoforders
  * @param bool $refresh
  * @param bool $update
+ * @param bool $alltime
+ * @param string $status_filter
  *
  * @return mixed
  *
  */
 if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
-  function wcusage_wh_getOrderbyCouponCode( $coupon_code, $start_date, $end_date, $numberoforders = '', $refresh = 1, $update = 0, $alltime = false ) {
+  function wcusage_wh_getOrderbyCouponCode( $coupon_code, $start_date, $end_date, $numberoforders = '', $refresh = 1, $update = 0, $alltime = false, $status_filter = '' ) {
 
     $coupon_code = sanitize_text_field($coupon_code);
     $get_start_date = sanitize_text_field($start_date);
-    $get_end_date = sanitize_text_field($end_date);
+		$get_end_date = sanitize_text_field($end_date);
+		$status_filter = sanitize_key(str_replace('wc-', '', $status_filter));
+		$status_filter_key = $status_filter ? 'wc-' . $status_filter : '';
 
 	$start_date = wcusage_convert_date_to_gmt($get_start_date, 0);
 	$end_date = wcusage_convert_date_to_gmt($get_end_date, 1);
@@ -106,6 +110,37 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
   		} else {
   			$statuses = $wcusage_field_order_type_custom;
   		}
+
+		if ($status_filter_key) {
+			if (isset($statuses[$status_filter_key])) {
+				$statuses = array($status_filter_key => $statuses[$status_filter_key]);
+			} else {
+				$statuses = array();
+			}
+		}
+
+		if (empty($statuses)) {
+			$allstats = array(
+				'total_orders' => 0,
+				'full_discount' => 0,
+				'total_commission' => 0,
+				'total_shipping' => 0,
+				'total_count' => 0,
+			);
+
+			return array(
+				'orders' => array(),
+				'list_of_products' => array(),
+				'total_count' => 0,
+				'full_discount' => 0,
+				'total_shipping' => 0,
+				'total_orders' => 0,
+				'total_commission' => 0,
+				'commission_summary' => array(),
+				'status_counts' => array(),
+				'allstats' => $allstats,
+			);
+		}
 
 		// Custom Orders Table or Posts Table
 		if (class_exists(OrderUtil::class) && method_exists(OrderUtil::class, 'custom_orders_table_usage_is_enabled') && OrderUtil::custom_orders_table_usage_is_enabled()) {

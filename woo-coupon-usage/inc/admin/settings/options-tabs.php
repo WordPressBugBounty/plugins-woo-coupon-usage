@@ -164,7 +164,7 @@ function wcusage_field_cb_custom_tabs( $args )
       if(isset($options['wcusage_field_custom_tabs_icon_'.$i])) {
         $thisid = 'wcusage_field_custom_tabs_icon_'.$i;
       } else {
-        $thisid = 'wcusage_field_custom_tabs_icon_'.$i;
+        $thisid = 'wcusage_field_custom_tabs_' . $i . '_icon';
       }
       // Get 20 good icons that could be used for tabs, books, news etc
       $icons = array('cog', 'user', 'chart-line', 'chart-bar', 'chart-pie',
