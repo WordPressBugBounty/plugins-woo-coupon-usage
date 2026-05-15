@@ -529,8 +529,8 @@ form#product_search_form input {
 .creatives-box {
 	background: linear-gradient(#fefefe, #fff);
 	color: #333;
-	box-shadow: 0px 0px 4px #dbdada;
-	border-radius: 10px;
+	box-shadow: 0px 0px 2px #dbdada;
+	border-radius: 5px;
 	padding: 10px 20px;
 	margin-top: 10px;
 }
@@ -582,7 +582,7 @@ form.wcu_payout_button {
 	background: #008cdd !important;
 	color: #fff !important;
 	font-size: 20px !important;
-	border-radius: 10px !important;
+	border-radius: 5px !important;
 	text-decoration: none !important;
 }
 
@@ -1088,11 +1088,11 @@ form.wcu_payout_button {
 	padding: 25px 15px 25px 105px;
 	background: linear-gradient(#fefefe, #fff);
 	color: #000;
-	border: 1px solid #f3f3f3;
+	border: 1px solid #e0e0e0;
 	display: block;
 	border-radius: 5px;
 	margin: 0.5%;
-	box-shadow: 0px 0px 4px #dbdada;
+	box-shadow: 0px 0px 2px #dbdada;
 	width: 99%;
 	position: relative;
 }
@@ -1386,7 +1386,7 @@ form.wcu_payout_button {
 	background: linear-gradient(#fefefe, #fff);
 	box-shadow: 0px 0px 4px #dbdada;
 	border: 1px solid #f3f3f3;
-	border-radius: 10px;
+	border-radius: 5px;
 	word-wrap: break-word;
 }
 
@@ -1466,7 +1466,7 @@ form.wcu_payout_button {
 	display: none;
 	padding: 10px;
 	border: 4px solid #f3f3f3;
-	border-radius: 10px;
+	border-radius: 5px;
 	text-align: center;
 	margin-top: 10px;
 }
@@ -1563,7 +1563,7 @@ form.wcu_payout_button {
 .creatives-box {
 	margin: 10px;
 	text-align: center;
-	border: 2px solid #f3f3f3;
+	border: 1px solid #f3f3f3;
 }
 
 @media screen and (max-width: 940px) {
@@ -1785,7 +1785,7 @@ form.wcu_payout_button {
 	background: linear-gradient(#fefefe, #fff) !important;
 	box-shadow: 0px 0px 4px #d0d0d0 !important;
 	border: 0 !important;
-	border-radius: 10px;
+	border-radius: 5px;
 	word-wrap: break-word;
 	margin-left: -2px;
 	cursor: grab;
@@ -1854,10 +1854,10 @@ form.wcu_payout_button {
 	text-align: center;
 	width: calc(50% - 20px);
 	float: left;
-	border: 2px solid #f3f3f3;
-	border-radius: 10px;
+	border: 1px solid #f3f3f3;
+	border-radius: 5px;
 	padding: 29px 10px 15px 10px;
-	box-shadow: 0px 0px 4px #dbdada;
+	box-shadow: 0px 0px 2px #dbdada;
 	margin-bottom: 0px;
 	position: relative;
 }
@@ -1984,7 +1984,7 @@ form.wcu_payout_button {
 	font-size: 15px;
 	margin-top: 10px;
 	margin-bottom: 10px;
-	border-radius: 10px;
+	border-radius: 5px;
 	font-weight: bold;
 }
 

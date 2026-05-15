@@ -262,15 +262,16 @@ function wcusage_update_ml_affiliate_parents(
 function wcusage_on_new_order_set_coupon_referrer(  $order_id  ) {
     // Get settings
     $wcusage_field_url_referrals = wcusage_get_setting_value( 'wcusage_field_url_referrals', '0' );
+    $wcusage_store_cookies = wcusage_get_setting_value( 'wcusage_field_store_cookies', '1' );
     // Get cookie
     $cookie = "";
     $url_applied = "";
     $coupon_applied = "";
-    if ( isset( $_COOKIE['wcusage_referral'] ) ) {
-        $cookie = $_COOKIE['wcusage_referral'];
+    if ( $wcusage_store_cookies && isset( $_COOKIE['wcusage_referral'] ) ) {
+        $cookie = wp_unslash( $_COOKIE['wcusage_referral'] );
     }
-    if ( !$cookie && isset( $_COOKIE['wcusage_referral_code'] ) ) {
-        $cookie = $_COOKIE['wcusage_referral_code'];
+    if ( $wcusage_store_cookies && !$cookie && isset( $_COOKIE['wcusage_referral_code'] ) ) {
+        $cookie = wp_unslash( $_COOKIE['wcusage_referral_code'] );
         $url_applied = 1;
     }
     $cookie = sanitize_text_field( $cookie );
@@ -369,6 +370,9 @@ function wcusage_on_new_order_delete_cookies(  $order_id  ) {
         if ( isset( $_COOKIE['wcusage_referral_campaign'] ) ) {
             unset($_COOKIE['wcusage_referral_campaign']);
             wcusage_set_cookie( 'wcusage_referral_campaign', '', -1 );
+        }
+        if ( function_exists( 'wcusage_clear_wc_session_value' ) ) {
+            wcusage_clear_wc_session_value( 'wcusage_referral' );
         }
     }
 }

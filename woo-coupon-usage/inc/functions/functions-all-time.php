@@ -127,7 +127,7 @@ if ( !function_exists( 'wcusage_update_all_stats_single' ) ) {
                 $allstats['full_discount'] = $total_discount - $order_discounts;
                 $allstats['total_commission'] = $total_commission - $order_commission;
                 if ( $change ) {
-                    $allstats['total_count'] = $total_count - 1;
+                    $allstats['total_count'] = max( 0, $total_count - 1 );
                 } else {
                     $allstats['total_count'] = $total_count;
                 }
@@ -391,6 +391,52 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
     var updateStatsNonce = '<?php 
     echo esc_html( wp_create_nonce( 'wcusage_update_stats_nonce' ) );
     ?>';
+    var ajaxErrorMessage = <?php 
+    echo wp_json_encode( $ajaxerrormessage );
+    ?>;
+
+    function wcusageShowBatchRefreshError(message, details) {
+      if(details) {
+        console.log('Coupon Affiliates batch refresh error:', details);
+      }
+      jQuery('.wcu-loading-loader').hide();
+      jQuery('.stuck-loading-message').show();
+      jQuery('.wcu-progress-bar-fill').css('background', '#d63638');
+      jQuery('#updated_total').html(message);
+      jQuery('.wcutablinks').css('opacity', '1');
+      jQuery('.wcutablinks').css('pointer-events', 'auto');
+    }
+
+    function wcusageGetAjaxError(jqXHR, textStatus, errorThrown) {
+      if(errorThrown) {
+        return errorThrown;
+      }
+      if(jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.data) {
+        if(jqXHR.responseJSON.data.message) {
+          return jqXHR.responseJSON.data.message;
+        }
+        return jqXHR.responseJSON.data;
+      }
+      return textStatus || 'AJAX error.';
+    }
+
+    function wcusageParseStatsResponse(response) {
+      var responseData = response;
+      if(typeof responseData === 'string') {
+        responseData = JSON.parse(responseData);
+      }
+      if(responseData && responseData.success === false) {
+        throw new Error(responseData.data && responseData.data.message ? responseData.data.message : 'Statistics request failed.');
+      }
+      if(responseData && responseData.data && typeof responseData.data === 'object') {
+        responseData = responseData.data;
+      }
+      if(!responseData || typeof responseData !== 'object') {
+        throw new Error('Invalid statistics response.');
+      }
+      responseData.commission_summary = responseData.commission_summary || {};
+      return responseData;
+    }
 
     function getOrders() {
     jQuery.ajax({
@@ -408,52 +454,56 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
       'security': updateStatsNonce
       },
       success: function(response) {
-        loop++;
-        var responseData = JSON.parse(response);
-        allstats.total_count += Number(responseData.total_count);
-        allstats.total_orders += Number(responseData.total_orders);
-        allstats.full_discount += Number(responseData.full_discount);
-        allstats.total_commission += Number(responseData.total_commission);
-        allstats.total_shipping += Number(responseData.total_shipping);
-        console.log('Testing responseData:', responseData);
-        for (var key in responseData.commission_summary) {
-          if (allstats.commission_summary[key]) {
-          allstats.commission_summary[key].total += Number(responseData.commission_summary[key].total);
-          allstats.commission_summary[key].commission += Number(responseData.commission_summary[key].commission);
-          allstats.commission_summary[key].number += Number(responseData.commission_summary[key].number);
-          } else {
-          allstats.commission_summary[key] = {
-            total: Number(responseData.commission_summary[key].total),
-            commission: Number(responseData.commission_summary[key].commission),
-            number: Number(responseData.commission_summary[key].number)
-          };
+        try {
+          loop++;
+          var responseData = wcusageParseStatsResponse(response);
+          allstats.total_count += Number(responseData.total_count) || 0;
+          allstats.total_orders += Number(responseData.total_orders) || 0;
+          allstats.full_discount += Number(responseData.full_discount) || 0;
+          allstats.total_commission += Number(responseData.total_commission) || 0;
+          allstats.total_shipping += Number(responseData.total_shipping) || 0;
+          for (var key in responseData.commission_summary) {
+            if (allstats.commission_summary[key]) {
+            allstats.commission_summary[key].total += Number(responseData.commission_summary[key].total) || 0;
+            allstats.commission_summary[key].commission += Number(responseData.commission_summary[key].commission) || 0;
+            allstats.commission_summary[key].number += Number(responseData.commission_summary[key].number) || 0;
+            } else {
+            allstats.commission_summary[key] = {
+              total: Number(responseData.commission_summary[key].total) || 0,
+              commission: Number(responseData.commission_summary[key].commission) || 0,
+              number: Number(responseData.commission_summary[key].number) || 0
+            };
+            }
           }
-        }
-        if (startDate >= first_order_date) {
-          var today = new Date('<?php 
+          if (startDate >= first_order_date) {
+            var today = new Date('<?php 
     echo esc_html( $last_order_date );
     ?>');
-          startDate.setDate(startDate.getDate() - <?php 
+            startDate.setDate(startDate.getDate() - <?php 
     echo esc_html( $batch_amount );
     ?>);
-          if(loop == 1) {
-            endDate.setDate(endDate.getDate() - <?php 
+            if(loop == 1) {
+              endDate.setDate(endDate.getDate() - <?php 
     echo esc_html( $batch_amount2 );
     ?>);
-          } else {
-            endDate.setDate(endDate.getDate() - <?php 
+            } else {
+              endDate.setDate(endDate.getDate() - <?php 
     echo esc_html( $batch_amount );
     ?>);
+            }
+            var totalRange = today - first_order_date;
+            var progress = totalRange > 0 ? Math.floor(((today - startDate) / totalRange) * 100) : 100;
+            updateProgressBar(progress);
+            getOrders();
+          } else {
+            updateAllStats(allstats);
           }
-          var progress = Math.floor(((today - startDate) / (today - first_order_date)) * 100);
-          updateProgressBar(progress);
-          getOrders();
-        } else {
-          updateAllStats(allstats);
+        } catch(error) {
+          wcusageShowBatchRefreshError(ajaxErrorMessage + '<br/><br/>' + error.message, response);
         }
       },
-      error: function(error) {
-        console.log('Testing error: ', error);
+      error: function(jqXHR, textStatus, errorThrown) {
+        wcusageShowBatchRefreshError(ajaxErrorMessage + '<br/><br/>' + wcusageGetAjaxError(jqXHR, textStatus, errorThrown), jqXHR);
       }
     });
     }
@@ -473,25 +523,41 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
       'security': updateStatsNonce
       },
       success: function(response) {
+        try {
+          if(response && typeof response === 'string') {
+            response = JSON.parse(response);
+          }
+          if(response && response.success === false) {
+            throw new Error(response.data && response.data.message ? response.data.message : 'Statistics update failed.');
+          }
+          if(!response || typeof response !== 'object') {
+            throw new Error('Invalid statistics update response.');
+          }
+        } catch(error) {
+          wcusageShowBatchRefreshError(ajaxErrorMessage + '<br/><br/>' + error.message, response);
+          return;
+        }
         updateProgressBar(100);
         jQuery('#updated_total').html("Complete! Reloading...");
         location.reload();
       },
-      error: function(error) {
-        console.log(error);
-        jQuery('#updated_total').html('<?php 
-    echo wp_kses_post( $ajaxerrormessage );
-    ?>');
+      error: function(jqXHR, textStatus, errorThrown) {
+        wcusageShowBatchRefreshError(ajaxErrorMessage + '<br/><br/>' + wcusageGetAjaxError(jqXHR, textStatus, errorThrown), jqXHR);
       }
     });
     }
 
     function updateProgressBar(progress) {
+      if(!isFinite(progress) || progress < 0) {
+        progress = 0;
+      }
       if(progress > 100) {
         progress = 100;
       }
       var progressBarFill = document.querySelector('.wcu-progress-bar-fill');
-      progressBarFill.style.width = progress + '%';
+      if(progressBarFill) {
+        progressBarFill.style.width = progress + '%';
+      }
       var updatedTotal = document.getElementById('updated_total');
       if(updatedTotal) {
         updatedTotal.textContent = '<?php 

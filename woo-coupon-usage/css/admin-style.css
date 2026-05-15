@@ -93,7 +93,7 @@
 .wcu-settings-sidebar-bottom-mobile {
     background: #fff;
     border: 1px solid #e5e7eb;
-    border-radius: 12px;
+    border-radius: 5px;
     box-shadow: 0 2px 8px rgba(16,24,40,0.07);
     padding: 24px 18px 18px 18px;
     margin: 32px auto 0 auto;
@@ -106,7 +106,7 @@
 .wcu-settings-sidebar-bottom-mobile .wcu-settings-sidebar-box {
     background: #f9fafb;
     border: 1px solid #e5e7eb;
-    border-radius: 10px;
+    border-radius: 5px;
     box-shadow: 0 1px 2px rgba(16,24,40,0.06);
     margin-bottom: 18px;
     padding: 18px 12px 16px 12px;
@@ -134,7 +134,7 @@
     padding: 22px 10px 30px 10px !important;
     font-size: 22px !important;
     text-align: center !important;
-    border-radius: 12px !important;
+    border-radius: 5px !important;
     margin: 17px 0 18px 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
@@ -147,7 +147,7 @@
     padding: 18px 0 18px 0 !important;
     font-size: 18px !important;
     text-align: center !important;
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     border: 2px solid #F8F8FF !important;
     margin-bottom: 10px !important;
     width: 100% !important;
@@ -403,7 +403,7 @@
     padding: 12px 0 20px 0;
     font-size: 22px;
     text-align: center;
-    border-radius: 10px;
+    border-radius: 5px;
     border: 2px solid #c9c9c9;
 }
 
@@ -451,7 +451,7 @@
 @media only screen and (min-width: 720px) {
     .wcusage-settings form {
         background: #fff;
-        border-radius: 10px;
+        border-radius: 5px;
     }
 }
 
@@ -525,11 +525,11 @@
 #wcu-settings-search-right .wcu-search-prompt-arrow::before { content: ""; position: absolute; left: 0; top: 50%; width: 20px; height: 2px; background: #888; transform: translateY(-50%); border-radius: 1px; opacity: 0.9; }
 #wcu-settings-search-right .wcu-search-prompt-arrow::after { content: ""; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 7px solid #888; opacity: 0.9; }
 #wcu-settings-search { min-width: 230px; max-width: 100%; padding: 6px 10px; }
-#wcu-settings-search-results { position: absolute; right: 0; width: min(520px, 90vw); margin-top: 6px; display: none; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; max-height: 280px; overflow: auto; z-index: 1000; }
+#wcu-settings-search-results { position: absolute; right: 0; width: min(520px, 90vw); margin-top: 6px; display: none; border: 1px solid #e5e7eb; border-radius: 5px; background: #fff; max-height: 280px; overflow: auto; z-index: 1000; }
 #wcu-settings-search-results ul { margin: 0; padding: 6px 0; list-style: none; }
 #wcu-settings-search-results li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-bottom: 1px solid #f0f0f0; }
 #wcu-settings-search-results li:last-child { border-bottom: 0; }
-.wcu-settings-header #wcu-settings-search-empty { position: absolute; right: 0; width: min(520px, 90vw); margin-top: 6px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; max-height: 280px; overflow: auto; z-index: 1000; }
+.wcu-settings-header #wcu-settings-search-empty { position: absolute; right: 0; width: min(520px, 90vw); margin-top: 6px; border: 1px solid #e5e7eb; border-radius: 5px; background: #fff; max-height: 280px; overflow: auto; z-index: 1000; }
 .wcu-search-no-results { color: #888; font-size: 15px; justify-content: center; border-bottom: 0 !important; }
 .wcu-search-item-label { font-weight: 600; }
 .wcu-search-item-meta { color: #666; font-size: 12px; }
@@ -626,7 +626,7 @@
     text-decoration: none;
     font-weight: 600;
     border: 1px solid #2271b1;
-    border-radius: 8px;
+    border-radius: 5px;
     margin-top: -5px;
     margin-left: 15px;
     padding: 10px 20px;
@@ -664,7 +664,7 @@ body.wcusage-admin-page .page-title-action {
     text-decoration: none;
     font-weight: 600;
     border: 1px solid #2271b1;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 6px 16px;
     font-size: 13px;
     line-height: 20px;
@@ -888,7 +888,7 @@ body.wcusage-admin-page {
     background: #fff;
     float: left;
     border: 1px solid #e5e7eb;
-    border-radius: 10px;
+    border-radius: 5px;
     box-sizing: border-box;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
@@ -909,7 +909,7 @@ body.wcusage-admin-page {
     margin-bottom: 25px;
     border: 1px solid #e5e7eb;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: 5px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     box-sizing: border-box;
 }
@@ -1020,7 +1020,7 @@ body.wcusage-admin-page {
     font-weight: 600;
     background: #374151;
     border: none;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     display: block;
     margin: 7px auto;
@@ -1143,7 +1143,7 @@ body.wcusage-admin-page {
     background: #383838;
     color: #fff;
     border: 0;
-    border-radius: 10px;
+    border-radius: 5px;
     padding: 2px 15px;
     width: 100%;
     max-width: 110px;
@@ -1557,7 +1557,7 @@ body.wcusage-admin-page {
     background: #456aa5;
     color: white;
     padding: 5px 10px;
-    border-radius: 20px;
+    border-radius: 5px;
     cursor: pointer;
 }
 .wcu-showhide-button:hover {
@@ -1587,7 +1587,7 @@ body.wcusage-admin-page {
     box-sizing: border-box;
     padding: 10px;
     background: #fff;
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid #e5e7eb;
     margin: 0;
     display: flex;
@@ -1644,7 +1644,7 @@ body.wcusage-admin-page {
     font-weight: 600;
     padding: 4px 12px;
     border: 1px solid #d0d5dd;
-    border-radius: 6px;
+    border-radius: 5px;
     text-decoration: none;
     background: #fff;
     color: #374151;
@@ -1664,7 +1664,7 @@ body.wcusage-admin-page {
     width: calc(100% - 10px);
     background: #333;
     color: #fff;
-    border-radius: 10px;
+    border-radius: 5px;
     margin: 10px 10px 0 5px;
     padding: 5px 0px;
     display: block;
@@ -1750,7 +1750,7 @@ td.column-wcu_order_affiliate_coupon {
 .wcusage-admin-page .wp-list-table.groups,
 .wcusage-admin-page .widefat {
     border: 1px solid #e5e7eb;
-    border-radius: 10px;
+    border-radius: 5px;
     border-collapse: separate;
     border-spacing: 0;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
@@ -1794,7 +1794,7 @@ body.wcusage-admin-page input[type="submit"].button-primary {
     background: linear-gradient(135deg, #2271b1, #135e96);
     border-color: #135e96;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    border-radius: 6px;
+    border-radius: 5px;
     transition: all 0.15s ease;
 }
 
@@ -1813,7 +1813,7 @@ body.wcusage-admin-page input[type="submit"].button-primary:hover {
 body.wcusage-admin-page .button:not(.button-primary),
 body.wcusage-admin-page input[type="submit"].button:not(.button-primary) {
     border: 1px solid #d0d5dd;
-    border-radius: 6px;
+    border-radius: 5px;
     color: #374151;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     transition: all 0.15s ease;
@@ -1835,7 +1835,7 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
 .wcusage-admin-page .wcusage-admin-title-filters input[type="number"],
 .wcusage-admin-page .wcusage-admin-title-filters select {
     border: 1px solid #d0d5dd;
-    border-radius: 6px;
+    border-radius: 5px;
     padding: 6px 10px;
     font-size: 13px;
     color: #1d2327;
@@ -1855,14 +1855,14 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
 /* Admin page tablenav actions button styling */
 .wcusage-admin-page .tablenav .actions select {
     border: 1px solid #d0d5dd;
-    border-radius: 6px;
+    border-radius: 5px;
     min-height: 32px;
     font-size: 13px;
 }
 
 .wcusage-admin-page .tablenav .tablenav-pages .button {
     border: 1px solid #d0d5dd;
-    border-radius: 6px;
+    border-radius: 5px;
 }
 
 .wp-list-table.payout {
@@ -2067,7 +2067,7 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
     padding: 7px 12px 7px 34px !important;
     font-size: 14px !important;
     border: 1px solid #d0d5dd !important;
-    border-radius: 6px !important;
+    border-radius: 5px !important;
     width: 280px !important;
     max-width: 100% !important;
     box-shadow: none !important;
@@ -2218,7 +2218,7 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
     position: absolute;
     top: 14px;
     margin-left: -19px;
-    border-radius: 8px;
+    border-radius: 5px;
     cursor: pointer;
     padding: 0px 5px 2px 5px;
 }
@@ -2238,7 +2238,7 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
 .dynamic-creative-line {
     padding: 5px 20px 10px 20px;
     border: 1px solid #e5e7eb;
-    border-radius: 6px;
+    border-radius: 5px;
     background: #f9fafb;
     margin-bottom: 20px;
     width: 400px;
@@ -2261,7 +2261,7 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
     padding: 0px 20px 10px 20px;
     padding-bottom: 15px;
     border: 1px solid #e5e7eb;
-    border-radius: 6px;
+    border-radius: 5px;
     background: #f9fafb;
     margin-bottom: 20px;
     max-width: 575px;
@@ -2338,7 +2338,7 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
     background: #1d2327;
     color: #fff;
     padding: 20px;
-    border-radius: 8px 0 0 0;
+    border-radius: 5px 0 0 0;
 }
 
 .wcu-admin-sidebar-header h3 {
@@ -2384,7 +2384,7 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
     background: #ffd700;
     color: #333;
     padding: 2px 6px;
-    border-radius: 10px;
+    border-radius: 5px;
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
@@ -2513,7 +2513,7 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
     color: #fff;
     font-size: 10px;
     padding: 2px 6px;
-    border-radius: 10px;
+    border-radius: 5px;
     margin-left: auto;
     position: static;
     margin-top: 0;
@@ -2545,11 +2545,11 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
     .wcu-admin-sidebar {
         width: 100%;
         min-width: auto;
-        border-radius: 8px 8px 0 0;
+        border-radius: 5px 8px 0 0;
     }
     
     .wcu-admin-sidebar-header {
-        border-radius: 8px 8px 0 0;
+        border-radius: 5px 8px 0 0;
     }
     
     .wcu-admin-content {
@@ -2649,11 +2649,11 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
     }
     
     .wcu-admin-sidebar {
-        border-radius: 6px;
+        border-radius: 5px;
     }
     
     .wcu-admin-content {
-        border-radius: 6px;
+        border-radius: 5px;
         border-left: 1px solid #e5e7eb;
     }
     
@@ -2776,7 +2776,7 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
 .wcu-settings-sidebar-bottom .wcu-settings-sidebar-box:not(#wcu-settings-sidebar-pro-upgrade) {
     background: #ffffff;
     border: 2px solid #e5e7eb;
-    border-radius: 10px;
+    border-radius: 5px;
     box-shadow: 0 1px 2px rgba(16,24,40,0.06);
 }
 
@@ -2814,7 +2814,7 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
         padding: 22px 10px 30px 10px !important;
         font-size: 22px !important;
         text-align: center !important;
-        border-radius: 12px !important;
+        border-radius: 5px !important;
         margin: 0 auto !important;
         width: calc(100% - 7px) !important;
         box-sizing: border-box !important;
@@ -2881,7 +2881,7 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
     padding: 12px 0 12px 0 !important;
     font-size: 14px !important;
     text-align: center !important;
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     border: 2px solid #F8F8FF !important;
     margin-bottom: 10px !important;
     width: 100% !important;
@@ -2992,7 +2992,7 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
 .wcu-setting-email-notification-box {
     padding: 15px 15px 20px 15px;
     background: rgba(255, 255, 255, 0.4);
-    border-radius: 15px;
+    border-radius: 5px;
     border: 2px solid #e3e8e8;
     margin-bottom: 20px;
     max-width: 700px;
@@ -3073,7 +3073,7 @@ p label {
 /* Tables */
 .coupon-item-box {
     display: block;
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid #f3f3f3;
     margin-bottom: 20px;
     background: linear-gradient(#fefefe, #fff);
@@ -3122,7 +3122,7 @@ p label {
 }
 
 .coupon-item-box tr {
-    border-radius: 10px;
+    border-radius: 5px;
     display: block
 }
 
@@ -3193,7 +3193,7 @@ p label {
     font-weight: bold;
     border: 0;
     padding: 0 20px;
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid #fff;
     cursor: pointer;
 }
@@ -3219,7 +3219,7 @@ p label {
     font-weight: bold;
     border: 0;
     padding: 0 20px;
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid #fff;
     cursor: pointer;
 }
@@ -3253,7 +3253,7 @@ p label {
 .wcusage-get-started {
     background: #F8F8FF;
     padding: 12px 12px;
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 .wcusage-get-started button {
@@ -3477,13 +3477,13 @@ p label {
     padding: 25px 15px 25px 100px;
     color: #000;
     display: block;
-    border-radius: 10px;
+    border-radius: 5px;
     margin: 0.5%;
-    border: 1px solid #e5e7eb;
+    border: 2px solid #e7e7e7;
     width: 99%;
     position: relative;
     background: linear-gradient(145deg, #f8fbff, #ffffff);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    box-shadow: 0 0px 2px rgba(0,0,0,0.04);
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -3497,7 +3497,7 @@ p label {
     background: #fff;
     border: 1px solid #d0d5dd;
     color: #374151;
-    border-radius: 6px;
+    border-radius: 5px;
     margin: 0px;
     padding: 8px 16px;
     display: block;
@@ -3697,7 +3697,7 @@ p label {
     background: linear-gradient(#fefefe, #fff);
     border: 1px solid #f3f3f3;
     box-shadow: 0px 0px 4px #dbdada;
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 .report-complete-box p {
@@ -3741,7 +3741,7 @@ p label {
     -webkit-overflow-scrolling: touch;
     margin-bottom: 15px;
     box-sizing: border-box;
-    border-radius: 8px;
+    border-radius: 5px;
     background: #fff;
     box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     border: 1px solid #ececec;
@@ -3905,7 +3905,7 @@ p label {
     transform: translateX(-50%) !important;
     padding: 14px 18px 14px 18px !important;
     border: none !important;
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     z-index: 99999 !important;
     white-space: normal;
     overflow: visible;
@@ -4084,7 +4084,7 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
 	color: #fff;
 	text-align: center;
 	padding: 5px 0;
-	border-radius: 6px;
+	border-radius: 5px;
 	position: absolute;
 	z-index: 99999 !important;
 }
@@ -4144,7 +4144,7 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
     border: 1px solid #e5e7eb;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     background: #fff;
-    border-radius: 10px;
+    border-radius: 5px;
     text-align: center;
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -4178,7 +4178,7 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
     color: #374151;
     background: #fff;
     border: 1px solid #d0d5dd;
-    border-radius: 6px;
+    border-radius: 5px;
     text-decoration: none;
     transition: all 0.15s ease;
     cursor: pointer;
@@ -4282,7 +4282,7 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
     padding: 5px 12px 9px 12px;
     display: inline-block;
     border: 1px solid #c6e1b5;
-    border-radius: 25px;
+    border-radius: 5px;
     margin-bottom: 20px;
 }
 .wcu-admin-faq p {
@@ -4296,7 +4296,7 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
 .wcu-admin-faq iframe {
     margin-top: 5px;
     border: 2px solid #c6e1b5;
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 .wcu-admin-faq .wcu-showhide-button {
@@ -4304,6 +4304,7 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
     font-size: 14px;
     font-weight: normal;
     margin-left: 5px;
+    border-radius: 5px;
 }
 
 /* Admin Pages Boxed Area */
@@ -4313,7 +4314,7 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
     margin: 20px auto;
     padding: 24px;
     background: #fff;
-    border-radius: 12px;
+    border-radius: 5px;
     border: 1px solid #e5e7eb;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -4549,7 +4550,7 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
 .wcu-mla-tier-box {
     background: #fff;
     border: 2px solid #c9c9c9;
-    border-radius: 10px;
+    border-radius: 5px;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }

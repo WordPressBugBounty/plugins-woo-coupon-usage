@@ -401,7 +401,7 @@ if (!function_exists('wcusage_tab_settings')) {
                                         value="<?php echo esc_attr($wcu_sms_phone); ?>"
                                         placeholder=""
                                         style="width: 300px; max-width: 100%;">
-                                    <br/><small><?php echo esc_html__("Enter in international format, e.g. +447911123456. Leave blank to disable SMS notifications.", "woo-coupon-usage"); ?></small>
+                                    <br/><small><?php echo esc_html__("Enter in international format, e.g. +447911123456.", "woo-coupon-usage"); ?></small>
                                 </p>
                                 <?php } ?>
 

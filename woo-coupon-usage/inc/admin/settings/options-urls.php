@@ -237,8 +237,8 @@ function wcusage_field_cb_urls( $args )
         <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Referral Cookie Settings', 'woo-coupon-usage' ); ?>:</h3>
 
         <p><?php echo esc_html__( 'If preferred you can disable cookies completely in the', 'woo-coupon-usage' ); ?>
-          <a href="#" onclick="wcusage_go_to_settings('#tab-debug', '#wcusage_field_store_cookies_p');">
-            <?php echo esc_html__( 'debug settings tab', 'woo-coupon-usage' ); ?></a>.
+          <a href="#" onclick="wcusage_go_to_settings('#tab-privacy', '#wcusage_field_store_cookies_p');">
+            <?php echo esc_html__( 'Privacy & Cookies settings tab', 'woo-coupon-usage' ); ?></a>.
         </p><br/>
 
         <!-- Cloudflare APO Detection and Warning -->
@@ -320,6 +320,20 @@ function wcusage_field_cb_urls( $args )
 
         <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Click / Visit History', 'woo-coupon-usage' ); ?>:</h3>
 
+        <script>
+        jQuery(function($) {
+          function wcuSyncCookieRequiredFields() {
+            var enabled = $('#wcusage_field_store_cookies').is(':checked');
+            $('.wcu-requires-cookies-enabled').toggle(enabled);
+            $('#wcu-cookies-disabled-notice').toggle(!enabled);
+          }
+          wcuSyncCookieRequiredFields();
+          $(document).on('change', '#wcusage_field_store_cookies', function() {
+            wcuSyncCookieRequiredFields();
+          });
+        });
+        </script>
+
         <?php wcusage_setting_toggle_option('wcusage_field_show_click_history', 1, esc_html__( 'Enable "Click History" Logs', 'woo-coupon-usage' ), '0px'); ?>
         <i><?php echo esc_html__( 'This will show a table with a log of the latest referral URL clicks/visits for the affiliate coupons referral URL (or selected campaign).', 'woo-coupon-usage' ); ?></i><br/>
 
@@ -340,16 +354,29 @@ function wcusage_field_cb_urls( $args )
 
             <br/>
 
+            <span class="wcu-requires-cookies-enabled">
             <?php wcusage_setting_toggle_option('wcusage_field_show_click_history_converted', 1, 'Enable "Converted Only" Toggle', '30px'); ?>
             <i style="margin-left: 30px;"><?php echo esc_html__( 'This will allow affiliates to click a toggle to only show converted clicks.', 'woo-coupon-usage' ); ?></i><br/>
 
             <br/>
+            </span>
 
           </span>
           
-          <?php wcusage_setting_toggle_option('wcusage_field_track_click_ip', 1, esc_html__( 'Store visitors "IP Address" for referral clicks, instead of a random ID.', 'woo-coupon-usage' ), '30px'); ?>
-          <i style="margin-left: 30px;"><?php echo esc_html__( 'The IP address will be stored in the "clicks" database table. The IP address is only used to check if a click has already been tracked for that visitor.', 'woo-coupon-usage' ); ?></i><br/>
-          <i style="margin-left: 30px;"><?php echo esc_html__( 'If disabled, it will instead store an extra random ID as a cookie for new referral clicks ("wcusage_referral_id") which will then work in the same way.', 'woo-coupon-usage' ); ?></i><br/>
+          <?php wcusage_setting_select_option(
+            'wcusage_field_track_click_ip',
+            '1',
+            esc_html__( 'Visitor Identification Method for Click Tracking', 'woo-coupon-usage' ),
+            '30px',
+            array(
+              '1' => esc_html__( 'IP Address', 'woo-coupon-usage' ),
+              '0' => esc_html__( 'Random ID (Cookie)', 'woo-coupon-usage' ),
+              '2' => esc_html__( 'Random ID (Session)', 'woo-coupon-usage' ),
+            )
+          ); ?>
+          <i style="margin-left: 30px;"><?php echo esc_html__( 'IP Address: The visitor\'s IP address is stored in the "clicks" database table and used to check if a click has already been tracked for that visitor.', 'woo-coupon-usage' ); ?></i><br/>
+          <i style="margin-left: 30px;"><?php echo esc_html__( 'Random ID (Cookie): A random ID is stored as a cookie ("wcusage_referral_id") for new referral clicks and used to check if a click has already been tracked for that visitor.', 'woo-coupon-usage' ); ?></i><br/>
+          <i style="margin-left: 30px;"><?php echo esc_html__( 'Random ID (Session): A random ID is stored in the WooCommerce session for new referral clicks and used to check if a click has already been tracked for that visitor. No additional cookie is set.', 'woo-coupon-usage' ); ?></i><br/>
 
       		<br/>
 
@@ -357,6 +384,13 @@ function wcusage_field_cb_urls( $args )
           <i style="margin-left: 30px;"><?php echo esc_html__( 'If enabled, all new referral URL clicks from the same user will be tracked (and increases total clicks + visit logged in click history). Only the latest click will be converted if they make a purchase.', 'woo-coupon-usage' ); ?></i><br/>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'If disabled, only the first click from the visitor will be tracked (until the cookie expires).', 'woo-coupon-usage' ); ?></i><br/>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'Note: If enabled, any new clicks (from the same visitor) within the same minute as another will not be logged, and will keep the same ID as the initial click (to prevent spamming the logs).', 'woo-coupon-usage' ); ?></i><br/>
+
+          <br/>
+
+          <?php
+            $wcusage_store_cookies_for_clicks = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
+            echo '<p id="wcu-cookies-disabled-notice" style="'.($wcusage_store_cookies_for_clicks ? 'display: none;' : '').'background: #fff3cd; border-left: 4px solid #f0ad4e; padding: 10px 14px; margin-top: 15px; margin-bottom: 10px;"><span class="dashicons dashicons-info" style="color: #856404; margin-right: 6px;"></span>' . esc_html__( 'Tracking the "Converted" state for specific clicks in the log requires cookies to be enabled. The "Converted" column and conversion-related options will be hidden while cookies are disabled.', 'woo-coupon-usage' ) . '</p>';
+          ?>
 
         </span>
 
@@ -667,6 +701,20 @@ function wcusage_field_cb_urls( $args )
 
           <h3 id="wcu-setting-header-landing-pages"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Affiliate Landing Pages', 'woo-coupon-usage' ); ?><?php if( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?>:</h3>
 
+          <p>
+            <?php echo esc_html__( 'Affiliate landing pages allow you to assign specific pages on your website as "landing pages" for your affiliate coupons that work the same way as a referral link.', 'woo-coupon-usage' ); ?>
+            <a href="https://couponaffiliates.com/docs/pro-affiliate-landing-pages/" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.
+          </p>
+
+          <br/>
+
+          <p>
+            <?php echo esc_html__( 'Dynamic landing pages are also supported, where you can use a URL structure like /landing-page/{affiliate_code}/ and it will dynamically track the affiliate based on the URL.', 'woo-coupon-usage' ); ?>
+            <a href="https://couponaffiliates.com/docs/dynamic-landing-pages/" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.
+          </p>
+
+          <br/>
+
           <!-- Enable "affiliate landing pages" features. -->
           <?php wcusage_setting_toggle_option('wcusage_field_landing_pages', 0, esc_html__( 'Enable "affiliate landing pages" features.', 'woo-coupon-usage' ), '0px'); ?>
           <i><?php echo esc_html__( 'This option will enable the "affiliate landing page" metabox on pages, for you to assign a page as a landing page for an affiliate coupon.', 'woo-coupon-usage' ); ?></i>
@@ -690,6 +738,24 @@ function wcusage_field_cb_urls( $args )
               <!-- Landing Pages Text -->
               <?php wcusage_setting_text_option('wcusage_field_landing_pages_text', '', esc_html__( 'Landing Pages Text', 'woo-coupon-usage' ), '0px'); ?>
               <i><?php echo esc_html__( 'Display a custom message above the list of landing pages on the affiliate dashboard.', 'woo-coupon-usage' ); ?></i>
+
+            </span>
+
+            <br/><br/>
+
+            <!-- Enable template page protection -->
+            <?php wcusage_setting_toggle_option('wcusage_field_landing_pages_protection', 0, esc_html__( 'Enable dynamic landing page template protection.', 'woo-coupon-usage' ), '0px'); ?>
+            <i><?php echo esc_html__( 'When enabled, normal users visiting a dynamic landing page directly without an affiliate code (e.g. /prime-partner/ instead of /prime-partner/devonto/) will redirect the visitor.', 'woo-coupon-usage' ); ?></i>
+            <br/><i><?php echo esc_html__( 'Administrators, page builders and logged-in editors are always permitted to view the page however.', 'woo-coupon-usage' ); ?></i>
+
+            <?php wcusage_setting_toggle('.wcusage_field_landing_pages_protection', '.wcu-field-section-landing-pages-protection'); // Show or Hide ?>
+            <span class="wcu-field-section-landing-pages-protection">
+
+              <br/><br/>
+
+              <!-- Protection Redirect URL -->
+              <?php wcusage_setting_text_option('wcusage_field_landing_pages_protection_redirect', '/', esc_html__( 'Redirect URL', 'woo-coupon-usage' ), '0px'); ?>
+              <i><?php echo esc_html__( 'The URL to redirect unaffiliated visitors to when they access the base template page. Defaults to / (site root). You can also use an absolute URL, e.g. https://example.com/affiliate-programme/.', 'woo-coupon-usage' ); ?></i>
 
             </span>
 

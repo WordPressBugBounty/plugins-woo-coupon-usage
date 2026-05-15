@@ -142,10 +142,13 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_coupons' ) ) {
           if ( ! $reapplied ) {
             // Fallback: prefer the current referral cookie coupon (may be stale during this request)
             $referral_code = "";
-            if(isset($_COOKIE['wcusage_referral_code'])) {
+            $wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
+            if($wcusage_store_cookies && isset($_COOKIE['wcusage_referral_code'])) {
               $referral_code = $_COOKIE['wcusage_referral_code'];
-            } else if(isset($_COOKIE['wcusage_referral'])) {
+            } else if($wcusage_store_cookies && isset($_COOKIE['wcusage_referral'])) {
               $referral_code = $_COOKIE['wcusage_referral'];
+            } else if(function_exists('wcusage_get_wc_session_value')) {
+              $referral_code = wcusage_get_wc_session_value('wcusage_referral', '');
             }
             if($referral_code) {
               WC()->cart->add_discount( $referral_code );
@@ -191,18 +194,21 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_customer' ) ) {
         if ( $require_referral_link ) {
           $coupon_code = strtolower( $coupon->get_code() );
           $ref_sources = array();
+          $wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
 
-          if ( isset( $_COOKIE['wcusage_referral'] ) ) {
+          if ( $wcusage_store_cookies && isset( $_COOKIE['wcusage_referral'] ) ) {
             $ref_sources[] = sanitize_text_field( wp_unslash( $_COOKIE['wcusage_referral'] ) );
           }
 
-          if ( isset( $_COOKIE['wcusage_referral_code'] ) ) {
+          if ( $wcusage_store_cookies && isset( $_COOKIE['wcusage_referral_code'] ) ) {
             $ref_sources[] = sanitize_text_field( wp_unslash( $_COOKIE['wcusage_referral_code'] ) );
           }
 
-          global $wp_session;
-          if ( isset( $wp_session['wcusage_referral'] ) ) {
-            $ref_sources[] = sanitize_text_field( $wp_session['wcusage_referral'] );
+          if ( function_exists('wcusage_get_wc_session_value') ) {
+            $session_referral = wcusage_get_wc_session_value('wcusage_referral', '');
+            if ( $session_referral ) {
+              $ref_sources[] = $session_referral;
+            }
           }
 
           $matching_referral = false;
@@ -401,23 +407,125 @@ function wcusage_custom_woocommerce_coupon_label( $label, $coupon ) {
     return $label;
   }
 
-  // Get the user ID of the coupon
-  $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
-  if( ! $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true ) ) {
-      return $label;
+  if ( wcusage_is_zero_discount_affiliate_coupon( $coupon ) ) {
+    return str_replace( 'Coupon:', $wcusage_field_coupon_custom_text . ":", $label );
   }
 
-  if ( WC()->cart->get_coupon_discount_amount( $coupon->get_code(), true ) == 0 ) {
-    $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
-    if ( $coupon_user_id == get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true ) ) {
-      return str_replace( 'Coupon:', $wcusage_field_coupon_custom_text . ":", $label );
-    } else {
-      return $label;
+  return $label;
+
+}
+
+if( !function_exists( 'wcusage_is_zero_discount_affiliate_coupon' ) ) {
+  function wcusage_is_zero_discount_affiliate_coupon( $coupon ) {
+    if ( ! $coupon || ! method_exists( $coupon, 'get_id' ) || ! method_exists( $coupon, 'get_code' ) ) {
+      return false;
     }
-  } else {
-    return $label;
-  }
 
+    $coupon_id = $coupon->get_id();
+    if ( ! $coupon_id ) {
+      return false;
+    }
+
+    $coupon_user_id = get_post_meta( $coupon_id, 'wcu_select_coupon_user', true );
+    if ( ! $coupon_user_id ) {
+      return false;
+    }
+
+    if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+      return false;
+    }
+
+    return (float) WC()->cart->get_coupon_discount_amount( $coupon->get_code(), true ) == 0.0;
+  }
+}
+
+/**
+ * Check if a coupon is an affiliate coupon with a configured amount of 0.
+ * Uses the coupon's stored amount rather than cart-calculated discount,
+ * so it works at validation time before discounts are computed.
+ */
+if( !function_exists( 'wcusage_is_affiliate_coupon_with_zero_amount' ) ) {
+  function wcusage_is_affiliate_coupon_with_zero_amount( $coupon ) {
+    if ( ! $coupon || ! method_exists( $coupon, 'get_id' ) ) {
+      return false;
+    }
+    $coupon_id = $coupon->get_id();
+    if ( ! $coupon_id ) {
+      return false;
+    }
+    $coupon_user_id = get_post_meta( $coupon_id, 'wcu_select_coupon_user', true );
+    if ( ! $coupon_user_id ) {
+      return false;
+    }
+    return (float) $coupon->get_amount() == 0.0;
+  }
+}
+
+/*
+ * When the setting is enabled, allow any coupon to be applied alongside
+ * a zero-discount affiliate coupon, bypassing individual-use restrictions.
+ *
+ * Hook 1: a new individual-use coupon is being applied — preserve any existing
+ * zero-discount affiliate coupons instead of removing them.
+ */
+add_filter( 'woocommerce_apply_individual_use_coupon', 'wcusage_keep_zero_affiliate_on_individual_use', 10, 3 );
+function wcusage_keep_zero_affiliate_on_individual_use( $coupons_to_keep, $new_coupon, $applied_coupon_codes ) {
+  $setting = wcusage_get_setting_value( 'wcusage_field_coupon_allow_extra_with_zero', 0 );
+  if ( ! $setting ) {
+    return $coupons_to_keep;
+  }
+  foreach ( $applied_coupon_codes as $code ) {
+    try {
+      $existing = new WC_Coupon( $code );
+      if ( wcusage_is_affiliate_coupon_with_zero_amount( $existing ) ) {
+        $coupons_to_keep[] = $code;
+      }
+    } catch ( Exception $e ) {
+      // skip invalid coupon
+    }
+  }
+  return $coupons_to_keep;
+}
+
+/*
+ * Hook 2: a new non-individual-use coupon is being applied but an existing
+ * individual-use coupon in the cart would reject it. Allow it through if
+ * the new coupon is a zero-discount affiliate coupon.
+ */
+add_filter( 'woocommerce_apply_with_individual_use_coupon', 'wcusage_allow_coupon_with_zero_affiliate', 10, 4 );
+function wcusage_allow_coupon_with_zero_affiliate( $allow, $coupon, $applied_coupon, $applied_coupons ) {
+  if ( $allow ) {
+    return $allow;
+  }
+  $setting = wcusage_get_setting_value( 'wcusage_field_coupon_allow_extra_with_zero', 0 );
+  if ( ! $setting ) {
+    return $allow;
+  }
+  // Allow if the coupon currently being applied is a zero-amount affiliate coupon
+  if ( wcusage_is_affiliate_coupon_with_zero_amount( $coupon ) ) {
+    return true;
+  }
+  // Allow if the existing individual-use coupon in cart is a zero-amount affiliate coupon
+  if ( wcusage_is_affiliate_coupon_with_zero_amount( $applied_coupon ) ) {
+    return true;
+  }
+  return $allow;
+}
+
+// Collect coupon codes that need their row hidden; CSS is output via wp_footer.
+$wcusage_hidden_coupon_rows = array();
+
+add_action( 'wp_footer', 'wcusage_output_hidden_coupon_row_styles', 100 );
+function wcusage_output_hidden_coupon_row_styles() {
+  global $wcusage_hidden_coupon_rows;
+  if ( empty( $wcusage_hidden_coupon_rows ) ) {
+    return;
+  }
+  echo '<style>';
+  foreach ( $wcusage_hidden_coupon_rows as $coupon_class ) {
+    echo 'tr.cart-discount.' . esc_html( $coupon_class ) . '{display:none!important;}';
+  }
+  echo '</style>';
 }
 
 /*
@@ -426,46 +534,49 @@ function wcusage_custom_woocommerce_coupon_label( $label, $coupon ) {
 */
 add_filter( 'woocommerce_cart_totals_coupon_html', 'wcusage_custom_woocommerce_coupon_html', 1000, 2 );
 function wcusage_custom_woocommerce_coupon_html( $discount_html, $coupon ) {
-  
-    // Check if the setting is enabled
-    $wcusage_field_coupon_hide_zero = wcusage_get_setting_value('wcusage_field_coupon_hide_zero', 0);
-    if(!$wcusage_field_coupon_hide_zero) {
-        return $discount_html;
-    }
 
-    // Get the user ID of the coupon
-    $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true );
-    if( ! $coupon_user_id = get_post_meta( $coupon->get_id(), 'wcu_select_coupon_user', true ) ) {
-        return $discount_html;
-    }
+  if ( ! wcusage_is_zero_discount_affiliate_coupon( $coupon ) ) {
+    return $discount_html;
+  }
+
+  $wcusage_field_coupon_hide_zero_coupon = wcusage_get_setting_value('wcusage_field_coupon_hide_zero_coupon', 0);
+  if ( $wcusage_field_coupon_hide_zero_coupon ) {
+    global $wcusage_hidden_coupon_rows;
+    $coupon_class = 'coupon-' . sanitize_title( $coupon->get_code() );
+    $wcusage_hidden_coupon_rows[] = $coupon_class;
+    return '';
+  }
+
+  // Check if the setting is enabled
+  $wcusage_field_coupon_hide_zero = wcusage_get_setting_value('wcusage_field_coupon_hide_zero', 0);
+  if(!$wcusage_field_coupon_hide_zero) {
+      return $discount_html;
+  }
     
-  // Check if the discount amount is £0.00
-  if ( WC()->cart->get_coupon_discount_amount( $coupon->get_code(), true ) == 0 ) {
-    // Hide the £0.00 value but keep the Remove link. Prefer extracting the existing link from $discount_html
-    // to preserve WooCommerce's nonce and attributes. Fallback to building a URL if needed.
-    $extracted = '';
-    if ( is_string( $discount_html ) ) {
-      // Find the first anchor tag (usually the remove link) and keep from there onwards
-      $a_pos = strpos( $discount_html, '<a ' );
-      if ( $a_pos !== false ) {
-        $extracted = substr( $discount_html, $a_pos );
-      }
-    }
-
-    if ( $extracted ) {
-      $discount_html = $extracted;
-    } else {
-      // Build a safe remove URL as a fallback
-      if ( function_exists( 'wc_get_cart_remove_coupon_url' ) ) {
-        $remove_url = wc_get_cart_remove_coupon_url( $coupon->get_code() );
-      } else {
-        $remove_url = add_query_arg( 'remove_coupon', $coupon->get_code(), wc_get_cart_url() );
-      }
-      $discount_html = '<a href="' . esc_url( $remove_url ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '" aria-label="' . esc_attr( sprintf( __( 'Remove coupon: %s', 'woocommerce' ), $coupon->get_code() ) ) . '">' . esc_html__( '[Remove]', 'woocommerce' ) . '</a>';
+  // Hide the £0.00 value but keep the Remove link. Prefer extracting the existing link from $discount_html
+  // to preserve WooCommerce's nonce and attributes. Fallback to building a URL if needed.
+  $extracted = '';
+  if ( is_string( $discount_html ) ) {
+    // Find the first anchor tag (usually the remove link) and keep from there onwards
+    $a_pos = strpos( $discount_html, '<a ' );
+    if ( $a_pos !== false ) {
+      $extracted = substr( $discount_html, $a_pos );
     }
   }
 
-    return $discount_html;
+  if ( $extracted ) {
+    $discount_html = $extracted;
+  } else {
+    // Build a safe remove URL as a fallback
+    if ( function_exists( 'wc_get_cart_remove_coupon_url' ) ) {
+      $remove_url = wc_get_cart_remove_coupon_url( $coupon->get_code() );
+    } else {
+      $remove_url = add_query_arg( 'remove_coupon', $coupon->get_code(), wc_get_cart_url() );
+    }
+    $discount_html = '<a href="' . esc_url( $remove_url ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '" aria-label="' . esc_attr( sprintf( __( 'Remove coupon: %s', 'woocommerce' ), $coupon->get_code() ) ) . '">' . esc_html__( '[Remove]', 'woocommerce' ) . '</a>';
+  }
+
+  return $discount_html;
 }
 
 // Run at "Place order": remove coupons where the billing email user matches the assigned coupon user.

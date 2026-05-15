@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 7.0
-Stable tag: 7.8.0
+Stable tag: 7.8.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -269,6 +269,19 @@ Please report security bugs found in the source code of the plugin through the [
 
 == Changelog ==
 
+= Version 7.8.1 - 15th May 2026 =
+- New: Added a new "Privacy & Cookies" settings tab with related options moved into this so they are easier to find, to control the cookie storage and sessions options etc. Also changed sessions to use WooCommerce sessions for the auto-apply coupon backup.
+- New: (PRO) Added a new option in "Coupon Checkout Settings" to always allow any other non-affiliate discount coupon to be applied alongside zero-discount affiliate coupons, overriding all individual-use and other coupon restrictions, and an option to completely hide applied affiliate coupons with zero discount on the cart and checkout page.
+- New: (PRO) Added a new {coupon_description} merge tag for dynamic landing pages, which outputs the WooCommerce coupon description.
+- New: (PRO) Added a "Dynamic Landing Page Template Protection" option to the landing pages settings. When enabled, visiting the base template page directly (e.g. /prime-partner/) without an affiliate code will redirect visitors to a configurable URL (defaults to the site root).
+- Tweak: (PRO) Improved dynamic creatives loading reliability, performance, and cache-busting when a creative is edited.
+- Tweak: (PRO) Affiliates whose saved payout method has been disabled can no longer request payouts (manual or scheduled) and are prompted to select a new method.
+- Tweak: Made some styling tweaks to the border radius styling of some elements on the affiliate dashboard and admin pages.
+- Tweak: Improved full and partial refund handling so refund recalculations can update saved commission stats when needed, lifetime/referrer tracked orders are included in partial refund payout adjustments, and full refunds update coupon all-time usage totals.
+- Tweak: Improved the database table import/export tool to work better when moving data between sites.
+- Fix: (PRO) Fixed several QR code issues on mobile browsers: logo not appearing when "Include logo in QR code" was enabled, download button not working, and downloaded files being saved with a .png.html extension instead of .png.
+- Fix: Fixed affiliate dashboard tabs becoming unclickable in some setups, particularly when using JS optimisation plugins such as WP Rocket, Autoptimize, or LiteSpeed Cache.
+
 = Version 7.8.0 - 30th April 2026 =
 - New: (PRO) Added a "Rewards Log" section to the affiliate dashboard Performance Bonuses tab so affiliates can see a history of the rewards they have earned.
 - New: (PRO) Added a "Rewards Log" admin page (Coupon Affiliates > Performance Bonuses > Rewards Log) showing earned rewards across all affiliates.
@@ -282,18 +295,18 @@ Please report security bugs found in the source code of the plugin through the [
 - Tweak: Improved the standalone affiliate portal by preventing theme/global styles from loading and adding proper meta title/description tags for shared portal links.
 - Tweak: Improved affiliate registration validation to prevent duplicate custom coupon codes from creating or logging in an account before the error is shown.
 - Tweak: (PRO) Performance bonus reward checks are now deferred until after order stats and commission have been fully calculated, so rewards that change the affiliate coupon's commission rate only apply to future orders and no longer affect the order that triggered the reward.
-- Fix: (PRO) Fixed an issue on the affiliate dashboard Payouts tab where the payout method input field (e.g. PayPal Email Address) was not visible on initial page load if JavaScript had not yet executed.
-- Fix: (PRO) Fixed an issue where MLA dashboard links could break if the MLA portal slug was saved with uppercase letters, due to case-sensitive URL matching in the rewrite rules and slug comparisons.
-- Fix: (PRO) Improved dynamic landing pages with better functionality, working better with caching, and added new merge tags.
-- Fix: Fixed an "Undefined array key" PHP warning for `wcusage_field_custom_tabs_icon_{n}` in the affiliate portal when custom tab icons had not yet been saved.
+- Tweak: (PRO) Improved dynamic landing pages with better functionality, working better with caching, and added new merge tags.
+- Fix: (PRO) Fixed an issue where the payout method input field (e.g. PayPal Email Address) was not visible on initial affiliate dashboard page load in some cases.
+- Fix: (PRO) Fixed an issue where the MLA dashboard link could break if the MLA portal slug was saved with uppercase letters.
+- Fix: Fixed an "Undefined array key" PHP warning for wcusage_field_custom_tabs_icon_{n} in the affiliate portal when custom tab icons had not yet been saved.
 - Fix: Fixed an issue where custom affiliate dashboard tab icons were no longer displayed in the standalone affiliate portal in certain cases.
 - Fix: Fixed an issue where the affiliate dashboard and admin affiliate view "Referred Orders" lists could show inconsistent subsets of orders since a recent update, especially for lifetime commission and manually assigned orders.
 - Fix: Fixed an issue where the affiliate dashboard "Referred Orders" statistics boxes did not reflect the selected order status when filtering by a single status.
-- Fix: Fixed the admin "View affiliate dashboard" preview button to use the configured shortcode dashboard page when the standalone affiliate portal is disabled, instead of always linking to the portal URL.
-- Fix: Fixed a bug on the affiliate dashboard Referred Orders tab where the number of orders displayed in the table could be lower than the actual referral count shown in the stats boxes.
-- Fix: Fixed a bug where refund deductions were never being applied to commission calculations in some cases.
+- Fix: Fixed the admin "View affiliate dashboard" preview button to use the configured shortcode dashboard page when the standalone affiliate portal is disabled.
+- Fix: Fixed a recent bug on the affiliate dashboard "Referred Orders" tab where the number of orders displayed in the table could be lower than the actual referral count.
+- Fix: Fixed a bug where in certain cases refund deductions were not being applied to calculations immediately.
 - Fix: (PRO) Fixed an issue where dynamic creatives would return a 403 "rest_forbidden" error and fail to display on the affiliate dashboard on some servers/setups.
-- Fix: Fixed a bug where affiliate registrations were silently failing on sites running MySQL with strict mode enabled.
+- Fix: Fixed a bug where affiliate registrations were failing on sites running MySQL with strict mode enabled.
 - Fix: Fixed an issue where the affiliate portal page could be treated as a 404 page.
 - Fix: (PRO) Fixed an issue where the admin payouts page could show an empty success notice and leave the payout as pending for users that were not the "administrator" role.
 - Dev: Added new filters to add custom columns to the affiliate dashboard Referred Orders table and render custom values for each order.

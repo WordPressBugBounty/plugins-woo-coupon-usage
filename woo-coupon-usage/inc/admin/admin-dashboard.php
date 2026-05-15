@@ -450,7 +450,7 @@ jQuery(document).ready(function($) {
                 }
                 if (!empty($item['dropdown'])): ?>
                     <li class="wcusage-admin-menu-dropdown" style="position: relative;">
-                        <a href="<?php echo esc_url($item['url']); ?>" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: #333;<?php echo $is_active ? ' background: #f3f3f3;' : ''; ?> font-weight: 500;">
+                        <a href="<?php echo esc_url($item['url']); ?>" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 5px; text-decoration: none; color: #333;<?php echo $is_active ? ' background: #f3f3f3;' : ''; ?> font-weight: 500;">
                             <span class="<?php echo esc_attr($item['icon']); ?>"></span> <?php echo esc_html($item['label']); ?> <span style="margin-left: 4px;" class="fa-solid fa-caret-down"></span>
                         </a>
                         <ul class="wcusage-admin-menu-dropdown-list" style="display: none; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; min-width: 200px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 9999;">
@@ -478,7 +478,7 @@ jQuery(document).ready(function($) {
                     </li>
                 <?php else: ?>
                     <li style="position: relative;">
-                        <a href="<?php echo esc_url($item['url']); ?>" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: #333;<?php echo $is_active ? ' background: #f3f3f3;' : ''; ?> font-weight: 500;">
+                        <a href="<?php echo esc_url($item['url']); ?>" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 5px; text-decoration: none; color: #333;<?php echo $is_active ? ' background: #f3f3f3;' : ''; ?> font-weight: 500;">
                             <span class="<?php echo esc_attr($item['icon']); ?>"></span> <?php echo esc_html($item['label']); ?>
                         </a>
                     </li>
@@ -486,7 +486,7 @@ jQuery(document).ready(function($) {
             endforeach; ?>
             <!-- Other dropdown -->
             <li class="wcusage-admin-menu-dropdown" style="position: relative;">
-                <a href="#" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: #333; font-weight: 500;">
+                <a href="#" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 5px; text-decoration: none; color: #333; font-weight: 500;">
                     <span class="fa-solid fa-ellipsis-h"></span> Other <span style="margin-left: 4px;" class="fa-solid fa-caret-down"></span>
                 </a>
                 <ul class="wcusage-admin-menu-dropdown-list" style="display: none; position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; min-width: 200px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 9999;">
@@ -531,7 +531,7 @@ jQuery(document).ready(function($) {
             </li>
             <!-- Support dropdown -->
             <li class="wcusage-admin-menu-dropdown" style="position: relative;">
-                <a href="#" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: #333; font-weight: 500;">
+                <a href="#" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 5px; text-decoration: none; color: #333; font-weight: 500;">
                     <span class="fa-solid fa-life-ring"></span> Support <span style="margin-left: 4px;" class="fa-solid fa-caret-down"></span>
                 </a>
                 <ul class="wcusage-admin-menu-dropdown-list" style="display: none; position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; min-width: 200px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 9999;">
@@ -549,7 +549,7 @@ jQuery(document).ready(function($) {
             <?php if (!wcu_fs()->can_use_premium_code()): ?>
             <!-- Upgrade to PRO button -->
             <li style="position: relative;">
-                <a href="https://couponaffiliates.com/pricing/?discount=SAVE25&utm_source=plugin&utm_medium=upgrade-menu" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 8px; text-decoration: none; color: #fff; font-weight: 600; background: linear-gradient(270deg,#00a32a,#008a20,#00a32a); box-shadow: 0 2px 8px rgba(0,163,42,0.15);">
+                <a href="https://couponaffiliates.com/pricing/?discount=SAVE25&utm_source=plugin&utm_medium=upgrade-menu" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 5px; text-decoration: none; color: #fff; font-weight: 600; background: linear-gradient(270deg,#00a32a,#008a20,#00a32a); box-shadow: 0 2px 8px rgba(0,163,42,0.15);">
                     Get 25% off PRO
                 </a>
             </li>

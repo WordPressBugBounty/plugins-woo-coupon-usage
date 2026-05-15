@@ -155,6 +155,17 @@ function wcusage_settings_init() {
             'class' => 'wcusage_row wcusage_row_widget',
         ]
     );
+    // register privacy and cookie settings
+    add_settings_field(
+        'wcusage_field_privacy',
+        esc_html__( 'Privacy & Cookies', 'woo-coupon-usage' ),
+        'wcusage_field_cb_privacy',
+        'wcusage',
+        'wcusage_section_developers',
+        [
+            'class' => 'wcusage_row wcusage_row_privacy',
+        ]
+    );
     // register debug
     add_settings_field(
         'wcusage_field_debug',
@@ -551,6 +562,10 @@ jQuery( document ).ready(function() {
     ?>
 
   <?php 
+    wcusage_admin_settings_tab_click( "#tab-privacy", ".wcusage_row_privacy", 1 );
+    ?>
+
+  <?php 
     wcusage_admin_settings_tab_click( "#tab-debug", ".wcusage_row_debug", 1 );
     ?>
 
@@ -744,6 +759,17 @@ jQuery( document ).ready(function() {
         "tab-widget",
         esc_html__( "Floating Widget", "woo-coupon-usage" ),
         "fas fa-square-caret-right",
+        0,
+        ''
+    );
+    ?>
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+    wcusage_admin_settings_sidebar_button(
+        "tab-privacy",
+        esc_html__( "Privacy & Cookies", "woo-coupon-usage" ),
+        "fas fa-cookie-bite",
         0,
         ''
     );
@@ -1985,6 +2011,7 @@ if ( !function_exists( 'wcusage_get_all_default_settings' ) ) {
                 // premium
                 'wcusage_field_cb_design',
                 'wcusage_field_cb_widget',
+                'wcusage_field_cb_privacy',
                 'wcusage_field_cb_debug',
                 'wcusage_field_cb_help',
                 'wcusage_field_cb_pro_details',

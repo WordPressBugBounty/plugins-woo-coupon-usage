@@ -178,41 +178,6 @@ function wcusage_field_cb_debug( $args )
     <br/>
   <?php } ?>
 
-	<hr/>
-
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Cookie Settings', 'woo-coupon-usage' ); ?>:</h3>
-
-  <p>
-    <?php echo esc_html__('Disabling these will prevent cookies from being stored by the plugin in the visitors browsers.', 'woo-coupon-usage'); ?>
-    <br/>
-    <?php echo esc_html__('You should only disable this if your primary method of tracking referrals is through customers manually applying the affiliates coupon at checkout.', 'woo-coupon-usage'); ?>
-    <br/>
-    <?php echo esc_html__('If cookies are disabled, the referral links will still work but will not be as effective, since they can only attempt to auto-apply coupons on the first page they load.', 'woo-coupon-usage'); ?>
-  </p>
-
-  <br/>
-
-  <!-- wcusage_field_store_cookies -->
-  <?php wcusage_setting_toggle_option('wcusage_field_store_cookies', 1, esc_html__( 'Store cookies for referral links (recommended).', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'This will store a cookie in the visitors browser when they click on a referral link, to automatically apply the coupon code once they add items to their cart, and to track link stats better.', 'woo-coupon-usage' ); ?></i><br/>
-  <i><?php echo esc_html__( 'If disabled, then it will only be able to try to automatically apply the coupon code on their first page visit, and URL only conversion tracking will not work. Coupons will be required to track referrals.', 'woo-coupon-usage' ); ?></i><br/>
-  <?php wcusage_setting_toggle('.wcusage_field_store_cookies', '.wcu-referral-cookies'); // Show or Hide ?>
-
-  <br/>
-
-  <!-- wcusage_field_store_cookies -->
-  <?php wcusage_setting_toggle_option('wcusage_field_store_cookies_mla', 1, esc_html__( 'Store cookies for MLA referral links (recommended).', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'This will store a cookie in the visitors browser when they click on a referral link, so the referral can be tracked even if they do not register on their first page visit.', 'woo-coupon-usage' ); ?></i><br/>
-  <i><?php echo esc_html__( 'If this is disabled, then it will only be able to try to track referrals if they register on their first page visit.', 'woo-coupon-usage' ); ?></i><br/>
-  
-  <br/>
-
-  <!-- wcusage_field_store_cookies -->
-  <?php wcusage_setting_toggle_option('wcusage_field_store_cookies_domains', 1, esc_html__( 'Store cookies for domain link tracking and blacklists.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'This is required for domain link tracking and domain blacklists to work.', 'woo-coupon-usage' ); ?></i><br/>
-
-  <br/>
-
   <hr/>
 
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( '(Admin) Activity Log', 'woo-coupon-usage' ); ?>:</h3>
@@ -274,6 +239,18 @@ function wcusage_field_cb_debug( $args )
   <!-- Hide "0.00" value on checkout from referral coupons. -->
   <?php wcusage_setting_toggle_option('wcusage_field_coupon_hide_zero', 1, esc_html__( 'Hide "0.00" value on checkout from referral coupons.', 'woo-coupon-usage' ), '0px'); ?>
   <i><?php echo esc_html__( 'When a referral coupon is applied, if the discount is "0.00", it will hide the 0.00 discount line on the checkout page.', 'woo-coupon-usage' ); ?></i><br/>
+
+  <br/>
+
+  <!-- Completely hide zero discount affiliate coupons on cart and checkout. -->
+  <?php wcusage_setting_toggle_option('wcusage_field_coupon_hide_zero_coupon', 0, esc_html__( 'Completely hide the applied coupon on cart and checkout if it has 0 discount and is an affiliate coupon.', 'woo-coupon-usage' ), '0px'); ?>
+  <i><?php echo esc_html__( 'When enabled, zero-discount affiliate coupons will remain applied but their coupon row will be hidden on the cart and checkout pages.', 'woo-coupon-usage' ); ?></i><br/>
+
+  <br/>
+
+  <!-- Allow any other discount coupon alongside zero-discount affiliate coupons. -->
+  <?php wcusage_setting_toggle_option('wcusage_field_coupon_allow_extra_with_zero', 0, esc_html__( 'Always allow any other non-affiliate discount coupon to be applied alongside zero-discount affiliate coupons, overriding all restrictions.', 'woo-coupon-usage' ), '0px'); ?>
+  <i><?php echo esc_html__( 'When enabled, customers can apply any additional coupon alongside a zero-discount affiliate coupon, even if individual-use or other coupon restrictions apply.', 'woo-coupon-usage' ); ?></i><br/>
 
   <br/>
 

@@ -155,6 +155,46 @@ function wcusage_field_cb_commission( $args )
 
     </span>
 
+    <br/><hr/>
+
+    <h3 id="wcu-setting-header-new-customer-bonus">
+      <span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'New Customer Bonus', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?>:
+    </h3>
+
+    <i><?php echo esc_html__( 'Increase the commission earned if the referred customer is placing their first order.', 'woo-coupon-usage' ); ?></i>
+
+    <br/><br/>
+
+    <!-- Enable "New Customer Bonus" commission. -->
+    <?php wcusage_setting_toggle_option('wcusage_field_new_customer_bonus_enable', 0, esc_html__( 'Enable "New Customer Bonus" commission.', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( 'When enabled, the first order for each customer will be marked and will receive the bonus commission set below.', 'woo-coupon-usage' ); ?></i>
+
+    <br/>
+
+    <?php wcusage_setting_toggle('.wcusage_field_new_customer_bonus_enable', '.wcu-field-section-new-customer-bonus'); // Show or Hide ?>
+    <span class="wcu-field-section-new-customer-bonus">
+    <br/>
+
+    <p style="margin-left: 0px;">
+      <strong><?php echo esc_html__( 'How it works:', 'woo-coupon-usage' ); ?></strong>
+      <ul style="list-style: disc; margin-left: 20px; margin-top: 6px;">
+        <li><?php echo esc_html__( 'When an order is placed, the plugin checks whether it is the first order for that customer by looking up previous orders matching their account ID and/or billing email address.', 'woo-coupon-usage' ); ?></li>
+        <li><?php echo esc_html__( 'If no previous orders are found, the order is marked as a "first order" using order meta. This mark is saved permanently so the bonus is still applied correctly if the order\'s commission is recalculated later.', 'woo-coupon-usage' ); ?></li>
+        <li><?php echo esc_html__( 'The check runs at priority 2 on checkout, before affiliate stats are saved, so the correct commission is recorded from the start.', 'woo-coupon-usage' ); ?></li>
+        <li><?php echo esc_html__( 'Only orders with a qualifying status (pending, processing, completed, on-hold, and any paid statuses) count as previous orders for the check.', 'woo-coupon-usage' ); ?></li>
+        <li><?php echo esc_html__( 'The bonus only applies to commission earned via this plugin — it does not affect the discount amount the customer receives.', 'woo-coupon-usage' ); ?></li>
+      </ul>
+    </p>
+
+    <br/>
+
+    <!-- New Customer Bonus Commission % -->
+    <?php wcusage_setting_number_option('wcusage_field_new_customer_bonus_amount', '100', esc_html__( 'Bonus Commission (%)', 'woo-coupon-usage' ), '0px', '0.01'); ?>
+    <i style="margin-left: 0px;"><?php echo esc_html__( 'This increases the commission earned on the customer\'s first order by the percentage entered.', 'woo-coupon-usage' ); ?></i><br/>
+    <i style="margin-left: 0px;"><?php echo esc_html__( 'For example, 100% doubles the commission, so a 10% base commission becomes 20% for the first order.', 'woo-coupon-usage' ); ?></i><br/>
+
+    </span>
+
     <!-- Per User Role -->
     <br/><hr/>
     <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;" id="wcu-setting-header-commission-user-role"></span> <?php echo esc_html__( 'Per User Role Commission', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?>:</h3>
@@ -167,15 +207,15 @@ function wcusage_field_cb_commission( $args )
 
     <br/><br/>
 
-    <p style="font-size: 17px; margin-left: 40px;"><strong><?php echo esc_html__( 'Information:', 'woo-coupon-usage' ); ?></strong></p>
+    <p style="font-size: 17px; margin-left: 0px;"><strong><?php echo esc_html__( 'Information:', 'woo-coupon-usage' ); ?></strong></p>
 
-    <p style="margin-left: 40px;">- <?php echo esc_html__( 'Set the custom commission rates for each user role below (this is the role of the affiliate user). Leave empty to use default rates.', 'woo-coupon-usage' ); ?></p>
+    <p style="margin-left: 0px;">- <?php echo esc_html__( 'Set the custom commission rates for each user role below (this is the role of the affiliate user). Leave empty to use default rates.', 'woo-coupon-usage' ); ?></p>
 
-    <p style="margin-left: 40px;">- <?php echo esc_html__( 'If you set custom "coupon" commission for that affiliate, or "per product" commission, they WILL take priority over the "user role" commission.', 'woo-coupon-usage' ); ?></p>
+    <p style="margin-left: 0px;">- <?php echo esc_html__( 'If you set custom "coupon" commission for that affiliate, or "per product" commission, they WILL take priority over the "user role" commission.', 'woo-coupon-usage' ); ?></p>
 
-    <p style="margin-left: 40px;">- <?php echo esc_html__( 'If the affiliate user is assigned to multiple user roles, it will apply the commission rates for the first role it detects with any custom values set.', 'woo-coupon-usage' ); ?></p>
+    <p style="margin-left: 0px;">- <?php echo esc_html__( 'If the affiliate user is assigned to multiple user roles, it will apply the commission rates for the first role it detects with any custom values set.', 'woo-coupon-usage' ); ?></p>
 
-    <p style="margin-left: 40px;">- <?php echo esc_html__( 'When updating these settings, you may need to click the "REFRESH ALL DATA" button in the "Debug" tab for changes to show immediately for existing orders.', 'woo-coupon-usage' ); ?></p>
+    <p style="margin-left: 0px;">- <?php echo esc_html__( 'When updating these settings, you may need to click the "REFRESH ALL DATA" button in the "Debug" tab for changes to show immediately for existing orders.', 'woo-coupon-usage' ); ?></p>
 
     <br/>
 

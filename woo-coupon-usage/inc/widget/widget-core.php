@@ -121,8 +121,8 @@ function wcusage_floating_widget_output() {
     }
     
     ?>
-    <div class="wcusage-floating-widget <?php echo esc_attr($position_class . ' ' . $size_class . $device_classes); ?>" style="<?php echo esc_attr($color_vars); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
-        <button class="wcusage-floating-button" id="wcusage-floating-btn">
+    <div class="wcusage-floating-widget <?php echo esc_attr($position_class . ' ' . $size_class . $device_classes); ?>">
+        <button class="wcusage-floating-button" id="wcusage-floating-btn" style="<?php echo esc_attr($color_vars); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
             <span class="wcusage-floating-icon"><?php echo esc_html($icon); ?></span>
             <?php echo esc_html($button_text); ?>
         </button>

@@ -1234,6 +1234,7 @@ function wcusage_widget_display_creatives(
                     'creative_id' => urlencode( $post_id ),
                     'coupon_code' => urlencode( $coupon_code ),
                     'token'       => $token,
+                    'ver'         => strtotime( get_post_field( 'post_modified', $post_id ) ),
                 );
                 $final_image_url = rest_url( $endpoint ) . '?' . http_build_query( $parameters );
                 ?>

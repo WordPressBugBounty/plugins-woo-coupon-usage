@@ -164,7 +164,7 @@ class wcusage_clicks_List_Table extends WP_List_Table {
     function get_columns(){
 
       $wcusage_field_track_click_ip = wcusage_get_setting_value('wcusage_field_track_click_ip', '1');
-      if($wcusage_field_track_click_ip) {
+      if ( $wcusage_field_track_click_ip === '1' || $wcusage_field_track_click_ip === 1 ) {
         $ip_text = esc_html__( 'IP Address', 'woo-coupon-usage' );
       } else {
         $ip_text = esc_html__( 'Visitor ID', 'woo-coupon-usage' );

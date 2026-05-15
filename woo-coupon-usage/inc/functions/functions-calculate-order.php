@@ -78,19 +78,26 @@ if ( !function_exists( 'wcusage_edit_order_meta' ) ) {
  * @param int $orderid
  */
 if ( !function_exists( 'wcusage_update_order_meta' ) ) {
-    function wcusage_update_order_meta(  $order_id, $item = '', $value = ''  ) {
+    function wcusage_update_order_meta(
+        $order_id,
+        $item = '',
+        $value = '',
+        $force_update = 0
+    ) {
+        $order = wc_get_order( $order_id );
+        if ( !$order || !is_a( $order, 'WC_Order' ) ) {
+            return;
+        }
+        $force_commission_meta_update = $force_update && ($order->get_status() == "refunded" || !empty( $order->get_refunds() ));
         $never_update_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_never_update_commission_meta', '0' );
-        if ( $never_update_commission_meta ) {
-            if ( $item == "wcusage_commission_summary" || $item == "wcusage_total_commission" || $item == "wcusage_product_commission" || $item == "wcusage_currency_conversion" || $item == "wcu_mla_commission" ) {
+        if ( $never_update_commission_meta && !$force_commission_meta_update ) {
+            if ( $item == "wcusage_commission_summary" || $item == "wcusage_total_commission" || $item == "wcusage_product_commission" || $item == "wcusage_fixed_order_commission" || $item == "wcusage_stats" || $item == "wcusage_currency_conversion" || $item == "wcu_mla_commission" ) {
                 if ( wcusage_order_meta( $order_id, $item ) ) {
                     return;
                 }
             }
         }
-        $order = wc_get_order( $order_id );
-        if ( $order && is_a( $order, 'WC_Order' ) ) {
-            wcusage_edit_order_meta( $order_id, $item, $value );
-        }
+        wcusage_edit_order_meta( $order_id, $item, $value );
     }
 
 }
@@ -99,14 +106,15 @@ if ( !function_exists( 'wcusage_update_order_meta' ) ) {
  *
  * @param int $orderid
  */
-function wcusage_update_order_meta_bulk(  $order_id, $meta_data = []  ) {
+function wcusage_update_order_meta_bulk(  $order_id, $meta_data = [], $force_update = 0  ) {
     $order = wc_get_order( $order_id );
     $update = 0;
     if ( $order && is_a( $order, 'WC_Order' ) ) {
+        $force_commission_meta_update = $force_update && ($order->get_status() == "refunded" || !empty( $order->get_refunds() ));
         foreach ( $meta_data as $key => $value ) {
             $never_update_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_never_update_commission_meta', '0' );
-            if ( $never_update_commission_meta ) {
-                if ( $key == "wcusage_commission_summary" || $key == "wcusage_total_commission" || $key == "wcusage_product_commission" || $key == "wcusage_currency_conversion" || $key == "wcu_mla_commission" ) {
+            if ( $never_update_commission_meta && !$force_commission_meta_update ) {
+                if ( $key == "wcusage_commission_summary" || $key == "wcusage_total_commission" || $key == "wcusage_product_commission" || $key == "wcusage_fixed_order_commission" || $key == "wcusage_stats" || $key == "wcusage_currency_conversion" || $key == "wcu_mla_commission" ) {
                     if ( wcusage_order_meta( $order_id, $key ) ) {
                         continue;
                     }
@@ -460,6 +468,10 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                     $affiliate_commission_amount = 0;
                 }
                 $never_update_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_never_update_commission_meta', '0' );
+                $force_refund_recalculation = $force_update && ($order->get_status() == "refunded" || !empty( $order->get_refunds() ));
+                if ( $force_refund_recalculation ) {
+                    $never_update_commission_meta = 0;
+                }
                 $current_commission = wcusage_order_meta( $orderid, 'wcusage_total_commission', true );
                 if ( !$never_update_commission_meta || !$current_commission ) {
                     $affiliatecommission = (float) $ordertotal * (float) $affiliate_commission_amount;
@@ -596,12 +608,22 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                     ''
                 );
                 if ( $save_order_commission_meta ) {
-                    wcusage_update_order_meta( $orderid, 'wcusage_stats', $allstats );
+                    wcusage_update_order_meta(
+                        $orderid,
+                        'wcusage_stats',
+                        $allstats,
+                        $force_refund_recalculation
+                    );
                 }
                 $commission_summary = $wcusage_get_order_calculate_data['commission_summary'];
                 $get_commission_summary = wcusage_order_meta( $orderid, 'wcusage_commission_summary', true );
                 if ( !$get_commission_summary && $save_order_commission_meta ) {
-                    wcusage_update_order_meta( $orderid, 'wcusage_commission_summary', $commission_summary );
+                    wcusage_update_order_meta(
+                        $orderid,
+                        'wcusage_commission_summary',
+                        $commission_summary,
+                        $force_refund_recalculation
+                    );
                 }
                 // Return Values
                 $return_array = [];
@@ -752,14 +774,16 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         $wcusage_show_tax_fixed = wcusage_get_setting_value( 'wcusage_field_show_tax_fixed', '0' );
         $taxpercent = wcusage_get_order_tax_percent( $orderid );
         $never_update_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_never_update_commission_meta', '0' );
+        $force_refund_recalculation = false;
         // check if order status refunded
         $order_status = "";
         if ( !empty( $order->get_status() ) ) {
             $order_status = $order->get_status();
         }
-        if ( $order_status == "refunded" && $force_update ) {
-            // When order is refunded it needs to update commission amounts.
+        if ( $force_update && ($order_status == "refunded" || !empty( $order->get_refunds() )) ) {
+            // When an order has refunds it needs to update commission amounts.
             $never_update_commission_meta = 0;
+            $force_refund_recalculation = true;
         }
         $affiliate_per_user = wcusage_get_setting_value( 'wcusage_field_affiliate_per_user', '0' );
         // ***** Get Affiliate Fixed Per Order Amount ***** //
@@ -1232,6 +1256,16 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         $totalcommission = $max_commission;
                     }
                 }
+                // Filter to edit totalcommission (mirrors wcusage_calculate_edit_commission applied to $all_commission above)
+                if ( $totalcommission ) {
+                    $totalcommission = apply_filters(
+                        'wcusage_calculate_edit_commission',
+                        $totalcommission,
+                        $orderid,
+                        $couponid,
+                        $couponuser
+                    );
+                }
                 // ***** Update Meta ***** //
                 $meta_total_commission = wcusage_order_meta( $orderid, 'wcusage_total_commission', true );
                 $meta_product_commission = wcusage_order_meta( $orderid, 'wcusage_product_commission', true );
@@ -1300,12 +1334,15 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
             }
         }
         if ( !empty( $meta_data ) ) {
-            wcusage_update_order_meta_bulk( $orderid, $meta_data );
+            wcusage_update_order_meta_bulk( $orderid, $meta_data, $force_refund_recalculation );
         }
         // Ensure we get current commission, no matter what, if never update meta enabled.
         $never_update_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_never_update_commission_meta', '0' );
+        if ( $force_refund_recalculation ) {
+            $never_update_commission_meta = 0;
+        }
         $current_commission = wcusage_order_meta( $orderid, 'wcusage_total_commission', true );
-        if ( $never_update_commission_meta && $current_commission ) {
+        if ( $type != "refunds" && $never_update_commission_meta && $current_commission ) {
             $current_totalcommission = wcusage_order_meta( $orderid, 'wcusage_total_commission', true );
             $current_fixed_product_commission_total = wcusage_order_meta( $orderid, 'wcusage_product_commission', true );
             $current_commission_summary = wcusage_order_meta( $orderid, 'wcusage_commission_summary', true );

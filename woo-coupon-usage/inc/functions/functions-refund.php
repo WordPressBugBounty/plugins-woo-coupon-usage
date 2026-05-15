@@ -3,6 +3,67 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+if( !function_exists( 'wcusage_order_refund_is_full' ) ) {
+  function wcusage_order_refund_is_full( $order, $refund = 0, $args = array() ) {
+
+    if( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+      return false;
+    }
+
+    if( $order->get_status() == "refunded" ) {
+      return true;
+    }
+
+    $order_total = (float) $order->get_total();
+    if( $order_total <= 0 ) {
+      return false;
+    }
+
+    $current_refund_id = 0;
+    $current_refund_amount = 0;
+
+    if( is_object( $refund ) && method_exists( $refund, 'get_id' ) ) {
+      $current_refund_id = absint( $refund->get_id() );
+      if( method_exists( $refund, 'get_amount' ) ) {
+        $current_refund_amount = abs( (float) $refund->get_amount() );
+      }
+    } elseif( $refund ) {
+      $current_refund_id = absint( $refund );
+      $refund_order = wc_get_order( $current_refund_id );
+      if( $refund_order && method_exists( $refund_order, 'get_amount' ) ) {
+        $current_refund_amount = abs( (float) $refund_order->get_amount() );
+      }
+    }
+
+    if( ! $current_refund_amount && isset( $args['amount'] ) ) {
+      $current_refund_amount = abs( (float) $args['amount'] );
+    }
+
+    $refunded_total = 0;
+    foreach( $order->get_refunds() as $order_refund ) {
+      if( $current_refund_id && $order_refund->get_id() == $current_refund_id ) {
+        continue;
+      }
+      if( method_exists( $order_refund, 'get_amount' ) ) {
+        $refunded_total += abs( (float) $order_refund->get_amount() );
+      }
+    }
+
+    if( $current_refund_amount ) {
+      $refunded_total += $current_refund_amount;
+    }
+
+    if( ! $refunded_total ) {
+      $refunded_total = (float) $order->get_total_refunded();
+    }
+
+    $price_decimals = function_exists( 'wc_get_price_decimals' ) ? wc_get_price_decimals() : 2;
+
+    return round( $refunded_total, $price_decimals ) >= round( $order_total, $price_decimals );
+
+  }
+}
+
 /**
  * Force refresh/update affiliate stats on order refunds change
  *
@@ -13,7 +74,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if( !function_exists( 'wcusage_order_update_stats_refund' ) ) {
   function wcusage_order_update_stats_refund( $refund, $args ) {
 
-    $order_id = $args['order_id'];
+    $order_id = isset( $args['order_id'] ) ? $args['order_id'] : 0;
 
     $wcusage_field_enable_order_commission_meta = wcusage_get_setting_value('wcusage_field_enable_order_commission_meta', '1');
 
@@ -22,34 +83,40 @@ if( !function_exists( 'wcusage_order_update_stats_refund' ) ) {
       $order = wc_get_order( $order_id );
       if($order) {
 
-        $order = wc_get_order( $order_id );
+        $full_refund = wcusage_order_refund_is_full( $order, $refund, $args );
+        $order_was_counted = wcusage_check_status_show( $order->get_status() ) || wcusage_order_meta( $order_id, 'wcusage_all_updated' );
+        $update_alltime_stats = !$full_refund || $order_was_counted;
+        $change_usage = ( $full_refund && $order_was_counted ) ? 1 : 0;
         
-        $order = wc_get_order( $order_id );
-        $status = $order->get_status();
+        $lifetimeaffiliate = wcusage_order_meta($order_id,'lifetime_affiliate_coupon_referrer');
+        $affiliatereferrer = wcusage_order_meta($order_id,'wcusage_referrer_coupon');
 
-        if($status != "refunded") {
-        
-          $lifetimeaffiliate = wcusage_order_meta($order_id,'lifetime_affiliate_coupon_referrer');
-          $affiliatereferrer = wcusage_order_meta($order_id,'wcusage_referrer_coupon');
+        if($lifetimeaffiliate) {
 
-          if($lifetimeaffiliate) {
-            
-            wcusage_update_all_stats_single($lifetimeaffiliate, $order_id, 0, 0, 0);
+          if($update_alltime_stats) {
+            wcusage_update_all_stats_single($lifetimeaffiliate, $order_id, 0, $change_usage, 0);
+          }
 
-          } elseif($affiliatereferrer) {
+        } elseif($affiliatereferrer) {
 
-            wcusage_update_all_stats_single($affiliatereferrer, $order_id, 0, 0, 0);
+          if($update_alltime_stats) {
+            wcusage_update_all_stats_single($affiliatereferrer, $order_id, 0, $change_usage, 0);
+          }
 
-          } else {
+        } else {
 
-            foreach( $order->get_coupon_codes() as $coupon_code ) {
+          foreach( $order->get_coupon_codes() as $coupon_code ) {
 
-              wcusage_update_all_stats_single($coupon_code, $order_id, 0, 0, 0);
-
+            if($update_alltime_stats) {
+              wcusage_update_all_stats_single($coupon_code, $order_id, 0, $change_usage, 0);
             }
 
           }
 
+        }
+
+        if($full_refund) {
+          wcusage_delete_order_meta( $order_id, 'wcusage_all_updated' );
         }
 
       }
@@ -84,7 +151,11 @@ add_action( 'woocommerce_refund_deleted', 'wcusage_order_update_stats_refund_del
 function wcusage_order_update_stats_refund_complete( $order_id, $refund_id ) {
 
   $order = wc_get_order( $order_id );
-  $status = $order->get_status();
+  if( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+    return;
+  }
+
+  $full_refund = wcusage_order_refund_is_full( $order, $refund_id );
 
   $wcusage_field_enable_order_commission_meta = wcusage_get_setting_value('wcusage_field_enable_order_commission_meta', '1');
 
@@ -98,7 +169,9 @@ function wcusage_order_update_stats_refund_complete( $order_id, $refund_id ) {
 
       if($lifetimeaffiliate) {
         
-        wcusage_update_all_stats_single($lifetimeaffiliate, $order_id, 1, 0);
+        if(!$full_refund) {
+          wcusage_update_all_stats_single($lifetimeaffiliate, $order_id, 1, 0);
+        }
 
         $calculateorder = wcusage_calculate_order_data( $order_id, $lifetimeaffiliate, 1, 0, 1 );
 
@@ -108,7 +181,9 @@ function wcusage_order_update_stats_refund_complete( $order_id, $refund_id ) {
 
       } elseif($affiliatereferrer) {
 
-        wcusage_update_all_stats_single($affiliatereferrer, $order_id, 1, 0);
+        if(!$full_refund) {
+          wcusage_update_all_stats_single($affiliatereferrer, $order_id, 1, 0);
+        }
 
         $calculateorder = wcusage_calculate_order_data( $order_id, $affiliatereferrer, 1, 0, 1 );
 
@@ -120,7 +195,9 @@ function wcusage_order_update_stats_refund_complete( $order_id, $refund_id ) {
 
         foreach( $order->get_coupon_codes() as $coupon_code ) {
 
-          wcusage_update_all_stats_single($coupon_code, $order_id, 1, 0);
+          if(!$full_refund) {
+            wcusage_update_all_stats_single($coupon_code, $order_id, 1, 0);
+          }
 
           $calculateorder = wcusage_calculate_order_data( $order_id, $coupon_code, 1, 0, 1 );
 
@@ -130,6 +207,10 @@ function wcusage_order_update_stats_refund_complete( $order_id, $refund_id ) {
 
         }
 
+      }
+
+      if($full_refund) {
+        wcusage_delete_order_meta( $order_id, 'wcusage_all_updated' );
       }
 
     }

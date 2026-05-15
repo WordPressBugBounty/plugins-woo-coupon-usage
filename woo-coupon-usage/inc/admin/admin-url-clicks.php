@@ -18,10 +18,14 @@ if ( ! wcusage_check_admin_access() ) {
 <?php
 $wcusage_click_enable_website = wcusage_get_setting_value('wcusage_field_click_enable_website', '0');
 $wcusage_field_track_click_ip = wcusage_get_setting_value('wcusage_field_track_click_ip', '1');
+$wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
 ?>
 
 <?php if(!$wcusage_click_enable_website) { ?>
 <style>.column-website { display: none; }</style>
+<?php } ?>
+<?php if(!$wcusage_store_cookies) { ?>
+<style>.column-converted { display: none; }</style>
 <?php } ?>
 
 <!-- Delete Click Entry When Click Delete Button -->
@@ -97,6 +101,7 @@ if(isset($_POST['_wpnonce'])) {
     <input type="search" id="user-search-input2" name="campaign" value="<?php esc_attr($input_campaign) ?>" placeholder="<?php echo esc_html__( 'Campaign', 'woo-coupon-usage' ); ?>..." title="<?php echo esc_html__( 'Campaign', 'woo-coupon-usage' ); ?>" style="padding: 6px 10px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; min-height: 36px; max-width: 140px;">
     <?php } ?>
     <input type="search" id="user-search-input3" name="referrer" value="<?php esc_attr($input_referrer) ?>" placeholder="<?php echo esc_html__( 'Referrer URL', 'woo-coupon-usage' ); ?>..." title="<?php echo esc_html__( 'Referrer URL', 'woo-coupon-usage' ); ?>" style="padding: 6px 10px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; min-height: 36px; max-width: 140px;">
+    <?php if($wcusage_store_cookies) { ?>
     <select id="user-search-input4" name="converted" value="<?php esc_attr($input_converted) ?>"
       placeholder="<?php echo esc_html__( 'Converted', 'woo-coupon-usage' ); ?>..."
       title="<?php echo esc_html__( 'Converted', 'woo-coupon-usage' ); ?>" style="padding: 6px 10px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; min-height: 36px; max-width: 140px;">
@@ -104,6 +109,7 @@ if(isset($_POST['_wpnonce'])) {
       <option value="1" <?php if($input_converted == "1") { echo "selected"; } ?>>Yes</option>
       <option value="0" <?php if($input_converted == "0") { echo "selected"; } ?>>No</option>
     </select>
+    <?php } ?>
     <input type="submit" id="search-submit" class="button" value="Search Visits" style="padding: 8px 18px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; background: #fff; color: #374151; transition: all 0.15s ease;">
 	</form>
   </div>

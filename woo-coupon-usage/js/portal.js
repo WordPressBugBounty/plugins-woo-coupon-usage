@@ -29,7 +29,7 @@ jQuery(document).ready(function($) {
 
 /* Affiliate Dashboard */
 
-function wcusage_portal_open_tab(evt, tabName, contentId, postid, coupon_code, force_refresh_stats) {
+window.wcusage_portal_open_tab = function wcusage_portal_open_tab(evt, tabName, contentId, postid, coupon_code, force_refresh_stats) {
     var tabcontent = document.getElementsByClassName("portal-tabcontent");
     for (var i = 0; i < tabcontent.length; i++) {
         tabcontent[i].className = tabcontent[i].className.replace(" active", "");
@@ -55,30 +55,25 @@ function wcusage_portal_open_tab(evt, tabName, contentId, postid, coupon_code, f
         wcutabcontent[i].classList.remove("active");
     }
 
-    document.getElementById(tabName).style.display = "block";
-    document.getElementById(tabName).className += " active";
-    document.getElementById(contentId).style.display = "block";
-    document.getElementById(contentId).className += " active";
-    evt.currentTarget.className += " active";
+    var tabEl = document.getElementById(tabName);
+    if (tabEl) {
+        tabEl.style.display = "block";
+        tabEl.className += " active";
+    }
+    var contentEl = document.getElementById(contentId);
+    if (contentEl) {
+        contentEl.style.display = "block";
+        contentEl.className += " active";
+    }
+    if (evt && evt.currentTarget) {
+        evt.currentTarget.className += " active";
+    }
 
     // Close the sidebar on mobile after clicking a tab
     if (window.innerWidth <= 768) {
         jQuery('.sidebar').removeClass('active');
         jQuery('.hamburger-menu').removeClass('active');
     }
-
-    // Open first tab by default
-    document.addEventListener("DOMContentLoaded", function() {
-        var firstTab = document.querySelector(".portal-tablink");
-        if (firstTab) {
-            var tabName = firstTab.getAttribute('id');
-            var contentId = firstTab.getAttribute('data-content-id') || 'wcu1'; // Default to wcu1 if not set
-            var postid = '<?php echo esc_js($postid); ?>';
-            var coupon_code = '<?php echo esc_js($coupon_code); ?>';
-            var force_refresh_stats = '<?php echo esc_js($force_refresh_stats); ?>';
-            wcusage_portal_open_tab(firstTab, tabName, contentId, postid, coupon_code, force_refresh_stats);
-        }
-    });
 }
 
 /* Hamburger Menu Toggle */
@@ -153,20 +148,22 @@ jQuery(document).ready(function($) {
 
 /* Mobile */
 
-document.getElementById('wcu-mla-select-tab').addEventListener('change', function() {
-    var tab = this.value;
-    var tabElement = document.getElementById('tab-ml-' + tab);
-    if (tabElement) {
-        console.log('Mobile tab selected:', tab);
-        tabElement.click();
-    } else {
-        console.error('Mobile tab not found:', 'tab-ml-' + tab);
+document.addEventListener('DOMContentLoaded', function() {
+    var mlaSelectTab = document.getElementById('wcu-mla-select-tab');
+    if (mlaSelectTab) {
+        mlaSelectTab.addEventListener('change', function() {
+            var tab = this.value;
+            var tabElement = document.getElementById('tab-ml-' + tab);
+            if (tabElement) {
+                tabElement.click();
+            }
+        });
     }
 });
 
 /* MLA */
 
-function wl_wcuOpenTab(evt, tabName) {
+window.wl_wcuOpenTab = function wl_wcuOpenTab(evt, tabName) {
 
     // Remove .active class from all .ml_wcutabcontent divs
     var tabContents = document.getElementsByClassName("ml_wcutabcontent");

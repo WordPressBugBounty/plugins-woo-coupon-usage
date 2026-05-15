@@ -22,11 +22,45 @@ if( !function_exists( 'wcusage_get_cookie_value' ) ) {
 }
 
 /**
+ * Check whether a plugin cookie is allowed to be stored.
+ *
+ */
+if( !function_exists( 'wcusage_can_store_cookie' ) ) {
+  function wcusage_can_store_cookie( $name, $value, $expire ) {
+
+    if ( (string) $value === '' || (int) $expire <= time() ) {
+      return true;
+    }
+
+    $cookie_settings = array(
+      'wcusage_referral'              => 'wcusage_field_store_cookies',
+      'wcusage_referral_code'         => 'wcusage_field_store_cookies',
+      'wcusage_referral_click'        => 'wcusage_field_store_cookies',
+      'wcusage_referral_click_recent' => 'wcusage_field_store_cookies',
+      'wcusage_referral_campaign'     => 'wcusage_field_store_cookies',
+      'wcusage_referral_id'           => 'wcusage_field_store_cookies',
+      'wcusage_referral_mla'          => 'wcusage_field_store_cookies_mla',
+      'wcusage_referral_domain'       => 'wcusage_field_store_cookies_domains',
+    );
+
+    if ( ! isset( $cookie_settings[ $name ] ) ) {
+      return true;
+    }
+
+    return (bool) wcusage_get_setting_value( $cookie_settings[ $name ], '1' );
+
+  }
+}
+
+/**
  * Sets a cookie with proper attributes
  *
  */
 if( !function_exists( 'wcusage_set_cookie' ) ) {
 	function wcusage_set_cookie($name, $value, $expire, $secure = false, $httponly = false) {
+    if ( ! wcusage_can_store_cookie( $name, $value, $expire ) ) {
+      return;
+    }
     
     $path = '/';
     $domain = '';
@@ -71,6 +105,120 @@ if( !function_exists( 'wcusage_set_cookie' ) ) {
         );
         setcookie( $name, $value, $options );
     }
+  }
+}
+
+/**
+ * Check if referral coupon auto-apply WooCommerce sessions are enabled.
+ *
+ */
+if( !function_exists( 'wcusage_referral_sessions_enabled' ) ) {
+  function wcusage_referral_sessions_enabled() {
+
+    return (bool) wcusage_get_setting_value( 'wcusage_field_store_sessions', '1' );
+
+  }
+}
+
+/**
+ * Get WooCommerce session handler when available.
+ *
+ */
+if( !function_exists( 'wcusage_get_wc_session_handler' ) ) {
+  function wcusage_get_wc_session_handler() {
+
+    if ( ! function_exists( 'WC' ) ) {
+      return false;
+    }
+
+    $woocommerce = WC();
+    if ( ! $woocommerce || ! isset( $woocommerce->session ) || ! is_object( $woocommerce->session ) ) {
+      return false;
+    }
+
+    return $woocommerce->session;
+
+  }
+}
+
+/**
+ * Get a WooCommerce session value used by referral coupon auto-apply.
+ *
+ */
+if( !function_exists( 'wcusage_get_wc_session_value' ) ) {
+  function wcusage_get_wc_session_value( $key, $default = '' ) {
+
+    if ( ! wcusage_referral_sessions_enabled() ) {
+      return $default;
+    }
+
+    $session = wcusage_get_wc_session_handler();
+    if ( ! $session || ! method_exists( $session, 'get' ) ) {
+      return $default;
+    }
+
+    $value = $session->get( $key, $default );
+    if ( is_array( $value ) || is_object( $value ) ) {
+      return $default;
+    }
+
+    return sanitize_text_field( $value );
+
+  }
+}
+
+/**
+ * Store a WooCommerce session value used by referral coupon auto-apply.
+ *
+ */
+if( !function_exists( 'wcusage_set_wc_session_value' ) ) {
+  function wcusage_set_wc_session_value( $key, $value ) {
+
+    if ( ! wcusage_referral_sessions_enabled() ) {
+      return false;
+    }
+
+    $session = wcusage_get_wc_session_handler();
+    if ( ! $session || ! method_exists( $session, 'set' ) ) {
+      return false;
+    }
+
+    $value = sanitize_text_field( $value );
+    if ( $value === '' ) {
+      wcusage_clear_wc_session_value( $key );
+      return false;
+    }
+
+    if ( method_exists( $session, 'set_customer_session_cookie' ) ) {
+      $session->set_customer_session_cookie( true );
+    }
+
+    $session->set( $key, $value );
+    return true;
+
+  }
+}
+
+/**
+ * Clear a WooCommerce session value used by referral coupon auto-apply.
+ *
+ */
+if( !function_exists( 'wcusage_clear_wc_session_value' ) ) {
+  function wcusage_clear_wc_session_value( $key ) {
+
+    $session = wcusage_get_wc_session_handler();
+    if ( ! $session ) {
+      return false;
+    }
+
+    if ( method_exists( $session, '__unset' ) ) {
+      $session->__unset( $key );
+    } elseif ( method_exists( $session, 'set' ) ) {
+      $session->set( $key, '' );
+    }
+
+    return true;
+
   }
 }
 
@@ -158,15 +306,14 @@ if( !function_exists( 'wcusage_url_cookie' ) ) {
       if( !wcusage_is_domain_blacklisted($refpage) ) {
 
   			global $woocommerce;
-        global $wp_session;
 
-        $cookie = wcusage_get_cookie_value("wcusage_referral");
+          $wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
 
-        $campaigncookie = wcusage_get_cookie_value("wcusage_referral_campaign");
+          $cookie = $wcusage_store_cookies ? wcusage_get_cookie_value("wcusage_referral") : '';
+
+          $campaigncookie = $wcusage_store_cookies ? wcusage_get_cookie_value("wcusage_referral_campaign") : '';
 
         $thereferral = wcusage_get_referral_value();
-        if($thereferral && !isset($wp_session["wcusage_referral"])) $wp_session["wcusage_referral"] = $thereferral;
-        if(!$thereferral && isset($wp_session["wcusage_referral"]) && !$cookie) $thereferral = $wp_session["wcusage_referral"];
 
         $campaign = wcusage_get_campaign_value();
 
@@ -235,22 +382,25 @@ add_action('plugins_loaded', 'wcusage_url_cookie', 1);
             $coupon_id = $coupon->get_id();
           }
 
-          // Track if we replaced the referral cookie (used to force new click record)
+          // Track if we replaced the referral cookie/session (used to force new click record)
           $did_replace_referral = false;
+          $first_click = wcusage_get_setting_value('wcusage_field_click_attribution_first', '0');
+          $session_referral = wcusage_get_wc_session_value('wcusage_referral', '');
+          $has_existing = (bool) $session_referral;
           if($wcusage_store_cookies) {
-            $first_click = wcusage_get_setting_value('wcusage_field_click_attribution_first', '0');
-            $has_existing = ( isset($_COOKIE['wcusage_referral']) && sanitize_text_field( wp_unslash($_COOKIE['wcusage_referral']) ) ) || ( isset($_COOKIE['wcusage_referral_code']) && sanitize_text_field( wp_unslash($_COOKIE['wcusage_referral_code']) ) );
-            if( $first_click && $has_existing ) {
-              // Do not replace existing referral cookies in first-click mode.
-            } else {
-              // Determine if the referral code is changing (last-click replacement)
-              $existing_ref = '';
-              if ( isset($_COOKIE['wcusage_referral']) ) {
-                $existing_ref = sanitize_text_field( wp_unslash( $_COOKIE['wcusage_referral'] ) );
-              }
-              if ( strtolower($existing_ref) !== strtolower($thereferral) ) {
-                $did_replace_referral = true;
-              }
+            $has_existing = $has_existing || ( isset($_COOKIE['wcusage_referral']) && sanitize_text_field( wp_unslash($_COOKIE['wcusage_referral']) ) ) || ( isset($_COOKIE['wcusage_referral_code']) && sanitize_text_field( wp_unslash($_COOKIE['wcusage_referral_code']) ) );
+          }
+          $should_replace_referral = !( $first_click && $has_existing );
+          if( $should_replace_referral ) {
+            $existing_ref = $session_referral;
+            if ( $wcusage_store_cookies && isset($_COOKIE['wcusage_referral']) ) {
+              $existing_ref = sanitize_text_field( wp_unslash( $_COOKIE['wcusage_referral'] ) );
+            }
+            if ( strtolower($existing_ref) !== strtolower($thereferral) ) {
+              $did_replace_referral = true;
+            }
+            wcusage_set_wc_session_value('wcusage_referral', $thereferral);
+            if($wcusage_store_cookies) {
               // Mark pending value for this request so removal hooks won't clear it.
               $GLOBALS['wcusage_referral_cookie_pending'] = $thereferral;
       		    wcusage_set_cookie('wcusage_referral', $thereferral, $expiry);
@@ -276,14 +426,14 @@ add_action('plugins_loaded', 'wcusage_url_cookie', 1);
 
             // Get referral click ID cookie
             $clickcookie = '';
-            if ( isset( $_COOKIE['wcusage_referral_click'] ) ) {
+            if ( $wcusage_store_cookies && isset( $_COOKIE['wcusage_referral_click'] ) ) {
               $clickcookie = wp_unslash( $_COOKIE['wcusage_referral_click'] );
             }
             $clickcookie = sanitize_text_field( $clickcookie );
 
             // Check if click within last minute
             $clickcookie_recent = '';
-            if ( isset( $_COOKIE['wcusage_referral_click_recent'] ) ) {
+            if ( $wcusage_store_cookies && isset( $_COOKIE['wcusage_referral_click_recent'] ) ) {
               $clickcookie_recent = sanitize_text_field( wp_unslash( $_COOKIE['wcusage_referral_click_recent'] ) );
             }
 
@@ -317,21 +467,69 @@ add_action('plugins_loaded', 'wcusage_url_cookie', 1);
 }
 
 /**
+ * Store referral URL coupon in WooCommerce sessions once WC sessions are ready.
+ *
+ */
+if( !function_exists( 'wcusage_store_referral_session_from_url' ) ) {
+  function wcusage_store_referral_session_from_url() {
+
+    if ( is_admin() ) {
+      return;
+    }
+
+    $thereferral = wcusage_get_referral_value();
+    if ( ! $thereferral ) {
+      return;
+    }
+
+    $wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
+    $first_click = wcusage_get_setting_value('wcusage_field_click_attribution_first', '0');
+    $session_referral = wcusage_get_wc_session_value('wcusage_referral', '');
+    $has_existing = (bool) $session_referral;
+
+    if($wcusage_store_cookies) {
+      $has_existing = $has_existing || ( isset($_COOKIE['wcusage_referral']) && sanitize_text_field( wp_unslash($_COOKIE['wcusage_referral']) ) ) || ( isset($_COOKIE['wcusage_referral_code']) && sanitize_text_field( wp_unslash($_COOKIE['wcusage_referral_code']) ) );
+    }
+
+    if ( ! ( $first_click && $has_existing ) ) {
+      wcusage_set_wc_session_value('wcusage_referral', $thereferral);
+    }
+
+  }
+}
+add_action('wp', 'wcusage_store_referral_session_from_url', 0);
+
+/**
  * Get the IP or ID for visitor
  *
  */
 function wcusage_get_visitor_ip() {
 
   $wcusage_field_track_click_ip = wcusage_get_setting_value('wcusage_field_track_click_ip', '1');
+  $wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
 
   // Get IP Address of visitor
   $ipaddress = "";
-  if($wcusage_field_track_click_ip) {
-    
+  if ( $wcusage_field_track_click_ip === '1' || $wcusage_field_track_click_ip === 1 ) {
+
     $ipaddress = wcusage_get_ip_only();
 
+  } elseif ( $wcusage_field_track_click_ip === '2' ) {
+
+    // Random ID stored in WooCommerce session — no cookie set
+    $session_id = wcusage_get_wc_session_value( 'wcusage_referral_id', '' );
+    if ( $session_id ) {
+      $ipaddress = $session_id;
+    } else {
+      $session_id = wcusage_url_shorten_random( 20 );
+      wcusage_set_wc_session_value( 'wcusage_referral_id', $session_id );
+      $ipaddress = $session_id;
+    }
+
   } else {
-    if ( isset( $_COOKIE['wcusage_referral_id'] ) ) {
+    if ( ! $wcusage_store_cookies ) {
+      $ipaddress = wcusage_url_shorten_random(20);
+    } elseif ( isset( $_COOKIE['wcusage_referral_id'] ) ) {
       $ipaddress = wp_unslash( $_COOKIE['wcusage_referral_id'] );
     } else {
       $randomid = wcusage_url_shorten_random(20);
@@ -386,19 +584,23 @@ if( !function_exists( 'wcusage_apply_coupon_to_cart' ) ) {
 
     $wcusage_apply_enable = wcusage_get_setting_value('wcusage_field_apply_enable', '1');
     $wcusage_field_apply_instant_enable = wcusage_get_setting_value('wcusage_field_apply_instant_enable', '1');
+    $wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
 
     // Attribution mode and existing cookies
     $first_click = wcusage_get_setting_value('wcusage_field_click_attribution_first', '0');
     $has_ref_cookie = false;
-    $cookie_ref = wcusage_get_cookie_value("wcusage_referral");
-    $cookie_ref_code = wcusage_get_cookie_value("wcusage_referral_code");
+    $cookie_ref = $wcusage_store_cookies ? wcusage_get_cookie_value("wcusage_referral") : '';
+    $cookie_ref_code = $wcusage_store_cookies ? wcusage_get_cookie_value("wcusage_referral_code") : '';
+    $session_ref = wcusage_get_wc_session_value('wcusage_referral', '');
+    $existing_ref_source = $cookie_ref ? $cookie_ref : ( $cookie_ref_code ? $cookie_ref_code : $session_ref );
     if( $cookie_ref || $cookie_ref_code ) { $has_ref_cookie = true; }
+    if( $session_ref ) { $has_ref_cookie = true; }
 
     // Apply Coupon Via Referral Link
     $thereferral = wcusage_get_referral_value();
     if($thereferral && $wcusage_apply_enable && $wcusage_field_apply_instant_enable) {
       // In first-click mode, if a referral cookie already exists, do not auto-apply new coupon
-      if( $first_click && $has_ref_cookie ) {
+      if( $first_click && $has_ref_cookie && strtolower($existing_ref_source) !== strtolower($thereferral) ) {
         // Skip applying new coupon from URL
       } else {
       wcusage_auto_apply_discount_coupon($thereferral);
@@ -410,7 +612,7 @@ if( !function_exists( 'wcusage_apply_coupon_to_cart' ) ) {
     if($mla_link_normal) {
       $thereferral = wcusage_get_mla_referral_value();
       if($thereferral && $wcusage_apply_enable && $wcusage_field_apply_instant_enable) {
-        if( $first_click && $has_ref_cookie ) {
+        if( $first_click && $has_ref_cookie && strtolower($existing_ref_source) !== strtolower($thereferral) ) {
           // Skip applying new coupon from MLA URL if first-click already set
         } else {
           wcusage_auto_apply_discount_coupon($thereferral);
@@ -419,7 +621,10 @@ if( !function_exists( 'wcusage_apply_coupon_to_cart' ) ) {
     }
 
     // Apply Coupon Via Cookie
-    $cookie = wcusage_get_cookie_value("wcusage_referral");
+    $cookie = $wcusage_store_cookies ? wcusage_get_cookie_value("wcusage_referral") : '';
+    if(!$cookie) {
+      $cookie = wcusage_get_wc_session_value('wcusage_referral', '');
+    }
     if($cookie && !is_admin() && $wcusage_apply_enable) {
       $first_click = wcusage_get_setting_value('wcusage_field_click_attribution_first', '0');
       if( $first_click && function_exists('WC') && WC()->cart ) {
@@ -516,12 +721,14 @@ if( !function_exists( 'wcusage_update_click_page_value' ) ) {
 
       // Get IP Address of visitor
       $ipaddress = "";
-      if($wcusage_field_track_click_ip) {
+      if ( $wcusage_field_track_click_ip === '1' || $wcusage_field_track_click_ip === 1 ) {
         $ipaddress = wcusage_get_ip_only();
+      } elseif ( $wcusage_field_track_click_ip === '2' ) {
+        $ipaddress = wcusage_get_wc_session_value( 'wcusage_referral_id', '' );
       } else {
-  if ( isset( $_COOKIE['wcusage_referral_id'] ) ) {
-					$ipaddress = wp_unslash( $_COOKIE['wcusage_referral_id'] );
-				}
+        if ( isset( $_COOKIE['wcusage_referral_id'] ) ) {
+          $ipaddress = wp_unslash( $_COOKIE['wcusage_referral_id'] );
+        }
       }
       $ipaddress = sanitize_text_field($ipaddress);
 
@@ -630,22 +837,28 @@ if( !function_exists( 'wcusage_action_woocommerce_removed_coupon' ) ) {
     }
     if(!$coupon_code) { return; }
     if (headers_sent()) {
+      $session_referral = strtolower( wcusage_get_wc_session_value('wcusage_referral', '') );
+      if ( $session_referral && $session_referral == strtolower($coupon_code) ) {
+        wcusage_clear_wc_session_value('wcusage_referral');
+      }
       return;
     }
   $cookie = isset( $_COOKIE['wcusage_referral'] ) ? strtolower( sanitize_text_field( wp_unslash( $_COOKIE['wcusage_referral'] ) ) ) : '';
     $coupon_code = strtolower($coupon_code);
+    $session_referral = strtolower( wcusage_get_wc_session_value('wcusage_referral', '') );
+    if ( $session_referral && $session_referral == $coupon_code ) {
+      wcusage_clear_wc_session_value('wcusage_referral');
+    }
     if (isset($_COOKIE['wcusage_referral']) && $cookie == $coupon_code) {
       unset($_COOKIE['wcusage_referral']);
   		wcusage_set_cookie("wcusage_referral", "", time() - 3600);
       $wcusage_field_url_referrals = wcusage_get_setting_value('wcusage_field_url_referrals', '0');
-      if($wcusage_field_url_referrals) {
+      $wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
+      if($wcusage_field_url_referrals && $wcusage_store_cookies) {
         $wcusage_urls_cookie_days = wcusage_get_setting_value('wcusage_urls_cookie_days', '30');
         $expiry = strtotime('+'.$wcusage_urls_cookie_days.' days');
         wcusage_set_cookie('wcusage_referral_code', $coupon_code, $expiry);
       }
-    }
-    if (isset($wp_session["wcusage_referral"]) && $wp_session["wcusage_referral"] == $coupon_code) {
-      $wp_session["wcusage_referral"] = "";
     }
 	}
 }
@@ -739,7 +952,8 @@ if( !function_exists( 'wcusage_clicks_log_converted' ) ) {
 	function wcusage_clicks_log_converted( $order_id ) {
 
       $clickcookie = "";
-      if ( isset( $_COOKIE['wcusage_referral_click'] ) ) {
+      $wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
+      if ( $wcusage_store_cookies && isset( $_COOKIE['wcusage_referral_click'] ) ) {
         $clickcookie = sanitize_text_field( wp_unslash( $_COOKIE['wcusage_referral_click'] ) );
       }
 
