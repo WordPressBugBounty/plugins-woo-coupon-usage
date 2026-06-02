@@ -215,7 +215,12 @@ function wcusage_check_portal_option_update($option) {
   if($option == "wcusage_mla_portal_slug") {
     $option_group = get_option('wcusage_options');
     if($option_group['wcusage_field_portal_enable'] == "1") {
-      add_rewrite_rule('^' . $option_group['wcusage_mla_portal_slug'] . '/?$', 'index.php?mla_affiliate_portal=1', 'top');
+      $wcusage_mla_portal_slug = isset($option_group['wcusage_mla_portal_slug']) ? sanitize_title($option_group['wcusage_mla_portal_slug']) : 'mla-affiliate-portal';
+      if ( ! $wcusage_mla_portal_slug ) {
+        $wcusage_mla_portal_slug = 'mla-affiliate-portal';
+      }
+      add_rewrite_rule('^' . preg_quote( $wcusage_mla_portal_slug, '/' ) . '/?$', 'index.php?mla_affiliate_portal=1', 'top');
+      add_rewrite_rule('^' . preg_quote( $wcusage_mla_portal_slug, '/' ) . '/user/([^/]+)/?$', 'index.php?mla_affiliate_portal=1&mla_user=$matches[1]', 'top');
       flush_rewrite_rules();
     }
   }

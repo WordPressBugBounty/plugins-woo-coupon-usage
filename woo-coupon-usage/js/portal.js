@@ -71,33 +71,62 @@ window.wcusage_portal_open_tab = function wcusage_portal_open_tab(evt, tabName, 
 
     // Close the sidebar on mobile after clicking a tab
     if (window.innerWidth <= 768) {
-        jQuery('.sidebar').removeClass('active');
-        jQuery('.hamburger-menu').removeClass('active');
+        if (typeof window.wcusage_portal_set_menu_state === 'function') {
+            window.wcusage_portal_set_menu_state(false);
+        } else {
+            jQuery('.sidebar').removeClass('active');
+            jQuery('.hamburger-menu').removeClass('active').attr('aria-expanded', 'false');
+        }
     }
 }
 
 /* Hamburger Menu Toggle */
 
 jQuery(document).ready(function($) {
-    $('.hamburger-menu').on('click', function() {
-        $(this).toggleClass('active');
-        $('.sidebar').toggleClass('active');
+    var $document = $(document);
+    var menuBreakpoint = 768;
+
+    window.wcusage_portal_set_menu_state = function(isOpen) {
+        $('.sidebar').toggleClass('active', isOpen);
+        $('.hamburger-menu')
+            .toggleClass('active', isOpen)
+            .attr('aria-expanded', isOpen ? 'true' : 'false')
+            .attr('aria-label', isOpen ? 'Close menu' : 'Open menu');
+    };
+
+    $('.hamburger-menu').attr({
+        'role': 'button',
+        'tabindex': '0',
+        'aria-expanded': 'false',
+        'aria-label': 'Open menu'
+    });
+
+    $document.off('.wcusagePortalMenu');
+
+    $document.on('click.wcusagePortalMenu', '.hamburger-menu', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.wcusage_portal_set_menu_state(!$('.sidebar').hasClass('active'));
+    });
+
+    $document.on('keydown.wcusagePortalMenu', '.hamburger-menu', function(e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar' || e.which === 13 || e.which === 32) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.wcusage_portal_set_menu_state(!$('.sidebar').hasClass('active'));
+        }
     });
 
     // Close sidebar when clicking the explicit close button
-    $(document).on('click', '.wcu-mobile-menu-close', function(e) {
+    $document.on('click.wcusagePortalMenu', '.wcu-mobile-menu-close', function(e) {
         e.preventDefault();
-        $('.sidebar').removeClass('active');
-        $('.hamburger-menu').removeClass('active');
+        window.wcusage_portal_set_menu_state(false);
     });
 
     // Close sidebar when clicking outside on mobile
-    $(document).on('click', function(e) {
-        if (window.innerWidth <= 768) {
-            if (!$(e.target).closest('.sidebar').length && !$(e.target).closest('.hamburger-menu').length) {
-                $('.sidebar').removeClass('active');
-                $('.hamburger-menu').removeClass('active');
-            }
+    $document.on('click.wcusagePortalMenu', function(e) {
+        if (window.innerWidth <= menuBreakpoint && !$(e.target).closest('.sidebar, .hamburger-menu').length) {
+            window.wcusage_portal_set_menu_state(false);
         }
     });
 });
@@ -199,8 +228,12 @@ window.wl_wcuOpenTab = function wl_wcuOpenTab(evt, tabName) {
 
     // Close the sidebar on mobile after clicking a tab
     if (window.innerWidth <= 768) {
-        jQuery('.sidebar').removeClass('active');
-        jQuery('.hamburger-menu').removeClass('active');
+        if (typeof window.wcusage_portal_set_menu_state === 'function') {
+            window.wcusage_portal_set_menu_state(false);
+        } else {
+            jQuery('.sidebar').removeClass('active');
+            jQuery('.hamburger-menu').removeClass('active').attr('aria-expanded', 'false');
+        }
     }
 }
 
@@ -213,24 +246,4 @@ jQuery(document).ready(function($) {
     } else {
         console.error('No first tab found with class ml-wcutabfirst');
     }
-});
-
-// Hamburger Menu Toggle
-jQuery(document).ready(function($) {
-    $('.hamburger-menu').on('click', function() {
-        $(this).toggleClass('active');
-        $('.sidebar').toggleClass('active');
-        console.log('Hamburger menu toggled. Sidebar active:', $('.sidebar').hasClass('active'));
-    });
-
-    // Close sidebar when clicking outside on mobile
-    $(document).on('click', function(e) {
-        if (window.innerWidth <= 768) {
-            if (!$(e.target).closest('.sidebar').length && !$(e.target).closest('.hamburger-menu').length) {
-                $('.sidebar').removeClass('active');
-                $('.hamburger-menu').removeClass('active');
-                console.log('Clicked outside. Sidebar active:', $('.sidebar').hasClass('active'));
-            }
-        }
-    });
 });

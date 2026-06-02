@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 7.0
-Stable tag: 7.8.1
+Stable tag: 7.8.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -269,11 +269,21 @@ Please report security bugs found in the source code of the plugin through the [
 
 == Changelog ==
 
+= Version 7.8.2 - 2nd June 2026 =
+- Fix: Fixed an issue where the referred orders table could show one fewer order than the date range stats summary.
+- Fix: (PRO) Fixed an issue with the direct domain feature incorrectly reporting that a valid affiliate coupon code does not exist when attempting to add a new direct domain.
+- Fix: Fixed an issue with the affiliate portal mobile hamburger menu not being clickable on some browsers, and the menu icon showing over the open sidebar menu.
+- Fix: Fixed an issue with administrators not being able to see affiliate orders table for other affiliates on the affiliate portal.
+- Fix: Fixed an issue where AJAX affiliate registrations could create an affiliate user account without a saved registration entry if registration storage failed.
+- Fix: Fixed a potential issue where in some cases the affiliate portal page would not load and show an error.
+- Fix: Fixed an issue with the MLA portal page slug option when changed not updating the MLA portal page link on the affiliate dashboard immediately in some cases.
+- Security: Fixed a security vulnerability that could potentially allow an unauthenticated user to view another affiliates recently referred orders stats (reported by Stefano via Patchstack).
+
 = Version 7.8.1 - 15th May 2026 =
 - New: Added a new "Privacy & Cookies" settings tab with related options moved into this so they are easier to find, to control the cookie storage and sessions options etc. Also changed sessions to use WooCommerce sessions for the auto-apply coupon backup.
 - New: (PRO) Added a new option in "Coupon Checkout Settings" to always allow any other non-affiliate discount coupon to be applied alongside zero-discount affiliate coupons, overriding all individual-use and other coupon restrictions, and an option to completely hide applied affiliate coupons with zero discount on the cart and checkout page.
 - New: (PRO) Added a new {coupon_description} merge tag for dynamic landing pages, which outputs the WooCommerce coupon description.
-- New: (PRO) Added a "Dynamic Landing Page Template Protection" option to the landing pages settings. When enabled, visiting the base template page directly (e.g. /prime-partner/) without an affiliate code will redirect visitors to a configurable URL (defaults to the site root).
+- New: (PRO) Added a "Dynamic Landing Page Template Protection" option to the landing pages settings. When enabled, visiting the base template page directly without an affiliate code will redirect visitors to a configurable URL (defaults to the site root).
 - Tweak: (PRO) Improved dynamic creatives loading reliability, performance, and cache-busting when a creative is edited.
 - Tweak: (PRO) Affiliates whose saved payout method has been disabled can no longer request payouts (manual or scheduled) and are prompted to select a new method.
 - Tweak: Made some styling tweaks to the border radius styling of some elements on the affiliate dashboard and admin pages.

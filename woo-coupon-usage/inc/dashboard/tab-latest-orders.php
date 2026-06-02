@@ -362,8 +362,17 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
             }
             echo '</div>';
         }
-        $totalcount = count( $orders );
+        $order_rows = array();
+        if ( is_array( $orders ) ) {
+            foreach ( $orders as $order_row ) {
+                if ( is_array( $order_row ) && !empty( $order_row['order_id'] ) ) {
+                    $order_rows[] = $order_row;
+                }
+            }
+        }
+        $totalcount = count( $order_rows );
         $completedorders = 0;
+        $orders_table_id = 'wcusage-orders-table-' . wp_rand();
         ?>
 
     <!-- Mobile Reponsive Labels -->
@@ -623,6 +632,9 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
     </style>
 
     <!-- Recent Orders Table -->
+    <div id="<?php 
+        echo esc_attr( $orders_table_id );
+        ?>" class="wcusage-orders-table-wrap">
     <table id='wcuTable2' class='wcuTable wcu-table-recent-orders' border='2'>
 
     <?php 
@@ -807,7 +819,6 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
         $combined_totalcommission = 0;
         $colstatus = 0;
         $coltime = 0;
-        $i = 0;
         $count = 0;
         $skip_count = 0;
         $cols = 0;
@@ -849,15 +860,11 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
             $offset = ($page - 1) * $per_page;
         }
         $loop_broken = false;
-        foreach ( $orders as $item ) {
-            if ( isset( $orders[$i]['order_id'] ) ) {
-                $orderid = $orders[$i]['order_id'];
-            } else {
-                $orderid = "";
-            }
+        foreach ( $order_rows as $item ) {
+            $orderid = ( isset( $item['order_id'] ) ? absint( $item['order_id'] ) : 0 );
             if ( $currentid != $orderid ) {
                 if ( !$orderid ) {
-                    break;
+                    continue;
                 }
                 $currentid = $orderid;
                 // For paginated views, skip orders before the current page offset
@@ -874,11 +881,9 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                             $skip_count++;
                         }
                     }
-                    $i++;
                     continue;
                 }
                 $orderinfo = wc_get_order( $orderid );
-                $i++;
                 if ( $orderinfo ) {
                     // Check if order can be shown by current status
                     $status = $orderinfo->get_status();
@@ -1433,11 +1438,12 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
         ?>
 
     </table>
+    </div>
     <?php 
         // No orders found
         if ( $completedorders == 0 ) {
-            echo "<p>" . esc_html__( "No orders found.", "woo-coupon-usage" ) . "<p>";
-            echo "<style>.wcu-table-recent-orders { display: none; }</style>";
+            echo "<p>" . esc_html__( "No orders found.", "woo-coupon-usage" ) . "</p>";
+            echo "<style>#" . esc_attr( $orders_table_id ) . " { display: none; }</style>";
         }
         // Status totals below table (non-date-range views only; date-range ones are under the stats boxes)
         if ( !$customdaterange && $wcusage_show_orders_table_status_totals && $option_show_status && !empty( $total_statuses ) ) {
@@ -1682,12 +1688,14 @@ if ( !function_exists( 'wcusage_tab_latest_orders_filters' ) ) {
 	(function() {
 		var preset = document.getElementById('wcu-date-range-preset');
 		if (!preset) return;
+		var wcusage_preset_changing = false;
 		preset.addEventListener('change', function() {
 			var val = this.value;
 			if (!val) return;
 			var today = new Date();
 			var startDate, endDate;
 			endDate = new Date(today);
+			wcusage_preset_changing = true;
 
 			function formatDate(d) {
 				var y = d.getFullYear();
@@ -1700,6 +1708,7 @@ if ( !function_exists( 'wcusage_tab_latest_orders_filters' ) ) {
 				case 'alltime':
 					document.getElementById('wcu-orders-start').value = '';
 					document.getElementById('wcu-orders-end').value = formatDate(today);
+					wcusage_preset_changing = false;
 					return;
 				case 'today':
 					startDate = new Date(today);
@@ -1754,14 +1763,15 @@ if ( !function_exists( 'wcusage_tab_latest_orders_filters' ) ) {
 
 			document.getElementById('wcu-orders-start').value = formatDate(startDate);
 			document.getElementById('wcu-orders-end').value = formatDate(endDate);
+			wcusage_preset_changing = false;
 		});
 
-		// Reset preset dropdown when date fields are manually changed
+		// Reset preset dropdown when date fields are manually changed (not when preset itself sets them)
 		document.getElementById('wcu-orders-start').addEventListener('change', function() {
-			preset.value = '';
+			if (!wcusage_preset_changing) preset.value = '';
 		});
 		document.getElementById('wcu-orders-end').addEventListener('change', function() {
-			preset.value = '';
+			if (!wcusage_preset_changing) preset.value = '';
 		});
 	})();
 	</script>
@@ -1875,6 +1885,19 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
     return text;
   }
 
+  function wcusage_restore_recent_orders_table() {
+    jQuery('style').filter(function() {
+      return (jQuery(this).html() || '').indexOf('.wcu-table-recent-orders { display: none; }') !== -1;
+    }).remove();
+
+    jQuery('.show_orders .wcu-table-recent-orders').each(function() {
+      var $table = jQuery(this);
+      if ($table.find('tr.wcuTableRow').length > 1) {
+        $table.css('display', 'table');
+      }
+    });
+  }
+
   function wcusage_show_all_orders() {
     /* Show All: single AJAX request that returns every order at once */
     jQuery('.wcusage-show-more-btn').css({'opacity': '0.6', 'pointer-events': 'none'});
@@ -1916,6 +1939,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
           jQuery('.show_orders_stats').html($stats);
         }
         jQuery('.show_orders').html($response.html());
+        wcusage_restore_recent_orders_table();
         jQuery('.show_orders_stats').show();
         /* Bind handlers in case any buttons are present */
         jQuery('.show_orders .wcusage-show-more-btn').on('click', function(e) {
@@ -2087,6 +2111,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
             wcusage_show_all_orders();
           });
         }
+        wcusage_restore_recent_orders_table();
 
       } else {
         /* === FULL LOAD: replace everything === */
@@ -2101,6 +2126,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
           }
         }
         jQuery('.show_orders').html($response.html());
+        wcusage_restore_recent_orders_table();
         jQuery('.show_orders_stats').show();
         jQuery('.wcu-loading-orders').hide();
 

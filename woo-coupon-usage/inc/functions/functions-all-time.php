@@ -306,7 +306,8 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
         $statuses = $wcusage_field_order_type_custom;
     }
     // Custom Orders Table or Posts Table
-    if ( class_exists( OrderUtil::class ) && method_exists( OrderUtil::class, 'custom_orders_table_usage_is_enabled' ) && OrderUtil::custom_orders_table_usage_is_enabled() ) {
+    $order_util_class = '\\Automattic\\WooCommerce\\Utilities\\OrderUtil';
+    if ( class_exists( $order_util_class ) && method_exists( $order_util_class, 'custom_orders_table_usage_is_enabled' ) && call_user_func( array($order_util_class, 'custom_orders_table_usage_is_enabled') ) ) {
         $id = "id";
         $posts = "wc_orders";
         $postmeta = "wc_orders_meta";

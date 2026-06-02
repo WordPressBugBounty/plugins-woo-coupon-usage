@@ -109,8 +109,10 @@ function wcusage_ajax_submit_registration() {
             'message' => sprintf( esc_html__( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ), $couponcode ),
         ) );
     }
+    $new_user_created = false;
     // Create a new user if the user is not logged in
     if ( !is_user_logged_in() ) {
+        // Delay the account email until after registration data is stored successfully.
         $new_affiliate_user = wcusage_add_new_affiliate_user(
             $username,
             $password,
@@ -119,7 +121,9 @@ function wcusage_ajax_submit_registration() {
             $lastname,
             $couponcode,
             $website,
-            $info
+            $info,
+            '',
+            false
         );
         if ( is_wp_error( $new_affiliate_user ) ) {
             wp_send_json_error( array(
@@ -132,6 +136,7 @@ function wcusage_ajax_submit_registration() {
             ) );
         }
         $userid = $new_affiliate_user['userid'];
+        $new_user_created = true;
     } else {
         // Use the current user's ID if already logged in
         $current_user = wp_get_current_user();
@@ -148,10 +153,35 @@ function wcusage_ajax_submit_registration() {
         $info
     );
     if ( !$getregisterid ) {
-        wp_send_json_error( array(
-            'message' => 'Failed to store registration data. Please try again.',
-        ) );
+        // Prevent orphaned "affiliate" users when registration storage fails.
+        if ( $new_user_created && isset( $new_affiliate_user['userid'] ) && $new_affiliate_user['userid'] ) {
+            if ( !function_exists( 'wp_delete_user' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/user.php';
+            }
+            // Check user registration date to avoid deleting existing users if something goes wrong with the user creation logic.
+            $user = get_user_by( 'id', $new_affiliate_user['userid'] );
+            $registration_date = strtotime( $user->user_registered );
+            $current_time = current_time( 'timestamp' );
+            $time_diff = abs( $current_time - $registration_date );
+            // Only delete if the user was created within the last 1 minute (60 seconds) to avoid deleting existing users in case of an error.
+            if ( $time_diff < 60 ) {
+                wp_delete_user( $new_affiliate_user['userid'] );
+            }
+        }
         error_log( 'CA: Failed to store registration data for user ID: ' . $userid );
+        wp_send_json_error( array(
+            'message' => esc_html__( 'We could not complete your affiliate registration. Please try again or contact the site administrator.', 'woo-coupon-usage' ),
+        ) );
+    }
+    // Send new account details only after registration data has been saved.
+    if ( $new_user_created ) {
+        wcusage_email_affiliate_register_new(
+            $email,
+            $couponcode,
+            $firstname,
+            $username,
+            $userid
+        );
     }
     // MLA: Set parent affiliate relationship if the user registered via an MLA invite link.
     $wcusage_field_mla_enable = wcusage_get_setting_value( 'wcusage_field_mla_enable', '0' );

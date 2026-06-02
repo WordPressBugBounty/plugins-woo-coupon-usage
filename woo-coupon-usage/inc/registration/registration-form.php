@@ -1238,7 +1238,8 @@ function wcusage_add_new_affiliate_user(
     $couponcode,
     $website = "",
     $info = "",
-    $role = ""
+    $role = "",
+    $send_account_email = true
 ) {
     $wcusage_field_registration_accepted_role = wcusage_get_setting_value( 'wcusage_field_registration_accepted_role', 'coupon_affiliate' );
     $wcusage_register_role = wcusage_get_setting_value( 'wcusage_field_register_role', '1' );
@@ -1311,7 +1312,7 @@ function wcusage_add_new_affiliate_user(
     }
     // Send New Account Email
     $wcusage_email_registration_new_enable = wcusage_get_setting_value( 'wcusage_field_email_registration_new_enable', '1' );
-    if ( $userid && $wcusage_email_registration_new_enable ) {
+    if ( $userid && $wcusage_email_registration_new_enable && $send_account_email ) {
         wcusage_email_affiliate_register_new(
             $email,
             $couponcode,

@@ -683,6 +683,13 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
 
 				$wcu_last_refreshed = get_post_meta( $postid, 'wcu_last_refreshed', true );
 				$wcu_alltime_stats = get_post_meta( $postid, 'wcu_alltime_stats', true );
+        $the_coupon_usage = 0;
+        try {
+          $c = new WC_Coupon($postid);
+          $the_coupon_usage = $c->get_usage_count();
+        } catch (Exception $e) {
+          $the_coupon_usage = 0;
+        }
         
 				$combined_commission = wcusage_commission_message($postid);
 				$current_commission_message = get_post_meta( $postid, 'wcu_commission_message', true );
@@ -727,8 +734,6 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
 				// Check if force refresh not done
 				if(!$wcu_last_refreshed) {
 					// If coupon usage is 0 and coupon is newer than 20 minutes old, do not force refresh and set stats to 0
-					$c = new WC_Coupon($postid);
-					$the_coupon_usage = $c->get_usage_count();
 					if(empty($wcu_alltime_stats) && (!$the_coupon_usage || $the_coupon_usage == 0)) {
 						$wcu_last_refreshed = time();
 						update_post_meta( $postid, 'wcu_last_refreshed', $wcu_last_refreshed );

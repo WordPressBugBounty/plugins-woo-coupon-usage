@@ -420,6 +420,40 @@ if( !function_exists( 'wcusage_get_mla_shortcode_page' ) ) {
 }
 
 /**
+ * Get MLA dashboard page URL.
+ *
+ * @param string $user_login Optional user login to view.
+ *
+ * @return string
+ *
+ */
+if( !function_exists( 'wcusage_get_mla_dashboard_page_url' ) ) {
+	function wcusage_get_mla_dashboard_page_url( $user_login = '' ) {
+
+		$wcusage_field_portal_enable = wcusage_get_setting_value( 'wcusage_field_portal_enable', '0' );
+		$portal_slug = wcusage_get_setting_value( 'wcusage_mla_portal_slug', 'mla-affiliate-portal' );
+		$portal_slug = sanitize_title( $portal_slug );
+
+		if ( ! $portal_slug ) {
+			$portal_slug = 'mla-affiliate-portal';
+		}
+
+		if ( $wcusage_field_portal_enable && function_exists( 'wcusage_check_mla_affiliate_portal_rewrite_rule' ) && wcusage_check_mla_affiliate_portal_rewrite_rule() ) {
+			$thepageurl = home_url( '/' . $portal_slug . '/' );
+		} else {
+			$thepageurl = wcusage_get_mla_shortcode_page();
+		}
+
+		if ( $user_login ) {
+			$thepageurl = add_query_arg( 'user', $user_login, $thepageurl );
+		}
+
+		return $thepageurl;
+
+	}
+}
+
+/**
  * Get Registration Shortcode Page by ID
  *
  * @return int

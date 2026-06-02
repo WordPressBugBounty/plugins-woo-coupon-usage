@@ -167,7 +167,7 @@ wp_enqueue_script(
     'wcusage-portal',
     WCUSAGE_UNIQUE_PLUGIN_URL . 'js/portal.js',
     array('jquery', 'woo-coupon-usage'),
-    '6.3.7',
+    '6.3.8',
     false
 );
 wp_enqueue_style(
@@ -180,7 +180,7 @@ wp_enqueue_style(
     'wcusage-portal-css',
     WCUSAGE_UNIQUE_PLUGIN_URL . 'inc/portal/style.css',
     array(),
-    '6.3.7'
+    '6.3.8'
 );
 do_action( 'wcusage_hook_custom_styles' );
 // Enqueue custom scripts and styles for the registration form
@@ -1277,8 +1277,7 @@ function wcusage_portal_tab_content(
         $postid,
         $coupon_code,
         $combined_commission,
-        $wcusage_page_load,
-        $force_refresh_stats
+        $wcusage_page_load
     );
     ?>
     </div>
@@ -1289,8 +1288,7 @@ function wcusage_portal_tab_content(
         $postid,
         $coupon_code,
         $combined_commission,
-        $wcusage_page_load,
-        $force_refresh_stats
+        $wcusage_page_load
     );
     ?>
     </div>
@@ -1302,8 +1300,7 @@ function wcusage_portal_tab_content(
             $postid,
             $coupon_code,
             $combined_commission,
-            $wcusage_page_load,
-            $force_refresh_stats
+            $wcusage_page_load
         );
     }
     ?>
@@ -1317,7 +1314,6 @@ function wcusage_portal_tab_content(
             $coupon_code,
             $combined_commission,
             $wcusage_page_load,
-            $force_refresh_stats,
             ''
         );
     }
@@ -1330,8 +1326,7 @@ function wcusage_portal_tab_content(
             'wcusage_hook_dashboard_tab_content_rates',
             $postid,
             $coupon_code,
-            $wcusage_page_load,
-            $force_refresh_stats
+            $wcusage_page_load
         );
     }
     ?>
@@ -1343,8 +1338,7 @@ function wcusage_portal_tab_content(
             'wcusage_hook_dashboard_tab_content_bonuses',
             $postid,
             $coupon_code,
-            $wcusage_page_load,
-            $force_refresh_stats
+            $wcusage_page_load
         );
     }
     ?>
@@ -1361,7 +1355,6 @@ function wcusage_portal_tab_content(
             $combined_commission,
             $wcusage_page_load,
             $coupon_user_id,
-            $force_refresh_stats,
             ''
         );
     }

@@ -496,11 +496,11 @@ class WC_Coupon_Users_Table extends WP_List_Table {
             case 'sales':
                 $coupons = wcusage_get_users_coupons_ids( $user_id );
                 $total_sales = 0;
-                $sales = 0;
                 if(!$coupons) {
-                    return wcusage_format_price($sales);
+                    return wcusage_format_price($total_sales);
                 }
                 foreach ($coupons as $coupon) {
+                    $sales = 0;
                     $wcu_alltime_stats = get_post_meta($coupon, 'wcu_alltime_stats', true);
                     if($wcu_alltime_stats) {
                         if(isset($wcu_alltime_stats['total_orders'])) {
@@ -518,7 +518,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
                 if($total_referrals > 0 && !$total_sales) {
                     return "<span title='".$qmessage."'><strong><i class='fa-solid fa-ellipsis'></i></strong></span></a>";
                 }
-                return wcusage_format_price($sales);
+                return wcusage_format_price($total_sales);
             case 'commission':
                 $theoutput = "";
                 $coupons = wcusage_get_users_coupons_ids( $user_id );
@@ -828,12 +828,10 @@ function wcusage_export_coupon_users_csv() {
             }
             
             // Get commission payouts - only if PRO and tracking enabled
-            $unpaid_commission_display = '';
             if (wcu_fs()->can_use_premium_code()) {
                 $wcusage_tracking_enable = wcusage_get_setting_value('wcusage_field_tracking_enable', '0');
                 if ($wcusage_tracking_enable) {
-                    $unpaid_commission = (float)get_post_meta($coupon, 'wcu_text_unpaid_commission', true);
-                    $unpaid_commission_display = number_format($unpaid_commission, 2, '.', '');
+                    $unpaid_commission += (float)get_post_meta($coupon, 'wcu_text_unpaid_commission', true);
                 }
             }
         }
@@ -995,6 +993,7 @@ if( !function_exists( 'wcusage_get_coupon_users' ) ) {
                     // Total Sales
                     $total_sales = 0;
                     foreach ($coupons as $coupon) {
+                        $sales = 0;
                         $wcu_alltime_stats = get_post_meta($coupon, 'wcu_alltime_stats', true);
                         if($wcu_alltime_stats) {
                             if(isset($wcu_alltime_stats['total_orders'])) {

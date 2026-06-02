@@ -3,10 +3,50 @@
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
+if ( !function_exists( 'wcusage_ajax_coupon_code_matches_postid' ) ) {
+    function wcusage_ajax_coupon_code_matches_postid(  $postid, $couponcode  ) {
+        $postid = absint( $postid );
+        $couponcode = sanitize_text_field( $couponcode );
+        if ( !$postid || !$couponcode || !function_exists( 'wc_get_coupon_id_by_code' ) ) {
+            return false;
+        }
+        return absint( wc_get_coupon_id_by_code( $couponcode ) ) === $postid;
+    }
+
+}
+if ( !function_exists( 'wcusage_ajax_user_can_access_coupon' ) ) {
+    function wcusage_ajax_user_can_access_coupon(  $resolved_postid, $requested_postid = 0, $requested_code = ''  ) {
+        $resolved_postid = absint( $resolved_postid );
+        $requested_postid = absint( $requested_postid );
+        $requested_code = sanitize_text_field( $requested_code );
+        if ( !$resolved_postid ) {
+            return false;
+        }
+        if ( wcusage_check_admin_access() ) {
+            return true;
+        }
+        $coupon_user_id = absint( get_post_meta( $resolved_postid, 'wcu_select_coupon_user', true ) );
+        $currentuserid = get_current_user_id();
+        if ( $coupon_user_id && $currentuserid && $coupon_user_id === $currentuserid ) {
+            return true;
+        }
+        if ( $coupon_user_id && $currentuserid && function_exists( 'wcusage_network_check_sub_affiliate' ) && wcusage_network_check_sub_affiliate( $currentuserid, $coupon_user_id ) ) {
+            return true;
+        }
+        $wcusage_urlprivate = wcusage_get_setting_value( 'wcusage_field_urlprivate', '1' );
+        if ( !$coupon_user_id && !$wcusage_urlprivate && $requested_postid && $requested_postid === $resolved_postid && wcusage_ajax_coupon_code_matches_postid( $requested_postid, $requested_code ) ) {
+            return true;
+        }
+        return false;
+    }
+
+}
 if ( !function_exists( 'wcusage_ajax_resolve_coupon' ) ) {
     function wcusage_ajax_resolve_coupon(  $postid, $couponcode  ) {
-        $resolved_postid = absint( $postid );
-        $resolved_code = sanitize_text_field( $couponcode );
+        $requested_postid = absint( $postid );
+        $resolved_postid = $requested_postid;
+        $requested_code = sanitize_text_field( $couponcode );
+        $resolved_code = '';
         if ( $resolved_postid && get_post_type( $resolved_postid ) === 'shop_coupon' ) {
             $status = get_post_status( $resolved_postid );
             if ( $status === 'trash' || $status === false ) {
@@ -15,16 +55,27 @@ if ( !function_exists( 'wcusage_ajax_resolve_coupon' ) ) {
         } else {
             $resolved_postid = 0;
         }
-        if ( !$resolved_postid && $resolved_code && function_exists( 'wc_get_coupon_id_by_code' ) ) {
-            $resolved_postid = wc_get_coupon_id_by_code( $resolved_code );
+        if ( !$resolved_postid && $requested_code && function_exists( 'wc_get_coupon_id_by_code' ) ) {
+            $resolved_postid = wc_get_coupon_id_by_code( $requested_code );
         }
         if ( !$resolved_postid ) {
             echo '<div class="wcusage-error">' . esc_html__( 'Error: Coupon does not exist.', 'woo-coupon-usage' ) . '</div>';
             return array(0, '');
         }
-        if ( !$resolved_code ) {
-            $resolved_code = get_the_title( $resolved_postid );
+        // Admins bypass all access checks and can view any coupon's data.
+        if ( wcusage_check_admin_access() ) {
+            $resolved_code = sanitize_text_field( get_post_field( 'post_title', $resolved_postid, 'raw' ) );
+            return array($resolved_postid, $resolved_code);
         }
+        if ( $requested_postid && $requested_code && !wcusage_ajax_coupon_code_matches_postid( $requested_postid, $requested_code ) ) {
+            echo '<div class="wcusage-error">' . esc_html__( 'Error: Coupon details do not match.', 'woo-coupon-usage' ) . '</div>';
+            return array(0, '');
+        }
+        if ( !wcusage_ajax_user_can_access_coupon( $resolved_postid, $requested_postid, $requested_code ) ) {
+            echo '<div class="wcusage-error">' . esc_html__( 'Error: You do not have permission to access this data.', 'woo-coupon-usage' ) . '</div>';
+            return array(0, '');
+        }
+        $resolved_code = sanitize_text_field( get_post_field( 'post_title', $resolved_postid, 'raw' ) );
         return array($resolved_postid, $resolved_code);
     }
 

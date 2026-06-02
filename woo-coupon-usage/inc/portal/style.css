@@ -875,6 +875,15 @@ body,
     color: var(--text-color); /* Use variable */
     margin-right: 15px;
     transition: color 0.3s ease;
+    position: relative;
+    z-index: 1000;
+    pointer-events: auto;
+    touch-action: manipulation;
+}
+
+.content-header .hamburger-menu:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
 .hamburger-menu:hover,
@@ -909,7 +918,11 @@ body,
     }
 
     .content-header .hamburger-menu {
-        display: block; /* Show hamburger icon on mobile */
+        display: inline-flex; /* Show hamburger icon on mobile */
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
         margin-left: 15px;
         order: -1; /* Place before welcome-header */
     }
@@ -921,7 +934,7 @@ body,
         top: 0;
         left: 0;
         height: 100%;
-        z-index: 1000;
+        z-index: 1001;
         transform: translateX(-100%); /* Hidden off-screen by default */
         overflow-y: auto; /* Allow scrolling if menu is long */
         box-sizing: border-box;
