@@ -5,72 +5,6 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-/**
- * Clear all dashboard transient caches
- * Called when orders change status or commission data updates
- */
-function wcusage_clear_dashboard_caches() {
-    global $wpdb;
-    $wpdb->query(
-        $wpdb->prepare(
-            "DELETE FROM {$wpdb->options} 
-             WHERE option_name LIKE %s 
-             OR option_name LIKE %s
-             OR option_name LIKE %s
-             OR option_name LIKE %s
-             OR option_name LIKE %s
-             OR option_name LIKE %s
-             OR option_name LIKE %s
-             OR option_name LIKE %s
-             OR option_name LIKE %s
-             OR option_name LIKE %s
-             OR option_name LIKE %s
-             OR option_name LIKE %s",
-            '_transient_wcusage_dashboard_top_affiliates_%',
-            '_transient_timeout_wcusage_dashboard_top_affiliates_%',
-            '_transient_wcusage_dashboard_latest_affiliates_%',
-            '_transient_timeout_wcusage_dashboard_latest_affiliates_%',
-            '_transient_wcusage_dashboard_sidebar_top_affiliates_%',
-            '_transient_timeout_wcusage_dashboard_sidebar_top_affiliates_%',
-            '_transient_wcusage_dashboard_program_stats%',
-            '_transient_timeout_wcusage_dashboard_program_stats%',
-            '_transient_wcusage_dashboard_activity_recent%',
-            '_transient_timeout_wcusage_dashboard_activity_recent%',
-            '_transient_wcusage_leaderboard_%',
-            '_transient_timeout_wcusage_leaderboard_%'
-        )
-    );
-}
-
-// Clear dashboard caches when order status changes
-add_action('woocommerce_order_status_changed', 'wcusage_clear_dashboard_caches', 999);
-
-// Clear dashboard caches when coupon is saved or deleted
-add_action('save_post_shop_coupon', 'wcusage_clear_dashboard_caches', 20);
-add_action('delete_post', function($post_id) {
-    if (get_post_type($post_id) === 'shop_coupon') {
-        wcusage_clear_dashboard_caches();
-    }
-}, 10);
-
-// Clear dashboard caches when affiliate user assignments change
-add_action('updated_post_meta', function($meta_id, $post_id, $meta_key, $meta_value) {
-    if ($meta_key === 'wcu_select_coupon_user') {
-        wcusage_clear_dashboard_caches();
-    }
-}, 10, 4);
-
-add_action('added_post_meta', function($meta_id, $post_id, $meta_key, $meta_value) {
-    if ($meta_key === 'wcu_select_coupon_user') {
-        wcusage_clear_dashboard_caches();
-    }
-}, 10, 4);
-
-add_action('deleted_post_meta', function($meta_ids, $post_id, $meta_key, $meta_value) {
-    if ($meta_key === 'wcu_select_coupon_user') {
-        wcusage_clear_dashboard_caches();
-    }
-}, 10, 4);
 
 /**
  * Displays header section on dashboard pages.
@@ -117,7 +51,7 @@ function wcusage_dashboard_page_header() {
     wp_enqueue_style('wcusage-admin-header-menu', WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-header-menu.css', array(), null);
 
     // Get affiliate orders and clicks for last 2 months with caching
-    $stats_cache_key = 'wcusage_dashboard_program_stats';
+    $stats_cache_key = wcusage_cache_key( 'dashboard', 'wcusage_dashboard_program_stats' );
     $cached_stats = get_transient($stats_cache_key);
     
     if ($cached_stats !== false && isset($cached_stats['orders_data']) && isset($cached_stats['clicks_data'])) {
@@ -274,7 +208,7 @@ jQuery(document).ready(function($) {
             // Affiliates with dropdown
             array('label' => 'Affiliates', 'icon' => 'fa-solid fa-user-group', 'url' => '#', 'dropdown' => array(
                 array('label' => 'View Affiliates', 'url' => admin_url('admin.php?page=wcusage_affiliates'), 'icon' => 'fa-solid fa-users'),
-                array('label' => 'Manage Registrations', 'url' => admin_url('admin.php?page=wcusage_registrations'), 'icon' => 'fa-solid fa-users-gear'),
+                array('label' => 'Manage Registrations', 'url' => admin_url('admin.php?page=wcusage_registrations'), 'icon' => 'fa-solid fa-users-gear', 'disabled' => !wcusage_get_setting_value('wcusage_field_registration_enable', '1')),
                 array('label' => 'Add New Affiliate', 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-user-plus'),
             )),
             array('label' => 'Referrals', 'icon' => 'fa-solid fa-arrow-right-arrow-left', 'url' => '#', 'dropdown' => array(
@@ -353,7 +287,7 @@ jQuery(document).ready(function($) {
             // Affiliates with dropdown
             array('label' => 'Affiliates', 'icon' => 'fa-solid fa-user-group', 'url' => '#', 'dropdown' => array(
                 array('label' => 'View Affiliates', 'url' => admin_url('admin.php?page=wcusage_affiliates'), 'icon' => 'fa-solid fa-users'),
-                array('label' => 'Manage Registrations', 'url' => admin_url('admin.php?page=wcusage_registrations'), 'icon' => 'fa-solid fa-user-plus'),
+                array('label' => 'Manage Registrations', 'url' => admin_url('admin.php?page=wcusage_registrations'), 'icon' => 'fa-solid fa-user-plus', 'disabled' => !wcusage_get_setting_value('wcusage_field_registration_enable', '1')),
                 array('label' => 'Add New Affiliate', 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-user-plus'),
             )),
             array('label' => 'Referrals', 'icon' => 'fa-solid fa-arrow-right-arrow-left', 'url' => '#', 'dropdown' => array(
@@ -702,22 +636,6 @@ function wcusage_save_dashboard_order_ajax() {
 add_action('wp_ajax_wcusage_save_dashboard_order', 'wcusage_save_dashboard_order_ajax');
 
 /**
- * AJAX: Clear dashboard caches
- */
-function wcusage_clear_dashboard_caches_ajax() {
-    check_ajax_referer('wcusage_dashboard_clear_cache', 'nonce');
-
-    if (!is_user_logged_in() || !function_exists('wcusage_check_admin_access') || !wcusage_check_admin_access()) {
-        wp_send_json_error(array('message' => __('Not authorized.', 'woo-coupon-usage')), 403);
-    }
-
-    wcusage_clear_dashboard_caches();
-
-    wp_send_json_success(array('message' => __('Dashboard caches cleared successfully!', 'woo-coupon-usage')));
-}
-add_action('wp_ajax_wcusage_clear_dashboard_caches', 'wcusage_clear_dashboard_caches_ajax');
-
-/**
  * AJAX: Paginate dashboard section tables
  */
 function wcusage_dashboard_paginate_ajax() {
@@ -741,7 +659,7 @@ function wcusage_dashboard_paginate_ajax() {
     switch ($section) {
         case 'affiliates_latest':
             // Check cache first for performance
-            $cache_key = 'wcusage_dashboard_latest_affiliates_' . $offset . '_' . $per_page;
+            $cache_key = wcusage_cache_key( 'dashboard', 'wcusage_dashboard_latest_affiliates_' . $offset . '_' . $per_page );
             $cached_data = get_transient($cache_key);
             
             if ($cached_data !== false && isset($cached_data['html']) && isset($cached_data['total'])) {
@@ -834,7 +752,7 @@ function wcusage_dashboard_paginate_ajax() {
 
         case 'affiliates_top':
             // Check cache first for performance
-            $cache_key = 'wcusage_dashboard_top_affiliates_' . $offset . '_' . $per_page;
+            $cache_key = wcusage_cache_key( 'dashboard', 'wcusage_dashboard_top_affiliates_' . $offset . '_' . $per_page );
             $cached_data = get_transient($cache_key);
             
             if ($cached_data !== false && isset($cached_data['html']) && isset($cached_data['total'])) {
@@ -1341,7 +1259,7 @@ function wcusage_dashboard_page_section_activity() {
     $per_page = 5;
     
     // Check cache first
-    $cache_key = 'wcusage_dashboard_activity_recent';
+    $cache_key = wcusage_cache_key( 'dashboard', 'wcusage_dashboard_activity_recent' );
     $cached_data = get_transient($cache_key);
     
     if ($cached_data !== false) {
@@ -1869,7 +1787,7 @@ function wcusage_dashboard_page_html() {
 
         if ($affiliate_sidebar_top_enabled && !empty($affiliate_sidebar_statuses)) {
             // Check cache first for performance
-            $sidebar_cache_key = 'wcusage_dashboard_sidebar_top_affiliates_' . $affiliate_sidebar_top_limit;
+            $sidebar_cache_key = wcusage_cache_key( 'dashboard', 'wcusage_dashboard_sidebar_top_affiliates_' . $affiliate_sidebar_top_limit );
             $cached_sidebar_data = get_transient($sidebar_cache_key);
             
             if ($cached_sidebar_data !== false && is_array($cached_sidebar_data)) {

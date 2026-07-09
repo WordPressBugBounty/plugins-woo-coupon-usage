@@ -86,8 +86,10 @@ class wcusage_Referrals_Table extends WP_List_Table {
         }
         // Success message status change
         if ( 'trash' === $this->current_action() || 'processing' === $this->current_action() || 'completed' === $this->current_action() || 'on-hold' === $this->current_action() || 'cancelled' === $this->current_action() ) {
-            $count = count( $_GET['bulk-delete'] );
-            echo '<div class="notice notice-success is-dismissible" style="margin-top: 25px;"><p>' . esc_html( $count ) . ' orders updated.</p></div>';
+            $count = ( isset( $_GET['bulk-delete'] ) ? count( (array) $_GET['bulk-delete'] ) : 0 );
+            if ( $count > 0 ) {
+                echo '<div class="notice notice-success is-dismissible" style="margin-top: 25px;"><p>' . esc_html( $count ) . ' orders updated.</p></div>';
+            }
         }
         // Now prepare the items for the table
         $columns = $this->get_columns();
@@ -151,6 +153,14 @@ class wcusage_Referrals_Table extends WP_List_Table {
         $current_from = ( isset( $_GET['date_from'] ) ? sanitize_text_field( wp_unslash( $_GET['date_from'] ) ) : '' );
         $current_to = ( isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash( $_GET['date_to'] ) ) : '' );
         $statuses = wc_get_order_statuses();
+        // "Only assigned affiliates" toggle. Rendered here as a fallback, then relocated by JS to sit
+        // right beside the bulk actions "Apply" button. Saved per-user, disabled by default.
+        $only_assigned = wcusage_referrals_only_assigned_enabled();
+        echo '<div class="alignleft actions wcusage-only-assigned-actions" style="display:flex; align-items:center;">';
+        // Hidden marker so we can tell the filter form was submitted (persist the checkbox per-user).
+        echo '<input type="hidden" name="wcu_ref_applied" value="1" />';
+        echo '<label class="wcusage-only-assigned-filter' . (( $only_assigned ? ' is-active' : '' )) . '" title="' . esc_attr__( 'Only show orders where the coupon has an assigned affiliate user.', 'woo-coupon-usage' ) . '">' . '<input type="checkbox" id="wcu_only_assigned" name="wcu_only_assigned" value="1"' . checked( $only_assigned, 1, false ) . ' />' . '<span class="wcu-switch" aria-hidden="true"></span>' . '<span class="wcu-label-text">' . esc_html__( 'Only show orders with an affiliate user', 'woo-coupon-usage' ) . '</span>' . '</label>';
+        echo '</div>';
         // Place filters on the left actions row so the pagination/navigation stays furthest right
         echo '<div class="alignleft actions wcusage-admin-title-filters" style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">';
         // Affiliate user (label removed, placeholder used; preserve current value)
@@ -310,11 +320,13 @@ function wcusage_orders_page() {
     // For username autocomplete in filters
     wp_enqueue_script( 'jquery-ui-autocomplete' );
     // Enqueue external script for this page (moved inline JS)
+    $wcusage_referrals_js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin-referrals.js';
+    $wcusage_referrals_js_ver = ( file_exists( $wcusage_referrals_js_path ) ? filemtime( $wcusage_referrals_js_path ) : WCUSAGE_VERSION );
     wp_enqueue_script(
         'wcusage-admin-referrals',
         WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-referrals.js',
         array('jquery', 'jquery-ui-autocomplete'),
-        '1.0.0',
+        $wcusage_referrals_js_ver,
         true
     );
     wp_localize_script( 'wcusage-admin-referrals', 'wcusage_referrals_vars', array(
@@ -324,6 +336,9 @@ function wcusage_orders_page() {
             'please_select_at_least_one_order' => esc_html__( 'Please select at least one order.', 'woo-coupon-usage' ),
             'update_unpaid_confirm_header'     => esc_html__( 'Update unpaid commission for the selected orders?', 'woo-coupon-usage' ),
             'update_unpaid_confirm_line'       => esc_html__( 'This will grant unpaid commission to affiliates, for COMPLETED orders, that have not already granted any unpaid commission.', 'woo-coupon-usage' ),
+            'trash_confirm'                    => esc_html__( 'Are you sure you want to move the selected WooCommerce orders to the trash?', 'woo-coupon-usage' ),
+            'status_confirm_template'          => esc_html__( 'Are you sure you want to apply "%s" to the selected orders?', 'woo-coupon-usage' ),
+            'status_confirm_line'              => esc_html__( 'Changing order statuses may affect the affiliate commissions for these orders.', 'woo-coupon-usage' ),
             'selected_orders'                  => esc_html__( 'Selected orders:', 'woo-coupon-usage' ),
         ),
     ) );
@@ -353,6 +368,62 @@ function wcusage_orders_page() {
         opacity: 0.5;
         pointer-events: none;
     }
+    /* "Only assigned affiliates" toggle (sits beside the bulk actions Apply button) */
+    .wcusage-only-assigned-filter {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 8px;
+        padding: 0 12px;
+        height: 30px;
+        border: 1px solid #c3c4c7;
+        border-radius: 4px;
+        background: #fff;
+        color: #2c3338;
+        font-size: 13px;
+        line-height: 1;
+        vertical-align: middle;
+        white-space: nowrap;
+        cursor: pointer;
+        user-select: none;
+        transition: border-color .15s ease, box-shadow .15s ease, color .15s ease;
+    }
+    .wcusage-only-assigned-filter:hover { border-color: #8c8f94; }
+    .wcusage-only-assigned-filter:focus-within {
+        border-color: #07bbe3;
+        box-shadow: 0 0 0 1px #07bbe3;
+        outline: 2px solid transparent;
+    }
+    .wcusage-only-assigned-filter input[type="checkbox"] {
+        position: absolute;
+        width: 1px; height: 1px;
+        margin: 0;
+        opacity: 0;
+        pointer-events: none;
+    }
+    .wcusage-only-assigned-filter .wcu-switch {
+        position: relative;
+        flex: 0 0 auto;
+        width: 34px;
+        height: 18px;
+        border-radius: 999px;
+        background: #c3c4c7;
+        transition: background-color .15s ease;
+    }
+    .wcusage-only-assigned-filter .wcu-switch::after {
+        content: "";
+        position: absolute;
+        top: 2px; left: 2px;
+        width: 14px; height: 14px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+        transition: transform .15s ease;
+    }
+    .wcusage-only-assigned-filter .wcu-label-text { font-weight: 500; }
+    .wcusage-only-assigned-filter.is-active { border-color: #07bbe3; color: #0a7ea3; }
+    .wcusage-only-assigned-filter.is-active .wcu-switch { background: #07bbe3; }
+    .wcusage-only-assigned-filter.is-active .wcu-switch::after { transform: translateX(16px); }
     </style>
     <link rel="stylesheet" href="<?php 
     echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
@@ -405,6 +476,101 @@ function wcusage_orders_page() {
     <?php 
 }
 
+/**
+ * Determine whether the "only assigned affiliate" referrals filter is enabled for the current user.
+ *
+ * The choice is saved per-user: when the filter form is submitted the current checkbox state is
+ * stored in user meta; on a normal page load the saved preference is used. Disabled by default.
+ *
+ * @return int 1 if enabled, 0 otherwise.
+ */
+function wcusage_referrals_only_assigned_enabled() {
+    static $enabled = null;
+    if ( null !== $enabled ) {
+        return $enabled;
+    }
+    $user_id = get_current_user_id();
+    if ( isset( $_GET['wcu_ref_applied'] ) ) {
+        // The filter form was submitted: checkbox present = on, absent = off.
+        $enabled = ( isset( $_GET['wcu_only_assigned'] ) && $_GET['wcu_only_assigned'] ? 1 : 0 );
+        if ( $user_id ) {
+            update_user_meta( $user_id, 'wcusage_referrals_only_assigned', $enabled );
+        }
+    } else {
+        // Normal page load: use the saved preference (disabled by default).
+        $enabled = ( $user_id ? (int) get_user_meta( $user_id, 'wcusage_referrals_only_assigned', true ) : 0 );
+    }
+    return $enabled;
+}
+
+/**
+ * Get the IDs of all orders that have an assigned affiliate user.
+ *
+ * This mirrors the "Affiliate User" column logic (lifetime referrer, then custom/URL referrer,
+ * then the order's coupon codes). An order counts as "assigned" when the relevant coupon has a
+ * user set in its `wcu_select_coupon_user` meta. Data is gathered in bulk (no per-order loads).
+ *
+ * @return array Order IDs (ints) that display an assigned affiliate user.
+ */
+function wcusage_get_assigned_affiliate_order_ids() {
+    global $wpdb;
+    static $cache = null;
+    if ( null !== $cache ) {
+        return $cache;
+    }
+    $hpos = class_exists( '\\Automattic\\WooCommerce\\Utilities\\OrderUtil' ) && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+    $meta_table = ( $hpos ? $wpdb->prefix . 'wc_orders_meta' : $wpdb->postmeta );
+    $id_col = ( $hpos ? 'order_id' : 'post_id' );
+    $items_table = $wpdb->prefix . 'woocommerce_order_items';
+    // Bulk: lifetime + custom/URL referrer coupon per order.
+    $lifetime = array();
+    $referrer = array();
+    $meta_rows = $wpdb->get_results( "SELECT {$id_col} AS oid, meta_key, meta_value FROM {$meta_table}\r\n         WHERE meta_key IN ('lifetime_affiliate_coupon_referrer','wcusage_referrer_coupon') AND meta_value <> ''" );
+    foreach ( $meta_rows as $row ) {
+        if ( 'lifetime_affiliate_coupon_referrer' === $row->meta_key ) {
+            $lifetime[(int) $row->oid] = $row->meta_value;
+        } else {
+            $referrer[(int) $row->oid] = $row->meta_value;
+        }
+    }
+    // Bulk: coupon codes used on each order.
+    $order_codes = array();
+    $item_rows = $wpdb->get_results( "SELECT order_id AS oid, order_item_name AS code FROM {$items_table} WHERE order_item_type = 'coupon'" );
+    foreach ( $item_rows as $row ) {
+        $order_codes[(int) $row->oid][] = $row->code;
+    }
+    // A coupon "has an affiliate" when its wcu_select_coupon_user is set (cached per code).
+    $has_affiliate = function ( $code ) {
+        if ( '' === $code || null === $code ) {
+            return false;
+        }
+        $info = wcusage_get_coupon_info( $code );
+        return isset( $info[1] ) && '' !== $info[1];
+    };
+    $candidates = array_unique( array_merge( array_keys( $lifetime ), array_keys( $referrer ), array_keys( $order_codes ) ) );
+    $assigned = array();
+    foreach ( $candidates as $oid ) {
+        $ok = false;
+        if ( isset( $lifetime[$oid] ) ) {
+            $ok = $has_affiliate( $lifetime[$oid] );
+        } elseif ( isset( $referrer[$oid] ) ) {
+            $ok = $has_affiliate( $referrer[$oid] );
+        } elseif ( isset( $order_codes[$oid] ) ) {
+            foreach ( $order_codes[$oid] as $code ) {
+                if ( $has_affiliate( $code ) ) {
+                    $ok = true;
+                    break;
+                }
+            }
+        }
+        if ( $ok ) {
+            $assigned[] = (int) $oid;
+        }
+    }
+    $cache = $assigned;
+    return $cache;
+}
+
 /*
 * Get all orders table data
 */
@@ -412,6 +578,7 @@ function get_wcusage_admin_table_orders(  $current_page = 1, $per_page = 20  ) {
     global $wpdb;
     $orders = array();
     // Read filters
+    $only_assigned = wcusage_referrals_only_assigned_enabled();
     $aff_user = ( isset( $_GET['affiliate_user'] ) ? sanitize_text_field( wp_unslash( $_GET['affiliate_user'] ) ) : '' );
     $aff_group = ( isset( $_GET['affiliate_group'] ) ? sanitize_text_field( wp_unslash( $_GET['affiliate_group'] ) ) : '' );
     $coupon = ( isset( $_GET['coupon_code'] ) ? sanitize_text_field( wp_unslash( $_GET['coupon_code'] ) ) : '' );
@@ -502,6 +669,29 @@ function get_wcusage_admin_table_orders(  $current_page = 1, $per_page = 20  ) {
             );
         }
         $args['post__in'] = $coupon_order_ids;
+    }
+    // Restrict to orders whose coupon currently has an assigned affiliate user. Applied when the
+    // "Only assigned affiliates" toggle is on, and always when filtering by a group/role (so those
+    // results never include orders whose coupon no longer has an affiliate - the "-" rows).
+    if ( $only_assigned || $aff_group !== '' ) {
+        $assigned_ids = wcusage_get_assigned_affiliate_order_ids();
+        if ( empty( $assigned_ids ) ) {
+            return array(
+                'orders' => array(),
+                'total'  => 0,
+            );
+        }
+        if ( isset( $args['post__in'] ) ) {
+            $args['post__in'] = array_values( array_intersect( $args['post__in'], $assigned_ids ) );
+            if ( empty( $args['post__in'] ) ) {
+                return array(
+                    'orders' => array(),
+                    'total'  => 0,
+                );
+            }
+        } else {
+            $args['post__in'] = $assigned_ids;
+        }
     }
     // Execute Query
     $results = wc_get_orders( $args );

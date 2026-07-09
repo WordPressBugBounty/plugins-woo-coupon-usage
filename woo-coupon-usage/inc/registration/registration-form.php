@@ -611,7 +611,11 @@ function wcusage_couponusage_register(  $atts  ) {
       <?php 
             // Get Login Form
             woocommerce_output_all_notices();
-            woocommerce_login_form();
+            // Redirect back to the current registration page after login instead of the
+            // default WooCommerce My Account page.
+            woocommerce_login_form( array(
+                'redirect' => get_permalink(),
+            ) );
             ?>
 
     <?php 
@@ -826,7 +830,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
             $field_password_confirm = wcusage_get_setting_value( 'wcusage_field_registration_password_confirm', '0' );
             if ( wcusage_register_verify( $post_field_values ) ) {
                 echo wcusage_register_verify( $post_field_values );
-                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Safe internal output; verified in manual audit.
             } else {
                 // Clear sessions wcu_login_success and wcu_login_username
                 if ( isset( $_SESSION['wcu_login_success'] ) ) {

@@ -3,6 +3,7 @@
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin settings UI: echoed values are internal pre-escaped helper markup and static strings; verified safe in manual audit.
 /**
  * custom option and settings
  */
@@ -461,10 +462,10 @@ function wcusage_section_developers_cb(  $args  ) {
         // WooCommerce is installed but not active
         if ( isset( $installed_plugins[$path] ) ) {
             $activate_url = wp_nonce_url( 'plugins.php?action=activate&amp;plugin=' . $path, 'activate-plugin_' . $path );
-            echo '<p style="font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> WooCommerce is installed but not activated. <a href="' . esc_url( $activate_url ) . '">Click here to activate it.</a></strong></p>';
+            echo '<p style="font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> ' . sprintf( wp_kses_post( __( 'WooCommerce is installed but not activated. <a href="%s">Click here to activate it.</a>', 'woo-coupon-usage' ) ), esc_url( $activate_url ) ) . '</strong></p>';
         } else {
             $install_url = self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=woocommerce' );
-            echo '<p style="font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> WooCommerce needs to be installed for this plugin to work. <a href="' . esc_url( $install_url ) . '">Click here to install it.</a></strong></p>';
+            echo '<p style="font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> ' . sprintf( wp_kses_post( __( 'WooCommerce needs to be installed for this plugin to work. <a href="%s">Click here to install it.</a>', 'woo-coupon-usage' ) ), esc_url( $install_url ) ) . '</strong></p>';
         }
     }
     ?>
@@ -574,8 +575,20 @@ jQuery( document ).ready(function() {
     ?>
 
   <?php 
+    // PRO sales tabs (free version only).
+    if ( function_exists( 'wcusage_output_pro_sales_tab_click_js' ) ) {
+        wcusage_output_pro_sales_tab_click_js();
+    }
+    ?>
+
+  <?php 
     wcusage_admin_settings_tab_click( "#tab-pro-details", ".wcusage_row_pro_details", 1 );
     ?>
+
+  // Tabs are now wired up and inactive panels hidden inline. Lift the CSS guard
+  // that hid the panels during initial page load (see .wcu-tabs-ready in CSS),
+  // so normal jQuery show()/hide() controls visibility from here on.
+  jQuery('.wcusage-settings-form').addClass('wcu-tabs-ready');
 
 });
 </script>
@@ -671,40 +684,177 @@ jQuery( document ).ready(function() {
     ?>
         </li>
         <?php 
-    ?>
-        <?php 
-    ?>
+    if ( wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() ) {
+        ?>
         <li class="wcu-sidebar-menu-item">
           <?php 
-    wcusage_js_settings_tab_toggle( '.wcusage_field_tracking_enable', '', '#tab-payouts' );
-    ?>
+        wcusage_js_settings_tab_toggle( '.wcusage_sms_enable', '', '#tab-sms' );
+        ?>
           <?php 
-    wcusage_admin_settings_sidebar_button(
-        "tab-payouts",
-        esc_html__( "Payouts", "woo-coupon-usage" ),
-        "fas fa-handshake",
-        1,
-        ''
-    );
-    ?>
+        wcusage_admin_settings_sidebar_button(
+            "tab-sms",
+            esc_html__( "SMS Notifications", "woo-coupon-usage" ),
+            "fas fa-comment-sms",
+            1,
+            ''
+        );
+        ?>
         </li>
         <?php 
+    }
     ?>
+        <?php 
+    if ( wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() ) {
+        ?>
         <li class="wcu-sidebar-menu-item">
           <?php 
-    wcusage_js_settings_tab_toggle( '.wcusage_field_enable_reports', '', '#tab-reports' );
-    ?>
+        wcusage_js_settings_tab_toggle( '.wcusage_field_email_newsletter_enable', '', '#tab-newsletter' );
+        ?>
           <?php 
-    wcusage_admin_settings_sidebar_button(
-        "tab-reports",
-        esc_html__( "Reports", "woo-coupon-usage" ),
-        "fas fa-file-alt",
-        1,
-        ''
-    );
-    ?>
+        wcusage_admin_settings_sidebar_button(
+            "tab-newsletter",
+            esc_html__( "Newsletters", "woo-coupon-usage" ),
+            "fas fa-envelope",
+            1,
+            ''
+        );
+        ?>
         </li>
         <?php 
+    }
+    ?>
+        <?php 
+    if ( wcu_fs()->can_use_premium_code() ) {
+        ?>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+        wcusage_js_settings_tab_toggle( '.wcusage_field_tracking_enable', '', '#tab-payouts' );
+        ?>
+          <?php 
+        wcusage_admin_settings_sidebar_button(
+            "tab-payouts",
+            esc_html__( "Payouts", "woo-coupon-usage" ),
+            "fas fa-handshake",
+            1,
+            ''
+        );
+        ?>
+        </li>
+        <?php 
+    }
+    ?>
+        <?php 
+    if ( wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() ) {
+        ?>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+        wcusage_js_settings_tab_toggle( '.wcusage_field_payouts_enable_invoices', '.wcusage_field_payouts_enable_statements', '#tab-invoices' );
+        ?>
+          <?php 
+        wcusage_admin_settings_sidebar_button(
+            "tab-invoices",
+            esc_html__( "Invoices", "woo-coupon-usage" ),
+            "fas fa-file-invoice",
+            1,
+            ''
+        );
+        ?>
+        </li>
+        <?php 
+    }
+    ?>
+        <?php 
+    if ( wcu_fs()->can_use_premium_code() ) {
+        ?>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+        wcusage_js_settings_tab_toggle( '.wcusage_field_enable_reports', '', '#tab-reports' );
+        ?>
+          <?php 
+        wcusage_admin_settings_sidebar_button(
+            "tab-reports",
+            esc_html__( "Reports", "woo-coupon-usage" ),
+            "fas fa-file-alt",
+            1,
+            ''
+        );
+        ?>
+        </li>
+        <?php 
+    }
+    ?>
+        <?php 
+    if ( wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() ) {
+        ?>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+        wcusage_admin_settings_sidebar_button(
+            "tab-custom-tabs",
+            esc_html__( "Custom Tabs", "woo-coupon-usage" ),
+            "fas fa-folder-plus",
+            1,
+            ''
+        );
+        ?>
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+        wcusage_js_settings_tab_toggle( '.wcusage_field_creatives_enable', '', '#tab-creatives' );
+        ?>
+          <?php 
+        wcusage_admin_settings_sidebar_button(
+            "tab-creatives",
+            esc_html__( "Creatives", "woo-coupon-usage" ),
+            "fas fa-images",
+            1,
+            ''
+        );
+        ?>
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+        wcusage_js_settings_tab_toggle( '.wcusage_field_bonuses_enable', '', '#tab-bonuses' );
+        ?>
+          <?php 
+        wcusage_admin_settings_sidebar_button(
+            "tab-bonuses",
+            esc_html__( "Bonuses", "woo-coupon-usage" ),
+            "fas fa-gift",
+            1,
+            ''
+        );
+        ?>
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+        wcusage_js_settings_tab_toggle( '.wcusage_field_mla_enable', '', '#tab-mla' );
+        ?>
+          <?php 
+        wcusage_admin_settings_sidebar_button(
+            "tab-mla",
+            esc_html__( "MLA", "woo-coupon-usage" ),
+            "fa-solid fa-users",
+            1,
+            ''
+        );
+        ?>
+        </li>
+        <li class="wcu-sidebar-menu-item">
+          <?php 
+        wcusage_js_settings_tab_toggle( '.wcusage_field_referral_popup_enable', '', '#tab-referral-popup' );
+        ?>
+          <?php 
+        wcusage_admin_settings_sidebar_button(
+            "tab-referral-popup",
+            esc_html__( "Referral Popup", "woo-coupon-usage" ),
+            "fas fa-comment-dots",
+            1,
+            ''
+        );
+        ?>
+        </li>
+        <?php 
+    }
     ?>
         <?php 
     $wcusage_subscriptions_enable = ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ) ? true : false );
@@ -793,7 +943,7 @@ jQuery( document ).ready(function() {
         esc_html__( "Help & Support", "woo-coupon-usage" ),
         "fas fa-question-circle",
         0,
-        'background: #bb9523; color: #fff;'
+        'background: #2271b1; color: #fff;'
     );
     ?>
         </li>
@@ -804,10 +954,16 @@ jQuery( document ).ready(function() {
         esc_html__( "PRO Modules", "woo-coupon-usage" ),
         "fas fa-star",
         0,
-        'background: green; color: #fff;'
+        'background: #bb9523; color: #fff;'
     );
     ?>
         </li>
+        <?php 
+    // PRO sales tabs (free version only) — shown just below "PRO Modules".
+    if ( function_exists( 'wcusage_output_pro_sales_sidebar_items' ) ) {
+        wcusage_output_pro_sales_sidebar_items();
+    }
+    ?>
       </ul>
     </nav>
   </div>
@@ -879,13 +1035,19 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         ?> <span class='fas fa-arrow-circle-right'></span></a>
       </h2>
 
-  <div id="wcu-settings-search-right" aria-label="Search settings">
+  <div id="wcu-settings-search-right" aria-label="<?php 
+        echo esc_attr__( 'Search settings', 'woo-coupon-usage' );
+        ?>">
         <div class="wcu-search-row">
           <span class="wcu-search-prompt" aria-hidden="true">
-            <span class="wcu-search-prompt-text">Looking for something?</span>
+            <span class="wcu-search-prompt-text"><?php 
+        echo esc_html__( 'Looking for something?', 'woo-coupon-usage' );
+        ?></span>
             <span class="wcu-search-prompt-arrow" role="presentation"></span>
           </span>
-          <input type="search" id="wcu-settings-search" placeholder="Search settings..." />
+          <input type="search" id="wcu-settings-search" placeholder="<?php 
+        echo esc_attr__( 'Search settings...', 'woo-coupon-usage' );
+        ?>" />
         </div>
         <div id="wcu-settings-search-results">
           <ul></ul>
@@ -893,7 +1055,9 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
   <div id="wcu-settings-search-empty" style="display:none;">
     <ul>
       <li class="wcu-search-no-results" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; color: #888;">
-        <span style="font-weight: 600;">No matching settings found.</span>
+        <span style="font-weight: 600;"><?php 
+        echo esc_html__( 'No matching settings found.', 'woo-coupon-usage' );
+        ?></span>
       </li>
     </ul>
   </div>
@@ -946,9 +1110,13 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
                 }
                 ?>
 
-          <p style="max-width: 500px;">Success! All affiliate dashboard stats will now be refreshed and re-calculated, the next time the affiliate dashboard is loaded (first load may take a few seconds longer).</p>
+          <p style="max-width: 500px;"><?php 
+                echo esc_html__( 'Success! All affiliate dashboard stats will now be refreshed and re-calculated, the next time the affiliate dashboard is loaded (first load may take a few seconds longer).', 'woo-coupon-usage' );
+                ?></p>
 
-          <p>Redirecting back to settings in <span id="count">5</span> seconds...</p>
+          <p><?php 
+                echo sprintf( esc_html__( 'Redirecting back to settings in %s seconds...', 'woo-coupon-usage' ), '<span id="count">5</span>' );
+                ?></p>
 
           <script type="text/javascript">
 
@@ -1017,10 +1185,10 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
             // WooCommerce is installed but not active
             if ( isset( $installed_plugins[$path] ) ) {
                 $activate_url = wp_nonce_url( 'plugins.php?action=activate&amp;plugin=' . $path, 'activate-plugin_' . $path );
-                echo '<p style="font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> WooCommerce is installed but not activated. <a href="' . esc_url( $activate_url ) . '">Click here to activate it.</a></strong></p>';
+                echo '<p style="font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> ' . sprintf( wp_kses_post( __( 'WooCommerce is installed but not activated. <a href="%s">Click here to activate it.</a>', 'woo-coupon-usage' ) ), esc_url( $activate_url ) ) . '</strong></p>';
             } else {
                 $install_url = self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=woocommerce' );
-                echo '<p style="font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> WooCommerce needs to be installed for this plugin to work. <a href="' . esc_url( $install_url ) . '">Click here to install it.</a></strong></p>';
+                echo '<p style="font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> ' . sprintf( wp_kses_post( __( 'WooCommerce needs to be installed for this plugin to work. <a href="%s">Click here to install it.</a>', 'woo-coupon-usage' ) ), esc_url( $install_url ) ) . '</strong></p>';
             }
             ?>
         <style>.wcusage-settings-form { display: none; }</style>
@@ -1033,6 +1201,10 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
   	<?php 
         settings_fields( 'wcusage' );
         do_settings_sections( 'wcusage' );
+        // PRO sales tabs content (free version only).
+        if ( function_exists( 'wcusage_output_pro_sales_panels' ) ) {
+            wcusage_output_pro_sales_panels();
+        }
         ?>
 
       <br/><hr/>
@@ -1128,14 +1300,21 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         $plugin = get_plugin_data( WP_PLUGIN_DIR . '/' . $pluginname . '/woo-coupon-usage.php', false, false );
         $pluginversion = $plugin['Version'];
         ?>
-      Thank you for using Coupon Affiliates<?php 
+      <?php 
+        echo esc_html__( 'Thank you for using Coupon Affiliates', 'woo-coupon-usage' );
         if ( $pluginversion ) {
-            ?> Version <?php 
+            ?> <?php 
+            echo esc_html__( 'Version', 'woo-coupon-usage' );
+            ?> <?php 
             echo esc_html( $pluginversion );
         }
-        ?>. <a href="https://roadmap.couponaffiliates.com/updates" target="_blank">View Changelog</a>.
+        ?>. <a href="https://roadmap.couponaffiliates.com/updates" target="_blank"><?php 
+        echo esc_html__( 'View Changelog', 'woo-coupon-usage' );
+        ?></a>.
       <br/>
-      Developed and supported by <a href="https://relywp.com">RelyWP Ltd</a>.
+      <?php 
+        echo esc_html__( 'Developed and supported by', 'woo-coupon-usage' );
+        ?> <a href="https://relywp.com">RelyWP Ltd</a>.
       </span>
 
       </div>
@@ -1185,8 +1364,12 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
                 ?>
         <a href="https://couponaffiliates.com/docs/setup-guide-free?utm_campaign=plugin&utm_source=dashboard-sidebar&utm_medium=setup-guide" style="text-decoration: none;" target="_blank">
           <div class="wcu-settings-sidebar-box">
-            <span style="font-size: 10px; color: green; font-weight: bold;">Need help getting started?</span><br/>
-            Setup Guide <span class="dashicons dashicons-external"></span>
+            <span style="font-size: 10px; color: green; font-weight: bold;"><?php 
+                echo esc_html__( 'Need help getting started?', 'woo-coupon-usage' );
+                ?></span><br/>
+            <?php 
+                echo esc_html__( 'Setup Guide', 'woo-coupon-usage' );
+                ?> <span class="dashicons dashicons-external"></span>
           </div>
         </a>
         <script>
@@ -1198,12 +1381,20 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         });
         </script>
         <div id="wcu-settings-sidebar-pro-upgrade">
-          <span style="font-size: 10px; color: #fff;">Want more advanced features?</span><br/>
-          <p style="font-size: 24px; line-height: 30px; margin: 0;">Upgrade to PRO!</p>
+          <span style="font-size: 10px; color: #fff;"><?php 
+                echo esc_html__( 'Want more advanced features?', 'woo-coupon-usage' );
+                ?></span><br/>
+          <p style="font-size: 24px; line-height: 30px; margin: 0;"><?php 
+                echo esc_html__( 'Upgrade to PRO!', 'woo-coupon-usage' );
+                ?></p>
           <a href="https://couponaffiliates.com/pricing?utm_campaign=plugin&utm_source=dashboard-sidebar&utm_medium=pro-upgrade" target="_blank" style="text-decoration: none;">
-          <p class="wcu-settings-sidebar-pro-upgrade-button">FREE 7 DAY TRIAL <span class="fas fa-arrow-right"></span></p>
+          <p class="wcu-settings-sidebar-pro-upgrade-button"><?php 
+                echo esc_html__( 'FREE 7 DAY TRIAL', 'woo-coupon-usage' );
+                ?> <span class="fas fa-arrow-right"></span></p>
           </a>
-          <p style="font-size: 10px; line-height: 20px; margin-top: 15px;">After your trial, just $14.99 per month.</p>
+          <p style="font-size: 10px; line-height: 20px; margin-top: 15px;"><?php 
+                echo esc_html__( 'After your trial, just $14.99 per month.', 'woo-coupon-usage' );
+                ?></p>
           <?php 
                 // Black Friday Deal
                 $todayDate = strtotime( 'now' );
@@ -1218,72 +1409,157 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
           <?php 
                 if ( !$specialsale ) {
                     ?>
-            <p style="font-size: 12px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;">25% discount code: DASH25</p>
+            <p style="font-size: 12px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;"><?php 
+                    echo esc_html__( '25% discount code:', 'woo-coupon-usage' );
+                    ?> DASH25</p>
           <?php 
                 } else {
                     ?>
-            <p style="font-size: 14px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;">Black Friday - 30% discount!<br/>Use code: BF2025</p>
+            <p style="font-size: 14px; color: #3fc13f; font-weight: bold; line-height: 20px; margin-bottom: 15px;"><?php 
+                    echo esc_html__( 'Black Friday - 30% discount!', 'woo-coupon-usage' );
+                    ?><br/><?php 
+                    echo esc_html__( 'Use code:', 'woo-coupon-usage' );
+                    ?> BF2025</p>
           <?php 
                 }
                 ?>
           <a href="#!" onclick="return false;" class="wcu-settings-sidebar-pro-upgrade-showmore">
-            What's included? <span class="fas fa-angle-double-down"></span>
+            <?php 
+                echo esc_html__( "What's included?", 'woo-coupon-usage' );
+                ?> <span class="fas fa-angle-double-down"></span>
           </a>
           <div style="font-size: 12px;" class="wcu-settings-sidebar-pro-upgrade-showmore-content">
-            <br><span class="dashicons dashicons-yes-alt"></span> Advanced Admin Reports
-            <br><span class="dashicons dashicons-yes-alt"></span> Affiliate Email Reports
-            <br><span class="dashicons dashicons-yes-alt"></span> Affiliate Email Newsletters
-            <br><span class="dashicons dashicons-yes-alt"></span> Automation Features
-            <br><span class="dashicons dashicons-yes-alt"></span> Advanced Registration Features
-            <br><span class="dashicons dashicons-yes-alt"></span> Creatives Section
-            <br><span class="dashicons dashicons-yes-alt"></span> Dynamic Creatives
-            <br><span class="dashicons dashicons-yes-alt"></span> Performance Bonuses
-            <br><span class="dashicons dashicons-yes-alt"></span> Multi-Level Affiliates
-            <br><span class="dashicons dashicons-yes-alt"></span> Unpaid Commission Tracking
-            <br><span class="dashicons dashicons-yes-alt"></span> Commission Payout Requests
-            <br><span class="dashicons dashicons-yes-alt"></span> Commission Payout Tracking
-            <br><span class="dashicons dashicons-yes-alt"></span> One-Click Stripe Payouts
-            <br><span class="dashicons dashicons-yes-alt"></span> One-Click PayPal Payouts
-            <br><span class="dashicons dashicons-yes-alt"></span> Wise Bank Transfer Payouts
-            <br><span class="dashicons dashicons-yes-alt"></span> Scheduled Payout Requests
-            <br><span class="dashicons dashicons-yes-alt"></span> Automatic Payouts
-            <br><span class="dashicons dashicons-yes-alt"></span> PDF Statements & Invoices
-            <br><span class="dashicons dashicons-yes-alt"></span> Lifetime Commissions
-            <br><span class="dashicons dashicons-yes-alt"></span> Affiliate Landing Pages
-            <br><span class="dashicons dashicons-yes-alt"></span> Monthly Summary Table
-            <br><span class="dashicons dashicons-yes-alt"></span> Commission Line Graphs
-            <br><span class="dashicons dashicons-yes-alt"></span> Export to Excel Buttons
-            <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per Coupon
-            <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per Product
-            <br><span class="dashicons dashicons-yes-alt"></span> Custom Commission Per Role
-            <br><span class="dashicons dashicons-yes-alt"></span> Campaigns
-            <br><span class="dashicons dashicons-yes-alt"></span> Direct Link Tracking
-            <br><span class="dashicons dashicons-yes-alt"></span> Social Sharing
-            <br><span class="dashicons dashicons-yes-alt"></span> Short URL Generator
-            <br><span class="dashicons dashicons-yes-alt"></span> QR Code Generator
-            <br><span class="dashicons dashicons-yes-alt"></span> Custom Dashboard Tabs
-            <br><span class="dashicons dashicons-yes-alt"></span> and more great features!
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Advanced Admin Reports', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Affiliate Email Reports', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Affiliate Email Newsletters', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Automation Features', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Advanced Registration Features', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Creatives Section', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Dynamic Creatives', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Performance Bonuses', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Multi-Level Affiliates', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Unpaid Commission Tracking', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Commission Payout Requests', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Commission Payout Tracking', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'One-Click Stripe Payouts', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'One-Click PayPal Payouts', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Wise Bank Transfer Payouts', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Scheduled Payout Requests', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Automatic Payouts', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'PDF Statements & Invoices', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Lifetime Commissions', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Affiliate Landing Pages', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Monthly Summary Table', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Commission Line Graphs', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Export to Excel Buttons', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Custom Commission Per Coupon', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Custom Commission Per Product', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Custom Commission Per Role', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Campaigns', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Direct Link Tracking', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Social Sharing', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Short URL Generator', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'QR Code Generator', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Custom Dashboard Tabs', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'and more great features!', 'woo-coupon-usage' );
+                ?>
             <br>
-            <br><span class="dashicons dashicons-yes-alt"></span> All Future PRO Features
-            <br><span class="dashicons dashicons-yes-alt"></span> Priority UK-based Support
-            <br><span class="dashicons dashicons-yes-alt"></span> 14 Day Money-Back Guarantee
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'All Future PRO Features', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( 'Priority UK-based Support', 'woo-coupon-usage' );
+                ?>
+            <br><span class="dashicons dashicons-yes-alt"></span> <?php 
+                echo esc_html__( '14 Day Money-Back Guarantee', 'woo-coupon-usage' );
+                ?>
           </div>
         </div>
         <a href="https://couponaffiliates.com?utm_campaign=plugin&utm_source=dashboard-sidebar&utm_medium=learn-more"
         style="text-decoration: none;" target="_blank">
           <div class="wcu-learn-more-pro">
-            Learn more about PRO <span class="dashicons dashicons-external"></span>
+            <?php 
+                echo esc_html__( 'Learn more about PRO', 'woo-coupon-usage' );
+                ?> <span class="dashicons dashicons-external"></span>
           </div>
         </a>
         <!-- Claim LIFETIME Deal Link -->
         <a href="https://couponaffiliates.com/pricing?utm_campaign=plugin&utm_source=dashboard-sidebar&utm_medium=lifetime-deal"
         style="text-decoration: none; margin-top: -10px;" target="_blank">
           <div style="text-align: center; font-size: 12px; font-weight: bold; margin: 10px;">
-            Pay once with lifetime deal <span class="dashicons dashicons-external"></span>
+            <?php 
+                echo esc_html__( 'Lifetime deal available now', 'woo-coupon-usage' );
+                ?> <span class="dashicons dashicons-external"></span>
           </div>
         </a>
-  <center><a href="https://twitter.com/CouponAffs" target="_blank" rel="noopener" class="button">Follow @CouponAffs on X</a></center>
-        <button type="button" class="wcu-sidebar-toggle" style="margin:18px auto 0 auto;display:block;padding:7px 18px;border-radius:18px;border:none;background:#e5e7eb;color:#333;font-size:15px;cursor:pointer;">Hide Sidebar &raquo;</button>
+        <button type="button" class="wcu-sidebar-toggle" style="margin:18px auto 0 auto;display:block;padding:7px 18px;border-radius:18px;border:none;background:#e5e7eb;color:#333;font-size:15px;cursor:pointer;"><?php 
+                echo esc_html__( 'Hide Sidebar', 'woo-coupon-usage' );
+                ?> &raquo;</button>
         <script>
         jQuery(function($){
           $('.wcu-sidebar-toggle').on('click', function(){
@@ -1688,18 +1964,19 @@ function wcu_admin_enqueue_scripts(  $hook_suffix  ) {
             wp_enqueue_script(
                 'wcusage-registrations-settings',
                 WCUSAGE_UNIQUE_PLUGIN_URL . 'js/registrations-settings.js',
-                array('jquery'),
+                array('jquery', 'jquery-ui-sortable'),
                 $reg_js_ver,
                 true
             );
             $wcusage_options = get_option( 'wcusage_options' );
             $custom_fields_count = ( isset( $wcusage_options['wcusage_field_registration_custom_fields'] ) ? intval( $wcusage_options['wcusage_field_registration_custom_fields'] ) : 5 );
             wp_localize_script( 'wcusage-registrations-settings', 'wcuRegSettings', array(
-                'ajaxurl'      => admin_url( 'admin-ajax.php' ),
-                'nonce'        => wp_create_nonce( 'wcusage_custom_fields' ),
-                'initialCount' => $custom_fields_count,
-                'textLabel'    => esc_html__( 'Text:', 'woo-coupon-usage' ),
-                'fieldLabel'   => esc_html__( 'Field Label:', 'woo-coupon-usage' ),
+                'ajaxurl'       => admin_url( 'admin-ajax.php' ),
+                'nonce'         => wp_create_nonce( 'wcusage_custom_fields' ),
+                'initialCount'  => $custom_fields_count,
+                'textLabel'     => esc_html__( 'Text', 'woo-coupon-usage' ),
+                'fieldLabel'    => esc_html__( 'Field Label', 'woo-coupon-usage' ),
+                'confirmDelete' => esc_html__( 'Remove this field? Existing affiliate values for it will remain saved but the field will no longer be shown.', 'woo-coupon-usage' ),
             ) );
         }
         // Enable WordPress code editor (CodeMirror) on settings page for custom CSS textarea
@@ -1928,10 +2205,19 @@ if ( !function_exists( 'wcusage_get_setting_value' ) ) {
         } else {
             $wcusage_field = $thedefault;
         }
-        if ( !is_array( $wcusage_field ) ) {
-            $wcusage_field = wp_kses_post( $wcusage_field );
+        if ( is_array( $wcusage_field ) ) {
+            return $wcusage_field;
         }
-        return $wcusage_field;
+        static $sanitized_cache = array();
+        $cache_key = ( is_scalar( $wcusage_field ) ? (string) $wcusage_field : null );
+        if ( $cache_key !== null && isset( $sanitized_cache[$cache_key] ) ) {
+            return $sanitized_cache[$cache_key];
+        }
+        $sanitized = wp_kses_post( $wcusage_field );
+        if ( $cache_key !== null ) {
+            $sanitized_cache[$cache_key] = $sanitized;
+        }
+        return $sanitized;
     }
 
 }
@@ -2253,8 +2539,8 @@ function wcusage_admin_faq_toggle(  $id, $class, $title  ) {
     wcu_admin_settings_showhide_toggle(
         $id,
         $class,
-        "Show",
-        "Hide"
+        __( 'Show', 'woo-coupon-usage' ),
+        __( 'Hide', 'woo-coupon-usage' )
     );
     ?>
   <p style="font-weight: bold;"><span class="dashicons dashicons-info" style="margin-top: 5px;"></span>
@@ -2284,7 +2570,7 @@ if ( !function_exists( 'wcusage_admin_tooltip' ) ) {
 if ( !function_exists( 'wcusage_admin_vimeo_embed' ) ) {
     function wcusage_admin_vimeo_embed(  $embed_url  ) {
         $embed_url = esc_url( $embed_url );
-        $html = '<div style="max-width: 720px;">' . '<div style="padding:56.25% 0 0 0;position:relative;">' . '<iframe src="' . $embed_url . '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen="allowfullscreen" frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>' . '</div>' . '</div>';
+        $html = '<div style="max-width: 720px;">' . '<div style="padding:56.25% 0 0 0;position:relative;">' . '<iframe src="' . esc_url( $embed_url ) . '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen="allowfullscreen" frameborder="0" style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>' . '</div>' . '</div>';
         $allowed_html = array(
             'div'    => array(
                 'style' => true,

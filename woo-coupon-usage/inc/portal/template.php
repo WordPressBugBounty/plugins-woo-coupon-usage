@@ -34,8 +34,17 @@ if ( isset( $_GET['userid'] ) && isset( $_GET['preview_nonce'] ) && wcusage_chec
 }
 if ( isset( $_GET['couponid'] ) ) {
     $coupon_code = strtolower( sanitize_text_field( wp_unslash( $_GET['couponid'] ) ) );
-    $coupon_code = preg_replace( '/-\\d+$/', '', $coupon_code );
     $coupon_code = str_replace( "%20", " ", $coupon_code );
+    // The couponid may include a trailing "-<coupon ID>" suffix (added when the "just coupon"
+    // URL setting is disabled). Only strip that suffix if the full value doesn't already match
+    // a coupon, so codes that legitimately end in "-<number>" (e.g. "relywp-10") still load
+    // correctly instead of the trailing number being mistaken for a coupon ID.
+    if ( !wcusage_get_coupon_id( $coupon_code ) ) {
+        $stripped_coupon_code = preg_replace( '/-\\d+$/', '', $coupon_code );
+        if ( $stripped_coupon_code !== $coupon_code && wcusage_get_coupon_id( $stripped_coupon_code ) ) {
+            $coupon_code = $stripped_coupon_code;
+        }
+    }
     // Get the coupon ID
     $the_coupon_id = wcusage_get_coupon_id( $coupon_code );
     // Get the coupon post
@@ -170,6 +179,11 @@ wp_enqueue_script(
     '6.3.8',
     false
 );
+wp_localize_script( 'wcusage-portal', 'wcusage_portal_vars', array(
+    'copy_coupon_enabled' => ( wcusage_get_setting_value( 'wcusage_field_header_copy_coupon', '1' ) ? 1 : 0 ),
+    'click_to_copy_text'  => __( 'Click to copy', 'woo-coupon-usage' ),
+    'copied_text'         => __( 'Copied!', 'woo-coupon-usage' ),
+) );
 wp_enqueue_style(
     'wcusage-portal-font-awesome',
     WCUSAGE_UNIQUE_PLUGIN_URL . 'fonts/font-awesome/css/all.min.css',
@@ -430,7 +444,12 @@ if ( !$current_user_id ) {
                 woocommerce_output_all_notices();
             }
             if ( function_exists( 'woocommerce_login_form' ) ) {
-                woocommerce_login_form();
+                // Redirect back to the affiliate portal after login instead of the
+                // default WooCommerce My Account page.
+                $wcusage_portal_slug = wcusage_get_setting_value( 'wcusage_portal_slug', 'affiliate-portal' );
+                woocommerce_login_form( array(
+                    'redirect' => home_url( '/' . $wcusage_portal_slug . '/' ),
+                ) );
             }
             ?>
                         <?php 
@@ -668,6 +687,60 @@ if ( !$current_user_id ) {
                 $dashboard_title = $wcusage_before_title . " " . $dashboard_title;
             }
             echo wp_kses_post( $dashboard_title );
+            // Coupon switcher: show the coupons belonging to the owner of the
+            // coupon being viewed (not necessarily the logged-in user), so that
+            // admins or parent affiliates viewing another user's dashboard get
+            // that user's coupons. For an affiliate viewing their own dashboard
+            // the owner is themselves, so this is unchanged.
+            $wcusage_field_header_coupon_switcher = wcusage_get_setting_value( 'wcusage_field_header_coupon_switcher', '1' );
+            $switcher_user_id = ( $wcusage_field_header_coupon_switcher && $postid ? get_post_meta( $postid, 'wcu_select_coupon_user', true ) : 0 );
+            $switcher_coupons = array();
+            if ( $switcher_user_id ) {
+                $switcher_coupons = get_posts( array(
+                    'post_type'   => 'shop_coupon',
+                    'meta_key'    => 'wcu_select_coupon_user',
+                    'meta_value'  => $switcher_user_id,
+                    'numberposts' => -1,
+                    'orderby'     => 'title',
+                    'order'       => 'ASC',
+                ) );
+            }
+            if ( is_array( $switcher_coupons ) && count( $switcher_coupons ) > 1 ) {
+                $wcusage_portal_slug = wcusage_get_setting_value( 'wcusage_portal_slug', 'affiliate-portal' );
+                $portal_base_url = home_url( '/' . $wcusage_portal_slug . '/' );
+                ?>
+                                    <span class="wcu-coupon-switcher">
+                                        <button type="button" class="wcu-coupon-switcher-toggle" aria-haspopup="true" aria-expanded="false" aria-label="<?php 
+                echo esc_attr__( 'Switch coupon', 'woo-coupon-usage' );
+                ?>" title="<?php 
+                echo esc_attr__( 'Switch coupon', 'woo-coupon-usage' );
+                ?>">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </button>
+                                        <div class="wcu-coupon-switcher-menu" role="menu">
+                                            <?php 
+                foreach ( $switcher_coupons as $coupon ) {
+                    $switch_title = $coupon->post_title;
+                    // Skip the coupon currently being viewed
+                    if ( strcasecmp( $switch_title, $coupon_code ) === 0 ) {
+                        continue;
+                    }
+                    $switch_url = add_query_arg( 'couponid', $switch_title, $portal_base_url );
+                    ?>
+                                                <a href="<?php 
+                    echo esc_url( $switch_url );
+                    ?>" class="wcu-coupon-switcher-item" role="menuitem">
+                                                    <i class="fas fa-tag"></i> <?php 
+                    echo esc_html( $switch_title );
+                    ?>
+                                                </a>
+                                                <?php 
+                }
+                ?>
+                                        </div>
+                                    </span>
+                                    <?php 
+            }
         }
     }
     ?>
@@ -1069,14 +1142,24 @@ function wcusage_portal_tabs(
     }
     // Determine first visible tab id to set active state dynamically
     $first_visible = '';
+    $visible_tab_ids = array();
     foreach ( $tabs as $t ) {
         if ( $t['tab-id'] !== 'tab-page-back' && $t['condition'] ) {
-            $first_visible = $t['tab-id'];
-            break;
+            $visible_tab_ids[] = $t['tab-id'];
+            if ( $first_visible === '' ) {
+                $first_visible = $t['tab-id'];
+            }
         }
     }
+    // Decide which tab opens on initial render. Defaults to the first visible tab,
+    // but when the page was reloaded by submitting a payout request we re-open the
+    // Payouts tab instead of falling back to the default (Statistics) tab.
+    $portal_initial_tab = $first_visible;
+    if ( (isset( $_POST['submitpayout'] ) || isset( $_POST['page-payouts'] )) && in_array( 'tab-page-payouts', $visible_tab_ids, true ) ) {
+        $portal_initial_tab = 'tab-page-payouts';
+    }
     // Track whether we auto-clicked first tab via JS (will inject script after list rendered)
-    $portal_first_tab_id = $first_visible;
+    $portal_first_tab_id = $portal_initial_tab;
     foreach ( $tabs as $tab ) {
         $wcusage_field_tracking_enable = wcusage_get_setting_value( 'wcusage_field_tracking_enable', '1' );
         $wcusage_field_payouts_enable = wcusage_get_setting_value( 'wcusage_field_payouts_enable', '1' );
@@ -1137,7 +1220,7 @@ function wcusage_portal_tabs(
                     <button id="<?php 
                     echo esc_attr( $tab['tab-id'] );
                     ?>" class="portal-tablink <?php 
-                    if ( $tab['tab-id'] == $first_visible ) {
+                    if ( $tab['tab-id'] == $portal_initial_tab ) {
                         echo 'active';
                     }
                     ?>"

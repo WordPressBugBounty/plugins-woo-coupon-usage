@@ -282,13 +282,15 @@ jQuery(document).ready(function($) {
             individual_use: checked('#individual_use_' + id),
             exclude_sale_items: checked('#exclude_sale_items_' + id),
             usage_limit_per_user: val('#usage_limit_per_user_' + id),
+            wcu_text_coupon_start_date: val('#wcu_text_coupon_start_date_' + id),
             wcu_enable_first_order_only: checked('#wcu_enable_first_order_only_' + id),
             wcu_select_coupon_user: val('#wcu_select_coupon_user_' + id),
             wcu_text_coupon_commission: val('#wcu_text_coupon_commission_' + id),
             wcu_text_coupon_commission_fixed_order: val('#wcu_text_coupon_commission_fixed_order_' + id),
             wcu_text_coupon_commission_fixed_product: val('#wcu_text_coupon_commission_fixed_product_' + id),
             wcu_text_unpaid_commission: val('#wcu_text_unpaid_commission_' + id),
-            wcu_text_pending_payment_commission: val('#wcu_text_pending_payment_commission_' + id)
+            wcu_text_pending_payment_commission: val('#wcu_text_pending_payment_commission_' + id),
+            wcu_text_pending_order_commission: val('#wcu_text_pending_order_commission_' + id) || '0'
         };
 
         $.ajax({ url: WCUAdminAffiliateView.ajax_url, method: 'POST', data: payload })
@@ -298,6 +300,9 @@ jQuery(document).ready(function($) {
                 var $tr = $('#coupon-row-' + id);
                 // Coupon code
                 $tr.find('td').eq(0).text(payload.post_title);
+                if (resp.data && resp.data.commission_html) {
+                    $tr.find('.column-commission').html(resp.data.commission_html);
+                }
                 // We won't recompute stats here; they update on next refresh
                 $row.hide();
             } else {

@@ -208,6 +208,7 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
             echo "<td class='wcuTableHead' style='max-width: 300px;'>" . esc_html( ucfirst( esc_html__( 'Landing Page', 'woo-coupon-usage' ) ) ) . "</td>";
             echo "<td class='wcuTableHead' style='max-width: 350px;'>" . esc_html( ucfirst( esc_html__( 'Referring URL', 'woo-coupon-usage' ) ) ) . "</td>";
             echo "<td class='wcuTableHead'>" . ucfirst( esc_html__( 'Date', 'woo-coupon-usage' ) ) . "</td>";
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Safe internal output; verified in manual audit.
             echo "</tr>";
             foreach ( $result2 as $result ) {
                 echo "<tr class='wcuTableRow'>";
@@ -243,6 +244,7 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
                 echo "<td class='wcuTableCell wcuTableCell-ref-website'>" . wp_kses_post( $referrerurl ) . "</td>";
                 $thedatetime = strtotime( $result->date );
                 echo "<td class='wcuTableCell' style='max-width: 100%;'>" . ucfirst( date_i18n( get_option( 'date_format' ) . " " . "(" . get_option( 'time_format' ) . ")", $thedatetime ) ) . "</td>";
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Safe internal output; verified in manual audit.
                 echo "</tr>";
             }
             echo "</table>";

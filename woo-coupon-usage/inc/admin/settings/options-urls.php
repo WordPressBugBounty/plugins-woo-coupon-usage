@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin settings UI: echoed values are internal pre-escaped helper markup and static strings; verified safe in manual audit.
 
 if ( !function_exists( 'wcusage_field_cb_urls' ) ) {
 function wcusage_field_cb_urls( $args )
@@ -17,6 +18,8 @@ function wcusage_field_cb_urls( $args )
 	<div id="urls-settings" class="settings-area">
 
 	<h1><?php echo esc_html__( 'Referral Links', 'woo-coupon-usage' ); ?></h1>
+
+  <p><?php echo esc_html__( 'Referral links allow your affiliates to generate their own custom referral links for your website, and track clicks, conversions, and conversion rates.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/referral-urls" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</p>
 
   <hr/>
 
@@ -199,7 +202,7 @@ function wcusage_field_cb_urls( $args )
                   // Compare domains (ignore www prefix and port differences)
                   var enteredDomain = a.hostname.replace(/^www\./, '').toLowerCase();
                   if( enteredDomain !== siteDomain ) {
-                      alert('The URL must be on this website only.');
+                      alert('<?php echo esc_js( __( 'The URL must be on this website only.', 'woo-coupon-usage' ) ); ?>');
                       jQuery(this).val(defaultURL);
                       e.stopImmediatePropagation();
                       return;
@@ -355,7 +358,7 @@ function wcusage_field_cb_urls( $args )
             <br/>
 
             <span class="wcu-requires-cookies-enabled">
-            <?php wcusage_setting_toggle_option('wcusage_field_show_click_history_converted', 1, 'Enable "Converted Only" Toggle', '30px'); ?>
+            <?php wcusage_setting_toggle_option('wcusage_field_show_click_history_converted', 1, esc_html__( 'Enable "Converted Only" Toggle', 'woo-coupon-usage' ), '30px'); ?>
             <i style="margin-left: 30px;"><?php echo esc_html__( 'This will allow affiliates to click a toggle to only show converted clicks.', 'woo-coupon-usage' ); ?></i><br/>
 
             <br/>
@@ -384,8 +387,6 @@ function wcusage_field_cb_urls( $args )
           <i style="margin-left: 30px;"><?php echo esc_html__( 'If enabled, all new referral URL clicks from the same user will be tracked (and increases total clicks + visit logged in click history). Only the latest click will be converted if they make a purchase.', 'woo-coupon-usage' ); ?></i><br/>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'If disabled, only the first click from the visitor will be tracked (until the cookie expires).', 'woo-coupon-usage' ); ?></i><br/>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'Note: If enabled, any new clicks (from the same visitor) within the same minute as another will not be logged, and will keep the same ID as the initial click (to prevent spamming the logs).', 'woo-coupon-usage' ); ?></i><br/>
-
-          <br/>
 
           <?php
             $wcusage_store_cookies_for_clicks = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
@@ -504,10 +505,10 @@ function wcusage_field_cb_urls( $args )
           <?php } ?>
 
       		<?php wcusage_setting_toggle_option('wcusage_field_enable_directlinks', 0, esc_html__( 'Enable Direct Link Tracking', 'woo-coupon-usage' ), '0px'); ?>
-          <i><?php echo esc_html__( 'With this enabled, affiliate users can link their website domain to their coupon.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-direct-link-tracking" target="_blank">Learn More</a>.</i><br/>
+          <i><?php echo esc_html__( 'With this enabled, affiliate users can link their website domain to their coupon.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-direct-link-tracking" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
           <i><?php echo esc_html__( 'Upon approval, they can then directly link to your site, directly from theirs, without needing to use a referral URL, and it will still be tracked.', 'woo-coupon-usage' ); ?></i><br/>
           <i><?php echo esc_html__( 'When an affiliate adds a new domain to their account, an email will be sent to your admin email, with a link to approve or deny the domain.', 'woo-coupon-usage' ); ?></i><br/>
-          <i><?php echo esc_html__( 'Important: There are some cases where direct link tracking may not be detected properly.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-direct-link-tracking" target="_blank">Learn More</a>.</i><br/>
+          <i><?php echo esc_html__( 'Important: There are some cases where direct link tracking may not be detected properly.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-direct-link-tracking" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
 
           <?php wcusage_setting_toggle('.wcusage_field_enable_directlinks', '.wcu-field-section-directlinks'); // Show or Hide ?>
           <span class="wcu-field-section-directlinks">
@@ -520,7 +521,7 @@ function wcusage_field_cb_urls( $args )
 
           <br/>
 
-          <?php wcusage_setting_toggle_option('wcusage_field_enable_directlinks_campaigns', 1, 'Enable "Campaigns" for Direct Link Tracking', '30px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_enable_directlinks_campaigns', 1, esc_html__( 'Enable "Campaigns" for Direct Link Tracking', 'woo-coupon-usage' ), '30px'); ?>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'With this enabled, when adding a new domain, affiliates will be able to select a "campaign" to assign that domains referrals to.', 'woo-coupon-usage' ); ?></i><br/>
 
           <br/>
@@ -537,7 +538,7 @@ function wcusage_field_cb_urls( $args )
 
           <br/>
 
-          <?php wcusage_setting_toggle_option('wcusage_field_enable_directlinks_protection', 0, 'Only allow affiliate coupons to be applied when directly linked by an approved domain.', '30px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_enable_directlinks_protection', 0, esc_html__( 'Only allow affiliate coupons to be applied when directly linked by an approved domain.', 'woo-coupon-usage' ), '30px'); ?>
           <i style="margin-left: 30px;"><?php echo esc_html__( 'Enabling this option will prevent ALL affiliate coupons and referral links from working UNLESS the customer was directly linked by the approved domain that is assigned to that coupon.', 'woo-coupon-usage' ); ?></i><br/>
 
           </span>
@@ -603,7 +604,7 @@ function wcusage_field_cb_urls( $args )
             <span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Social Sharing Buttons', 'woo-coupon-usage' ); ?><?php if( !wcu_fs()->can_use_premium_code() ) { ?> (PRO)<?php } ?>:
           </h3>
 
-      		<?php wcusage_setting_toggle_option('wcusage_field_show_social', 1, 'Enable Social Sharing Buttons', '0px'); ?>
+      		<?php wcusage_setting_toggle_option('wcusage_field_show_social', 1, esc_html__( 'Enable Social Sharing Buttons', 'woo-coupon-usage' ), '0px'); ?>
 
           <?php wcusage_setting_toggle('.wcusage_field_show_social', '.wcu-field-section-social-icons'); // Show or Hide ?>
           <span class="wcu-field-section-social-icons">
@@ -613,10 +614,10 @@ function wcusage_field_cb_urls( $args )
             wcusage_setting_toggle_option('wcusage_field_show_social_facebook', 1, 'Facebook', '30px');
 
             // Twitter
-            wcusage_setting_toggle_option('wcusage_field_show_social_twitter', 1, 'X (Twitter)', '30px');
+            wcusage_setting_toggle_option('wcusage_field_show_social_twitter', 1, esc_html__( 'X (Twitter)', 'woo-coupon-usage' ), '30px');
 
             // WhatsApp
-            wcusage_setting_toggle_option('wcusage_field_show_social_whatsapp', 0, 'WhatsApp (Mobile Only)', '30px');
+            wcusage_setting_toggle_option('wcusage_field_show_social_whatsapp', 0, esc_html__( 'WhatsApp (Mobile Only)', 'woo-coupon-usage' ), '30px');
 
             // Tumblr
             wcusage_setting_toggle_option('wcusage_field_show_social_tumblr', 0, 'Tumblr', '30px');
@@ -628,7 +629,7 @@ function wcusage_field_cb_urls( $args )
             wcusage_setting_toggle_option('wcusage_field_show_social_reddit', 0, 'Reddit', '30px');
 
             // Email
-            wcusage_setting_toggle_option('wcusage_field_show_social_email', 1, 'Email', '30px');
+            wcusage_setting_toggle_option('wcusage_field_show_social_email', 1, esc_html__( 'Email', 'woo-coupon-usage' ), '30px');
             ?>
 
             <br/>

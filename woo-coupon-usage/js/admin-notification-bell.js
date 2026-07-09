@@ -3,14 +3,23 @@ jQuery(document).ready(function($){
     var bellCheckInterval;
     var originalTitle = document.title;
     var currentNotificationCount = 0;
+    var bellRequestInFlight = false;
 
-    // Load bell data on page load
+    // Poll interval (ms). Provided by the server (filterable) with a safe fallback.
+    var pollInterval = parseInt(wcusageAdminBell.interval, 10);
+    if (!pollInterval || pollInterval < 5000) {
+        pollInterval = 30000; // default 30 seconds
+    }
+
+    // Load bell count on page load (dropdown is fetched on demand when opened)
     loadBellData();
 
-    // Start periodic checking for new notifications
+    // Start periodic checking for new notifications. This keeps running while the
+    // tab is in the background (browsers throttle background timers on their own)
+    // so the tab-title count stays current when new notifications come in.
     startPeriodicCheck();
 
-    // Listen for tab visibility changes
+    // Listen for tab visibility changes (to keep the tab title count in sync)
     $(document).on('visibilitychange', handleVisibilityChange);
 
     // Handle bell click to show/hide dropdown
@@ -60,13 +69,22 @@ jQuery(document).ready(function($){
         });
     });
 
-    function loadBellData(updateDate, updateDropdown, callback) {
+    function loadBellData(updateDate, includeDropdown, callback) {
+        // Prevent overlapping background polls from stacking up if the server is slow.
+        // User-driven requests (bell click / toggle, which set updateDate) always run.
+        if (bellRequestInFlight && !updateDate) {
+            return;
+        }
+        bellRequestInFlight = true;
         var data = {
             action: 'wcusage_admin_bell_data',
             nonce: wcusageAdminBell.nonce
         };
         if (updateDate) {
             data.update_date = '1';
+        }
+        if (includeDropdown) {
+            data.include_dropdown = '1';
         }
         $.post(wcusageAdminBell.ajax_url, data, function(response){
             currentNotificationCount = response.count;
@@ -77,7 +95,8 @@ jQuery(document).ready(function($){
                 $('.wcusage-admin-bell-count').hide();
                 stopBellShake();
             }
-            if (updateDropdown !== false) {
+            // Only touch the dropdown when it was requested (bell open / toggle)
+            if (includeDropdown) {
                 if (response.dropdown_html && response.dropdown_html.trim() !== '') {
                     $('#wcusage-admin-bell-dropdown-placeholder').html(response.dropdown_html);
                 } else {
@@ -87,20 +106,16 @@ jQuery(document).ready(function($){
             $('#wcusage-admin-bell').css('opacity', response.enabled == '1' ? '1' : '0.5');
             updateTabTitle();
             if (callback) callback();
+        }).always(function(){
+            bellRequestInFlight = false;
         });
     }
 
     function startPeriodicCheck() {
+        if (bellCheckInterval) return; // Already running
         bellCheckInterval = setInterval(function(){
-            loadBellData(false, false); // Don't update date, don't update dropdown
-        }, 10000); // Every 10 seconds
-    }
-
-    function stopPeriodicCheck() {
-        if (bellCheckInterval) {
-            clearInterval(bellCheckInterval);
-            bellCheckInterval = null;
-        }
+            loadBellData(false, false); // Count only: don't update date, don't fetch dropdown
+        }, pollInterval);
     }
 
     function startBellShake() {
@@ -111,7 +126,7 @@ jQuery(document).ready(function($){
             setTimeout(function(){
                 $('.fa-bell').removeClass('wcusage-bell-shake');
             }, 500); // Animation duration
-        }, 2000); // Every 5 seconds
+        }, 2000); // Every 2 seconds
     }
 
     function stopBellShake() {
@@ -124,10 +139,10 @@ jQuery(document).ready(function($){
 
     function handleVisibilityChange() {
         if (document.hidden) {
-            // Tab is now hidden
+            // Tab hidden: reflect the current notification count in the tab title
             updateTabTitle();
         } else {
-            // Tab is now visible
+            // Tab visible again: restore the original title
             restoreTabTitle();
         }
     }

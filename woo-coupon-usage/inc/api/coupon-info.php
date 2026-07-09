@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /* Get the coupon name and info by ID */
 
 add_action('rest_api_init', function () {

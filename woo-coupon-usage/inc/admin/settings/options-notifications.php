@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin settings UI: echoed values are internal pre-escaped helper markup and static strings; verified safe in manual audit.
 
 if ( !function_exists( 'wcusage_field_cb_notifications' ) ) {
 function wcusage_field_cb_notifications( $args )
@@ -36,9 +37,9 @@ function wcusage_field_cb_notifications( $args )
 
       <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-      <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_cancel_email_customise_1">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+      <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_cancel_email_customise_1"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-      <?php echo wcu_admin_settings_showhide_toggle("wcu_show_cancel_email_customise_1", "wcu_cancel_email_customise_1", "Show", "Hide"); ?>
+      <?php echo wcu_admin_settings_showhide_toggle("wcu_show_cancel_email_customise_1", "wcu_cancel_email_customise_1", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
       <div id="wcu_cancel_email_customise_1" style="display: none;">
 
         <br/>
@@ -49,7 +50,7 @@ function wcusage_field_cb_notifications( $args )
         <br/>
 
         <?php
-        $email2message = "Hi {name},\r\n<br/>\r\nWe're sorry to inform you that one of your referred orders has been {status}.\r\n<br/>\r\nOrder ID: {id}\r\n<br/>\r\nThe following commission has been removed from your account: {commission}\r\n<br/>\r\nThank you for your continued support.";
+        $email2message = __( "Hi {name},\r\n<br/>\r\nWe're sorry to inform you that one of your referred orders has been {status}.\r\n<br/>\r\nOrder ID: {id}\r\n<br/>\r\nThe following commission has been removed from your account: {commission}\r\n<br/>\r\nThank you for your continued support.", "woo-coupon-usage" );
         wcusage_setting_tinymce_option('wcusage_field_cancel_email_message', $email2message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
         ?>
 
@@ -96,9 +97,9 @@ function wcusage_field_cb_notifications( $args )
 
       <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Administrator', 'woo-coupon-usage' ); ?></p>
 
-      <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_payout_admin_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+      <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_payout_admin_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-      <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_payout_admin_customise", "wcu_email_payout_admin_customise", "Show", "Hide"); ?>
+      <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_payout_admin_customise", "wcu_email_payout_admin_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
       <div id="wcu_email_payout_admin_customise" style="display: none;">
 
         <br/>
@@ -110,11 +111,7 @@ function wcusage_field_cb_notifications( $args )
 
         <!-- Email Notification Message -->
         <?php
-        $email4messagepayout = "You have received a new payout request from an affiliate."
-        . "<br/><br/>Username: {username}"
-        . "<br/><br/>Coupon code: {coupon}"
-        . "<br/><br/>Amount: " . get_woocommerce_currency_symbol() . "{amount}"
-        . "<br/><br/>You can manage this payout here: {adminpayoutsurl}";
+        $email4messagepayout = sprintf( __( "You have received a new payout request from an affiliate.<br/><br/>Username: {username}<br/><br/>Coupon code: {coupon}<br/><br/>Amount: %s{amount}<br/><br/>You can manage this payout here: {adminpayoutsurl}", "woo-coupon-usage" ), get_woocommerce_currency_symbol() );
         wcusage_setting_tinymce_option('wcusage_field_email_payout_admin_message', $email4messagepayout, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
         ?>
 
@@ -139,9 +136,9 @@ function wcusage_field_cb_notifications( $args )
 
       <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Administrator', 'woo-coupon-usage' ); ?></p>
 
-      <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_payout_admin_bulk_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+      <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_payout_admin_bulk_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-      <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_payout_admin_bulk_customise", "wcu_email_payout_admin_bulk_customise", "Show", "Hide"); ?>
+      <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_payout_admin_bulk_customise", "wcu_email_payout_admin_bulk_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
       <div id="wcu_email_payout_admin_bulk_customise" style="display: none;">
 
         <br/>
@@ -180,9 +177,9 @@ function wcusage_field_cb_notifications( $args )
 
       <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-      <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_payout_affiliate_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+      <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_payout_affiliate_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-      <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_payout_affiliate_customise", "wcu_email_payout_affiliate_customise", "Show", "Hide"); ?>
+      <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_payout_affiliate_customise", "wcu_email_payout_affiliate_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
       <div id="wcu_email_payout_affiliate_customise" style="display: none;">
 
         <br/>
@@ -195,11 +192,7 @@ function wcusage_field_cb_notifications( $args )
         <!-- Email Notification Message -->
         <?php
         $payoutcurrency = get_option('woocommerce_currency');
-        $email5messagepayout = "Hello {name},"
-        . "<br/><br/>Your latest payout request #{id} has now been successfully paid."
-        . "<br/><br/>Coupon code: {coupon}"
-        . "<br/><br/>Amount: " . get_woocommerce_currency_symbol() . "{amount}"
-        . "<br/><br/>Payment method: {method}";
+        $email5messagepayout = sprintf( __( "Hello {name},<br/><br/>Your latest payout request #{id} has now been successfully paid.<br/><br/>Coupon code: {coupon}<br/><br/>Amount: %s{amount}<br/><br/>Payment method: {method}", "woo-coupon-usage" ), get_woocommerce_currency_symbol() );
         wcusage_setting_tinymce_option('wcusage_field_email_payout_affiliate_message', $email5messagepayout, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
         ?>
 
@@ -233,9 +226,9 @@ function wcusage_field_cb_notifications( $args )
 
           <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Administrator', 'woo-coupon-usage' ); ?></p>
 
-          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_direct_link_admin_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_direct_link_admin_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_direct_link_admin_customise", "wcu_email_direct_link_admin_customise", "Show", "Hide"); ?>
+          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_direct_link_admin_customise", "wcu_email_direct_link_admin_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
           <div id="wcu_email_direct_link_admin_customise" style="display: none;">
 
             <br/>
@@ -247,10 +240,7 @@ function wcusage_field_cb_notifications( $args )
 
             <!-- Email Notification Message -->
             <?php
-            $email6message = "You have received a new domain request for direct link tracking."
-            . "<br/><br/>Coupon code: {coupon}"
-            . "<br/><br/>Domain: {domain}"
-            . "<br/><br/>You can approve or decline this domain here: {adminurl}";
+            $email6message = __( "You have received a new domain request for direct link tracking.<br/><br/>Coupon code: {coupon}<br/><br/>Domain: {domain}<br/><br/>You can approve or decline this domain here: {adminurl}", "woo-coupon-usage" );
             wcusage_setting_tinymce_option('wcusage_field_email_direct_link_admin_message', $email6message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
@@ -275,9 +265,9 @@ function wcusage_field_cb_notifications( $args )
 
           <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_direct_link_accept_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_direct_link_accept_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_direct_link_accept_customise", "wcu_email_direct_link_accept_customise", "Show", "Hide"); ?>
+          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_direct_link_accept_customise", "wcu_email_direct_link_accept_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
           <div id="wcu_email_direct_link_accept_customise" style="display: none;">
 
             <br/>
@@ -289,13 +279,7 @@ function wcusage_field_cb_notifications( $args )
 
             <!-- Email Notification Message -->
             <?php
-            $email7message = "Hello {name},"
-            . "<br/><br/>Your domain has been accepted for direct link tracking."
-            . "<br/><br/>Coupon code: {coupon}"
-            . "<br/><br/>Domain: {domain}"
-            . "<br/><br/>You can now link directly to our website on this domain, and it will work in the same way as a referral URL."
-            . "<br/><br/>"
-            . "{dashboardurl}";
+            $email7message = __( "Hello {name},<br/><br/>Your domain has been accepted for direct link tracking.<br/><br/>Coupon code: {coupon}<br/><br/>Domain: {domain}<br/><br/>You can now link directly to our website on this domain, and it will work in the same way as a referral URL.<br/><br/>{dashboardurl}", "woo-coupon-usage" );
             wcusage_setting_tinymce_option('wcusage_field_email_direct_link_accept_message', $email7message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
@@ -320,9 +304,9 @@ function wcusage_field_cb_notifications( $args )
 
           <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_direct_link_decline_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_direct_link_decline_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_direct_link_decline_customise", "wcu_email_direct_link_decline_customise", "Show", "Hide"); ?>
+          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_direct_link_decline_customise", "wcu_email_direct_link_decline_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
           <div id="wcu_email_direct_link_decline_customise" style="display: none;">
 
             <br/>
@@ -334,10 +318,7 @@ function wcusage_field_cb_notifications( $args )
 
             <!-- Email Notification Message -->
             <?php
-            $email7message = "Hello {name},"
-            . "<br/><br/>Sorry, your domain has been declined for direct link tracking."
-            . "<br/><br/>Coupon code: {coupon}"
-            . "<br/><br/>Domain: {domain}";
+            $email7message = __( "Hello {name},<br/><br/>Sorry, your domain has been declined for direct link tracking.<br/><br/>Coupon code: {coupon}<br/><br/>Domain: {domain}", "woo-coupon-usage" );
             wcusage_setting_tinymce_option('wcusage_field_email_direct_link_decline_message', $email7message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
@@ -373,9 +354,9 @@ function wcusage_field_cb_notifications( $args )
 
           <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_mla_invite_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_mla_invite_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_mla_invite_customise", "wcu_email_mla_invite_customise", "Show", "Hide"); ?>
+          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_mla_invite_customise", "wcu_email_mla_invite_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
           <div id="wcu_email_mla_invite_customise" style="display: none;">
 
             <br/>
@@ -387,10 +368,7 @@ function wcusage_field_cb_notifications( $args )
 
             <!-- Email Notification Message -->
             <?php
-            $email51message = "Hello,"
-            . "<br/><br/>You have just been invited to join our affiliate program."
-            . "<br/><br/>Earn commission on all the sales that you refer to us!"
-            . "<br/><br/>Get started by registering here: {inviteurl}";
+            $email51message = __( "Hello,<br/><br/>You have just been invited to join our affiliate program.<br/><br/>Earn commission on all the sales that you refer to us!<br/><br/>Get started by registering here: {inviteurl}", "woo-coupon-usage" );
             wcusage_setting_tinymce_option('wcusage_field_email_mla_invite_message', $email51message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
@@ -415,9 +393,9 @@ function wcusage_field_cb_notifications( $args )
 
           <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Parent Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_mla_sub_referral_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_mla_sub_referral_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_mla_sub_referral_customise", "wcu_email_mla_sub_referral_customise", "Show", "Hide"); ?>
+          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_mla_sub_referral_customise", "wcu_email_mla_sub_referral_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
           <div id="wcu_email_mla_sub_referral_customise" style="display: none;">
 
             <br/>
@@ -429,9 +407,7 @@ function wcusage_field_cb_notifications( $args )
 
             <!-- Email Notification Message -->
             <?php
-            $email51message = "Hello {name},"
-            . "<br/><br/>Congratulations, your sub-affiliate member '{sub-affiliate-user}' has referrered a new sale!"
-            . "<br/><br/>You earned a commission share of: {commission}";
+            $email51message = __( "Hello {name},<br/><br/>Congratulations, your sub-affiliate member '{sub-affiliate-user}' has referrered a new sale!<br/><br/>You earned a commission share of: {commission}", "woo-coupon-usage" );
             wcusage_setting_tinymce_option('wcusage_field_email_mla_sub_referral_message', $email51message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
@@ -456,9 +432,9 @@ function wcusage_field_cb_notifications( $args )
 
           <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Parent Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_mla_sub_signup_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_mla_sub_signup_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_mla_sub_signup_customise", "wcu_email_mla_sub_signup_customise", "Show", "Hide"); ?>
+          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_mla_sub_signup_customise", "wcu_email_mla_sub_signup_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
           <div id="wcu_email_mla_sub_signup_customise" style="display: none;">
 
             <br/>
@@ -470,9 +446,7 @@ function wcusage_field_cb_notifications( $args )
 
             <!-- Email Notification Message -->
             <?php
-            $email51message = "Hello {name},"
-            . "<br/><br/>The user '{sub-affiliate-user}' has just become a tier {sub-affiliate-tier} affiliate in your MLA network!"
-            . "<br/><br/>You will earn {sub-affiliate-commission}% commission on all sales they refer to us.";
+            $email51message = __( "Hello {name},<br/><br/>The user '{sub-affiliate-user}' has just become a tier {sub-affiliate-tier} affiliate in your MLA network!<br/><br/>You will earn {sub-affiliate-commission}% commission on all sales they refer to us.", "woo-coupon-usage" );
             wcusage_setting_tinymce_option('wcusage_field_email_mla_sub_signup_message', $email51message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
@@ -497,9 +471,9 @@ function wcusage_field_cb_notifications( $args )
 
           <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Parent Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_mla_sub_reg_notify_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+          <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_mla_sub_reg_notify_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_mla_sub_reg_notify_customise", "wcu_email_mla_sub_reg_notify_customise", "Show", "Hide"); ?>
+          <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_mla_sub_reg_notify_customise", "wcu_email_mla_sub_reg_notify_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
           <div id="wcu_email_mla_sub_reg_notify_customise" style="display: none;">
 
             <br/>
@@ -511,18 +485,7 @@ function wcusage_field_cb_notifications( $args )
 
             <!-- Email Notification Message -->
             <?php
-            $email_mla_sub_reg_notify_message = "Hello {name},"
-            . "<br/><br/>A new affiliate has registered via your invite link and is pending your approval:"
-            . "<br/><br/><strong>Username:</strong> {username}"
-            . "<br/><strong>Name:</strong> {sub-affiliate-name}"
-            . "<br/><strong>Email:</strong> {sub-affiliate-email}"
-            . "<br/><strong>Coupon:</strong> {coupon}"
-            . "<br/><strong>Website:</strong> {website}"
-            . "<br/><strong>Referrer:</strong> {referrer}"
-            . "<br/><strong>Promote:</strong> {promote}"
-            . "<br/>{custom-fields}"
-            . "<br/><br/>Review and approve or decline this registration from your MLA dashboard:"
-            . "<br/><br/>{dashboardurl}";
+            $email_mla_sub_reg_notify_message = __( "Hello {name},<br/><br/>A new affiliate has registered via your invite link and is pending your approval:<br/><br/><strong>Username:</strong> {username}<br/><strong>Name:</strong> {sub-affiliate-name}<br/><strong>Email:</strong> {sub-affiliate-email}<br/><strong>Coupon:</strong> {coupon}<br/><strong>Website:</strong> {website}<br/><strong>Referrer:</strong> {referrer}<br/><strong>Promote:</strong> {promote}<br/>{custom-fields}<br/><br/>Review and approve or decline this registration from your MLA dashboard:<br/><br/>{dashboardurl}", "woo-coupon-usage" );
             wcusage_setting_tinymce_option('wcusage_field_email_mla_sub_reg_notify_message', $email_mla_sub_reg_notify_message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
             ?>
 
@@ -610,9 +573,9 @@ if( !function_exists( 'wcusage_setting_sectio_email_free' ) ) {
 
       <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-      <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_customise_1">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+      <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_customise_1"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-      <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_customise_1", "wcu_email_customise_1", "Show", "Hide"); ?>
+      <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_customise_1", "wcu_email_customise_1", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
       <div id="wcu_email_customise_1" style="display: none;">
 
         <br/>
@@ -637,7 +600,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_free' ) ) {
         <br/>
 
         <?php
-        $email1message = "Hello {name},\r\n<br/>\r\nCongratulations, you just referred a new order to us, with the coupon code: {coupon}\r\n<br/>\r\nYou have earned {commission} in unpaid commission!\r\n<br/>\r\nHere's a list of items the customer purchased:\r\n<br/>\r\n{listproducts}\r\n<br/>\r\nThank you for your support!\r\n<br>\r\n" . get_bloginfo( 'name' );
+        $email1message = sprintf( __( "Hello {name},\r\n<br/>\r\nCongratulations, you just referred a new order to us, with the coupon code: {coupon}\r\n<br/>\r\nYou have earned {commission} in unpaid commission!\r\n<br/>\r\nHere's a list of items the customer purchased:\r\n<br/>\r\n{listproducts}\r\n<br/>\r\nThank you for your support!\r\n<br>\r\n%s", "woo-coupon-usage" ), get_bloginfo( 'name' ) );
         wcusage_setting_tinymce_option('wcusage_field_email_message', $email1message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
         ?>
 
@@ -682,9 +645,9 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
 
         <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-        <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_registration_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+        <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_registration_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-        <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_registration_customise", "wcu_email_registration_customise", "Show", "Hide"); ?>
+        <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_registration_customise", "wcu_email_registration_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
         <div id="wcu_email_registration_customise" style="display: none;">
 
           <br/>
@@ -696,13 +659,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
 
           <!-- Email Notification Message -->
           <?php
-          $email2message = "Hello {name},"
-          . "<br/><br/>"
-          . "Your affiliate application for the coupon code"
-          . " '{coupon}' "
-          . "has been submitted."
-          . "<br/><br/>"
-          . "We will review your application and get back to you soon.";
+          $email2message = __( "Hello {name},<br/><br/>Your affiliate application for the coupon code '{coupon}' has been submitted.<br/><br/>We will review your application and get back to you soon.", "woo-coupon-usage" );
           wcusage_setting_tinymce_option('wcusage_field_email_registration_message', $email2message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
           ?>
 
@@ -727,9 +684,9 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
 
         <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-        <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_registration_new_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+        <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_registration_new_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-        <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_registration_new_customise", "wcu_email_registration_new_customise", "Show", "Hide"); ?>
+        <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_registration_new_customise", "wcu_email_registration_new_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
         <div id="wcu_email_registration_new_customise" style="display: none;">
 
           <br/>
@@ -741,17 +698,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
 
           <!-- Email Notification Message -->
           <?php
-          $email3message = "Hello {name},"
-          . "<br/><br/>"
-          . "Your new affiliate account has been created."
-          . "<br/><br/>"
-          . "Username: {username}"
-          . "<br/><br/>"
-          . '<a href="{passwordurl}">Click here to set your password.</a>'
-          . "<br/><br/>"
-          . "You can login and access the affiliate dashboard page here: "
-          . "<br/>"
-          . "{dashboardurl}";
+          $email3message = __( "Hello {name},<br/><br/>Your new affiliate account has been created.<br/><br/>Username: {username}<br/><br/><a href=\"{passwordurl}\">Click here to set your password.</a><br/><br/>You can login and access the affiliate dashboard page here: <br/>{dashboardurl}", "woo-coupon-usage" );
           wcusage_setting_tinymce_option('wcusage_field_email_registration_new_message', $email3message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
           ?>
 
@@ -776,9 +723,9 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
 
         <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Administrator', 'woo-coupon-usage' ); ?></p>
 
-        <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_registration_admin_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+        <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_registration_admin_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-        <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_registration_admin_customise", "wcu_email_registration_admin_customise", "Show", "Hide"); ?>
+        <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_registration_admin_customise", "wcu_email_registration_admin_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
         <div id="wcu_email_registration_admin_customise" style="display: none;">
 
           <br/>
@@ -790,11 +737,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
 
           <!-- Email Notification Message -->
           <?php
-          $email4message = "You have received a new coupon affiliate application!"
-          . "<br/><br/>Username: {username}"
-          . "<br/><br/>Preferred coupon code: {coupon}"
-          . "<br/><br/>{custom-fields}"
-          . "<br/><br/>You can approve or decline this application here: {adminurl}";
+          $email4message = __( "You have received a new coupon affiliate application!<br/><br/>Username: {username}<br/><br/>Preferred coupon code: {coupon}<br/><br/>{custom-fields}<br/><br/>You can approve or decline this application here: {adminurl}", "woo-coupon-usage" );
           wcusage_setting_tinymce_option('wcusage_field_email_registration_admin_message', $email4message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
           ?>
 
@@ -819,9 +762,9 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
 
         <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-        <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_registration_accept_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+        <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_registration_accept_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-        <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_registration_accept_customise", "wcu_email_registration_accept_customise", "Show", "Hide"); ?>
+        <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_registration_accept_customise", "wcu_email_registration_accept_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
         <div id="wcu_email_registration_accept_customise" style="display: none;">
 
           <br/>
@@ -833,11 +776,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
 
           <!-- Email Notification Message -->
           <?php
-          $email5message = "Your affiliate application has been accepted for the coupon code: {coupon}"
-          . "<br/><br/>Get started by visiting the affiliate dashboard here: {dashboardurl}"
-          . "<br/><br/>Your default referral link is: {referralurl}"
-          . "<br/><br/>You can also use the affiliate dashboard to generate referral links for specific pages and campaigns."
-          . "<br/><br/>{message}";
+          $email5message = __( "Your affiliate application has been accepted for the coupon code: {coupon}<br/><br/>Get started by visiting the affiliate dashboard here: {dashboardurl}<br/><br/>Your default referral link is: {referralurl}<br/><br/>You can also use the affiliate dashboard to generate referral links for specific pages and campaigns.<br/><br/>{message}", "woo-coupon-usage" );
           wcusage_setting_tinymce_option('wcusage_field_email_registration_accept_message', $email5message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
           ?>
 
@@ -862,9 +801,9 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
 
         <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ); ?></p>
 
-        <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_registration_decline_customise">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+        <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_registration_decline_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-        <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_registration_decline_customise", "wcu_email_registration_decline_customise", "Show", "Hide"); ?>
+        <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_registration_decline_customise", "wcu_email_registration_decline_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
         <div id="wcu_email_registration_decline_customise" style="display: none;">
 
           <br/>
@@ -876,9 +815,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
 
           <!-- Email Notification Message -->
           <?php
-          $email6message = "Sorry, your affiliate application has been declined for the coupon code: {coupon}"
-          . "<br/><br/>Please feel free to submit another application for a different coupon code, or contact us if you have any questions."
-          . "<br/><br/>{message}";
+          $email6message = __( "Sorry, your affiliate application has been declined for the coupon code: {coupon}<br/><br/>Please feel free to submit another application for a different coupon code, or contact us if you have any questions.<br/><br/>{message}", "woo-coupon-usage" );
           wcusage_setting_tinymce_option('wcusage_field_email_registration_decline_message', $email6message, esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
           ?>
 

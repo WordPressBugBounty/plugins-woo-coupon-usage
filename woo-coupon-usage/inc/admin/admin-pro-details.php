@@ -30,7 +30,7 @@ function wcusage_field_cb_pro_details( $args )
 
   <?php if(!$ispro) { ?>
 
-  <div class="wcu-pro-details-col-1">
+  <div>
 
     <div class="wcu-pro-col-inner">
 
@@ -46,7 +46,7 @@ function wcusage_field_cb_pro_details( $args )
 
     <p style="font-size: 20px; margin-bottom: 0px;">Upgrade for just $14.99 per month.</p><br/>
 
-    <a href="<?php echo esc_url(admin_url('admin.php?billing_cycle=annual&page=wcusage-pricing&trial=true')); ?>" class="button button-primary" style="background: linear-gradient(135deg, #00a32a, #008a20); border-color: #008a20; padding: 5px 20px;">
+    <a href="https://couponaffiliates.com/pricing?utm_campaign=plugin&utm_source=dashboard-link&utm_medium=pro-tab" target="_blank" rel="noopener" class="button button-primary" style="background: linear-gradient(135deg, #00a32a, #008a20); border-color: #008a20; padding: 5px 20px;">
         <?php echo esc_html__( 'Start your FREE 7 Day Trial', 'woo-coupon-usage' ); ?> <i class="fas fa-arrow-right" style="background: transparent; color: #fff;"></i>
     </a>
 
@@ -62,19 +62,6 @@ function wcusage_field_cb_pro_details( $args )
       <strong style="color: #dc2626;"><span class="fas fa-star fa-spin"></span> Black Friday Sale! 30% off PRO with code: BF2025</strong>
     <?php } ?>
     </p>
-
-    </div>
-
-  </div>
-
-  <div class="wcu-pro-details-col-2">
-
-    <div class="wcu-pro-col-inner">
-
-    <center>
-      
-      <iframe width="560" height="315" src="https://www.youtube.com/embed/SqxMX07VM44?si=K7N7nVVez_zqRFTG" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-    </center>
 
     </div>
 
@@ -97,6 +84,7 @@ function wcusage_field_cb_pro_details( $args )
 <br/>
 
 <div class="wcu-pro-modules-search-wrap">
+  <i class="fas fa-search wcu-pro-modules-search-icon" aria-hidden="true"></i>
   <input type="text" id="wcu-pro-modules-search" placeholder="<?php echo esc_attr__( 'Search modules...', 'woo-coupon-usage' ); ?>" autocomplete="off" />
 </div>
 <p id="wcu-pro-modules-no-results" style="display:none;"><?php echo esc_html__( 'No modules found matching your search.', 'woo-coupon-usage' ); ?></p>
@@ -759,8 +747,14 @@ if(isset($default)) {
 
 if( !$ispro ) { $checked2 = 0; }
 
-$color1 = wcusage_random_color();
-$color2 = wcusage_random_color();
+// Curated accent palette. A stable colour is chosen per-module (based on the
+// title) so each card looks intentional and consistent across page loads,
+// instead of the old fully-random gradient that flickered on every refresh.
+$wcu_addon_palette = array(
+  '#2271b1', '#16a34a', '#9333ea', '#ea580c',
+  '#0891b2', '#db2777', '#ca8a04', '#4f46e5',
+);
+$accent = $wcu_addon_palette[ abs( crc32( $title ) ) % count( $wcu_addon_palette ) ];
 ?>
 
 <?php if($id) { ?>
@@ -774,16 +768,15 @@ $color2 = wcusage_random_color();
 <?php } ?>
   <div class="wcu-addons-box wcu-addons-box-<?php echo esc_attr($id); ?>" data-module-title="<?php echo esc_attr(strtolower($title)); ?>" data-module-desc="<?php echo esc_attr(strtolower(wp_strip_all_tags($text))); ?>">
 
-    <span><i class="<?php echo esc_html($icon); ?>"
-      style="text-align: center; font-size: 25px; display: block; margin: 5px auto 15px auto; background: linear-gradient(#<?php echo esc_attr($color1); ?>, #<?php echo esc_attr($color2); ?>);
-      color: #fff; width: 40px; text-shadow: 0 0 2px #333; min-height: 27px; opacity: 0.7;"></i>
+    <span class="wcu-addon-icon" style="--wcu-accent: <?php echo esc_attr($accent); ?>;">
+      <i class="<?php echo esc_html($icon); ?>" aria-hidden="true"></i>
     </span>
 
-    <?php if($link) { ?><a href="<?php echo esc_attr($link); ?>" target="_blank" title="<?php echo esc_html__( 'Click for more details', 'woo-coupon-usage' ); ?>."><?php } ?>
-      <strong style="text-align: center; display: block;"><?php echo esc_html($title); ?></strong>
+    <?php if($link) { ?><a href="<?php echo esc_attr($link); ?>" target="_blank" title="<?php echo esc_html__( 'Click for more details', 'woo-coupon-usage' ); ?>." class="wcu-addon-title-link"><?php } ?>
+      <strong class="wcu-addon-title"><?php echo esc_html($title); ?></strong>
     <?php if($link) { ?></a><?php } ?>
 
-  <p style="text-align: center;"><?php echo wp_kses_post($text); ?></p>
+  <p class="wcu-addon-desc"><?php echo wp_kses_post($text); ?></p>
 
     <div class="wcu-addons-box-bottom">
 

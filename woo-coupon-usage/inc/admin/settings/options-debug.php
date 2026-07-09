@@ -57,16 +57,76 @@ function wcusage_field_cb_debug( $args )
 
   <br/>
   
-  <p><strong>Data not currently accurate, due to settings changes?</strong></p>
+  <p><strong><?php echo esc_html__( 'Data not currently accurate, due to settings changes?', 'woo-coupon-usage' ); ?></strong></p>
 
-  <p>If you want to force refresh (re-calculate) all data that is saved on the affiliate dashboards (for past orders), then click the button below. (The first page load for each coupon dashboard may take slightly longer.)</p>
+  <p><?php echo esc_html__( 'If you want to force refresh (re-calculate) all data that is saved on the affiliate dashboards (for past orders), then click the button below. (The first page load for each coupon dashboard may take slightly longer.)', 'woo-coupon-usage' ); ?></p>
 
-  <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_settings&refreshstats=true')); ?>"
-   onclick="if (confirm('Are you sure you want to refresh all affiliate dashboard data? The next time your affiliates visit their affiliate dashboard, it may take significantly longer to load (first visit).')){return true;}else{event.stopPropagation(); event.preventDefault();};"
+  <a href="#" id="wcusage-refresh-all-data-btn"
    class="wcu-addons-box-view-details" style="padding: 7px 20px; margin: 10px 0;">
     <?php echo esc_html__( 'REFRESH ALL DATA', 'woo-coupon-usage' ); ?> <i class="fas fa-sync" style="background: transparent; margin: 0;"></i>
   </a>
-  
+
+  <div id="wcusage-refresh-all-data-message" style="display: none; max-width: 500px; margin: 12px 0; padding: 14px 16px; border-radius: 8px; border: 1px solid transparent; border-left-width: 4px; font-size: 14px; line-height: 1.5;">
+    <span class="wcusage-refresh-all-data-message-icon" style="margin-right: 8px;"></span>
+    <span class="wcusage-refresh-all-data-message-text"></span>
+  </div>
+
+  <script>
+  jQuery( function( $ ) {
+    var $btn = $( '#wcusage-refresh-all-data-btn' );
+    var $msg = $( '#wcusage-refresh-all-data-message' );
+    var $msgIcon = $msg.find( '.wcusage-refresh-all-data-message-icon' );
+    var $msgText = $msg.find( '.wcusage-refresh-all-data-message-text' );
+    var $icon = $btn.find( 'i' );
+
+    function showMessage( type, text ) {
+      var isSuccess = ( type === 'success' );
+      $msg.css( {
+        'color': isSuccess ? '#1e6b34' : '#8a1f1f',
+        'background': isSuccess ? '#eafbf0' : '#fdecec',
+        'border-color': isSuccess ? '#b6e7c6' : '#f2c2c2',
+        'border-left-color': isSuccess ? '#2ea44f' : '#d63638'
+      } );
+      $msgIcon.attr( 'class', 'wcusage-refresh-all-data-message-icon fas ' + ( isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation' ) )
+        .css( { 'margin-right': '8px', 'color': isSuccess ? '#2ea44f' : '#d63638' } );
+      $msgText.text( text );
+      $msg.show();
+    }
+
+    $btn.on( 'click', function( e ) {
+      e.preventDefault();
+
+      if ( $btn.data( 'wcuLoading' ) ) {
+        return;
+      }
+
+      if ( ! window.confirm( '<?php echo esc_js( __( 'Are you sure you want to refresh all affiliate dashboard data? The next time your affiliates visit their affiliate dashboard, it may take significantly longer to load (first visit).', 'woo-coupon-usage' ) ); ?>' ) ) {
+        return;
+      }
+
+      $btn.data( 'wcuLoading', true ).css( 'opacity', 0.6 );
+      $icon.addClass( 'fa-spin' );
+
+      $.post( ajaxurl, {
+        action: 'wcusage_refresh_all_data',
+        security: '<?php echo esc_js( wp_create_nonce( 'wcusage_refresh_all_data_nonce' ) ); ?>'
+      } ).done( function( response ) {
+        if ( response && response.success && response.data ) {
+          showMessage( 'success', response.data.message );
+        } else {
+          var m = ( response && response.data && response.data.message ) ? response.data.message : '<?php echo esc_js( __( 'Something went wrong. Please try again.', 'woo-coupon-usage' ) ); ?>';
+          showMessage( 'error', m );
+        }
+      } ).fail( function() {
+        showMessage( 'error', '<?php echo esc_js( __( 'Something went wrong. Please try again.', 'woo-coupon-usage' ) ); ?>' );
+      } ).always( function() {
+        $btn.data( 'wcuLoading', false ).css( 'opacity', 1 );
+        $icon.removeClass( 'fa-spin' );
+      } );
+    } );
+  } );
+  </script>
+
 	<br/>
 
 	<hr/>
@@ -343,7 +403,7 @@ function wcusage_field_cb_debug( $args )
   -->
 
   <br/><hr/>
-	<h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Plugin Uninstallation</h3>
+	<h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Plugin Uninstallation', 'woo-coupon-usage' ); ?></h3>
 
 	<p>
 		<?php
@@ -368,4 +428,30 @@ function wcusage_field_cb_debug( $args )
 	</div>
 
  <?php
+}
+
+/**
+ * AJAX: Flag all affiliate dashboard data for a full refresh/recalculation.
+ *
+ * Triggered by the "REFRESH ALL DATA" button on the Debug settings tab. Instead
+ * of reloading the settings page (the old ?refreshstats=true flow), this just
+ * updates the global refresh timestamp so every coupon dashboard recalculates
+ * its saved stats the next time it is loaded — see wcusage_check_if_refresh_needed().
+ */
+if ( ! function_exists( 'wcusage_refresh_all_data_ajax' ) ) {
+    function wcusage_refresh_all_data_ajax() {
+
+        check_ajax_referer( 'wcusage_refresh_all_data_nonce', 'security' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( array( 'message' => esc_html__( 'You do not have permission to do this.', 'woo-coupon-usage' ) ) );
+        }
+
+        wcusage_update_options_merge( array( 'wcusage_refresh_date' => time() ) );
+
+        wp_send_json_success( array(
+            'message' => esc_html__( 'Success! All affiliate dashboard stats will now be refreshed and re-calculated, the next time the affiliate dashboard is loaded (first load may take a few seconds longer).', 'woo-coupon-usage' ),
+        ) );
+    }
+    add_action( 'wp_ajax_wcusage_refresh_all_data', 'wcusage_refresh_all_data_ajax' );
 }

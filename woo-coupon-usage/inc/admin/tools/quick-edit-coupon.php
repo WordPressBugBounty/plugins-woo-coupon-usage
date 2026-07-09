@@ -143,6 +143,14 @@ if ( ! function_exists( 'wcusage_render_quick_edit_row' ) ) {
                                 </div>
                             </div>
                             <?php endif; ?>
+
+                            <h3 class="section-heading"><?php esc_html_e( 'Coupon History', 'woo-coupon-usage' ); ?></h3>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label for="wcu_text_coupon_start_date_<?php echo esc_attr( $coupon_id ); ?>"><?php esc_html_e( 'Coupon History Start Date', 'woo-coupon-usage' ); ?><span class="wcusage-rate-tooltip"><button type="button" class="wcusage-rate-tooltip-trigger" aria-label="<?php esc_attr_e( 'About the coupon history start date', 'woo-coupon-usage' ); ?>">?</button><span class="wcusage-rate-tooltip-panel" role="tooltip"><span class="wcusage-rate-tooltip-title"><?php esc_html_e( 'Coupon History Start Date', 'woo-coupon-usage' ); ?></span><span class="wcusage-rate-tooltip-empty"><?php esc_html_e( "Set the date this coupon's statistics start counting from. Orders placed before this date are excluded from the coupon's totals. Leave empty to show the full history. Changing this wiill recalculate the coupons statistics the next time the dashboard is loaded.", 'woo-coupon-usage' ); ?></span></span></span></label>
+                                    <input type="date" id="wcu_text_coupon_start_date_<?php echo esc_attr( $coupon_id ); ?>" value="<?php echo esc_attr( get_post_meta( $coupon_id, 'wcu_text_coupon_start_date', true ) ); ?>">
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <p class="submit inline-edit-save">

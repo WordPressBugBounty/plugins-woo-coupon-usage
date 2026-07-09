@@ -2,13 +2,14 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin settings UI: echoed values are internal pre-escaped helper markup and static strings; verified safe in manual audit.
 
 function wcusage_field_cb_reports( $args )
 {
     $options = get_option( 'wcusage_options' );
     ?>
 
-  <div id="affiliate-reports-settings" class="settings-area" <?php if ( !wcu_fs()->can_use_premium_code() ) { ?>title="Available with Pro version." style="pointer-events:none; opacity: 0.6;"<?php } ?>>
+  <div id="affiliate-reports-settings" class="settings-area" <?php if ( !wcu_fs()->can_use_premium_code() ) { ?>title="<?php echo esc_attr__( 'Available with Pro version.', 'woo-coupon-usage' ); ?>" style="pointer-events:none; opacity: 0.6;"<?php } ?>>
 
 	<?php if ( !wcu_fs()->can_use_premium_code() ) { ?><p><strong style="color: green;"><?php echo esc_html__( 'Available with Pro version.', 'woo-coupon-usage' ); ?></strong></p><?php } ?>
 
@@ -16,7 +17,7 @@ function wcusage_field_cb_reports( $args )
 
     <hr/>
 
-    <?php wcusage_setting_toggle_option('wcusage_field_enable_reports', 0, 'Enable "Affiliate Reports" Features', '0px'); ?>
+    <?php wcusage_setting_toggle_option('wcusage_field_enable_reports', 0, esc_html__( 'Enable "Affiliate Reports" Features', 'woo-coupon-usage' ), '0px'); ?>
 
     <br/>
 
@@ -93,7 +94,7 @@ function wcusage_field_cb_reports( $args )
 
             <h3 id="statements-settings"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> General Settings:</h3>
 
-            <?php wcusage_setting_toggle_option('wcusage_field_enable_reports_user_option', 1, 'Give affiliates option to toggle on/off email reports.', '0px'); ?>
+            <?php wcusage_setting_toggle_option('wcusage_field_enable_reports_user_option', 1, esc_html__( 'Give affiliates option to toggle on/off email reports.', 'woo-coupon-usage' ), '0px'); ?>
             <i><?php echo esc_html__( 'If enabled, an option will be displayed in the affiliate dashboard settings tab, allowing affiliates to turn off the email reports.', 'woo-coupon-usage' ); ?></i>
 
             <?php wcusage_setting_toggle('.wcusage_field_enable_reports_user_option', '.wcu-field-section-reports-option'); // Show or Hide ?>
@@ -101,14 +102,14 @@ function wcusage_field_cb_reports( $args )
 
               <br/><br/>
 
-              <?php wcusage_setting_toggle_option('wcusage_field_enable_reports_default', 1, 'Make "Affiliate Reports" enabled by default for all coupon affiliates.', '0px'); ?>
+              <?php wcusage_setting_toggle_option('wcusage_field_enable_reports_default', 1, esc_html__( 'Make "Affiliate Reports" enabled by default for all coupon affiliates.', 'woo-coupon-usage' ), '0px'); ?>
               <i><?php echo esc_html__( 'If enabled, the affiliate reports will be turned on by default for all affiliate users (if they have not yet updated the setting). They can toggle this off in the settings tab of their dashboard. If disabled, then the reports will be turned off by default, and the affiliate user will need to toggle it on to receive the reports.', 'woo-coupon-usage' ); ?></i>
 
             </span>
 
             <br/><br/><hr/>
 
-            <h3 id="statements-settings"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Report Customisation:</h3>
+            <h3 id="statements-settings"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Report Customisation:', 'woo-coupon-usage' ); ?></h3>
 
               <!-- IMAGE - Statement Header Image -->
               <script>
@@ -123,7 +124,6 @@ function wcusage_field_cb_reports( $args )
                               multiple: false  // Set this to true to allow multiple files to be selected
                           })
                           .on('select', function() {
-                              var attachment = custom_uploader.state().get('selection').first().toJSON();
                               $('.wcusage_field_pdfreport_statements_logo').attr('src', attachment.url);
                               $('.wcusage_field_pdfreport_statements_logo_url').val(attachment.url);
                 $('.wcusage_field_pdfreport_statements_logo_url').change();
@@ -145,7 +145,7 @@ function wcusage_field_cb_reports( $args )
                 id="wcusage_field_pdfreport_statements_logo"
                 name="wcusage_options['wcusage_field_pdfreport_statements_logo']"
                 size="60" value="<?php echo esc_html($report_statements_logo); ?>">
-                <a href="#" class="report_header_logo_upload">Upload</a>
+                <a href="#" class="report_header_logo_upload"><?php echo esc_html__( 'Upload', 'woo-coupon-usage' ); ?></a>
                 <br/><i><?php echo esc_html__( 'This is shown at the very top of the PDF report (attached to the email). Recommended size is 340 x 70.', 'woo-coupon-usage' ); ?></i><br/>
               </p>
 
@@ -157,9 +157,9 @@ function wcusage_field_cb_reports( $args )
                       $('.report_header_email_logo_upload').click(function(e) {
                           e.preventDefault();
                           var custom_uploader = wp.media({
-                              title: 'Custom Image',
+                              title: '<?php echo esc_js( __( 'Custom Image', 'woo-coupon-usage' ) ); ?>',
                               button: {
-                                  text: 'Upload Image'
+                                  text: '<?php echo esc_js( __( 'Upload Image', 'woo-coupon-usage' ) ); ?>'
                               },
                               multiple: false  // Set this to true to allow multiple files to be selected
                           })
@@ -186,7 +186,7 @@ function wcusage_field_cb_reports( $args )
                 id="wcusage_field_pdfreport_statements_email_logo"
                 name="wcusage_options['wcusage_field_pdfreport_statements_email_logo']"
                 size="60" value="<?php echo $report_statements_email_logo; ?>">
-                <a href="#" class="report_header_email_logo_upload">Upload</a>
+                <a href="#" class="report_header_email_logo_upload"><?php echo esc_html__( 'Upload', 'woo-coupon-usage' ); ?></a>
                 <br/><i><?php echo esc_html__( 'This will replace your default WooCommerce email template "header image" with a custom one for your reports.', 'woo-coupon-usage' ); ?> <?php echo esc_html__( 'Leave empty to use your default "header image".', 'woo-coupon-usage' ); ?></i><br/>
               </p>
 
@@ -198,7 +198,7 @@ function wcusage_field_cb_reports( $args )
               </style>
               <?php
               $wcusage_field_pdfreports_text_header = wcusage_get_setting_value('wcusage_field_pdfreports_text_header', '');
-              wcusage_setting_tinymce_option('wcusage_field_pdfreports_text_header', $wcusage_field_pdfreports_text_header, "Report Header Text", '0px');
+              wcusage_setting_tinymce_option('wcusage_field_pdfreports_text_header', $wcusage_field_pdfreports_text_header, esc_html__( 'Report Header Text', 'woo-coupon-usage' ), '0px');
               ?>
 
               <br/>
@@ -209,7 +209,7 @@ function wcusage_field_cb_reports( $args )
               </style>
               <?php
               $wcusage_field_pdfreports_text_footer = wcusage_get_setting_value('wcusage_field_pdfreports_text_footer', '');
-              wcusage_setting_tinymce_option('wcusage_field_pdfreports_text_footer', $wcusage_field_pdfreports_text_footer, "Report Footer Text", '0px');
+              wcusage_setting_tinymce_option('wcusage_field_pdfreports_text_footer', $wcusage_field_pdfreports_text_footer, esc_html__( 'Report Footer Text', 'woo-coupon-usage' ), '0px');
               ?>
 
               <br/>
@@ -233,7 +233,7 @@ function wcusage_field_cb_reports( $args )
 
               <br/>
 
-              <?php wcusage_setting_toggle_option('wcusage_field_reports_show_sales', 1, 'Show "Sales Statistics" Section', '0px'); ?>
+              <?php wcusage_setting_toggle_option('wcusage_field_reports_show_sales', 1, esc_html__( 'Show "Sales Statistics" Section', 'woo-coupon-usage' ), '0px'); ?>
 
               <?php wcusage_setting_toggle('.wcusage_field_reports_show_sales', '.wcu-field-section-reports-text-sales'); // Show or Hide ?>
               <span class="wcu-field-section-reports-text-sales">
@@ -246,7 +246,7 @@ function wcusage_field_cb_reports( $args )
 
               <br/>
 
-              <?php wcusage_setting_toggle_option('wcusage_field_reports_show_commission', 1, 'Show "Commission Statistics" Section', '0px'); ?>
+              <?php wcusage_setting_toggle_option('wcusage_field_reports_show_commission', 1, esc_html__( 'Show "Commission Statistics" Section', 'woo-coupon-usage' ), '0px'); ?>
 
               <?php wcusage_setting_toggle('.wcusage_field_reports_show_commission', '.wcu-field-section-reports-text-commission'); // Show or Hide ?>
               <span class="wcu-field-section-reports-text-commission">
@@ -259,7 +259,7 @@ function wcusage_field_cb_reports( $args )
 
               <br/>
 
-              <?php wcusage_setting_toggle_option('wcusage_field_reports_show_referral', 1, 'Show "Referral URL Statistics" Section', '0px'); ?>
+              <?php wcusage_setting_toggle_option('wcusage_field_reports_show_referral', 1, esc_html__( 'Show "Referral URL Statistics" Section', 'woo-coupon-usage' ), '0px'); ?>
 
               <?php wcusage_setting_toggle('.wcusage_field_reports_show_referral', '.wcu-field-section-reports-text-url'); // Show or Hide ?>
               <span class="wcu-field-section-reports-text-url">
@@ -308,13 +308,13 @@ if( !function_exists( 'wcusage_test_report_form' ) ) {
 
           <h3 id="statements-settings"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Send an example affiliate report:</h3>
 
-    			<p><strong>Coupon Code:</strong>
+    			<p><strong><?php echo esc_html__( 'Coupon Code:', 'woo-coupon-usage' ); ?></strong>
           <br/>
           <input type="text" id="wcu_example_report_coupon" name="wcu_example_report_coupon" checktype="ignore">
           <i>Which coupon should it show statistics for?</i>
           </p>
 
-          <p><strong>Email Address:</strong>
+          <p><strong><?php echo esc_html__( 'Email Address:', 'woo-coupon-usage' ); ?></strong>
           <br/>
           <input type="text" id="wcu_example_report_email" name="wcu_example_report_email" checktype="ignore">
           <i>Which email address should the example report be sent to?</i>

@@ -53,20 +53,60 @@
 
 /* Modern Form Styling - Clean and Simple */
 .wcusage-form-body {
-    padding: 25px 10px;
+    padding: 20px 0px;
 }
 
+/* Submit area below the section cards */
+.wcusage-form-actions {
+    margin-top: 4px;
+}
+
+/* Each section renders as its own modern card */
 .wcusage-form-section {
-    margin-bottom: 24px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    overflow: hidden;
+    padding: 0 22px 20px;
+    margin-bottom: 20px;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.wcusage-form-section h4 {
-    margin: 0 0 16px 0;
+.wcusage-form-section:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-color: #d0d5dd;
+}
+
+/* Never show a card that ended up with no content */
+.wcusage-form-section:empty {
+    display: none;
+}
+
+/* Section heading = full-width card header band */
+.wcusage-form-section > h3,
+.wcusage-form-section > h4 {
+    margin: 0 -22px 18px;
+    padding: 14px 22px;
     color: #1d2327;
     font-size: 15px;
     font-weight: 600;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #2271b1;
+    line-height: 1.4;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Action links inside a section header (e.g. "Edit Groups") sit on the right */
+.wcusage-form-section > h3 .page-title-action {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
 }
 
 .wcusage-form-group {
@@ -420,64 +460,13 @@
     text-decoration: underline;
 }
 
-/* Tab Styling Updates */
-.wcusage-tabs {
-    background: none !important;
-    border-radius: 8px;
-    margin-bottom: 24px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    position: relative;
-    z-index: 99;
-    clear: both;
-}
-
-.wcusage-tabs .nav-tab {
-    border: none;
-    background: transparent;
-    color: #6b7280;
-    padding: 14px 20px;
-    margin: 0;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.wcusage-tabs .nav-tab:hover {
-    background: #f9fafb;
-    color: #374151;
-}
-
+/* Tab Styling — the canonical container / tab / active-state rules live in the
+   ".wcusage-tabs" block further down. Only the disabled-tab state is defined here
+   (previously this section held a second, conflicting set of tab styles). */
 .wcusage-tabs .nav-tab.wcusage-tab-disabled {
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
-}
-
-.wcusage-tabs .nav-tab-active {
-    background: #2271b1;
-    color: white;
-}
-
-.wcusage-tabs .nav-tab-active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 20px;
-    height: 3px;
-    background: white;
-    border-radius: 2px;
-}
-
-/* Tab Content Styling */
-.wcusage-tab-content {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    overflow: visible;
 }
 
 .tab-content {
@@ -490,7 +479,7 @@
     font-weight: 600;
     margin-bottom: 16px;
     padding-bottom: 10px;
-    border-bottom: 2px solid #2271b1;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .tab-content h3 i {
@@ -550,12 +539,12 @@
     padding: 10px 12px !important;
 }
 
-/* Inline actions: Quick Edit | Edit | Delete on one line */
+/* Coupon actions: Quick Edit with secondary actions below */
 .wcusage-actions-inline {
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    flex-wrap: wrap; /* allow wrapping so links can move below Quick Edit */
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
     white-space: normal;
     justify-content: center; /* center align actions */
 }
@@ -565,12 +554,13 @@
     height: auto;
     box-shadow: none;
     flex: 0 0 auto; /* auto width */
-    margin: 0 0 2px 0; /* small gap before icons */
+    margin: 0;
 }
-.wcusage-actions-inline .button.button-large.button-primary::after {
-    content: "";
-    display: block;
-    width: 100%; /* force next items to wrap to new line */
+.wcusage-actions-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 .wcusage-actions-stack .wcusage-delete-action {
     color: #7a0707;
@@ -686,7 +676,7 @@
         display: flex;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        gap: 0;
+        gap: 8px;
     }
     .wcusage-tabs .nav-tab {
         flex: 0 0 auto;
@@ -773,16 +763,6 @@
     overflow: hidden;
 }
 
-.wcusage-stat-box::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: #2271b1;
-}
-
 .wcusage-stat-box:hover {
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     border-color: #d0d5dd;
@@ -828,56 +808,65 @@
     margin-bottom: 0;
 }
 
+/* Standalone tab "chips" — no wrapping box; each tab is its own bordered pill.
+   Default = light grey chip, hover = blue tint, active = filled blue chip. */
 .wcusage-tabs {
     margin-bottom: 24px;
-    border-bottom: none;
-    background: #fff;
+    background: none;
     padding: 0;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    position: relative;
+    z-index: 99;
+    clear: both;
+    display: flex;
+    gap: 5px;
 }
 
 .wcusage-tabs .nav-tab {
-    border: none;
+    border: 1px solid #e5e7eb !important;
     background: #f9fafb;
     color: #50575e;
     text-decoration: none;
-    padding: 14px 22px;
-    margin-right: 0;
-    border-radius: 0;
+    padding: 10px 18px;
+    margin: 0;
+    border-radius: 4px 4px 0 0;
     cursor: pointer;
     font-weight: 500;
-    font-size: 13px;
-    transition: all 0.15s ease;
+    font-size: 15px;
+    line-height: 1.4;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     position: relative;
-    border-right: 1px solid #e5e7eb;
 }
 
 .wcusage-tabs .nav-tab:hover {
-    background: #eef3ff;
+    background: #f9fbff;
     color: #2271b1;
-}
-
-.wcusage-tabs .nav-tab:last-child {
-    border-right: none;
+    border-color: #cdddf5;
 }
 
 .wcusage-tabs .nav-tab-active {
-    background: #fff;
-    color: #1d2327;
-    border-bottom: 3px solid #2271b1;
+    background: #f9fbff;
+    border-color: #c5e5ff;
+    color: #2271b1;
     font-weight: 600;
+}
+
+/* Suppress the blue focus ring/outline that WP core + browsers draw on a tab
+   link while it is clicked/focused. */
+.wcusage-tabs .nav-tab:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 .wcusage-tab-content {
     background: #fff;
     border: 1px solid #e5e7eb;
     padding: 0 10px 10px 10px;
-    border-radius: 10px;
+    border-radius: 0px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    margin-top: -5px;
+    margin-top: 0;
     position: relative;
 }
 
@@ -905,17 +894,6 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     position: relative;
     overflow: visible;
-}
-
-.wcusage-stat-box::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: #2271b1;
-    border-radius: 10px 10px 0 0;
 }
 
 .wcusage-stat-box:hover {
@@ -1320,8 +1298,8 @@
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 20px;
-    border-bottom: 2px solid #2271b1;
     padding-bottom: 10px;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .wcusage-icon-color-primary {
@@ -1367,4 +1345,3 @@
 .wcusage-border-radius-3 {
     border-radius: 3px;
 }
-

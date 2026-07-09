@@ -260,6 +260,13 @@ function wcusage_update_ml_affiliate_parents(
  *
  */
 function wcusage_on_new_order_set_coupon_referrer(  $order_id  ) {
+    if ( is_a( $order_id, 'WC_Order' ) ) {
+        $order_id = $order_id->get_id();
+    }
+    $order_id = absint( $order_id );
+    if ( !$order_id ) {
+        return;
+    }
     // Get settings
     $wcusage_field_url_referrals = wcusage_get_setting_value( 'wcusage_field_url_referrals', '0' );
     $wcusage_store_cookies = wcusage_get_setting_value( 'wcusage_field_store_cookies', '1' );
@@ -277,6 +284,9 @@ function wcusage_on_new_order_set_coupon_referrer(  $order_id  ) {
     $cookie = sanitize_text_field( $cookie );
     // If $cookie is not a coupon applied to order
     $order = wc_get_order( $order_id );
+    if ( !$order ) {
+        return;
+    }
     if ( version_compare( WC_VERSION, 3.7, ">=" ) ) {
         $coupons_array = $order->get_coupon_codes();
     } else {
@@ -310,6 +320,7 @@ function wcusage_on_new_order_set_coupon_referrer(  $order_id  ) {
     }
     // URL Referrals
     if ( $cookie && $url_applied && $wcusage_field_url_referrals ) {
+        $coupon_info = wcusage_get_coupon_info( $cookie );
         $meta_data = [];
         $coupon = new WC_Coupon($cookie);
         $wcusage_field_allow_assigned_user = wcusage_get_setting_value( 'wcusage_field_allow_assigned_user', 1 );
@@ -337,6 +348,12 @@ function wcusage_on_new_order_set_coupon_referrer(  $order_id  ) {
 
 add_action(
     'woocommerce_checkout_order_processed',
+    'wcusage_on_new_order_set_coupon_referrer',
+    10,
+    1
+);
+add_action(
+    'woocommerce_store_api_checkout_order_processed',
     'wcusage_on_new_order_set_coupon_referrer',
     10,
     1

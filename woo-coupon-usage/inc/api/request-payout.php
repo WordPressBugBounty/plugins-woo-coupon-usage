@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 if ( wcu_fs()->can_use_premium_code() && wcu_fs()->is_premium() ) {
 
   /* Get the coupon name by ID */

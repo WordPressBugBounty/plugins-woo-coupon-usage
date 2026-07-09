@@ -11,6 +11,9 @@ function wcusage_admin_bell_data_ajax() {
     check_ajax_referer( 'wcusage_admin_bell', 'nonce' );
     // Check if this is a bell click (update date) or just a fetch
     $update_date = isset( $_POST['update_date'] ) && $_POST['update_date'] == '1';
+    // Only build the (heavier) dropdown HTML when the client actually needs it,
+    // i.e. when the bell is opened. Background polls just need the count.
+    $include_dropdown = isset( $_POST['include_dropdown'] ) && $_POST['include_dropdown'] == '1';
     // Use static cache for this request
     static $cached_data = null;
     if ( $cached_data === null ) {
@@ -50,18 +53,31 @@ function wcusage_admin_bell_data_ajax() {
     }
     $meta_key = 'wcusage_referral_notify_last_date';
     $now = current_time( 'mysql' );
-    $wpdb = $GLOBALS['wpdb'];
-    $table = $wpdb->prefix . 'wcusage_activity';
-    $max_days = 7;
-    $last_date = sanitize_text_field( get_user_meta( $user_id, $meta_key, true ) );
-    if ( !$last_date ) {
-        $date_limit = date( 'Y-m-d H:i:s', strtotime( "-{$max_days} days", strtotime( $now ) ) );
-    } else {
-        $date_limit = $last_date;
+    // Per-user cache for the referral count. This query runs on every poll, so
+    // without caching it would scan the (potentially very large) activity table on
+    // each request. Cleared below when the bell is opened (last-viewed date changes).
+    $referral_cache_key = 'wcusage_admin_bell_referrals_' . $user_id;
+    $referral_cache = get_transient( $referral_cache_key );
+    if ( $referral_cache === false ) {
+        $wpdb = $GLOBALS['wpdb'];
+        $table = $wpdb->prefix . 'wcusage_activity';
+        $max_days = 7;
+        $last_date = sanitize_text_field( get_user_meta( $user_id, $meta_key, true ) );
+        if ( !$last_date ) {
+            $date_limit = date( 'Y-m-d H:i:s', strtotime( "-{$max_days} days", strtotime( $now ) ) );
+        } else {
+            $date_limit = $last_date;
+        }
+        $referral_count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE event = %s AND date >= %s", 'referral', $date_limit ) );
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $referral_cache = array(
+            'count'      => $referral_count,
+            'date_limit' => $date_limit,
+        );
+        set_transient( $referral_cache_key, $referral_cache, 1 * MINUTE_IN_SECONDS );
     }
-    $referrals = $wpdb->get_results( $wpdb->prepare( "SELECT date FROM {$table} WHERE event = %s AND date >= %s", 'referral', $date_limit ) );
-    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $referral_count = count( $referrals );
+    $referral_count = intval( $referral_cache['count'] );
+    $date_limit = $referral_cache['date_limit'];
     $referral_message = '';
     if ( $referral_count > 0 ) {
         /* translators: 1: number of referrals, 2: date/time */
@@ -71,139 +87,149 @@ function wcusage_admin_bell_data_ajax() {
     }
     if ( !$notifications_enabled ) {
         $bell_total = 0;
-        // Generate simple dropdown with toggle
-        ob_start();
-        ?>
+    }
+    // Build the dropdown markup only when the bell is actually opened. A background
+    // poll passes include_dropdown=0 and only needs the count, so this avoids
+    // rendering the full list (and its queries) on every poll.
+    $dropdown_html = '';
+    if ( $include_dropdown ) {
+        if ( !$notifications_enabled ) {
+            // Generate simple dropdown with toggle
+            ob_start();
+            ?>
         <div id="wcusage-admin-bell-dropdown" style="display: none; position: absolute; margin-top: 10px; left: 50%; top: 32px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; width: 300px; transform: translateX(-50%); box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 99999;">
             <div style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #1d2327; text-align: center;"><?php 
-        echo esc_html__( 'Notifications Disabled', 'woo-coupon-usage' );
-        ?></div>
+            echo esc_html__( 'Notifications Disabled', 'woo-coupon-usage' );
+            ?></div>
             <div style="padding: 12px 16px; text-align: center;">
                 <a href="#" id="wcusage-toggle-notifications" style="color: #0073aa; text-decoration: underline; font-size: 11px;"><?php 
-        echo esc_html__( 'Enable Notifications', 'woo-coupon-usage' );
-        ?></a>
+            echo esc_html__( 'Enable Notifications', 'woo-coupon-usage' );
+            ?></a>
             </div>
         </div>
         <?php 
-        $dropdown_html = ob_get_clean();
-    } else {
-        // Generate dropdown HTML
-        ob_start();
-        ?>
+            $dropdown_html = ob_get_clean();
+        } else {
+            // Generate dropdown HTML
+            ob_start();
+            ?>
         <div id="wcusage-admin-bell-dropdown" style="display: none; position: absolute; margin-top: 10px; left: 50%; top: 32px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; width: 300px; transform: translateX(-50%); box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 99999;">
             <?php 
-        if ( $referral_count > 0 ) {
-            ?>
+            if ( $referral_count > 0 ) {
+                ?>
             <div id="wcusage-admin-bell-referral-section" style="display:block;">
                 <div style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #1d2327; text-align: center;"><?php 
-            echo esc_html__( 'Notifications', 'woo-coupon-usage' );
-            ?></div>
+                echo esc_html__( 'Notifications', 'woo-coupon-usage' );
+                ?></div>
                 <div id="wcusage-admin-bell-referral-message" style="padding:10px 16px; border-bottom: 1px solid #f3f3f3;">
                     <span class="fa-solid fa-cart-plus" style="margin-right: 5px;"></span>
                     <a href="<?php 
-            echo esc_url( admin_url( 'admin.php?page=wcusage_referrals' ) );
-            ?>"
+                echo esc_url( admin_url( 'admin.php?page=wcusage_referrals' ) );
+                ?>"
                         style="text-decoration: none; color: #111;">
                         <?php 
-            echo esc_html( $referral_message );
-            ?>
+                echo esc_html( $referral_message );
+                ?>
                     </a>
                 </div>
             </div>
             <?php 
-        }
-        ?>
+            }
+            ?>
             <div style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; font-weight: 600; color: #1d2327; text-align: center;"><?php 
-        echo esc_html__( 'Pending Admin Tasks', 'woo-coupon-usage' );
-        ?></div>
+            echo esc_html__( 'Pending Admin Tasks', 'woo-coupon-usage' );
+            ?></div>
             <ul style="list-style: none; margin: 0; padding: 0;" id="wcusage-admin-bell-referral-list">
                 <?php 
-        if ( $show_affiliate_notification ) {
-            ?>
+            if ( $show_affiliate_notification ) {
+                ?>
                 <li style="padding: 5px 16px 7px 16px; display: flex; align-items: center; gap: 8px; margin-bottom: 0; border-bottom: 1px solid #f3f3f3;">
                     <span class="fa-solid fa-user-group" style="color: #f39c12;"></span>
                     <span style="font-weight: bold; color: #f39c12;">
                     <?php 
-            echo sprintf( esc_html__( 'You currently have no %s!', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'affiliates', 'woo-coupon-usage' ) ) ) );
-            ?>
+                echo sprintf( esc_html__( 'You currently have no %s!', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'affiliates', 'woo-coupon-usage' ) ) ) );
+                ?>
                     <br/>
                     <a href="<?php 
-            echo esc_url( admin_url( 'admin.php?page=wcusage_add_affiliate' ) );
-            ?>"
+                echo esc_url( admin_url( 'admin.php?page=wcusage_add_affiliate' ) );
+                ?>"
                     style="margin-left: auto; color: #f39c12; text-decoration: underline; font-size: 13px; font-weight: bold;">
                         <?php 
-            echo sprintf( esc_html__( 'Add your first %s', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
-            ?>
+                echo sprintf( esc_html__( 'Add your first %s', 'woo-coupon-usage' ), esc_html( wcusage_get_affiliate_text( __( 'affiliate', 'woo-coupon-usage' ) ) ) );
+                ?>
                     </a>
                     </span>
                 </li>
                 <?php 
-        }
-        ?>
-                <?php 
-        if ( $pending_registrations > 0 ) {
+            }
             ?>
+                <?php 
+            if ( $pending_registrations > 0 && wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' ) ) {
+                ?>
                 <li style="padding: 10px 16px; border-bottom: 1px solid #f3f3f3; display: flex; align-items: center; gap: 8px; margin-bottom: 0;">
                     <span class="fa-solid fa-user-plus" style="color: #0073aa;"></span>
                     <span><?php 
-            echo esc_html__( 'Pending Registrations:', 'woo-coupon-usage' );
-            ?></span>
+                echo esc_html__( 'Pending Registrations:', 'woo-coupon-usage' );
+                ?></span>
                     <span style="margin-left: auto; font-weight: bold; color: #d9534f;"><?php 
-            echo intval( $pending_registrations );
-            ?></span>
+                echo intval( $pending_registrations );
+                ?></span>
                     <a href="<?php 
-            echo esc_url( admin_url( 'admin.php?page=wcusage_registrations' ) );
-            ?>" style="margin-left: 10px; color: #0073aa; text-decoration: underline; font-size: 13px;"><?php 
-            echo esc_html__( 'Manage', 'woo-coupon-usage' );
-            ?></a>
+                echo esc_url( admin_url( 'admin.php?page=wcusage_registrations' ) );
+                ?>" style="margin-left: 10px; color: #0073aa; text-decoration: underline; font-size: 13px;"><?php 
+                echo esc_html__( 'Manage', 'woo-coupon-usage' );
+                ?></a>
                 </li>
                 <?php 
-        }
-        ?>
-                <?php 
-        if ( $pending_direct_links > 0 ) {
+            }
             ?>
+                <?php 
+            if ( $pending_direct_links > 0 ) {
+                ?>
                 <li style="padding: 10px 16px; border-bottom: 1px solid #f3f3f3; display: flex; align-items: center; gap: 8px; margin-bottom: 0;">
                     <span class="fa-solid fa-globe" style="color: #6f42c1;"></span>
                     <span><?php 
-            echo esc_html__( 'Pending Domains:', 'woo-coupon-usage' );
-            ?></span>
+                echo esc_html__( 'Pending Domains:', 'woo-coupon-usage' );
+                ?></span>
                     <span style="margin-left: auto; font-weight: bold; color: #d9534f;"><?php 
-            echo intval( $pending_direct_links );
-            ?></span>
+                echo intval( $pending_direct_links );
+                ?></span>
                     <a href="<?php 
-            echo esc_url( admin_url( 'admin.php?page=wcusage_domains&status=pending' ) );
-            ?>" style="margin-left: 10px; color: #6f42c1; text-decoration: underline; font-size: 13px;"><?php 
-            echo esc_html__( 'Manage', 'woo-coupon-usage' );
-            ?></a>
+                echo esc_url( admin_url( 'admin.php?page=wcusage_domains&status=pending' ) );
+                ?>" style="margin-left: 10px; color: #6f42c1; text-decoration: underline; font-size: 13px;"><?php 
+                echo esc_html__( 'Manage', 'woo-coupon-usage' );
+                ?></a>
                 </li>
                 <?php 
-        }
-        ?>
+            }
+            ?>
                 <?php 
-        ?>
+            ?>
             </ul>
             <?php 
-        if ( $pending_total == 0 && !$show_affiliate_notification ) {
-            ?>
+            if ( $pending_total == 0 && !$show_affiliate_notification ) {
+                ?>
             <div style="padding: 12px 16px; color: #888; text-align: center;"><?php 
-            echo esc_html__( 'No pending tasks 🎉', 'woo-coupon-usage' );
-            ?></div>
+                echo esc_html__( 'No pending tasks 🎉', 'woo-coupon-usage' );
+                ?></div>
             <?php 
-        }
-        ?>
+            }
+            ?>
             <div style="padding: 4px 16px 9px 16px; border-top: 1px solid #eee; text-align: center;">
                 <a href="#" id="wcusage-toggle-notifications" style="color: #0073aa; text-decoration: underline; font-size: 11px;"><?php 
-        echo esc_html__( 'Disable Notifications', 'woo-coupon-usage' );
-        ?></a>
+            echo esc_html__( 'Disable Notifications', 'woo-coupon-usage' );
+            ?></a>
             </div>
         </div>
         <?php 
-        $dropdown_html = ob_get_clean();
+            $dropdown_html = ob_get_clean();
+        }
     }
     // Only update last viewed date if bell is clicked
     if ( $update_date ) {
         update_user_meta( $user_id, $meta_key, $now );
+        // Last-viewed date changed, so the cached referral count is now stale.
+        delete_transient( $referral_cache_key );
     }
     wp_send_json( array(
         'count'         => $bell_total,
@@ -242,9 +268,12 @@ function wcusage_admin_notification_bell() {
         null,
         true
     );
+    // Polling interval in seconds. Filterable so it can be tuned per-site; minimum 5s.
+    $poll_interval = max( 5, intval( apply_filters( 'wcusage_admin_bell_poll_interval', 30 ) ) );
     wp_localize_script( 'wcusage-admin-notification-bell', 'wcusageAdminBell', array(
         'ajax_url' => admin_url( 'admin-ajax.php' ),
         'nonce'    => wp_create_nonce( 'wcusage_admin_bell' ),
+        'interval' => $poll_interval * 1000,
     ) );
     // Add inline CSS for bell shake animation
     $shake_css = "\r\n    @keyframes wcusage-bell-shake {\r\n        0% { transform: rotate(0deg); }\r\n        25% { transform: rotate(-10deg); }\r\n        50% { transform: rotate(10deg); }\r\n        75% { transform: rotate(-10deg); }\r\n        100% { transform: rotate(0deg); }\r\n    }\r\n    .wcusage-bell-shake {\r\n        animation: wcusage-bell-shake 0.5s ease-in-out;\r\n    }\r\n    ";

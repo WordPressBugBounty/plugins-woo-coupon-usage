@@ -15,8 +15,10 @@ function wcusage_field_cb_commission( $args )
 	<div id="commission-settings" class="settings-area">
 
 	<h1><?php echo esc_html__( 'Flexible Commission Settings', 'woo-coupon-usage' ); ?></h1>
+
+  <p><?php echo esc_html__( 'Set the commission amounts for your affiliates. You can set a variety of commission types and structures depending on your needs.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/flexible-commission-settings/" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</p>
   
-  <hr/>
+  <hr>
 
   <!-- Enable commission calculation statistics -->
   <?php wcusage_setting_toggle_option('wcusage_field_show_commission', 1, esc_html__( 'Enable Commission Calculations & Statistics', 'woo-coupon-usage' ), '0px'); ?>
@@ -68,7 +70,7 @@ function wcusage_field_cb_commission( $args )
     <br/>
 
     <a href="#" onclick="wcusage_go_to_settings('#tab-currency', '#tab-currency');"
-      class="wcu-addons-box-view-details" style="margin-left: 5px;">Click here</a> to manage multi-currency settings.
+      class="wcu-addons-box-view-details" style="margin-left: 5px;"><?php echo esc_html__( 'Click here', 'woo-coupon-usage' ); ?></a> <?php echo esc_html__( 'to manage multi-currency settings.', 'woo-coupon-usage' ); ?>
 
     <br/>
   </span>
@@ -76,7 +78,7 @@ function wcusage_field_cb_commission( $args )
 	<span <?php if( !wcu_fs()->can_use_premium_code() || !wcu_fs()->is_premium() ) { ?>style="opacity: 0.4; display: block; pointer-events: none;" class="wcu-settings-pro-only"<?php } ?>>
 
     <!-- Priority Commission Field -->
-    <br/><hr/>
+    <br/><hr style="margin-top: 20px;">
     <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Commission Priority', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?>:</h3>
 
 		<?php
@@ -337,9 +339,9 @@ if( !function_exists( 'wcusage_setting_section_calculations' ) ) {
 
   <br/>
 
-  <br/><p><span class="fa-solid fa-gear"></span> <strong><?php echo esc_html__( 'Advanced Calculation Settings', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_commission_calc_advanced">Show <span class="fa-solid fa-arrow-down"></span></button></p>
+  <br/><p><span class="fa-solid fa-gear"></span> <strong><?php echo esc_html__( 'Advanced Calculation Settings', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_commission_calc_advanced"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
-  <?php wcu_admin_settings_showhide_toggle("wcu_show_commission_calc_advanced", "wcu_commission_calc_advanced", "Show", "Hide"); ?>
+  <?php wcu_admin_settings_showhide_toggle("wcu_show_commission_calc_advanced", "wcu_commission_calc_advanced", esc_html__( 'Show', 'woo-coupon-usage' ), esc_html__( 'Hide', 'woo-coupon-usage' )); ?>
   <div id="wcu_commission_calc_advanced" style="display: none; padding-top: 10px;">
 
     <!-- Calculate commission BEFORE any custom discounts are applied. -->

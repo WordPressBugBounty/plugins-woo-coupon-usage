@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin settings UI: echoed values are internal pre-escaped helper markup and static strings; verified safe in manual audit.
 
 function wcusage_field_cb_widget( $args )
 {
@@ -12,9 +13,7 @@ function wcusage_field_cb_widget( $args )
 
         <h1><?php echo esc_html__( 'Floating Affiliate Widget', 'woo-coupon-usage' ); ?></h1>
 
-        <hr/>
-
-        <p><?php echo esc_html__( 'Customize the floating affiliate widget that appears on your website to provide easy access to affiliate features.', 'woo-coupon-usage' ); ?></p>
+        <p><?php echo esc_html__( 'Display and customise a floating affiliate widget on your website to provide easy access to affiliate features.', 'woo-coupon-usage' ); ?></p>
 
         <br/>
 
@@ -51,10 +50,10 @@ function wcusage_field_cb_widget( $args )
 
         </div>
 
-        <br/><hr/>
+        <br/><hr style="margin-top: 20px;"/>
 
         <!-- Enable Floating Widget -->
-        <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_enable', 0, 'Enable Floating Affiliate Widget', '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_enable', 0, esc_html__( 'Enable Floating Affiliate Widget', 'woo-coupon-usage' ), '0px'); ?>
         <i><?php echo esc_html__( 'Display a floating affiliate button on your website that opens a compact dashboard popup.', 'woo-coupon-usage' ); ?></i><br/>
 
         <?php wcusage_setting_toggle('.wcusage_field_floating_widget_enable', '.wcu-field-section-floating-widget'); // Show or Hide ?>

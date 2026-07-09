@@ -300,8 +300,40 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
 
 }
 
-// Store the previous value before the update
+/**
+ * Manual commission-edit guard.
+ *
+ * The activity log records "Manual ... Commission Edit" entries whenever the
+ * unpaid / processing / pending / commission-rate coupon meta changes. Those
+ * entries are only meaningful for genuine manual edits made by an admin.
+ *
+ * The plugin also updates the exact same meta keys programmatically - the
+ * per-order processing commission, payout grants/reversals, all-time stats
+ * refreshes, rewards, etc. For a busy coupon that can be thousands of writes in
+ * a row, which previously flooded the activity log with bogus "Manual Edit"
+ * rows and could make the coupon dashboard's stats refresh time out.
+ *
+ * Manual save handlers call wcusage_set_manual_commission_edit(true) around
+ * their updates so those (and only those) are logged; automated writers leave
+ * the flag off and are silently skipped.
+ */
+if( !function_exists( 'wcusage_set_manual_commission_edit' ) ) {
+  function wcusage_set_manual_commission_edit( $is_manual = true ) {
+    $GLOBALS['wcusage_manual_commission_edit'] = (bool) $is_manual;
+  }
+}
+if( !function_exists( 'wcusage_is_manual_commission_edit' ) ) {
+  function wcusage_is_manual_commission_edit() {
+    return ! empty( $GLOBALS['wcusage_manual_commission_edit'] );
+  }
+}
+
+// Store the previous value before the update (manual admin edits only)
 add_filter('update_postmeta', function($check, $object_id, $meta_key, $meta_value) {
+  // Skip the plugin's own automated commission updates; only track manual edits.
+  if ( ! wcusage_is_manual_commission_edit() ) {
+    return $check;
+  }
   $meta_configs = [
       'wcu_text_unpaid_commission' => 'manual_unpaid_commission_edit',
       'wcu_text_pending_commission' => 'manual_pending_commission_edit',
@@ -322,6 +354,13 @@ add_filter('update_postmeta', function($check, $object_id, $meta_key, $meta_valu
 // Log the update with the previous value
 add_action('updated_post_meta', 'wcusage_after_update_function', 10, 4);
 function wcusage_after_update_function($meta_id, $post_id, $meta_key, $meta_value) {
+  // Only log genuine manual admin edits. The plugin updates these same meta
+  // keys programmatically (per-order processing commission, payout grants,
+  // stats refreshes, rewards, etc.) - sometimes thousands of times for a busy
+  // coupon - and those must not be recorded as "Manual ... Edit" activity.
+  if ( ! wcusage_is_manual_commission_edit() ) {
+    return;
+  }
   $meta_configs = [
       'wcu_text_unpaid_commission' => 'manual_unpaid_commission_edit',
       'wcu_text_pending_commission' => 'manual_pending_commission_edit',

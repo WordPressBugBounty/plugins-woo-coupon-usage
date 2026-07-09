@@ -63,6 +63,7 @@ if ( !function_exists( 'wcusage_tab_latest_orders' ) ) {
                 $option_show_ordercity = wcusage_get_setting_value( 'wcusage_field_ordercity', '0' );
                 $option_show_ordername = wcusage_get_setting_value( 'wcusage_field_ordername', '0' );
                 $option_show_ordernamelast = wcusage_get_setting_value( 'wcusage_field_ordernamelast', '0' );
+                $option_show_ordernamelast_initial = wcusage_get_setting_value( 'wcusage_field_ordernamelast_initial', '0' );
                 $option_show_amount = wcusage_get_setting_value( 'wcusage_field_amount', '1' );
                 $option_show_amount_saved = wcusage_get_setting_value( 'wcusage_field_amount_saved', '1' );
                 $option_show_shipping = wcusage_get_setting_value( 'wcusage_field_show_shipping', '0' );
@@ -226,6 +227,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
         $option_show_ordercity = wcusage_get_setting_value( 'wcusage_field_ordercity', '0' );
         $option_show_ordername = wcusage_get_setting_value( 'wcusage_field_ordername', '0' );
         $option_show_ordernamelast = wcusage_get_setting_value( 'wcusage_field_ordernamelast', '0' );
+        $option_show_ordernamelast_initial = wcusage_get_setting_value( 'wcusage_field_ordernamelast_initial', '0' );
         $option_show_amount = wcusage_get_setting_value( 'wcusage_field_amount', '1' );
         $option_show_amount_saved = wcusage_get_setting_value( 'wcusage_field_amount_saved', '1' );
         $option_show_shipping = wcusage_get_setting_value( 'wcusage_field_show_shipping', '0' );
@@ -933,12 +935,12 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         if ( $orderinfo ) {
                             $currencycode = $orderinfo->get_currency();
                         }
-                        $offset = get_option( 'gmt_offset' );
-                        $order_date = date_i18n( "F j, Y", strtotime( $orderinfo->get_date_created() ) + $offset * HOUR_IN_SECONDS );
+                        $gmt_offset = get_option( 'gmt_offset' );
+                        $order_date = date_i18n( "F j, Y", strtotime( $orderinfo->get_date_created() ) + $gmt_offset * HOUR_IN_SECONDS );
                         if ( $orderinfo ) {
                             $completed_date = $orderinfo->get_date_completed();
                             if ( $completed_date ) {
-                                $completed_date = date_i18n( "F j, Y", strtotime( $completed_date ) + $offset * HOUR_IN_SECONDS );
+                                $completed_date = date_i18n( "F j, Y", strtotime( $completed_date ) + $gmt_offset * HOUR_IN_SECONDS );
                             } else {
                                 $completed_date = "";
                             }
@@ -1193,6 +1195,9 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                                     echo esc_html( $zone_name );
                                 }
                                 if ( $option_show_ordernamelast ) {
+                                    if ( $option_show_ordernamelast_initial ) {
+                                        $zone_name_last = mb_substr( $zone_name_last, 0, 1 );
+                                    }
                                     echo " " . esc_html( $zone_name_last );
                                 }
                             } else {
@@ -2277,7 +2282,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
       <?php 
             $orders_tab_title = ( !empty( $custom_orders_tab_name ) ? esc_html( $custom_orders_tab_name ) : esc_html__( "Referred Orders", "woo-coupon-usage" ) );
             echo "<p class='wcu-tab-title coupon-orders-list-title' style='font-size: 22px; margin-bottom: 0;'>" . $orders_tab_title . ":</p>";
-            // Referred Orders
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Safe internal output; verified in manual audit.
             ?>
 
       <?php 

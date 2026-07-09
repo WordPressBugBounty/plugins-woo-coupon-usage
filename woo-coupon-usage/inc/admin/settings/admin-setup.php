@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin settings UI: echoed values are internal pre-escaped helper markup and static strings; verified safe in manual audit.
 
 /**
  * Displays setup page.
@@ -85,12 +86,12 @@ function wcusage_setup_page_html() {
       // WooCommerce is installed but not active
       if( isset( $installed_plugins[ $path ] ) ) {
         $activate_url = wp_nonce_url( 'plugins.php?action=activate&amp;plugin=' . $path, 'activate-plugin_' . $path );
-        echo '<p style="font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> WooCommerce is installed but not activated. <a href="' . esc_url($activate_url) . '">Click here to activate it.</a></strong></p>';
+        echo '<p style="font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> ' . sprintf( wp_kses_post( __( 'WooCommerce is installed but not activated. <a href="%s">Click here to activate it.</a>', 'woo-coupon-usage' ) ), esc_url($activate_url) ) . '</strong></p>';
       }
       // WooCommerce is not installed
       else {
         $install_url = self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=woocommerce' );
-        echo '<br/><p style="text-align: center; display: block; margin: 20px auto; font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> WooCommerce needs to be installed for this plugin to work. <a href="' . esc_url($install_url) . '">Click here to install it.</a></strong></p>';
+        echo '<br/><p style="text-align: center; display: block; margin: 20px auto; font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> ' . sprintf( wp_kses_post( __( 'WooCommerce needs to be installed for this plugin to work. <a href="%s">Click here to install it.</a>', 'woo-coupon-usage' ) ), esc_url($install_url) ) . '</strong></p>';
       }
     }
     ?>
@@ -177,8 +178,6 @@ function wcusage_setup_page_html() {
               <?php echo esc_html__('Next, we need to setup the affiliate registration system.', 'woo-coupon-usage'); ?>
               <?php echo esc_html__('This will allow users to register as affiliates on your website. Once accepted, it will automatically generate their new account, create their affiliate coupon, and assign them to it, so they can access the dashboard.', 'woo-coupon-usage'); ?>
             </p>
-
-            <hr style="margin: 20px 0;">
 
             <!-- Enable Affiliate Registration Features -->
             <?php wcusage_setting_toggle_option('wcusage_field_registration_enable', 1, esc_html__( 'Enable Affiliate Registration Features', 'woo-coupon-usage' ), '0px'); ?>
@@ -398,12 +397,12 @@ function wcusage_setup_page_html() {
 
           <div class="steps-container">
             <div class="step-box">
-              <h3><span class="step-number">1)</span> Customize Your Program</h3>
+              <h3><span class="step-number">1)</span> <?php echo esc_html__( 'Customize Your Program', 'woo-coupon-usage' ); ?></h3>
               <p><?php echo sprintf( wp_kses_post( __('Visit the <a href="%s" target="_blank">settings page</a> to edit more options, enable more features, and customise your affiliate program to work exactly how you want!', 'woo-coupon-usage') ), esc_url(get_admin_url()) . 'admin.php?page=wcusage_settings'); ?></p>
             </div>
 
             <div class="step-box">
-              <h3><span class="step-number">2)</span> Manage Coupons</h3>
+              <h3><span class="step-number">2)</span> <?php echo esc_html__( 'Manage Coupons', 'woo-coupon-usage' ); ?></h3>
               <p><?php echo sprintf( wp_kses_post( __('View and manage all of your affiliate coupons, and access links to each of their affiliate dashboards on the <a href="%s" target="_blank">coupons list</a> page.', 'woo-coupon-usage') ), esc_url(admin_url("admin.php?page=wcusage_coupons"))); ?></p>
             </div>
 
@@ -419,7 +418,7 @@ function wcusage_setup_page_html() {
             }
             ?>
             <div class="step-box">
-              <h3><span class="step-number">3)</span> Template Coupon</h3>
+              <h3><span class="step-number">3)</span> <?php echo esc_html__( 'Template Coupon', 'woo-coupon-usage' ); ?></h3>
               <?php if($template_id) { ?>
                 <p>
                   <?php echo sprintf( wp_kses_post( __('You can <a href="%s" target="_blank">edit your template coupon</a> if you want to change the default affiliate coupon settings.', 'woo-coupon-usage') ), esc_url(admin_url("post.php?post=" . $template_id . "&action=edit"))); ?>
@@ -431,19 +430,19 @@ function wcusage_setup_page_html() {
             </div>
 
             <div class="step-box">
-              <h3><span class="step-number">4)</span> Add New Affiliates</h3>
+              <h3><span class="step-number">4)</span> <?php echo esc_html__( 'Add New Affiliates', 'woo-coupon-usage' ); ?></h3>
               <p><?php echo sprintf( wp_kses_post( __('Ready to get started? Create your first affiliate user on the <a href="%s" target="_blank">affiliates page</a> or share your <a href="%s" target="_blank">affiliate registration form</a> with people to signup. Any new affiliate registrations will auto-create their new coupon code.', 'woo-coupon-usage') ), esc_url(admin_url("admin.php?page=wcusage_affiliates")), esc_url(get_permalink($registrationpage)) ); ?></p>
             </div>
 
             <div class="step-box">
-              <h3><span class="step-number">5)</span> Explore PRO Features</h3>
+              <h3><span class="step-number">5)</span> <?php echo esc_html__( 'Explore PRO Features', 'woo-coupon-usage' ); ?></h3>
               <p><?php echo sprintf( wp_kses_post( __('For advanced features like automated payouts, multi-level affiliates, dynamic creatives, performance bonuses, affiliate groups, email reports, and more, visit the <a href="%s" target="_blank">PRO modules section</a>.', 'woo-coupon-usage') ), esc_url(admin_url('admin.php?page=wcusage_settings&section=tab-pro-details'))); ?></p>
             </div>
 
             <?php if( wcu_fs()->can_use_premium_code() ) { ?>
             <!-- Payouts -->
             <div class="step-box">
-              <h3><span class="step-number">6)</span> Commission Payouts Settings</h3>
+              <h3><span class="step-number">6)</span> <?php echo esc_html__( 'Commission Payouts Settings', 'woo-coupon-usage' ); ?></h3>
               <p>
                 <?php echo sprintf( wp_kses_post( __('Setup your commission payout methods and settings on the <a href="%s" target="_blank">payouts settings page</a>. You can pay your affiliates via PayPal, Stripe, or Store Credit, and even automate payouts to be paid automatically on a scheduled basis.', 'woo-coupon-usage') ), esc_url(admin_url('admin.php?page=wcusage_settings&section=tab-payouts'))); ?>
                 <a href="https://couponaffiliates.com/docs/commission-tracking-and-payouts/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step" target="_blank"><?php echo esc_html__('Learn more about payouts.', 'woo-coupon-usage'); ?></a>

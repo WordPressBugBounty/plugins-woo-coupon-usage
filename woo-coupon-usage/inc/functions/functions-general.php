@@ -365,7 +365,7 @@ if( !function_exists( 'wcusage_custom_login_redirect' ) ) {
   			$prev_path = str_replace( home_url(), '', $prev_url );
   		  $page = get_page_by_path( $prev_path );
 
-  			if ( $page->ID == wcusage_get_coupon_shortcode_page_id() ) {
+  			if ( $page && $page->ID == wcusage_get_coupon_shortcode_page_id() ) {
 
   				$redirect = get_page_link( wcusage_get_coupon_shortcode_page_id() );
   				wp_safe_redirect( $redirect, 302 );
@@ -373,11 +373,19 @@ if( !function_exists( 'wcusage_custom_login_redirect' ) ) {
 
   			}
 
+        // MLA portal (checked first: its slug contains the regular portal slug as a substring).
+        $mla_portal_slug = wcusage_get_setting_value('wcusage_mla_portal_slug', 'mla-affiliate-portal');
+        if( $mla_portal_slug && strpos( $prev_path, $mla_portal_slug ) !== false ) {
+          $redirect = home_url( '/' . $mla_portal_slug . '/' );
+          wp_safe_redirect( $redirect, 302 );
+          exit;
+        }
+
         $wcusage_field_portal_enable = wcusage_get_setting_value('wcusage_field_portal_enable', '0');
         $portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
         if($wcusage_field_portal_enable && $portal_slug) {
           if ( strpos( $prev_path, $portal_slug ) !== false ) {
-            $redirect = home_url() . $portal_slug;
+            $redirect = home_url( '/' . $portal_slug . '/' );
             wp_safe_redirect( $redirect, 302 );
             exit;
           }
@@ -753,7 +761,31 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
 
         // Return force refresh status
         return $force_refresh_stats;
-        
+
     }
+}
+
+if( !function_exists( 'wcusage_csv_escape_cell' ) ) {
+	/**
+	 * Neutralize spreadsheet formula/CSV injection in an exported cell value.
+	 *
+	 * Prefixes a single quote to any value that begins with a formula-trigger
+	 * character ( = + - @ TAB CR ), unless the value is a plain number, so that
+	 * spreadsheet apps treat the cell as text instead of evaluating it as a formula.
+	 * Non-scalar values are returned unchanged.
+	 *
+	 * @param mixed $value Cell value.
+	 * @return mixed
+	 */
+	function wcusage_csv_escape_cell( $value ) {
+		if ( ! is_scalar( $value ) ) {
+			return $value;
+		}
+		$value = (string) $value;
+		if ( strlen( $value ) > 1 && ! is_numeric( $value ) && in_array( $value[0], array( '=', '+', '-', '@', "\t", "\r" ), true ) ) {
+			$value = "'" . $value;
+		}
+		return $value;
+	}
 }
 

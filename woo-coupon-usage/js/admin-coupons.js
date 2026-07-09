@@ -132,6 +132,7 @@ jQuery(document).ready(function($) {
             individual_use: $row.find('#individual_use_' + couponId).is(':checked') ? 'yes' : 'no',
             exclude_sale_items: $row.find('#exclude_sale_items_' + couponId).is(':checked') ? 'yes' : 'no',
             usage_limit_per_user: $row.find('#usage_limit_per_user_' + couponId).val(),
+            wcu_text_coupon_start_date: $row.find('#wcu_text_coupon_start_date_' + couponId).val(),
             wcu_enable_first_order_only: $row.find('#wcu_enable_first_order_only_' + couponId).is(':checked') ? 'yes' : 'no',
             wcu_select_coupon_user: $row.find('#wcu_select_coupon_user_' + couponId).val(), // Use username directly
             wcu_text_coupon_commission: $row.find('#wcu_text_coupon_commission_' + couponId).val(),
@@ -166,6 +167,10 @@ jQuery(document).ready(function($) {
                     var display = types[discountType] || discountType;
                     var formattedAmount = amount ? (discountType === 'percent' ? amount + '%' : wcusage_coupons_vars.currency_symbol + amount) : '';
                     $tableRow.find('.column-coupon_type').text(display + (formattedAmount ? ' (' + formattedAmount + ')' : ''));
+
+                    if (response.data && response.data.commission_html) {
+                        $tableRow.find('.column-commission').html(response.data.commission_html);
+                    }
                     
                     // Update Affiliate User
                     var username = formData.wcu_select_coupon_user;

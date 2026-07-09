@@ -145,7 +145,11 @@ jQuery(document).ready(function($) {
         if (select.length) {
             titleText = (select.find('option:selected').text() || '').trim();
         } else {
-            const headerText = header.find('.welcome-header').text() || '';
+            // Measure the title only, excluding the coupon switcher menu (its hidden
+            // items would otherwise inflate the length and always flag the title as long).
+            const welcomeHeader = header.find('.welcome-header').clone();
+            welcomeHeader.find('.wcu-coupon-switcher').remove();
+            const headerText = welcomeHeader.text() || '';
             titleText = headerText.replace(/\s+/g, ' ').trim();
         }
 
@@ -171,6 +175,103 @@ jQuery(document).ready(function($) {
     $(document).on('click', function(e) {
         if (!$(e.target).closest('.profile-dropdown').length) {
             $('.dropdown-content').hide();
+        }
+    });
+});
+
+/* Coupon Switcher (multi-coupon dropdown) */
+
+jQuery(document).ready(function($) {
+    function closeCouponSwitcher() {
+        $('.wcu-coupon-switcher').removeClass('open');
+        $('.wcu-coupon-switcher-toggle').attr('aria-expanded', 'false');
+    }
+
+    $(document).on('click', '.wcu-coupon-switcher-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $switcher = $(this).closest('.wcu-coupon-switcher');
+        var isOpen = $switcher.hasClass('open');
+        closeCouponSwitcher();
+        if (!isOpen) {
+            $switcher.addClass('open');
+            $(this).attr('aria-expanded', 'true');
+        }
+    });
+
+    // Close when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.wcu-coupon-switcher').length) {
+            closeCouponSwitcher();
+        }
+    });
+
+    // Close on Escape
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape' || e.which === 27) {
+            closeCouponSwitcher();
+        }
+    });
+});
+
+/* Coupon Title Click-to-Copy */
+
+jQuery(document).ready(function($) {
+    var portalVars = window.wcusage_portal_vars || {};
+    if (!portalVars.copy_coupon_enabled) {
+        return;
+    }
+
+    var $couponTitle = $('.wcu-coupon-title');
+    if ($couponTitle.length) {
+        $couponTitle.addClass('wcu-coupon-title-clickable')
+            .attr('title', portalVars.click_to_copy_text || '')
+            .attr('data-copied-label', portalVars.copied_text || '');
+    }
+
+    function showCopyFeedback($el) {
+        $el.addClass('wcu-coupon-title-copied');
+        setTimeout(function() {
+            $el.removeClass('wcu-coupon-title-copied');
+        }, 1500);
+    }
+
+    function fallbackCopy(text, onSuccess) {
+        var textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            if (document.execCommand('copy')) {
+                onSuccess();
+            }
+        } catch (err) {
+            console.log('Clipboard fallback failed:', err);
+        }
+        document.body.removeChild(textArea);
+    }
+
+    $(document).on('click', '.wcu-coupon-title', function(e) {
+        e.preventDefault();
+        var $title = $(this);
+        var couponCode = $('#wcu-coupon-title').val();
+        if (!couponCode) {
+            couponCode = $.trim($title.text());
+        }
+        if (!couponCode) {
+            return;
+        }
+        var onSuccess = function() { showCopyFeedback($title); };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(couponCode).then(onSuccess).catch(function(err) {
+                console.log('Clipboard API failed:', err);
+                fallbackCopy(couponCode, onSuccess);
+            });
+        } else {
+            fallbackCopy(couponCode, onSuccess);
         }
     });
 });

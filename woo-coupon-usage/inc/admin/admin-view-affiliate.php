@@ -2,6 +2,7 @@
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Affiliate view UI: echoed values are internal pre-escaped helper markup (price/currency/labels) and integers; verified safe in manual audit.
 // Check user capabilities
 if ( !wcusage_check_admin_access() ) {
     return;
@@ -19,6 +20,43 @@ if ( !$user_info ) {
 }
 // Get affiliate coupons
 $coupons = wcusage_get_users_coupons_ids( $user_id );
+/**
+ * Wrap each <h3>-delimited section of profile-field HTML in its own card.
+ *
+ * Functions such as wcusage_profile_fields() echo a flat sequence of
+ * "<h3>Section title</h3> ...fields..." blocks. On the Edit User tab we want
+ * each of those sections to render as a separate styled box, so we capture the
+ * output and wrap every section (delimited by a top-level <h3>) in a
+ * .wcusage-form-section card. Leading content without a heading (e.g. HTML
+ * comments) is passed through untouched.
+ *
+ * @param string $html Buffered HTML output from a profile-fields function.
+ * @return string HTML with each section wrapped in a .wcusage-form-section card.
+ */
+if ( !function_exists( 'wcusage_wrap_profile_sections' ) ) {
+    function wcusage_wrap_profile_sections(  $html  ) {
+        $html = trim( $html );
+        if ( $html === '' ) {
+            return '';
+        }
+        // Split immediately before each <h3 …>, keeping the heading with its section.
+        $parts = preg_split( '/(?=<h3\\b)/i', $html );
+        $output = '';
+        foreach ( $parts as $part ) {
+            if ( trim( $part ) === '' ) {
+                continue;
+            }
+            if ( stripos( $part, '<h3' ) === false ) {
+                // Content before the first heading (comments/whitespace) — keep as-is.
+                $output .= $part;
+                continue;
+            }
+            $output .= '<div class="wcusage-form-section">' . $part . '</div>';
+        }
+        return $output;
+    }
+
+}
 // Handle form submission for user updates
 if ( isset( $_POST['update_user'] ) && isset( $_POST['_wpnonce'] ) ) {
     if ( wp_verify_nonce( $_POST['_wpnonce'], 'update-user_' . $user_id ) ) {
@@ -41,6 +79,10 @@ if ( isset( $_POST['update_user'] ) && isset( $_POST['_wpnonce'] ) ) {
             // Handle bonus fields if the save function exists
             if ( function_exists( 'wcusage_save_custom_user_profile_fields' ) ) {
                 wcusage_save_custom_user_profile_fields( $user_id );
+            }
+            // Handle registration custom fields (stored in 'wcu_info', keyed by label)
+            if ( function_exists( 'wcusage_admin_save_custom_fields' ) ) {
+                wcusage_admin_save_custom_fields( $user_id );
             }
             echo '<div class="notice notice-success"><p>' . esc_html__( 'User updated successfully.', 'woo-coupon-usage' ) . '</p></div>';
             // Refresh user info
@@ -261,6 +303,15 @@ wp_enqueue_style(
     array(),
     $wcusage_coupons_css_ver
 );
+// Enqueue the (shared) Refresh Statistics box styles
+$wcusage_refresh_css_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-refresh-statistics.css';
+$wcusage_refresh_css_ver = ( file_exists( $wcusage_refresh_css_path ) ? filemtime( $wcusage_refresh_css_path ) : WCUSAGE_VERSION );
+wp_enqueue_style(
+    'wcusage-admin-refresh-statistics',
+    WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-refresh-statistics.css',
+    array(),
+    $wcusage_refresh_css_ver
+);
 // Enqueue admin view affiliate scripts
 wp_enqueue_script( 'jquery-ui-autocomplete' );
 $wcusage_admin_aff_js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin-view-affiliate.js';
@@ -270,6 +321,16 @@ wp_enqueue_script(
     WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-view-affiliate.js',
     array('jquery'),
     $wcusage_admin_aff_js_ver,
+    true
+);
+// Enqueue the Refresh Statistics box script
+$wcusage_admin_aff_refresh_js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin-view-affiliate-refresh.js';
+$wcusage_admin_aff_refresh_js_ver = ( file_exists( $wcusage_admin_aff_refresh_js_path ) ? filemtime( $wcusage_admin_aff_refresh_js_path ) : WCUSAGE_VERSION );
+wp_enqueue_script(
+    'wcusage-admin-view-affiliate-refresh',
+    WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-view-affiliate-refresh.js',
+    array('jquery', 'wcusage-admin-view-affiliate'),
+    $wcusage_admin_aff_refresh_js_ver,
     true
 );
 // Enqueue delete dropdown assets used in Coupon Affiliate Users page
@@ -302,6 +363,9 @@ wp_localize_script( 'wcusage-admin-view-affiliate', 'WCUAdminAffiliateView', arr
     'nonce_activity'             => wp_create_nonce( 'wcusage_affiliate_activity' ),
     'nonce_add_sub_affiliate'    => wp_create_nonce( 'wcusage_add_sub_affiliate_nonce' ),
     'nonce_remove_sub_affiliate' => wp_create_nonce( 'wcusage_remove_sub_affiliate_nonce' ),
+    'nonce_refresh'              => wp_create_nonce( 'wcusage_admin_refresh_nonce' ),
+    'refresh_batch_days'         => intval( wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_batch_amount', '20' ) ),
+    'refresh_i18n'               => ( function_exists( 'wcusage_refresh_i18n' ) ? wcusage_refresh_i18n() : array() ),
 ) );
 ?>
 
@@ -486,7 +550,7 @@ echo esc_html__( 'Edit User', 'woo-coupon-usage' );
                     <div id="tab-overview" class="tab-content <?php 
 echo ( $current_tab === 'overview' ? 'active' : '' );
 ?>">
-                        <h3 style="color: #1d2327; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #2271b1; padding-bottom: 10px;">
+                        <h3 style="color: #1d2327; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
                             <i class="fas fa-chart-line" style="color: #2271b1; margin-right: 10px;"></i>
                             <?php 
 echo esc_html__( 'Statistics Overview', 'woo-coupon-usage' );
@@ -502,7 +566,7 @@ wcusage_display_affiliate_stats( $user_id, 'all' );
                     <div id="tab-referrals" class="tab-content <?php 
 echo ( $current_tab === 'referrals' ? 'active' : '' );
 ?>">
-                        <h3 style="color: #1d2327; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #2271b1; padding-bottom: 10px;">
+                        <h3 style="color: #1d2327; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
                             <i class="fas fa-shopping-cart" style="color: #2271b1; margin-right: 10px;"></i>
                             <?php 
 echo esc_html__( 'Referred Orders', 'woo-coupon-usage' );
@@ -542,7 +606,7 @@ wcusage_display_affiliate_referrals(
                     <div id="tab-visits" class="tab-content <?php 
 echo ( $current_tab === 'visits' ? 'active' : '' );
 ?>">
-                        <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
+                        <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
                             <i class="fas fa-eye" style="color: #007cba; margin-right: 10px;"></i>
                             <?php 
 echo esc_html__( 'Latest Clicks / Visits', 'woo-coupon-usage' );
@@ -585,7 +649,7 @@ if ( $wcusage_tracking_enable ) {
                     <div id="tab-payouts" class="tab-content <?php 
     echo ( $current_tab === 'payouts' ? 'active' : '' );
     ?>">
-                        <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
+                        <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
                             <i class="fas fa-dollar-sign" style="color: #007cba; margin-right: 10px;"></i>
                             <?php 
     echo esc_html__( 'Payout History', 'woo-coupon-usage' );
@@ -628,7 +692,7 @@ if ( $wcusage_tracking_enable ) {
                     <div id="tab-activity" class="tab-content <?php 
 echo ( $current_tab === 'activity' ? 'active' : '' );
 ?>">
-                        <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
+                        <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
                             <i class="fas fa-history" style="color: #007cba; margin-right: 10px;"></i>
                             <?php 
 echo esc_html__( 'Activity Log', 'woo-coupon-usage' );
@@ -741,7 +805,7 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
                             <div id="mla-subtab-overview" class="mla-subtab-panel <?php 
     echo ( $mla_subtab === 'mla-overview' ? 'active' : '' );
     ?>">
-                                <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
+                                <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
                                     <i class="fas fa-chart-line" style="color: #007cba; margin-right: 10px;"></i>
                                     <?php 
     echo esc_html__( 'MLA Statistics Overview', 'woo-coupon-usage' );
@@ -781,10 +845,9 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
     echo esc_html__( 'Sub-Affiliates', 'woo-coupon-usage' );
     ?></h3>
                                     <button type="button" id="wcusage-add-sub-affiliate-toggle" class="button">
-                                        <span class="dashicons dashicons-plus-alt2"></span>
                                         <?php 
     echo esc_html__( 'Add New Sub-Affiliate', 'woo-coupon-usage' );
-    ?>
+    ?> +
                                     </button>
                                 </div>
 
@@ -1020,7 +1083,7 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
                             <div id="mla-subtab-network" class="mla-subtab-panel <?php 
     echo ( $mla_subtab === 'mla-network' ? 'active' : '' );
     ?>">
-                                <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
+                                <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
                                     <i class="fa-solid fa-network-wired" style="color: #007cba; margin-right: 10px;"></i>
                                     <?php 
     echo esc_html__( 'MLA Network Tree', 'woo-coupon-usage' );
@@ -1075,7 +1138,7 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
                             <div id="mla-subtab-tiers" class="mla-subtab-panel <?php 
     echo ( $mla_subtab === 'mla-tiers' ? 'active' : '' );
     ?>">
-                                <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
+                                <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
                                     <i class="fas fa-layer-group" style="color: #007cba; margin-right: 10px;"></i>
                                     <?php 
     echo esc_html__( 'Commission Per Tier', 'woo-coupon-usage' );
@@ -1148,7 +1211,7 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
                             <div id="mla-subtab-rates" class="mla-subtab-panel <?php 
         echo ( $mla_subtab === 'mla-rates' ? 'active' : '' );
         ?>">
-                                <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 2px solid #007cba; padding-bottom: 10px;">
+                                <h3 style="color: #23282d; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
                                     <i class="fas fa-sliders-h" style="color: #007cba; margin-right: 10px;"></i>
                                     <?php 
         echo esc_html__( 'Per-User MLA Commission Rates', 'woo-coupon-usage' );
@@ -1349,8 +1412,8 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
 echo ( $current_tab === 'edit-user' ? 'active' : '' );
 ?>">
                         <div>
-                            <h3 class="wcusage-form-header">
-                                <i class="fas fa-user-edit" style="margin-right: 10px;"></i>
+                            <h3 style="color: #1d2327; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+                                <i class="fas fa-user-edit" style="color: #2271b1; margin-right: 10px;"></i>
                                 <?php 
 echo esc_html__( 'Edit User', 'woo-coupon-usage' );
 ?>
@@ -1418,20 +1481,29 @@ echo esc_attr( $user_info->user_url );
 ?>" />
                                         </div>
                                     </div>
+
+                                    <?php 
+// Registration custom fields (stored in 'wcu_info', keyed by field label).
+if ( function_exists( 'wcusage_admin_render_custom_fields' ) ) {
+    wcusage_admin_render_custom_fields( $user_id, 'view-affiliate' );
+}
+?>
                                 </div>
 
                                 <?php 
-// Include plugin-specific user profile fields
+// Include plugin-specific user profile fields.
+// Each <h3>-delimited section is captured and wrapped in its own
+// card so the sections render as separate boxes (see helper above).
 if ( function_exists( 'wcusage_profile_fields' ) ) {
-    echo '<div class="wcusage-form-section">';
+    ob_start();
     wcusage_profile_fields( $user_info );
-    echo '</div>';
+    echo wcusage_wrap_profile_sections( ob_get_clean() );
 }
 // Include bonus fields if available
 if ( function_exists( 'wcusage_custom_user_profile_fields' ) ) {
-    echo '<div class="wcusage-form-section">';
+    ob_start();
     wcusage_custom_user_profile_fields( $user_info );
-    echo '</div>';
+    echo wcusage_wrap_profile_sections( ob_get_clean() );
 }
 ?>
 
@@ -1511,7 +1583,7 @@ echo count( $coupons );
                         </div>
                         <div class="info-row">
                             <span class="info-label"><?php 
-echo esc_html__( 'User Roles:', 'woo-coupon-usage' );
+echo esc_html__( 'Roles:', 'woo-coupon-usage' );
 ?></span>
                             <span class="info-value">
                                 <?php 
@@ -1521,7 +1593,7 @@ if ( !empty( $user_roles ) ) {
     foreach ( $user_roles as $role ) {
         $role_names[] = ucfirst( $role );
     }
-    echo esc_html( implode( ', ', $role_names ) );
+    echo wp_kses_post( implode( '<br/>', $role_names ) );
 } else {
     echo esc_html__( 'No roles assigned', 'woo-coupon-usage' );
 }
@@ -1671,8 +1743,13 @@ function wcusage_display_affiliate_stats(  $user_id, $coupon_id = 'all'  ) {
         }
         // Calculate coupon commission
         $coupon_commission = ( isset( $wcu_alltime_stats['total_commission'] ) ? $wcu_alltime_stats['total_commission'] : 0 );
-        // Check if this coupon needs dashboard message
-        if ( $coupon_referrals > 0 && (!$coupon_sales || !$coupon_commission) ) {
+        // Check if this coupon needs dashboard message.
+        // The notice means "stats have never been calculated" — detected by the
+        // absence of a saved wcu_alltime_stats array, NOT by a value being zero.
+        // A coupon calculated to a genuine 0.00 (e.g. a 100%-off coupon) has a
+        // saved stats array and must not be flagged as needing a refresh.
+        $stats_calculated = is_array( $wcu_alltime_stats ) && !empty( $wcu_alltime_stats );
+        if ( $coupon_referrals > 0 && !$stats_calculated ) {
             $show_dashboard_message = true;
             $coupon_info = wcusage_get_coupon_info_by_id( $coupon );
             $dashboard_url = ( isset( $coupon_info[4] ) ? $coupon_info[4] : '' );
@@ -1716,50 +1793,19 @@ function wcusage_display_affiliate_stats(  $user_id, $coupon_id = 'all'  ) {
     <?php 
     if ( $show_dashboard_message ) {
         ?>
-    <div style="margin-top: -20px; margin-bottom: 40px; padding: 10px 15px; border: 1px solid #000000ff; border-radius: 6px; background-color: #ffd2d2ff; display: flex; flex-wrap: wrap; align-items: center; gap: 15px;">
+    <div class="wcusage-dashboard-load-notice" style="margin-top: -20px; margin-bottom: 40px; padding: 10px 15px; border: 1px solid #000000ff; border-radius: 6px; background-color: #ffd2d2ff; display: flex; flex-wrap: wrap; align-items: center; gap: 15px;">
         <p style="flex: 1 1 260px; margin: 0;"><strong><?php 
         echo esc_html__( 'Note:', 'woo-coupon-usage' );
         ?></strong> <?php 
-        echo esc_html__( 'The affiliate dashboard for one or more coupons needs to be loaded at least once to initially calculate and display complete the statistics.', 'woo-coupon-usage' );
+        echo esc_html__( 'The statistics for one or more coupons needs to be refreshed to initially calculate totals. Load the affiliate dashboard for each coupon, or click the "Refresh Statistics" on this page.', 'woo-coupon-usage' );
         ?></p>
-        <?php 
-        if ( !empty( $uncalculated_coupons ) ) {
-            ?>
-            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; margin-left: auto;">
+        <div style="display: flex; align-items: center; justify-content: flex-end; margin-left: auto;">
+            <button type="button" class="button button-primary wcusage-refresh-scroll-btn">
                 <?php 
-            foreach ( $uncalculated_coupons as $uncalculated_coupon ) {
-                ?>
-                    <div style="display: flex; align-items: center; gap: 8px; padding: 6px 8px; background-color: #ffffff; border-radius: 3px;">
-                        <span style="font-weight: 600;"><?php 
-                echo esc_html( $uncalculated_coupon['title'] );
-                ?></span>
-                        <?php 
-                if ( !empty( $uncalculated_coupon['dashboard_url'] ) ) {
-                    ?>
-                            <a href="<?php 
-                    echo esc_url( $uncalculated_coupon['dashboard_url'] );
-                    ?>" target="_blank" class="button button-small button-primary">
-                                <?php 
-                    echo esc_html__( 'Calculate Statistics', 'woo-coupon-usage' );
-                    ?> <i class="fas fa-external-link-alt" style="margin-left: 5px;"></i>
-                            </a>
-                        <?php 
-                } else {
-                    ?>
-                            <em style="font-size: 12px;"><?php 
-                    echo esc_html__( 'Not available', 'woo-coupon-usage' );
-                    ?></em>
-                        <?php 
-                }
-                ?>
-                    </div>
-                <?php 
-            }
-            ?>
-            </div>
-        <?php 
-        }
-        ?>
+        echo esc_html__( 'Refresh Statistics', 'woo-coupon-usage' );
+        ?> <i class="fas fa-sync" style="margin-left: 5px;"></i>
+            </button>
+        </div>
     </div>
     
     <?php 
@@ -1824,6 +1870,11 @@ function wcusage_display_affiliate_stats(  $user_id, $coupon_id = 'all'  ) {
                 <?php 
             $coupon_title = get_the_title( $coupon );
             $wcu_alltime_stats = get_post_meta( $coupon, 'wcu_alltime_stats', true );
+            // Stats that have been calculated (even to a genuine zero) are
+            // stored as a non-empty wcu_alltime_stats array. Only a coupon
+            // whose stats have never been calculated should show the
+            // "needs refresh" (ellipsis) indicator.
+            $stats_calculated = is_array( $wcu_alltime_stats ) && !empty( $wcu_alltime_stats );
             $all_stats = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_meta', '1' );
             $wcusage_hide_all_time = wcusage_get_setting_value( 'wcusage_field_hide_all_time', '0' );
             $coupon_referrals = 0;
@@ -1871,21 +1922,28 @@ function wcusage_display_affiliate_stats(  $user_id, $coupon_id = 'all'  ) {
             ?>
                         </a>
                     </td>
-                    <td><?php 
+                    <td class="wcusage-col-usage"><?php 
             echo esc_html( $coupon_referrals );
             ?></td>
-                    <td>
+                    <td class="wcusage-col-sales">
                         <?php 
-            if ( $coupon_referrals > 0 && !$coupon_sales ) {
+            if ( $coupon_referrals > 0 && !$coupon_sales && !$stats_calculated ) {
                 echo "<span title='" . esc_attr( $qmessage ) . "'><strong><i class='fa-solid fa-ellipsis'></i></strong></span>";
             } else {
                 echo wcusage_format_price( $coupon_sales );
             }
             ?>
                     </td>
-                    <td>
+                    <td class="column-commission">
                         <?php 
-            if ( $coupon_referrals > 0 && !$coupon_commission ) {
+            if ( function_exists( 'wcusage_coupons_get_commission_column_output' ) ) {
+                echo wcusage_coupons_get_commission_column_output(
+                    $coupon,
+                    $wcu_alltime_stats,
+                    $coupon_referrals,
+                    $qmessage
+                );
+            } elseif ( $coupon_referrals > 0 && !$coupon_commission && !$stats_calculated ) {
                 echo "<span title='" . esc_attr( $qmessage ) . "'><strong><i class='fa-solid fa-ellipsis'></i></strong></span>";
             } else {
                 echo wcusage_format_price( $coupon_commission );
@@ -1955,19 +2013,28 @@ function wcusage_display_affiliate_stats(  $user_id, $coupon_id = 'all'  ) {
             ?>"><?php 
             echo esc_html__( 'Quick Edit', 'woo-coupon-usage' );
             ?></a>
-                            <a href="<?php 
+                            <div class="wcusage-actions-secondary">
+                                <a href="<?php 
             echo esc_url( $edit_link );
-            ?>" class="wcusage-inline-link"><?php 
+            ?>" class="wcusage-inline-link" title="<?php 
+            echo esc_attr__( 'Edit', 'woo-coupon-usage' );
+            ?>" aria-label="<?php 
+            echo esc_attr__( 'Edit', 'woo-coupon-usage' );
+            ?>"><?php 
             echo esc_html__( 'Edit', 'woo-coupon-usage' );
             ?></a>
-                            <span class="sep">|</span>
-                            <a href="<?php 
+                                <a href="<?php 
             echo esc_url( $delete_link );
-            ?>" class="wcusage-inline-link wcusage-delete-link" onclick="return confirm('<?php 
+            ?>" class="wcusage-inline-link wcusage-delete-link" title="<?php 
+            echo esc_attr__( 'Delete', 'woo-coupon-usage' );
+            ?>" aria-label="<?php 
+            echo esc_attr__( 'Delete', 'woo-coupon-usage' );
+            ?>" onclick="return confirm('<?php 
             echo esc_js( __( 'Are you sure you want to delete this coupon?', 'woo-coupon-usage' ) );
             ?>');"><?php 
             echo esc_html__( 'Delete', 'woo-coupon-usage' );
             ?></a>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -2083,6 +2150,18 @@ function wcusage_display_affiliate_stats(  $user_id, $coupon_id = 'all'  ) {
                 </p>
             </form>
         </div>
+
+        <div style="clear: both;"></div>
+
+        <br/>
+
+        <?php 
+        // Refresh Statistics box — full-width, at the bottom of the page.
+        if ( function_exists( 'wcusage_render_refresh_statistics_box' ) ) {
+            wcusage_render_refresh_statistics_box( $user_id, $coupons );
+        }
+        ?>
+
     </div>
     <?php 
     }

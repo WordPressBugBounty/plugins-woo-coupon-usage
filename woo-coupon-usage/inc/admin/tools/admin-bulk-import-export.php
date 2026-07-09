@@ -199,7 +199,10 @@ function wcusage_data_import_export_page() {
     </style>
     ";
 
-    // Add jQuery code to handle show/hide of content
+    // Add jQuery code to handle show/hide of content, and confirm before importing
+    $wcusage_import_nofile_msg  = esc_js(__('Please choose a CSV file to import.', 'woo-coupon-usage'));
+    $wcusage_import_confirm_msg = esc_js(__('WARNING: Importing will permanently DELETE all existing data in this database table and replace it with the contents of the selected CSV file. This cannot be undone. Make sure you have a backup before continuing.', 'woo-coupon-usage'));
+    $wcusage_import_table_label = esc_js(__('Table:', 'woo-coupon-usage'));
     echo "
     <script>
     jQuery(document).ready(function($) {
@@ -209,6 +212,19 @@ function wcusage_data_import_export_page() {
             $(this).text(function(i, text){
                 return text === 'Show' ? 'Hide' : 'Show';
             })
+        });
+        $('.import-form').on('submit', function(e) {
+            var fileField = $(this).find('input[type=file]');
+            if (!fileField.val()) {
+                window.alert('{$wcusage_import_nofile_msg}');
+                e.preventDefault();
+                return false;
+            }
+            var tableName = $(this).find('input[name=table]').val();
+            if (!window.confirm('{$wcusage_import_confirm_msg}' + '\\n\\n' + '{$wcusage_import_table_label} ' + tableName)) {
+                e.preventDefault();
+                return false;
+            }
         });
     });
     </script>
@@ -262,7 +278,7 @@ function wcusage_handle_export_import() {
             foreach ($data as $row) {
                 $row = array_intersect_key($row, array_flip($columns));
                 $row = array_merge(array_fill_keys($columns, ''), $row);
-                fputcsv($fp, $row);
+                fputcsv($fp, array_map('wcusage_csv_escape_cell', $row));
             }
         }
 

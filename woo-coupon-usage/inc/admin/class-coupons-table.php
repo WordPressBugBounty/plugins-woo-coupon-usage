@@ -422,13 +422,15 @@ class wcusage_Coupons_Table extends WP_List_Table {
                 if ( isset( $wcu_alltime_stats['total_discount'] ) ) {
                     $sales = (float) $sales - (float) $wcu_alltime_stats['total_discount'];
                 }
-                return $usage > 0 && !$sales ? "<span title='" . esc_html( $qmessage ) . "'><strong><i class='fa-solid fa-ellipsis'></i></strong></span>" : wcusage_format_price( $sales );
+                // Stats are calculated at this point (the empty-stats case returned
+                // above), so show the value even when it is a genuine 0.00 rather
+                // than falsely flagging the coupon as still needing a refresh.
+                return wcusage_format_price( $sales );
             case 'commission':
                 if ( $disable_commission && wcusage_get_setting_value( 'wcusage_field_commission_disable_non_affiliate', '0' ) ) {
-                    return '-';
+                    return '<div class="wcusage-coupon-commission-cell">' . wcusage_coupons_get_rate_subline_output( $coupon_id ) . '</div>';
                 }
-                $commission = $wcu_alltime_stats && isset( $wcu_alltime_stats['total_commission'] ) ? $wcu_alltime_stats['total_commission'] : 0;
-                return $usage > 0 && !$commission ? "<span title='" . esc_html( $qmessage ) . "'><strong><i class='fa-solid fa-ellipsis'></i></strong></span>" : wcusage_format_price( $commission );
+                return wcusage_coupons_get_commission_column_output( $coupon_id, $wcu_alltime_stats, $usage, $qmessage );
             case 'unpaidcommission':
                 if ( $disable_commission ) {
                     return '-';
@@ -673,6 +675,339 @@ class wcusage_Coupons_Table extends WP_List_Table {
     }
 }
 
+if ( ! function_exists( 'wcusage_coupons_rate_is_valid' ) ) {
+    function wcusage_coupons_rate_is_valid( $value ) {
+        return '' !== $value && is_numeric( $value ) && (float) $value >= 0;
+    }
+}
+
+if ( ! function_exists( 'wcusage_coupons_rate_is_configured' ) ) {
+    function wcusage_coupons_rate_is_configured( $value, $allow_zero = true ) {
+        return wcusage_coupons_rate_is_valid( $value ) && ( $allow_zero || (float) $value > 0 );
+    }
+}
+
+if ( ! function_exists( 'wcusage_coupons_format_rate_value' ) ) {
+    function wcusage_coupons_format_rate_value( $value, $type ) {
+        if ( 'percent' === $type ) {
+            return esc_html( $value ) . '%';
+        }
+
+        $formatted = function_exists( 'wcusage_format_price' ) ? wcusage_format_price( $value ) : wc_price( $value );
+        if ( 'fixed_product' === $type ) {
+            $formatted .= esc_html__( ' / Product', 'woo-coupon-usage' );
+        }
+
+        return $formatted;
+    }
+}
+
+if ( ! function_exists( 'wcusage_coupons_format_rate_value_plain' ) ) {
+    function wcusage_coupons_format_rate_value_plain( $value, $type ) {
+        if ( 'percent' === $type ) {
+            return $value . '%';
+        }
+
+        if ( function_exists( 'wcusage_format_price_plain' ) ) {
+            $formatted = wcusage_format_price_plain( $value );
+        } else {
+            $formatted = html_entity_decode( wp_strip_all_tags( wcusage_coupons_format_rate_value( $value, $type ) ) );
+        }
+
+        if ( 'fixed_product' === $type ) {
+            $formatted .= ' / Product';
+        }
+
+        return $formatted;
+    }
+}
+
+if ( ! function_exists( 'wcusage_coupons_get_role_rate_label' ) ) {
+    function wcusage_coupons_get_role_rate_label( $role ) {
+        $role_name = $role;
+        $wp_roles = wp_roles();
+        if ( $wp_roles && isset( $wp_roles->roles[ $role ]['name'] ) ) {
+            $role_name = translate_user_role( $wp_roles->roles[ $role ]['name'] );
+        }
+
+        $is_group_role = ( 'coupon_affiliate' === $role || 0 === strpos( $role, 'coupon_affiliate_' ) );
+        if ( $is_group_role ) {
+            return sprintf( __( 'Group: %s', 'woo-coupon-usage' ), $role_name );
+        }
+
+        return sprintf( __( 'Role: %s', 'woo-coupon-usage' ), $role_name );
+    }
+}
+
+if ( ! function_exists( 'wcusage_coupons_get_role_rate_candidates' ) ) {
+    function wcusage_coupons_get_role_rate_candidates( $user, $setting_prefix, $type, $label ) {
+        if ( ! $user || ! isset( $user->roles ) || ! is_array( $user->roles ) ) {
+            return array();
+        }
+
+        $candidates = array();
+        foreach ( $user->roles as $role ) {
+            $role_rate = wcusage_get_setting_value( $setting_prefix . $role, '' );
+            if ( ! wcusage_coupons_rate_is_valid( $role_rate ) ) {
+                continue;
+            }
+
+            $candidates[] = array(
+                'label'        => $label,
+                'type'         => $type,
+                'value'        => $role_rate,
+                'source_id'    => 'role:' . $role,
+                'source_level' => 'role',
+                'source_label' => wcusage_coupons_get_role_rate_label( $role ),
+                'role'         => $role,
+            );
+        }
+
+        return $candidates;
+    }
+}
+
+if ( ! function_exists( 'wcusage_coupons_get_highest_rate_candidate' ) ) {
+    function wcusage_coupons_get_highest_rate_candidate( $candidates ) {
+        $selected_candidate = false;
+        foreach ( $candidates as $candidate ) {
+            if ( false === $selected_candidate || (float) $candidate['value'] > (float) $selected_candidate['value'] ) {
+                $selected_candidate = $candidate;
+            }
+        }
+
+        return $selected_candidate;
+    }
+}
+
+if ( ! function_exists( 'wcusage_coupons_format_rate_display' ) ) {
+    function wcusage_coupons_format_rate_display( $components ) {
+        $display_parts = array();
+        foreach ( $components as $component ) {
+            if ( wcusage_coupons_rate_is_valid( $component['value'] ) && (float) $component['value'] > 0 ) {
+                $display_parts[] = wcusage_coupons_format_rate_value( $component['value'], $component['type'] );
+            }
+        }
+
+        if ( empty( $display_parts ) ) {
+            return '0';
+        }
+
+        return implode( ' + ', $display_parts );
+    }
+}
+
+if ( ! function_exists( 'wcusage_coupons_get_rate_tooltip_sections' ) ) {
+    function wcusage_coupons_get_rate_tooltip_sections( $components, $candidates ) {
+        $sections = array();
+
+        foreach ( $components as $component_key => $component ) {
+            if ( empty( $candidates[ $component_key ] ) ) {
+                continue;
+            }
+
+            $rows = array();
+            foreach ( $candidates[ $component_key ] as $candidate ) {
+                $rows[] = array(
+                    'level'  => $candidate['source_label'],
+                    'value'  => wcusage_coupons_format_rate_value_plain( $candidate['value'], $candidate['type'] ),
+                    'active' => $candidate['source_id'] === $component['source_id'],
+                );
+            }
+
+            $sections[] = array(
+                'label' => $component['label'],
+                'rows'  => $rows,
+            );
+        }
+
+        return $sections;
+    }
+}
+
+if ( ! function_exists( 'wcusage_coupons_get_rate_visual_tooltip' ) ) {
+    function wcusage_coupons_get_rate_visual_tooltip( $rate_details ) {
+        $sections = isset( $rate_details['sections'] ) ? $rate_details['sections'] : array();
+        $message = isset( $rate_details['message'] ) ? $rate_details['message'] : __( 'No configured rates for this coupon/user.', 'woo-coupon-usage' );
+
+        $output  = '<span class="wcusage-rate-tooltip">';
+        $output .= '<button type="button" class="wcusage-rate-tooltip-trigger" aria-label="' . esc_attr__( 'View commission rate levels', 'woo-coupon-usage' ) . '">?</button>';
+        $output .= '<span class="wcusage-rate-tooltip-panel" role="tooltip">';
+        $output .= '<span class="wcusage-rate-tooltip-title">' . esc_html__( 'Commission Levels', 'woo-coupon-usage' ) . '</span>';
+
+        if ( empty( $sections ) ) {
+            $output .= '<span class="wcusage-rate-tooltip-empty">' . esc_html( $message ) . '</span>';
+        } else {
+            foreach ( $sections as $section ) {
+                $output .= '<span class="wcusage-rate-tooltip-section">';
+                $output .= '<span class="wcusage-rate-tooltip-section-title">' . esc_html( $section['label'] ) . '</span>';
+
+                foreach ( $section['rows'] as $row ) {
+                    $row_class = $row['active'] ? ' is-active' : ' is-overridden';
+                    $status = $row['active'] ? esc_html__( 'Using', 'woo-coupon-usage' ) : esc_html__( 'Overridden', 'woo-coupon-usage' );
+
+                    $output .= '<span class="wcusage-rate-tooltip-row' . esc_attr( $row_class ) . '">';
+                    $output .= '<span class="wcusage-rate-tooltip-level">' . esc_html( $row['level'] ) . '</span>';
+                    $output .= '<span class="wcusage-rate-tooltip-value">' . esc_html( $row['value'] ) . '</span>';
+                    $output .= '<span class="wcusage-rate-tooltip-status">' . esc_html( $status ) . '</span>';
+                    $output .= '</span>';
+                }
+
+                $output .= '</span>';
+            }
+        }
+
+        $output .= '</span>';
+        $output .= '</span>';
+
+        return $output;
+    }
+}
+
+if ( ! function_exists( 'wcusage_coupons_get_rate_details' ) ) {
+    function wcusage_coupons_get_rate_details( $coupon_id ) {
+        $coupon_user_id = get_post_meta( $coupon_id, 'wcu_select_coupon_user', true );
+        $user = $coupon_user_id ? get_userdata( $coupon_user_id ) : false;
+
+        $component_definitions = array(
+            'percent'       => array(
+                'label'          => __( 'Percent', 'woo-coupon-usage' ),
+                'type'           => 'percent',
+                'global_setting' => 'wcusage_field_affiliate',
+                'role_setting'   => 'wcusage_field_affiliate_percent_role_',
+                'coupon_meta'    => 'wcu_text_coupon_commission',
+            ),
+            'fixed_order'   => array(
+                'label'          => __( 'Per order', 'woo-coupon-usage' ),
+                'type'           => 'fixed_order',
+                'global_setting' => 'wcusage_field_affiliate_fixed_order',
+                'role_setting'   => 'wcusage_field_affiliate_fixed_order_role_',
+                'coupon_meta'    => 'wcu_text_coupon_commission_fixed_order',
+            ),
+            'fixed_product' => array(
+                'label'          => __( 'Per product', 'woo-coupon-usage' ),
+                'type'           => 'fixed_product',
+                'global_setting' => 'wcusage_field_affiliate_fixed_product',
+                'role_setting'   => 'wcusage_field_affiliate_fixed_product_role_',
+                'coupon_meta'    => 'wcu_text_coupon_commission_fixed_product',
+            ),
+        );
+
+        $components = array();
+        $candidates = array();
+
+        foreach ( $component_definitions as $component_key => $definition ) {
+            $global_value = wcusage_get_setting_value( $definition['global_setting'], '0' );
+            if ( ! is_numeric( $global_value ) ) {
+                $global_value = '0';
+            }
+
+            $components[ $component_key ] = array(
+                'label'        => $definition['label'],
+                'type'         => $definition['type'],
+                'value'        => $global_value,
+                'source_id'    => 'global',
+                'source_level' => 'global',
+                'source_label' => __( 'Global', 'woo-coupon-usage' ),
+            );
+            $candidates[ $component_key ] = array();
+
+            if ( wcusage_coupons_rate_is_configured( $global_value, false ) ) {
+                $candidates[ $component_key ][] = $components[ $component_key ];
+            }
+        }
+
+        $affiliate_per_user = wcusage_get_setting_value( 'wcusage_field_affiliate_per_user', '0' );
+        if ( wcu_fs()->is__premium_only() && $affiliate_per_user && $user ) {
+            foreach ( $component_definitions as $component_key => $definition ) {
+                $role_candidates = wcusage_coupons_get_role_rate_candidates( $user, $definition['role_setting'], $definition['type'], $definition['label'] );
+                if ( empty( $role_candidates ) ) {
+                    continue;
+                }
+
+                $components[ $component_key ] = wcusage_coupons_get_highest_rate_candidate( $role_candidates );
+                $candidates[ $component_key ] = array_merge( $candidates[ $component_key ], $role_candidates );
+            }
+        }
+
+        foreach ( $component_definitions as $component_key => $definition ) {
+            $coupon_value = get_post_meta( $coupon_id, $definition['coupon_meta'], true );
+            if ( '' === $coupon_value ) {
+                continue;
+            }
+
+            if ( ! wcusage_coupons_rate_is_valid( $coupon_value ) ) {
+                continue;
+            }
+
+            $coupon_candidate = array(
+                'label'        => $definition['label'],
+                'type'         => $definition['type'],
+                'value'        => $coupon_value,
+                'source_id'    => 'coupon',
+                'source_level' => 'coupon',
+                'source_label' => __( 'Coupon', 'woo-coupon-usage' ),
+            );
+
+            $candidates[ $component_key ][] = $coupon_candidate;
+
+            if ( 'fixed_order' === $component_key && (float) $coupon_value <= 0 && (float) $components[ $component_key ]['value'] > 0 ) {
+                continue;
+            }
+
+            $components[ $component_key ] = $coupon_candidate;
+        }
+
+        $display = wcusage_coupons_format_rate_display( $components );
+
+        return array(
+            'display'  => $display,
+            'sections' => wcusage_coupons_get_rate_tooltip_sections( $components, $candidates ),
+        );
+    }
+}
+
+if ( ! function_exists( 'wcusage_coupons_get_rate_subline_output' ) ) {
+    function wcusage_coupons_get_rate_subline_output( $coupon_id ) {
+        $coupon_id = absint( $coupon_id );
+        if ( ! $coupon_id ) {
+            return '';
+        }
+
+        if ( wcusage_coupon_disable_commission( $coupon_id ) ) {
+            $rate_details = array(
+                'sections' => array(),
+                'message'  => __( 'Commission disabled for this coupon.', 'woo-coupon-usage' ),
+            );
+            return '<div class="wcusage-coupon-rate-subline"><span class="wcusage-coupon-rate-label">' . esc_html__( 'Rate:', 'woo-coupon-usage' ) . '</span> N/A' . wcusage_coupons_get_rate_visual_tooltip( $rate_details ) . '</div>';
+        }
+
+        $rate_details = wcusage_coupons_get_rate_details( $coupon_id );
+
+        return '<div class="wcusage-coupon-rate-subline"><span class="wcusage-coupon-rate-label">' . esc_html__( 'Rate:', 'woo-coupon-usage' ) . '</span> <strong>' . wp_kses_post( $rate_details['display'] ) . '</strong>' . wcusage_coupons_get_rate_visual_tooltip( $rate_details ) . '</div>';
+    }
+}
+
+if ( ! function_exists( 'wcusage_coupons_get_commission_column_output' ) ) {
+    function wcusage_coupons_get_commission_column_output( $coupon_id, $alltime_stats, $usage, $message ) {
+        $commission = $alltime_stats && isset( $alltime_stats['total_commission'] ) ? $alltime_stats['total_commission'] : 0;
+
+        // Stats that have been calculated (even to a genuine zero) are stored as
+        // a non-empty wcu_alltime_stats array. Only a coupon whose stats have
+        // never been calculated should show the "needs refresh" indicator — a
+        // coupon with a real 0.00 commission must show the value, not the dots.
+        $stats_calculated = ( is_array( $alltime_stats ) && ! empty( $alltime_stats ) );
+
+        if ( $usage > 0 && ! $commission && ! $stats_calculated ) {
+            $commission_output = "<span title='" . esc_html( $message ) . "'><strong><i class='fa-solid fa-ellipsis'></i></strong></span>";
+        } else {
+            $commission_output = wcusage_format_price( $commission );
+        }
+
+        return '<div class="wcusage-coupon-commission-cell">' . $commission_output . wcusage_coupons_get_rate_subline_output( $coupon_id ) . '</div>';
+    }
+}
+
 
 /**
  * Coupons page handler
@@ -697,14 +1032,16 @@ function wcusage_coupons_page() {
         }
     }
 
+    $wcusage_coupons_asset_version = defined( 'WCUSAGE_VERSION' ) ? WCUSAGE_VERSION : '1.0.0';
+
     // Enqueue styles
     wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
     wp_enqueue_style( 'wcusage-font-awesome', WCUSAGE_UNIQUE_PLUGIN_URL . 'fonts/font-awesome/css/all.min.css', array(), '5.15.4' );
-    wp_enqueue_style( 'wcusage-coupons', WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-coupons.css', array(), '1.0.0' );
+    wp_enqueue_style( 'wcusage-coupons', WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-coupons.css', array(), $wcusage_coupons_asset_version );
 
     // Enqueue scripts
     wp_enqueue_script( 'jquery-ui-autocomplete' );
-    wp_enqueue_script( 'wcusage-coupons', WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-coupons.js', array( 'jquery' ), '1.0.0', true );
+    wp_enqueue_script( 'wcusage-coupons', WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-coupons.js', array( 'jquery' ), $wcusage_coupons_asset_version, true );
     
     wp_localize_script( 'wcusage-coupons', 'wcusage_coupons_vars', array(
         'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -800,7 +1137,7 @@ function wcusage_save_coupon_data() {
     
     $coupon_id = intval( $_POST['coupon_id'] );
     $coupon = new WC_Coupon( $coupon_id );
-    
+
     // Get old user ID before update (for cache clearing)
     $old_user_id = get_post_meta( $coupon_id, 'wcu_select_coupon_user', true );
     
@@ -866,39 +1203,62 @@ function wcusage_save_coupon_data() {
         unset( $meta['wcu_text_pending_order_commission'] );
     }
     
+    // Quick-edit commission changes are genuine manual admin edits, so allow the
+    // activity log to record them (see wcusage_after_update_function). Flag only
+    // around the actual writes so it can't leak onto later automated updates.
+    if ( function_exists( 'wcusage_set_manual_commission_edit' ) ) {
+        wcusage_set_manual_commission_edit( true );
+    }
+
     foreach ( $meta as $key => $value ) {
 
         update_post_meta( $coupon_id, $key, $value );
-        
+
     }
-    
+
+    if ( function_exists( 'wcusage_set_manual_commission_edit' ) ) {
+        wcusage_set_manual_commission_edit( false );
+    }
+
+    // Coupon History Start Date (available in free and PRO). Force a statistics
+    // refresh when it changes, since it affects which orders are included in the
+    // coupon's statistics (same behaviour as the full coupon edit screen).
+    if ( isset( $_POST['wcu_text_coupon_start_date'] ) ) {
+        $wcu_new_start_date      = sanitize_text_field( wp_unslash( $_POST['wcu_text_coupon_start_date'] ) );
+        $wcu_previous_start_date = get_post_meta( $coupon_id, 'wcu_text_coupon_start_date', true );
+        if ( $wcu_previous_start_date != $wcu_new_start_date ) {
+            delete_post_meta( $coupon_id, 'wcu_last_refreshed' );
+        }
+        update_post_meta( $coupon_id, 'wcu_text_coupon_start_date', $wcu_new_start_date );
+    }
+
     // Clear user caches for both old and new users (if user assignment changed)
     if ( $old_user_id && $old_user_id != $user_id ) {
-        delete_transient( 'wcusage_user_affiliate_col_' . $old_user_id );
-        delete_transient( 'wcusage_is_affiliate_' . $old_user_id );
-        delete_transient( 'wcusage_user_coupon_ids_' . $old_user_id );
-        delete_transient( 'wcusage_user_coupon_names_' . $old_user_id );
+        wcusage_clear_user_cache( $old_user_id );
     }
     if ( $user_id ) {
-        delete_transient( 'wcusage_user_affiliate_col_' . $user_id );
-        delete_transient( 'wcusage_is_affiliate_' . $user_id );
-        delete_transient( 'wcusage_user_coupon_ids_' . $user_id );
-        delete_transient( 'wcusage_user_coupon_names_' . $user_id );
+        wcusage_clear_user_cache( $user_id );
     }
     
     // Clear the is_coupon_users cache for this specific coupon + user combination
     $coupon_code = get_the_title($coupon_id);
     if ($old_user_id && $coupon_code) {
-        delete_transient('wcusage_is_coupon_users_' . md5($coupon_code . '_' . $old_user_id));
+        delete_transient( wcusage_cache_key( 'user', 'wcusage_is_coupon_users_' . md5($coupon_code . '_' . $old_user_id) ) );
     }
     if ($user_id && $coupon_code) {
-        delete_transient('wcusage_is_coupon_users_' . md5($coupon_code . '_' . $user_id));
+        delete_transient( wcusage_cache_key( 'user', 'wcusage_is_coupon_users_' . md5($coupon_code . '_' . $user_id) ) );
     }
     
     // Clear coupon cache
     $coupon->save();
+
+    $wcu_alltime_stats = get_post_meta( $coupon_id, 'wcu_alltime_stats', true );
+    $usage = $wcu_alltime_stats && isset( $wcu_alltime_stats['total_count'] ) ? $wcu_alltime_stats['total_count'] : $coupon->get_usage_count();
+    $qmessage = esc_html__( 'The affiliate dashboard for this coupon needs to be loaded at-least once.', 'woo-coupon-usage' );
     
-    wp_send_json_success();
+    wp_send_json_success( array(
+        'commission_html' => wcusage_coupons_get_commission_column_output( $coupon_id, $wcu_alltime_stats, $usage, $qmessage ),
+    ) );
 }
 add_action( 'wp_ajax_wcusage_save_coupon_data', 'wcusage_save_coupon_data' );
 

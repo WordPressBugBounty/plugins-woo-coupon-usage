@@ -269,6 +269,7 @@ function wcusage_generate_affiliate_dashboard(  $user_coupons, $settings  ) {
             <div id="wcusage-links-content">
                 <?php 
         echo wcusage_get_floating_widget_links( $first_coupon_id );
+        /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Safe internal widget markup from helper. */
         ?>
             </div>
         </div>

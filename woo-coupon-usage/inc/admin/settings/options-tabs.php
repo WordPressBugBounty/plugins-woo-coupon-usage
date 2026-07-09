@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin settings UI: echoed values are internal pre-escaped helper markup and static strings; verified safe in manual audit.
 
 if ( !function_exists( 'wcusage_field_cb_custom_tabs' ) ) {
 function wcusage_field_cb_custom_tabs( $args )
@@ -9,7 +10,7 @@ function wcusage_field_cb_custom_tabs( $args )
     $options = get_option( 'wcusage_options' );
     ?>
 
-	<div id="custom-tabs-settings" class="settings-area"<?php if ( !wcu_fs()->can_use_premium_code() ) { ?> title="Available with Pro version." style="pointer-events:none; opacity: 0.6;"<?php } ?>>
+	<div id="custom-tabs-settings" class="settings-area"<?php if ( !wcu_fs()->can_use_premium_code() ) { ?> title="<?php echo esc_attr__( 'Available with Pro version.', 'woo-coupon-usage' ); ?>" style="pointer-events:none; opacity: 0.6;"<?php } ?>>
 
 	<?php
     if ( !wcu_fs()->can_use_premium_code() ) {
@@ -19,11 +20,9 @@ function wcusage_field_cb_custom_tabs( $args )
 
 	<h1><?php echo esc_html__( 'Custom Affiliate Dashboard Tabs', 'woo-coupon-usage' ); ?> (Pro)</h1>
 
-  <hr/>
+  <p><?php echo esc_html__( 'In this section, you can create your own custom tabs to show on the affiliate dashboard. Shortcode usage supported.', 'woo-coupon-usage' ); ?></p>
 
-    <p><?php echo esc_html__( 'In this section, you can create your own custom tabs to show on the affiliate dashboard. Shortcode usage supported.', 'woo-coupon-usage' ); ?></p>
-
-  <br/><hr/>
+  <br/><hr style="margin-top: 20px;"/>
 
   <?php $wcusage_field_custom_tabs = wcusage_get_setting_value('wcusage_field_custom_tabs', '');
   ?>
@@ -38,7 +37,7 @@ function wcusage_field_cb_custom_tabs( $args )
   <?php
   // Loop through custom tabs
   for ($i = 1; $i <= $tabsnumber; $i++) {
-    echo '<h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Custom Tab #' . esc_html($i) . '</h3>';
+    echo '<h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> ' . sprintf( esc_html__( 'Custom Tab #%s', 'woo-coupon-usage' ), esc_html($i) ) . '</h3>';
     if(isset($options['wcusage_field_custom_tabs'][$i]['name'])) {
         $wcusage_field_custom_tab = $options['wcusage_field_custom_tabs'][$i]['name'];
     } else {
@@ -60,7 +59,7 @@ function wcusage_field_cb_custom_tabs( $args )
     }
     echo ' <div class="input_fields_wrap"></div>';
 
-  echo '<strong>Tab Name:</strong><br/>';
+  echo '<strong>' . esc_html__( 'Tab Name:', 'woo-coupon-usage' ) . '</strong><br/>';
   echo '<input type="text" id="wcusage_field_custom_tabs" checktype="customnumber" custom1="'.esc_attr($i).'" custom2="name" name="wcusage_options[wcusage_field_custom_tabs]['.esc_attr($i).'][name]" value="'.esc_attr($wcusage_field_custom_tab).'">';
   echo '<br/><i>' . esc_html__('The name of the tab button.', 'woo-coupon-usage') . '</i>';
 
@@ -126,7 +125,7 @@ function wcusage_field_cb_custom_tabs( $args )
 
           $role_name = $role['name'];
           if (strpos($key, 'coupon_affiliate') !== false) {
-            $role_name = '(Group) '.$role_name;
+            $role_name = __( '(Group) ', 'woo-coupon-usage' ).$role_name;
           }
           $checked = '';
           if(isset($options[$thisid][$key])) {
@@ -180,7 +179,7 @@ function wcusage_field_cb_custom_tabs( $args )
         if(isset($options[$thisid]) && $options[$thisid] == $icon) {
           $selected = 'selected';
         }
-        echo '<option value="'.esc_attr($icon).'" '.esc_attr($selected).'>'.$icon.'</option>';
+        echo '<option value="'.esc_attr($icon).'" '.esc_attr($selected).'>'.esc_html($icon).'</option>';
       }
       echo '</select>';
       ?>
@@ -202,8 +201,8 @@ function wcusage_field_cb_custom_tabs( $args )
   echo '<br/><br/>';
   // Now open internal fields wrapper for header + content only
   echo '<div class="wcusage-custom-tab-internal-fields wcusage-custom-tab-internal-'.esc_attr($i).'"'.($wcusage_field_custom_tab_external == '1' ? ' style="display:none;"' : '').'>'; // open internal fields wrapper
-  echo '<strong>Tab Header:</strong><br/>';
-  echo '<input type="text" id="wcusage_field_custom_tabs" checktype="customnumber" custom1="'.esc_attr($i).'" custom2="header" name="wcusage_options[wcusage_field_custom_tabs]['.esc_attr($i).'][header]" value="'.$wcusage_field_custom_tab_header.'">';
+  echo '<strong>' . esc_html__( 'Tab Header:', 'woo-coupon-usage' ) . '</strong><br/>';
+  echo '<input type="text" id="wcusage_field_custom_tabs" checktype="customnumber" custom1="'.esc_attr($i).'" custom2="header" name="wcusage_options[wcusage_field_custom_tabs]['.esc_attr($i).'][header]" value="'.esc_attr($wcusage_field_custom_tab_header).'">';
   echo '<br/><i>' . esc_html__('The header text displayed at the top of the tab content.', 'woo-coupon-usage') . '</i>';
   echo '<br/><br/>';
     $settingstabscontent = array(

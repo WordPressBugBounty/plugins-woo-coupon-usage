@@ -262,7 +262,58 @@
     color: #ffffff !important;
 }
 
-/* === Settings Tab === */
+/* === Settings Screen (modern cards) === */
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-modern__subtitle,
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-card__eyebrow,
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-hint,
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-account-card__email,
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-account-card__gravatar-note {
+    color: #b0b0b0 !important;
+}
+
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-tab-content.wcu-settings-grid {
+    background: transparent !important;
+    border: 0 !important;
+}
+
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-card {
+    background: #242424 !important;
+    border-color: #404040 !important;
+    box-shadow: none !important;
+}
+
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-card__header,
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-card__footer,
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-account-card__identity,
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-subsection,
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-toggle + .wcu-settings-toggle {
+    border-color: #404040 !important;
+}
+
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-card__icon {
+    background: #2d2d2d !important;
+    color: #64b5f6 !important;
+}
+
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-card__title,
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-account-card__name,
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-subsection__title,
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-field > label,
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-toggle__label {
+    color: #f1f1f1 !important;
+}
+
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-toggle__track {
+    background: #4a4a4a !important;
+}
+
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-card .wcu-settings-field input {
+    background: #2d2d2d !important;
+    border-color: #404040 !important;
+    color: #f1f1f1 !important;
+}
+
+/* === Settings Screen (legacy tabs layout) === */
 .wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-tabs {
     background: #2d2d2d !important;
 }
@@ -279,7 +330,7 @@
     color: #ffffff !important;
 }
 
-.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-tab-content {
+.wcu-dash-coupon-area.wcu-dark-mode .wcu-settings-tab-content:not(.wcu-settings-grid) {
     background: #242424 !important;
     border-color: #404040 !important;
 }

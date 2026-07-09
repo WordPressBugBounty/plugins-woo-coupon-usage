@@ -52,7 +52,7 @@ function wcusage_field_cb_subscriptions( $args )
 
   <br/><hr/>
 
-  Looking for more subscription options? <?php if ( wcu_fs()->can_use_premium_code() ) { ?><a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-contact')); ?>"><?php } else { ?><a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank"><?php } ?>Contact us</a> with your suggestions.
+  <?php echo esc_html__( 'Looking for more subscription options?', 'woo-coupon-usage' ); ?> <?php if ( wcu_fs()->can_use_premium_code() ) { ?><a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-contact')); ?>"><?php } else { ?><a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank"><?php } ?><?php echo esc_html__( 'Contact us', 'woo-coupon-usage' ); ?></a> <?php echo esc_html__( 'with your suggestions.', 'woo-coupon-usage' ); ?>
 
 </div>
 

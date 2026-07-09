@@ -200,7 +200,7 @@ class wcusage_registrations_List_Table extends WP_List_Table {
   						<?php echo esc_html__( 'Accept', 'woo-coupon-usage' ); ?> <span class="dashicons dashicons-arrow-right-alt"></span>
   					</button>
 
-  					<button onClick="return confirm('\nMark this affiliate application as declined? \n\n<?php echo esc_html__( 'User', 'woo-coupon-usage' ) . ": " . esc_html($usernamelogin); ?>\n<?php echo esc_html__( 'Coupon', 'woo-coupon-usage' ) . ": " . esc_html($item['couponcode']); ?> \n\n');"
+  					<button onClick="return confirm('\nMark this affiliate application as declined? \n\n<?php echo esc_js( esc_html__( 'User', 'woo-coupon-usage' ) . ": " . $usernamelogin ); ?>\n<?php echo esc_js( esc_html__( 'Coupon', 'woo-coupon-usage' ) . ": " . $item['couponcode'] ); ?> \n\n');"
   					type="submit" name="submitregisterdecline" class="payout-action payout-action-declined" title="<?php echo esc_html__( 'Decline Application', 'woo-coupon-usage' ); ?>">
   						<?php echo esc_html__( 'Decline', 'woo-coupon-usage' ); ?> <span class="dashicons dashicons-dismiss"></span>
   					</button>
@@ -243,7 +243,7 @@ class wcusage_registrations_List_Table extends WP_List_Table {
 
             <?php wp_nonce_field( 'admin_affiliate_register_form' ); ?>
 
-            <button onClick="return confirm('\nAre you sure you want to delete this entry? \n\nThis will only remove the entry from this page. It will not remove the affiliate user or coupon code. \n\n<?php echo esc_html__( 'User', 'woo-coupon-usage' ) . ": " . esc_html($usernamelogin); ?>\n<?php echo esc_html__( 'Coupon', 'woo-coupon-usage' ) . ": " . esc_html($item['couponcode']); ?> \n\n');"
+            <button onClick="return confirm('\nAre you sure you want to delete this entry? \n\nThis will only remove the entry from this page. It will not remove the affiliate user or coupon code. \n\n<?php echo esc_js( esc_html__( 'User', 'woo-coupon-usage' ) . ": " . $usernamelogin ); ?>\n<?php echo esc_js( esc_html__( 'Coupon', 'woo-coupon-usage' ) . ": " . $item['couponcode'] ); ?> \n\n');"
             title="<?php echo esc_html__( 'Delete this registration.', 'woo-coupon-usage' ); ?>"
             type="submit" name="submitregisterdelete" style="padding: 0; background: 0; border: 0; cursor: pointer; margin-bottom: 5px; color: #B52828;">
               <i class="fa-solid fa-trash-can"></i> <?php echo esc_html__( 'Delete', 'woo-coupon-usage' ); ?>

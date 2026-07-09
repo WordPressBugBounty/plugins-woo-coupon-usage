@@ -882,6 +882,11 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                                     $this_refunded_quantity = abs( $this_refunded_quantity );
                                     $this_total_refunded_quantity += $this_refunded_quantity;
                                     $refunded_line_subtotal += abs( $this_refund_item_data['total'] );
+                                    // Match tax handling of $this_line_total/$this_line_subtotal so partial-refund
+                                    // commission deductions include tax when "Include taxes in % commission" is on.
+                                    if ( $wcusage_show_tax == 1 ) {
+                                        $refunded_line_subtotal += $this_refunded_total_tax;
+                                    }
                                 }
                             }
                         }

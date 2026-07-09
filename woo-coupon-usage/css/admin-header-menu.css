@@ -31,7 +31,7 @@
 		gap: 0px !important;
 	}
 }
-@media screen and (max-width: 1619px) {
+@media screen and (max-width: 1739px) {
 	.wcusage-admin-header-menu {
 		width: 100% !important;
 		display: flex !important;
@@ -142,7 +142,7 @@
 .wcusage-admin-menu-dropdown > a { cursor: pointer; }
 .wcusage-admin-menu-dropdown-list { position: absolute !important; z-index: 9999 !important; }
 
-@media screen and (min-width: 1620px) {
+@media screen and (min-width: 1740px) {
 	.wcusage-admin-header-menu {
 		flex-direction: row;
 		align-items: center;

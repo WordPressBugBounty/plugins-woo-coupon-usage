@@ -1,0 +1,198 @@
+.wcu-bulk-pay-wrap {
+  max-width: 1280px;
+}
+
+.wcu-bulk-pay-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin: 18px 0 16px;
+}
+
+.wcu-bulk-pay-header h1 {
+  margin-bottom: 6px;
+}
+
+.wcu-bulk-pay-header p {
+  color: #50575e;
+  font-size: 14px;
+  margin: 0;
+}
+
+.wcu-bulk-pay-stats {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 16px 0;
+}
+
+.wcu-bulk-pay-stat,
+.wcu-bulk-pay-panel {
+  background: #fff;
+  border: 1px solid #dcdcde;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.wcu-bulk-pay-stat {
+  padding: 16px;
+}
+
+.wcu-bulk-pay-stat span {
+  color: #646970;
+  display: inline-block;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.wcu-bulk-pay-stat strong {
+  color: #1d2327;
+  display: block;
+  font-size: 29px;
+  line-height: 1.2;
+}
+
+.wcu-bulk-pay-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  margin-bottom: 16px;
+}
+
+.wcu-bulk-pay-panel {
+  margin-bottom: 16px;
+  padding: 16px;
+}
+
+.wcu-bulk-pay-panel h2 {
+  font-size: 16px;
+  margin: 0 0 12px;
+}
+
+.wcu-bulk-pay-context p {
+  color: #50575e;
+  margin: 0 0 10px;
+}
+
+.wcu-bulk-pay-context p:last-child {
+  margin-bottom: 0;
+}
+
+.wcu-bulk-pay-table .check-column,
+.wcu-bulk-pay-methods th,
+.wcu-bulk-pay-methods td,
+.wcu-bulk-pay-table th,
+.wcu-bulk-pay-table td {
+  vertical-align: middle;
+}
+
+.wcu-bulk-pay-progress-bar {
+  background: #f0f0f1;
+  border-radius: 999px;
+  height: 10px;
+  margin: 4px 0 12px;
+  overflow: hidden;
+}
+
+.wcu-bulk-pay-progress-bar span {
+  background: #2271b1;
+  display: block;
+  height: 100%;
+  transition: width 0.2s ease;
+  width: 0;
+}
+
+.wcu-bulk-pay-progress-counts {
+  align-items: center;
+  color: #50575e;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.wcu-bulk-pay-actions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin: 18px 0;
+}
+
+.wcu-bulk-pay-log {
+  background: #1d2327;
+  border-radius: 4px;
+  color: #f6f7f7;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  max-height: 320px;
+  min-height: 180px;
+  overflow: auto;
+  padding: 12px;
+  white-space: pre-wrap;
+}
+
+.wcu-bulk-pay-log-entry {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 0;
+}
+
+.wcu-bulk-pay-log-entry:last-child {
+  border-bottom: 0;
+}
+
+.wcu-bulk-pay-log-entry.is-success {
+  color: #9be29b;
+}
+
+.wcu-bulk-pay-log-entry.is-created {
+  color: #8ec5ff;
+}
+
+.wcu-bulk-pay-log-entry.is-warning {
+  color: #ffd36f;
+}
+
+.wcu-bulk-pay-log-entry.is-error {
+  color: #ffb0b0;
+}
+
+.wcu-bulk-pay-row-paid .wcu-bulk-pay-row-status {
+  color: #008a20;
+  font-weight: 600;
+}
+
+.wcu-bulk-pay-row-created .wcu-bulk-pay-row-status {
+  color: #2271b1;
+  font-weight: 600;
+}
+
+.wcu-bulk-pay-row-failed .wcu-bulk-pay-row-status {
+  color: #b32d2e;
+  font-weight: 600;
+}
+
+.wcu-bulk-pay-row-skipped .wcu-bulk-pay-row-status {
+  color: #8c8f94;
+}
+
+@media (max-width: 782px) {
+  .wcu-bulk-pay-header,
+  .wcu-bulk-pay-actions,
+  .wcu-bulk-pay-progress-counts {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .wcu-bulk-pay-stats,
+  .wcu-bulk-pay-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wcu-bulk-pay-table {
+    display: block;
+    overflow-x: auto;
+  }
+}

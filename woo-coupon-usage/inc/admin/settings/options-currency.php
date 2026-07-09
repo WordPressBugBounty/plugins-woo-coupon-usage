@@ -61,7 +61,9 @@ if ( !function_exists( 'wcusage_field_cb_currency' ) ) {
         $defaultcurrency = get_woocommerce_currency();
         $defaultcurrencysym = get_woocommerce_currency_symbol();
         ?>
-  <strong>Base Store Currency:</strong> <?php 
+  <strong><?php 
+        echo esc_html__( 'Base Store Currency:', 'woo-coupon-usage' );
+        ?></strong> <?php 
         echo esc_html( $defaultcurrency );
         ?><br/>
   <i><?php 
@@ -115,13 +117,15 @@ if ( !function_exists( 'wcusage_field_cb_currency' ) ) {
         }
         // Loop through custom tabs
         for ($i = 1; $i <= $currencynumber; $i++) {
-            echo '<h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Currency #' . esc_html( $i ) . '</h3>';
+            echo '<h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> ' . esc_html__( 'Currency', 'woo-coupon-usage' ) . ' #' . esc_html( $i ) . '</h3>';
             $get_default_currency_settings = wcusage_get_default_currency_settings( $i );
             $wcusage_field_currency_name = $get_default_currency_settings['wcusage_field_currency_name'];
             $wcusage_field_currency_rate = $get_default_currency_settings['wcusage_field_currency_rate'];
             ?>
     <div class="input_fields_wrap"></div>
-    <span style="display: block; float: left;"><span style="margin-left: 35px; font-size: 12px;">Currency Code:</span><br/> <span style="font-size: 12px;">1.00 x</span> <input type="text" style="max-width: 82px;" id="wcusage_field_currencies_name_<?php 
+    <span style="display: block; float: left;"><span style="margin-left: 35px; font-size: 12px;"><?php 
+            echo esc_html__( 'Currency Code:', 'woo-coupon-usage' );
+            ?></span><br/> <span style="font-size: 12px;">1.00 x</span> <input type="text" style="max-width: 82px;" id="wcusage_field_currencies_name_<?php 
             echo esc_attr( $i );
             ?>" customid="wcusage_field_currencies" name="wcusage_options[wcusage_field_currencies][<?php 
             echo esc_attr( $i );
@@ -130,7 +134,9 @@ if ( !function_exists( 'wcusage_field_cb_currency' ) ) {
             ?>" custom2="name" placeholder="" value="<?php 
             echo esc_attr( $wcusage_field_currency_name );
             ?>"></span>
-    <span style="display: block; float: left;"><span style="margin-left: 18px; font-size: 12px;">Conversion:</span><br/>&nbsp;= <input type="number"
+    <span style="display: block; float: left;"><span style="margin-left: 18px; font-size: 12px;"><?php 
+            echo esc_html__( 'Conversion:', 'woo-coupon-usage' );
+            ?></span><br/>&nbsp;= <input type="number"
     style="max-width: 82px;" lang="en" id="wcusage_field_currencies_rate_<?php 
             echo esc_attr( $i );
             ?>"

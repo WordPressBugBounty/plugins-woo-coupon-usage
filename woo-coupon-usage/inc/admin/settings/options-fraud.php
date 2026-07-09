@@ -16,11 +16,9 @@ function wcusage_field_cb_fraud( $args )
 
     <h1><?php echo esc_html__( 'Fraud Prevention & Usage Restrictions', 'woo-coupon-usage' ); ?></h1>
 
-    <hr/>
-
     <p><?php echo esc_html__( 'Apply restrictions on when affiliate coupons can be used to help prevent affiliate fraud.', 'woo-coupon-usage' ); ?></p>
 
-    <br/><hr/>
+    <br/><hr style="margin-top: 20px;"/>
 
     <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Coupon Usage Restrictions', 'woo-coupon-usage' ); ?>:</h3>
 
@@ -68,15 +66,6 @@ function wcusage_field_cb_fraud( $args )
     </p>
     <i><?php echo esc_html__( '(Only applies to coupons that have an affiliate user assigned to them.)', 'woo-coupon-usage' ); ?></i><br/>
     <i><?php echo esc_html__( 'If preferred, you can enable "New Customers Only" for individual coupons in the "Usage limits" coupon settings tab.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/new-customers-only/" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a></i><br/>
-
-    <?php if(!is_plugin_active('better-coupon-restrictions/coupon-restrictions.php') && !is_plugin_active('better-coupon-restrictions-pro/coupon-restrictions-pro.php')) { ?>
-    <br/><br/>
-    <p class="wcu-admin-faq" style="padding-top: 9px;">
-    <?php echo sprintf( wp_kses_post( __( 'Want more advanced coupon usage restrictions? Check out our %s plugin!',
-    'woo-coupon-usage' ) ), '<a href="https://relywp.com/plugins/better-coupon-restrictions-woocommerce/?utm_source=caffs-settings" target="_blank">Better Coupon Restrictions</a>' ); ?>
-    </p>
-    <br/>
-    <?php } ?>
 
     <br/><hr/>
 
@@ -136,7 +125,7 @@ function wcusage_field_cb_fraud( $args )
 
         <br/><br/>
 
-        <?php wcusage_setting_toggle_option('wcusage_field_enable_directlinks_protection', 0, 'Only allow affiliate coupons to be applied when directly linked by an approved domain.', '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_field_enable_directlinks_protection', 0, esc_html__( 'Only allow affiliate coupons to be applied when directly linked by an approved domain.', 'woo-coupon-usage' ), '0px'); ?>
         <i><?php echo esc_html__( 'Enabling this option will prevent ALL affiliate coupons and referral links from working UNLESS the customer was directly linked by the approved domain that is assigned to that coupon.', 'woo-coupon-usage' ); ?></i><br/>
 
       </span>

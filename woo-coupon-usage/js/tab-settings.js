@@ -1,31 +1,36 @@
 jQuery(document).ready(function($) {
-    // Tab switching
-    const tabs = $('.wcu-settings-tab-nav a');
-    const panes = $('.wcu-settings-tab-pane');
-    
     // Scope to settings tab only (not payout tab)
     var $settingsForm = $('#wcusage-settings-form');
     var $payoutsForm = $('#wcu-settings-form');
     var current_payout_type = $settingsForm.find('[name="payouttype"]').val();
 
-    tabs.on('click', function(e) {
-    console.log('Tab clicked: scroll-to-top code running');
+    // Each settings card has its own "Save changes" button. Track which one was
+    // used so the saving state + confirmation message appear in that section.
+    var $activeSaveBtn = null;
+    $settingsForm.on('click', '.wcu-save-settings-button', function() {
+        $activeSaveBtn = $(this);
+    });
+
+    // Tab switching (legacy layout only — these elements are absent in the modern layout,
+    // so this binds to nothing and is a no-op when the modern boxed layout is active).
+    var $tabs = $('.wcu-settings-tab-nav a');
+    var $panes = $('.wcu-settings-tab-pane');
+    $tabs.on('click', function(e) {
         e.preventDefault();
-        tabs.parent().removeClass('active');
-        panes.removeClass('active');
+        $tabs.parent().removeClass('active');
+        $panes.removeClass('active');
         $(this).parent().addClass('active');
         $($(this).attr('href')).addClass('active');
-        // Scroll to top of page when switching tabs
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            $('html, body').animate({ scrollTop: 0 }, 300);
-            // Try to scroll any scrollable parent of the active pane
-            var $activePane = $($(this).attr('href'));
-            $activePane.parents().each(function() {
-                var $parent = $(this);
-                if ($parent.css('overflow-y') === 'auto' || $parent.css('overflow-y') === 'scroll') {
-                    $parent.animate({ scrollTop: 0 }, 300);
-                }
-            });
+        // Scroll to top when switching tabs
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        $('html, body').animate({ scrollTop: 0 }, 300);
+        var $activePane = $($(this).attr('href'));
+        $activePane.parents().each(function() {
+            var $parent = $(this);
+            if ($parent.css('overflow-y') === 'auto' || $parent.css('overflow-y') === 'scroll') {
+                $parent.animate({ scrollTop: 0 }, 300);
+            }
+        });
     });
 
     // Payout type checker - uses addClass/removeClass to work with CSS !important rules
@@ -210,15 +215,39 @@ jQuery(document).ready(function($) {
             'wcu-billing2': $settingsForm.find('#wcu-billing2').val() || '',
             'wcu-billing3': $settingsForm.find('#wcu-billing3').val() || '',
             'wcu-taxid': $settingsForm.find('#wcu-taxid').val() || '',
-            wcu_first_name: $settingsForm.find('#wcu_first_name').val() || '',
-            wcu_last_name: $settingsForm.find('#wcu_last_name').val() || '',
-            wcu_display_name: $settingsForm.find('#wcu_display_name').val() || '',
-            wcu_email: $settingsForm.find('#wcu_email').val() || '',
-            wcu_phone: $settingsForm.find('#wcu_phone').val() || '',
-            wcu_website: $settingsForm.find('#wcu_website').val() || '',
             wcusage_sms_phone: $settingsForm.find('#wcusage_sms_phone').val() || '',
             wcusage_sms_opted_out: $settingsForm.find('#wcusage_sms_opted_out').is(':checked') ? '1' : '0'
         };
+
+        // Only include Account Details fields when that section is actually rendered.
+        // When the "Account Details" settings tab is disabled these inputs are absent
+        // from the DOM. Sending them as empty strings would overwrite the saved values
+        // and trigger a false "Email is required." error when saving from another tab
+        // (e.g. Payout Settings). Omitting them lets the server's isset() checks skip them.
+        if ($settingsForm.find('#wcu_email').length) {
+            formData.wcu_first_name   = $settingsForm.find('#wcu_first_name').val()   || '';
+            formData.wcu_last_name    = $settingsForm.find('#wcu_last_name').val()    || '';
+            formData.wcu_display_name = $settingsForm.find('#wcu_display_name').val() || '';
+            formData.wcu_email        = $settingsForm.find('#wcu_email').val()        || '';
+            formData.wcu_phone        = $settingsForm.find('#wcu_phone').val()        || '';
+            formData.wcu_website      = $settingsForm.find('#wcu_website').val()      || '';
+        }
+
+        // Registration custom fields shown in Account Details (dynamic; names wcu_account_custom_N).
+        // Handles text/textarea/date/select plus checkbox (Yes/No) and radio groups.
+        $settingsForm.find('.wcu-account-custom-input').each(function () {
+            var $f = $(this);
+            var name = $f.attr('name');
+            if (!name) { return; }
+            if ($f.is(':checkbox')) {
+                formData[name] = $f.is(':checked') ? ($f.val() || 'Yes') : 'No';
+            } else if ($f.is(':radio')) {
+                if (!(name in formData)) { formData[name] = ''; }
+                if ($f.is(':checked')) { formData[name] = $f.val(); }
+            } else {
+                formData[name] = $f.val() || '';
+            }
+        });
 
         // Add region-specific account number fields for debugging/backup
         var selectedRegion = $settingsForm.find('[name="wisebank_region"]').val();
@@ -230,27 +259,39 @@ jQuery(document).ready(function($) {
             formData.wisebank_account_number_intl = $settingsForm.find('[name="wisebank_account_number_intl"]').val() || '';
         }
 
+        // Target the saved section's button + message (fall back to the first button
+        // and its message, e.g. when submitting via the Enter key).
+        var $clickedBtn = ($activeSaveBtn && $activeSaveBtn.length)
+            ? $activeSaveBtn
+            : $settingsForm.find('.wcu-save-settings-button').first();
+        var $btnMsg = $clickedBtn.closest('.wcu-settings-card').find('.wcu-settings-card-msg').first();
+        if (!$btnMsg.length) {
+            $btnMsg = $settingsForm.find('.wcu-settings-card-msg').first();
+        }
+        if (!$btnMsg.length) {
+            // Legacy (tabs) layout uses a single shared message area.
+            $btnMsg = $settingsForm.find('#wcu-settings-ajax-message');
+        }
+
         $.ajax({
             url: wcusage_ajax.ajax_url,
             type: 'POST',
             data: formData,
             beforeSend: function() {
-                $settingsForm.find('#wcu-settings-update-button')
-                    .prop('disabled', true)
-                    .text(wcusage_ajax.saving_text);
-                $settingsForm.find('#wcu-settings-ajax-message').stop(true, true).empty().show();
+                $clickedBtn.prop('disabled', true).text(wcusage_ajax.saving_text);
+                $btnMsg.stop(true, true).empty().show();
             },
             success: function(response) {
                 if (response.success) {
-                    $settingsForm.find('#wcu-settings-ajax-message').html(
-                        '<p style="color: green;">' + response.data.message + '</p>'
+                    $btnMsg.html(
+                        '<span style="color: green;">' + response.data.message + '</span>'
                     ).fadeIn().delay(4000).fadeOut();
 
                     // Hide .wcu-bank-details-display if exists (within settings form only)
                     if( $settingsForm.find('.wcu-bank-details-display').length > 0) {
                         $settingsForm.find('.wcu-bank-details-display').hide();
                     }
-                    
+
                     if(response.data.updated_payout_fields.payouttype) {
                         $settingsForm.find('[name="payouttype"]')
                             .val(response.data.updated_payout_fields.payouttype)
@@ -260,30 +301,67 @@ jQuery(document).ready(function($) {
                             location.reload();
                         }
                     }
-                    
-                    $settingsForm.find('#wcu-settings-update-button')
-                        .prop('disabled', false)
-                        .text(wcusage_ajax.save_text);
-                    $settingsForm.find("#tab-page-settings").trigger('click');
                 } else {
-                    $settingsForm.find('#wcu-settings-ajax-message').stop(true, true).html(
-                        '<p style="color: red;">Error: ' + (response.data || 'Unknown error') + '</p>'
+                    $btnMsg.stop(true, true).html(
+                        '<span style="color: red;">Error: ' + (response.data || 'Unknown error') + '</span>'
                     ).show();
                 }
             },
             error: function(xhr, status, error) {
-                $settingsForm.find('#wcu-settings-ajax-message').stop(true, true).html(
-                    '<p style="color: red;">AJAX Error: ' + error + '</p>'
+                $btnMsg.stop(true, true).html(
+                    '<span style="color: red;">AJAX Error: ' + error + '</span>'
                 ).show();
             },
             complete: function() {
-                $settingsForm.find('#wcu-settings-update-button')
+                $settingsForm.find('.wcu-save-settings-button')
                     .prop('disabled', false)
                     .text(wcusage_ajax.save_text);
+                $activeSaveBtn = null;
             }
         });
 
         return false;
+    });
+
+    // =====================================================
+    // Password reset — behaves like the WooCommerce "Lost password" form.
+    // Confirms first, then emails a reset link to the logged-in user.
+    // =====================================================
+    $(document).on('click', '.wcu-reset-password-link', function(e) {
+        e.preventDefault();
+        var $link = $(this);
+        if ($link.data('sending')) { return; }
+
+        var confirmText = $link.data('confirm') || 'Are you sure you want to reset your password?';
+        if (!window.confirm(confirmText)) { return; }
+
+        var $msg = $link.closest('p, .wcu-settings-field').find('.wcu-reset-password-msg');
+
+        $.ajax({
+            url: wcusage_ajax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'wcusage_send_password_reset',
+                nonce: $link.data('nonce')
+            },
+            beforeSend: function() {
+                $link.data('sending', true).css({ 'pointer-events': 'none', 'opacity': 0.6 });
+                $msg.css('color', '').text(wcusage_ajax.saving_text || 'Sending...');
+            },
+            success: function(response) {
+                if (response && response.success) {
+                    $msg.css('color', 'green').text(response.data.message);
+                } else {
+                    $msg.css('color', 'red').text((response && response.data) ? response.data : 'Error.');
+                }
+            },
+            error: function(xhr, status, error) {
+                $msg.css('color', 'red').text('Error: ' + error);
+            },
+            complete: function() {
+                $link.data('sending', false).css({ 'pointer-events': '', 'opacity': '' });
+            }
+        });
     });
 
     // =====================================================

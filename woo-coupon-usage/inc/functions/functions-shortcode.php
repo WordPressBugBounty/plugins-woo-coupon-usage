@@ -101,10 +101,18 @@ function wcusage_couponusage(  $atts  ) {
                     $show_coupon = strtolower( $urlid );
                 }
             }
-            // Remove everything after last dash ("-") if it is numbers after the dash
-            $show_coupon = preg_replace( '/-\\d+$/', '', $show_coupon );
             // Replace %20 with space
             $show_coupon = str_replace( "%20", " ", $show_coupon );
+            // The couponid may include a trailing "-<coupon ID>" suffix (added when the "just coupon"
+            // URL setting is disabled). Only strip that suffix if the full value doesn't already match
+            // a coupon, so codes that legitimately end in "-<number>" (e.g. "relywp-10") still load
+            // correctly instead of the trailing number being mistaken for a coupon ID.
+            if ( $show_coupon && !wcusage_get_coupon_id( $show_coupon ) ) {
+                $stripped_show_coupon = preg_replace( '/-\\d+$/', '', $show_coupon );
+                if ( $stripped_show_coupon !== $show_coupon && wcusage_get_coupon_id( $stripped_show_coupon ) ) {
+                    $show_coupon = $stripped_show_coupon;
+                }
+            }
             if ( $show_coupon ) {
                 // Get ID of coupon with name $show_coupon
                 $the_coupon_id = wcusage_get_coupon_id( $show_coupon );

@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
-* Version: 7.8.2
+* Version: 8.0.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -13,7 +13,7 @@
 * Requires Plugins: woocommerce
 *
 * WC requires at least: 3.7
-* WC tested up to: 10.8
+* WC tested up to: 10.9
 *
 */
 if ( !defined( 'ABSPATH' ) ) {
@@ -21,7 +21,7 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 // Define plugin version constant
 if ( !defined( 'WCUSAGE_VERSION' ) ) {
-    define( 'WCUSAGE_VERSION', '7.8.2' );
+    define( 'WCUSAGE_VERSION', '8.0.0' );
 }
 if ( function_exists( 'wcu_fs' ) ) {
     wcu_fs()->set_basename( false, __FILE__ );
@@ -223,11 +223,13 @@ if ( function_exists( 'wcu_fs' ) ) {
     /*** Include Admin Styles ***/
     function wcusage_include_admin_styles() {
         $plugin_url = plugin_dir_url( __FILE__ );
+        $style_path = plugin_dir_path( __FILE__ ) . 'css/admin-style.css';
+        $style_ver = ( file_exists( $style_path ) ? filemtime( $style_path ) : WCUSAGE_VERSION );
         wp_enqueue_style(
             'woo-coupon-usage-admin-style',
             $plugin_url . 'css/admin-style.css',
             array(),
-            '7.0.0'
+            $style_ver
         );
     }
 
@@ -268,6 +270,79 @@ if ( function_exists( 'wcu_fs' ) ) {
     }
 
     add_action( 'admin_enqueue_scripts', 'wcusage_enqueue_admin_reports_assets' );
+    /*** Enqueue Payouts CSS & JS on the payouts admin page ***/
+    function wcusage_enqueue_payouts_assets(  $hook  ) {
+        $wcusage_current_page = ( isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '' );
+        if ( $wcusage_current_page !== 'wcusage_payouts' && $wcusage_current_page !== 'wcusage_payouts_create' ) {
+            return;
+        }
+        $plugin_url = plugin_dir_url( __FILE__ );
+        // Font Awesome (icons used across the payouts toolbar, timeline and create-page accordions).
+        wp_enqueue_style(
+            'wcusage-font-awesome',
+            WCUSAGE_UNIQUE_PLUGIN_URL . 'fonts/font-awesome/css/all.min.css',
+            array(),
+            null
+        );
+        $payouts_css_path = plugin_dir_path( __FILE__ ) . 'css/admin-payouts.css';
+        $payouts_css_ver = ( file_exists( $payouts_css_path ) ? filemtime( $payouts_css_path ) : WCUSAGE_VERSION );
+        wp_enqueue_style(
+            'woo-coupon-usage-admin-payouts',
+            $plugin_url . 'css/admin-payouts.css',
+            array(),
+            $payouts_css_ver
+        );
+        // Create Payout Requests page: inline "configure payout method" helper.
+        if ( $wcusage_current_page === 'wcusage_payouts_create' ) {
+            $create_js_path = plugin_dir_path( __FILE__ ) . 'js/admin-payouts-create.js';
+            $create_js_ver = ( file_exists( $create_js_path ) ? filemtime( $create_js_path ) : WCUSAGE_VERSION );
+            wp_enqueue_script(
+                'woo-coupon-usage-admin-payouts-create',
+                $plugin_url . 'js/admin-payouts-create.js',
+                array('jquery'),
+                $create_js_ver,
+                true
+            );
+            wp_localize_script( 'woo-coupon-usage-admin-payouts-create', 'wcusage_payoutcreate_vars', array(
+                'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
+                'nonce'       => wp_create_nonce( 'wcusage_set_payout_method' ),
+                'assignNonce' => wp_create_nonce( 'wcusage_assign_coupon_user' ),
+                'searchNonce' => wp_create_nonce( 'wcusage_search_usernames' ),
+                'reloadNonce' => wp_create_nonce( 'wcusage_reload_payoutcreate_cell' ),
+                'i18n'        => array(
+                    'selectMethod' => esc_html__( 'Please select a payout method.', 'woo-coupon-usage' ),
+                    'selectUser'   => esc_html__( 'Please select a user.', 'woo-coupon-usage' ),
+                    'saving'       => esc_html__( 'Saving…', 'woo-coupon-usage' ),
+                    'noResults'    => esc_html__( 'No users found.', 'woo-coupon-usage' ),
+                    'error'        => esc_html__( 'Something went wrong. Please try again.', 'woo-coupon-usage' ),
+                ),
+            ) );
+            return;
+        }
+        // The scripts below (filter autocomplete, bulk actions) are only used on the main payouts list page.
+        if ( $wcusage_current_page !== 'wcusage_payouts' ) {
+            return;
+        }
+        wp_enqueue_script(
+            'woo-coupon-usage-admin-payouts',
+            $plugin_url . 'js/admin-payouts.js',
+            array('jquery', 'jquery-ui-autocomplete'),
+            WCUSAGE_VERSION,
+            true
+        );
+        wp_localize_script( 'woo-coupon-usage-admin-payouts', 'wcusage_payouts_vars', array(
+            'ajaxUrl'               => admin_url( 'admin-ajax.php' ),
+            'autoDownloadStatement' => ( isset( $_POST['generatestatementid'] ) ? absint( $_POST['generatestatementid'] ) : 0 ),
+            'i18n'                  => array(
+                'selectAction'  => __( 'Please select a bulk action.', 'woo-coupon-usage' ),
+                'selectPayout'  => __( 'Please select at least one payout.', 'woo-coupon-usage' ),
+                'confirmCancel' => __( 'Cancel the selected payouts? This will return funds to unpaid commission for the affiliates.', 'woo-coupon-usage' ),
+                'confirmDelete' => __( 'Delete the selected payouts? Only payouts with status Cancelled will be deleted. This action cannot be undone.', 'woo-coupon-usage' ),
+            ),
+        ) );
+    }
+
+    add_action( 'admin_enqueue_scripts', 'wcusage_enqueue_payouts_assets' );
     /*** Enqueue Font Awesome on relevant admin pages (including Statements/Bonuses CPTs) ***/
     function wcusage_enqueue_font_awesome_admin(  $hook  ) {
         $should_enqueue = false;
@@ -389,8 +464,12 @@ if ( function_exists( 'wcu_fs' ) ) {
     include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/options-widget.php';
     include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/options-payouts.php';
     include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/options-registrations.php';
+    include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/pro-sales-tabs.php';
     // Admin Affiliate View data/ajax (for AJAX handlers used on admin-ajax.php)
     include plugin_dir_path( __FILE__ ) . 'inc/admin/admin-view-affiliate-data.php';
+    include plugin_dir_path( __FILE__ ) . 'inc/admin/admin-view-affiliate-refresh.php';
+    // Cache Layer (transient cache invalidation — object-cache/Redis safe)
+    include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-cache.php';
     // Admin Files
     include plugin_dir_path( __FILE__ ) . 'inc/admin/admin-dashboard.php';
     include plugin_dir_path( __FILE__ ) . 'inc/admin/admin-notification-bell.php';

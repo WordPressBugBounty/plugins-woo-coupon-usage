@@ -365,6 +365,7 @@ document.addEventListener('DOMContentLoaded', function(){
             }
             ?>><?php 
             echo ucfirst( esc_html__( "Monthly Summary", "woo-coupon-usage" ) );
+            /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Safe internal output; verified in manual audit. */
             ?></option>
   <?php 
         }

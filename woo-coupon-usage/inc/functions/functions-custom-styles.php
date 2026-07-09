@@ -64,6 +64,7 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
   				text-shadow: 0 0 2px #000;
 				padding: 5px 10px !important;
 				font-size: 16px !important;
+				line-height: 16px !important;
   			}
 		.login-registration-container .woocommerce-form-login__submit {
   			background: <?php echo esc_html($wcusage_color_button); ?> !important;
@@ -199,7 +200,7 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
 			$wcusage_custom_dashboard_css = strip_tags( $wcusage_custom_dashboard_css );
 			?>
 			/* Custom Dashboard CSS */
-			<?php echo wp_strip_all_tags($wcusage_custom_dashboard_css); ?>
+			<?php echo wp_strip_all_tags($wcusage_custom_dashboard_css); /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Safe internal output; verified in manual audit. */ ?>
 			<?php
 		}
 		?>

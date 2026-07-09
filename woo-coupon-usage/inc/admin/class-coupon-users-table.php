@@ -874,8 +874,8 @@ function wcusage_export_coupon_users_csv() {
             }
         }
         
-        // Write row
-        fputcsv($output, $row);
+        // Write row (neutralize CSV/formula injection)
+        fputcsv($output, array_map('wcusage_csv_escape_cell', $row));
     }
     
     fclose($output);
@@ -888,7 +888,7 @@ if( !function_exists( 'wcusage_get_coupon_users' ) ) {
     function wcusage_get_coupon_users($search_query = '', $role = '', $sort_by = '') {
         
         // Check cache first (10 minutes)
-        $cache_key = 'wcusage_coupon_users_list_' . md5($search_query . $role . $sort_by);
+        $cache_key = wcusage_cache_key( 'coupon_users_list', 'wcusage_coupon_users_list_' . md5($search_query . $role . $sort_by) );
         $cached = get_transient($cache_key);
         if (is_array($cached)) {
             return $cached;
@@ -1069,78 +1069,5 @@ if( !function_exists( 'wcusage_get_coupon_users' ) ) {
     }
 }
 
-/**
- * Clear coupon users list cache when assignments change
- */
-add_action('updated_post_meta', function($meta_id, $post_id, $meta_key, $meta_value) {
-    if ($meta_key === 'wcu_select_coupon_user') {
-        // Get old user ID to clear their cache too
-        $old_user_id = get_post_meta($post_id, 'wcu_select_coupon_user', true);
-        wcusage_clear_coupon_users_cache($meta_value);
-        if ($old_user_id && $old_user_id != $meta_value) {
-            wcusage_clear_coupon_users_cache($old_user_id);
-        }
-    }
-}, 10, 4);
-
-add_action('added_post_meta', function($meta_id, $post_id, $meta_key, $meta_value) {
-    if ($meta_key === 'wcu_select_coupon_user') {
-        wcusage_clear_coupon_users_cache($meta_value);
-    }
-}, 10, 4);
-
-add_action('deleted_post_meta', function($meta_ids, $post_id, $meta_key, $meta_value) {
-    if ($meta_key === 'wcu_select_coupon_user') {
-        wcusage_clear_coupon_users_cache($meta_value);
-    }
-}, 10, 4);
-
-// Also clear cache when a shop_coupon post is saved/published
-add_action('save_post_shop_coupon', function($post_id, $post, $update) {
-    // Check if this is an autosave or revision
-    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-        return;
-    }
-    if (wp_is_post_revision($post_id)) {
-        return;
-    }
-    
-    // Check if the coupon has an assigned user
-    $assigned_user = get_post_meta($post_id, 'wcu_select_coupon_user', true);
-    if ($assigned_user) {
-        wcusage_clear_coupon_users_cache();
-    }
-}, 20, 3);
-
-// Clear cache after WooCommerce coupon save action completes
-add_action('woocommerce_coupon_options_save', function($post_id) {
-    wcusage_clear_coupon_users_cache();
-}, 20);
-
-if (!function_exists('wcusage_clear_coupon_users_cache')) {
-    function wcusage_clear_coupon_users_cache($user_id = null) {
-        global $wpdb;
-        
-        // Delete all affiliate users list caches
-        $wpdb->query(
-            "DELETE FROM {$wpdb->options} 
-             WHERE option_name LIKE '_transient_wcusage_coupon_users_list_%' 
-             OR option_name LIKE '_transient_timeout_wcusage_coupon_users_list_%'"
-        );
-        
-        // If a specific user ID is provided, clear their per-user coupon cache
-        if ($user_id) {
-            delete_transient('wcusage_user_coupon_ids_' . $user_id);
-            delete_transient('wcusage_user_coupon_names_' . $user_id);
-        } else {
-            // Clear all per-user coupon caches
-            $wpdb->query(
-                "DELETE FROM {$wpdb->options} 
-                 WHERE option_name LIKE '_transient_wcusage_user_coupon_ids_%' 
-                 OR option_name LIKE '_transient_timeout_wcusage_user_coupon_ids_%'
-                 OR option_name LIKE '_transient_wcusage_user_coupon_names_%'
-                 OR option_name LIKE '_transient_timeout_wcusage_user_coupon_names_%'"
-            );
-        }
-    }
-}
+// Cache invalidation for the affiliate users list lives in
+// inc/functions/functions-cache.php ( wcusage_clear_coupon_users_cache() ).

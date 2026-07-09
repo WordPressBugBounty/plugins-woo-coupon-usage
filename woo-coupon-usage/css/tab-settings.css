@@ -1,58 +1,442 @@
-.wcu-settings-tabs {
-    margin-bottom: 20px;
+/* =========================================================================
+   Affiliate Dashboard — Settings screen (modern card layout)
+   Uses the dashboard CSS variables (see inc/portal/style.css) with light
+   fallbacks so it also renders correctly outside the portal context.
+   Dark mode overrides live in css/dark-mode.css and inc/portal/style.css.
+   ========================================================================= */
+
+.wcu-settings-modern {
+    padding-top: 20px;
+    --wcu-set-radius: 12px;
+    --wcu-set-gap: 20px;
+    max-width: 100%;
+    margin: 0;
 }
 
-.wcu-settings-tab-nav {
-    list-style: none;
+/* ---- Page header ---- */
+.wcu-settings-modern__head {
+    margin-bottom: 22px;
+}
+
+.wcu-settings-modern .settings-title {
+    margin: 0 0 4px;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-color, #1d2327);
+}
+
+.wcu-settings-modern__subtitle {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--secondary-text-color, #6b7280);
+}
+
+/* ---- Two-column grid: account (left) + sections (right) ---- */
+.wcu-settings-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 550px) minmax(0, 1fr);
+    gap: var(--wcu-set-gap);
+    align-items: start;
+}
+
+.wcu-settings-grid--single {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+/* Neutralise the legacy .wcu-settings-tab-content box styling now that the
+   same element is our grid container (the class is kept so the shared input
+   styles in inc/portal/style.css still apply). */
+.wcu-settings-tab-content.wcu-settings-grid {
     padding: 0;
-    margin: 0;
-    border-bottom: 1px solid #e5e7eb;
+    border: 0;
+    background: transparent;
+}
+
+.wcu-settings-col {
+    min-width: 0;
+}
+
+.wcu-settings-col--main {
     display: flex;
-    padding-left: 0 !important;
-    margin-bottom: 0 !important;
+    flex-direction: column;
+    gap: var(--wcu-set-gap);
 }
 
-.wcu-settings-tab-nav li {
+/* ---- Card ---- */
+.wcu-settings-card {
+    background: var(--content-bg, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: var(--wcu-set-radius);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.03);
+    overflow: hidden;
+}
+
+.wcu-settings-card__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color, #eef0f2);
+}
+
+.wcu-settings-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    color: var(--accent-color, #3498db);
+    font-size: 20px;
+}
+
+.wcu-settings-card__icon i {
+    line-height: 1;
+}
+
+.wcu-settings-card__title {
     margin: 0;
-    list-style: none;
-}
-.wcu-settings-tab-nav li::marker {
-    content: none;
-}
-
-.wcu-settings-tab-nav a {
-    display: block;
-    padding: 10px 20px;
-    text-decoration: none;
-    color: #2271b1;
-    border-bottom: 2px solid transparent;
+    padding: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text-color, #1d2327);
 }
 
-.wcu-settings-tab-nav li.active a {
-    color: #1d2327;
-    border-bottom: 2px solid #2271b1;
+.wcu-settings-card__eyebrow {
+    margin: 0 0 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--secondary-text-color, #8a94a6);
 }
 
-#wcu-settings-update-button {
-    margin-top: 20px;
-}
-
-.wcu-settings-tab-content {
+.wcu-settings-card__body {
     padding: 20px;
-    border: 1px solid #e5e7eb;
-    border-top: none;
-    background: #fff;
 }
 
-.wcu-settings-tab-pane {
+.wcu-settings-card__body > *:first-child {
+    margin-top: 0;
+}
+
+.wcu-settings-card__body > *:last-child {
+    margin-bottom: 0;
+}
+
+/* The hooked payout / statement sections render their own <p> heading —
+   the card already provides a title, so hide the legacy inline header here. */
+.wcu-settings-card .wcu-settings-header {
     display: none;
 }
 
-.wcu-settings-tab-pane.active {
-    display: block;
+/* ---- Card footer (per-section save button) ---- */
+.wcu-settings-card__footer {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border-color, #eef0f2);
 }
 
-/* Payout type sections - hide by default, show with wcu-show class */
+.wcu-settings-card-msg {
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.wcu-settings-card-msg p {
+    margin: 0;
+}
+
+/* ---- Account card (left column) ---- */
+.wcu-settings-account-card {
+    position: sticky;
+    top: 20px;
+}
+
+.wcu-settings-account-card__identity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 28px 20px 22px;
+    border-bottom: 1px solid var(--border-color, #eef0f2);
+}
+
+.wcu-settings-account-card__avatar {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 14px;
+}
+
+.wcu-settings-account-card__avatar img {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    background: var(--content-bg, #fff);
+    box-shadow: 0 0 0 4px var(--content-bg, #fff), 0 0 0 5px var(--border-color, #e5e7eb);
+}
+
+.wcu-settings-account-card__initial {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    font-size: 40px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--accent-color, #3498db);
+    box-shadow: 0 0 0 4px var(--content-bg, #fff), 0 0 0 5px var(--border-color, #e5e7eb);
+}
+
+.wcu-settings-account-card__name {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text-color, #1d2327);
+    word-break: break-word;
+}
+
+.wcu-settings-account-card__email {
+    margin-top: 3px;
+    font-size: 13px;
+    color: var(--secondary-text-color, #6b7280);
+    word-break: break-word;
+}
+
+.wcu-settings-account-card__gravatar-note {
+    margin: 0 0 18px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--secondary-text-color, #6b7280);
+}
+
+.wcu-settings-account-card__password a {
+    display: inline-block;
+    font-size: 14px;
+}
+
+.wcu-reset-password-link {
+    cursor: pointer;
+}
+
+.wcu-reset-password-msg {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* ---- Fields ---- */
+.wcu-settings-field {
+    margin: 0 0 16px;
+}
+
+.wcu-settings-field:last-child {
+    margin-bottom: 0;
+}
+
+.wcu-settings-field > label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-color, #374151);
+}
+
+.wcu-settings-card .wcu-settings-field input[type="text"],
+.wcu-settings-card .wcu-settings-field input[type="email"],
+.wcu-settings-card .wcu-settings-field input[type="url"],
+.wcu-settings-card .wcu-settings-field input[type="tel"],
+.wcu-settings-card .wcu-settings-field input[type="password"] {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.wcu-settings-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--secondary-text-color, #6b7280);
+}
+
+/* Registration custom fields shown in Account Details */
+.wcu-settings-card .wcu-account-custom-field textarea,
+.wcu-settings-card .wcu-account-custom-field select,
+.wcu-settings-card .wcu-account-custom-field input[type="text"],
+.wcu-settings-card .wcu-account-custom-field input[type="date"] {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.wcu-settings-card .wcu-account-custom-field textarea {
+    min-height: 90px;
+}
+
+.wcu-account-custom-radios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+}
+
+.wcu-account-custom-radio,
+.wcu-account-custom-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.wcu-account-custom-radio input,
+.wcu-account-custom-checkbox input {
+    width: auto;
+    min-height: 0;
+    margin: 0;
+}
+
+/* Sub-section within a card (e.g. SMS block under Notifications) */
+.wcu-settings-subsection {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-color, #eef0f2);
+}
+
+.wcu-settings-subsection__title {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color, #1d2327);
+}
+
+/* ---- Toggle switch ---- */
+.wcu-settings-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.wcu-settings-toggle + .wcu-settings-toggle {
+    border-top: 1px solid var(--border-color, #f0f2f5);
+}
+
+.wcu-settings-toggle input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    pointer-events: none;
+}
+
+.wcu-settings-toggle__track {
+    position: relative;
+    flex: 0 0 auto;
+    width: 42px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--border-color, #cbd5e1);
+    transition: background 0.2s ease;
+}
+
+.wcu-settings-toggle__track::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.wcu-settings-toggle input:checked + .wcu-settings-toggle__track {
+    background: var(--accent-color, #3498db);
+}
+
+.wcu-settings-toggle input:checked + .wcu-settings-toggle__track::after {
+    transform: translateX(18px);
+}
+
+.wcu-settings-toggle input:focus-visible + .wcu-settings-toggle__track {
+    outline: 2px solid var(--accent-color, #3498db);
+    outline-offset: 2px;
+}
+
+.wcu-settings-toggle__label {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text-color, #374151);
+}
+
+/* ---- Actions / save bar ---- */
+.wcu-settings-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 22px;
+}
+
+.wcu-save-settings-button#wcu-settings-update-button,
+button.wcu-save-settings-button {
+    margin: 0;
+    padding: 11px 26px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--button-text, #ffffff);
+    background: var(--button-bg, #3498db);
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.05s ease;
+}
+
+button.wcu-save-settings-button:hover {
+    background: var(--button-bg-hover, #2980b9);
+}
+
+button.wcu-save-settings-button:active {
+    transform: translateY(1px);
+}
+
+button.wcu-save-settings-button:disabled {
+    opacity: 0.65;
+    cursor: default;
+}
+
+#wcu-settings-ajax-message {
+    margin: 0;
+}
+
+#wcu-settings-ajax-message p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.admin-edit-account {
+    opacity: 0.5;
+}
+
+/* =========================================================================
+   Payout type sections — hide by default, show with the JS-added wcu-show
+   class. (Functional; must be preserved.)
+   ========================================================================= */
 .wcu-payout-type-custom1,
 .wcu-payout-type-custom2,
 .wcu-payout-type-banktransfer,
@@ -73,14 +457,84 @@
     display: block !important;
 }
 
+/* ---- Responsive ---- */
+@media (max-width: 860px) {
+    .wcu-settings-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .wcu-settings-account-card {
+        position: static;
+    }
+}
+
+/* =========================================================================
+   Legacy layout (tabs) — used when the "Settings Tab Layout" option is set
+   to "Legacy". These selectors only exist in the legacy markup, so they do
+   not affect the modern boxed layout above.
+   ========================================================================= */
+.wcu-settings-tabs {
+    margin-bottom: 20px;
+}
+
+.wcu-settings-tab-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.wcu-settings-tab-nav li {
+    margin: 0;
+    list-style: none;
+}
+
+.wcu-settings-tab-nav li::marker {
+    content: none;
+}
+
+.wcu-settings-tab-nav a {
+    display: block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #2271b1;
+    border-bottom: 2px solid transparent;
+}
+
+.wcu-settings-tab-nav li.active a {
+    color: #1d2327;
+    border-bottom: 2px solid #2271b1;
+}
+
+/* Legacy tab-content box (the modern grid overrides this via the compound
+   .wcu-settings-tab-content.wcu-settings-grid selector). */
+.wcu-settings-tab-content:not(.wcu-settings-grid) {
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    background: #fff;
+}
+
+.wcu-settings-tabs #wcu-settings-update-button {
+    margin-top: 20px;
+}
+
+.wcu-settings-tab-pane {
+    display: none;
+}
+
+.wcu-settings-tab-pane.active {
+    display: block;
+}
+
 .wcu-settings-tab-content .profile-picture img {
     border-radius: 50%;
     width: 96px;
     height: 96px;
-}
-
-.admin-edit-account {
-    opacity: 0.5;
 }
 
 .wcu-settings-tab-content #wcu-settings-ajax-message {

@@ -1,0 +1,461 @@
+/* ============================================================
+   Refresh Statistics box
+   Shared between the "View Affiliate" admin page and the coupon
+   edit page. All selectors are namespaced with .wcusage-refresh-*
+   so this file is safe to load on any admin screen.
+   ============================================================ */
+
+.wcusage-refresh-stats-box {
+    margin: 24px 0 10px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    overflow: hidden;
+    scroll-margin-top: 40px;
+}
+
+/* Compact all-time stat boxes (shown above the box on the coupon edit page) */
+.wcusage-coupon-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 12px 0 0;
+}
+
+.wcusage-coupon-stat-box {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+}
+
+.wcusage-coupon-stat-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1d2327;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+.wcusage-coupon-stat-label {
+    margin-top: 3px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #6b7280;
+}
+
+.wcusage-coupon-stats-grid.wcusage-stats-updated .wcusage-coupon-stat-box {
+    animation: wcusage-row-flash 1.5s ease;
+}
+
+/* Closed state = a single slim clickable bar */
+.wcusage-refresh-stats-box .wcusage-refresh-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    margin: 0;
+    padding: 11px 18px;
+    background: #f9fafb;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    cursor: pointer;
+    text-align: left;
+    color: #1d2327;
+    font-size: 14px;
+    line-height: 1.3;
+    height: auto;
+    min-height: 0;
+}
+
+.wcusage-refresh-stats-box .wcusage-refresh-toggle:hover {
+    background: #f3f4f6;
+}
+
+.wcusage-refresh-stats-box .wcusage-refresh-toggle:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.wcusage-refresh-toggle-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.wcusage-refresh-toggle-main > i {
+    color: #2271b1;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.wcusage-refresh-toggle-title {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.wcusage-refresh-toggle-hint {
+    font-weight: 400;
+    font-size: 12px;
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wcusage-refresh-toggle-arrow {
+    color: #6b7280;
+    font-size: 13px;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.wcusage-refresh-stats-box.is-open .wcusage-refresh-toggle-arrow {
+    transform: rotate(180deg);
+}
+
+.wcusage-refresh-stats-box.wcusage-attention {
+    animation: wcusage-box-attention 1.4s ease;
+}
+
+@keyframes wcusage-box-attention {
+    0%, 100% { box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    30%      { box-shadow: 0 0 0 3px rgba(34,113,177,0.35); }
+}
+
+.wcusage-refresh-panel {
+    padding: 16px 18px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.wcusage-refresh-selectall-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 0 10px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #1d2327;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.wcusage-refresh-coupon-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 320px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0 28px;
+}
+
+.wcusage-refresh-coupon-item {
+    padding: 9px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.wcusage-refresh-coupon-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.wcusage-refresh-coupon-code {
+    font-weight: 600;
+    color: #1d2327;
+    word-break: break-all;
+}
+
+/* On narrow screens hide the inline hint so the bar stays compact */
+@media (max-width: 782px) {
+    .wcusage-refresh-toggle-hint {
+        display: none;
+    }
+    .wcusage-refresh-coupon-list {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
+
+.wcusage-refresh-coupon-status {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.wcusage-refresh-coupon-status.is-running { color: #2271b1; }
+.wcusage-refresh-coupon-status.is-done    { color: #1a7f37; }
+.wcusage-refresh-coupon-status.is-error   { color: #d63638; }
+
+.wcusage-refresh-coupon-status.is-done::before {
+    content: "\2713\00a0";
+}
+
+.wcusage-refresh-progress {
+    margin-top: 8px;
+    padding-left: 24px;
+}
+
+.wcusage-refresh-progress-bar {
+    height: 6px;
+    background-color: rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.wcusage-refresh-progress-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 10px;
+    transition: width 0.35s ease;
+}
+
+.wcusage-refresh-progress-fill.is-error {
+    background: #d63638;
+}
+
+.wcusage-refresh-start-desc {
+    margin: 0 0 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #6b7280;
+}
+
+.wcusage-refresh-start {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+    display: inline-flex !important;
+    align-items: center;
+}
+
+.wcusage-refresh-start.is-busy {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.wcusage-refresh-log {
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: #1e1e1e;
+    border-radius: 8px;
+    max-height: 180px;
+    overflow-y: auto;
+    font-family: Menlo, Consolas, Monaco, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #d4d4d4;
+}
+
+.wcusage-refresh-log-line {
+    padding: 1px 0;
+    word-break: break-word;
+}
+
+.wcusage-refresh-log-line.is-done     { color: #4ec9b0; }
+.wcusage-refresh-log-line.is-error    { color: #f48771; }
+.wcusage-refresh-log-line.is-complete { color: #9cdcfe; font-weight: 600; margin-top: 4px; }
+
+/* Row highlight after a coupon's stats are updated in a table */
+.wcusage-row-updated td {
+    animation: wcusage-row-flash 1.5s ease;
+}
+
+@keyframes wcusage-row-flash {
+    0%   { background-color: #fff8c5; }
+    100% { background-color: transparent; }
+}
+
+/* ------------------------------------------------------------
+   Coupon edit meta box (#wcusage-meta-box). The collapsed toggle
+   is styled as a standalone button rather than a card header.
+   ------------------------------------------------------------ */
+#wcusage-meta-box .wcusage-refresh-stats-box {
+    margin: 12px 0 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+}
+
+/* Match the "View Affiliate Dashboard" button (.wcusage-settings-button) */
+#wcusage-meta-box .wcusage-refresh-toggle {
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 600;
+    background: #f6f7f7;
+    color: #2271b1;
+    border: 1px solid #2271b1;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+}
+
+#wcusage-meta-box .wcusage-refresh-toggle:hover {
+    background: #e8f0f8;
+    border-color: #135e96;
+    color: #135e96;
+    box-shadow: 0 2px 4px rgba(34,113,177,0.15);
+}
+
+#wcusage-meta-box .wcusage-refresh-toggle-main > i,
+#wcusage-meta-box .wcusage-refresh-toggle-arrow {
+    color: inherit;
+}
+
+#wcusage-meta-box .wcusage-refresh-toggle-hint {
+    display: none;
+}
+
+#wcusage-meta-box .wcusage-refresh-panel {
+    margin-top: 8px;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+}
+
+#wcusage-meta-box .wcusage-refresh-coupon-list {
+    grid-template-columns: 1fr;
+    gap: 0;
+}
+
+#wcusage-meta-box .wcusage-refresh-start {
+    max-width: none;
+}
+
+/* ------------------------------------------------------------
+   Reset Start Date box (coupon edit meta box). Styled as a
+   button that matches the "Refresh Statistics" toggle.
+   ------------------------------------------------------------ */
+.wcusage-startdate-box {
+    margin: 10px 0 0;
+}
+
+.wcusage-startdate-current {
+    margin: 0 0 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #50575e;
+}
+
+.wcusage-startdate-current > i {
+    color: #2271b1;
+}
+
+.wcusage-startdate-current-value {
+    color: #1d2327;
+}
+
+.wcusage-startdate-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+    padding: 10px 20px;
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 600;
+    background: #f6f7f7;
+    color: #2271b1;
+    border: 1px solid #2271b1;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.wcusage-startdate-toggle:hover {
+    background: #e8f0f8;
+    border-color: #135e96;
+    color: #135e96;
+    box-shadow: 0 2px 4px rgba(34,113,177,0.15);
+}
+
+.wcusage-startdate-toggle:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.wcusage-startdate-toggle-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.wcusage-startdate-toggle-main > i,
+.wcusage-startdate-toggle-arrow {
+    color: inherit;
+    flex-shrink: 0;
+}
+
+.wcusage-startdate-toggle-title {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.wcusage-startdate-toggle-arrow {
+    font-size: 13px;
+    transition: transform 0.2s ease;
+}
+
+.wcusage-startdate-box.is-open .wcusage-startdate-toggle-arrow {
+    transform: rotate(180deg);
+}
+
+.wcusage-startdate-panel {
+    margin-top: 8px;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.wcusage-startdate-desc {
+    margin: 0 0 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #6b7280;
+}
+
+.wcusage-startdate-field-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #1d2327;
+}
+
+.wcusage-startdate-required {
+    color: #d63638;
+}
+
+.wcusage-startdate-input {
+    width: 100%;
+    margin: 0 0 10px;
+}
+
+.wcusage-startdate-reset-btn {
+    width: 100%;
+    justify-content: center;
+    display: inline-flex !important;
+    align-items: center;
+}

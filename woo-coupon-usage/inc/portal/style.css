@@ -298,6 +298,120 @@ textarea {
     display: none;
 }
 
+/* Click-to-copy coupon title */
+.wcu-coupon-title-clickable {
+    cursor: pointer;
+    position: relative;
+}
+
+.wcu-coupon-title-copied::after {
+    content: attr(data-copied-label);
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 6px;
+    background: #2c3e50;
+    color: #fff;
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Coupon switcher (multi-coupon dropdown) */
+.wcu-coupon-switcher {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+.wcu-coupon-switcher-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--content-bg);
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.wcu-coupon-switcher-toggle:hover,
+.wcu-coupon-switcher.open .wcu-coupon-switcher-toggle {
+    background: var(--input-bg);
+    border-color: var(--button-bg);
+}
+
+.wcu-coupon-switcher-toggle i {
+    transition: transform 0.2s ease;
+}
+
+.wcu-coupon-switcher.open .wcu-coupon-switcher-toggle i {
+    transform: rotate(180deg);
+}
+
+.wcu-coupon-switcher-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 220px;
+    max-height: 320px;
+    overflow-y: auto;
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    padding: 6px;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+}
+
+.wcu-coupon-switcher.open .wcu-coupon-switcher-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.wcu-coupon-switcher-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-color) !important;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.12s ease;
+}
+
+.wcu-coupon-switcher-item:hover,
+.wcu-coupon-switcher-item:focus {
+    background: var(--input-bg);
+    color: var(--text-color) !important;
+}
+
+.wcu-coupon-switcher-item i {
+    font-size: 0.85em;
+    opacity: 0.6;
+}
+
 .wcu-coupon-select {
     color: #2c3e50;
 }
@@ -400,6 +514,7 @@ textarea {
 
 .wcuTableCell {
     background: var(--content-bg); /* Use variable */
+    color: var(--text-color); /* Use variable */
 }
 
 .dashboard-table th {
@@ -1113,6 +1228,57 @@ body.dark-mode .welcome-header h1 {
     color: var(--text-color) !important;
 }
 
+body.dark-mode .wcu-settings-tab-content.wcu-settings-grid {
+    background: transparent;
+    border: 0;
+}
+
+body.dark-mode .wcu-settings-card {
+    background: var(--content-bg);
+    border-color: var(--border-color);
+    box-shadow: none;
+}
+
+body.dark-mode .wcu-settings-card__header,
+body.dark-mode .wcu-settings-card__footer,
+body.dark-mode .wcu-settings-account-card__identity,
+body.dark-mode .wcu-settings-subsection,
+body.dark-mode .wcu-settings-toggle + .wcu-settings-toggle {
+    border-color: var(--border-color);
+}
+
+body.dark-mode .wcu-settings-card__icon {
+    background: var(--content-bg2, #1b1b1b);
+    color: var(--accent-color);
+}
+
+body.dark-mode .wcu-settings-card__title,
+body.dark-mode .wcu-settings-account-card__name,
+body.dark-mode .wcu-settings-subsection__title,
+body.dark-mode .wcu-settings-field > label,
+body.dark-mode .wcu-settings-toggle__label {
+    color: var(--text-color);
+}
+
+body.dark-mode .wcu-settings-modern__subtitle,
+body.dark-mode .wcu-settings-card__eyebrow,
+body.dark-mode .wcu-settings-hint,
+body.dark-mode .wcu-settings-account-card__email,
+body.dark-mode .wcu-settings-account-card__gravatar-note {
+    color: var(--secondary-text-color);
+}
+
+body.dark-mode .wcu-settings-toggle__track {
+    background: var(--border-color);
+}
+
+body.dark-mode .wcu-settings-card .wcu-settings-field input {
+    background: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+/* Legacy tabs layout (dark mode) */
 body.dark-mode .wcu-settings-tab-nav {
     border-bottom: 1px solid var(--border-color);
 }
@@ -1133,7 +1299,7 @@ body.dark-mode .wcu-settings-tab-nav li.active a {
     border-bottom: 2px solid var(--accent-color);
 }
 
-body.dark-mode .wcu-settings-tab-content {
+body.dark-mode .wcu-settings-tab-content:not(.wcu-settings-grid) {
     background: var(--content-bg2);
     border: 1px solid var(--border-color);
 }

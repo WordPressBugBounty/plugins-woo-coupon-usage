@@ -508,7 +508,7 @@ form#product_search_form input {
 #wcusage_copylink,
 .wcusage_copylink {
 	margin: 0;
-	padding: 2px 10px !important;
+	padding: 5px 10px !important;
 	border-radius: 20px !important;
 	cursor: pointer;
 }
@@ -928,12 +928,15 @@ form.wcu_payout_button {
 }
 
 .wcu-reg-terms {
+	display: flex;
+	align-items: flex-start;
 	padding: 5px 0;
 	font-weight: bold;
 }
 
 .wcu-form-section .wcu-reg-terms p {
 	line-height: 1.5em;
+	margin: 0;
 }
 
 .wcu_form_style_columns .wcu-register-field-col-1,
@@ -1615,7 +1618,7 @@ form.wcu_payout_button {
 	border: 2px solid #f3f3f3 !important;
 	border-radius: 4px !important;
 	margin-bottom: 10px;
-	padding: 4px !important;
+	padding: 10px !important;
 }
 
 /* Tooltip */

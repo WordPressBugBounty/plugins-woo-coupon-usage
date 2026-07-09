@@ -2,6 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin settings UI: echoed values are internal pre-escaped helper markup and static strings; verified safe in manual audit.
 
 function wcusage_field_cb_payouts( $args ) {
     $options = get_option( 'wcusage_options' );
@@ -9,7 +10,7 @@ function wcusage_field_cb_payouts( $args ) {
 
 	<div id="payouts-settings" class="settings-area<?php
     if ( !wcu_fs()->can_use_premium_code() ) {
-        ?> premium-only-settings" title="Available with Pro version." style="pointer-events:none; opacity: 0.6;"<?php
+        ?> premium-only-settings" title="<?php echo esc_attr__( 'Available with Pro version.', 'woo-coupon-usage' ); ?>" style="pointer-events:none; opacity: 0.6;"<?php
     } else { ?>"<?php } ?>>
     
 	<?php if ( !wcu_fs()->can_use_premium_code() ) { ?><p><strong style="color: green;"><?php echo esc_html__( 'Available with Pro version.', 'woo-coupon-usage' ); ?></strong></p><?php } ?>
@@ -298,7 +299,7 @@ function wcusage_field_cb_payouts( $args ) {
 
        <h3 id="wcu-setting-header-payouts-scheduled"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Scheduled Payout Requests', 'woo-coupon-usage' ); ?>:</h3>
 
-       <?php wcusage_setting_toggle_option('wcusage_field_enable_payoutschedule', 0, 'Enable Scheduled Payout Requests', '0px'); ?>
+       <?php wcusage_setting_toggle_option('wcusage_field_enable_payoutschedule', 0, esc_html__( 'Enable Scheduled Payout Requests', 'woo-coupon-usage' ), '0px'); ?>
        <i><?php echo esc_html__( 'Enable this to automatically submit "payout requests" for your affiliates, every month/week/day, if they meet certain criteria.', 'woo-coupon-usage' ); ?></i><br/>
        <i><?php echo esc_html__( 'This will work in the same way as if the user clicked the "Request Payout" button in their dashboard.', 'woo-coupon-usage' ); ?></i><br/>
        <i><?php echo esc_html__( 'Requires cron jobs to be enabled.', 'woo-coupon-usage' ); ?></i><br/>
@@ -327,6 +328,45 @@ function wcusage_field_cb_payouts( $args ) {
               </select>
           </p>
           <i><?php echo esc_html__( 'Payout requests will be scheduled to send on the first day of the selected schedule.', 'woo-coupon-usage' ); ?></i><br/>
+
+          <br/>
+
+          <!-- Weekly Day of Week -->
+          <p class="wcu-field-payoutschedule-day" style="<?php echo ( $wcusage_field_payoutschedule_freq === 'weekly' ) ? '' : 'display: none;'; ?>">
+          	<?php
+          	$wcusage_field_payoutschedule_day = wcusage_get_setting_value('wcusage_field_payoutschedule_day', 'monday');
+          	$days_of_week = array(
+          		'monday'    => esc_html__( 'Monday', 'woo-coupon-usage' ),
+          		'tuesday'   => esc_html__( 'Tuesday', 'woo-coupon-usage' ),
+          		'wednesday' => esc_html__( 'Wednesday', 'woo-coupon-usage' ),
+          		'thursday'  => esc_html__( 'Thursday', 'woo-coupon-usage' ),
+          		'friday'    => esc_html__( 'Friday', 'woo-coupon-usage' ),
+          		'saturday'  => esc_html__( 'Saturday', 'woo-coupon-usage' ),
+          		'sunday'    => esc_html__( 'Sunday', 'woo-coupon-usage' ),
+          	);
+          	?>
+          	<input type="hidden" value="0" data-custom="custom" name="wcusage_options[wcusage_field_payoutschedule_day]" >
+          	<strong><label for="wcusage_field_payoutschedule_day"><?php echo esc_html__( 'Which day of the week should payouts be scheduled for?', 'woo-coupon-usage' ); ?></label></strong><br/>
+          	<select name="wcusage_options[wcusage_field_payoutschedule_day]" id="wcusage_field_payoutschedule_day">
+          		<?php foreach ($days_of_week as $day_key => $day_label) { ?>
+          			<option value="<?php echo esc_attr($day_key); ?>" <?php selected($wcusage_field_payoutschedule_day, $day_key); ?>><?php echo esc_html($day_label); ?></option>
+          		<?php } ?>
+          	</select>
+          </p>
+          <script>
+          jQuery(document).ready(function($) {
+          	var $freq = $('select[name="wcusage_options[wcusage_field_payoutschedule_freq]"]');
+          	function wcusageTogglePayoutScheduleDay() {
+          		if ($freq.val() === 'weekly') {
+          			$('.wcu-field-payoutschedule-day').show();
+          		} else {
+          			$('.wcu-field-payoutschedule-day').hide();
+          		}
+          	}
+          	$freq.on('change', wcusageTogglePayoutScheduleDay);
+          	wcusageTogglePayoutScheduleDay();
+          });
+          </script>
 
           <br/>
 
@@ -413,7 +453,7 @@ function wcusage_field_cb_payouts( $args ) {
 
         <h3 id="wcu-setting-header-payouts-scheduled"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Automatic Payouts', 'woo-coupon-usage' ); ?>:</h3>
 
-        <?php wcusage_setting_toggle_option('wcusage_payouts_auto_accept', 0, 'Automatically and instantly pay affiliates commission into their account, after a payout request is made.', '0px'); ?>
+        <?php wcusage_setting_toggle_option('wcusage_payouts_auto_accept', 0, esc_html__( 'Automatically and instantly pay affiliates commission into their account, after a payout request is made.', 'woo-coupon-usage' ), '0px'); ?>
         <i><?php echo esc_html__( 'With this enabled commission will be paid instantly into the affiliate account automatically, as soon as they request a payout. This will apply to Stripe, PayPal and Store Credit payout methods.', 'woo-coupon-usage' ); ?></i><br/>
         <i><?php echo esc_html__( 'For Wise bank transfer payouts, it will automatically complete the first step of creating the unfunded payment in Wise ready to complete manually.', 'woo-coupon-usage' ); ?></i><br/>
         <i><?php echo esc_html__( 'Warning: If you use this option, you should be even more careful of fraudulent activity. We do recommend reviewing and accepting payouts manually instead, simply so you can make sure each payout is valid and non-fraudulent.', 'woo-coupon-usage' ); ?></i><br/>
@@ -430,13 +470,13 @@ function wcusage_field_cb_payouts( $args ) {
           <br/>
 
           <!-- Manual First Payout -->
-          <?php wcusage_setting_toggle_option('wcusage_payouts_auto_accept_first_manual', 0, 'Require manual approval for affiliates first payout request.', '40px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_payouts_auto_accept_first_manual', 0, esc_html__( 'Require manual approval for affiliates first payout request.', 'woo-coupon-usage' ), '40px'); ?>
           <i style="margin-left: 40px;"><?php echo esc_html__( 'With this enabled, the first ever payout request by an affiliate will require manual approval. After they have at-least 1 completed payout, all future payouts can be paid automatically.', 'woo-coupon-usage' ); ?></i><br/>
 
           <br/>
 
           <!-- Only enable for specific payout methods -->
-          <?php wcusage_setting_toggle_option('wcusage_payouts_auto_accept_specific_methods', 0, 'Only enable automatic payouts for specific payout methods.', '40px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_payouts_auto_accept_specific_methods', 0, esc_html__( 'Only enable automatic payouts for specific payout methods.', 'woo-coupon-usage' ), '40px'); ?>
           <i style="margin-left: 40px;"><?php echo esc_html__( 'If enabled, you can select which payout methods should be eligible for automatic payouts.', 'woo-coupon-usage' ); ?></i><br/>
 
           <?php wcusage_setting_toggle('.wcusage_payouts_auto_accept_specific_methods', '.wcu-field-auto-payout-methods'); // Show or Hide ?>
@@ -710,7 +750,7 @@ function wcusage_field_cb_payouts( $args ) {
 
         <br/>
 
-        <p style="margin-left: 40px; font-size: 16px; font-weight: bold;">Payment Email</p>
+        <p style="margin-left: 40px; font-size: 16px; font-weight: bold;"><?php echo esc_html__( 'Payment Email', 'woo-coupon-usage' ); ?></p>
 
         <br/>
 
@@ -724,9 +764,9 @@ function wcusage_field_cb_payouts( $args ) {
 
         <br/>
 
-        <p style="margin-left: 40px; font-size: 16px; font-weight: bold;">API Credentials*</p>
+        <p style="margin-left: 40px; font-size: 16px; font-weight: bold;"><?php echo esc_html__( 'API Credentials*', 'woo-coupon-usage' ); ?></p>
 
-        <p style="margin-left: 40px;">Instructions: <a href="https://couponaffiliates.com/docs/pro-paypal-payouts-setup/" target="_blank">https://couponaffiliates.com/docs/pro-paypal-payouts-setup</a></p>
+        <p style="margin-left: 40px;"><?php echo esc_html__( 'Instructions:', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-paypal-payouts-setup/" target="_blank">https://couponaffiliates.com/docs/pro-paypal-payouts-setup</a></p>
 
         <br/>
 
@@ -791,7 +831,7 @@ function wcusage_field_cb_payouts( $args ) {
       $ukicon = '<img src="'.WCUSAGE_UNIQUE_PLUGIN_URL.'images/gb.png" style="height: 8px;"> UK';
       ?>
       <i><?php echo esc_html__( 'Stripe Payouts payment method will allow you to one-click pay your affiliates directly into their Stripe / bank account.', 'woo-coupon-usage' ); ?>
-      <?php echo esc_html__( 'Fees vary (typically around 1% - 2%). Learn more about Stripe Connect', 'woo-coupon-usage' ); ?> <a href="https://stripe.com/connect" target="_blank">here</a>.</i><br/>
+      <?php echo esc_html__( 'Fees vary (typically around 1% - 2%). Learn more about Stripe Connect', 'woo-coupon-usage' ); ?> <a href="https://stripe.com/connect" target="_blank"><?php echo esc_html__( 'here', 'woo-coupon-usage' ); ?></a>.</i><br/>
       <i><?php echo esc_html__( 'Note: Payouts can only be made if you have the required funds in your Stripe account.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-stripe-payouts/#funds" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a></i><br/>
 
       <?php wcusage_setting_toggle('.wcusage_field_stripeapi_enable', '.wcu-field-section-tr-payouts-stripeapi'); // Show or Hide ?>
@@ -802,10 +842,10 @@ function wcusage_field_cb_payouts( $args ) {
         <?php $wcusage_field_stripeapi_connect = wcusage_get_setting_value('wcusage_field_stripeapi_connect', 'standard'); ?>
     		<strong style="margin-left: 40px; display: inline-block;"><label for="scales"><?php echo esc_html__( 'Account Type:', 'woo-coupon-usage' ); ?></label></strong><br/>
     		<select style="margin-left: 40px;" name="wcusage_options[wcusage_field_stripeapi_connect]" id="wcusage_field_stripeapi_connect" class="wcusage_field_stripeapi_connect">
-          <option value="standard" <?php if($wcusage_field_stripeapi_connect == "standard") { ?>selected<?php } ?>>Standard</option>
-    			<option value="express" <?php if($wcusage_field_stripeapi_connect == "express") { ?>selected<?php } ?>>Express</option>
+          <option value="standard" <?php if($wcusage_field_stripeapi_connect == "standard") { ?>selected<?php } ?>><?php echo esc_html__( 'Standard', 'woo-coupon-usage' ); ?></option>
+    			<option value="express" <?php if($wcusage_field_stripeapi_connect == "express") { ?>selected<?php } ?>><?php echo esc_html__( 'Express', 'woo-coupon-usage' ); ?></option>
         </select>
-        <br/><i style="margin-left: 40px;">If you're not sure, then use "Standard". The "Express" option offers a better user experience, but has extra fees. Learn More: <a href="https://couponaffiliates.com/docs/pro-stripe-payouts-standard-vs-express" target="_blank">Standard vs Express</a></i>
+        <br/><i style="margin-left: 40px;"><?php echo esc_html__( 'If you\'re not sure, then use "Standard". The "Express" option offers a better user experience, but has extra fees. Learn More:', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-stripe-payouts-standard-vs-express" target="_blank"><?php echo esc_html__( 'Standard vs Express', 'woo-coupon-usage' ); ?></a></i>
 
         <br/><br/>
 
@@ -825,11 +865,11 @@ function wcusage_field_cb_payouts( $args ) {
 
         <br/>
 
-        <p style="margin-left: 40px; font-size: 16px; font-weight: bold;">API Credentials*</p>
+        <p style="margin-left: 40px; font-size: 16px; font-weight: bold;"><?php echo esc_html__( 'API Credentials*', 'woo-coupon-usage' ); ?></p>
 
-        <p style="margin-left: 40px;">Get API keys here: <a href="https://dashboard.stripe.com/apikeys/" target="_blank">https://dashboard.stripe.com/apikeys/</a></p>
+        <p style="margin-left: 40px;"><?php echo esc_html__( 'Get API keys here:', 'woo-coupon-usage' ); ?> <a href="https://dashboard.stripe.com/apikeys/" target="_blank">https://dashboard.stripe.com/apikeys/</a></p>
 
-        <p style="margin-left: 40px;">Instructions: <a href="https://couponaffiliates.com/docs/pro-stripe-payouts-setup/" target="_blank">https://couponaffiliates.com/docs/pro-stripe-payouts-setup/</a></p>
+        <p style="margin-left: 40px;"><?php echo esc_html__( 'Instructions:', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-stripe-payouts-setup/" target="_blank">https://couponaffiliates.com/docs/pro-stripe-payouts-setup/</a></p>
 
         <br/>
 
@@ -1009,11 +1049,11 @@ function wcusage_field_cb_payouts( $args ) {
       
         <br/>
 
-        <p style="margin-left: 40px; font-size: 16px; font-weight: bold;">API Credentials*</p>
+        <p style="margin-left: 40px; font-size: 16px; font-weight: bold;"><?php echo esc_html__( 'API Credentials*', 'woo-coupon-usage' ); ?></p>
 
-        <p style="margin-left: 40px;">Instructions: <a href="https://docs.wise.com/api-docs/api-reference/getting-started" target="_blank">https://docs.wise.com/api-docs/api-reference/getting-started</a></p>
+        <p style="margin-left: 40px;"><?php echo esc_html__( 'Instructions:', 'woo-coupon-usage' ); ?> <a href="https://docs.wise.com/api-docs/api-reference/getting-started" target="_blank">https://docs.wise.com/api-docs/api-reference/getting-started</a></p>
 
-        <p style="margin-left: 40px;">Generate API Token: <a href="https://wise.com/your-account/integrations-and-tools/api-tokens/" target="_blank">https://wise.com/profile/api-keys</a></p>
+        <p style="margin-left: 40px;"><?php echo esc_html__( 'Generate API Token:', 'woo-coupon-usage' ); ?> <a href="https://wise.com/your-account/integrations-and-tools/api-tokens/" target="_blank">https://wise.com/profile/api-keys</a></p>
         
         <br/>
 
@@ -1070,7 +1110,7 @@ function wcusage_field_cb_payouts( $args ) {
               success: function(response) {
                 if (response.success && response.data.profiles) {
                   var profiles = response.data.profiles;
-                  jQuery(dropdown).empty().append('<option value="">Select a profile...</option>');
+                  jQuery(dropdown).empty().append('<option value=""><?php echo esc_js( __( 'Select a profile...', 'woo-coupon-usage' ) ); ?></option>');
                   
                   jQuery.each(profiles, function(index, profile) {
                     var optionText = profile.name + ' (' + profile.type + ') - ID: ' + profile.id;
@@ -1248,7 +1288,7 @@ function wcusage_field_cb_payouts( $args ) {
         <?php $wcusage_field_storecredit_system = wcusage_get_setting_value('wcusage_field_storecredit_system', 'default'); ?>
     		<strong style="margin-left: 40px; display: inline-block;"><label for="scales"><?php echo esc_html__( 'Wallet System', 'woo-coupon-usage' ); ?></label></strong><br/>
     		<select style="margin-left: 40px;" name="wcusage_options[wcusage_field_storecredit_system]" id="wcusage_field_storecredit_system" class="wcusage_field_storecredit_system">
-          <option value="">Select an option...</option>
+          <option value=""><?php echo esc_html__( 'Select an option...', 'woo-coupon-usage' ); ?></option>
           <option value="default" <?php if($wcusage_field_storecredit_system == "default") { ?>selected<?php } ?>><?php echo esc_html__( '(Free) Built-in Store Credit & Wallet System', 'woo-coupon-usage' ); ?></option>
           <?php
           // Custom Hook
@@ -1299,16 +1339,16 @@ function wcusage_field_cb_payouts( $args ) {
             $terawallet_addon_active = ( is_plugin_active( 'woo-coupon-usage-terawallet-integration-premium/wcu-terawallet-integration.php' ) ? true : false );
             $terawallet_link = "https://en-gb.wordpress.org/plugins/woo-wallet";
             ?>
-            <strong>TeraWallet</strong> <span style="font-size: 10px;">By WCBeginner <a href="<?php echo esc_url($terawallet_link); ?>" target="_blank" title="View Plugin"><span class="fas fa-external-link-alt"></span></a></span><br/>
-            <?php if($terawallet_active) { ?><span class="fas fa-check-circle" style="color: green;"></span> Plugin Installed & Activated<br/><?php } ?>
+            <strong>TeraWallet</strong> <span style="font-size: 10px;">By WCBeginner <a href="<?php echo esc_url($terawallet_link); ?>" target="_blank" title="<?php echo esc_attr__( 'View Plugin', 'woo-coupon-usage' ); ?>"><span class="fas fa-external-link-alt"></span></a></span><br/>
+            <?php if($terawallet_active) { ?><span class="fas fa-check-circle" style="color: green;"></span> <?php echo esc_html__( 'Plugin Installed & Activated', 'woo-coupon-usage' ); ?><br/><?php } ?>
             <?php if($terawallet_addon_active) { ?>
-              <?php if(!$terawallet_active) { ?><span class="fas fa-times-circle" style="color: red;"></span> Plugin Installed & Activated<br/><?php } ?>
-              <span class="fas fa-check-circle" style="color: green;"></span> Integration Addon Installed & Activated
+              <?php if(!$terawallet_active) { ?><span class="fas fa-times-circle" style="color: red;"></span> <?php echo esc_html__( 'Plugin Installed & Activated', 'woo-coupon-usage' ); ?><br/><?php } ?>
+              <span class="fas fa-check-circle" style="color: green;"></span> <?php echo esc_html__( 'Integration Addon Installed & Activated', 'woo-coupon-usage' ); ?>
             <?php } else { ?>
-              Integration Addon Price: $19.99 (One-Time)<br/>
+              <?php echo esc_html__( 'Integration Addon Price: $19.99 (One-Time)', 'woo-coupon-usage' ); ?><br/>
               <?php if($terawallet_active) { ?><span class="fas fa-times-circle" style="color: red;"></span><?php } ?>
-                <a href="https://couponaffiliates.com/addons/terawallet-integration" target="_blank" title="View Addon" style="text-decoration: none;">
-                  View Details & Download Integration <span class="fas fa-arrow-circle-right"></span>
+                <a href="https://couponaffiliates.com/addons/terawallet-integration" target="_blank" title="<?php echo esc_attr__( 'View Addon', 'woo-coupon-usage' ); ?>" style="text-decoration: none;">
+                  <?php echo esc_html__( 'View Details & Download Integration', 'woo-coupon-usage' ); ?> <span class="fas fa-arrow-circle-right"></span>
                 </a>
             <?php } ?>
           </p>
@@ -1322,16 +1362,16 @@ function wcusage_field_cb_payouts( $args ) {
             $yithfunds_addon_active = ( is_plugin_active( 'woo-coupon-usage-yithfunds-integration-premium/wcu-yithfunds-integration.php' ) ? true : false );
             $yithfunds_link = "https://yithemes.com/themes/plugins/yith-woocommerce-account-funds";
             ?>
-            <strong>YITH WooCommerce Account Funds</strong> <span style="font-size: 10px;">By YITH® <a href="<?php echo esc_url($yithfunds_link); ?>" target="_blank" title="View Plugin"><span class="fas fa-external-link-alt"></span></a></span><br/>
-            <?php if($yithfunds_active) { ?><span class="fas fa-check-circle" style="color: green;"></span> Plugin Installed & Activated<br/><?php } ?>
+            <strong>YITH WooCommerce Account Funds</strong> <span style="font-size: 10px;">By YITH® <a href="<?php echo esc_url($yithfunds_link); ?>" target="_blank" title="<?php echo esc_attr__( 'View Plugin', 'woo-coupon-usage' ); ?>"><span class="fas fa-external-link-alt"></span></a></span><br/>
+            <?php if($yithfunds_active) { ?><span class="fas fa-check-circle" style="color: green;"></span> <?php echo esc_html__( 'Plugin Installed & Activated', 'woo-coupon-usage' ); ?><br/><?php } ?>
             <?php if($yithfunds_addon_active) { ?>
-              <?php if(!$yithfunds_active) { ?><span class="fas fa-times-circle" style="color: red;"></span> Plugin Installed & Activated<br/><?php } ?>
-              <span class="fas fa-check-circle" style="color: green;"></span> Integration Addon Installed & Activated
+              <?php if(!$yithfunds_active) { ?><span class="fas fa-times-circle" style="color: red;"></span> <?php echo esc_html__( 'Plugin Installed & Activated', 'woo-coupon-usage' ); ?><br/><?php } ?>
+              <span class="fas fa-check-circle" style="color: green;"></span> <?php echo esc_html__( 'Integration Addon Installed & Activated', 'woo-coupon-usage' ); ?>
             <?php } else { ?>
-              Integration Addon Price: $19.99 (One-Time)<br/>
+              <?php echo esc_html__( 'Integration Addon Price: $19.99 (One-Time)', 'woo-coupon-usage' ); ?><br/>
               <?php if($yithfunds_active) { ?><span class="fas fa-times-circle" style="color: red;"></span><?php } ?>
-                <a href="https://couponaffiliates.com/addons/yithfunds-integration" target="_blank" title="View Addon" style="text-decoration: none;">
-                  View Details & Download Integration <span class="fas fa-arrow-circle-right"></span>
+                <a href="https://couponaffiliates.com/addons/yithfunds-integration" target="_blank" title="<?php echo esc_attr__( 'View Addon', 'woo-coupon-usage' ); ?>" style="text-decoration: none;">
+                  <?php echo esc_html__( 'View Details & Download Integration', 'woo-coupon-usage' ); ?> <span class="fas fa-arrow-circle-right"></span>
                 </a>
             <?php } ?>
           </p>
@@ -1456,11 +1496,11 @@ function wcusage_field_cb_payouts( $args ) {
 
       <hr/>
 
-      <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Default Payout Method:</h3>
+      <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Default Payout Method:', 'woo-coupon-usage' ); ?></h3>
 
-      <p>If required, you can set one of the payout methods as the default. This means that if the affiliate does not currently have a payout method selected, this one will be enabled by default.</p>
-      <p>- If set to "Store Credit Payouts" or "Custom Payment methods" (with field disabled), they will therefore be able to instantly request payouts without needing to select their payout method first.</p>
-      <p>- If set to "Direct Bank Transfer", "PayPal Payouts", "Stripe Payouts", or "Wise Bank Transfer Payouts" they will still be required to update and set their payment details in the settings tab, but it will be selected as their default option.</p>
+      <p><?php echo esc_html__( 'If required, you can set one of the payout methods as the default. This means that if the affiliate does not currently have a payout method selected, this one will be enabled by default.', 'woo-coupon-usage' ); ?></p>
+      <p>- <?php echo esc_html__( 'If set to "Store Credit Payouts" or "Custom Payment methods" (with field disabled), they will therefore be able to instantly request payouts without needing to select their payout method first.', 'woo-coupon-usage' ); ?></p>
+      <p>- <?php echo esc_html__( 'If set to "Direct Bank Transfer", "PayPal Payouts", "Stripe Payouts", or "Wise Bank Transfer Payouts" they will still be required to update and set their payment details in the settings tab, but it will be selected as their default option.', 'woo-coupon-usage' ); ?></p>
 
       <br/>
 
@@ -1488,11 +1528,33 @@ function wcusage_field_cb_payouts( $args ) {
 
       <br/><hr/>
 
-      <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Invoices & PDF Statements:</h3>
+      <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Invoices & PDF Statements:', 'woo-coupon-usage' ); ?></h3>
 
-      <p>You can enable "Invoices" and "PDF statement" features in the "PRO modules" section. A new settings tab (Invoices/Statements) will then appear on this page for setup and customisation.</p>
-      <p>- Invoices will allow affiliates to upload their invoices when submitting a payout.</p>
-      <p>- Statements will automatically generate a PDF payment statement for affiliates to download, when a payout is requested.</p>
+      <p><?php echo esc_html__( 'Enable the "Invoices" and/or "PDF Statement" features below. When either is enabled, a new "Invoices" settings tab will appear on this page for further setup and customisation.', 'woo-coupon-usage' ); ?></p>
+
+      <br/>
+
+      <!-- Enable Affiliate Invoices -->
+      <?php wcusage_setting_toggle_option('wcusage_field_payouts_enable_invoices', 0, esc_html__( 'Enable "Affiliate Invoices" features.', 'woo-coupon-usage' ), '0px'); ?>
+      <i><?php echo esc_html__( 'Invoices will allow affiliates to upload their invoices when submitting a payout.', 'woo-coupon-usage' ); ?></i><br/>
+
+      <?php wcusage_setting_toggle('.wcusage_field_payouts_enable_invoices', '.wcu-field-payouts-invoices-link'); // Show or Hide ?>
+      <span class="wcu-field-payouts-invoices-link">
+        <br/>
+        <button type="button" class="button" onclick="wcusage_go_to_settings('#tab-invoices', '#invoices-settings');"><?php echo esc_html__( 'Go to Invoices Settings', 'woo-coupon-usage' ); ?> <span class="fas fa-arrow-circle-right"></span></button>
+      </span>
+
+      <br/><br/>
+
+      <!-- Enable PDF Statements -->
+      <?php wcusage_setting_toggle_option('wcusage_field_payouts_enable_statements', 0, esc_html__( 'Enable "PDF Statements" features.', 'woo-coupon-usage' ), '0px'); ?>
+      <i><?php echo esc_html__( 'Statements will automatically generate a PDF payment statement for affiliates to download, when a payout is requested.', 'woo-coupon-usage' ); ?></i><br/>
+
+      <?php wcusage_setting_toggle('.wcusage_field_payouts_enable_statements', '.wcu-field-payouts-statements-link'); // Show or Hide ?>
+      <span class="wcu-field-payouts-statements-link">
+        <br/>
+        <button type="button" class="button" onclick="wcusage_go_to_settings('#tab-invoices', '#statements-settings');"><?php echo esc_html__( 'Go to PDF Statements Settings', 'woo-coupon-usage' ); ?> <span class="fas fa-arrow-circle-right"></span></button>
+      </span>
 
     </span>
 

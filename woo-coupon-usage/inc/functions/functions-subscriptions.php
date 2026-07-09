@@ -56,13 +56,13 @@ if ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php'
             ) );
             if ( $subscriptions_ids ) {
                 foreach ( $subscriptions_ids as $subscription_id => $subscription_obj ) {
-                    if ( $subscription_obj->order->id == $order_id ) {
+                    if ( $subscription_obj->get_parent_id() == $order_id ) {
                         break;
                     }
                 }
                 // Stop the loop
                 $subscription = new WC_Subscription($subscription_id);
-                $order_id = ( method_exists( $subscription, 'get_parent_id' ) ? $subscription->get_parent_id() : $subscription->order->id );
+                $order_id = $subscription->get_parent_id();
                 return $order_id;
             } else {
                 return "";
@@ -84,7 +84,7 @@ if ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php'
                 'order_type' => 'any',
             ) );
             foreach ( $subscriptions_ids as $subscription_id => $subscription_obj ) {
-                if ( $subscription_obj->order->id == $order_id ) {
+                if ( $subscription_obj->get_parent_id() == $order_id ) {
                     break;
                 }
             }
@@ -112,7 +112,7 @@ if ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php'
      */
     if ( !function_exists( 'wcusage_new_renewal_order' ) ) {
         function wcusage_new_renewal_order(  $order, $subscription  ) {
-            $parent_order_id = ( method_exists( $subscription, 'get_parent_id' ) ? $subscription->get_parent_id() : $subscription->order->id );
+            $parent_order_id = $subscription->get_parent_id();
             if ( $parent_order_id ) {
                 $parentorder = wc_get_order( $parent_order_id );
                 if ( $parentorder ) {
@@ -214,6 +214,7 @@ if ( !function_exists( 'wcusage_check_if_renewal_allowed' ) ) {
 if ( !function_exists( 'wcusage_get_sub_order_icon' ) ) {
     function wcusage_get_sub_order_icon(  $orderid  ) {
         $subicon = "";
+        $option_show_orderid = wcusage_get_setting_value( 'wcusage_field_orderid', '0' );
         if ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ) ) {
             $subid = wcusage_sub_get_order_parent( $orderid );
             if ( wcusage_is_order_renewal( $orderid ) ) {

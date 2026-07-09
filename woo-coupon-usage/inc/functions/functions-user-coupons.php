@@ -20,6 +20,50 @@ if ( !function_exists( 'wcusage_update_custom_roles' ) ) {
 }
 add_action( 'init', 'wcusage_update_custom_roles' );
 /**
+ * Enqueue CSS/JS for the WooCommerce coupon edit screen (Coupon Affiliates data
+ * panel + side meta box). Replaces the previously inline <style>/<script> blocks
+ * in add_wcusage_coupon_data_fields() and wcusage_coupon_meta_box_markup().
+ */
+if ( !function_exists( 'wcusage_enqueue_coupon_edit_assets' ) ) {
+    function wcusage_enqueue_coupon_edit_assets(  $hook  ) {
+        if ( 'post.php' !== $hook && 'post-new.php' !== $hook ) {
+            return;
+        }
+        $screen = get_current_screen();
+        if ( !$screen || 'shop_coupon' !== $screen->post_type ) {
+            return;
+        }
+        $ver = ( defined( 'WCUSAGE_VERSION' ) ? WCUSAGE_VERSION : '1.0.0' );
+        // jQuery UI Autocomplete + its base stylesheet (used by the affiliate-user fields).
+        wp_enqueue_script( 'jquery-ui-autocomplete' );
+        wp_enqueue_style(
+            'wcusage-jquery-ui',
+            'https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css',
+            array(),
+            '1.12.1'
+        );
+        wp_enqueue_style(
+            'wcusage-coupon-edit',
+            WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-coupon-edit.css',
+            array(),
+            $ver
+        );
+        wp_enqueue_script(
+            'wcusage-coupon-edit',
+            WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-coupon-edit.js',
+            array('jquery', 'jquery-ui-autocomplete'),
+            $ver,
+            true
+        );
+        wp_localize_script( 'wcusage-coupon-edit', 'wcusage_coupon_edit_vars', array(
+            'ajax_url' => admin_url( 'admin-ajax.php' ),
+            'nonce'    => wp_create_nonce( 'wcusage_coupon_nonce' ),
+        ) );
+    }
+
+}
+add_action( 'admin_enqueue_scripts', 'wcusage_enqueue_coupon_edit_assets' );
+/**
  * Add custom settings to coupons
  */
 if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
@@ -43,74 +87,11 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
                 update_post_meta( $post_id, 'wcu_select_coupon_user', $user->ID );
             }
         }
-        // Enqueue jQuery UI Autocomplete
-        wp_enqueue_script( 'jquery-ui-autocomplete' );
-        wp_enqueue_style( 'jquery-ui', 'https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css' );
-        // Generate nonce for AJAX action
-        $nonce = wp_create_nonce( 'wcusage_coupon_nonce' );
         ?>
-        <style>
-            .wcu-input-checkbox label { width: 100%; }
-            .ui-autocomplete { max-height: 200px; overflow-y: auto; overflow-x: hidden; z-index: 1000 !important; }
-        </style>
 
-        <script>
-            jQuery(document).ready(function($) {
-                $('#wcu_select_coupon_user').autocomplete({
-                    source: function(request, response) {
-                        $.ajax({
-                            url: '<?php 
-        echo esc_url( admin_url( 'admin-ajax.php' ) );
-        ?>',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                search: request.term,
-                                label: '',
-                                action: 'wcusage_search_users',
-                                nonce: '<?php 
-        echo esc_js( $nonce );
-        ?>'
-                            },
-                            success: function(data) {
-                                if (!data.success) {
-                                    console.error('Autocomplete error:', data.data || 'Unknown error');
-                                    response([]);
-                                    return;
-                                }
-                                var results = data.data.map(function(item) {
-                                    return {
-                                        label: item.label,
-                                        value: item.value || item.label
-                                    };
-                                });
-                                response(results);
-                            },
-                            error: function(xhr, status, error) {
-                                var errorMsg = xhr.status + ' ' + (xhr.responseText || 'No response from server');
-                                console.error('Autocomplete AJAX error:', errorMsg);
-                                response([]);
-                            }
-                        });
-                    },
-                    minLength: 1,
-                    select: function(event, ui) {
-                        $(this).val(ui.item.value);
-                        return false;
-                    },
-                    focus: function(event, ui) {
-                        return false;
-                    }
-                });
-
-                // Sync with meta box field
-                $('#wcu_select_coupon_user').on('change input', function() {
-                    $('#wcu_select_coupon_user_meta').val($(this).val());
-                });
-            });
-        </script>
-
-        <br/>   General Settings:<br/>
+        <br/><span style="display: inline-block; padding-left: 10px;"><?php 
+        echo esc_html__( 'General Settings:', 'woo-coupon-usage' );
+        ?></span><br/>
 
         <p class="form-field wcu_select_coupon_user_field">
             <label for="wcu_select_coupon_user"><?php 
@@ -127,10 +108,12 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
         <?php 
         if ( wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() ) {
             ?>
-            <hr/><br/>   Custom Commission:<br/>
-            <p>Custom commission amounts can be set for each coupon, or you can set the global commission rates for all coupons in the <a href="<?php 
-            echo esc_url( admin_url( 'admin.php?page=wcusage_settings' ) );
-            ?>">plugin settings</a> page.</p>
+            <hr/><br/><span style="display: inline-block; padding-left: 10px;"><?php 
+            echo esc_html__( 'Custom Commission:', 'woo-coupon-usage' );
+            ?></span><br/>
+            <p><?php 
+            echo sprintf( wp_kses_post( __( 'Custom commission amounts can be set for each coupon, or you can set the global commission rates for all coupons in the <a href="%s">plugin settings</a> page.', 'woo-coupon-usage' ) ), esc_url( admin_url( 'admin.php?page=wcusage_settings' ) ) );
+            ?></p>
 
             <?php 
             woocommerce_wp_text_input( array(
@@ -170,7 +153,7 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
             'description' => '<i>' . wp_kses_post( esc_html__( 'Custom date to begin displaying past coupon data. Leave empty to show full history.', 'woo-coupon-usage' ) ) . '</i>',
             'desc_tip'    => false,
         ) );
-        echo "<br/><hr/><br/>   " . esc_html__( 'Email Notifications:', 'woo-coupon-usage' ) . "<br/>";
+        echo "<br/><hr/><br/><span style='display: inline-block; padding-left: 10px;'>" . esc_html__( 'Email Notifications:', 'woo-coupon-usage' ) . "</span><br/>";
         $wcu_enable_notifications = get_post_meta( $coupon_get_id, 'wcu_enable_notifications', true );
         woocommerce_wp_select( array(
             'id'      => 'wcu_enable_notifications',
@@ -209,30 +192,71 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
                 'desc_tip'    => true,
             ) );
             if ( $wcusage_field_lifetime_all ) {
-                echo "<br/><hr/><br/>   <span class='dashicons dashicons-yes-alt'></span> Lifetime commission enabled globally.<br/>";
+                echo "<br/><hr/><br/><span style='display: inline-block; padding-left: 10px;'><span class='dashicons dashicons-yes-alt'></span> " . esc_html__( 'Lifetime commission enabled globally.', 'woo-coupon-usage' ) . "</span><br/>";
             }
         }
         echo "<br/><hr/><br/>";
-        echo "<p>" . sprintf( esc_html__( 'You can set the global commission rates for all coupons in the <a href="%s">plugin settings</a> page.', 'woo-coupon-usage' ), esc_url( admin_url( "admin.php?page=wcusage_settings" ) ) ) . "</p>";
-        echo "<p>" . sprintf( esc_html__( 'Extra features are available with PRO version including custom commission amounts per coupon, email notifications, and more. <a href="%s">UPGRADE</a>', 'woo-coupon-usage' ), esc_url( admin_url( "admin.php?page=wcusage-pricing&trial=true" ) ) ) . "</p>";
-        echo "<img src='" . esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . "images/coupon-settings-pro.png' style='max-width: 100%;'>";
-        ?>
+        echo "<p>" . sprintf( wp_kses_post( __( 'You can set the global commission rates for all coupons in the <a href="%s">plugin settings</a> page.', 'woo-coupon-usage' ) ), esc_url( admin_url( "admin.php?page=wcusage_settings" ) ) ) . "</p>";
+        if ( !wcu_fs()->can_use_premium_code() ) {
+            $wcu_pro_promo_url = "https://woocouponusage.com/pricing/?utm_source=plugin&utm_medium=admin&utm_campaign=pro_coupon_page";
+            $wcu_pro_promo_features = array(
+                array('dashicons-chart-line', __( 'Custom Commission Rate', 'woo-coupon-usage' ), __( 'Set a unique commission percentage for this specific coupon, overriding your global rate.', 'woo-coupon-usage' )),
+                array('dashicons-cart', __( 'Fixed Commission Amounts', 'woo-coupon-usage' ), __( 'Pay a flat commission amount per order or per product for this coupon.', 'woo-coupon-usage' )),
+                array('dashicons-testimonial', __( 'Custom Commission Message', 'woo-coupon-usage' ), __( 'Show a personalised commission message to the affiliate on their dashboard.', 'woo-coupon-usage' )),
+                array('dashicons-update', __( 'Lifetime Commission', 'woo-coupon-usage' ), __( 'Keep earning the affiliate commission on every future order from the customers they refer.', 'woo-coupon-usage' )),
+                array('dashicons-email-alt', __( 'Extra Email Recipients', 'woo-coupon-usage' ), __( "Send this coupon's affiliate email notifications to additional email addresses.", 'woo-coupon-usage' )),
+                array('dashicons-edit', __( 'Manual Commission Adjustments', 'woo-coupon-usage' ), __( 'Directly edit the unpaid, pending and processing commission totals for this coupon.', 'woo-coupon-usage' ))
+            );
+            ?>
 
-        <?php 
-        if ( !is_plugin_active( 'better-coupon-restrictions/coupon-restrictions.php' ) && !is_plugin_active( 'better-coupon-restrictions-pro/coupon-restrictions-pro.php' ) ) {
+            <div class="wcu-coupon-pro-promo">
+                <div class="wcu-coupon-pro-promo-head">
+                    <span class="wcu-coupon-pro-promo-badge"><span class="dashicons dashicons-star-filled"></span> <?php 
+            echo esc_html__( 'Coupon Affiliates: PRO Features', 'woo-coupon-usage' );
+            ?></span>
+                    <h2 class="wcu-coupon-pro-promo-title"><?php 
+            echo esc_html__( 'More customisation options for every affiliate coupon', 'woo-coupon-usage' );
+            ?></h2>
+                    <p class="wcu-coupon-pro-promo-sub"><?php 
+            echo esc_html__( 'Upgrade to PRO to unlock powerful per-coupon settings that give you full control over commissions, notifications and rewards.', 'woo-coupon-usage' );
+            ?></p>
+                    <a class="wcu-coupon-pro-promo-btn" href="<?php 
+            echo esc_url( $wcu_pro_promo_url );
+            ?>">
+                        <?php 
+            echo esc_html__( 'Upgrade to PRO', 'woo-coupon-usage' );
+            ?> <span class="dashicons dashicons-arrow-right-alt"></span>
+                    </a>
+                    <p class="wcu-coupon-pro-promo-note"><?php 
+            echo esc_html__( 'Includes a free trial. Cancel anytime.', 'woo-coupon-usage' );
+            ?></p>
+                </div>
+
+                <div class="wcu-coupon-pro-promo-grid">
+                    <?php 
+            foreach ( $wcu_pro_promo_features as $wcu_pro_feature ) {
+                list( $wcu_f_icon, $wcu_f_title, $wcu_f_desc ) = $wcu_pro_feature;
+                ?>
+                        <div class="wcu-coupon-pro-card">
+                            <span class="wcu-coupon-pro-card-icon"><span class="dashicons <?php 
+                echo esc_attr( $wcu_f_icon );
+                ?>"></span></span>
+                            <strong class="wcu-coupon-pro-card-title"><?php 
+                echo esc_html( $wcu_f_title );
+                ?></strong>
+                            <p class="wcu-coupon-pro-card-desc"><?php 
+                echo esc_html( $wcu_f_desc );
+                ?></p>
+                        </div>
+                    <?php 
+            }
             ?>
-            <br/><hr/>
-            <p>
-                <?php 
-            echo esc_html__( 'Extra Restrictions', 'woo-coupon-usage' );
-            ?>:<br/>
-                <?php 
-            echo sprintf( wp_kses_post( __( 'Want more advanced coupon usage restrictions? Check out our %s plugin!', 'woo-coupon-usage' ) ), '<a href="https://relywp.com/plugins/better-coupon-restrictions-woocommerce/?utm_source=caffs-settings" target="_blank">Better Coupon Restrictions</a>' );
-            ?>
-            </p>
-        <?php 
+                </div>
+            </div>
+
+            <?php 
         }
-        ?>
+        ?>        
 
         </div>
         <?php 
@@ -245,9 +269,9 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields_limits' ) ) {
         $allow_all_customers = wcusage_get_setting_value( 'wcusage_field_allow_all_customers', '1' );
         ?>
 
-        <br/>   <?php 
+        <br/><span style="display: inline-block; padding-left: 10px;"><?php 
         echo esc_html__( 'Coupon Affiliates - Extra Limits:', 'woo-coupon-usage' );
-        ?><br/>
+        ?></span><br/>
 
         <?php 
         $wcu_enable_first_order_only = get_post_meta( $coupon_get_id, 'wcu_enable_first_order_only', true );
@@ -260,18 +284,7 @@ if ( !function_exists( 'add_wcusage_coupon_data_fields_limits' ) ) {
             'description' => esc_html__( 'When checked, this coupon can only be used by new customers on their first order.', 'woo-coupon-usage' ),
         ) );
         ?>
-
-        <?php 
-        if ( !is_plugin_active( 'better-coupon-restrictions/coupon-restrictions.php' ) && !is_plugin_active( 'better-coupon-restrictions-pro/coupon-restrictions-pro.php' ) ) {
-            ?>
-            <p class="form-field" style="font-size: 12px; color: #999;">
-                <?php 
-            echo sprintf( wp_kses_post( __( 'Want more advanced coupon usage restrictions? Check out the %s plugin.', 'woo-coupon-usage' ) ), '<a href="https://relywp.com/plugins/better-coupon-restrictions-woocommerce/?utm_source=caffs-settings" target="_blank">Better Coupon Restrictions</a>' );
-            ?>
-            </p>
-        <?php 
-        }
-        ?>
+        
         <?php 
     }
 
@@ -282,6 +295,11 @@ add_action( 'woocommerce_coupon_options_usage_limit', 'add_wcusage_coupon_data_f
  */
 if ( !function_exists( 'wcusage_save_coupon_settings' ) ) {
     function wcusage_save_coupon_settings(  $post_id  ) {
+        // Commission values changed here are genuine manual admin edits, so allow
+        // the activity log to record them (see wcusage_after_update_function).
+        if ( function_exists( 'wcusage_set_manual_commission_edit' ) ) {
+            wcusage_set_manual_commission_edit( true );
+        }
         $wcu_select_coupon_user = ( isset( $_POST['wcu_select_coupon_user'] ) ? sanitize_text_field( $_POST['wcu_select_coupon_user'] ) : '' );
         // Convert username to user ID
         $user = get_user_by( 'login', $wcu_select_coupon_user );
@@ -290,6 +308,13 @@ if ( !function_exists( 'wcusage_save_coupon_settings' ) ) {
         update_post_meta( $post_id, 'wcu_select_coupon_user', $user_id );
         if ( isset( $_POST['wcu_text_coupon_start_date'] ) ) {
             $wcu_text_coupon_start_date = sanitize_text_field( $_POST['wcu_text_coupon_start_date'] );
+            // Force a statistics refresh (same as changing the commission rates)
+            // when the history start date changes, since it changes which orders
+            // are included in the coupon's statistics.
+            $wcu_previous_start_date = get_post_meta( $post_id, 'wcu_text_coupon_start_date', true );
+            if ( $wcu_previous_start_date != $wcu_text_coupon_start_date ) {
+                delete_post_meta( $post_id, 'wcu_last_refreshed' );
+            }
             update_post_meta( $post_id, 'wcu_text_coupon_start_date', $wcu_text_coupon_start_date );
         }
         $first_order_only = ( isset( $_POST['wcu_enable_first_order_only'] ) ? 'yes' : 'no' );
@@ -358,6 +383,13 @@ if ( !function_exists( 'wcusage_save_coupon_settings' ) ) {
 
 }
 add_action( 'woocommerce_coupon_options_save', 'wcusage_save_coupon_settings' );
+// Reset the manual-edit flag once the coupon save has fully completed, so it
+// never leaks onto any automated commission writes later in the same request.
+add_action( 'woocommerce_coupon_options_save', function () {
+    if ( function_exists( 'wcusage_set_manual_commission_edit' ) ) {
+        wcusage_set_manual_commission_edit( false );
+    }
+}, 9999 );
 /**
  * Checks if coupon is users
  */
@@ -366,8 +398,10 @@ if ( !function_exists( 'wcusage_iscouponusers' ) ) {
         if ( !$current_user_id ) {
             return false;
         }
-        // Check cache first
-        $cache_key = 'wcusage_is_coupon_users_' . md5( $coupon . '_' . $current_user_id );
+        // Check cache first (namespaced under 'user' so any coupon assignment
+        // change invalidates it — this caches negative results too, so a stale
+        // entry would block a newly-assigned affiliate or let a removed one in)
+        $cache_key = wcusage_cache_key( 'user', 'wcusage_is_coupon_users_' . md5( $coupon . '_' . $current_user_id ) );
         $cached = get_transient( $cache_key );
         if ( $cached !== false ) {
             return (bool) $cached;
@@ -396,7 +430,7 @@ if ( !function_exists( 'wcusage_is_user_affiliate' ) ) {
             return false;
         }
         // Check transient cache first
-        $cache_key = 'wcusage_is_affiliate_' . $user_id;
+        $cache_key = wcusage_cache_key( 'user', 'wcusage_is_affiliate_' . $user_id );
         $cached = get_transient( $cache_key );
         if ( $cached !== false ) {
             return (bool) $cached;
@@ -431,7 +465,7 @@ if ( !function_exists( 'wcusage_get_users_coupons_ids' ) ) {
             return array();
         }
         // Check transient cache first
-        $cache_key = 'wcusage_user_coupon_ids_' . $user_id;
+        $cache_key = wcusage_cache_key( 'user', 'wcusage_user_coupon_ids_' . $user_id );
         $cached = get_transient( $cache_key );
         if ( $cached !== false ) {
             return ( is_array( $cached ) ? $cached : array() );
@@ -464,7 +498,7 @@ if ( !function_exists( 'wcusage_get_users_coupons_names' ) ) {
             return array();
         }
         // Check cache first
-        $cache_key = 'wcusage_user_coupon_names_' . $user_id;
+        $cache_key = wcusage_cache_key( 'user', 'wcusage_user_coupon_names_' . $user_id );
         $cached = get_transient( $cache_key );
         if ( $cached !== false ) {
             return $cached;
@@ -589,7 +623,11 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                             woocommerce_output_all_notices();
                         }
                         if ( function_exists( 'woocommerce_login_form' ) ) {
-                            woocommerce_login_form();
+                            // Redirect back to the affiliate dashboard page after login instead
+                            // of the default WooCommerce My Account page.
+                            woocommerce_login_form( array(
+                                'redirect' => get_page_link( wcusage_get_coupon_shortcode_page_id() ),
+                            ) );
                         }
                         ?>
                         </div>
@@ -754,6 +792,31 @@ if ( !function_exists( 'wcusage_add_coupon_meta_box' ) ) {
 }
 add_action( "add_meta_boxes", "wcusage_add_coupon_meta_box" );
 /**
+ * Position the "Coupon Affiliates" meta box directly under the Publish box on
+ * the coupon edit page. The Publish box is forced to the top of the side column
+ * with our box right beneath it, while any other side boxes keep their order.
+ */
+if ( !function_exists( 'wcusage_default_coupon_meta_box_order' ) ) {
+    function wcusage_default_coupon_meta_box_order(  $order  ) {
+        if ( !is_array( $order ) ) {
+            $order = array();
+        }
+        // Existing side boxes (from the user's saved order, if any).
+        $side = ( isset( $order['side'] ) ? $order['side'] : '' );
+        $ids = array_values( array_filter( array_map( 'trim', explode( ',', $side ) ) ) );
+        // Remove Publish + our box so we can re-add them at the front in order.
+        $ids = array_values( array_filter( $ids, function ( $id ) {
+            return 'submitdiv' !== $id && 'wcusage-meta-box' !== $id;
+        } ) );
+        // Publish first, then Coupon Affiliates directly below it, then the rest.
+        array_unshift( $ids, 'submitdiv', 'wcusage-meta-box' );
+        $order['side'] = implode( ',', $ids );
+        return $order;
+    }
+
+}
+add_filter( 'get_user_option_meta-box-order_shop_coupon', 'wcusage_default_coupon_meta_box_order' );
+/**
  * Content for meta box on coupons page.
  */
 if ( !function_exists( 'wcusage_coupon_meta_box_markup' ) ) {
@@ -790,13 +853,12 @@ if ( !function_exists( 'wcusage_coupon_meta_box_markup' ) ) {
                     delete_post_meta( $post_id, 'wcu_last_refreshed' );
                 }
             }
-            // Enqueue jQuery UI Autocomplete
-            wp_enqueue_script( 'jquery-ui-autocomplete' );
-            wp_enqueue_style( 'jquery-ui', 'https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css' );
-            // Generate nonce for AJAX
-            $nonce = wp_create_nonce( 'wcusage_coupon_nonce' );
-            ?>
+        }
+        ?>
 
+        <?php 
+        if ( isset( $post_id ) && $post_id ) {
+            ?>
             <p style="margin-top: 14px;"><a href="<?php 
             echo esc_url( $uniqueurl );
             ?>" target="_blank" class="wcusage-settings-button"
@@ -805,86 +867,48 @@ if ( !function_exists( 'wcusage_coupon_meta_box_markup' ) ) {
             echo esc_html__( 'View Affiliate Dashboard', 'woo-coupon-usage' );
             ?>
                 <span class="dashicons dashicons-external"></span></a></p>
+        <?php 
+        }
+        ?>
 
-            <p class="form-field wcu_select_coupon_user_meta_field" style="margin-top: 5px; margin-bottom: 20px;">
+            <p class="form-field wcu_select_coupon_user_meta_field" style="margin-top: 5px; margin-bottom: 6px;">
                 <label for="wcu_select_coupon_user_meta"><?php 
-            echo esc_html__( 'Affiliate User', 'woo-coupon-usage' );
-            ?></label>
+        echo esc_html__( 'Affiliate User', 'woo-coupon-usage' );
+        ?></label>
                 <input type="text" id="wcu_select_coupon_user_meta" style="width: 100%;"
                 name="wcu_select_coupon_user_meta" value="<?php 
-            echo esc_attr( $coupon_user );
-            ?>" class="regular-text" />
+        echo esc_attr( $coupon_user );
+        ?>" class="regular-text" />
             </p>
 
-            <p style="margin-bottom: 5px;">
-              <a href="#" class="" onclick="if (confirm('<?php 
-            echo esc_html__( 'Are you sure you want to refresh all this coupons affiliate dashboard data? The next time you visit the affiliate dashboard, it may take significantly longer to load (first visit).', 'woo-coupon-usage' );
-            ?>')){location+='&refreshstats=true'}else{event.stopPropagation(); event.preventDefault();};">
-                <?php 
-            echo esc_html__( 'REFRESH ALL DATA', 'woo-coupon-usage' );
-            ?> <i class="fas fa-sync" style="background: transparent; margin: 0;"></i>
-              </a>
+            <p style="margin-top: 0; margin-bottom: 20px;">
+                <a href="#wcusage_coupon_data" class="wcusage-customise-more-settings" style="font-size: 12px; text-decoration: none;">
+                    <span class="dashicons dashicons-admin-generic" style="font-size: 14px; width: 14px; height: 14px; vertical-align: text-bottom;"></span>
+                    <?php 
+        echo esc_html__( 'Customise more settings', 'woo-coupon-usage' );
+        ?>
+                </a>
             </p>
-
-            <style>
-                .ui-autocomplete { max-height: 200px; overflow-y: auto; overflow-x: hidden; z-index: 1000 !important; }
-            </style>
-
-            <script>
-                jQuery(document).ready(function($) {
-                    $('#wcu_select_coupon_user_meta').autocomplete({
-                        source: function(request, response) {
-                            $.ajax({
-                                url: '<?php 
-            echo admin_url( 'admin-ajax.php' );
-            ?>',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    search: request.term,
-                                    label: '',
-                                    action: 'wcusage_search_users',
-                                    nonce: '<?php 
-            echo esc_js( $nonce );
-            ?>'
-                                },
-                                success: function(data) {
-                                    if (!data.success) {
-                                        response([]);
-                                        return;
-                                    }
-                                    var results = data.data.map(function(item) {
-                                        return {
-                                            label: item.label,
-                                            value: item.value || item.label
-                                        };
-                                    });
-                                    response(results);
-                                },
-                                error: function(xhr, status, error) {
-                                    response([]);
-                                }
-                            });
-                        },
-                        minLength: 1,
-                        select: function(event, ui) {
-                            $(this).val(ui.item.value);
-                            $('#wcu_select_coupon_user').val(ui.item.value);
-                            return false;
-                        },
-                        focus: function(event, ui) {
-                            return false;
-                        }
-                    });
-
-                    // Sync with main field
-                    $('#wcu_select_coupon_user_meta').on('change input', function() {
-                        $('#wcu_select_coupon_user').val($(this).val());
-                    });
-                });
-            </script>
 
             <?php 
+        // All-time stats + Refresh Statistics — recalculate this coupon's
+        // statistics directly here via AJAX (no need to open the affiliate
+        // dashboard). Replaces the old "REFRESH ALL DATA" link that relied on
+        // a first dashboard visit.
+        if ( isset( $_GET['post'] ) ) {
+            $wcu_refresh_coupon_user_id = intval( get_post_meta( $post_id, 'wcu_select_coupon_user', true ) );
+            if ( function_exists( 'wcusage_refresh_enqueue_assets' ) ) {
+                wcusage_refresh_enqueue_assets( $wcu_refresh_coupon_user_id );
+            }
+            if ( function_exists( 'wcusage_render_coupon_stat_boxes' ) ) {
+                wcusage_render_coupon_stat_boxes( $post_id );
+            }
+            if ( function_exists( 'wcusage_render_refresh_statistics_box' ) ) {
+                wcusage_render_refresh_statistics_box( $wcu_refresh_coupon_user_id, array($post_id) );
+            }
+            if ( function_exists( 'wcusage_render_reset_start_date_box' ) ) {
+                wcusage_render_reset_start_date_box( $post_id );
+            }
         }
     }
 
@@ -900,10 +924,7 @@ if ( !function_exists( 'wcusage_coupon_affiliate_unlink' ) ) {
         update_post_meta( $coupon, 'wcu_select_coupon_user', '' );
         // Clear the user's affiliate column cache, affiliate status cache, and coupon IDs cache
         if ( $user_id ) {
-            delete_transient( 'wcusage_user_affiliate_col_' . $user_id );
-            delete_transient( 'wcusage_is_affiliate_' . $user_id );
-            delete_transient( 'wcusage_user_coupon_ids_' . $user_id );
-            delete_transient( 'wcusage_user_coupon_names_' . $user_id );
+            wcusage_clear_user_cache( $user_id );
         }
         $coupon_name = get_the_title( $coupon );
         echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Coupon unlinked from user:', 'woo-coupon-usage' ) . esc_html( $coupon ) . '</p></div>';

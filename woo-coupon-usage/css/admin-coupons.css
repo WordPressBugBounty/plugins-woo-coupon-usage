@@ -1,6 +1,162 @@
 .wp-list-table .column-ID {
     width: 75px;
 }
+.wcusage-coupon-rate-subline {
+    color: #646970;
+    font-size: 12px;
+    line-height: 1.3;
+    margin-top: 2px;
+    white-space: nowrap;
+}
+.wcusage-coupon-rate-label {
+    font-weight: 600;
+}
+.wcusage-admin-page .wp-list-table .column-commission,
+.wcusage-affiliate-view-page .wp-list-table .column-commission {
+    overflow: visible;
+}
+.wcusage-rate-tooltip {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+.wcusage-rate-tooltip-trigger {
+    align-items: center;
+    background: #f6f7f7;
+    border: 1px solid #c3c4c7;
+    border-radius: 50%;
+    color: #50575e;
+    cursor: help;
+    display: inline-flex;
+    font-size: 10px;
+    font-weight: 700;
+    height: 16px;
+    justify-content: center;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+    width: 16px;
+}
+.wcusage-rate-tooltip-trigger:focus,
+.wcusage-rate-tooltip-trigger:hover {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+    outline: none;
+}
+.wcusage-rate-tooltip-panel {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 8px;
+    bottom: calc(100% + 8px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+    color: #1d2327;
+    display: none;
+    font-size: 12px;
+    font-weight: 400;
+    left: 50%;
+    letter-spacing: normal;
+    line-height: 1.35;
+    min-width: 300px;
+    padding: 12px;
+    position: absolute;
+    text-align: left;
+    text-transform: none;
+    transform: translateX(-50%);
+    white-space: normal;
+    width: max-content;
+    max-width: 360px;
+    z-index: 99999;
+}
+.wcusage-rate-tooltip-panel::after {
+    background: #fff;
+    border-bottom: 1px solid #dcdcde;
+    border-right: 1px solid #dcdcde;
+    bottom: -6px;
+    content: "";
+    height: 10px;
+    left: 50%;
+    position: absolute;
+    transform: translateX(-50%) rotate(45deg);
+    width: 10px;
+}
+.wcusage-rate-tooltip:hover .wcusage-rate-tooltip-panel,
+.wcusage-rate-tooltip:focus-within .wcusage-rate-tooltip-panel {
+    display: block;
+}
+.wcusage-rate-tooltip-title {
+    color: #1d2327;
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.wcusage-rate-tooltip-section {
+    display: block;
+    margin-top: 8px;
+}
+.wcusage-rate-tooltip-section:first-of-type {
+    margin-top: 0;
+}
+.wcusage-rate-tooltip-title + .wcusage-rate-tooltip-section {
+    margin-top: 0;
+}
+.wcusage-rate-tooltip-section-title {
+    color: #646970;
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+.wcusage-rate-tooltip-row {
+    align-items: center;
+    background: #f6f7f7;
+    border: 1px solid #dcdcde;
+    border-radius: 6px;
+    display: grid;
+    gap: 6px;
+    grid-template-columns: minmax(86px, 1fr) auto auto;
+    margin-top: 4px;
+    padding: 6px 8px;
+}
+.wcusage-rate-tooltip-row.is-active {
+    background: #f0f6fc;
+    border-color: #72aee6;
+}
+.wcusage-rate-tooltip-row.is-overridden {
+    color: #646970;
+}
+.wcusage-rate-tooltip-level {
+    font-weight: 600;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.wcusage-rate-tooltip-value {
+    color: #1d2327;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.wcusage-rate-tooltip-status {
+    background: #e5e5e5;
+    border-radius: 999px;
+    color: #50575e;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    white-space: nowrap;
+}
+.wcusage-rate-tooltip-row.is-active .wcusage-rate-tooltip-status {
+    background: #00a32a;
+    color: #fff;
+}
+.wcusage-rate-tooltip-empty {
+    color: #646970;
+    display: block;
+    padding: 2px 0;
+}
 /* Coupons table: shrink checkbox column and ensure borders */
 .wcusage-admin-page .wp-list-table .column-cb,
 .wcusage-admin-page .wp-list-table .check-column {

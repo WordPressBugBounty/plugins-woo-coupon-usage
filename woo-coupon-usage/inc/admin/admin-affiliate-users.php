@@ -109,7 +109,7 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
      switch ($column_name) {
          case 'affiliateinfo':
              // Check cache first for performance
-             $cache_key = 'wcusage_user_affiliate_col_' . $user_id;
+             $cache_key = wcusage_cache_key( 'user', 'wcusage_user_affiliate_col_' . $user_id );
              $cached_output = get_transient( $cache_key );
              
              if ( $cached_output !== false ) {
@@ -258,68 +258,8 @@ $coupon_code_linked = "<span class='wcusage-users-affiliate-column'>"
  }
  add_action('wcusage_hook_output_affiliate_tooltip_users', 'wcusage_output_affiliate_tooltip_users');
 
- /**
-  * Clear user affiliate column cache when coupon user assignment changes
-  *
-  */
- function wcusage_clear_user_affiliate_column_cache( $post_id ) {
-     // Only for shop_coupon post type
-     if ( get_post_type( $post_id ) !== 'shop_coupon' ) {
-         return;
-     }
-     
-     // Get the OLD user ID (before save) from global variable if available
-     global $wcusage_old_coupon_user_id;
-     
-     // Get the NEW/current assigned user ID
-     $new_user_id = get_post_meta( $post_id, 'wcu_select_coupon_user', true );
-     
-     // Clear cache for new user
-     if ( $new_user_id ) {
-         delete_transient( 'wcusage_user_affiliate_col_' . $new_user_id );
-         delete_transient( 'wcusage_is_affiliate_' . $new_user_id );
-         delete_transient( 'wcusage_user_coupon_ids_' . $new_user_id );
-         delete_transient( 'wcusage_user_coupon_names_' . $new_user_id );
-     }
-     
-     // Clear cache for the old user (if there was one and it's different)
-     if ( ! empty( $wcusage_old_coupon_user_id ) && $wcusage_old_coupon_user_id != $new_user_id ) {
-         delete_transient( 'wcusage_user_affiliate_col_' . $wcusage_old_coupon_user_id );
-         delete_transient( 'wcusage_is_affiliate_' . $wcusage_old_coupon_user_id );
-         delete_transient( 'wcusage_user_coupon_ids_' . $wcusage_old_coupon_user_id );
-         delete_transient( 'wcusage_user_coupon_names_' . $wcusage_old_coupon_user_id );
-     }
- }
- add_action( 'save_post', 'wcusage_clear_user_affiliate_column_cache' );
- add_action( 'delete_post', 'wcusage_clear_user_affiliate_column_cache' );
- 
- /**
-  * Store the old coupon user ID before saving
-  *
-  */
- function wcusage_store_old_coupon_user_id( $post_id ) {
-     // Only for shop_coupon post type
-     if ( get_post_type( $post_id ) !== 'shop_coupon' ) {
-         return;
-     }
-     
-     // Store the old user ID in a global variable before the save happens
-     global $wcusage_old_coupon_user_id;
-     $wcusage_old_coupon_user_id = get_post_meta( $post_id, 'wcu_select_coupon_user', true );
- }
- add_action( 'pre_post_update', 'wcusage_store_old_coupon_user_id' );
- 
- /**
-  * Clear user affiliate column cache when user meta is updated
-  *
-  */
- function wcusage_clear_user_affiliate_column_cache_on_meta_update( $meta_id, $user_id, $meta_key, $meta_value ) {
-     // Clear cache when commission-related meta is updated
-     if ( in_array( $meta_key, array( 'wcu_text_unpaid_commission', 'wcu_ml_unpaid_commission' ) ) ) {
-         delete_transient( 'wcusage_user_affiliate_col_' . $user_id );
-     }
- }
- add_action( 'update_user_meta', 'wcusage_clear_user_affiliate_column_cache_on_meta_update', 10, 4 );
+ // Per-user affiliate column cache invalidation (coupon assignment, commission
+ // meta, and role/group changes) lives in inc/functions/functions-cache.php.
 
  /**
   * Get Coupon Tooltip

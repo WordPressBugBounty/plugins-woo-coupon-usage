@@ -1,0 +1,39 @@
+/**
+ * Styles for the WooCommerce coupon edit screen (Coupon Affiliates data panel
+ * and side meta box). Enqueued via wcusage_enqueue_coupon_edit_assets() in
+ * inc/functions/functions-user-coupons.php.
+ */
+
+/* Coupon data panel fields + jQuery UI autocomplete dropdown */
+.wcu-input-checkbox label { width: 100%; }
+.ui-autocomplete { max-height: 200px; overflow-y: auto; overflow-x: hidden; z-index: 1000 !important; }
+
+/* PRO promo boxes (free version only) */
+body .wcu-coupon-pro-promo { max-width: 1120px; margin: 42px auto 42px; }
+body .wcu-coupon-pro-promo * { box-sizing: border-box; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-head { text-align: center; padding: 30px 24px 26px; background: linear-gradient(165deg, #f7fbf8 0%, #ffffff 60%); border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 3px rgba(16,24,40,0.04); }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #008a20; background: rgba(0,138,32,0.10); padding: 4px 12px; border-radius: 999px; margin: 0 0 16px; line-height: 1.5; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-badge .dashicons { font-size: 13px; width: 13px; height: 13px; vertical-align: text-bottom; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-title { font-size: 24px; line-height: 1.25; font-weight: 700; color: #101828; margin: 0 0 10px; padding: 0; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-sub { font-size: 14px; line-height: 1.55; color: #475467; margin: 0 auto 20px; padding: 0; max-width: 560px; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-btn { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #00a32a, #008a20); color: #fff !important; font-size: 14px; font-weight: 600; text-decoration: none; padding: 11px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,138,32,0.22); transition: transform 0.15s ease, box-shadow 0.15s ease; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,138,32,0.30); color: #fff !important; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-btn .dashicons { font-size: 17px; width: 17px; height: 17px; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-note { font-size: 12px; color: #98a2b3; margin: 14px 0 0; padding: 0; line-height: 1.4; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-card { display: flex; flex-direction: column; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 18px; box-shadow: 0 1px 2px rgba(16,24,40,0.04); transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-card:hover { box-shadow: 0 6px 18px rgba(16,24,40,0.08); border-color: #d0d5dd; transform: translateY(-2px); }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-card-icon { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 11px; background-image: linear-gradient(140deg, #1bc94a, #008a20); box-shadow: 0 5px 12px -4px rgba(0,138,32,0.45), inset 0 1px 0 rgba(255,255,255,0.30); margin-bottom: 14px; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-card-icon .dashicons { color: #fff; font-size: 22px; width: 22px; height: 22px; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-card-title { display: block; font-size: 15px; font-weight: 600; line-height: 1.35; color: #101828; margin: 0 0 6px; }
+body .wcu-coupon-pro-promo .wcu-coupon-pro-card-desc { font-size: 13px; line-height: 1.55; color: #667085; margin: 0; padding: 0; }
+@media (max-width: 1200px) {
+    body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 782px) {
+    body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-grid { grid-template-columns: 1fr; }
+    body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-head { padding: 24px 16px 22px; }
+    body .wcu-coupon-pro-promo .wcu-coupon-pro-promo-title { font-size: 24px; }
+}
+
+#wcusage_coupon_data label { line-height: 1.5 !important; }

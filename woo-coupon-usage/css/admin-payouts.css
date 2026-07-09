@@ -1,0 +1,135 @@
+/**
+ * Admin styles for the Payouts page (page=wcusage_payouts).
+ *
+ * Enqueued via wcusage_enqueue_payouts_assets() in woo-coupon-usage.php.
+ */
+
+/* ---- "How payouts work" timeline ---- */
+.wcu-payouts-timeline-details { max-width: 100%; margin: 4px 0 20px; }
+.wcu-payouts-timeline-summary { margin-top: 10px; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; cursor: pointer; font-size: 14px; color: #333; list-style: none; padding: 4px 0; }
+.wcu-payouts-timeline-summary::-webkit-details-marker { display: none; }
+.wcu-payouts-timeline-summary .wcu-timeline-info-icon { color: #2271b1; }
+.wcu-timeline-link { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: #2271b1; }
+.wcu-payouts-timeline-summary:hover .wcu-timeline-link { text-decoration: underline; }
+.wcu-payouts-timeline-summary .wcu-timeline-chevron { font-size: 12px; color: #2271b1; transition: transform .2s ease; }
+.wcu-payouts-timeline-details[open] .wcu-payouts-timeline-summary .wcu-timeline-chevron { transform: rotate(180deg); }
+.wcu-payouts-timeline-wrap { max-width: 100%; margin: 10px 0 0; background: #fff; border: 1px solid #e2e4e7; border-radius: 10px; padding: 22px 22px 6px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.wcu-payouts-timeline { display: flex; list-style: none; margin: 0; padding: 0; }
+.wcu-timeline-step { position: relative; flex: 1 1 0; text-align: center; padding: 0 10px 20px 10px; }
+.wcu-timeline-step:not(:last-child)::after { content: ""; position: absolute; top: 24px; left: calc(50% + 32px); width: calc(100% - 64px); height: 3px; border-radius: 3px; background: linear-gradient(90deg, #2271b1, #cfe4f5); z-index: 0; }
+.wcu-timeline-icon { position: relative; z-index: 1; width: 50px; height: 50px; margin: 0 auto 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; background: linear-gradient(135deg, #2271b1, #135e96); box-shadow: 0 4px 10px rgba(34,113,177,.28); transition: transform .18s ease, box-shadow .18s ease; }
+.wcu-timeline-step:hover .wcu-timeline-icon { transform: translateY(-3px) scale(1.05); box-shadow: 0 7px 16px rgba(34,113,177,.36); }
+.wcu-timeline-body { display: flex; flex-direction: column; gap: 3px; }
+.wcu-timeline-num { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #2271b1; }
+.wcu-timeline-title { font-size: 13.5px; font-weight: 600; color: #1d2327; }
+.wcu-timeline-desc { font-size: 12.5px; line-height: 1.5; color: #646970; }
+.wcu-timeline-footer { margin-top: 4px; padding: 16px 0 6px; border-top: 1px solid #f0f0f1; text-align: center; }
+.wcu-timeline-guide-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; color: #fff; background: linear-gradient(135deg, #2271b1, #135e96); box-shadow: 0 3px 8px rgba(34,113,177,.25); transition: transform .18s ease, box-shadow .18s ease; }
+.wcu-timeline-guide-btn:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 6px 14px rgba(34,113,177,.34); }
+.wcu-timeline-guide-btn .fa-arrow-up-right-from-square { font-size: 11px; opacity: .85; }
+@media (max-width: 900px) {
+  .wcu-payouts-timeline { flex-direction: column; }
+  .wcu-timeline-step { text-align: left; display: flex; gap: 16px; padding: 0 0 22px 0; }
+  .wcu-timeline-icon { margin: 0; flex: 0 0 50px; }
+  .wcu-timeline-body { padding-top: 3px; }
+  .wcu-timeline-step:not(:last-child)::after { top: 50px; left: 23px; width: 3px; height: auto; bottom: 0; background: linear-gradient(180deg, #2271b1, #cfe4f5); }
+}
+
+/* ---- Create Payouts: accordion sections ---- */
+.wcu-accordion { max-width: 100%; margin: 20px 0 0; }
+.wcu-accordion-item { background: #fff; border: 1px solid #e2e4e7; border-radius: 10px; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); transition: box-shadow .18s ease; }
+.wcu-accordion-item[open] { box-shadow: 0 3px 10px rgba(0,0,0,.06); }
+.wcu-accordion-summary { display: flex; align-items: center; gap: 14px; padding: 15px 18px; cursor: pointer; list-style: none; user-select: none; border-radius: 10px; }
+.wcu-accordion-summary::-webkit-details-marker { display: none; }
+.wcu-accordion-summary:hover { background: #f6f9fc; }
+.wcu-accordion-summary:focus-visible { outline: 2px solid #2271b1; outline-offset: -2px; }
+.wcu-accordion-item[open] .wcu-accordion-summary { border-bottom: 1px solid #f0f0f1; border-radius: 10px 10px 0 0; }
+.wcu-accordion-icon { flex: 0 0 42px; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; background: linear-gradient(135deg, #2271b1, #135e96); box-shadow: 0 3px 8px rgba(34,113,177,.28); }
+.wcu-accordion-heading { display: flex; flex-direction: column; gap: 2px; flex: 1 1 auto; min-width: 0; }
+.wcu-accordion-title { font-size: 15px; font-weight: 600; color: #1d2327; }
+.wcu-accordion-sub { font-size: 12.5px; line-height: 1.4; color: #646970; }
+.wcu-accordion-badge { flex: 0 0 auto; font-size: 12px; font-weight: 600; padding: 3px 11px; border-radius: 999px; background: #eef4fb; color: #2271b1; white-space: nowrap; }
+.wcu-accordion-badge.is-on { background: #edf7ed; color: #1e7e34; }
+.wcu-accordion-badge.is-off { background: #f0f0f1; color: #646970; }
+.wcu-accordion-chevron { flex: 0 0 auto; font-size: 13px; color: #2271b1; transition: transform .2s ease; }
+.wcu-accordion-item[open] .wcu-accordion-chevron { transform: rotate(180deg); }
+.wcu-accordion-body { padding: 4px 22px 20px; }
+.wcu-accordion-body > p:first-child { margin-top: 14px; }
+.wcu-accordion-subheading { font-size: 14px; font-weight: 600; color: #1d2327; margin: 26px 0 4px; padding-top: 18px; border-top: 1px solid #f0f0f1; }
+@media (max-width: 600px) {
+  .wcu-accordion-sub { display: none; }
+  .wcu-accordion-body { padding-left: 15px; padding-right: 15px; }
+}
+
+/* ---- Create Payouts: compact scheduled payout settings form ----
+   One wrapping flex line on larger screens; .wcu-schedule-fields uses
+   display: contents so its rows flow inline with the enable toggle and
+   save button, while still being show/hideable as a group. */
+.wcu-schedule-form { margin: 14px 0 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; font-size: 13px; }
+.wcu-schedule-fields { display: contents; }
+.wcu-schedule-row { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.wcu-schedule-fields > .wcu-schedule-row { padding-left: 14px; border-left: 1px solid #e2e4e7; }
+.wcu-schedule-row select { width: auto; max-width: none; min-height: 28px; padding: 2px 24px 2px 8px; font-size: 13px; margin: 0; border-radius: 4px; }
+.wcu-schedule-form .switch { scale: 0.7; margin: -6px -9px; }
+.wcu-schedule-day { display: inline-flex; align-items: center; gap: 8px; }
+.wcu-schedule-methods { display: inline-flex; flex-wrap: wrap; gap: 6px 12px; padding-left: 14px; border-left: 1px solid #e2e4e7; }
+.wcu-schedule-methods label { display: inline-flex; align-items: center; gap: 5px; margin: 0; white-space: nowrap; }
+.wcu-schedule-methods input[type="checkbox"] { margin: 0; }
+.wcu-schedule-form > .button { margin-left: auto; }
+@media (max-width: 782px) {
+  .wcu-schedule-form { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .wcu-schedule-fields { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .wcu-schedule-fields > .wcu-schedule-row, .wcu-schedule-methods { padding-left: 0; border-left: none; }
+  .wcu-schedule-form > .button { margin-left: 0; }
+}
+
+/* Export dropdown styles (.wcu-export-*) live in the global admin-style.css so they are
+   shared by the Payouts and Referrals export dropdowns. */
+
+/* ---- Payouts list table: tighten the checkbox column on this page only ---- */
+.wp-list-table th.check-column,
+.wp-list-table td.check-column,
+.wp-list-table th#cb,
+.wp-list-table td.column-cb,
+.wp-list-table th.manage-column.column-cb,
+.wp-list-table .column-cb { width: 18px !important; min-width: 18px !important; max-width: 18px !important; padding-left: 2px !important; padding-right: 2px !important; }
+.wp-list-table .check-column input[type="checkbox"] { margin: 0 auto !important; display: block; }
+
+/* Create Payout Requests: inline "Configure payout method" panel */
+.wcu-cp-wrap { text-align: center; }
+.wcu-cp-panel { text-align: center; }
+.wcu-cp-toggle { margin: 0 auto; }
+.wcu-cp-status:empty { display: none; }
+
+/* Create Payout Requests: inline "Assign a user" panel */
+.wcu-au-wrap { text-align: center; }
+.wcu-au-panel { text-align: center; }
+.wcu-au-status:empty { display: none; }
+.wcu-au-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    max-height: 180px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    text-align: left;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+.wcu-au-result,
+.wcu-au-noresult {
+    padding: 6px 8px;
+    font-size: 12px;
+    line-height: 1.3;
+}
+.wcu-au-result { cursor: pointer; }
+.wcu-au-result:hover { background: #f0f6fc; }
+.wcu-au-noresult { color: #777; }
+
+/* Create Payout Requests: refresh-cell icon spin feedback */
+.wcu-rc-refresh .fa-arrows-rotate { transition: transform 0.2s; }
+.wcu-rc-spinning .fa-arrows-rotate { animation: wcu-rc-spin 0.7s linear infinite; }
+@keyframes wcu-rc-spin { to { transform: rotate(360deg); } }

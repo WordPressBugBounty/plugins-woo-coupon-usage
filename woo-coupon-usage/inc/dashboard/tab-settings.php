@@ -191,14 +191,13 @@ function wcusage_ajax_update_settings() {
     if($couponuserid == get_current_user_id()) {
         foreach($account_fields as $post_key => $meta_key) {
             if($meta_key === 'user_email') {
-                // Only validate email if the field was actually submitted
-                if(!isset($_POST[$post_key])) {
+                // Skip the email update if the field was not part of this submission.
+                // It may be absent, or present but empty when the "Account Details" tab
+                // is hidden (the form sends an empty string). The field is client-side
+                // "required" when shown, so an empty value here means it is not being
+                // edited and must not trigger a false "Email is required." error.
+                if(!isset($_POST[$post_key]) || $_POST[$post_key] === '') {
                     continue;
-                }
-                // Check the email is not empty
-                if(empty($_POST[$post_key])) {
-                    wp_send_json_error(esc_html__('Email is required.', 'woo-coupon-usage'));
-                    wp_die();
                 }
                 // Check email is valid
                 if(!is_email($_POST[$post_key])) {
@@ -220,6 +219,39 @@ function wcusage_ajax_update_settings() {
                     update_user_meta($couponuserid, $meta_key, $value);
                 }
                 $updated_account_fields[$post_key] = $value;
+            }
+        }
+
+        // Update registration custom fields (stored in 'wcu_info', keyed by field label).
+        // Only touch fields that were actually submitted; preserve any other stored keys.
+        $wcu_show_custom_fields = wcusage_get_setting_value('wcusage_field_show_settings_tab_custom_fields', '1');
+        if ($wcu_show_custom_fields) {
+            $custom_fields_number = (int) wcusage_get_setting_value('wcusage_field_registration_custom_fields', '2');
+            $custom_info = function_exists('wcusage_get_user_custom_fields') ? wcusage_get_user_custom_fields($couponuserid) : array();
+            $custom_changed = false;
+            for ($cx = 1; $cx <= $custom_fields_number; $cx++) {
+                $post_key = 'wcu_account_custom_' . $cx;
+                if (!isset($_POST[$post_key])) {
+                    continue;
+                }
+                $ctype = wcusage_get_setting_value('wcusage_field_registration_custom_type_' . $cx, '');
+                if ($ctype === 'header' || $ctype === 'paragraph') {
+                    continue;
+                }
+                // Only save fields the admin marked editable by the user.
+                if (!wcusage_get_setting_value('wcusage_field_registration_custom_editable_' . $cx, '1')) {
+                    continue;
+                }
+                $clabel = html_entity_decode(sanitize_text_field(wcusage_get_setting_value('wcusage_field_registration_custom_label_' . $cx, '')));
+                if ($clabel === '') {
+                    continue;
+                }
+                $custom_info[$clabel] = sanitize_text_field(wp_unslash($_POST[$post_key]));
+                $custom_changed = true;
+            }
+            if ($custom_changed) {
+                update_user_meta($couponuserid, 'wcu_info', wp_json_encode($custom_info));
+                $updated_account_fields['custom_fields'] = $custom_info;
             }
         }
     } else {
@@ -249,6 +281,316 @@ function wcusage_ajax_update_settings() {
         'updated_account_fields' => $updated_account_fields
     ]);
     wp_die();
+}
+
+/**
+ * AJAX: send a password reset link to the logged-in user.
+ *
+ * Behaves like the WooCommerce/WordPress "Lost password" form: it emails a
+ * reset link to the current user's own registered address. It never accepts a
+ * target account from the request, so it can only ever reset the requester's
+ * own password.
+ */
+add_action('wp_ajax_wcusage_send_password_reset', 'wcusage_ajax_send_password_reset');
+function wcusage_ajax_send_password_reset() {
+    // CSRF check.
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'wcusage_password_reset')) {
+        wp_send_json_error(esc_html__('Invalid request. Please refresh the page and try again.', 'woo-coupon-usage'));
+        wp_die();
+    }
+
+    // Must be logged in — only the current user's own password can be reset.
+    if (!is_user_logged_in()) {
+        wp_send_json_error(esc_html__('You must be logged in to reset your password.', 'woo-coupon-usage'));
+        wp_die();
+    }
+
+    $user = wp_get_current_user();
+    if (!$user || !$user->ID) {
+        wp_send_json_error(esc_html__('Unable to determine your account.', 'woo-coupon-usage'));
+        wp_die();
+    }
+
+    // Light throttle to prevent repeated emails being triggered.
+    $throttle_key = 'wcu_pwd_reset_' . $user->ID;
+    if (get_transient($throttle_key)) {
+        wp_send_json_error(esc_html__('A password reset email was just sent. Please check your inbox, or try again in a minute.', 'woo-coupon-usage'));
+        wp_die();
+    }
+
+    // Core WP: generates a secure reset key and sends the (WooCommerce-templated, if active) email.
+    $result = retrieve_password($user->user_login);
+    if (is_wp_error($result)) {
+        wp_send_json_error($result->get_error_message());
+        wp_die();
+    }
+
+    set_transient($throttle_key, 1, MINUTE_IN_SECONDS);
+
+    wp_send_json_success([
+        'message' => sprintf(
+            /* translators: %s: the user's email address. */
+            esc_html__('A password reset link has been sent to %s. Please check your email.', 'woo-coupon-usage'),
+            $user->user_email
+        ),
+    ]);
+    wp_die();
+}
+
+/**
+ * Opens a settings "card" wrapper on the affiliate dashboard settings screen.
+ *
+ * Fires 'wcusage_hook_settings_card_before' and 'wcusage_hook_settings_card_before_{key}'
+ * so cards can be prepended to / customised per section.
+ *
+ * @param string $key   Unique card key (used for id/class and hooks).
+ * @param string $title Card title shown in the header.
+ * @param string $icon  Optional Font Awesome icon class (e.g. "fas fa-bell").
+ */
+if (!function_exists('wcusage_settings_card_open')) {
+    function wcusage_settings_card_open($key, $title = '', $icon = '') {
+        $key = sanitize_key($key);
+        do_action('wcusage_hook_settings_card_before', $key);
+        do_action("wcusage_hook_settings_card_before_{$key}");
+        ?>
+        <section class="wcu-settings-card wcu-settings-card--<?php echo esc_attr($key); ?>" id="wcu-settings-card-<?php echo esc_attr($key); ?>">
+            <?php if ($title) { ?>
+                <div class="wcu-settings-card__header">
+                    <?php if ($icon) { ?><span class="wcu-settings-card__icon"><i class="<?php echo esc_attr($icon); ?>" aria-hidden="true"></i></span><?php } ?>
+                    <h3 class="wcu-settings-card__title"><?php echo esc_html($title); ?></h3>
+                </div>
+            <?php } ?>
+            <div class="wcu-settings-card__body">
+        <?php
+    }
+}
+
+/**
+ * Closes a settings "card" wrapper.
+ *
+ * Fires 'wcusage_hook_settings_card_after_{key}' and 'wcusage_hook_settings_card_after'.
+ *
+ * @param string $key Unique card key (matching the one passed to wcusage_settings_card_open()).
+ */
+if (!function_exists('wcusage_settings_card_close')) {
+    function wcusage_settings_card_close($key) {
+        $key = sanitize_key($key);
+        ?>
+            </div>
+            <?php wcusage_settings_card_footer(); ?>
+        </section>
+        <?php
+        do_action("wcusage_hook_settings_card_after_{$key}");
+        do_action('wcusage_hook_settings_card_after', $key);
+    }
+}
+
+/**
+ * Outputs a card footer with a "Save changes" button and an inline message area.
+ * Every card shares the same settings form, so any button saves the whole form;
+ * the confirmation just appears in the section that was saved from.
+ */
+if (!function_exists('wcusage_settings_card_footer')) {
+    function wcusage_settings_card_footer() {
+        ?>
+        <div class="wcu-settings-card__footer">
+            <button type="submit" class="wcu-save-settings-button woocommerce-Button button" name="submitsettingsupdate"><?php echo esc_html__('Save changes', 'woo-coupon-usage'); ?></button>
+            <div class="wcu-settings-card-msg" role="status" aria-live="polite"></div>
+        </div>
+        <?php
+    }
+}
+
+/**
+ * Outputs a styled toggle switch (a checkbox) used inside the settings cards.
+ *
+ * Keeps the underlying checkbox id/name intact so existing JS/AJAX handling is unchanged.
+ *
+ * @param string $id      Input id.
+ * @param string $name    Input name.
+ * @param bool   $checked Whether the toggle is on.
+ * @param string $label   Label text.
+ * @param string $value   Submitted value when checked (default "1").
+ */
+if (!function_exists('wcusage_settings_toggle')) {
+    function wcusage_settings_toggle($id, $name, $checked, $label, $value = '1') {
+        ?>
+        <label class="wcu-settings-toggle" for="<?php echo esc_attr($id); ?>">
+            <input type="checkbox" id="<?php echo esc_attr($id); ?>" name="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($value); ?>" <?php checked((bool) $checked); ?>>
+            <span class="wcu-settings-toggle__track" aria-hidden="true"></span>
+            <span class="wcu-settings-toggle__label"><?php echo esc_html($label); ?></span>
+        </label>
+        <?php
+    }
+}
+
+/**
+ * Returns the affiliate's saved registration custom-field values.
+ *
+ * At registration these are stored in the 'wcu_info' user meta as a JSON object
+ * keyed by the field label. This normalises that (JSON / serialized / array) into
+ * a plain array.
+ *
+ * @param int $user_id
+ * @return array label => value
+ */
+if (!function_exists('wcusage_get_user_custom_fields')) {
+    function wcusage_get_user_custom_fields($user_id) {
+        $raw  = get_user_meta($user_id, 'wcu_info', true);
+        $info = array();
+        if (is_array($raw)) {
+            $info = $raw;
+        } elseif (is_string($raw) && strlen($raw)) {
+            $decoded = json_decode($raw, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $info = $decoded;
+            } elseif (function_exists('is_serialized') && is_serialized($raw)) {
+                $maybe = maybe_unserialize($raw);
+                if (is_array($maybe)) {
+                    $info = $maybe;
+                }
+            }
+        }
+        return $info;
+    }
+}
+
+/**
+ * Parses the "Options (one per line)" setting for a registration custom field.
+ *
+ * @param int $x Field index.
+ * @return array
+ */
+if (!function_exists('wcusage_settings_custom_field_options')) {
+    function wcusage_settings_custom_field_options($x) {
+        $raw  = wcusage_get_setting_value('wcusage_field_registration_custom_options_' . $x, '');
+        $opts = preg_split("/\r\n|\r|\n/", (string) $raw);
+        $opts = array_values(array_filter(array_map('trim', $opts), 'strlen'));
+        return $opts;
+    }
+}
+
+/**
+ * Outputs the configured registration custom fields as editable inputs inside the
+ * "Account Details" section, pre-filled with the affiliate's saved values (from
+ * 'wcu_info'). Header/paragraph field types are skipped (not user data).
+ *
+ * Required fields show a "*" marker but the HTML "required" attribute is not added
+ * so a blank legacy value can never block saving the combined settings form.
+ *
+ * @param int    $user_id
+ * @param string $layout  'modern' or 'legacy' (controls the field wrapper markup).
+ */
+if (!function_exists('wcusage_settings_output_custom_fields')) {
+    function wcusage_settings_output_custom_fields($user_id, $layout = 'modern') {
+        if (!$user_id) {
+            return;
+        }
+
+        $show = wcusage_get_setting_value('wcusage_field_show_settings_tab_custom_fields', '1');
+        /** Filter whether registration custom fields are shown/editable in Account Details. */
+        $show = apply_filters('wcusage_settings_show_custom_fields', $show, $user_id);
+        if (!$show) {
+            return;
+        }
+
+        $fieldsnumber = (int) wcusage_get_setting_value('wcusage_field_registration_custom_fields', '2');
+        if ($fieldsnumber < 1) {
+            return;
+        }
+
+        $info = wcusage_get_user_custom_fields($user_id);
+
+        for ($x = 1; $x <= $fieldsnumber; $x++) {
+            $label = html_entity_decode((string) wcusage_get_setting_value('wcusage_field_registration_custom_label_' . $x, ''));
+            $type  = wcusage_get_setting_value('wcusage_field_registration_custom_type_' . $x, '');
+
+            if ($label === '') {
+                continue;
+            }
+            // Display-only types are not editable account data.
+            if ($type === 'header' || $type === 'paragraph') {
+                continue;
+            }
+            // Respect the per-field "editable by user" setting.
+            if (!wcusage_get_setting_value('wcusage_field_registration_custom_editable_' . $x, '1')) {
+                continue;
+            }
+            if (!$type) {
+                $type = 'text';
+            }
+
+            $required = wcusage_get_setting_value('wcusage_field_registration_custom_required_' . $x, '');
+            $star     = $required ? ' *' : '';
+
+            $value = isset($info[$label]) ? $info[$label] : '';
+            if (is_array($value)) {
+                $value = implode(', ', $value);
+            }
+
+            $input_id = 'wcu_account_custom_' . $x;
+
+            if ($layout === 'legacy') {
+                echo '<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide wcu-account-custom-field">';
+            } else {
+                echo '<div class="wcu-settings-field wcu-account-custom-field">';
+            }
+
+            if ($type !== 'checkbox' && $type !== 'acceptance') {
+                echo '<label for="' . esc_attr($input_id) . '">' . esc_html($label . $star) . '</label>';
+            }
+
+            switch ($type) {
+                case 'textarea':
+                    echo '<textarea class="wcu-account-custom-input woocommerce-Input input-text" id="' . esc_attr($input_id) . '" name="' . esc_attr($input_id) . '">' . esc_textarea($value) . '</textarea>';
+                    break;
+
+                case 'date':
+                    echo '<input type="date" class="wcu-account-custom-input woocommerce-Input input-text" id="' . esc_attr($input_id) . '" name="' . esc_attr($input_id) . '" value="' . esc_attr($value) . '">';
+                    break;
+
+                case 'dropdown':
+                    $opts = wcusage_settings_custom_field_options($x);
+                    echo '<select class="wcu-account-custom-input" id="' . esc_attr($input_id) . '" name="' . esc_attr($input_id) . '">';
+                    echo '<option value="">' . esc_html__('Select...', 'woo-coupon-usage') . '</option>';
+                    // Preserve a previously-saved value even if it is no longer an available option.
+                    if ($value !== '' && !in_array($value, $opts, true)) {
+                        echo '<option value="' . esc_attr($value) . '" selected>' . esc_html($value) . '</option>';
+                    }
+                    foreach ($opts as $opt) {
+                        echo '<option value="' . esc_attr($opt) . '"' . selected($value, $opt, false) . '>' . esc_html($opt) . '</option>';
+                    }
+                    echo '</select>';
+                    break;
+
+                case 'radio':
+                    $opts = wcusage_settings_custom_field_options($x);
+                    echo '<span class="wcu-account-custom-radios">';
+                    foreach ($opts as $i => $opt) {
+                        $rid = $input_id . '_' . $i;
+                        echo '<label class="wcu-account-custom-radio" for="' . esc_attr($rid) . '"><input type="radio" class="wcu-account-custom-input" id="' . esc_attr($rid) . '" name="' . esc_attr($input_id) . '" value="' . esc_attr($opt) . '"' . checked($value, $opt, false) . '> ' . esc_html($opt) . '</label>';
+                    }
+                    echo '</span>';
+                    break;
+
+                case 'checkbox':
+                case 'acceptance':
+                    $checked = ($value === 'Yes') ? ' checked' : '';
+                    echo '<label class="wcu-account-custom-checkbox" for="' . esc_attr($input_id) . '">';
+                    echo '<input type="checkbox" class="wcu-account-custom-input" id="' . esc_attr($input_id) . '" name="' . esc_attr($input_id) . '" value="Yes"' . $checked . '> '; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Safe internal output; verified in manual audit.
+                    echo '<span>' . esc_html($label . $star) . '</span>';
+                    echo '</label>';
+                    break;
+
+                case 'text':
+                default:
+                    echo '<input type="text" class="wcu-account-custom-input woocommerce-Input input-text" id="' . esc_attr($input_id) . '" name="' . esc_attr($input_id) . '" value="' . esc_attr($value) . '">';
+                    break;
+            }
+
+            echo ($layout === 'legacy') ? '</p>' : '</div>';
+        }
+    }
 }
 
 /**
@@ -308,6 +650,18 @@ if (!function_exists('wcusage_tab_settings')) {
             $phone = '';
             $website = '';
         }
+
+        $wcu_settings_layout = wcusage_get_setting_value('wcusage_field_settings_tab_layout', 'modern');
+        /**
+         * Filter the affiliate "Settings" screen layout.
+         *
+         * @param string $wcu_settings_layout 'modern' (boxed cards) or 'legacy' (tabs).
+         * @param int    $postid              Coupon post ID.
+         * @param int    $couponuserid        Affiliate user ID.
+         */
+        $wcu_settings_layout = apply_filters('wcusage_settings_tab_layout', $wcu_settings_layout, $postid, $couponuserid);
+
+        if ($wcu_settings_layout === 'legacy') {
         ?>
 
         <p class="wcu-tab-title settings-title" style="font-size: 22px; margin-bottom: 25px;"><?php echo esc_html__("Settings", "woo-coupon-usage"); ?>:</p>
@@ -441,9 +795,11 @@ if (!function_exists('wcusage_tab_settings')) {
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
                                         <label><?php echo esc_html__('Profile Picture', 'woo-coupon-usage'); ?></label>
                                         <div style="margin-bottom: 10px;" class="profile-picture">
-                                            <?php echo get_avatar($couponuserid, 96); ?>
+                                            <a href="https://gravatar.com/profile/avatars" target="_blank" rel="noopener noreferrer"
+                                            title="<?php echo esc_attr__('Change your profile picture on Gravatar', 'woo-coupon-usage'); ?>">
+                                                <?php echo get_avatar($couponuserid, 96); ?>
+                                            </a>
                                         </div>
-                                        <p style="margin-top: 0px;font-size:12px;"><?php echo esc_html__('Your profile picture is managed via Gravatar. To set or change it, visit ', 'woo-coupon-usage'); ?><a href="https://gravatar.com/profile/avatars" target="_blank"><?php echo esc_html__('Gravatar.com', 'woo-coupon-usage'); ?></a>.</p>
                                     </p>
                                     <?php } ?>
                                     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
@@ -477,11 +833,15 @@ if (!function_exists('wcusage_tab_settings')) {
                                         <input type="url" class="woocommerce-Input woocommerce-Input--text input-text"
                                             id="wcu_website" name="wcu_website" value="<?php echo esc_attr($website); ?>" autocomplete="url">
                                     </p>
+                                    <?php wcusage_settings_output_custom_fields($couponuserid, 'legacy'); ?>
                                     <p>
                                         <label for="wcu_password"><?php echo esc_html__('Password', 'woo-coupon-usage'); ?>:</label>
-                                        <a href="<?php echo esc_url(wp_lostpassword_url()); ?>" target="_blank">
+                                        <a class="wcu-reset-password-link" href="#"
+                                            data-nonce="<?php echo esc_attr(wp_create_nonce('wcusage_password_reset')); ?>"
+                                            data-confirm="<?php echo esc_attr__('Are you sure you want to reset your password? A password reset link will be emailed to you.', 'woo-coupon-usage'); ?>">
                                             <?php echo esc_html__('Click here to reset your password.', 'woo-coupon-usage'); ?>
                                         </a>
+                                        <span class="wcu-reset-password-msg" role="status" aria-live="polite"></span>
                                     </p>
                                 <?php } else { ?>
                                     <p><?php echo esc_html__("Sorry, this coupon is not assigned to you. You can only edit your own account details.", "woo-coupon-usage"); ?></p>
@@ -527,7 +887,252 @@ if (!function_exists('wcusage_tab_settings')) {
 
         <?php } else { ?>
             <br/><p><?php echo esc_html__("Sorry, this coupon is not assigned to you.", "woo-coupon-usage"); ?></p>
+        <?php }
+
+            return;
+        }
+        ?>
+
+        <div class="wcu-settings-modern">
+
+            <?php do_action('wcusage_hook_settings_top', $postid, $couponuserid); ?>
+
+        <?php if ($couponuserid == $currentuserid || wcusage_check_admin_access()) {
+
+            $wcu_is_pro = wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code();
+
+            // Determine which right-column section cards to show.
+            $wcusage_field_payouts_enable = $wcu_is_pro ? wcusage_get_setting_value('wcusage_field_payouts_enable', '1') : 0;
+            $wcu_enable_statements        = wcusage_get_setting_value('wcusage_field_payouts_enable_statements', '0');
+            $wcu_enable_statements_data   = wcusage_get_setting_value('wcusage_field_payouts_enable_statements_data', '1');
+            $wcu_show_statements          = ($wcu_is_pro && $wcu_enable_statements && $wcu_enable_statements_data);
+
+            $wcu_sections = array();
+            if ($wcusage_field_payouts_enable) {
+                $wcu_sections['payout'] = array(
+                    'title' => esc_html__('Payout Settings', 'woo-coupon-usage'),
+                    'icon'  => 'fas fa-wallet',
+                );
+            }
+            if ($wcu_show_statements) {
+                $wcu_sections['statement'] = array(
+                    'title' => esc_html__('Statement Details', 'woo-coupon-usage'),
+                    'icon'  => 'fas fa-file-invoice',
+                );
+            }
+            $wcu_sections['notifications'] = array(
+                'title' => esc_html__('Email Notifications', 'woo-coupon-usage'),
+                'icon'  => 'fas fa-bell',
+            );
+            if ($wcu_is_pro && $wcusage_sms_enable && ($wcusage_sms_affiliate_phone_show || $wcusage_sms_affiliate_optout_show)) {
+                $wcu_sections['sms'] = array(
+                    'title' => esc_html__('SMS Notifications', 'woo-coupon-usage'),
+                    'icon'  => 'fas fa-comment-sms',
+                );
+            }
+
+            /**
+             * Filter the right-column section cards and their order on the settings screen.
+             * Add a custom key (['title' => '', 'icon' => '']) and hook
+             * 'wcusage_hook_settings_card_content_{key}' to render its contents.
+             *
+             * @param array $wcu_sections  Keyed array of section definitions.
+             * @param int   $postid        Coupon post ID.
+             * @param int   $couponuserid  Affiliate user ID.
+             */
+            $wcu_sections = apply_filters('wcusage_settings_sections', $wcu_sections, $postid, $couponuserid);
+
+            $wcu_show_account = wcusage_get_setting_value('wcusage_field_show_settings_tab_account', '1');
+            /** Filter whether the account details card (left column) is shown. */
+            $wcu_show_account = apply_filters('wcusage_settings_show_account_card', $wcu_show_account, $postid, $couponuserid);
+            ?>
+
+            <form method="post" class="wcusage_settings_form" id="wcusage-settings-form" data-post-id="<?php echo esc_attr($postid); ?>">
+                <?php wp_nonce_field('wcusage_settings_update', 'wcusage_settings_nonce'); ?>
+
+                <div class="wcu-settings-tab-content wcu-settings-grid<?php echo $wcu_show_account ? '' : ' wcu-settings-grid--single'; ?>">
+
+                    <?php if ($wcu_show_account) { ?>
+                    <div class="wcu-settings-col wcu-settings-col--account">
+                        <?php do_action('wcusage_hook_settings_account_card_before', $postid, $couponuserid); ?>
+                        <section class="wcu-settings-card wcu-settings-account-card" id="wcu-settings-card-account">
+                            <?php
+                            $wcu_show_gravatar = wcusage_get_setting_value('wcusage_field_show_settings_tab_gravatar', '1');
+                            $wcu_identity_name = $display_name ? $display_name : trim($first_name . ' ' . $last_name);
+                            if (!$wcu_identity_name) { $wcu_identity_name = $email; }
+                            ?>
+                            <div class="wcu-settings-account-card__identity">
+                                <div class="wcu-settings-account-card__avatar">
+                                    <?php
+                                    if ($wcu_show_gravatar) {
+                                        echo '<a href="https://gravatar.com/profile/avatars" target="_blank" rel="noopener noreferrer" title="' . esc_attr__('Change your profile picture on Gravatar', 'woo-coupon-usage') . '">';
+                                        echo get_avatar($couponuserid, 120);
+                                        echo '</a>';
+                                    } else {
+                                        if ($wcu_identity_name) {
+                                            $wcu_initial = function_exists('mb_substr') ? mb_substr($wcu_identity_name, 0, 1) : substr($wcu_identity_name, 0, 1);
+                                        } else {
+                                            $wcu_initial = '?';
+                                        }
+                                        echo '<span class="wcu-settings-account-card__initial">' . esc_html(function_exists('mb_strtoupper') ? mb_strtoupper($wcu_initial) : strtoupper($wcu_initial)) . '</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <?php if ($wcu_identity_name) { ?>
+                                    <div class="wcu-settings-account-card__name"><?php echo esc_html($wcu_identity_name); ?></div>
+                                <?php } ?>
+                                <?php if ($email) { ?>
+                                    <div class="wcu-settings-account-card__email"><?php echo esc_html($email); ?></div>
+                                <?php } ?>
+                            </div>
+
+                            <div class="wcu-settings-card__body">
+                                <p class="wcu-settings-card__eyebrow"><?php echo esc_html__("Account Details", "woo-coupon-usage"); ?></p>
+                                <?php if ($couponuserid && $currentuserid == $couponuserid) { ?>
+
+                                    <div class="wcu-settings-field">
+                                        <label for="wcu_first_name"><?php echo esc_html__('First Name', 'woo-coupon-usage'); ?></label>
+                                        <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" id="wcu_first_name" name="wcu_first_name" value="<?php echo esc_attr($first_name); ?>" autocomplete="given-name">
+                                    </div>
+                                    <div class="wcu-settings-field">
+                                        <label for="wcu_last_name"><?php echo esc_html__('Last Name', 'woo-coupon-usage'); ?></label>
+                                        <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" id="wcu_last_name" name="wcu_last_name" value="<?php echo esc_attr($last_name); ?>" autocomplete="family-name">
+                                    </div>
+                                    <div class="wcu-settings-field">
+                                        <label for="wcu_display_name"><?php echo esc_html__('Display Name', 'woo-coupon-usage'); ?></label>
+                                        <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" id="wcu_display_name" name="wcu_display_name" value="<?php echo esc_attr($display_name); ?>" autocomplete="nickname">
+                                    </div>
+                                    <div class="wcu-settings-field">
+                                        <label for="wcu_email"><?php echo esc_html__('Email Address', 'woo-coupon-usage'); ?></label>
+                                        <input type="email" class="woocommerce-Input woocommerce-Input--email input-text" id="wcu_email" name="wcu_email" value="<?php echo esc_attr($email); ?>" autocomplete="email" required>
+                                    </div>
+                                    <div class="wcu-settings-field">
+                                        <label for="wcu_phone"><?php echo esc_html__('Phone Number', 'woo-coupon-usage'); ?></label>
+                                        <input type="tel" class="woocommerce-Input woocommerce-Input--text input-text" id="wcu_phone" name="wcu_phone" value="<?php echo esc_attr($phone); ?>" autocomplete="tel">
+                                    </div>
+                                    <div class="wcu-settings-field">
+                                        <label for="wcu_website"><?php echo esc_html__('Website', 'woo-coupon-usage'); ?></label>
+                                        <input type="url" class="woocommerce-Input woocommerce-Input--text input-text" id="wcu_website" name="wcu_website" value="<?php echo esc_attr($website); ?>" autocomplete="url">
+                                    </div>
+
+                                    <?php wcusage_settings_output_custom_fields($couponuserid, 'modern'); ?>
+
+                                    <?php do_action('wcusage_hook_settings_account_fields_after', $couponuserid); ?>
+
+                                    <div class="wcu-settings-field wcu-settings-account-card__password">
+                                        <label><?php echo esc_html__('Password', 'woo-coupon-usage'); ?></label>
+                                        <a class="wcu-settings-link wcu-reset-password-link" href="#"
+                                            data-nonce="<?php echo esc_attr(wp_create_nonce('wcusage_password_reset')); ?>"
+                                            data-confirm="<?php echo esc_attr__('Are you sure you want to reset your password? A password reset link will be emailed to you.', 'woo-coupon-usage'); ?>"><?php echo esc_html__('Click here to reset your password.', 'woo-coupon-usage'); ?></a>
+                                        <span class="wcu-reset-password-msg" role="status" aria-live="polite"></span>
+                                    </div>
+
+                                <?php } else { ?>
+                                    <p><?php echo esc_html__("Sorry, this coupon is not assigned to you. You can only edit your own account details.", "woo-coupon-usage"); ?></p>
+                                    <?php if (wcusage_check_admin_access() && current_user_can('edit_users')) { ?>
+                                        <p><?php echo sprintf(esc_html__("[Admin] You can edit the account details for this user in the admin area: %s", "woo-coupon-usage"),
+                                            "<a href='" . esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $couponuserid) ) . "' target='_blank'>" . esc_html__("View Affiliate", "woo-coupon-usage") . "</a>"); ?></p>
+                                        <span class='admin-edit-account'>
+                                            <div class="wcu-settings-field"><label><?php echo esc_html__('First Name', 'woo-coupon-usage'); ?>: <?php echo esc_html($first_name); ?></label></div>
+                                            <div class="wcu-settings-field"><label><?php echo esc_html__('Last Name', 'woo-coupon-usage'); ?>: <?php echo esc_html($last_name); ?></label></div>
+                                            <div class="wcu-settings-field"><label><?php echo esc_html__('Display Name', 'woo-coupon-usage'); ?>: <?php echo esc_html($display_name); ?></label></div>
+                                            <div class="wcu-settings-field"><label><?php echo esc_html__('Email Address', 'woo-coupon-usage'); ?>: <?php echo esc_html($email); ?></label></div>
+                                            <div class="wcu-settings-field"><label><?php echo esc_html__('Phone Number', 'woo-coupon-usage'); ?>: <?php echo esc_html($phone); ?></label></div>
+                                            <div class="wcu-settings-field"><label><?php echo esc_html__('Website', 'woo-coupon-usage'); ?>: <?php echo esc_html($website); ?></label></div>
+                                        </span>
+                                    <?php } ?>
+                                <?php } ?>
+                            </div>
+                            <?php if ($couponuserid && $currentuserid == $couponuserid) { wcusage_settings_card_footer(); } ?>
+                        </section>
+                        <?php do_action('wcusage_hook_settings_account_card_after', $postid, $couponuserid); ?>
+                    </div>
+                    <?php } ?>
+
+                    <div class="wcu-settings-col wcu-settings-col--main">
+                        <?php
+                        do_action('wcusage_hook_settings_sections_before', $postid, $couponuserid);
+
+                        foreach ($wcu_sections as $wcu_key => $wcu_section) {
+                            $wcu_key   = sanitize_key($wcu_key);
+                            $wcu_title = isset($wcu_section['title']) ? $wcu_section['title'] : '';
+                            $wcu_icon  = isset($wcu_section['icon']) ? $wcu_section['icon'] : '';
+
+                            wcusage_settings_card_open($wcu_key, $wcu_title, $wcu_icon);
+
+                            if ($wcu_key === 'payout') {
+                                do_action('wcusage_hook_output_payout_data_section', $postid, '');
+                            } elseif ($wcu_key === 'statement') {
+                                do_action('wcusage_hook_output_statement_data_section', $couponuserid);
+                            } elseif ($wcu_key === 'notifications') {
+
+                                wcusage_settings_toggle('wcu_enable_notifications', 'wcu_enable_notifications', $wcu_enable_notifications, esc_html__("Enable Email Notifications", "woo-coupon-usage"));
+
+                                if ($wcu_is_pro) {
+                                    // Newsletter subscription state: subscribed if user meta flag not set.
+                                    $is_unsub = get_user_meta($couponuserid, 'wcusage_newsletter_unsubscribed', true) ? true : false;
+                                    $newsletters_enabled = wcusage_get_setting_value('wcusage_field_email_newsletter_enable', 0);
+                                    $global_unsub_enabled = wcusage_get_setting_value('wcusage_field_newsletter_enable_unsubscribe', 1);
+                                    if ($newsletters_enabled && $global_unsub_enabled) {
+                                        wcusage_settings_toggle('wcu_newsletter_subscribed', 'wcu_newsletter_subscribed', !$is_unsub, esc_html__("Subscribe to Affiliate Newsletters", "woo-coupon-usage"));
+                                    }
+                                }
+
+                                if ($enable_reports_user_option && $wcusage_field_enable_reports && $wcu_is_pro) {
+                                    $wcusage_field_pdfreports_freq = wcusage_get_setting_value('wcusage_field_pdfreports_freq', 'monthly');
+                                    $pdfreports_freq = esc_html__("Monthly", "woo-coupon-usage");
+                                    if ($wcusage_field_pdfreports_freq == "weekly") {
+                                        $pdfreports_freq = esc_html__("Weekly", "woo-coupon-usage");
+                                    } elseif ($wcusage_field_pdfreports_freq == "quarterly") {
+                                        $pdfreports_freq = esc_html__("Quarterly", "woo-coupon-usage");
+                                    }
+                                    wcusage_settings_toggle('wcu_enable_reports', 'wcu_enable_reports', $wcu_enable_reports, esc_html__("Enable Email Reports", "woo-coupon-usage") . ' (' . $pdfreports_freq . ')');
+                                }
+
+                                if ($wcusage_email_enable_extra && $wcu_is_pro) { ?>
+                                    <div class="wcu-settings-field">
+                                        <label for="wcu_notifications_extra"><?php echo esc_html__("Additional Email Addresses", "woo-coupon-usage"); ?></label>
+                                        <input type="text" id="wcu_notifications_extra" name="wcu_notifications_extra" value="<?php echo esc_attr($wcu_notifications_extra); ?>" placeholder="example@email.com, another@email.com">
+                                        <small class="wcu-settings-hint"><?php echo esc_html__("Separate multiple addresses with a comma.", "woo-coupon-usage"); ?></small>
+                                    </div>
+                                <?php }
+
+                            } elseif ($wcu_key === 'sms') {
+
+                                if ($wcusage_sms_affiliate_phone_show) { ?>
+                                    <div class="wcu-settings-field">
+                                        <label for="wcusage_sms_phone"><?php echo esc_html__("Phone Number for SMS Notifications", "woo-coupon-usage"); ?></label>
+                                        <input type="tel" id="wcusage_sms_phone" name="wcusage_sms_phone" value="<?php echo esc_attr($wcu_sms_phone); ?>">
+                                        <small class="wcu-settings-hint"><?php echo esc_html__("Enter in international format, e.g. +447911123456.", "woo-coupon-usage"); ?></small>
+                                    </div>
+                                <?php }
+
+                                if ($wcusage_sms_affiliate_optout_show) {
+                                    wcusage_settings_toggle('wcusage_sms_opted_out', 'wcusage_sms_opted_out', $wcu_sms_opted_out, esc_html__("Opt out of SMS notifications", "woo-coupon-usage"));
+                                }
+
+                            } else {
+                                /** Render a custom section registered via the 'wcusage_settings_sections' filter. */
+                                do_action("wcusage_hook_settings_card_content_{$wcu_key}", $postid, $couponuserid);
+                            }
+
+                            wcusage_settings_card_close($wcu_key);
+                        }
+
+                        do_action('wcusage_hook_settings_sections_after', $postid, $couponuserid);
+                        ?>
+                    </div>
+
+                </div>
+
+            </form>
+
+        <?php } else { ?>
+            <br/><p><?php echo esc_html__("Sorry, this coupon is not assigned to you.", "woo-coupon-usage"); ?></p>
         <?php } ?>
+
+        </div>
+
         <?php
     }
 }

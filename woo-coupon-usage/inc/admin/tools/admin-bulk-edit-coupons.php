@@ -80,8 +80,8 @@ function wcusage_bulk_coupon_page() {
         <h2><?php echo esc_html__('Bulk Edit: Coupon Settings', 'woo-coupon-usage'); ?></h2>
         <p><?php echo esc_html__('Use this tool to bulk edit your coupon settings.', 'woo-coupon-usage'); ?></p>
         <br/>
-        <button id="import-csv" class="button">Import CSV</button>
-        <button id="export-csv" class="button">Export CSV</button>
+        <button type="button" id="import-csv" class="button"><?php esc_html_e('Import CSV', 'woo-coupon-usage'); ?></button>
+        <button type="button" id="export-csv" class="button"><?php esc_html_e('Export CSV', 'woo-coupon-usage'); ?></button>
         <br/><br/>
         <form id="bulk-coupon-form" method="POST">
             <input type="hidden" name="action" value="update_coupons">
@@ -145,41 +145,176 @@ function wcusage_bulk_coupon_page() {
                 }
             });
 
+            function wcusageParseBulkCouponCsv(csv) {
+                var rows = [];
+                var row = [];
+                var value = '';
+                var insideQuotes = false;
+
+                csv = csv.replace(/^\uFEFF/, '');
+
+                for (var index = 0; index < csv.length; index++) {
+                    var character = csv.charAt(index);
+                    var nextCharacter = csv.charAt(index + 1);
+
+                    if (insideQuotes) {
+                        if (character === '"') {
+                            if (nextCharacter === '"') {
+                                value += '"';
+                                index++;
+                            } else {
+                                insideQuotes = false;
+                            }
+                        } else {
+                            value += character;
+                        }
+                    } else if (character === '"') {
+                        insideQuotes = true;
+                    } else if (character === ',') {
+                        row.push(value);
+                        value = '';
+                    } else if (character === '\n' || character === '\r') {
+                        row.push(value);
+                        rows.push(row);
+                        row = [];
+                        value = '';
+
+                        if (character === '\r' && nextCharacter === '\n') {
+                            index++;
+                        }
+                    } else {
+                        value += character;
+                    }
+                }
+
+                if (value !== '' || row.length > 0) {
+                    row.push(value);
+                    rows.push(row);
+                }
+
+                return rows.filter(function(rowData) {
+                    return rowData.some(function(cell) {
+                        return $.trim(cell) !== '';
+                    });
+                });
+            }
+
+            function wcusageGetBulkCouponCsvValue(row, headers, possibleHeaders, fallbackIndex) {
+                var value = '';
+                var foundHeader = false;
+
+                $.each(possibleHeaders, function(index, header) {
+                    var headerIndex = headers.indexOf(header.toLowerCase());
+
+                    if (headerIndex !== -1 && typeof row[headerIndex] !== 'undefined') {
+                        value = row[headerIndex];
+                        foundHeader = true;
+                        return false;
+                    }
+                });
+
+                if (!foundHeader && typeof row[fallbackIndex] !== 'undefined') {
+                    value = row[fallbackIndex];
+                }
+
+                return $.trim(value);
+            }
+
+            function wcusageSetBulkCouponField(couponRow, selector, value, eventName) {
+                var field = couponRow.find(selector);
+
+                if (!field.length) {
+                    return false;
+                }
+
+                field.val(value).trigger(eventName);
+                return true;
+            }
+
+            function wcusageShowBulkCouponImportMessage(message, type) {
+                $('.wcusage-message.import-message').remove();
+                $('<div class="wcusage-message import-message ' + type + '"><p>' + message + '</p></div>').insertAfter('#export-csv');
+            }
+
+            function wcusageEscapeBulkCouponCsvValue(value) {
+                value = (typeof value === 'undefined' || value === null) ? '' : String(value);
+                return '"' + value.replace(/"/g, '""') + '"';
+            }
+
             // Import CSV button click event
             $('#import-csv').on('click', function() {
-                var csvFileInput = $('<input type="file" accept=".csv" style="display:none">');
+                var csvFileInput = $('<input type="file" accept=".csv" style="display:none">').appendTo('body');
                 csvFileInput.change(function(e) {
                     var file = e.target.files[0];
                     if (!file) return;
                     var reader = new FileReader();
                     reader.onload = function(e) {
-                        var csv = e.target.result;
-                        var lines = csv.split('\n');
-                        var headers = lines[0].split(',');
-                        for (var i = 1; i < lines.length; i++) {
-                            var data = lines[i].split(',');
-                            if (data.length >= 8) {
-                                // Get data
-                                var couponId = data[0].trim();
-                                var couponName = data[1].trim();
-                                var discountType = data[2].trim();
-                                var couponAmount = data[3].trim();
-                                var username = data[4].trim();
-                                var commissionPercent = data[5].trim();
-                                var commissionOrder = data[6].trim();
-                                var commissionProduct = data[7].trim();
-                                // Update fields and trigger change event
-                                $('input[name="coupon_name[' + couponId + ']"]').val(couponName).trigger('input');
-                                $('select[name="discount_type[' + couponId + ']"]').val(discountType).trigger('change');
-                                $('input[name="coupon_amount[' + couponId + ']"]').val(couponAmount).trigger('input');
-                                $('input[name="username[' + couponId + ']"]').val(username).trigger('input');
-                                <?php if (wcu_fs()->can_use_premium_code()) { ?>
-                                $('input[name="commission_percent[' + couponId + ']"]').val(commissionPercent).trigger('input');
-                                $('input[name="commission_order[' + couponId + ']"]').val(commissionOrder).trigger('input');
-                                $('input[name="commission_product[' + couponId + ']"]').val(commissionProduct).trigger('input');
-                                <?php } ?>
+                        var rows = wcusageParseBulkCouponCsv(e.target.result);
+
+                        if (rows.length < 2) {
+                            wcusageShowBulkCouponImportMessage('<?php echo esc_js(__('No coupon rows were found in the selected CSV file.', 'woo-coupon-usage')); ?>', 'error');
+                            csvFileInput.remove();
+                            return;
+                        }
+
+                        var headers = $.map(rows[0], function(header) {
+                            return $.trim(header).replace(/^\uFEFF/, '').toLowerCase();
+                        });
+                        var importedRows = 0;
+                        var skippedRows = 0;
+
+                        for (var i = 1; i < rows.length; i++) {
+                            var data = rows[i];
+                            var couponId = wcusageGetBulkCouponCsvValue(data, headers, ['coupon id'], 0).replace(/[^0-9]/g, '');
+                            var couponRow = $('#wcusage-tools-rows tr[data-coupon-id="' + couponId + '"]');
+
+                            if (!couponId || !couponRow.length) {
+                                skippedRows++;
+                                continue;
+                            }
+
+                            var couponName = wcusageGetBulkCouponCsvValue(data, headers, ['coupon name'], 1);
+                            var discountType = wcusageGetBulkCouponCsvValue(data, headers, ['discount type'], 2);
+                            var couponAmount = wcusageGetBulkCouponCsvValue(data, headers, ['discount amount'], 3);
+                            var username = wcusageGetBulkCouponCsvValue(data, headers, ['affiliate username'], 4);
+                            var rowUpdated = false;
+
+                            rowUpdated = wcusageSetBulkCouponField(couponRow, 'input[name="coupon_name[' + couponId + ']"]', couponName, 'input') || rowUpdated;
+                            rowUpdated = wcusageSetBulkCouponField(couponRow, 'select[name="discount_type[' + couponId + ']"]', discountType, 'change') || rowUpdated;
+                            rowUpdated = wcusageSetBulkCouponField(couponRow, 'input[name="coupon_amount[' + couponId + ']"]', couponAmount, 'input') || rowUpdated;
+                            rowUpdated = wcusageSetBulkCouponField(couponRow, 'input[name="username[' + couponId + ']"]', username, 'input') || rowUpdated;
+                            <?php if (wcu_fs()->can_use_premium_code()) { ?>
+                            var commissionPercent = wcusageGetBulkCouponCsvValue(data, headers, ['commission percent'], 5);
+                            var commissionOrder = wcusageGetBulkCouponCsvValue(data, headers, ['commission £ - order', 'commission - order'], 6);
+                            var commissionProduct = wcusageGetBulkCouponCsvValue(data, headers, ['commission £ - product', 'commission - product'], 7);
+
+                            rowUpdated = wcusageSetBulkCouponField(couponRow, 'input[name="commission_percent[' + couponId + ']"]', commissionPercent, 'input') || rowUpdated;
+                            rowUpdated = wcusageSetBulkCouponField(couponRow, 'input[name="commission_order[' + couponId + ']"]', commissionOrder, 'input') || rowUpdated;
+                            rowUpdated = wcusageSetBulkCouponField(couponRow, 'input[name="commission_product[' + couponId + ']"]', commissionProduct, 'input') || rowUpdated;
+                            <?php } ?>
+
+                            if (rowUpdated) {
+                                importedRows++;
                             }
                         }
+
+                        if (importedRows > 0) {
+                            var message = '<?php echo esc_js(__('Imported coupon rows: ', 'woo-coupon-usage')); ?>' + importedRows + '. <?php echo esc_js(__('Review the highlighted rows, then click "Update Coupons" to save them.', 'woo-coupon-usage')); ?>';
+
+                            if (skippedRows > 0) {
+                                message += ' <?php echo esc_js(__('Skipped rows with no matching coupon ID: ', 'woo-coupon-usage')); ?>' + skippedRows + '.';
+                            }
+
+                            wcusageShowBulkCouponImportMessage(message, 'updated');
+                        } else {
+                            wcusageShowBulkCouponImportMessage('<?php echo esc_js(__('No matching coupon IDs were found in the selected CSV file.', 'woo-coupon-usage')); ?>', 'error');
+                        }
+
+                        csvFileInput.remove();
+                    };
+                    reader.onerror = function() {
+                        wcusageShowBulkCouponImportMessage('<?php echo esc_js(__('The selected CSV file could not be read.', 'woo-coupon-usage')); ?>', 'error');
+                        csvFileInput.remove();
                     };
                     reader.readAsText(file);
                 });
@@ -188,7 +323,7 @@ function wcusage_bulk_coupon_page() {
 
             // Export CSV button click event
             $('#export-csv').on('click', function() {
-                var csvContent = "data:text/csv;charset=utf-8,";
+                var csvContent = "";
                 var headers = [];
                 var rows = [];
 
@@ -196,13 +331,18 @@ function wcusage_bulk_coupon_page() {
                 $('#wcusage-tools-rows th').each(function() {
                     headers.push($(this).text());
                 });
-                rows.push(headers.join(','));
+                rows.push($.map(headers, wcusageEscapeBulkCouponCsvValue).join(','));
 
                 // Get table data
                 $('#wcusage-tools-rows tr:gt(0)').each(function() { // Exclude the first row (headings)
                     var rowData = [];
                     var couponId = $(this).data('coupon-id');
-                    rowData.push('"' + couponId + '"'); // Add Coupon ID to the row data
+
+                    if (!couponId) {
+                        return;
+                    }
+
+                    rowData.push(wcusageEscapeBulkCouponCsvValue(couponId)); // Add Coupon ID to the row data
                     $(this).find('td').each(function() {
                         // exclude first
                         if ($(this).index() == 0) return;
@@ -213,17 +353,18 @@ function wcusage_bulk_coupon_page() {
                         } else if (inputElement.is('select')) {
                             value = inputElement.find('option:selected').val(); // Get the selected option's value
                         }
-                        rowData.push('"' + value.replace(/"/g, '""') + '"');
+                        rowData.push(wcusageEscapeBulkCouponCsvValue(value));
                     });
                     rows.push(rowData.join(','));
                 });
 
                 // Create CSV file
                 csvContent += rows.join('\n');
-
-                // Create a temporary link element to trigger the download
+                var csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                var csvUrl = URL.createObjectURL(csvBlob);
                 var link = document.createElement('a');
-                link.setAttribute('href', encodeURI(csvContent));
+
+                link.setAttribute('href', csvUrl);
                 link.setAttribute('download', 'wcusage-tools.csv');
                 document.body.appendChild(link);
 
@@ -232,6 +373,7 @@ function wcusage_bulk_coupon_page() {
 
                 // Clean up the temporary link element
                 document.body.removeChild(link);
+                URL.revokeObjectURL(csvUrl);
             });
 
             // Handle form submission
@@ -249,7 +391,14 @@ function wcusage_bulk_coupon_page() {
                     $(this).prop('disabled', false);
                     return;
                 }
-                
+
+                var confirmMsg = '<?php echo esc_js(__('You are about to update %s coupon(s). Changes are applied immediately and cannot be automatically undone.', 'woo-coupon-usage')); ?>'.replace('%s', totalChangedCoupons);
+                confirmMsg += '\n\n' + '<?php echo esc_js(__('Continue?', 'woo-coupon-usage')); ?>';
+                if (!window.confirm(confirmMsg)) {
+                    $(this).prop('disabled', false);
+                    return;
+                }
+
                 $('#spinner').show(); // Show the spinner icon
                 $('#progress').text('0/' + totalChangedCoupons); // Initialize progress with changed count
                 updateChangedCoupons(changedRows, 0);
@@ -343,7 +492,7 @@ function wcusage_bulk_coupon_page() {
 // Enqueue scripts for admin page
 add_action('admin_enqueue_scripts', 'wcusage_enqueue_admin_scripts_coupon');
 function wcusage_enqueue_admin_scripts_coupon() {
-    if (isset($_GET['page']) && $_GET['page'] === 'wcusage-bulk-coupon-update') {
+    if (isset($_GET['page']) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wcusage-bulk-edit-coupon') {
         wp_enqueue_script('jquery');
     }
 }
@@ -419,12 +568,24 @@ function wcusage_update_coupon() {
     wp_update_post($post);
 
     update_post_meta($coupon_id, 'wcu_select_coupon_user', $user_id);
-    
+
+    // Bulk-edit commission changes are genuine manual admin edits, so allow the
+    // activity log to record them (see wcusage_after_update_function). Flag only
+    // around the actual writes so it can't leak onto later automated updates.
+    if ( function_exists( 'wcusage_set_manual_commission_edit' ) ) {
+        wcusage_set_manual_commission_edit( true );
+    }
+
     if (wcu_fs()->can_use_premium_code()) {
         update_post_meta($coupon_id, 'wcu_text_coupon_commission', $commission_percent);
         update_post_meta($coupon_id, 'wcu_text_coupon_commission_fixed_order', $commission_order);
         update_post_meta($coupon_id, 'wcu_text_coupon_commission_fixed_product', $commission_product);
     }
+
+    if ( function_exists( 'wcusage_set_manual_commission_edit' ) ) {
+        wcusage_set_manual_commission_edit( false );
+    }
+
     update_post_meta($coupon_id, 'discount_type', $discount_type);
     update_post_meta($coupon_id, 'coupon_amount', $coupon_amount);
 
