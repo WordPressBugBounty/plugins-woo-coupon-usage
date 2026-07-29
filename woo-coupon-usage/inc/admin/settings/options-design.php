@@ -500,6 +500,41 @@ if( !function_exists( 'wcusage_setting_section_colours' ) ) {
   <div style="clear: both;"></div>
   <?php } ?>
 
+  <?php $wcusage_field_bonuses_enable = wcusage_get_setting_value('wcusage_field_bonuses_enable', '0');
+  if( wcu_fs()->can_use_premium_code() && $wcusage_field_bonuses_enable ) { ?>
+
+  <br/><hr/>
+
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Performance Bonuses', 'woo-coupon-usage' ); ?> (PRO)</h3>
+
+  <!-- Bonuses Progress Bar -->
+  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
+
+    <h3><?php echo esc_html__( 'Progress Bar', 'woo-coupon-usage' ); ?></h3>
+
+    <!-- Bar -->
+    <?php wcusage_setting_color_option('wcusage_field_color_bonus_bar', '#2bc253', esc_html__( 'Bar', 'woo-coupon-usage' ), '0px'); ?>
+
+    <!-- Background -->
+    <?php wcusage_setting_color_option('wcusage_field_color_bonus_bar_bg', '#d2d2d2', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
+
+  </div>
+
+  <!-- Bonuses Reward Summary Box -->
+  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
+
+    <h3><?php echo esc_html__( 'Reward Summary Box', 'woo-coupon-usage' ); ?></h3>
+
+    <!-- Background -->
+    <?php wcusage_setting_color_option('wcusage_field_color_bonus_box', '#f6d365', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
+
+    <!-- Text -->
+    <?php wcusage_setting_color_option('wcusage_field_color_bonus_box_font', '#000000', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
+
+  </div>
+  <div style="clear: both;"></div>
+  <?php } ?>
+
   <?php
   }
 }

@@ -18,11 +18,13 @@ function wcusage_dashboard_page_header() {
         array(),
         null
     );
+    $dashboard_js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin-dashboard.js';
+    $dashboard_js_ver = file_exists($dashboard_js_path) ? filemtime($dashboard_js_path) : WCUSAGE_VERSION;
     wp_enqueue_script(
         'wcusage-admin-dashboard',
         WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-dashboard.js',
         array('jquery', 'jquery-ui-sortable'),
-        null,
+        $dashboard_js_ver,
         true
     );
     // Provide AJAX data for sortable dashboard sections
@@ -34,6 +36,10 @@ function wcusage_dashboard_page_header() {
             'nonce'   => wp_create_nonce('wcusage_dashboard_order'),
             'paginationNonce' => wp_create_nonce('wcusage_dashboard_paginate'),
             'clearCacheNonce' => wp_create_nonce('wcusage_dashboard_clear_cache'),
+            'i18n' => array(
+                /* translators: %d: current page number in a paginated table. */
+                'pageIndicator' => __( 'Page %d', 'woo-coupon-usage' ),
+            ),
         )
     );
     $rss_items = array();
@@ -187,7 +193,7 @@ jQuery(document).ready(function($) {
 
 <div class="wcusage-admin-page-col3">
     <div style="float: left; margin: 12px 0 10px 0; display: flex; align-items: center; gap: 18px;">
-        <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage" title="View Dashboard">
+        <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage" title="<?php echo esc_attr__( 'View Dashboard', 'woo-coupon-usage' ); ?>">
             <img src="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL); ?>images/coupon-affiliates-logo.png" style="display: inline-block; width: 100%; max-width: 290px; text-align: left;">
         </a>
 
@@ -199,78 +205,78 @@ jQuery(document).ready(function($) {
         <?php
     if (wcu_fs()->can_use_premium_code()) {
         $menu_items = array(
-            array('label' => 'Settings', 'icon' => 'fa-solid fa-cog', 'url' => ''),
-            array('label' => 'Coupons', 'icon' => 'fa-solid fa-ticket', 'url' => '#', 'dropdown' => array(
-                array('label' => 'View Affiliate Coupons', 'url' => admin_url('admin.php?page=wcusage_coupons'), 'icon' => 'fa-solid fa-tags'),
-                array('label' => 'Add New Affiliate Coupon', 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-plus'),
-                array('label' => 'Bulk Create Affiliate Coupons', 'url' => admin_url('admin.php?page=wcusage-bulk-coupon-creator'), 'icon' => 'fa-solid fa-layer-group'),
+            array('label' => __( 'Settings', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-cog', 'url' => ''),
+            array('label' => __( 'Coupons', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-ticket', 'url' => '#', 'dropdown' => array(
+                array('label' => __( 'View Affiliate Coupons', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_coupons'), 'icon' => 'fa-solid fa-tags'),
+                array('label' => __( 'Add New Affiliate Coupon', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-plus'),
+                array('label' => __( 'Bulk Create Affiliate Coupons', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage-bulk-coupon-creator'), 'icon' => 'fa-solid fa-layer-group'),
             )),
             // Affiliates with dropdown
-            array('label' => 'Affiliates', 'icon' => 'fa-solid fa-user-group', 'url' => '#', 'dropdown' => array(
-                array('label' => 'View Affiliates', 'url' => admin_url('admin.php?page=wcusage_affiliates'), 'icon' => 'fa-solid fa-users'),
-                array('label' => 'Manage Registrations', 'url' => admin_url('admin.php?page=wcusage_registrations'), 'icon' => 'fa-solid fa-users-gear', 'disabled' => !wcusage_get_setting_value('wcusage_field_registration_enable', '1')),
-                array('label' => 'Add New Affiliate', 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-user-plus'),
+            array('label' => __( 'Affiliates', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-user-group', 'url' => '#', 'dropdown' => array(
+                array('label' => __( 'View Affiliates', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_affiliates'), 'icon' => 'fa-solid fa-users'),
+                array('label' => __( 'Manage Registrations', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_registrations'), 'icon' => 'fa-solid fa-users-gear', 'disabled' => !wcusage_get_setting_value('wcusage_field_registration_enable', '1')),
+                array('label' => __( 'Add New Affiliate', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-user-plus'),
             )),
-            array('label' => 'Referrals', 'icon' => 'fa-solid fa-arrow-right-arrow-left', 'url' => '#', 'dropdown' => array(
-                array('label' => 'View Referred Orders', 'url' => admin_url('admin.php?page=wcusage_referrals'), 'icon' => 'fa-solid fa-arrow-right-arrow-left'),
-                array('label' => 'View Visits Log', 'url' => admin_url('admin.php?page=wcusage_clicks'), 'icon' => 'fa-solid fa-eye'),
+            array('label' => __( 'Referrals', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-arrow-right-arrow-left', 'url' => '#', 'dropdown' => array(
+                array('label' => __( 'View Referred Orders', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_referrals'), 'icon' => 'fa-solid fa-arrow-right-arrow-left'),
+                array('label' => __( 'View Visits Log', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_clicks'), 'icon' => 'fa-solid fa-eye'),
             )),
-            array('label' => 'Payouts', 'icon' => 'fa-solid fa-money-bill', 'url' => '#', 'dropdown' => array(
-                array('label' => 'View Payouts', 'url' => admin_url('admin.php?page=wcusage_payouts'), 'icon' => 'fa-solid fa-money-bill'),
-                array('label' => 'Create New Payout', 'url' => admin_url('admin.php?page=wcusage_payouts_create'), 'icon' => 'fa-solid fa-plus'),
-                array('label' => 'PDF Invoices', 'url' => admin_url('admin.php?post_type=wcu-statements'), 'icon' => 'fa-solid fa-file-invoice-dollar',
+            array('label' => __( 'Payouts', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-money-bill', 'url' => '#', 'dropdown' => array(
+                array('label' => __( 'View Payouts', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_payouts'), 'icon' => 'fa-solid fa-money-bill'),
+                array('label' => __( 'Create New Payout', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_payouts_create'), 'icon' => 'fa-solid fa-plus'),
+                array('label' => __( 'PDF Invoices', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?post_type=wcu-statements'), 'icon' => 'fa-solid fa-file-invoice-dollar',
                 'disabled' => wcusage_get_setting_value('wcusage_field_payouts_enable_statements', '0')),
             )),
-            array('label' => 'Reports', 'icon' => 'fa-solid fa-chart-bar', 'url' => '#', 'dropdown' => array(
-                array('label' => 'Admin Reports & Analytics', 'url' => admin_url('admin.php?page=wcusage_admin_reports'), 'icon' => 'fa-solid fa-chart-bar'),
-                array('label' => 'Affiliate Email Reports', 'url' => admin_url('admin.php?page=wcusage_settings&section=tab-reports'), 'icon' => 'fa-solid fa-file-pdf', 'pro_only' => true, 'disabled' => !wcusage_get_setting_value('wcusage_field_enable_reports', '0')),
+            array('label' => __( 'Reports', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-chart-bar', 'url' => '#', 'dropdown' => array(
+                array('label' => __( 'Admin Reports & Analytics', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_admin_reports'), 'icon' => 'fa-solid fa-chart-bar'),
+                array('label' => __( 'Affiliate Email Reports', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_settings&section=tab-reports'), 'icon' => 'fa-solid fa-file-pdf', 'pro_only' => true, 'disabled' => !wcusage_get_setting_value('wcusage_field_enable_reports', '0')),
             )),
         );
         $other_items = array(
-            array('label' => 'Admin Tools', 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
+            array('label' => __( 'Admin Tools', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
             array(
-                'label' => 'Email Newsletters',
+                'label' => __( 'Email Newsletters', 'woo-coupon-usage' ),
                 'url' => admin_url('admin.php?page=wcusage_email_newsletters'),
                 'icon' => 'fa-solid fa-envelope',
                 'disabled' => !(wcusage_get_setting_value('wcusage_field_email_newsletter_enable', '0') && function_exists('wcusage_admin_email_newsletters_page_html'))
             ),
             array(
-                'label' => 'Leaderboards',
+                'label' => __( 'Leaderboards', 'woo-coupon-usage' ),
                 'url' => admin_url('admin.php?page=wcusage_leaderboard'),
                 'icon' => 'fa-solid fa-trophy',
                 'disabled' => !wcu_fs()->can_use_premium_code()
             ),
             array(
-                'label' => 'Affiliate Groups',
+                'label' => __( 'Affiliate Groups', 'woo-coupon-usage' ),
                 'url' => admin_url('admin.php?page=wcusage_groups'),
                 'icon' => 'fa-solid fa-users',
                 'disabled' => !wcu_fs()->can_use_premium_code()
             ),
             array(
-                'label' => 'Performance Bonuses',
+                'label' => __( 'Performance Bonuses', 'woo-coupon-usage' ),
                 'url' => admin_url('edit.php?post_type=wcu-bonuses'),
                 'icon' => 'fa-solid fa-bolt',
                 'disabled' => !(wcusage_get_setting_value('wcusage_field_bonuses_enable', '0') && wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_meta', '1')),
                 'dropdown' => array(
-                    array('label' => 'View Bonuses / Rewards', 'url' => admin_url('edit.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-bolt'),
-                    array('label' => 'Add New Bonus / Reward', 'url' => admin_url('post-new.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-plus'),
-                    array('label' => 'Rewards Log', 'url' => admin_url('admin.php?page=wcusage_rewards_log'), 'icon' => 'fa-solid fa-clock-rotate-left'),
+                    array('label' => __( 'View Bonuses / Rewards', 'woo-coupon-usage' ), 'url' => admin_url('edit.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-bolt'),
+                    array('label' => __( 'Add New Bonus / Reward', 'woo-coupon-usage' ), 'url' => admin_url('post-new.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-plus'),
+                    array('label' => __( 'Rewards Log', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_rewards_log'), 'icon' => 'fa-solid fa-clock-rotate-left'),
                 ),
             ),
             array(
-                'label' => 'Direct Link Domains',
+                'label' => __( 'Direct Link Domains', 'woo-coupon-usage' ),
                 'url' => admin_url('admin.php?page=wcusage_domains'),
                 'icon' => 'fa-solid fa-globe',
                 'disabled' => !wcusage_get_setting_value('wcusage_field_enable_directlinks', 0)
             ),
             array(
-                'label' => 'View Short URLs',
+                'label' => __( 'View Short URLs', 'woo-coupon-usage' ),
                 'url' => admin_url('edit.php?post_type=wcu-short-urls'),
                 'icon' => 'fa-solid fa-link',
                 'disabled' => !wcusage_get_setting_value('wcusage_field_show_shortlink', 0)
             ),
             array(
-                'label' => 'Manage Creatives',
+                'label' => __( 'Manage Creatives', 'woo-coupon-usage' ),
                 'url' => admin_url('admin.php?page=wcusage_creatives'),
                 'icon' => 'fa-solid fa-image',
                 'disabled' => !wcusage_get_setting_value('wcusage_field_creatives_enable', '1')
@@ -278,45 +284,45 @@ jQuery(document).ready(function($) {
         );
     } else {
         $menu_items = array(
-            array('label' => 'Settings', 'icon' => 'fa-solid fa-cog', 'url' => admin_url('admin.php?page=wcusage_settings')),
-            array('label' => 'Coupons', 'icon' => 'fa-solid fa-ticket', 'url' => '#', 'dropdown' => array(
-                array('label' => 'View Coupons', 'url' => admin_url('admin.php?page=wcusage_coupons'), 'icon' => 'fa-solid fa-ticket'),
-                array('label' => 'Add New Affiliate Coupon', 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-plus'),
-                array('label' => 'Bulk Create Affiliate Coupons', 'url' => admin_url('admin.php?page=wcusage-bulk-coupon-creator'), 'icon' => 'fa-solid fa-layer-group'),
+            array('label' => __( 'Settings', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-cog', 'url' => admin_url('admin.php?page=wcusage_settings')),
+            array('label' => __( 'Coupons', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-ticket', 'url' => '#', 'dropdown' => array(
+                array('label' => __( 'View Coupons', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_coupons'), 'icon' => 'fa-solid fa-ticket'),
+                array('label' => __( 'Add New Affiliate Coupon', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-plus'),
+                array('label' => __( 'Bulk Create Affiliate Coupons', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage-bulk-coupon-creator'), 'icon' => 'fa-solid fa-layer-group'),
             )),
             // Affiliates with dropdown
-            array('label' => 'Affiliates', 'icon' => 'fa-solid fa-user-group', 'url' => '#', 'dropdown' => array(
-                array('label' => 'View Affiliates', 'url' => admin_url('admin.php?page=wcusage_affiliates'), 'icon' => 'fa-solid fa-users'),
-                array('label' => 'Manage Registrations', 'url' => admin_url('admin.php?page=wcusage_registrations'), 'icon' => 'fa-solid fa-user-plus', 'disabled' => !wcusage_get_setting_value('wcusage_field_registration_enable', '1')),
-                array('label' => 'Add New Affiliate', 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-user-plus'),
+            array('label' => __( 'Affiliates', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-user-group', 'url' => '#', 'dropdown' => array(
+                array('label' => __( 'View Affiliates', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_affiliates'), 'icon' => 'fa-solid fa-users'),
+                array('label' => __( 'Manage Registrations', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_registrations'), 'icon' => 'fa-solid fa-user-plus', 'disabled' => !wcusage_get_setting_value('wcusage_field_registration_enable', '1')),
+                array('label' => __( 'Add New Affiliate', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_add_affiliate'), 'icon' => 'fa-solid fa-user-plus'),
             )),
-            array('label' => 'Referrals', 'icon' => 'fa-solid fa-arrow-right-arrow-left', 'url' => '#', 'dropdown' => array(
-                array('label' => 'View Referred Orders', 'url' => admin_url('admin.php?page=wcusage_referrals'), 'icon' => 'fa-solid fa-arrow-right-arrow-left'),
-                array('label' => 'View URL Visits Log', 'url' => admin_url('admin.php?page=wcusage_clicks'), 'icon' => 'fa-solid fa-eye'),
+            array('label' => __( 'Referrals', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-arrow-right-arrow-left', 'url' => '#', 'dropdown' => array(
+                array('label' => __( 'View Referred Orders', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_referrals'), 'icon' => 'fa-solid fa-arrow-right-arrow-left'),
+                array('label' => __( 'View URL Visits Log', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_clicks'), 'icon' => 'fa-solid fa-eye'),
             )),
-            array('label' => 'Reports', 'icon' => 'fa-solid fa-chart-bar', 'url' => '#', 'dropdown' => array(
-                array('label' => 'Admin Reports & Analytics', 'url' => admin_url('admin.php?page=wcusage_admin_reports'), 'icon' => 'fa-solid fa-chart-bar'),
-                array('label' => 'Affiliate Email Reports', 'url' => admin_url('admin.php?page=wcusage_settings&section=tab-reports'), 'icon' => 'fa-solid fa-file-pdf', 'pro_only' => true, 'disabled' => !wcusage_get_setting_value('wcusage_field_enable_reports', '0')),
+            array('label' => __( 'Reports', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-chart-bar', 'url' => '#', 'dropdown' => array(
+                array('label' => __( 'Admin Reports & Analytics', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_admin_reports'), 'icon' => 'fa-solid fa-chart-bar'),
+                array('label' => __( 'Affiliate Email Reports', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_settings&section=tab-reports'), 'icon' => 'fa-solid fa-file-pdf', 'pro_only' => true, 'disabled' => !wcusage_get_setting_value('wcusage_field_enable_reports', '0')),
             )),
         );
         $other_items = array(
-            array('label' => 'Admin Tools', 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
-            array('label' => 'Manage Payouts', 'url' => admin_url('admin.php?page=wcusage_payouts'), 'icon' => 'fa-solid fa-money-bill', 'disabled' => true),
-            array('label' => 'PDF Statements', 'url' => admin_url('admin.php?page=wcusage_statements'), 'icon' => 'fa-solid fa-file-invoice-dollar', 'disabled' => true),
-            array('label' => 'Email Newsletters', 'url' => admin_url('admin.php?page=wcusage_email_newsletters'), 'icon' => 'fa-solid fa-envelope', 'disabled' => true),
-            array('label' => 'Leaderboards', 'url' => admin_url('admin.php?page=wcusage_leaderboard'), 'icon' => 'fa-solid fa-trophy', 'disabled' => true),
-            array('label' => 'Affiliate Groups', 'url' => admin_url('admin.php?page=wcusage_groups'), 'icon' => 'fa-solid fa-users', 'disabled' => true),
-            array('label' => 'Performance Bonuses', 'url' => admin_url('edit.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-bolt', 'disabled' => true),
-            array('label' => 'Direct Link Domains', 'url' => admin_url('admin.php?page=wcusage_domains'), 'icon' => 'fa-solid fa-globe', 'disabled' => true),
-            array('label' => 'View Short URLs', 'url' => admin_url('edit.php?post_type=wcu-short-urls'), 'icon' => 'fa-solid fa-link', 'disabled' => true),
-            array('label' => 'Manage Creatives', 'url' => admin_url('admin.php?page=wcusage_creatives'), 'icon' => 'fa-solid fa-image', 'disabled' => true),
+            array('label' => __( 'Admin Tools', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
+            array('label' => __( 'Manage Payouts', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_payouts'), 'icon' => 'fa-solid fa-money-bill', 'disabled' => true),
+            array('label' => __( 'PDF Statements', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_statements'), 'icon' => 'fa-solid fa-file-invoice-dollar', 'disabled' => true),
+            array('label' => __( 'Email Newsletters', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_email_newsletters'), 'icon' => 'fa-solid fa-envelope', 'disabled' => true),
+            array('label' => __( 'Leaderboards', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_leaderboard'), 'icon' => 'fa-solid fa-trophy', 'disabled' => true),
+            array('label' => __( 'Affiliate Groups', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_groups'), 'icon' => 'fa-solid fa-users', 'disabled' => true),
+            array('label' => __( 'Performance Bonuses', 'woo-coupon-usage' ), 'url' => admin_url('edit.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-bolt', 'disabled' => true),
+            array('label' => __( 'Direct Link Domains', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_domains'), 'icon' => 'fa-solid fa-globe', 'disabled' => true),
+            array('label' => __( 'View Short URLs', 'woo-coupon-usage' ), 'url' => admin_url('edit.php?post_type=wcu-short-urls'), 'icon' => 'fa-solid fa-link', 'disabled' => true),
+            array('label' => __( 'Manage Creatives', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_creatives'), 'icon' => 'fa-solid fa-image', 'disabled' => true),
         );
     }
     $support_items = array(
-        array('label' => 'Support Forum', 'url' => 'https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0', 'icon' => 'fa-solid fa-comments', 'external' => true),
-        array('label' => 'Documentation', 'url' => 'https://couponaffiliates.com/docs?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button', 'icon' => 'fa-solid fa-book', 'external' => true),
-        array('label' => 'Roadmap', 'url' => 'https://roadmap.couponaffiliates.com/roadmap', 'icon' => 'fa-solid fa-list', 'external' => true),
-        array('label' => 'Updates', 'url' => 'https://couponaffiliates.com/changelog/?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button', 'icon' => 'fa-solid fa-rotate', 'external' => true),
+        array('label' => __( 'Support Forum', 'woo-coupon-usage' ), 'url' => 'https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0', 'icon' => 'fa-solid fa-comments', 'external' => true),
+        array('label' => __( 'Documentation', 'woo-coupon-usage' ), 'url' => 'https://couponaffiliates.com/docs?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button', 'icon' => 'fa-solid fa-book', 'external' => true),
+        array('label' => __( 'Roadmap', 'woo-coupon-usage' ), 'url' => 'https://roadmap.couponaffiliates.com/roadmap', 'icon' => 'fa-solid fa-list', 'external' => true),
+        array('label' => __( 'Updates', 'woo-coupon-usage' ), 'url' => 'https://couponaffiliates.com/changelog/?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button', 'icon' => 'fa-solid fa-rotate', 'external' => true),
     );
     ?>
     <div class="wcusage-admin-header-menu">
@@ -403,8 +409,8 @@ jQuery(document).ready(function($) {
                                        style="display: flex; align-items: center; gap: 6px; padding: 8px 16px;<?php echo $show_as_disabled ? ' color: #aaa; cursor: not-allowed;' : ' color: #333;'; ?> text-decoration: none;<?php echo $sub_active ? ' background: #f3f3f3;' : ''; ?>"
                                        <?php echo $show_as_disabled ? 'aria-disabled="true" tabindex="-1"' : ''; ?>>
                                         <span class="<?php echo esc_attr($subitem['icon']); ?>"></span> <?php echo esc_html($subitem['label']); ?>
-                                        <?php if ($is_disabled): ?><span style="margin-left: auto; color: #d9534f; font-size: 13px; font-weight: bold;">(Disabled)</span><?php endif; ?>
-                                        <?php if ($is_pro_only && !wcu_fs()->can_use_premium_code()): ?><span style="margin-left: auto; color: #d9534f; font-size: 13px; font-weight: bold;">(PRO)</span><?php endif; ?>
+                                        <?php if ($is_disabled): ?><span style="margin-left: auto; color: #d9534f; font-size: 13px; font-weight: bold;"><?php echo esc_html__( '(Disabled)', 'woo-coupon-usage' ); ?></span><?php endif; ?>
+                                        <?php if ($is_pro_only && !wcu_fs()->can_use_premium_code()): ?><span style="margin-left: auto; color: #d9534f; font-size: 13px; font-weight: bold;"><?php echo esc_html__( '(PRO)', 'woo-coupon-usage' ); ?></span><?php endif; ?>
                                     </a>
                                 </li>
                             <?php endforeach; ?>
@@ -421,7 +427,7 @@ jQuery(document).ready(function($) {
             <!-- Other dropdown -->
             <li class="wcusage-admin-menu-dropdown" style="position: relative;">
                 <a href="#" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 5px; text-decoration: none; color: #333; font-weight: 500;">
-                    <span class="fa-solid fa-ellipsis-h"></span> Other <span style="margin-left: 4px;" class="fa-solid fa-caret-down"></span>
+                    <span class="fa-solid fa-ellipsis-h"></span> <?php echo esc_html__( 'Other', 'woo-coupon-usage' ); ?> <span style="margin-left: 4px;" class="fa-solid fa-caret-down"></span>
                 </a>
                 <ul class="wcusage-admin-menu-dropdown-list" style="display: none; position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; min-width: 200px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 9999;">
                     <?php
@@ -436,7 +442,7 @@ jQuery(document).ready(function($) {
                             <li>
                                 <a href="<?php echo $is_disabled ? 'javascript:void(0);' : esc_url($item['url']); ?>" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px;<?php echo $is_disabled ? ' color: #aaa; cursor: not-allowed;' : ' color: #333;'; ?> text-decoration: none;<?php echo $other_active ? ' background: #f3f3f3;' : ''; ?>">
                                     <?php if (!empty($item['icon'])): ?><span class="<?php echo esc_attr($item['icon']); ?>"></span> <?php endif; ?><?php echo esc_html($item['label']); ?>
-                                    <?php if ($is_disabled): ?><span style="margin-left: auto; color: #d9534f; font-size: 13px; font-weight: bold;">(Disabled)</span><?php endif; ?>
+                                    <?php if ($is_disabled): ?><span style="margin-left: auto; color: #d9534f; font-size: 13px; font-weight: bold;"><?php echo esc_html__( '(Disabled)', 'woo-coupon-usage' ); ?></span><?php endif; ?>
                                 </a>
                             </li>
                             <?php
@@ -454,7 +460,7 @@ jQuery(document).ready(function($) {
                             <li>
                                 <a href="<?php echo $show_as_disabled ? 'javascript:void(0);' : esc_url($item['url']); ?>" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px;<?php echo $show_as_disabled ? ' color: #aaa; text-decoration: none; cursor: not-allowed;' : ' color: #333; text-decoration: none;'; ?><?php echo $other_active ? ' background: #f3f3f3;' : ''; ?>">
                                     <?php if (!empty($item['icon'])): ?><span class="<?php echo esc_attr($item['icon']); ?>"></span> <?php endif; ?><?php echo esc_html($item['label']); ?>
-                                    <?php if ($show_as_disabled): ?><span style="margin-left: auto; color: #d9534f; font-size: 13px; font-weight: bold;">(PRO)</span><?php endif; ?>
+                                    <?php if ($show_as_disabled): ?><span style="margin-left: auto; color: #d9534f; font-size: 13px; font-weight: bold;"><?php echo esc_html__( '(PRO)', 'woo-coupon-usage' ); ?></span><?php endif; ?>
                                 </a>
                             </li>
                             <?php
@@ -466,7 +472,7 @@ jQuery(document).ready(function($) {
             <!-- Support dropdown -->
             <li class="wcusage-admin-menu-dropdown" style="position: relative;">
                 <a href="#" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 5px; text-decoration: none; color: #333; font-weight: 500;">
-                    <span class="fa-solid fa-life-ring"></span> Support <span style="margin-left: 4px;" class="fa-solid fa-caret-down"></span>
+                    <span class="fa-solid fa-life-ring"></span> <?php echo esc_html__( 'Support', 'woo-coupon-usage' ); ?> <span style="margin-left: 4px;" class="fa-solid fa-caret-down"></span>
                 </a>
                 <ul class="wcusage-admin-menu-dropdown-list" style="display: none; position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; min-width: 200px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); z-index: 9999;">
                     <?php foreach ($support_items as $item):
@@ -484,7 +490,7 @@ jQuery(document).ready(function($) {
             <!-- Upgrade to PRO button -->
             <li style="position: relative;">
                 <a href="https://couponaffiliates.com/pricing/?discount=SAVE25&utm_source=plugin&utm_medium=upgrade-menu" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 5px; text-decoration: none; color: #fff; font-weight: 600; background: linear-gradient(270deg,#00a32a,#008a20,#00a32a); box-shadow: 0 2px 8px rgba(0,163,42,0.15);">
-                    Get 25% off PRO
+                    <?php echo esc_html__( 'Get 25% off PRO', 'woo-coupon-usage' ); ?>
                 </a>
             </li>
             <style>
@@ -499,7 +505,7 @@ jQuery(document).ready(function($) {
             <li style="position: relative; margin-left: 10px;">
                 <a href="https://relywp.com" target="_blank" rel="noopener" style="display: flex; align-items: center;">
                     <img src="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL); ?>images/relywp.png"
-                    title="Developed by RelyWP"
+                    title="<?php echo esc_attr__( 'Developed by RelyWP', 'woo-coupon-usage' ); ?>"
                     alt="RelyWP" style="height: 25px; width: auto;">
                 </a>
             </li>
@@ -969,12 +975,12 @@ function wcusage_dashboard_paginate_ajax() {
                 $date = date_i18n('F jS (H:i)', strtotime($result->date));
                 $coupon = get_the_title($result->couponid);
                 $referrer = $result->referrer ? $result->referrer : '-';
-                $converted = $result->converted ? 'yes' : 'no';
+                $converted = $result->converted ? esc_html__( 'Yes', 'woo-coupon-usage' ) : esc_html__( 'No', 'woo-coupon-usage' );
                 $html .= '<tr class="wcusage-admin-table-col-row">'
                       . '<td>' . esc_html($date) . '</td>'
                       . '<td>' . esc_html($coupon) . '</td>'
                       . '<td>' . esc_html($referrer) . '</td>'
-                      . '<td>' . ucfirst(esc_html($converted)) . '</td>'
+                      . '<td>' . $converted . '</td>'
                       . '</tr>';
             }
             break;
@@ -1185,9 +1191,9 @@ add_action( 'wcusage_hook_dashboard_page_section_statistics', 'wcusage_dashboard
 function wcusage_dashboard_page_section_statistics() {
     // Reordered to show "This Month" first and "Last 7 Days" last
     $date_ranges = array(
-        'thismonth' => 'This Month',
-        'lastmonth' => 'Last Month',
-        'last7days' => 'Last 7 Days',
+        'thismonth' => __( 'This Month', 'woo-coupon-usage' ),
+        'lastmonth' => __( 'Last Month', 'woo-coupon-usage' ),
+        'last7days' => __( 'Last 7 Days', 'woo-coupon-usage' ),
     );
 ?>
 
@@ -1206,7 +1212,7 @@ function wcusage_dashboard_page_section_statistics() {
             <div class="wcu-card-icon wcu-icon-usage"><i class="fas fa-users"></i></div>
             <div class="wcu-card-data">
                 <span class="wcu-card-value total-usage">0</span>
-                <span class="wcu-card-label">Referrals</span>
+                <span class="wcu-card-label"><?php echo esc_html__( 'Referrals', 'woo-coupon-usage' ); ?></span>
             </div>
         </div>
 
@@ -1214,7 +1220,7 @@ function wcusage_dashboard_page_section_statistics() {
             <div class="wcu-card-icon wcu-icon-sales"><i class="fas fa-shopping-cart"></i></div>
             <div class="wcu-card-data">
                 <span class="wcu-card-value total-sales">0</span>
-                <span class="wcu-card-label">Sales</span>
+                <span class="wcu-card-label"><?php echo esc_html__( 'Sales', 'woo-coupon-usage' ); ?></span>
             </div>
         </div>
 
@@ -1222,7 +1228,7 @@ function wcusage_dashboard_page_section_statistics() {
             <div class="wcu-card-icon wcu-icon-discounts"><i class="fas fa-tags"></i></div>
             <div class="wcu-card-data">
                 <span class="wcu-card-value total-discounts">0</span>
-                <span class="wcu-card-label">Discounts</span>
+                <span class="wcu-card-label"><?php echo esc_html__( 'Discounts', 'woo-coupon-usage' ); ?></span>
             </div>
         </div>
 
@@ -1230,7 +1236,7 @@ function wcusage_dashboard_page_section_statistics() {
             <div class="wcu-card-icon wcu-icon-commission"><i class="fas fa-hand-holding-usd"></i></div>
             <div class="wcu-card-data">
                 <span class="wcu-card-value total-commission">0</span>
-                <span class="wcu-card-label">Commission</span>
+                <span class="wcu-card-label"><?php echo esc_html__( 'Commission', 'woo-coupon-usage' ); ?></span>
             </div>
         </div>
 
@@ -1238,7 +1244,7 @@ function wcusage_dashboard_page_section_statistics() {
             <div class="wcu-card-icon wcu-icon-clicks"><i class="fas fa-mouse-pointer"></i></div>
             <div class="wcu-card-data">
                 <span class="wcu-card-value total-clicks">0</span>
-                <span class="wcu-card-label">Clicks</span>
+                <span class="wcu-card-label"><?php echo esc_html__( 'Clicks', 'woo-coupon-usage' ); ?></span>
             </div>
         </div>
 
@@ -1283,8 +1289,8 @@ function wcusage_dashboard_page_section_activity() {
     <table style="border: 2px solid #f3f3f3; width: 100%; text-align: center; border-collapse: collapse;">
         <thead>
             <tr class="wcusage-admin-table-col-head">
-                <th>Date</th>
-                <th>Event</th>
+                <th><?php echo esc_html__( 'Date', 'woo-coupon-usage' ); ?></th>
+                <th><?php echo esc_html__( 'Event', 'woo-coupon-usage' ); ?></th>
             </tr>
         </thead>
     <tbody id="wcusage-tbody-activity">
@@ -1325,7 +1331,7 @@ function wcusage_dashboard_page_section_activity() {
     </div>
     <div class="wcusage-pagination" data-section="activity" data-page="1" data-per-page="<?php echo esc_attr($per_page); ?>" data-total="<?php echo esc_attr($total_count); ?>">
     <button type="button" class="button button-secondary button-small wcusage-page-prev" aria-label="<?php echo esc_attr__('Previous Page', 'woo-coupon-usage'); ?>" disabled><span class="fa-solid fa-arrow-left" aria-hidden="true"></span></button>
-        <span class="wcusage-page-indicator" aria-live="polite">Page 1</span>
+        <span class="wcusage-page-indicator" aria-live="polite"><?php /* translators: %d: current page number in a paginated table. */ printf(esc_html__( 'Page %d', 'woo-coupon-usage' ), 1); ?></span>
     <button type="button" class="button button-secondary button-small wcusage-page-next" aria-label="<?php echo esc_attr__('Next Page', 'woo-coupon-usage'); ?>"<?php echo $has_next ? '' : ' disabled'; ?>><span class="fa-solid fa-arrow-right" aria-hidden="true"></span></button>
     </div>
     <?php } else { ?>
@@ -1378,11 +1384,11 @@ function wcusage_dashboard_page_section_referrals() {
         <thead>
             <tr class="wcusage-admin-table-col-head">
                 <th><?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?></th>
-                <th>Date</th>
-                <th>Order ID</th>
-                <th>Total</th>
-                <th>Commission</th>
-                <th>Status</th>
+                <th><?php echo esc_html__( 'Date', 'woo-coupon-usage' ); ?></th>
+                <th><?php echo esc_html__( 'Order ID', 'woo-coupon-usage' ); ?></th>
+                <th><?php echo esc_html__( 'Total', 'woo-coupon-usage' ); ?></th>
+                <th><?php echo esc_html__( 'Commission', 'woo-coupon-usage' ); ?></th>
+                <th><?php echo esc_html__( 'Status', 'woo-coupon-usage' ); ?></th>
             </tr>
         </thead>
     <tbody id="wcusage-tbody-referrals">
@@ -1414,7 +1420,7 @@ function wcusage_dashboard_page_section_referrals() {
     </div>
     <div class="wcusage-pagination" data-section="referrals" data-page="1" data-per-page="<?php echo esc_attr($per_page); ?>" data-total="<?php echo esc_attr($total_count); ?>">
     <button type="button" class="button button-secondary button-small wcusage-page-prev" aria-label="<?php echo esc_attr__('Previous Page', 'woo-coupon-usage'); ?>" disabled><span class="fa-solid fa-arrow-left" aria-hidden="true"></span></button>
-        <span class="wcusage-page-indicator" aria-live="polite">Page 1</span>
+        <span class="wcusage-page-indicator" aria-live="polite"><?php /* translators: %d: current page number in a paginated table. */ printf(esc_html__( 'Page %d', 'woo-coupon-usage' ), 1); ?></span>
     <button type="button" class="button button-secondary button-small wcusage-page-next" aria-label="<?php echo esc_attr__('Next Page', 'woo-coupon-usage'); ?>"<?php echo $has_next ? '' : ' disabled'; ?>><span class="fa-solid fa-arrow-right" aria-hidden="true"></span></button>
     </div>
     <?php } else { ?>
@@ -1459,13 +1465,13 @@ function wcusage_dashboard_page_section_visits() {
                 if(!$referrer) {
                     $referrer = '-';
                 }
-                $converted = $result->converted ? "yes" : "no";
+                $converted = $result->converted ? __( 'Yes', 'woo-coupon-usage' ) : __( 'No', 'woo-coupon-usage' );
             ?>
             <tr class="wcusage-admin-table-col-row">
                 <td><?php echo esc_html($date); ?></td>
                 <td><?php echo esc_html($coupon); ?></td>
                 <td><?php echo esc_html($referrer); ?></td>
-                <td><?php echo esc_html(ucfirst($converted)); ?></td>
+                <td><?php echo esc_html($converted); ?></td>
             </tr>
             <?php } ?>
         </tbody>
@@ -1473,7 +1479,7 @@ function wcusage_dashboard_page_section_visits() {
     </div>
     <div class="wcusage-pagination" data-section="visits" data-page="1" data-per-page="<?php echo esc_attr($per_page); ?>" data-total="<?php echo esc_attr($total_count); ?>">
     <button type="button" class="button button-secondary button-small wcusage-page-prev" aria-label="<?php echo esc_attr__('Previous Page', 'woo-coupon-usage'); ?>" disabled><span class="fa-solid fa-arrow-left" aria-hidden="true"></span></button>
-        <span class="wcusage-page-indicator" aria-live="polite">Page 1</span>
+        <span class="wcusage-page-indicator" aria-live="polite"><?php /* translators: %d: current page number in a paginated table. */ printf(esc_html__( 'Page %d', 'woo-coupon-usage' ), 1); ?></span>
     <button type="button" class="button button-secondary button-small wcusage-page-next" aria-label="<?php echo esc_attr__('Next Page', 'woo-coupon-usage'); ?>"<?php echo $has_next ? '' : ' disabled'; ?>><span class="fa-solid fa-arrow-right" aria-hidden="true"></span></button>
     </div>
     <?php } else { ?>
@@ -1539,7 +1545,7 @@ function wcusage_dashboard_page_section_coupons() {
             ?>
             <tr class="wcusage-admin-table-col-row">
                 <td><a href="<?php echo esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $user_id) ); ?>" title="<?php echo esc_html($name); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
-                <td><a href="<?php echo esc_html($uniqueurl); ?>" title="View Dashboard" target="_blank"><?php echo esc_html(get_the_title($coupon_id)); ?></a></td>
+                <td><a href="<?php echo esc_html($uniqueurl); ?>" title="<?php echo esc_attr__( 'View Dashboard', 'woo-coupon-usage' ); ?>" target="_blank"><?php echo esc_html(get_the_title($coupon_id)); ?></a></td>
                 <td><?php echo esc_html($date); ?></td>
             </tr>
             <?php } ?>
@@ -1548,7 +1554,7 @@ function wcusage_dashboard_page_section_coupons() {
     </div>
     <div class="wcusage-pagination" data-section="coupons" data-page="1" data-per-page="<?php echo esc_attr($per_page); ?>" data-total="<?php echo esc_attr($total_count); ?>">
     <button type="button" class="button button-secondary button-small wcusage-page-prev" aria-label="<?php echo esc_attr__('Previous Page', 'woo-coupon-usage'); ?>" disabled><span class="fa-solid fa-arrow-left" aria-hidden="true"></span></button>
-        <span class="wcusage-page-indicator" aria-live="polite">Page 1</span>
+        <span class="wcusage-page-indicator" aria-live="polite"><?php /* translators: %d: current page number in a paginated table. */ printf(esc_html__( 'Page %d', 'woo-coupon-usage' ), 1); ?></span>
     <button type="button" class="button button-secondary button-small wcusage-page-next" aria-label="<?php echo esc_attr__('Next Page', 'woo-coupon-usage'); ?>"<?php echo $has_next ? '' : ' disabled'; ?>><span class="fa-solid fa-arrow-right" aria-hidden="true"></span></button>
     </div>
     <?php } else { ?>
@@ -1611,7 +1617,7 @@ function wcusage_dashboard_page_section_registrations() {
     </div>
     <div class="wcusage-pagination" data-section="registrations" data-page="1" data-per-page="<?php echo esc_attr($per_page); ?>" data-total="<?php echo esc_attr($total_count); ?>">
     <button type="button" class="button button-secondary button-small wcusage-page-prev" aria-label="<?php echo esc_attr__('Previous Page', 'woo-coupon-usage'); ?>" disabled><span class="fa-solid fa-arrow-left" aria-hidden="true"></span></button>
-        <span class="wcusage-page-indicator" aria-live="polite">Page 1</span>
+        <span class="wcusage-page-indicator" aria-live="polite"><?php /* translators: %d: current page number in a paginated table. */ printf(esc_html__( 'Page %d', 'woo-coupon-usage' ), 1); ?></span>
     <button type="button" class="button button-secondary button-small wcusage-page-next" aria-label="<?php echo esc_attr__('Next Page', 'woo-coupon-usage'); ?>"<?php echo $has_next ? '' : ' disabled'; ?>><span class="fa-solid fa-arrow-right" aria-hidden="true"></span></button>
     </div>
     <?php } else { ?>
@@ -1672,7 +1678,7 @@ function wcusage_dashboard_page_section_payouts() {
     </div>
     <div class="wcusage-pagination" data-section="payouts" data-page="1" data-per-page="<?php echo esc_attr($per_page); ?>" data-total="<?php echo esc_attr($total_count); ?>">
     <button type="button" class="button button-secondary button-small wcusage-page-prev" aria-label="<?php echo esc_attr__('Previous Page', 'woo-coupon-usage'); ?>" disabled><span class="fa-solid fa-arrow-left" aria-hidden="true"></span></button>
-        <span class="wcusage-page-indicator" aria-live="polite">Page 1</span>
+        <span class="wcusage-page-indicator" aria-live="polite"><?php /* translators: %d: current page number in a paginated table. */ printf(esc_html__( 'Page %d', 'woo-coupon-usage' ), 1); ?></span>
     <button type="button" class="button button-secondary button-small wcusage-page-next" aria-label="<?php echo esc_attr__('Next Page', 'woo-coupon-usage'); ?>"<?php echo $has_next ? '' : ' disabled'; ?>><span class="fa-solid fa-arrow-right" aria-hidden="true"></span></button>
     </div>
     <?php } else { ?>
@@ -2048,7 +2054,7 @@ function wcusage_dashboard_page_html() {
                         ?>
                         <div class="wcusage-pagination" data-section="affiliates_latest" data-page="1" data-per-page="<?php echo esc_attr($affiliate_sidebar_latest_limit); ?>" data-total="<?php echo esc_attr($latest_total); ?>">
                             <button type="button" class="button button-secondary button-small wcusage-page-prev" aria-label="<?php echo esc_attr__('Previous Page', 'woo-coupon-usage'); ?>" disabled><span class="fa-solid fa-arrow-left" aria-hidden="true"></span></button>
-                            <span class="wcusage-page-indicator" aria-live="polite">Page 1</span>
+                            <span class="wcusage-page-indicator" aria-live="polite"><?php /* translators: %d: current page number in a paginated table. */ printf(esc_html__( 'Page %d', 'woo-coupon-usage' ), 1); ?></span>
                             <button type="button" class="button button-secondary button-small wcusage-page-next" aria-label="<?php echo esc_attr__('Next Page', 'woo-coupon-usage'); ?>"<?php echo $latest_has_next ? '' : ' disabled'; ?>><span class="fa-solid fa-arrow-right" aria-hidden="true"></span></button>
                         </div>
                     </div>
@@ -2119,7 +2125,7 @@ function wcusage_dashboard_page_html() {
                         <?php $top_has_next = ($affiliate_sidebar_top_total > $affiliate_sidebar_top_limit); ?>
                         <div class="wcusage-pagination" data-section="affiliates_top" data-page="1" data-per-page="<?php echo esc_attr($affiliate_sidebar_top_limit); ?>" data-total="<?php echo esc_attr($affiliate_sidebar_top_total); ?>">
                             <button type="button" class="button button-secondary button-small wcusage-page-prev" aria-label="<?php echo esc_attr__('Previous Page', 'woo-coupon-usage'); ?>" disabled><span class="fa-solid fa-arrow-left" aria-hidden="true"></span></button>
-                            <span class="wcusage-page-indicator" aria-live="polite">Page 1</span>
+                            <span class="wcusage-page-indicator" aria-live="polite"><?php /* translators: %d: current page number in a paginated table. */ printf(esc_html__( 'Page %d', 'woo-coupon-usage' ), 1); ?></span>
                             <button type="button" class="button button-secondary button-small wcusage-page-next" aria-label="<?php echo esc_attr__('Next Page', 'woo-coupon-usage'); ?>"<?php echo $top_has_next ? '' : ' disabled'; ?>><span class="fa-solid fa-arrow-right" aria-hidden="true"></span></button>
                         </div>
                     </div>
@@ -2132,10 +2138,20 @@ function wcusage_dashboard_page_html() {
         $installed_plugins = get_plugins();
         if(isset($installed_plugins[$path])) {
             $activate_url = wp_nonce_url('plugins.php?action=activate&plugin=' . $path, 'activate-plugin_' . $path);
-            echo '<p style="font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> WooCommerce is installed but not activated. <a href="' . esc_url($activate_url) . '">Click here to activate it.</a></strong></p>';
+            echo '<p style="font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> ' . sprintf(
+                /* translators: %1$s: opening link tag to activate WooCommerce, %2$s: closing link tag. */
+                esc_html__( 'WooCommerce is installed but not activated. %1$sClick here to activate it.%2$s', 'woo-coupon-usage' ),
+                '<a href="' . esc_url($activate_url) . '">',
+                '</a>'
+            ) . '</strong></p>';
         } else {
             $install_url = self_admin_url('plugin-install.php?tab=plugin-information&plugin=woocommerce');
-            echo '<p style="margin-left: 20px; font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> WooCommerce needs to be installed for this plugin to work. <a href="' . esc_url($install_url) . '">Click here to install it.</a></strong></p>';
+            echo '<p style="margin-left: 20px; font-size: 15px; color: red;"><strong><span class="dashicons dashicons-bell"></span> ' . sprintf(
+                /* translators: %1$s: opening link tag to install WooCommerce, %2$s: closing link tag. */
+                esc_html__( 'WooCommerce needs to be installed for this plugin to work. %1$sClick here to install it.%2$s', 'woo-coupon-usage' ),
+                '<a href="' . esc_url($install_url) . '">',
+                '</a>'
+            ) . '</strong></p>';
         }
     } ?>
 </div>

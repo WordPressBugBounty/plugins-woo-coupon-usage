@@ -134,7 +134,7 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
         }
         $offset = $page * $wcusage_field_show_click_history_amount;
         if ( $campaign && $campaign != "all" ) {
-            $campaignline = " AND campaign = '" . $campaign . "'";
+            $campaignline = " AND campaign = %s";
         } else {
             $campaignline = "";
         }
@@ -147,12 +147,14 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
         $table_name = $wpdb->prefix . 'wcusage_clicks';
         $query = "SELECT * FROM {$table_name} WHERE couponid = %d {$campaignline} {$convertedline} ORDER BY id DESC LIMIT %d OFFSET %d";
         // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-        $query = $wpdb->prepare(
-            $query,
-            $postid,
-            $wcusage_field_show_click_history_amount,
-            $offset
-        );
+        $prepare_args = array($postid);
+        if ( $campaign && $campaign != "all" ) {
+            $prepare_args[] = $campaign;
+        }
+        // matches the %s placeholder in $campaignline
+        $prepare_args[] = $wcusage_field_show_click_history_amount;
+        $prepare_args[] = $offset;
+        $query = $wpdb->prepare( $query, $prepare_args );
         // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
         $result2 = $wpdb->get_results( $query );
         // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter

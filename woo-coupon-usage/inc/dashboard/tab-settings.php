@@ -321,7 +321,9 @@ function wcusage_ajax_send_password_reset() {
     // Core WP: generates a secure reset key and sends the (WooCommerce-templated, if active) email.
     $result = retrieve_password($user->user_login);
     if (is_wp_error($result)) {
-        wp_send_json_error($result->get_error_message());
+        $message = wp_strip_all_tags($result->get_error_message());
+        $message = trim(preg_replace('/\s+/', ' ', $message));
+        wp_send_json_error($message);
         wp_die();
     }
 

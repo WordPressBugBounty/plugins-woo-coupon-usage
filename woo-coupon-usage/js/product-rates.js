@@ -53,10 +53,17 @@ jQuery(document).ready(function($) {
     }
 
     function loadData(searchTerm, page) {
+        // Read the coupon and its access token from the table wrapper rather than
+        // the search form: the form is only rendered when the search box is
+        // enabled, but pagination is available either way.
+        // .attr() not .data(): jQuery coerces number-like data attributes, which
+        // would turn a coupon code such as "1e3" into 1000 before posting it.
+        var $wrap = $('.wcusage-product-rates').first();
         $.post(wcusage_product_rates_ajax.ajax_url, {
             action: 'wcusage_rates_pagination',
             search: searchTerm,
-            coupon: $('#product_search_form input[name="coupon"]').val(),
+            coupon: $wrap.attr('data-coupon'),
+            nonce: $wrap.attr('data-nonce'),
             paged: page,
         }, function(response) {
             // replaceWith keeps only one .wcusage-product-rates in the DOM

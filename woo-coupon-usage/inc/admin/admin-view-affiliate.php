@@ -364,7 +364,6 @@ wp_localize_script( 'wcusage-admin-view-affiliate', 'WCUAdminAffiliateView', arr
     'nonce_add_sub_affiliate'    => wp_create_nonce( 'wcusage_add_sub_affiliate_nonce' ),
     'nonce_remove_sub_affiliate' => wp_create_nonce( 'wcusage_remove_sub_affiliate_nonce' ),
     'nonce_refresh'              => wp_create_nonce( 'wcusage_admin_refresh_nonce' ),
-    'refresh_batch_days'         => intval( wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_batch_amount', '20' ) ),
     'refresh_i18n'               => ( function_exists( 'wcusage_refresh_i18n' ) ? wcusage_refresh_i18n() : array() ),
 ) );
 ?>

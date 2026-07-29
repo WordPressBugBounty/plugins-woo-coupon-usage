@@ -153,8 +153,8 @@ function wcusage_field_cb_debug( $args )
   <span class="wcu-field-section-show-ajax-batch">
 
     <p>
-      <?php wcusage_setting_number_option('wcusage_field_enable_coupon_all_stats_batch_amount', '20', esc_html__( 'Batch size:', 'woo-coupon-usage' ), '70px'); ?>
-      <i style="margin-left: 70px;"><?php echo esc_html__( 'This is the amount of days that will be calculated at a time. If you experience issues with the ajax loading, try lowering this number (will be slower but more reliable).', 'woo-coupon-usage' ); ?></i><br/>
+      <?php wcusage_setting_number_option('wcusage_field_enable_coupon_all_stats_batch_amount', '50', esc_html__( 'Batch size:', 'woo-coupon-usage' ), '70px'); ?>
+      <i style="margin-left: 70px;"><?php echo esc_html__( 'This is the number of orders that will be calculated at a time. If you experience issues with the ajax loading, try lowering this number (will use more requests, but each one is quicker).', 'woo-coupon-usage' ); ?></i><br/>
     </p>
 
   </span>

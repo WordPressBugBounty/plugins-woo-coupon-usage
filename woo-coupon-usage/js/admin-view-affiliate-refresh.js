@@ -19,18 +19,13 @@ jQuery(function ($) {
     if (USER_ID === undefined || USER_ID === '') { USER_ID = cfg.user_id; }
 
     var i18n = cfg.refresh_i18n || {};
-    var BATCH_DAYS = parseInt(cfg.refresh_batch_days, 10);
-    if (!BATCH_DAYS || BATCH_DAYS < 1) { BATCH_DAYS = 20; }
+    var MAX_RETRIES = 2;
 
     var running = false;
 
     /* ------------------------------------------------------------------ */
     /* UI helpers                                                          */
     /* ------------------------------------------------------------------ */
-
-    function isoDate(d) {
-        return d.toISOString().slice(0, 10);
-    }
 
     function log(message, type) {
         var $logbox = $box.find('.wcusage-refresh-log');
@@ -174,15 +169,12 @@ jQuery(function ($) {
     }
 
     function runBatches(couponId, code, $item, info, deferred) {
-        var firstDate = new Date(info.first_date);
-        var lastDate = new Date(info.last_date);
-        var today = new Date(info.last_date);
+        // Windows of roughly equal order counts, built server-side so the work
+        // scales with the number of orders rather than the length of history.
+        var windows = info.windows || [];
+        var index = 0;
+        var retries = 0;
 
-        var endDate = new Date(info.last_date);
-        var startDate = new Date(info.last_date);
-        startDate.setDate(startDate.getDate() - BATCH_DAYS);
-
-        var loop = 0;
         var accum = {
             total_orders: 0,
             full_discount: 0,
@@ -201,20 +193,26 @@ jQuery(function ($) {
         setRefreshingStatus(0);
 
         function getBatch() {
+            if (index >= windows.length) {
+                saveCoupon(couponId, code, $item, accum, deferred);
+                return;
+            }
+
+            var currentWindow = windows[index];
+
             $.post(cfg.ajax_url, {
                 action: 'wcusage_admin_refresh_batch',
                 security: cfg.nonce_refresh,
                 user_id: USER_ID,
                 coupon_id: couponId,
-                start: isoDate(startDate),
-                end: isoDate(endDate)
+                start: currentWindow[0],
+                end: currentWindow[1]
             }).done(function (resp) {
                 if (!resp || !resp.success) {
                     failCoupon($item, code, resp, deferred);
                     return;
                 }
 
-                loop++;
                 var d = resp.data || {};
                 accum.total_count += Number(d.total_count) || 0;
                 accum.total_orders += Number(d.total_orders) || 0;
@@ -238,23 +236,20 @@ jQuery(function ($) {
                     }
                 }
 
-                if (startDate >= firstDate) {
-                    // Advance the window (identical arithmetic to the dashboard refresh).
-                    startDate.setDate(startDate.getDate() - BATCH_DAYS);
-                    if (loop === 1) {
-                        endDate.setDate(endDate.getDate() - (BATCH_DAYS + 1));
-                    } else {
-                        endDate.setDate(endDate.getDate() - BATCH_DAYS);
-                    }
-                    var totalRange = today - firstDate;
-                    var progress = totalRange > 0 ? Math.floor(((today - startDate) / totalRange) * 100) : 100;
-                    setProgress($item, progress);
-                    setRefreshingStatus(progress);
-                    getBatch();
-                } else {
-                    saveCoupon(couponId, code, $item, accum, deferred);
-                }
+                retries = 0;
+                index++;
+                var progress = Math.floor((index / windows.length) * 100);
+                setProgress($item, progress);
+                setRefreshingStatus(progress);
+                getBatch();
             }).fail(function (jqXHR) {
+                // A single dropped request (a timeout, or a brief server hiccup)
+                // should not abandon the coupon — retry the same window first.
+                if (retries < MAX_RETRIES) {
+                    retries++;
+                    setTimeout(getBatch, 1500 * retries);
+                    return;
+                }
                 failCoupon($item, code, jqXHR, deferred);
             });
         }

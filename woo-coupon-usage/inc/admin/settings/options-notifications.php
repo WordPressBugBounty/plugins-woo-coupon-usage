@@ -117,7 +117,7 @@ function wcusage_field_cb_notifications( $args )
 
         <br/>
 
-        <?php echo wcusage_email_merge_tags(array("username", "coupon", "adminpayoutsurl", "amount")); ?>
+        <?php echo wcusage_email_merge_tags(array("username", "firstname", "lastname", "coupon", "adminpayoutsurl", "amount")); ?>
 
       </div>
 
@@ -198,7 +198,7 @@ function wcusage_field_cb_notifications( $args )
 
         <br/>
 
-        <?php echo wcusage_email_merge_tags(array("username", "coupon", "amount", "method", "name")); ?>
+        <?php echo wcusage_email_merge_tags(array("username", "coupon", "amount", "method", "name", "firstname", "lastname")); ?>
 
       </div>
 
@@ -848,6 +848,12 @@ if( !function_exists( 'wcusage_email_merge_tags' ) ) {
 
           case "name":
               echo "<p>- <strong>{name}</strong> ".esc_html__( 'to show the users display name.', 'woo-coupon-usage' )."</p>";
+              break;
+          case "firstname":
+              echo "<p>- <strong>{firstname}</strong> ".esc_html__( 'to show the users first name.', 'woo-coupon-usage' )."</p>";
+              break;
+          case "lastname":
+              echo "<p>- <strong>{lastname}</strong> ".esc_html__( 'to show the users last name.', 'woo-coupon-usage' )."</p>";
               break;
           case "email":
               echo "<p>- <strong>{email}</strong> ".esc_html__( 'to show the users email address.', 'woo-coupon-usage' )."</p>";

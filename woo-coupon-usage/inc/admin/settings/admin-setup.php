@@ -775,8 +775,16 @@ function wcusage_setup_page_update() {
       $option_group['wcusage_field_commission_before_discount_custom'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_commission_before_discount_custom'] );
     }
 
+    if( isset( $_POST['wcusage_options']['wcusage_field_commission_blended_discount_rate'] ) ) {
+      $option_group['wcusage_field_commission_blended_discount_rate'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_commission_blended_discount_rate'] );
+    }
+
     if( isset( $_POST['wcusage_options']['wcusage_field_commission_include_fees'] ) ) {
       $option_group['wcusage_field_commission_include_fees'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_commission_include_fees'] );
+    }
+
+    if( isset( $_POST['wcusage_options']['wcusage_field_commission_exclude_restricted_products'] ) ) {
+      $option_group['wcusage_field_commission_exclude_restricted_products'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_commission_exclude_restricted_products'] );
     }
 
     if( isset( $_POST['wcusage_options']['wcusage_field_show_tax'] ) ) {

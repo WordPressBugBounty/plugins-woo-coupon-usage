@@ -643,28 +643,28 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-size: 18px;
+    font-size: 28px;
 }
 
-.wcu-icon-usage { background: #eef3ff; color: #2271b1; }
-.wcu-icon-sales { background: #e6f7ee; color: #00a32a; }
-.wcu-icon-discounts { background: #fef3e6; color: #d97706; }
-.wcu-icon-avg { background: #f0e6ff; color: #7c3aed; }
-.wcu-icon-commission { background: #e6f7ee; color: #00a32a; }
-.wcu-icon-unpaid { background: #fff3e6; color: #d97706; }
-.wcu-icon-pending { background: #fef2f2; color: #dc2626; }
-.wcu-icon-rate { background: #ecfdf5; color: #059669; }
-.wcu-icon-clicks { background: #eef3ff; color: #2271b1; }
-.wcu-icon-conversions { background: #e6f7ee; color: #00a32a; }
-.wcu-icon-convrate { background: #f5f3ff; color: #7c3aed; }
+.wcu-icon-usage { color: #2271b1; }
+.wcu-icon-sales { color: #00a32a; }
+.wcu-icon-discounts { color: #d97706; }
+.wcu-icon-avg { color: #7c3aed; }
+.wcu-icon-commission { color: #00a32a; }
+.wcu-icon-unpaid { color: #d97706; }
+.wcu-icon-pending { color: #dc2626; }
+.wcu-icon-rate { color: #059669; }
+.wcu-icon-clicks { color: #2271b1; }
+.wcu-icon-conversions { color: #00a32a; }
+.wcu-icon-convrate { color: #7c3aed; }
 
 /* Activity log icon colors */
-.wcu-icon-activity-registrations { background: #eef3ff; color: #2271b1; }
-.wcu-icon-activity-payouts { background: #ecfdf5; color: #059669; }
-.wcu-icon-activity-payout-requests { background: #fef2f2; color: #dc2626; }
-.wcu-icon-activity-rewards { background: #f5f3ff; color: #7c3aed; }
-.wcu-icon-activity-campaigns { background: #fff7ed; color: #c2410c; }
-.wcu-icon-activity-mla { background: #f0fdf4; color: #15803d; }
+.wcu-icon-activity-registrations { color: #2271b1; }
+.wcu-icon-activity-payouts { color: #059669; }
+.wcu-icon-activity-payout-requests { color: #dc2626; }
+.wcu-icon-activity-rewards { color: #7c3aed; }
+.wcu-icon-activity-campaigns { color: #c2410c; }
+.wcu-icon-activity-mla { color: #15803d; }
 
 .wcu-card-data {
     display: flex;

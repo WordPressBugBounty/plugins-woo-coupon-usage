@@ -326,11 +326,10 @@ if ( !function_exists( 'wcusage_refresh_enqueue_assets' ) ) {
             true
         );
         wp_localize_script( 'wcusage-admin-view-affiliate-refresh', 'WCUAdminAffiliateView', array(
-            'ajax_url'           => admin_url( 'admin-ajax.php' ),
-            'user_id'            => $user_id,
-            'nonce_refresh'      => wp_create_nonce( 'wcusage_admin_refresh_nonce' ),
-            'refresh_batch_days' => intval( wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_batch_amount', '20' ) ),
-            'refresh_i18n'       => wcusage_refresh_i18n(),
+            'ajax_url'      => admin_url( 'admin-ajax.php' ),
+            'user_id'       => $user_id,
+            'nonce_refresh' => wp_create_nonce( 'wcusage_admin_refresh_nonce' ),
+            'refresh_i18n'  => wcusage_refresh_i18n(),
         ) );
     }
 
@@ -384,98 +383,38 @@ if ( !function_exists( 'wcusage_admin_refresh_verify_request' ) ) {
 
 }
 /**
- * Get the first and last order dates for a coupon.
+ * AJAX: Start refreshing a single coupon — returns the windows it must walk.
  *
- * Mirrors the date-range query used by wcusage_update_all_stats_batch_ajax()
- * so the admin refresh walks the exact same order range as a dashboard refresh.
- *
- * @param string $coupon_code
- * @return array  [ 'first' => 'Y-m-d', 'last' => 'Y-m-d' ]
- */
-if ( !function_exists( 'wcusage_admin_refresh_get_coupon_daterange' ) ) {
-    function wcusage_admin_refresh_get_coupon_daterange(  $coupon_code  ) {
-        global $wpdb;
-        $coupon_code = sanitize_text_field( $coupon_code );
-        $wcusage_field_order_type_custom = wcusage_get_setting_value( 'wcusage_field_order_type_custom', '' );
-        if ( !$wcusage_field_order_type_custom ) {
-            $statuses = wc_get_order_statuses();
-            if ( isset( $statuses['wc-refunded'] ) ) {
-                unset($statuses['wc-refunded']);
-            }
-        } else {
-            $statuses = $wcusage_field_order_type_custom;
-        }
-        // Custom Orders Table (HPOS) or legacy posts table.
-        $order_util_class = '\\Automattic\\WooCommerce\\Utilities\\OrderUtil';
-        if ( class_exists( $order_util_class ) && method_exists( $order_util_class, 'custom_orders_table_usage_is_enabled' ) && call_user_func( array($order_util_class, 'custom_orders_table_usage_is_enabled') ) ) {
-            $id = 'id';
-            $posts = 'wc_orders';
-            $postmeta = 'wc_orders_meta';
-            $post_date = 'date_created_gmt';
-            $post_status = 'status';
-            $post_id = 'order_id';
-        } else {
-            $id = 'ID';
-            $posts = 'posts';
-            $postmeta = 'postmeta';
-            $post_date = 'post_date';
-            $post_status = 'post_status';
-            $post_id = 'post_id';
-        }
-        $query = $wpdb->prepare(
-            "SELECT DISTINCT p." . $id . " AS order_id, p." . $post_date . " AS order_date\n            FROM {$wpdb->prefix}" . $posts . " AS p\n            LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS woi\n                ON p." . $id . " = woi.order_id AND woi.order_item_type = 'coupon' AND woi.order_item_name = %s\n            LEFT JOIN {$wpdb->prefix}" . $postmeta . " AS woi2\n                ON p." . $id . " = woi2." . $post_id . " AND (\n                    (woi2.meta_key = 'lifetime_affiliate_coupon_referrer' AND woi2.meta_value = %s) OR\n                    (woi2.meta_key = 'wcusage_referrer_coupon' AND woi2.meta_value = %s)\n                )\n            WHERE p." . $post_status . " IN ('" . implode( "','", array_keys( $statuses ) ) . "')\n            AND (woi.order_id IS NOT NULL OR woi2.meta_value = %s AND woi2.meta_key IS NOT NULL)",
-            $coupon_code,
-            $coupon_code,
-            $coupon_code,
-            $coupon_code
-        );
-        $date_range_query = "SELECT MIN(sub.order_date) AS first_date, MAX(sub.order_date) AS last_date FROM (" . $query . ") AS sub";
-        $date_range = $wpdb->get_row( $date_range_query );
-        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL
-        if ( $date_range && $date_range->first_date ) {
-            $first_order_date = $date_range->first_date;
-            $wcusage_hide_all_time = wcusage_get_setting_value( 'wcusage_field_hide_all_time', '0' );
-            if ( $wcusage_hide_all_time ) {
-                $first_order_date = date( 'Y-m-d' );
-            }
-        } else {
-            $first_order_date = date( 'Y-m-d' );
-        }
-        if ( $date_range && $date_range->last_date ) {
-            $last_order_date = $date_range->last_date;
-        } else {
-            $last_order_date = date( 'Y-m-d' );
-        }
-        return array(
-            'first' => date( 'Y-m-d', strtotime( $first_order_date ) ),
-            'last'  => date( 'Y-m-d', strtotime( $last_order_date ) ),
-        );
-    }
-
-}
-/**
- * AJAX: Start refreshing a single coupon — returns its order date range.
+ * The windows come from wcusage_get_refresh_date_windows(), the same helper the
+ * affiliate dashboard uses, so both refresh paths do the identical work.
  */
 if ( !function_exists( 'wcusage_admin_refresh_start_ajax' ) ) {
     function wcusage_admin_refresh_start_ajax() {
         list( $user_id, $coupon_id, $coupon_code ) = wcusage_admin_refresh_verify_request();
-        $range = wcusage_admin_refresh_get_coupon_daterange( $coupon_code );
+        $windows = wcusage_get_refresh_date_windows( $coupon_code );
+        $windows_js = array();
+        foreach ( $windows as $window ) {
+            $windows_js[] = array($window['start'], $window['end']);
+        }
         // Mark the coupon as needing a refresh straight away. If this admin-side
         // refresh is interrupted before it finishes (the save step re-sets this to
         // the current time), the affiliate dashboard will still recalculate the
         // stats the next time it is loaded. This is the same trigger the old
         // "REFRESH ALL DATA" link used (see wcusage_check_if_refresh_needed()).
+        // The stored statistics themselves are left alone until the run finishes.
         delete_post_meta( $coupon_id, 'wcu_last_refreshed' );
-        // Reset the processing (pending) commission total before the per-order
-        // recalculation runs. Each pending order re-adds its commission to this
-        // meta during the refresh, so it must start from zero to avoid doubling
-        // up on top of the previous value (mirrors the dashboard batch refresh).
-        update_post_meta( $coupon_id, 'wcu_text_pending_order_commission', 0 );
+        // Rebuild the processing (pending) commission total in a temporary key.
+        // Each pending order re-adds its commission during the refresh, so it
+        // must start from zero — but the value the affiliate sees is only
+        // replaced once the whole run has completed. With no windows to walk
+        // nothing would be re-added, so the existing total is left alone.
+        if ( !empty( $windows ) ) {
+            wcusage_begin_refresh_pending( $coupon_id );
+        }
         wp_send_json_success( array(
             'coupon_id'   => $coupon_id,
             'coupon_code' => $coupon_code,
-            'first_date'  => $range['first'],
-            'last_date'   => $range['last'],
+            'windows'     => $windows_js,
         ) );
     }
 
@@ -494,6 +433,12 @@ if ( !function_exists( 'wcusage_admin_refresh_batch_ajax' ) ) {
         list( $user_id, $coupon_id, $coupon_code ) = wcusage_admin_refresh_verify_request();
         $start = ( isset( $_POST['start'] ) ? sanitize_text_field( $_POST['start'] ) : '' );
         $end = ( isset( $_POST['end'] ) ? sanitize_text_field( $_POST['end'] ) : '' );
+        // Build the processing commission total in a temporary key while the
+        // run is going (see wcusage_begin_refresh_pending()).
+        $recalculate_pending = wcusage_refresh_recalculates_pending();
+        if ( $recalculate_pending ) {
+            $GLOBALS['wcusage_pending_refresh_key'] = 'wcu_text_pending_order_commission_refresh';
+        }
         // Full refresh: refresh = 1, update = 1, alltime = 1.
         $orders = wcusage_wh_getOrderbyCouponCode(
             $coupon_code,
@@ -504,6 +449,9 @@ if ( !function_exists( 'wcusage_admin_refresh_batch_ajax' ) ) {
             1,
             1
         );
+        if ( $recalculate_pending ) {
+            unset($GLOBALS['wcusage_pending_refresh_key']);
+        }
         $allstats = ( isset( $orders['allstats'] ) && is_array( $orders['allstats'] ) ? $orders['allstats'] : array() );
         $response = array(
             'total_orders'       => ( isset( $allstats['total_orders'] ) ? (float) $allstats['total_orders'] : 0 ),
@@ -526,33 +474,10 @@ if ( !function_exists( 'wcusage_admin_refresh_save_ajax' ) ) {
     function wcusage_admin_refresh_save_ajax() {
         list( $user_id, $coupon_id, $coupon_code ) = wcusage_admin_refresh_verify_request();
         $stats = ( isset( $_POST['stats'] ) && is_array( $_POST['stats'] ) ? wp_unslash( $_POST['stats'] ) : array() );
-        // Sanitize the accumulated stats (mirrors wcusage_update_all_stats_data()).
-        $allstats = array();
-        $allstats['total_orders'] = ( isset( $stats['total_orders'] ) ? floatval( $stats['total_orders'] ) : 0 );
-        $allstats['full_discount'] = ( isset( $stats['full_discount'] ) ? floatval( $stats['full_discount'] ) : 0 );
-        $allstats['total_commission'] = ( isset( $stats['total_commission'] ) ? floatval( $stats['total_commission'] ) : 0 );
-        $allstats['total_shipping'] = ( isset( $stats['total_shipping'] ) ? floatval( $stats['total_shipping'] ) : 0 );
-        $allstats['total_count'] = ( isset( $stats['total_count'] ) ? floatval( $stats['total_count'] ) : 0 );
-        $allstats['commission_summary'] = array();
-        if ( isset( $stats['commission_summary'] ) && is_array( $stats['commission_summary'] ) ) {
-            foreach ( $stats['commission_summary'] as $key => $value ) {
-                $sanitized_key = sanitize_text_field( $key );
-                if ( is_array( $value ) || is_object( $value ) ) {
-                    $value = (array) $value;
-                    $allstats['commission_summary'][$sanitized_key] = array(
-                        'total'      => ( isset( $value['total'] ) ? floatval( $value['total'] ) : 0 ),
-                        'commission' => ( isset( $value['commission'] ) ? floatval( $value['commission'] ) : 0 ),
-                        'number'     => ( isset( $value['number'] ) ? intval( $value['number'] ) : 0 ),
-                    );
-                }
-            }
-        }
-        // Persist (same meta updates a dashboard refresh performs).
-        update_post_meta( $coupon_id, 'wcu_alltime_stats', $allstats );
-        update_post_meta( $coupon_id, 'wcu_last_refreshed', time() );
-        delete_post_meta( $coupon_id, 'wcusage_monthly_summary_data' );
-        delete_post_meta( $coupon_id, 'wcusage_monthly_summary_data_orders' );
-        delete_post_meta( $coupon_id, 'wcusage_monthly_cache_time_current' );
+        // Persist (identical to what a dashboard refresh performs). This also
+        // clears the saved resume point and swaps the recalculated processing
+        // commission into place.
+        $allstats = wcusage_save_alltime_stats( $coupon_id, $stats );
         // Keep the stored commission message in sync with the current rate so the
         // affiliate dashboard does not treat the coupon as still needing a refresh
         // on its next load (see wcusage_check_if_refresh_needed()).

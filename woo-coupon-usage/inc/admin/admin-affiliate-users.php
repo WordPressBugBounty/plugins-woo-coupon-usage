@@ -87,7 +87,7 @@ add_action('admin_footer-users.php', 'wcusage_filter_users_custom_button');
        $credit_enable = wcusage_get_setting_value('wcusage_field_storecredit_enable', 0);
        $system = wcusage_get_setting_value('wcusage_field_storecredit_system', 'default');
        $storecredit_users_col = wcusage_get_setting_value('wcusage_field_tr_payouts_storecredit_users_col', 1);
-       if($credit_enable && $storecredit_users_col && $system == "default") {
+       if($credit_enable && $storecredit_users_col && ( function_exists('wcusage_credit_use_builtin') ? wcusage_credit_use_builtin($system) : ($system == "default") )) {
          $credit_label = wcusage_get_setting_value('wcusage_field_tr_payouts_storecredit_only', 'Store Credit');
          $column['affiliatestorecredit'] = $credit_label;
        }

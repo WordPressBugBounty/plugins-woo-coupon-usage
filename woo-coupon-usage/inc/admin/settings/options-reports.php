@@ -368,7 +368,8 @@ if( !function_exists( 'wcusage_test_report_form' ) ) {
 
   /* Popup inner div */
   .wcu-popup-content {
-      width: 300px;
+      width: 400px;
+      padding: 20px;
       margin: 0 auto;
       box-sizing: border-box;
       padding: 0px;

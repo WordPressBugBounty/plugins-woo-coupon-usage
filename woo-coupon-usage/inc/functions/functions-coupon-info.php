@@ -214,3 +214,110 @@ if( !function_exists( 'wcusage_get_coupon_info_by_id' ) ) {
 	}
 }
 add_action('wcusage_hook_get_coupon_info_by_id', 'wcusage_get_coupon_info_by_id', 10, 1);
+
+/**
+ * Checks whether a coupon's own product/category usage restrictions allow a product.
+ *
+ * This mirrors WC_Coupon::is_valid_for_product() (products, categories, excluded
+ * products, excluded categories, exclude sale items) but deliberately omits core's
+ * coupon-type gate. Core returns false for EVERY product when the coupon is not a
+ * "product" type - i.e. for fixed_cart coupons - which would wrongly report that a
+ * fixed_cart coupon applies to nothing. Restrictions are still meaningful for those
+ * coupons (they gate validity), so we evaluate the lists directly.
+ *
+ * Category matching uses wc_get_product_cat_ids(), which includes ancestors, so a
+ * restriction on a parent category covers products filed in its sub-categories.
+ *
+ * @param WC_Coupon|string $coupon      Coupon object or code.
+ * @param int              $product_id  Product or variation ID from the line item.
+ * @param int              $parent_id   Parent product ID from the line item.
+ *
+ * @return bool True if the coupon's restrictions allow this product (or cannot be determined).
+ *
+ */
+if( !function_exists( 'wcusage_coupon_restrictions_allow_product' ) ) {
+	function wcusage_coupon_restrictions_allow_product( $coupon, $product_id, $parent_id = 0 ) {
+
+		if ( ! ( $coupon instanceof WC_Coupon ) ) {
+			if ( ! $coupon || ! function_exists( 'wc_get_coupon_id_by_code' ) ) {
+				return true;
+			}
+
+			// Cache the coupon object per request. This runs once per order line item, so a
+			// statistics rebuild walking thousands of orders would otherwise build the same
+			// coupon object tens of thousands of times.
+			static $coupon_cache = array();
+			$cache_key = (string) $coupon;
+
+			if ( ! array_key_exists( $cache_key, $coupon_cache ) ) {
+				$coupon_id = wc_get_coupon_id_by_code( $coupon );
+				$coupon_cache[ $cache_key ] = $coupon_id ? new WC_Coupon( $coupon_id ) : null;
+			}
+
+			if ( null === $coupon_cache[ $cache_key ] ) {
+				return true; // Coupon no longer exists - do not withhold commission.
+			}
+			$coupon = $coupon_cache[ $cache_key ];
+		}
+
+		$include_ids   = $coupon->get_product_ids();
+		$exclude_ids   = $coupon->get_excluded_product_ids();
+		$include_cats  = $coupon->get_product_categories();
+		$exclude_cats  = $coupon->get_excluded_product_categories();
+		$exclude_sale  = $coupon->get_exclude_sale_items();
+
+		// No restrictions set at all - nothing to evaluate.
+		if ( ! count( $include_ids ) && ! count( $exclude_ids )
+			&& ! count( $include_cats ) && ! count( $exclude_cats ) && ! $exclude_sale ) {
+			return true;
+		}
+
+		$product_id = (int) $product_id;
+		$parent_id  = (int) $parent_id;
+
+		// Match on both the variation and its parent, as core does.
+		$product_ids = array_filter( array( $product_id, $parent_id ) );
+
+		// Ancestors included, so a parent-category restriction covers sub-categories.
+		$cat_source   = $parent_id ? $parent_id : $product_id;
+		$product_cats = function_exists( 'wc_get_product_cat_ids' ) ? wc_get_product_cat_ids( $cat_source ) : array();
+
+		$valid = false;
+
+		// Specific products included.
+		if ( count( $include_ids ) && count( array_intersect( $product_ids, $include_ids ) ) ) {
+			$valid = true;
+		}
+
+		// Specific categories included.
+		if ( count( $include_cats ) && count( array_intersect( $product_cats, $include_cats ) ) ) {
+			$valid = true;
+		}
+
+		// No include lists at all - everything is covered by default.
+		if ( ! count( $include_ids ) && ! count( $include_cats ) ) {
+			$valid = true;
+		}
+
+		// Specific products excluded.
+		if ( count( $exclude_ids ) && count( array_intersect( $product_ids, $exclude_ids ) ) ) {
+			$valid = false;
+		}
+
+		// Specific categories excluded.
+		if ( count( $exclude_cats ) && count( array_intersect( $product_cats, $exclude_cats ) ) ) {
+			$valid = false;
+		}
+
+		// Sale items excluded.
+		if ( $exclude_sale ) {
+			$product = wc_get_product( $product_id ? $product_id : $parent_id );
+			if ( $product && $product->is_on_sale() ) {
+				$valid = false;
+			}
+		}
+
+		return apply_filters( 'wcusage_coupon_restrictions_allow_product', $valid, $coupon, $product_id, $parent_id );
+
+	}
+}

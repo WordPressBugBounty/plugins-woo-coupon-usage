@@ -527,14 +527,14 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-size: 18px;
+    font-size: 28px;
 }
 
-.wcusage-dashboard-modern .wcu-icon-usage { background: #eef3ff; color: #2271b1; }
-.wcusage-dashboard-modern .wcu-icon-sales { background: #e6f7ee; color: #00a32a; }
-.wcusage-dashboard-modern .wcu-icon-discounts { background: #fef3e6; color: #d97706; }
-.wcusage-dashboard-modern .wcu-icon-commission { background: #e6f7ee; color: #00a32a; }
-.wcusage-dashboard-modern .wcu-icon-clicks { background: #eef3ff; color: #2271b1; }
+.wcusage-dashboard-modern .wcu-icon-usage { color: #2271b1; }
+.wcusage-dashboard-modern .wcu-icon-sales { color: #00a32a; }
+.wcusage-dashboard-modern .wcu-icon-discounts { color: #d97706; }
+.wcusage-dashboard-modern .wcu-icon-commission { color: #00a32a; }
+.wcusage-dashboard-modern .wcu-icon-clicks { color: #2271b1; }
 
 .wcusage-dashboard-modern .wcu-card-data {
     display: flex;
@@ -594,7 +594,6 @@
 }
 
 .wcusage-dashboard-modern .wcu-icon-affiliates {
-    background: #eef3ff;
     color: #2271b1;
 }
 

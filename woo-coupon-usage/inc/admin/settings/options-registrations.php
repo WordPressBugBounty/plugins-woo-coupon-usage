@@ -785,6 +785,8 @@ function wcusage_field_cb_registration( $args )
 
               $is_option_type  = ( $type === 'dropdown' || $type === 'radio' );
               $is_display_type = ( $type === 'header' || $type === 'paragraph' );
+
+              $editable_tip = __( 'When enabled, affiliates can view and edit this field in the Account Details section of their dashboard Settings tab. When disabled, it is hidden from affiliates but still editable by admins.', 'woo-coupon-usage' );
               ?>
               <div class="wcu-cf-item" data-index="<?php echo esc_attr( $x ); ?>">
                 <span class="wcu-cf-handle dashicons dashicons-menu" title="<?php echo esc_attr__( 'Drag to reorder', 'woo-coupon-usage' ); ?>"></span>
@@ -819,7 +821,7 @@ function wcusage_field_cb_registration( $args )
                   </div>
 
                   <div class="wcu-cf-field wcu-cf-col-toggle wcu-cf-col-editable"<?php echo $is_display_type ? ' style="display:none;"' : ''; ?>>
-                    <label><?php echo esc_html__( 'Editable by user', 'woo-coupon-usage' ); ?><span class="wcu-cf-tip dashicons dashicons-editor-help" tabindex="0" role="img" aria-label="<?php echo esc_attr__( 'When enabled, affiliates can view and edit this field in the Account Details section of their dashboard Settings tab. When disabled, it is hidden from affiliates but still editable by admins.', 'woo-coupon-usage' ); ?>" data-tip="<?php echo esc_attr__( 'When enabled, affiliates can view and edit this field in the Account Details section of their dashboard Settings tab. When disabled, it is hidden from affiliates but still editable by admins.', 'woo-coupon-usage' ); ?>"></span></label>
+                    <label><?php echo esc_html__( 'Editable by user', 'woo-coupon-usage' ); ?><span class="wcu-cf-tip" tabindex="0" role="img" aria-label="<?php echo esc_attr( $editable_tip ); ?>" data-tip="<?php echo esc_attr( $editable_tip ); ?>"><span class="dashicons dashicons-editor-help" aria-hidden="true"></span></span></label>
                     <label class="switch wcu-cf-switch">
                       <input type="hidden" class="wcu-cf-hidden-editable" value="0" name="wcusage_options[<?php echo esc_attr( $base_editable ); ?>]">
                       <input type="checkbox" class="wcu-cf-input-editable" value="1" id="<?php echo esc_attr( $base_editable ); ?>" name="wcusage_options[<?php echo esc_attr( $base_editable ); ?>]" <?php checked( (bool) $editable ); ?>>
@@ -880,7 +882,8 @@ function wcusage_field_cb_registration( $args )
             .wcu-cf-col-options textarea { width: 100%; min-width: 170px; }
             .wcu-cf-col-toggle { flex: 0 0 auto; }
             .wcu-cf-col-toggle > label { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
-            .wcu-cf-tip { display: contents; color: #8a94a6; cursor: help; font-size: 16px; line-height: 1; position: relative; }
+            .wcu-cf-tip { display: inline-flex; align-items: center; color: #8a94a6; cursor: help; line-height: 1; position: relative; }
+            .wcu-cf-tip .dashicons { width: 16px; height: 16px; font-size: 16px; line-height: 1; }
             .wcu-cf-tip:hover::after, .wcu-cf-tip:focus::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%); width: 240px; white-space: normal; background: #1d2327; color: #fff; font-size: 12px; font-weight: 400; line-height: 1.45; padding: 9px 11px; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.22); z-index: 100; }
             .wcu-cf-tip:hover::before, .wcu-cf-tip:focus::before { content: ""; position: absolute; left: 50%; bottom: calc(100% + 3px); transform: translateX(-50%); border: 6px solid transparent; border-top-color: #1d2327; z-index: 100; }
             .wcu-cf-delete { background: transparent; border: 0; color: #b32d2e; cursor: pointer; padding: 4px; margin-top: 20px; border-radius: 6px; flex: 0 0 auto; }

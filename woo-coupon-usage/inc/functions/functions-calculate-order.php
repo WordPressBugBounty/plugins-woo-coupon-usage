@@ -717,6 +717,69 @@ if ( !function_exists( 'wcusage_round_commission_amount' ) ) {
 
 }
 /**
+ * Remove affiliate commission on an affiliate's own purchases.
+ *
+ * Applies only when BOTH of these settings are enabled:
+ * - "Allow affiliate user to apply their own coupon code at cart / checkout"
+ *   (wcusage_field_allow_assigned_user), and
+ * - "Do not give the affiliate commission when they use their own coupon code"
+ *   (wcusage_field_assigned_user_no_commission).
+ *
+ * The affiliate can still apply their own coupon and receive the customer discount;
+ * this only zeroes the commission when the buyer is the affiliate the coupon is
+ * assigned to. Purchases made by other customers using the same coupon are unaffected.
+ *
+ * Hooked to the same filter used in both commission calculation paths
+ * (wcusage_calculate_order_data and wcusage_get_order_calculate_data).
+ *
+ * @param float $commission Calculated commission for this order/coupon.
+ * @param int   $orderid    Order ID.
+ * @param int   $couponid   Coupon ID.
+ * @param int   $couponuser User ID of the affiliate assigned to the coupon.
+ *
+ * @return float
+ */
+if ( !function_exists( 'wcusage_remove_own_coupon_commission' ) ) {
+    function wcusage_remove_own_coupon_commission(
+        $commission,
+        $orderid,
+        $couponid,
+        $couponuser
+    ) {
+        if ( empty( $commission ) || empty( $couponuser ) || empty( $orderid ) ) {
+            return $commission;
+        }
+        $allow_assigned_user = wcusage_get_setting_value( 'wcusage_field_allow_assigned_user', 1 );
+        $no_commission = wcusage_get_setting_value( 'wcusage_field_assigned_user_no_commission', 0 );
+        if ( !$allow_assigned_user || !$no_commission ) {
+            return $commission;
+        }
+        $order = wc_get_order( $orderid );
+        if ( !$order ) {
+            return $commission;
+        }
+        // Buyer is logged in as the affiliate assigned to the coupon.
+        $customer_id = $order->get_customer_id();
+        if ( $customer_id && (int) $customer_id === (int) $couponuser ) {
+            return 0;
+        }
+        // Or the order was placed using the affiliate account's email (e.g. guest checkout).
+        $affiliate = get_userdata( $couponuser );
+        $billing_email = $order->get_billing_email();
+        if ( $affiliate && !empty( $affiliate->user_email ) && $billing_email && strtolower( $billing_email ) === strtolower( $affiliate->user_email ) ) {
+            return 0;
+        }
+        return $commission;
+    }
+
+    add_filter(
+        'wcusage_calculate_edit_commission',
+        'wcusage_remove_own_coupon_commission',
+        10,
+        4
+    );
+}
+/**
  * Loops through all orders for coupon and calculates order data including commission. Will only loop through data if $refresh true otherwise uses saved meta data.
  *
  * @param int $orderid
@@ -748,6 +811,8 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         }
         $options = get_option( 'wcusage_options' );
         $totalcommission = 0;
+        $commission_base_total = 0;
+        // Sum of product value that % commission was based on (used for blended custom-discount deduction)
         $fixed_product_commission_total = 0;
         $totalrefunds = 0;
         $refunded_quantity = 0;
@@ -811,6 +876,10 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         } else {
             $productpriority = false;
         }
+        // Withhold commission on line items the coupon's own usage restrictions excluded?
+        // Off by default - the long-standing behaviour is to pay on the whole order, since
+        // the affiliate drove the sale regardless of which lines the discount touched.
+        $exclude_restricted_products = wcusage_get_setting_value( 'wcusage_field_commission_exclude_restricted_products', '0' );
         // If order data type is refund
         if ( $order instanceof WC_Order ) {
             if ( $type == "refunds" ) {
@@ -869,6 +938,12 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                             } else {
                                 $this_id = 0;
                             }
+                        }
+                        // Does the coupon's own product/category restrictions cover this line?
+                        // When the setting is off this stays false and nothing below changes.
+                        $item_coupon_restricted = false;
+                        if ( $exclude_restricted_products && $coupon_code && $this_id ) {
+                            $item_coupon_restricted = !wcusage_coupon_restrictions_allow_product( $coupon_code, $this_id, $parent_id );
                         }
                         // Count this products refunds
                         foreach ( $order->get_refunds() as $refund ) {
@@ -1036,9 +1111,13 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         $this_line_total = $this_line_total - $refunded_line_subtotal;
                         $this_line_subtotal = $this_line_subtotal - $refunded_line_subtotal;
                         // ***** Get Commission Percentage Amount ***** //
-                        if ( $product_percent != "" && $product_percent >= 0 && $productpriority || $product_percent > 0 && $option_affiliate == "" ) {
+                        if ( $item_coupon_restricted ) {
+                            // Coupon's usage restrictions excluded this product - it earns no % commission.
+                        } elseif ( $product_percent != "" && $product_percent >= 0 && $productpriority || $product_percent > 0 && $option_affiliate == "" ) {
                             // If product priority or product commission set but no other commmission options available.
-                            $product_percent = (int) $product_percent;
+                            // Cast to float, not int - the per-product/per-category rate fields use
+                            // step="0.01", so an integer cast silently truncated rates like 2.5% to 2%.
+                            $product_percent = (float) $product_percent;
                             $product_commission_amount = (float) $product_percent / 100;
                             if ( $wcusage_show_commission_before_discount ) {
                                 $this_line_total_commission += $this_line_subtotal * $deduct_percent * $product_commission_amount;
@@ -1060,11 +1139,27 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                                 }
                             }
                         }
+                        // Track the product value this line's percentage commission was based on, so
+                        // order-level custom discounts / store credit can later be deducted at the blended
+                        // effective rate instead of the flat coupon rate (which over-deducts when products
+                        // use lower per-product commission rates). Restricted lines earned nothing, so
+                        // they must stay out of the base or they would dilute the blended rate.
+                        if ( !$item_coupon_restricted ) {
+                            if ( $wcusage_show_commission_before_discount ) {
+                                $commission_base_total += (float) $this_line_subtotal * (float) $deduct_percent;
+                            } else {
+                                $commission_base_total += (float) $this_line_total * (float) $deduct_percent;
+                            }
+                        }
                         $totalcommission += $this_line_total_commission;
                         $affiliate_commission_amount = 0;
                         // Reset Value
                         //  ***** Get Per Product Commission ***** //
-                        if ( $fixed_product_commission != "" && $fixed_product_commission >= 0 && $productpriority || $fixed_product_commission > 0 && $wcu_text_coupon_commission_fixed_product == "" ) {
+                        if ( $item_coupon_restricted ) {
+                            // Coupon's usage restrictions excluded this product - no fixed per-product
+                            // commission either, and it must not fall through to the global default below.
+                            $fixed_product_commission = 0;
+                        } elseif ( $fixed_product_commission != "" && $fixed_product_commission >= 0 && $productpriority || $fixed_product_commission > 0 && $wcu_text_coupon_commission_fixed_product == "" ) {
                             if ( $deduct_percent ) {
                                 $fixed_product_commission = $fixed_product_commission * $deduct_percent;
                             }
@@ -1084,13 +1179,6 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                                 $fixed_product_commission_total += $fixed_product_commission * $this_quantity2;
                             }
                             $iscommissionproduct = true;
-                        }
-                        // Add tax to fixed commission amounts
-                        if ( $wcusage_show_tax_fixed ) {
-                            $fixed_product_commission_total_tax = $fixed_product_commission_total * $taxpercent;
-                            $fixed_product_commission_total += $fixed_product_commission_total_tax;
-                            $fixed_order_commission_tax = $fixed_order_commission * $taxpercent;
-                            $fixed_order_commission += $fixed_order_commission_tax;
                         }
                         // Count Items
                         if ( is_numeric( $this_quantity2 ) ) {
@@ -1142,12 +1230,38 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                     }
                 }
                 // End of Order Items Loop
+                // ***** Add Tax To Fixed Commission Amounts ***** //
+                // Applied once to the finished totals. This previously ran inside the order items
+                // loop, so on an order with more than one line item the tax was applied again on
+                // every pass - compounding to total * (1 + tax)^number_of_line_items. The per-order
+                // fixed amount was worst affected, as it is not per-item at all.
+                if ( $wcusage_show_tax_fixed ) {
+                    $fixed_product_commission_total += (float) $fixed_product_commission_total * (float) $taxpercent;
+                    $fixed_order_commission += (float) $fixed_order_commission * (float) $taxpercent;
+                }
                 // ***** Deduct Custom Discounts Commission ***** //
                 $total_fees = wcusage_get_total_fees( $orderid );
                 if ( is_numeric( $option_affiliate ) ) {
                     $affiliate_commission_amount = (float) $option_affiliate / 100;
                 } else {
                     $affiliate_commission_amount = 0;
+                }
+                // Blended effective commission rate across all line items. When products use
+                // per-product rates that differ from the coupon rate, this reflects the rate
+                // actually earned, so order-level custom discounts / store credit are deducted
+                // proportionally instead of at the flat coupon rate (which could push commission
+                // negative). Falls back to the coupon rate when there is no percentage base.
+                // NOTE: must be read before any fees are added to $totalcommission below.
+                if ( $commission_base_total > 0 ) {
+                    $blended_commission_rate = (float) $totalcommission / (float) $commission_base_total;
+                } else {
+                    $blended_commission_rate = $affiliate_commission_amount;
+                }
+                // Setting gate: when disabled, revert to deducting custom discounts / store credit
+                // at the flat coupon/global commission rate (pre-8.1.0 behaviour). Enabled by default.
+                $use_blended_discount_rate = wcusage_get_setting_value( 'wcusage_field_commission_blended_discount_rate', '1' );
+                if ( !$use_blended_discount_rate ) {
+                    $blended_commission_rate = $affiliate_commission_amount;
                 }
                 // ***** Add Fees Commission ***** //
                 $wcusage_field_commission_include_fees = wcusage_get_setting_value( 'wcusage_field_commission_include_fees', '0' );
@@ -1178,7 +1292,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                 // ***** Remove custom discounts from total for commission calculations (if disabled) ***** //
                 $total_fees_remove = $total_fees['fee_total_remove'];
                 if ( !$wcusage_field_commission_before_discount_custom ) {
-                    $total_fees_remove_commission = $total_fees_remove * $affiliate_commission_amount;
+                    $total_fees_remove_commission = $total_fees_remove * $blended_commission_rate;
                     if ( $wcusage_show_tax ) {
                         $total_fees_remove_commission_tax = $total_fees_remove_commission * $taxpercent;
                         $total_fees_remove_commission += $total_fees_remove_commission_tax;
@@ -1227,7 +1341,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                 // Filter for other store credit plugins
                 $store_credit_used = apply_filters( 'wcusage_order_store_credit', $store_credit_used, $order );
                 if ( $store_credit_used > 0 ) {
-                    $store_credit_commission_deduction = $store_credit_used * $affiliate_commission_amount;
+                    $store_credit_commission_deduction = $store_credit_used * $blended_commission_rate;
                     $totalcommission = $totalcommission - $store_credit_commission_deduction;
                     // Update Commission Summary
                     if ( is_array( $commission_summary ) ) {
@@ -1270,6 +1384,12 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         $couponid,
                         $couponuser
                     );
+                }
+                // Floor negative commission at 0 BEFORE writing to meta, so large custom discounts /
+                // store credit can never surface a negative value in the admin order email, reports,
+                // or saved order meta. (The returned value is also floored again further below.)
+                if ( $totalcommission < 0 ) {
+                    $totalcommission = 0;
                 }
                 // ***** Update Meta ***** //
                 $meta_total_commission = wcusage_order_meta( $orderid, 'wcusage_total_commission', true );

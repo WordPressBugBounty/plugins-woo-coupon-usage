@@ -509,13 +509,16 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                         </script>';
                             echo '<style>.wcu-statistics-orders .wcuOrdersStatuses { display: none; }</style>';
                             echo '<div class="wcu-statistics-orders" div style="margin: 0 auto; width: calc(100% - 10px);">';
-                            // Use a recent start date to avoid querying ALL orders (we only show 5)
-                            $latest_referrals_start = date( 'Y-m-d', strtotime( '-90 days' ) );
+                            // No start date: the query is capped by a SQL LIMIT (see the
+                            // $numberoforders argument of wcusage_wh_getOrderbyCouponCode), so
+                            // the cost does not grow with the length of the coupon's history.
+                            // A date floor here would hide referrals whenever an affiliate's
+                            // most recent orders happen to span a longer period than the floor.
                             do_action(
                                 'wcusage_hook_tab_latest_orders',
                                 $postid,
                                 $coupon_code,
-                                $latest_referrals_start,
+                                '',
                                 date( "Y-m-d" ),
                                 false,
                                 "",

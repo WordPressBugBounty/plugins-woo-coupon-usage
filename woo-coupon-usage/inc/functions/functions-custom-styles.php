@@ -24,6 +24,11 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
     $wcusage_color_button_hover = wcusage_get_setting_value('wcusage_field_color_button_hover', '#1b3e47');
   	$wcusage_color_button_font_hover = wcusage_get_setting_value('wcusage_field_color_button_font_hover', '#fff');
   	$wcusage_color_stats_icon = wcusage_get_setting_value('wcusage_field_color_stats_icon', '#bebebe');
+  	$wcusage_field_bonuses_enable = wcusage_get_setting_value('wcusage_field_bonuses_enable', '0');
+  	$wcusage_color_bonus_bar = strtolower(wcusage_get_setting_value('wcusage_field_color_bonus_bar', ''));
+  	$wcusage_color_bonus_bar_bg = strtolower(wcusage_get_setting_value('wcusage_field_color_bonus_bar_bg', ''));
+  	$wcusage_color_bonus_box = strtolower(wcusage_get_setting_value('wcusage_field_color_bonus_box', ''));
+  	$wcusage_color_bonus_box_font = strtolower(wcusage_get_setting_value('wcusage_field_color_bonus_box_font', ''));
   	?>
 
   	<style>
@@ -96,6 +101,32 @@ if( !function_exists( 'wcusage_custom_styles' ) ) {
   			.wcusage-info-box::before {
   				color: <?php echo esc_html($wcusage_color_stats_icon); ?> !important;
   			}
+  		<?php } ?>
+  		<?php if($wcusage_field_bonuses_enable) { ?>
+  			<?php // Bonuses colours: only override the stylesheet defaults when a custom colour is chosen,
+  			// so the default gradient styling is kept until then. ?>
+  			<?php if($wcusage_color_bonus_bar && $wcusage_color_bonus_bar != '#2bc253') { ?>
+  			.wcusage-progress-bar>span {
+  				background-color: <?php echo esc_html($wcusage_color_bonus_bar); ?> !important;
+  				background-image: none;
+  			}
+  			<?php } ?>
+  			<?php if($wcusage_color_bonus_bar_bg && $wcusage_color_bonus_bar_bg != '#d2d2d2') { ?>
+  			.wcusage-progress-bar {
+  				background: <?php echo esc_html($wcusage_color_bonus_bar_bg); ?> !important;
+  			}
+  			<?php } ?>
+  			<?php if($wcusage_color_bonus_box && $wcusage_color_bonus_box != '#f6d365') { ?>
+  			.wcusage-reward-text {
+  				background: <?php echo esc_html($wcusage_color_bonus_box); ?> !important;
+  			}
+  			<?php } ?>
+  			<?php if($wcusage_color_bonus_box_font && $wcusage_color_bonus_box_font != '#000000') { ?>
+  			.wcusage-reward-text {
+  				color: <?php echo esc_html($wcusage_color_bonus_box_font); ?> !important;
+  				text-shadow: none;
+  			}
+  			<?php } ?>
   		<?php } ?>
 
 		@media screen and (max-width: 768px) {

@@ -213,7 +213,10 @@ if ( !function_exists( 'wcusage_refresh_dashboard_stats' ) ) {
         $coupon_post_id = $couponinfo[2];
         $coupon_user_id = intval( $couponinfo[1] );
         $currentuserid = get_current_user_id();
-        // Check MLA sub-affiliate access
+        // Check MLA sub-affiliate access. The helper is ($parent_id, $sub_id) - it
+        // answers "is arg1 an upline of arg2" - so the current user goes first. Passing
+        // these the other way round grants access to the coupon owner's DOWNLINE
+        // instead of their upline, which is the opposite of what is intended here.
         $sub_affiliate = false;
         // Check access permissions (strict comparison to prevent type juggling)
         if ( $coupon_user_id !== $currentuserid && !$sub_affiliate && !wcusage_check_admin_access() ) {
@@ -464,7 +467,10 @@ if ( !function_exists( 'wcusage_reload_dashboard_stats' ) ) {
         $coupon_post_id = $couponinfo[2];
         $coupon_user_id = intval( $couponinfo[1] );
         $currentuserid = get_current_user_id();
-        // Check MLA sub-affiliate access
+        // Check MLA sub-affiliate access. The helper is ($parent_id, $sub_id) - it
+        // answers "is arg1 an upline of arg2" - so the current user goes first. Passing
+        // these the other way round grants access to the coupon owner's DOWNLINE
+        // instead of their upline, which is the opposite of what is intended here.
         $sub_affiliate = false;
         // Check access permissions (strict comparison to prevent type juggling)
         if ( $coupon_user_id !== $currentuserid && !$sub_affiliate && !wcusage_check_admin_access() ) {
@@ -647,13 +653,15 @@ if ( !function_exists( 'wcusage_reload_dashboard_stats' ) ) {
         // Render Latest Referrals HTML
         $html_latest_referrals = '';
         if ( wcusage_get_setting_value( 'wcusage_field_statistics_latest', '1' ) ) {
-            $latest_referrals_start = date( 'Y-m-d', strtotime( '-90 days' ) );
+            // No start date - matches the initial render in tab-statistics.php. The
+            // query is capped by a SQL LIMIT, so a date floor would only serve to
+            // hide referrals when an affiliate's most recent orders are further back.
             ob_start();
             do_action(
                 'wcusage_hook_tab_latest_orders',
                 $coupon_post_id,
                 $coupon_code,
-                $latest_referrals_start,
+                '',
                 date( 'Y-m-d' ),
                 false,
                 '',

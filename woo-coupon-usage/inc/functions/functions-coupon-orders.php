@@ -212,8 +212,21 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 
   		$save_order_commission_meta = wcusage_get_setting_value('wcusage_field_enable_order_commission_meta', '1');
 
-		// Suspend cache addition during batch processing to reduce memory pressure
-		$previous_cache_state = wp_suspend_cache_addition( true );
+		// Prime the post meta cache for every order in this batch. The per-order
+		// work below reads several meta values per order, so loading them all in
+		// one query avoids a separate database round-trip for each lookup.
+		// If the result set is too large to do that safely, fall back to
+		// suspending cache additions so memory usage stays flat instead.
+		$primed = wcusage_prime_order_meta_cache( $orders );
+		$previous_cache_state = null;
+		if ( ! $primed ) {
+			// wp_suspend_cache_addition() returns the value *after* applying its
+			// argument, so the current state has to be read before suspending -
+			// passing its return value back would just suspend it again and leave
+			// the object cache disabled for the rest of the request.
+			$previous_cache_state = wp_suspend_cache_addition();
+			wp_suspend_cache_addition( true );
+		}
 
   		if ( !empty($orders) ) {
 		$dp = ( isset( $filter['dp'] ) ? intval( $filter['dp'] ) : 2 );
@@ -408,7 +421,7 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 					foreach ( $items as $item_id => $item ) {
 						$refunded_quantity = 0;
 						foreach ( $order_refunds as $refund ) {
-							foreach ( $refund->get_items() as $item_id => $item2 ) {
+							foreach ( $refund->get_items() as $refund_item_id => $item2 ) {
 
 								if ( $item2->get_product_id() == $item['product_id'] ) {
 									$refunded_quantity += abs( $item2->get_quantity() ); // Get Refund Qty
@@ -443,28 +456,28 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 						if(!is_array($a2)) { $a2 = maybe_unserialize($a2); }
 						if(!is_array($a2)) { $a2 = array(); }
 						$a1 = $commission_summary;
-						foreach (array_keys($a1 + $a2) as $key) {
-							$a1_total = isset($a1[$key]['total']) && is_numeric($a1[$key]['total']) ? $a1[$key]['total'] : 0;
-							$a2_total = isset($a2[$key]['total']) && is_numeric($a2[$key]['total']) ? $a2[$key]['total'] : 0;
+						foreach (array_keys($a1 + $a2) as $cskey) {
+							$a1_total = isset($a1[$cskey]['total']) && is_numeric($a1[$cskey]['total']) ? $a1[$cskey]['total'] : 0;
+							$a2_total = isset($a2[$cskey]['total']) && is_numeric($a2[$cskey]['total']) ? $a2[$cskey]['total'] : 0;
 							$a2_total = wcusage_convert_order_value_to_currency($order, $a2_total);
 							$total1 = $a1_total + $a2_total;
-							$commission_summary[$key]['total'] = $total1;
+							$commission_summary[$cskey]['total'] = $total1;
 
-							$a1_subtotal = isset($a1[$key]['subtotal']) && is_numeric($a1[$key]['subtotal']) ? $a1[$key]['subtotal'] : 0;
-							$a2_subtotal = isset($a2[$key]['subtotal']) && is_numeric($a2[$key]['subtotal']) ? $a2[$key]['subtotal'] : 0;
+							$a1_subtotal = isset($a1[$cskey]['subtotal']) && is_numeric($a1[$cskey]['subtotal']) ? $a1[$cskey]['subtotal'] : 0;
+							$a2_subtotal = isset($a2[$cskey]['subtotal']) && is_numeric($a2[$cskey]['subtotal']) ? $a2[$cskey]['subtotal'] : 0;
 							$a2_subtotal = wcusage_convert_order_value_to_currency($order, $a2_subtotal);
 							$subtotal1 = $a1_subtotal + $a2_subtotal;
-							$commission_summary[$key]['subtotal'] = $subtotal1;
-							
-							$a1_commission = isset($a1[$key]['commission']) && is_numeric($a1[$key]['commission']) ? $a1[$key]['commission'] : 0;
-							$a2_commission = isset($a2[$key]['commission']) && is_numeric($a2[$key]['commission']) ? $a2[$key]['commission'] : 0;
+							$commission_summary[$cskey]['subtotal'] = $subtotal1;
+
+							$a1_commission = isset($a1[$cskey]['commission']) && is_numeric($a1[$cskey]['commission']) ? $a1[$cskey]['commission'] : 0;
+							$a2_commission = isset($a2[$cskey]['commission']) && is_numeric($a2[$cskey]['commission']) ? $a2[$cskey]['commission'] : 0;
 							$a2_commission = wcusage_convert_order_value_to_currency($order, $a2_commission);
 							$commission1 = $a1_commission + $a2_commission;
-							$commission_summary[$key]['commission'] = $commission1;
+							$commission_summary[$cskey]['commission'] = $commission1;
 
-							$a1_number = isset($a1[$key]['number']) && is_numeric($a1[$key]['number']) ? $a1[$key]['number'] : 0;
-							$a2_number = isset($a2[$key]['number']) && is_numeric($a2[$key]['number']) ? $a2[$key]['number'] : 0;
-							$commission_summary[$key]['number'] = $a1_number + $a2_number;
+							$a1_number = isset($a1[$cskey]['number']) && is_numeric($a1[$cskey]['number']) ? $a1[$cskey]['number'] : 0;
+							$a2_number = isset($a2[$cskey]['number']) && is_numeric($a2[$cskey]['number']) ? $a2[$cskey]['number'] : 0;
+							$commission_summary[$cskey]['number'] = $a1_number + $a2_number;
 						}
 					}
 				}
@@ -476,8 +489,10 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 
   		}
 
-		// Restore cache addition state
-		wp_suspend_cache_addition( $previous_cache_state );
+		// Restore cache addition state (only touched for very large result sets)
+		if ( null !== $previous_cache_state ) {
+			wp_suspend_cache_addition( $previous_cache_state );
+		}
 
 		$allstats = array();
 		$allstats['total_orders'] = $total_orders;
@@ -711,6 +726,55 @@ if( !function_exists( 'wcusage_convert_date_to_gmt' ) ) {
 		}
 		// Format and return the GMT date
 		return gmdate( 'Y-m-d H:i:s', $gmt_timestamp );
+	}
+}
+
+/**
+ * Load the post meta for a batch of orders into the object cache in one query.
+ *
+ * The order loop in wcusage_wh_getOrderbyCouponCode() reads several meta values
+ * per order (referrer coupon, saved stats, commission data). Without priming,
+ * WordPress issues a separate query the first time each order is touched.
+ *
+ * Very large result sets are left alone so a single call can never build a huge
+ * in-memory meta cache. The caller suspends cache additions in that case, which
+ * keeps memory flat at the cost of re-querying each value (the previous
+ * behaviour for every call).
+ *
+ * @param array $orders Rows with an ->order_id property.
+ *
+ * @return bool True when the cache was primed (or there was nothing to prime).
+ *
+ */
+if( !function_exists( 'wcusage_prime_order_meta_cache' ) ) {
+	function wcusage_prime_order_meta_cache( $orders ) {
+
+		if ( empty( $orders ) || ! is_array( $orders ) ) {
+			return true;
+		}
+
+		$order_ids = array();
+		foreach ( $orders as $the_order ) {
+			if ( ! empty( $the_order->order_id ) ) {
+				$order_ids[] = (int) $the_order->order_id;
+			}
+		}
+		$order_ids = array_unique( $order_ids );
+
+		if ( empty( $order_ids ) ) {
+			return true;
+		}
+
+		if ( count( $order_ids ) > 2000 ) {
+			return false;
+		}
+
+		foreach ( array_chunk( $order_ids, 200 ) as $chunk ) {
+			update_meta_cache( 'post', $chunk );
+		}
+
+		return true;
+
 	}
 }
 

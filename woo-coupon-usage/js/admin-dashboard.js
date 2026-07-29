@@ -14,7 +14,7 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         var $dropdown = $(this).next('.wcusage-admin-menu-dropdown-list');
         var $parent = $(this).parent();
-        $('.wcusage-admin-menu-dropdown-list:visible, #wcusage-admin-bell-dropdown:visible').each(function() {
+        $('.wcusage-admin-menu-dropdown-list:visible').each(function() {
             $(this).hide();
             if ($(this).data('portal')) {
                 $(this).appendTo($(this).data('originalParent'));
@@ -37,36 +37,12 @@ jQuery(document).ready(function($) {
             zIndex: 9999
         }).data('portal', true);
     });
-    // Bell dropdown portal logic
-    $('#wcusage-admin-bell').on('click', function(e) {
-        e.preventDefault();
-        var $dropdown = $('#wcusage-admin-bell-dropdown');
-        var $parent = $(this).parent();
-        if ($dropdown.is(':visible')) {
-            $dropdown.hide();
-            if ($dropdown.data('portal')) {
-                $dropdown.appendTo($dropdown.data('originalParent'));
-                $dropdown.removeData('portal').removeData('originalParent');
-            }
-            return;
-        }
-        var offset = $(this).offset();
-        var height = $(this).outerHeight();
-        var parentWidth = $(this).outerWidth();
-        $dropdown.data('originalParent', $parent);
-        $dropdown.appendTo('body').css({
-            display: 'block',
-            position: 'absolute',
-            left: offset.left + parentWidth / 2,
-            top: offset.top + height,
-            minWidth: parentWidth,
-            zIndex: 99999
-        }).data('portal', true);
-    });
+    // The notification bell owns its own dropdown (open/close, positioning and
+    // refreshing) in js/admin-notification-bell.js - see that file instead.
     // Hide dropdowns on outside click
     $(document).on('mousedown', function(e) {
-        $('.wcusage-admin-menu-dropdown-list:visible, #wcusage-admin-bell-dropdown:visible').each(function() {
-            if (!$(e.target).closest(this).length && !$(e.target).closest('.wcusage-admin-menu-dropdown > a, #wcusage-admin-bell').length) {
+        $('.wcusage-admin-menu-dropdown-list:visible').each(function() {
+            if (!$(e.target).closest(this).length && !$(e.target).closest('.wcusage-admin-menu-dropdown > a').length) {
                 $(this).hide();
                 if ($(this).data('portal')) {
                     $(this).appendTo($(this).data('originalParent'));
@@ -104,10 +80,15 @@ jQuery(document).ready(function($) {
     }
 
     // AJAX pagination for dashboard section tables
+    function pageIndicatorText(page) {
+        var tmpl = (window.WCUsageDashboard && WCUsageDashboard.i18n && WCUsageDashboard.i18n.pageIndicator) || 'Page %d';
+        return tmpl.replace('%d', page);
+    }
+
     function updatePaginationUI($pager, data) {
         var page = parseInt(data.page, 10) || 1;
         $pager.attr('data-page', page);
-        $pager.find('.wcusage-page-indicator').text('Page ' + page);
+        $pager.find('.wcusage-page-indicator').text(pageIndicatorText(page));
         $pager.find('.wcusage-page-prev').prop('disabled', !data.has_prev);
         $pager.find('.wcusage-page-next').prop('disabled', !data.has_next);
     }
@@ -155,7 +136,7 @@ jQuery(document).ready(function($) {
             var hasNext = (curr * pp) < total;
             $pager.find('.wcusage-page-prev').prop('disabled', !hasPrev);
             $pager.find('.wcusage-page-next').prop('disabled', !hasNext);
-            $pager.find('.wcusage-page-indicator').text('Page ' + curr);
+            $pager.find('.wcusage-page-indicator').text(pageIndicatorText(curr));
         }).always(function(){
             // Clear loading flag
             $pager.data('loading', false);

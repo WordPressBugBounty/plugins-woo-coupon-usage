@@ -252,6 +252,7 @@ function wcusage_custom_box_html_content(
         echo '<strong>(' . esc_html__( 'Custom / URL Referral', 'woo-coupon-usage' ) . ')</strong><br/>';
     }
     $ispaid = "";
+    $deduct_notice = "";
     if ( isset( $coupon_id ) && $coupon_id ) {
         echo 'Referral Code: <a href="' . esc_url( admin_url( 'post.php?post=' . esc_attr( $coupon_id ) . '&action=edit' ) ) . '" target="_blank" style="color: #07bbe3;">' . esc_html( $coupon_code ) . '</a>';
         $order_status = $order->get_status();
@@ -268,6 +269,10 @@ function wcusage_custom_box_html_content(
     }
     if ( $order->get_status() != "refunded" && !wcusage_coupon_disable_commission( $coupon_id ) ) {
         echo esc_html__( 'Commission', 'woo-coupon-usage' ) . ": " . wp_kses_post( $getinfo['thecommission'] ) . wp_kses_post( $ispaid ) . "<br/>";
+        if ( !empty( $deduct_notice ) ) {
+            echo $deduct_notice;
+            // Escaped when built; wp_kses_post would strip the onClick confirm.
+        }
     }
     // Get discount amount
     $applied_coupons = $order->get_coupon_codes();
@@ -342,6 +347,68 @@ function wcusage_custom_box_html_content(
     }
 }
 
+/**
+ * Gets the current commission for an order/coupon, including partial refunds
+ * that were not allocated to line items (amount-only refunds), which the
+ * per-line-item calculation cannot see.
+ *
+ * @param int $order_id The order ID.
+ * @param string $coupon_code The coupon code.
+ *
+ * @return float
+ */
+if ( !function_exists( 'wcusage_get_order_commission_after_refunds' ) ) {
+    function wcusage_get_order_commission_after_refunds(  $order_id, $coupon_code  ) {
+        $orderdata = wcusage_calculate_order_data(
+            $order_id,
+            $coupon_code,
+            1,
+            0,
+            1
+        );
+        $commission = ( isset( $orderdata['totalcommission'] ) ? (float) $orderdata['totalcommission'] : 0 );
+        $order = wc_get_order( $order_id );
+        if ( !$order || !is_a( $order, 'WC_Order' ) ) {
+            return $commission;
+        }
+        // Refund amounts with no line items allocated are invisible to the
+        // per-line calculation, so deduct them at the order's percentage rate.
+        $unallocated = 0;
+        foreach ( $order->get_refunds() as $refund ) {
+            $allocated = 0;
+            foreach ( $refund->get_items( array('line_item', 'shipping', 'fee') ) as $refund_item ) {
+                $allocated += abs( (float) $refund_item->get_total() );
+            }
+            $allocated += abs( (float) $refund->get_total_tax() );
+            $refund_total = abs( (float) $refund->get_total() );
+            if ( $refund_total > $allocated + 0.001 ) {
+                $unallocated += $refund_total - $allocated;
+            }
+        }
+        if ( $unallocated > 0 ) {
+            $percent = ( isset( $orderdata['commissionpercentage'] ) && is_numeric( $orderdata['commissionpercentage'] ) ? (float) $orderdata['commissionpercentage'] : 0 );
+            if ( $percent > 0 ) {
+                $enablecurrency = wcusage_get_setting_value( 'wcusage_field_enable_currency', '0' );
+                if ( $enablecurrency && $order->get_currency() ) {
+                    $saved_rate = wcusage_order_meta( $order_id, 'wcusage_currency_conversion', true );
+                    $enable_save_rate = wcusage_get_setting_value( 'wcusage_field_enable_currency_save_rate', '0' );
+                    if ( !$saved_rate || !$enable_save_rate ) {
+                        $saved_rate = "";
+                    }
+                    $unallocated = wcusage_calculate_currency( $order->get_currency(), $unallocated, $saved_rate );
+                }
+                $deduct_percent = wcusage_get_setting_value( 'wcusage_field_affiliate_deduct_percent', '0' );
+                $deduct_percent = (100 - (float) $deduct_percent) / 100;
+                $commission -= $unallocated * ($percent / 100) * $deduct_percent;
+            }
+        }
+        if ( $commission < 0 ) {
+            $commission = 0;
+        }
+        return (float) wcusage_round_commission_amount( $commission, 2 );
+    }
+
+}
 /**
  * Save the custom meta box data
  *

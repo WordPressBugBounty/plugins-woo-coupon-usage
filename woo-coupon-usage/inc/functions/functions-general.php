@@ -717,7 +717,14 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
 					if(isset($the_coupon_usage) && $the_coupon_usage > 10) {
 						$wcu_alltime_stats = get_post_meta($postid, 'wcu_alltime_stats', true);
 						if(!$wcu_alltime_stats || empty($wcu_alltime_stats['total_count']) || $wcu_alltime_stats['total_count'] == 0) {
-							$force_refresh_stats = 1;
+							// Only rebuild when a full refresh has not already produced this
+							// result. A coupon can legitimately have usage but no countable
+							// orders (all cancelled or refunded, or placed before its start
+							// date), and without this check every single page load would
+							// start the whole calculation again.
+							if(!$wcu_last_refreshed) {
+								$force_refresh_stats = 1;
+							}
 						}
 					}
 				}

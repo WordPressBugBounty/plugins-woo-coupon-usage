@@ -1672,12 +1672,8 @@ form.wcu_payout_button {
 	z-index: 999999;
 }
 
-.wcuTableCell .wcu-tooltip .wcu-tooltiptext {
-	position: absolute !important;
+.wcuTableCell .wcu-tooltip .wcu-tooltip-text {
 	z-index: 999999 !important;
-	top: calc(100% + 5px);
-	left: 50%;
-	transform: translateX(-50%);
 }
 
 /* Ensure table cells don't clip tooltips */
@@ -1691,21 +1687,20 @@ form.wcu_payout_button {
 
 /* Adjust tooltip positioning for mobile */
 @media only screen and (max-width: 760px) {
-	.wcu-tooltip .wcu-tooltiptext {
+	.wcu-tooltip .wcu-tooltip-text {
 		position: fixed !important;
 		left: 10px !important;
 		right: 10px !important;
 		width: auto !important;
 		max-width: calc(100vw - 20px) !important;
 		top: 50% !important;
+		bottom: auto !important;
 		transform: translateY(-50%) !important;
 		z-index: 999999 !important;
 	}
-	
-	.wcuTableCell .wcu-tooltip .wcu-tooltiptext {
-		transform: translateY(-50%) !important;
-		left: 10px !important;
-		right: 10px !important;
+
+	.wcu-tooltip .wcu-tooltip-text::after {
+		display: none;
 	}
 }
 

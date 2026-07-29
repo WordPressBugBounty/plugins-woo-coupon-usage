@@ -584,6 +584,11 @@ function wcusage_field_cb_payouts( $args ) {
 
         </span>
 
+        <br/>
+
+        <!-- User Role -->
+        <?php do_action('wcusage_hook_payouts_user_role_select', 'wcusage_field_tr_payouts_paypal_role'); ?>
+
       </span>
 
       <!-- Enable Manual Payment Method #2 -->
@@ -619,6 +624,11 @@ function wcusage_field_cb_payouts( $args ) {
           <?php wcusage_setting_text_option('wcusage_field_tr_payouts_paypal2', 'Payment Details', esc_html__( 'Payment Details Field Label', 'woo-coupon-usage' ), '40px'); ?>
 
         </span>
+
+        <br/>
+
+        <!-- User Role -->
+        <?php do_action('wcusage_hook_payouts_user_role_select', 'wcusage_field_tr_payouts_paypal2_role'); ?>
 
       </span>
 
@@ -1288,7 +1298,7 @@ function wcusage_field_cb_payouts( $args ) {
         <?php $wcusage_field_storecredit_system = wcusage_get_setting_value('wcusage_field_storecredit_system', 'default'); ?>
     		<strong style="margin-left: 40px; display: inline-block;"><label for="scales"><?php echo esc_html__( 'Wallet System', 'woo-coupon-usage' ); ?></label></strong><br/>
     		<select style="margin-left: 40px;" name="wcusage_options[wcusage_field_storecredit_system]" id="wcusage_field_storecredit_system" class="wcusage_field_storecredit_system">
-          <option value=""><?php echo esc_html__( 'Select an option...', 'woo-coupon-usage' ); ?></option>
+          <option value="" <?php if(!$wcusage_field_storecredit_system) { ?>selected<?php } ?>><?php echo esc_html__( 'Select an option...', 'woo-coupon-usage' ); ?></option>
           <option value="default" <?php if($wcusage_field_storecredit_system == "default") { ?>selected<?php } ?>><?php echo esc_html__( '(Free) Built-in Store Credit & Wallet System', 'woo-coupon-usage' ); ?></option>
           <?php
           // Custom Hook
@@ -1584,37 +1594,13 @@ function wcusage_payouts_user_role_select($thisid) {
 
   <!-- Toggle Option -->
   <?php
-  if(empty($current_roles)) {    
-    $toggle_checked = 0;
-  } else {
-    $toggle_checked = 1;
-    // Only update on non-GET requests
-    if ( $_SERVER['REQUEST_METHOD'] !== 'GET' ) {
-      $options1 = get_option('wcusage_options');
-      $options1[$thisid . '_toggle'] = 1;
-      update_option('wcusage_options', $options1);
-    }
-  }
+  // If roles are selected the limit is switched on, so that a limit can never be
+  // applied without this page showing it. Switching the toggle off clears the
+  // selected roles (see wcusage_clear_payout_roles_on_toggle_off).
+  $toggle_checked = empty($current_roles) ? 0 : 1;
   wcusage_setting_toggle_option($thisid.'_toggle', $toggle_checked, esc_html__( 'Limit to certain user roles & groups?', 'woo-coupon-usage' ), '40px');
   wcusage_setting_toggle('.'.$thisid.'_toggle', '.payouts-role-select-'.$thisid); // Show or Hide
   ?>
-
-  <script>
-  jQuery( document ).ready(function() {
-    if(jQuery('.payouts-role-select-<?php echo esc_attr($thisid); ?> input[type="checkbox"]:checked').length > 0) {
-      jQuery('#<?php echo esc_attr($thisid); ?>_toggle_p label.switch').hide();
-    } else {
-      jQuery('#<?php echo esc_attr($thisid); ?>_toggle_p label.switch').show();
-    }
-    jQuery('.payouts-role-select-<?php echo esc_attr($thisid); ?> input[type="checkbox"]').change(function() {
-      if(jQuery('.payouts-role-select-<?php echo esc_attr($thisid); ?> input[type="checkbox"]:checked').length > 0) {
-        jQuery('#<?php echo esc_attr($thisid); ?>_toggle_p label.switch').hide();
-      } else {
-        jQuery('#<?php echo esc_attr($thisid); ?>_toggle_p label.switch').show();
-      }
-    });
-  });
-  </script>
 
   <!-- User Role Select -->
   <span class="payouts-role-select-<?php echo esc_attr($thisid); ?>">
@@ -1664,6 +1650,30 @@ function wcusage_payouts_user_role_select($thisid) {
   </span>
 
   <i style="margin-left: 40px;"><?php echo esc_html__( 'If at-least 1 role is selected, this payout method will only be available for the selected user roles. If none are selected it will be available for all roles.', 'woo-coupon-usage' ); ?></i><br/>
+
+  <?php
+  // Groups that have this payout method turned off on their "Edit Group" page.
+  $excluded_roles = ( !empty($options[$thisid . '_exclude']) && is_array($options[$thisid . '_exclude']) ) ? array_keys( array_filter( $options[$thisid . '_exclude'] ) ) : array();
+  if( !empty($excluded_roles) ) {
+    $all_roles = get_editable_roles();
+    $excluded_names = array();
+    foreach( $excluded_roles as $excluded_role ) {
+      $excluded_names[] = isset($all_roles[$excluded_role]['name']) ? $all_roles[$excluded_role]['name'] : $excluded_role;
+    }
+    ?>
+    <i style="margin-left: 40px; display: block; margin-top: 5px;">
+    <?php
+    echo sprintf(
+      /* translators: %1$s: list of group names, %2$s: link to the groups page */
+      esc_html__( 'This payout method is also turned off for these groups: %1$s. You can change this on the %2$s page.', 'woo-coupon-usage' ),
+      '<strong>' . esc_html( implode( ', ', $excluded_names ) ) . '</strong>',
+      '<a href="' . esc_url( admin_url('admin.php?page=wcusage_groups') ) . '" target="_blank">' . esc_html__( 'Groups', 'woo-coupon-usage' ) . '</a>'
+    );
+    ?>
+    </i>
+    <?php
+  }
+  ?>
 
   <br/>
 

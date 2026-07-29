@@ -29,7 +29,14 @@ function wcusage_field_cb_fraud( $args )
     <br/><i class="wcusage_field_url_referrals_p_info"><?php echo esc_html__( 'This will also allow them to use their own referral link and earn commission on their own purchases.', 'woo-coupon-usage' ); ?></i>
     <br/>
     <i><?php echo esc_html__( 'Unless you have a specific use case, we suggest keeping this disabled as in general it can cause some issues (commission granted to all coupons).', 'woo-coupon-usage' ); ?></i>
-    
+
+    <?php wcusage_setting_toggle('.wcusage_field_allow_assigned_user', '.wcu-field-section-assigned-user-commission'); // Show sub-option only when the parent option is enabled ?>
+    <span class="wcu-field-section-assigned-user-commission">
+      <br/><br/>
+      <?php wcusage_setting_toggle_option('wcusage_field_assigned_user_no_commission', 0, esc_html__( 'Do not give the affiliate commission when they use their own coupon code.', 'woo-coupon-usage' ), '30px'); ?>
+      <i style="display: block; margin-left: 30px;"><?php echo esc_html__( 'When enabled, the affiliate can still apply their own coupon and receive the discount, but no commission will be generated on purchases they make themselves. Commission for other customers using the coupon is not affected.', 'woo-coupon-usage' ); ?></i>
+    </span>
+
     <br/><br/>
 
     <!-- Allow multiple affiliate coupons to be used in the same order. -->

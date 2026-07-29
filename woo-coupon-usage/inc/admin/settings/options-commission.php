@@ -163,9 +163,9 @@ function wcusage_field_cb_commission( $args )
       <span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'New Customer Bonus', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?>:
     </h3>
 
-    <i><?php echo esc_html__( 'Increase the commission earned if the referred customer is placing their first order.', 'woo-coupon-usage' ); ?></i>
+    <p><?php echo esc_html__( 'Increase the commission earned if the referred customer is placing their first order.', 'woo-coupon-usage' ); ?></p>
 
-    <br/><br/>
+    <br/>
 
     <!-- Enable "New Customer Bonus" commission. -->
     <?php wcusage_setting_toggle_option('wcusage_field_new_customer_bonus_enable', 0, esc_html__( 'Enable "New Customer Bonus" commission.', 'woo-coupon-usage' ), '0px'); ?>
@@ -351,9 +351,23 @@ if( !function_exists( 'wcusage_setting_section_calculations' ) ) {
 
     <br/><br/>
 
+    <!-- Deduct custom discounts / store credit at the order's blended commission rate. -->
+    <?php wcusage_setting_toggle_option('wcusage_field_commission_blended_discount_rate', 1, esc_html__( 'Deduct custom discounts & store credit at each order\'s blended commission rate.', 'woo-coupon-usage' ), ''); ?>
+    <i><?php echo esc_html__( 'Recommended. When enabled, custom discounts and store credit reduce commission at the rate actually earned across the order\'s products (a blend of your per-product and coupon rates), rather than always at the coupon rate. This prevents over-deducting - and negative commission - when products use lower per-product commission rates.', 'woo-coupon-usage' ); ?></i>
+    <br/><i><?php echo esc_html__( 'Disable this to revert to the previous behaviour of always deducting these at the coupon/global commission rate.', 'woo-coupon-usage' ); ?></i>
+
+    <br/><br/>
+
     <!-- Calculate affiliate commission BEFORE the discount is applied (at full price). -->
     <?php wcusage_setting_toggle_option('wcusage_field_commission_include_fees', 0, esc_html__( 'Include "fees" in % commission calculations & order totals.', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'When enabled, % commission will be calculated based on the order subtotal/total including "fees". It will also be added to the subtotal/total shown in statistics.', 'woo-coupon-usage' ); ?></i>
+
+    <br/><br/>
+
+    <!-- Withhold commission on products the coupon's usage restrictions excluded. -->
+    <?php wcusage_setting_toggle_option('wcusage_field_commission_exclude_restricted_products', 0, esc_html__( 'Exclude products the coupon does not apply to from commission.', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( 'When enabled, products excluded by the coupon\'s own "Usage restriction" settings will earn no commission - neither percentage nor fixed.', 'woo-coupon-usage' ); ?></i>
+    <br/><i><?php echo esc_html__( 'When disabled, commission is calculated on every product in the order, because the affiliate referred the sale regardless of which items the discount applied to.', 'woo-coupon-usage' ); ?></i>
 
     <br/><br/>
 
