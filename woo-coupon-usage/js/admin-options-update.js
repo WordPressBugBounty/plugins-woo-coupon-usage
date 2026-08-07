@@ -262,4 +262,136 @@
     }
   });
 
+  // =====================================================
+  // TinyMCE backed settings fields (wcusage_setting_tinymce_option)
+  // =====================================================
+  var wcuTinymceFields = function(){ return window.wcusageTinymceFields || []; };
+  var wcuIsOurEditor = function(id){ return id && wcuTinymceFields().indexOf(id) > -1; };
+
+  // Auto save a rich text setting once editing stops. TinyMCE 4 replaced the old
+  // editor.onChange.add() dispatcher with editor.on('change'), so this has to bind
+  // after the editor exists rather than from an inline script next to the field.
+  var wcuBoundEditors = {};
+  var wcuBindEditor = function(editor){
+    if (!editor || !editor.id || wcuBoundEditors[editor.id] || !wcuIsOurEditor(editor.id)) { return; }
+    wcuBoundEditors[editor.id] = true;
+
+    var lastSaved;
+    try { lastSaved = editor.getContent({format:'raw'}); } catch (e) { lastSaved = null; }
+
+    editor.on('change', wcusettingsdelay(function(){
+      if (isLegacyEnabled()) { return; }
+      var value;
+      try {
+        editor.save(); // write the iframe content back to the underlying <textarea>
+        value = editor.getContent({format:'raw'});
+      } catch (e) { return; }
+      if (value === lastSaved) { return; } // ignore change events that did not alter the content
+      lastSaved = value;
+      window.wcu_ajax_update_the_options(editor.id, 'data-id', 'wcu-update-text', 1);
+    }, 1500));
+  };
+
+  var wcuWatchEditor = function(editor){
+    if (!editor || !wcuIsOurEditor(editor.id)) { return; }
+    if (editor.initialized) {
+      wcuBindEditor(editor);
+    } else {
+      editor.on('init', function(){ wcuBindEditor(editor); });
+    }
+  };
+
+  // When the browser fails to fetch one of TinyMCE's own plugin scripts - a dropped
+  // connection, a blocked request - the ScriptLoader caches that url as permanently
+  // failed and PluginManager keeps the half-registered entry, so the plugin stays
+  // missing for the rest of the page and every editor opens with a red
+  // "Failed to load plugin: <name> from url ..." bar. The editors still work, but the
+  // notice looks like a broken page and the plugin's features (tab key navigation for
+  // tabfocus, list buttons for lists, and so on) are gone. Ask for the script once more
+  // and, if it arrives, rebuild the editors that came up without it.
+  var wcuRetriedEditors = false;
+
+  // A plugin counts as failed only when it never registered *and* its script never
+  // arrived - a script that loaded without registering under that name is not something
+  // asking for it again would fix.
+  var wcuMissingPlugins = function(){
+    var missing = [];
+    try {
+      var urls = tinymce.PluginManager.urls;
+      var suffix = tinymce.suffix || '';
+      Object.keys(urls).forEach(function(name){
+        if (tinymce.PluginManager.get(name)) { return; }
+        if (tinymce.ScriptLoader.isDone(urls[name] + '/plugin' + suffix + '.js')) { return; }
+        missing.push(name);
+      });
+    } catch (e) {}
+    return missing;
+  };
+
+  var wcuReloadEditors = function(){
+    wcuTinymceFields().forEach(function(id){
+      if (!tinyMCEPreInit.mceInit[id] || !document.getElementById(id)) { return; }
+      var wrap = document.getElementById('wp-' + id + '-wrap');
+      if (!wrap || wrap.className.indexOf('tmce-active') === -1) { return; } // left in Text mode on purpose
+      var editor = tinymce.get(id);
+      if (editor) {
+        // Never interrupt a field that is being worked in.
+        if (editor.initialized && (editor.isDirty() || editor === tinymce.focusedEditor)) { return; }
+        try { editor.save(); } catch (e) {}
+        try { tinymce.remove('#' + id); } catch (e) {}
+        delete wcuBoundEditors[id]; // the replacement instance needs its own change binding
+      }
+      try { tinymce.init(tinyMCEPreInit.mceInit[id]); } catch (e) {}
+    });
+  };
+
+  var wcuRecoverEditors = function(){
+    if (wcuRetriedEditors || typeof window.tinymce === 'undefined' || typeof window.tinyMCEPreInit === 'undefined') { return; }
+    if (!tinyMCEPreInit.mceInit) { return; }
+
+    var missing = wcuMissingPlugins();
+    if (!missing.length) { return; }
+
+    wcuRetriedEditors = true;
+    if (window.console && console.warn) {
+      console.warn('Coupon Affiliates: TinyMCE plugin(s) failed to load (' + missing.join(', ') + '), retrying.');
+    }
+
+    var suffix = tinymce.suffix || '';
+    var retries = [];
+    missing.forEach(function(name){
+      var url = tinymce.PluginManager.urls[name] + '/plugin' + suffix + '.js';
+      retries.push({ name: name, url: url });
+      // PluginManager.load() skips anything already listed in PluginManager.urls, and the
+      // ScriptLoader answers from its cached FAILED state, so both have to be cleared.
+      try {
+        tinymce.ScriptLoader.remove(url);
+        tinymce.PluginManager.remove(name);
+      } catch (e) {}
+    });
+
+    var waiting = retries.length;
+    var settled = function(){
+      waiting--;
+      if (waiting > 0) { return; }
+      var stillMissing = retries.filter(function(r){ return !tinymce.PluginManager.get(r.name); });
+      if (stillMissing.length) { return; } // still unreachable - leave the page alone
+      wcuReloadEditors();
+    };
+
+    try {
+      retries.forEach(function(r){ tinymce.ScriptLoader.add(r.url, settled, null, settled); });
+      tinymce.ScriptLoader.loadQueue();
+    } catch (e) {}
+  };
+
+  $(function(){
+    if (typeof window.tinymce === 'undefined') { return; }
+    tinymce.on('AddEditor', function(e){ wcuWatchEditor(e.editor); });
+    for (var i = 0; i < tinymce.editors.length; i++) { wcuWatchEditor(tinymce.editors[i]); }
+  });
+
+  // Late enough that a slow (but working) page is never rebuilt for nothing.
+  $(window).on('load', function(){ setTimeout(wcuRecoverEditors, 3000); });
+
 })(jQuery);

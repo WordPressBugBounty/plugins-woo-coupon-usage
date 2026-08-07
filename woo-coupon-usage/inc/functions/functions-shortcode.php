@@ -103,20 +103,14 @@ function wcusage_couponusage(  $atts  ) {
             }
             // Replace %20 with space
             $show_coupon = str_replace( "%20", " ", $show_coupon );
-            // The couponid may include a trailing "-<coupon ID>" suffix (added when the "just coupon"
-            // URL setting is disabled). Only strip that suffix if the full value doesn't already match
-            // a coupon, so codes that legitimately end in "-<number>" (e.g. "relywp-10") still load
-            // correctly instead of the trailing number being mistaken for a coupon ID.
-            if ( $show_coupon && !wcusage_get_coupon_id( $show_coupon ) ) {
-                $stripped_show_coupon = preg_replace( '/-\\d+$/', '', $show_coupon );
-                if ( $stripped_show_coupon !== $show_coupon && wcusage_get_coupon_id( $stripped_show_coupon ) ) {
-                    $show_coupon = $stripped_show_coupon;
-                }
-            }
             if ( $show_coupon ) {
-                // Get ID of coupon with name $show_coupon
-                $the_coupon_id = wcusage_get_coupon_id( $show_coupon );
+                // Get the coupon this dashboard is for. The couponid may include a trailing
+                // "-<coupon ID>" suffix, which is what tells two coupons apart when they share
+                // a code (codes are case-insensitive to WooCommerce, so "Summer" and "summer"
+                // are one code and only one of them can be found by looking that code up).
+                $the_coupon_id = wcusage_get_dashboard_coupon_id( $show_coupon );
                 if ( $the_coupon_id ) {
+                    $show_coupon = strtolower( get_post_field( 'post_title', $the_coupon_id, 'raw' ) );
                     $args = array(
                         'post_type' => 'shop_coupon',
                         'p'         => $the_coupon_id,
@@ -591,7 +585,7 @@ function wcusage_couponusage(  $atts  ) {
             ob_end_clean();
             wp_reset_postdata();
             // Return content removing white spaces
-            $thecontent = trim( preg_replace( '/\\s+/', ' ', $thecontent ) );
+            $thecontent = wcusage_minify_output( $thecontent );
             return $thecontent;
         }
     }

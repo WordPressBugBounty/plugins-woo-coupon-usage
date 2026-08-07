@@ -98,7 +98,7 @@ if ( ! function_exists( 'wcusage_admin_order_email' ) ) {
             $order_id = $order->get_id();
 
             $affiliate = wcusage_order_meta( $order_id, 'wcusage_affiliate_user' );
-            $commission = wcusage_order_meta( $order_id, 'wcusage_total_commission' );
+            $commission = wcusage_get_order_saved_commission( $order_id );
 
             if ( $affiliate ) {
 

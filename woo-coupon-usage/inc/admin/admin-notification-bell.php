@@ -327,6 +327,14 @@ function wcusage_admin_bell_dropdown_html(  $data  ) {
 add_action( 'wp_ajax_wcusage_admin_bell_data', 'wcusage_admin_bell_data_ajax' );
 function wcusage_admin_bell_data_ajax() {
     check_ajax_referer( 'wcusage_admin_bell', 'nonce' );
+    // The panel reports pending registration/payout counts and renders affiliate
+    // details, so it needs a capability check of its own - the nonce only proves the
+    // request came from the logged-in user, not that they are allowed to see this.
+    if ( !wcusage_check_admin_access() ) {
+        wp_send_json_error( array(
+            'message' => esc_html__( 'You do not have permission to do this.', 'woo-coupon-usage' ),
+        ), 403 );
+    }
     // Check if this is a bell click (update date) or just a fetch
     $update_date = isset( $_POST['update_date'] ) && $_POST['update_date'] == '1';
     // Hash of the panel the browser is currently showing, so background polls can

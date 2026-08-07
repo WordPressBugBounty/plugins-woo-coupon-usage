@@ -1528,6 +1528,7 @@ form.wcu_payout_button {
 }
 
 .wcusage-login-form-section .woocommerce-form-login {
+	display: block !important;
 	padding: 0 !important;
 }
 

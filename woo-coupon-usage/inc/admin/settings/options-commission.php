@@ -215,7 +215,7 @@ function wcusage_field_cb_commission( $args )
 
     <p style="margin-left: 0px;">- <?php echo esc_html__( 'If you set custom "coupon" commission for that affiliate, or "per product" commission, they WILL take priority over the "user role" commission.', 'woo-coupon-usage' ); ?></p>
 
-    <p style="margin-left: 0px;">- <?php echo esc_html__( 'If the affiliate user is assigned to multiple user roles, it will apply the commission rates for the first role it detects with any custom values set.', 'woo-coupon-usage' ); ?></p>
+    <p style="margin-left: 0px;">- <?php echo esc_html__( 'If the affiliate user has more than one user role, a role that is an affiliate group takes priority over any other role. Where more than one of those roles sets a rate, the highest is used. Each rate below is worked out separately, so a role can set only a fixed amount and still leave the percentage to be taken from another role.', 'woo-coupon-usage' ); ?></p>
 
     <p style="margin-left: 0px;">- <?php echo esc_html__( 'When updating these settings, you may need to click the "REFRESH ALL DATA" button in the "Debug" tab for changes to show immediately for existing orders.', 'woo-coupon-usage' ); ?></p>
 

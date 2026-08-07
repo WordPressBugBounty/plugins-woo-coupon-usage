@@ -2222,34 +2222,43 @@ if ( !function_exists( 'wcusage_get_setting_value' ) ) {
 
 }
 /**
- * Script for TinyMCE editor to auto update via ajax
+ * Register a TinyMCE settings field for ajax auto updating.
  *
+ * The change binding itself lives in js/admin-options-update.js, which knows how to
+ * wait for each editor to exist. This used to print an inline script per editor that
+ * called tinymce.editors[id].onChange.add() - that is the TinyMCE 3 API, removed in
+ * TinyMCE 4 (WordPress 3.9), so it threw once per editor on every settings page load
+ * and the auto save it was meant to set up never ran.
  */
 if ( !function_exists( 'wcusage_tinymce_ajax_script' ) ) {
     function wcusage_tinymce_ajax_script(  $id  ) {
+        global $wcusage_tinymce_ajax_fields;
+        if ( !is_array( $wcusage_tinymce_ajax_fields ) ) {
+            $wcusage_tinymce_ajax_fields = array();
+            add_action( 'admin_print_footer_scripts', 'wcusage_tinymce_ajax_fields_script', 5 );
+        }
+        $wcusage_tinymce_ajax_fields[] = $id;
+    }
+
+}
+/**
+ * Output the list of TinyMCE backed settings fields for the ajax auto update script.
+ *
+ */
+if ( !function_exists( 'wcusage_tinymce_ajax_fields_script' ) ) {
+    function wcusage_tinymce_ajax_fields_script() {
+        global $wcusage_tinymce_ajax_fields;
+        if ( empty( $wcusage_tinymce_ajax_fields ) ) {
+            return;
+        }
+        $fields = array_values( array_unique( $wcusage_tinymce_ajax_fields ) );
         ?>
-  <script>
-  function wcusettingsdelay(callback, ms) {
-    var timer = 0;
-    return function() {
-      var context = this, args = arguments;
-      clearTimeout(timer);
-      timer = setTimeout(function () {
-        callback.apply(context, args);
-      }, ms || 0);
-    };
-  }
-  jQuery( document ).ready(function() {
-      tinymce.editors['<?php 
-        echo esc_html( $id );
-        ?>'].onChange.add(wcusettingsdelay(function (ed, e) {
-          wcu_ajax_update_the_options('<?php 
-        echo esc_html( $id );
-        ?>', 'data-id', 'wcu-update-text', 1);
-      }, 1500));
-  });
-  </script>
-  <?php 
+    <script>
+    window.wcusageTinymceFields = <?php 
+        echo wp_json_encode( $fields );
+        ?>;
+    </script>
+    <?php 
     }
 
 }

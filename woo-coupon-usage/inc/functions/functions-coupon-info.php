@@ -94,6 +94,163 @@ function wcusage_get_coupon_id($coupon_code) {
 }
 
 /**
+ * Whether two strings are the same coupon code.
+ *
+ * WooCommerce compares coupon codes case-insensitively (wc_format_coupon_code()
+ * lowercases them), so "SUMMER" and "summer" are one code as far as it is
+ * concerned. Accents are deliberately NOT folded here: the post_title collation
+ * (utf8mb4_unicode_520_ci on most installs) treats "korperkur" and "körperkur"
+ * as equal, which is too loose to identify one specific coupon.
+ *
+ * @param string $code_a
+ * @param string $code_b
+ *
+ * @return bool
+ *
+ */
+if( !function_exists( 'wcusage_coupon_codes_match' ) ) {
+	function wcusage_coupon_codes_match( $code_a, $code_b ) {
+
+		if ( ! is_string( $code_a ) || ! is_string( $code_b ) || $code_a === '' || $code_b === '' ) {
+			return false;
+		}
+
+		if ( function_exists( 'wc_format_coupon_code' ) ) {
+			return wc_format_coupon_code( $code_a ) === wc_format_coupon_code( $code_b );
+		}
+
+		if ( function_exists( 'mb_strtolower' ) ) {
+			return mb_strtolower( $code_a ) === mb_strtolower( $code_b );
+		}
+
+		return strtolower( $code_a ) === strtolower( $code_b );
+
+	}
+}
+
+/**
+ * Whether a coupon's own code is the given code.
+ *
+ * This asks the coupon, rather than asking the code which coupon it belongs to.
+ * The difference matters when two coupons share a code - they differ only by
+ * letter case, which the post_title collation ignores - because looking the code
+ * up can only ever return one of them, and so reports every other coupon with
+ * that code as "not that coupon".
+ *
+ * @param int    $couponid
+ * @param string $coupon_code
+ *
+ * @return bool
+ *
+ */
+if( !function_exists( 'wcusage_coupon_id_has_code' ) ) {
+	function wcusage_coupon_id_has_code( $couponid, $coupon_code ) {
+
+		$couponid = absint( $couponid );
+
+		if ( ! $couponid || ! $coupon_code || get_post_type( $couponid ) !== 'shop_coupon' ) {
+			return false;
+		}
+
+		return wcusage_coupon_codes_match( get_post_field( 'post_title', $couponid, 'raw' ), $coupon_code );
+
+	}
+}
+
+/**
+ * Whether another coupon shares this coupon's code.
+ *
+ * Two coupons whose codes differ only by letter case are a single code to
+ * WooCommerce, so only one of them is ever reachable by code. Dashboard URLs for
+ * an ambiguous coupon have to carry its ID to point anywhere in particular.
+ *
+ * @param int $couponid
+ *
+ * @return bool
+ *
+ */
+if( !function_exists( 'wcusage_coupon_code_is_ambiguous' ) ) {
+	function wcusage_coupon_code_is_ambiguous( $couponid ) {
+
+		// Called once per row on the coupons and affiliate orders lists, and again for
+		// every dashboard URL built on those pages. wc_get_coupon_id_by_code() runs a
+		// direct query for any code not already in the object cache, so without this the
+		// check adds a query per row - see wcusage_get_coupon_id(), which caches the same
+		// way. Keyed on the coupon ID, which is what callers pass.
+		static $ambiguous_cache = array();
+
+		$couponid = absint( $couponid );
+
+		if ( isset( $ambiguous_cache[ $couponid ] ) ) {
+			return $ambiguous_cache[ $couponid ];
+		}
+
+		if ( ! $couponid || ! function_exists( 'wc_get_coupon_id_by_code' ) || get_post_type( $couponid ) !== 'shop_coupon' ) {
+			return false;
+		}
+
+		$coupon_code = get_post_field( 'post_title', $couponid, 'raw' );
+		if ( ! $coupon_code ) {
+			$ambiguous_cache[ $couponid ] = false;
+			return false;
+		}
+
+		// $exclude is applied after the lookup, so this returns a *different*
+		// coupon that answers to the same code, when there is one.
+		$ambiguous_cache[ $couponid ] = (bool) wc_get_coupon_id_by_code( $coupon_code, $couponid );
+
+		return $ambiguous_cache[ $couponid ];
+
+	}
+}
+
+/**
+ * Resolve a "couponid" dashboard URL parameter to a coupon ID.
+ *
+ * The parameter is either the coupon code on its own, or "<code>-<coupon id>".
+ * Where the ID suffix is present and names a coupon that really does have that
+ * code, it is used directly - the only way to tell two coupons apart when they
+ * share a code. A value that matches a code in full always wins, so codes that
+ * legitimately end in "-<number>" (e.g. "relywp-10") are never mistaken for a
+ * code plus a suffix.
+ *
+ * @param string $urlid
+ *
+ * @return int Coupon ID, or 0 when nothing matches.
+ *
+ */
+if( !function_exists( 'wcusage_get_dashboard_coupon_id' ) ) {
+	function wcusage_get_dashboard_coupon_id( $urlid ) {
+
+		$urlid = is_string( $urlid ) ? trim( $urlid ) : '';
+
+		if ( ! $urlid ) {
+			return 0;
+		}
+
+		$coupon_id = absint( wcusage_get_coupon_id( $urlid ) );
+		if ( $coupon_id ) {
+			return $coupon_id;
+		}
+
+		if ( preg_match( '/^(.+)-(\d+)$/', $urlid, $matches ) ) {
+
+			$suffix_id = absint( $matches[2] );
+
+			if ( wcusage_coupon_id_has_code( $suffix_id, $matches[1] ) && get_post_status( $suffix_id ) === 'publish' ) {
+				return $suffix_id;
+			}
+
+			return absint( wcusage_get_coupon_id( $matches[1] ) );
+
+		}
+
+		return 0;
+
+	}
+}
+
+/**
  * Safely get a WC_Coupon object without throwing exceptions.
  *
  * @param mixed $coupon_value
@@ -192,8 +349,9 @@ if( !function_exists( 'wcusage_get_coupon_info_by_id' ) ) {
 
 		$coupon = get_the_title($couponid);
 
-		// Getting the URL
-		if($wcusage_justcoupon) {
+		// Getting the URL. The "just coupon" form cannot identify this coupon when
+		// another one answers to the same code, so keep the ID suffix in that case.
+		if($wcusage_justcoupon && !wcusage_coupon_code_is_ambiguous($couponid)) {
 			$secretid = $coupon;
 		} else {
 			$secretid = $coupon . "-" . $couponid;
@@ -318,6 +476,51 @@ if( !function_exists( 'wcusage_coupon_restrictions_allow_product' ) ) {
 		}
 
 		return apply_filters( 'wcusage_coupon_restrictions_allow_product', $valid, $coupon, $product_id, $parent_id );
+
+	}
+}
+
+/**
+ * Reset the WooCommerce usage tracking on a coupon that was just duplicated from a template.
+ *
+ * Every "create coupon from template" path copies the template's post meta wholesale, which
+ * also drags across the template's usage history: 'usage_count' and, more damagingly, the
+ * '_used_by' rows. WooCommerce reads '_used_by' directly when enforcing "Usage limit per user"
+ * (WC_Coupon_Data_Store_CPT::get_usage_by_user_id), so an inherited list makes a brand new
+ * coupon appear already used by those customers - they get "Coupon usage limit has been
+ * reached." on a coupon nobody has ever redeemed, while the admin sees a usage count of 0.
+ *
+ * Call this immediately after copying template meta onto the new coupon.
+ *
+ * @param int $coupon_id The newly created coupon post ID.
+ */
+if( !function_exists( 'wcusage_reset_coupon_usage_meta' ) ) {
+	function wcusage_reset_coupon_usage_meta( $coupon_id ) {
+
+		$coupon_id = (int) $coupon_id;
+		if ( ! $coupon_id ) {
+			return;
+		}
+
+		// '_used_by' is stored as one meta row per redemption, so delete them all.
+		delete_post_meta( $coupon_id, '_used_by' );
+
+		update_post_meta( $coupon_id, 'usage_count', '0' );
+
+		// WooCommerce also holds usage tentatively while a customer is at checkout, under
+		// generated keys ('_coupon_held_<expiry>_<rand>' and '_maybe_used_by_<expiry>_<rand>').
+		// These expire on their own, but until they do a copied row counts against the new
+		// coupon, so clear any that came over with the template.
+		$meta = get_post_meta( $coupon_id );
+		if ( is_array( $meta ) ) {
+			foreach ( array_keys( $meta ) as $meta_key ) {
+				if ( 0 === strpos( $meta_key, '_coupon_held_' ) || 0 === strpos( $meta_key, '_maybe_used_by_' ) ) {
+					delete_post_meta( $coupon_id, $meta_key );
+				}
+			}
+		}
+
+		do_action( 'wcusage_hook_reset_coupon_usage_meta', $coupon_id );
 
 	}
 }

@@ -2198,6 +2198,13 @@ function wcusage_flush_permalinks_callback() {
         wp_die();
     }
 
+    // Rebuilding the rewrite rules is an expensive site-wide write, so it must not be
+    // driven by anyone who merely holds a valid nonce.
+    if ( ! wcusage_check_admin_access() ) {
+        wp_send_json_error( esc_html__( 'You do not have permission to do this.', 'woo-coupon-usage' ) );
+        wp_die();
+    }
+
     // Flush permalinks
     flush_rewrite_rules();
 

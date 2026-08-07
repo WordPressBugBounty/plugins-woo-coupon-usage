@@ -10,7 +10,15 @@ if ( !function_exists( 'wcusage_ajax_coupon_code_matches_postid' ) ) {
         if ( !$postid || !$couponcode || !function_exists( 'wc_get_coupon_id_by_code' ) ) {
             return false;
         }
-        return absint( wc_get_coupon_id_by_code( $couponcode ) ) === $postid;
+        if ( absint( wc_get_coupon_id_by_code( $couponcode ) ) === $postid ) {
+            return true;
+        }
+        // wc_get_coupon_id_by_code() returns a single coupon, so when two coupons
+        // share a code (they differ only by letter case, which the post_title
+        // collation ignores) it can only ever name one of them - and every tab on
+        // the other one's dashboard would be rejected here. Asking the coupon for
+        // its own code instead keeps the pair verified without that false negative.
+        return function_exists( 'wcusage_coupon_id_has_code' ) && wcusage_coupon_id_has_code( $postid, $couponcode );
     }
 
 }

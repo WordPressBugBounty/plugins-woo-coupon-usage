@@ -236,9 +236,13 @@ function wcusage_custom_box_html_content(
         }
         delete_post_meta( $order_id, 'wcusage_commission_summary' );
         delete_post_meta( $order_id, 'wcusage_stats' );
+        delete_post_meta( $order_id, 'wcu_mla_commission' );
+        // All three commission keys, so nothing is left to be read back as a stale
+        // partial figure by wcusage_get_order_saved_commission() before the
+        // recalculation runs - "wcusage_product_commission" was being kept.
         delete_post_meta( $order_id, 'wcusage_total_commission' );
         delete_post_meta( $order_id, 'wcusage_fixed_order_commission' );
-        delete_post_meta( $order_id, 'wcu_mla_commission' );
+        delete_post_meta( $order_id, 'wcusage_product_commission' );
         $url = remove_query_arg( 'refresh_stats' );
         wp_safe_redirect( $url );
         exit;
@@ -642,6 +646,14 @@ function add_coupon_link_below_coupons(  $order_id  ) {
 add_action( 'wp_ajax_add_coupon_to_order', 'handle_add_coupon_to_order' );
 function handle_add_coupon_to_order() {
     check_ajax_referer( 'add_coupon_nonce', 'security' );
+    // Adding a coupon to an order bumps its usage count and re-runs the commission
+    // calculation, i.e. it credits an affiliate. Gate it on the same capability that
+    // gates the order edit screen this button lives on.
+    if ( !current_user_can( 'edit_shop_orders' ) ) {
+        wp_send_json_error( [
+            'message' => esc_html__( 'You do not have permission to do this.', 'woo-coupon-usage' ),
+        ] );
+    }
     $order_id = ( isset( $_POST['order_id'] ) ? intval( $_POST['order_id'] ) : 0 );
     $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( $_POST['coupon_code'] ) : '' );
     if ( !$order_id || !$coupon_code ) {
@@ -691,6 +703,13 @@ function handle_add_coupon_to_order() {
 add_action( 'wp_ajax_remove_coupon_from_order', 'handle_remove_coupon_from_order' );
 function handle_remove_coupon_from_order() {
     check_ajax_referer( 'remove_coupon_nonce', 'security' );
+    // Removing a coupon reverses the affiliate's commission for this order - same
+    // capability requirement as adding one.
+    if ( !current_user_can( 'edit_shop_orders' ) ) {
+        wp_send_json_error( [
+            'message' => esc_html__( 'You do not have permission to do this.', 'woo-coupon-usage' ),
+        ] );
+    }
     $order_id = ( isset( $_POST['order_id'] ) ? intval( $_POST['order_id'] ) : 0 );
     $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( $_POST['coupon_code'] ) : '' );
     if ( !$order_id || !$coupon_code ) {

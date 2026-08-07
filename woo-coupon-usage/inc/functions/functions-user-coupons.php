@@ -857,6 +857,26 @@ if ( !function_exists( 'wcusage_coupon_meta_box_markup' ) ) {
         ?>
 
         <?php 
+        // Coupon codes are case-insensitive to WooCommerce, so two coupons whose codes
+        // differ only by letter case are one code: only one of them can ever be applied
+        // at checkout, and looking that code up always returns the same one. Warn here,
+        // because nothing else in WooCommerce does.
+        if ( isset( $post_id ) && $post_id && function_exists( 'wcusage_coupon_code_is_ambiguous' ) && wcusage_coupon_code_is_ambiguous( $post_id ) ) {
+            $wcu_duplicate_id = wc_get_coupon_id_by_code( get_post_field( 'post_title', $post_id, 'raw' ), $post_id );
+            ?>
+            <div class="notice notice-warning inline" style="margin: 14px 0 0 0; padding: 8px 12px;">
+                <p style="margin: 0;"><strong><?php 
+            echo esc_html__( 'Duplicate coupon code', 'woo-coupon-usage' );
+            ?></strong><br/>
+                <?php 
+            echo sprintf( wp_kses_post( __( 'Another coupon (<a href="%1$s">%2$s</a>) uses the same code as this one - coupon codes ignore letter case. Only one of them can be used at checkout, and both share the same statistics. Rename one of them to keep their affiliate dashboards separate.', 'woo-coupon-usage' ) ), esc_url( get_edit_post_link( $wcu_duplicate_id ) ), esc_html( get_the_title( $wcu_duplicate_id ) ) );
+            ?></p>
+            </div>
+            <?php 
+        }
+        ?>
+
+        <?php 
         if ( isset( $post_id ) && $post_id ) {
             ?>
             <p style="margin-top: 14px;"><a href="<?php 

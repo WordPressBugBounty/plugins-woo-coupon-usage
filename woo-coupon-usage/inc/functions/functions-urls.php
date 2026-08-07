@@ -894,24 +894,26 @@ function wcusage_woocommerce_coupon_message( $msg, $msg_code, $coupon ) {
     return $msg;
   }
   // Skip message if not applied on cart or checkout
-  if( !is_object($coupon) ) {
-    // Check if the setting to hide coupon messages is enabled.
-    $wcusage_field_coupon_applied_hide = wcusage_get_setting_value('wcusage_field_coupon_applied_hide', '0');
-    if ($wcusage_field_coupon_applied_hide) {
-      $referer = $_SERVER['HTTP_REFERER'] ?? '';
-      if ( !strstr($referer, 'cart') && !strstr($referer, 'checkout') ) {
-        if ( !defined('DOING_AJAX') || (defined('DOING_AJAX') && DOING_AJAX && (!isset($_POST['action']) || $_POST['action'] !== 'apply_coupon')) ) {
-          if( $msg === esc_html__( 'Coupon code applied successfully.', 'woocommerce' ) ) {
-            $msg = "";
-          }
-          if( $msg === esc_html__( 'Sorry, this coupon is not applicable to selected products.', 'woocommerce' ) ) {
-            $msg = "";
-          }
+  // Note: WooCommerce always passes a WC_Coupon object here (see WC_Coupon::get_coupon_message()
+  // and WC_Discounts::is_coupon_valid()), so this must not be gated on the coupon being empty -
+  // doing so previously skipped the whole block and fell out of the function returning null,
+  // which blanked every coupon message and error, including errors added by other plugins.
+  // Check if the setting to hide coupon messages is enabled.
+  $wcusage_field_coupon_applied_hide = wcusage_get_setting_value('wcusage_field_coupon_applied_hide', '1');
+  if ($wcusage_field_coupon_applied_hide) {
+    $referer = $_SERVER['HTTP_REFERER'] ?? '';
+    if ( !strstr($referer, 'cart') && !strstr($referer, 'checkout') ) {
+      if ( !defined('DOING_AJAX') || (defined('DOING_AJAX') && DOING_AJAX && (!isset($_POST['action']) || $_POST['action'] !== 'apply_coupon')) ) {
+        if( $msg === esc_html__( 'Coupon code applied successfully.', 'woocommerce' ) ) {
+          $msg = "";
+        }
+        if( $msg === esc_html__( 'Sorry, this coupon is not applicable to selected products.', 'woocommerce' ) ) {
+          $msg = "";
         }
       }
     }
-    return $msg;
   }
+  return $msg;
 }
 }
 add_filter( 'woocommerce_coupon_message', 'wcusage_woocommerce_coupon_message', 10, 3 );
@@ -924,7 +926,13 @@ add_filter( 'woocommerce_coupon_error', 'wcusage_woocommerce_coupon_message', 10
 if( !function_exists( 'wcusage_woocommerce_coupon_error_message' ) ) {
 	function wcusage_woocommerce_coupon_error_message( $error ) {
 
-		$wcusage_field_coupon_applied_hide = wcusage_get_setting_value('wcusage_field_coupon_applied_hide', '0');
+		// Same default as the toggle is registered with (see wcusage_setting_toggle_option()
+		// in options-debug.php) and as wcusage_woocommerce_coupon_message() reads it with.
+		// Defaulting to '0' here meant that on a site which had never saved the setting the
+		// two halves of the same option disagreed: "Coupon code applied successfully." was
+		// hidden while "Coupon code already applied!" was not, even though the toggle shows
+		// as enabled.
+		$wcusage_field_coupon_applied_hide = wcusage_get_setting_value('wcusage_field_coupon_applied_hide', '1');
 
 		if($wcusage_field_coupon_applied_hide) {
 

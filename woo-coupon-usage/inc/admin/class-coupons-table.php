@@ -251,7 +251,10 @@ class wcusage_Coupons_Table extends WP_List_Table {
                     $commission = 0.0;
                     if ( $all_stats_enabled && $stats ) {
                         $sales = isset( $stats['total_orders'] ) ? (float) $stats['total_orders'] : 0.0;
-                        if ( isset( $stats['total_discount'] ) ) { $sales -= (float) $stats['total_discount']; }
+                        // The saved stats store the discount under 'full_discount' - see
+                        // wcusage_update_all_stats_single(). Reading 'total_discount' here never
+                        // matched, so sorting by sales used the totals before the discount.
+                        if ( isset( $stats['full_discount'] ) ) { $sales = max( 0, $sales - (float) $stats['full_discount'] ); }
                         $commission = isset( $stats['total_commission'] ) ? (float) $stats['total_commission'] : 0.0;
                     }
                     return array( 'usage' => $usage, 'sales' => $sales, 'commission' => $commission, 'id' => (float) $id );
@@ -419,8 +422,14 @@ class wcusage_Coupons_Table extends WP_List_Table {
                     return '<span title="' . esc_html( $qmessage ) . '"><strong><i class="fa-solid fa-ellipsis"></i></strong></span>';
                 }
                 $sales = isset( $wcu_alltime_stats['total_orders'] ) ? $wcu_alltime_stats['total_orders'] : 0;
-                if ( isset( $wcu_alltime_stats['total_discount'] ) ) {
-                    $sales = (float) $sales - (float) $wcu_alltime_stats['total_discount'];
+                // The saved stats store the discount under 'full_discount' - see
+                // wcusage_update_all_stats_single(). Reading 'total_discount' here never matched,
+                // so this column showed sales before the coupon discount was taken off, while
+                // every other screen (View Affiliate, affiliate dashboard, reports) showed it after.
+                if ( isset( $wcu_alltime_stats['full_discount'] ) ) {
+                    // Floored at zero so statistics saved before the totals were corrected
+                    // (where the discount can exceed the sales) cannot show a minus figure.
+                    $sales = max( 0, (float) $sales - (float) $wcu_alltime_stats['full_discount'] );
                 }
                 // Stats are calculated at this point (the empty-stats case returned
                 // above), so show the value even when it is a genuine 0.00 rather
@@ -730,8 +739,7 @@ if ( ! function_exists( 'wcusage_coupons_get_role_rate_label' ) ) {
             $role_name = translate_user_role( $wp_roles->roles[ $role ]['name'] );
         }
 
-        $is_group_role = ( 'coupon_affiliate' === $role || 0 === strpos( $role, 'coupon_affiliate_' ) );
-        if ( $is_group_role ) {
+        if ( wcusage_is_affiliate_group_role( $role ) ) {
             return sprintf( __( 'Group: %s', 'woo-coupon-usage' ), $role_name );
         }
 
@@ -747,7 +755,10 @@ if ( ! function_exists( 'wcusage_coupons_get_role_rate_candidates' ) ) {
 
         $candidates = array();
         foreach ( $user->roles as $role ) {
-            $role_rate = wcusage_get_setting_value( $setting_prefix . $role, '' );
+            // Read through the same parser the calculation uses, so a rate stored as
+            // "10%" is listed here as 10 rather than skipped - and is displayed as a
+            // plain number, not "10%%".
+            $role_rate = wcusage_parse_rate_value( wcusage_get_setting_value( $setting_prefix . $role, '' ) );
             if ( ! wcusage_coupons_rate_is_valid( $role_rate ) ) {
                 continue;
             }
@@ -769,6 +780,24 @@ if ( ! function_exists( 'wcusage_coupons_get_role_rate_candidates' ) ) {
 
 if ( ! function_exists( 'wcusage_coupons_get_highest_rate_candidate' ) ) {
     function wcusage_coupons_get_highest_rate_candidate( $candidates ) {
+
+        // Only ever receives the role candidates for one component, so this mirrors
+        // wcusage_get_role_rate(), which decides the rate an order actually pays: a
+        // role that is an affiliate group beats any other role the affiliate happens
+        // to hold, since an assigned group is a deliberate choice and "customer" is
+        // not. Highest wins within whichever set applies. Picking the highest across
+        // every role instead made this column advertise, for an affiliate holding more
+        // than one role, a rate that is never paid.
+        $group_candidates = array();
+        foreach ( $candidates as $candidate ) {
+            if ( isset( $candidate['role'] ) && wcusage_is_affiliate_group_role( $candidate['role'] ) ) {
+                $group_candidates[] = $candidate;
+            }
+        }
+        if ( ! empty( $group_candidates ) ) {
+            $candidates = $group_candidates;
+        }
+
         $selected_candidate = false;
         foreach ( $candidates as $candidate ) {
             if ( false === $selected_candidate || (float) $candidate['value'] > (float) $selected_candidate['value'] ) {
@@ -1267,9 +1296,15 @@ add_action( 'wp_ajax_wcusage_save_coupon_data', 'wcusage_save_coupon_data' );
  */
 function wcusage_coupons_list_search_users() {
     check_ajax_referer( 'wcusage_coupon_nonce', 'nonce' );
-    
-    $search = sanitize_text_field( $_POST['search'] );
-    $label = sanitize_text_field( $_POST['label'] );
+
+    // Wildcard username lookup - restrict it the same way the sibling handler
+    // wcusage_save_coupon_data() is restricted.
+    if ( ! current_user_can( 'manage_woocommerce' ) ) {
+        wp_send_json_error( array( 'message' => esc_html__( 'You do not have permission to do this.', 'woo-coupon-usage' ) ), 403 );
+    }
+
+    $search = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
+    $label = isset( $_POST['label'] ) ? sanitize_text_field( wp_unslash( $_POST['label'] ) ) : '';
     $users = get_users( array(
         // contain exactly the search term anywhere in the username, full phrase anywhere inside
         'search' => '*' . $search . '*',

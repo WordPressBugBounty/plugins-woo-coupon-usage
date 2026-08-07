@@ -162,7 +162,15 @@ if ( isset( $_POST['add_new_coupon'] ) && isset( $_POST['add_coupon_nonce'] ) ) 
                             update_post_meta( $new_coupon_id, 'wcu_select_coupon_user', $user_id );
                             update_post_meta( $new_coupon_id, 'wcu_text_unpaid_commission', '0' );
                             update_post_meta( $new_coupon_id, 'wcu_text_pending_payment_commission', '0' );
-                            update_post_meta( $new_coupon_id, 'usage_count', '0' );
+                            // Clear the usage history inherited from the template coupon ('usage_count'
+                            // and '_used_by'), otherwise customers on the template's '_used_by' list are
+                            // blocked by "Usage limit per user" on a coupon never redeemed.
+                            if ( function_exists( 'wcusage_reset_coupon_usage_meta' ) ) {
+                                wcusage_reset_coupon_usage_meta( $new_coupon_id );
+                            } else {
+                                delete_post_meta( $new_coupon_id, '_used_by' );
+                                update_post_meta( $new_coupon_id, 'usage_count', '0' );
+                            }
                             // Clear stats meta
                             delete_post_meta( $new_coupon_id, 'wcu_alltime_stats' );
                             delete_post_meta( $new_coupon_id, 'wcu_last_refreshed' );
@@ -2270,7 +2278,7 @@ function wcusage_display_affiliate_referrals(
         ?>
                 <?php 
         $order_id = $order->get_id();
-        $commission = wcusage_order_meta( $order_id, 'wcusage_total_commission' );
+        $commission = wcusage_get_order_saved_commission( $order_id );
         $billing_first_name = $order->get_billing_first_name();
         $billing_last_name = $order->get_billing_last_name();
         $customer_name = trim( $billing_first_name . ' ' . $billing_last_name );

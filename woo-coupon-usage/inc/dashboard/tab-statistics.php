@@ -379,7 +379,7 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                               var $refreshBtn = $('#wcusage-refresh-stats');
                               var $statsContainer = $('.wcusage-sales-stats-toggles').next('.wcusage-sales-stats');
 
-                              // === Background auto-check (once per hour, on page load) ===
+                              /* === Background auto-check (once per hour, on page load) === */
                               if ($checkIcon.length) {
                                   $refreshBtn.hide();
                                   $checkIcon.show();
@@ -422,7 +422,7 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                                   });
                               }
 
-                              // === Manual refresh button (reads cached meta only — instant) ===
+                              /* === Manual refresh button (reads cached meta only — instant) === */
                               $refreshBtn.on('click', function(e) {
                                   e.preventDefault();
                                   var $btn = $(this);
@@ -458,7 +458,7 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                                               var $lastmonth = $statsContainer.find('.wcusage-show-last-7');
                                               if ($lastmonth.length && d.html_lastmonth) $lastmonth.html(d.html_lastmonth);
                                               if (d.total_count !== undefined) $('#wcu-total-usage-number').text(d.total_count);
-                                              // Update Latest Referrals
+                                              /* Update Latest Referrals */
                                               if (d.html_latest_referrals) {
                                                   var $referrals = $('.wcu-statistics-orders');
                                                   if ($referrals.length) $referrals.html(d.html_latest_referrals);

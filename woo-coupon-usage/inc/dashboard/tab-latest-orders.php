@@ -1771,7 +1771,7 @@ if ( !function_exists( 'wcusage_tab_latest_orders_filters' ) ) {
 			wcusage_preset_changing = false;
 		});
 
-		// Reset preset dropdown when date fields are manually changed (not when preset itself sets them)
+		/* Reset preset dropdown when date fields are manually changed (not when preset itself sets them) */
 		document.getElementById('wcu-orders-start').addEventListener('change', function() {
 			if (!wcusage_preset_changing) preset.value = '';
 		});

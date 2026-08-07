@@ -35,29 +35,25 @@ if ( isset( $_GET['userid'] ) && isset( $_GET['preview_nonce'] ) && wcusage_chec
 if ( isset( $_GET['couponid'] ) ) {
     $coupon_code = strtolower( sanitize_text_field( wp_unslash( $_GET['couponid'] ) ) );
     $coupon_code = str_replace( "%20", " ", $coupon_code );
-    // The couponid may include a trailing "-<coupon ID>" suffix (added when the "just coupon"
-    // URL setting is disabled). Only strip that suffix if the full value doesn't already match
-    // a coupon, so codes that legitimately end in "-<number>" (e.g. "relywp-10") still load
-    // correctly instead of the trailing number being mistaken for a coupon ID.
-    if ( !wcusage_get_coupon_id( $coupon_code ) ) {
-        $stripped_coupon_code = preg_replace( '/-\\d+$/', '', $coupon_code );
-        if ( $stripped_coupon_code !== $coupon_code && wcusage_get_coupon_id( $stripped_coupon_code ) ) {
-            $coupon_code = $stripped_coupon_code;
+    // Get the coupon this dashboard is for. The couponid may include a trailing
+    // "-<coupon ID>" suffix, which is what tells two coupons apart when they share
+    // a code (codes are case-insensitive to WooCommerce, so "Summer" and "summer"
+    // are one code and only one of them can be found by looking that code up).
+    $the_coupon_id = wcusage_get_dashboard_coupon_id( $coupon_code );
+    // Get the coupon post. Without an ID there is nothing to load - passing
+    // 'p' => 0 would drop the constraint and return every coupon on the site.
+    if ( $the_coupon_id ) {
+        $args = array(
+            'post_type' => 'shop_coupon',
+            'p'         => $the_coupon_id,
+        );
+        $the_query = new WP_Query($args);
+        while ( $the_query->have_posts() ) {
+            $the_query->the_post();
+            $postid = get_the_ID();
+            $coupon_code = get_the_title();
+            $couponvisible = 1;
         }
-    }
-    // Get the coupon ID
-    $the_coupon_id = wcusage_get_coupon_id( $coupon_code );
-    // Get the coupon post
-    $args = array(
-        'post_type' => 'shop_coupon',
-        'p'         => $the_coupon_id,
-    );
-    $the_query = new WP_Query($args);
-    while ( $the_query->have_posts() ) {
-        $the_query->the_post();
-        $postid = get_the_ID();
-        $coupon_code = get_the_title();
-        $couponvisible = 1;
     }
     $coupons = get_posts( array(
         'post_type'  => 'shop_coupon',
@@ -94,7 +90,10 @@ $other_view = 0;
 $user_info = get_userdata( $preview_user_id );
 if ( isset( $_GET['couponid'] ) ) {
     $other_view = 1;
-    $couponinfo = wcusage_get_coupon_info( sanitize_text_field( wp_unslash( $_GET['couponid'] ) ) );
+    // Use the coupon already resolved above rather than looking the parameter up
+    // again as a code: it may carry a "-<coupon ID>" suffix, and a shared code
+    // resolves to whichever coupon the lookup happens to return.
+    $couponinfo = ( $postid ? wcusage_get_coupon_info_by_id( $postid ) : wcusage_get_coupon_info( sanitize_text_field( wp_unslash( $_GET['couponid'] ) ) ) );
     $couponuser = $couponinfo[1];
     $user_info = get_userdata( $couponuser );
 } elseif ( $is_admin_preview ) {
@@ -149,13 +148,28 @@ if ( $postid ) {
             echo "<style>#tab-page-payouts, #tab-page-settings { display: none; }</style>";
         }
     }
-    // If not user's coupon, or not MLA parent, or not admin, redirect to affiliate registration page
-    if ( $preview_user_id != get_post_meta( $postid, 'wcu_select_coupon_user', true ) && !$is_mla_parent && !wcusage_check_admin_access( $couponuser ) && !$is_admin_preview ) {
+    // If not user's coupon, or not MLA parent, or not admin, redirect away.
+    //
+    // This MUST fail closed. $postid comes straight from ?couponid= with no ownership
+    // constraint, and the tab content below is rendered directly from it. Statistics,
+    // Latest Orders, Monthly Summary and Payouts each re-check ownership themselves,
+    // but Referral URL, Bonuses, Rates and Creatives do not - so falling through here
+    // exposes another affiliate's click history, rewards log and negotiated per-product
+    // commission rates to any visitor, including logged-out ones.
+    if ( $preview_user_id != get_post_meta( $postid, 'wcu_select_coupon_user', true ) && !$is_mla_parent && !wcusage_check_admin_access() && !$is_admin_preview ) {
+        // Prefer the registration page, so a non-affiliate is pushed towards signing up.
         $registration_page = ( isset( $options['wcusage_registration_page'] ) ? $options['wcusage_registration_page'] : '' );
-        if ( $registration_page ) {
-            wp_safe_redirect( get_permalink( $registration_page ) );
-            exit;
+        $redirect_url = ( $registration_page ? get_permalink( $registration_page ) : '' );
+        // No registration page configured - a supported setup, since the portal can
+        // register affiliates inline (see wcusage_affiliate_portal_redirect_registration()) -
+        // or the configured page has since been deleted. Fall back to the portal root:
+        // without ?couponid= it only ever loads the viewer's own coupons, so it cannot loop.
+        if ( !$redirect_url ) {
+            $wcusage_portal_slug = wcusage_get_setting_value( 'wcusage_portal_slug', 'affiliate-portal' );
+            $redirect_url = home_url( '/' . $wcusage_portal_slug . '/' );
         }
+        wp_safe_redirect( $redirect_url );
+        exit;
     }
 }
 // Enqueue necessary styles and scripts
@@ -721,11 +735,15 @@ if ( !$current_user_id ) {
                                             <?php 
                 foreach ( $switcher_coupons as $coupon ) {
                     $switch_title = $coupon->post_title;
-                    // Skip the coupon currently being viewed
-                    if ( strcasecmp( $switch_title, $coupon_code ) === 0 ) {
+                    // Skip the coupon currently being viewed. Compared by ID, since
+                    // a coupon sharing its code with this one is still a different
+                    // coupon and has to stay listed.
+                    if ( (int) $coupon->ID === (int) $postid ) {
                         continue;
                     }
-                    $switch_url = add_query_arg( 'couponid', $switch_title, $portal_base_url );
+                    // Only the ID identifies a coupon whose code is shared.
+                    $switch_id = ( wcusage_coupon_code_is_ambiguous( $coupon->ID ) ? $switch_title . '-' . $coupon->ID : $switch_title );
+                    $switch_url = add_query_arg( 'couponid', $switch_id, $portal_base_url );
                     ?>
                                                 <a href="<?php 
                     echo esc_url( $switch_url );

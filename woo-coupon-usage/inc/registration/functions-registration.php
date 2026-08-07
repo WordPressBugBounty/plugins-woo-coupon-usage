@@ -19,7 +19,7 @@ function wcusage_install_register_tables() {
     }
     if ( !$installed_ver || $installed_ver != $wcusage_register_db_version ) {
         $table_name = $wpdb->prefix . 'wcusage_register';
-        $sql = "CREATE TABLE {$table_name} (\r\n\t\t\tid bigint NOT NULL AUTO_INCREMENT,\r\n\t\t\tuserid bigint NOT NULL,\r\n      couponcode text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      promote text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      referrer text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      website text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      status text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      type text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      info text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n\t\t\tdate datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\r\n\t\t\tdateaccepted datetime DEFAULT NULL,\r\n\t\t\tPRIMARY KEY  (id)\r\n\t\t);";
+        $sql = "CREATE TABLE {$table_name} (\r\n\t\t\tid bigint NOT NULL AUTO_INCREMENT,\r\n\t\t\tuserid bigint NOT NULL,\r\n      couponcode text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      promote text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      referrer text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      website text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      status text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      type text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n      info text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,\r\n\t\t\tdate datetime DEFAULT NULL,\r\n\t\t\tdateaccepted datetime DEFAULT NULL,\r\n\t\t\tPRIMARY KEY  (id)\r\n\t\t);";
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta( $sql );
         update_option( "wcusage_register_db_version", $wcusage_register_db_version );
@@ -43,9 +43,18 @@ add_action( 'plugins_loaded', 'wcusage_update_register_db_check' );
  * One-time migration: ensure the dateaccepted column allows NULL.
  * dbDelta() cannot remove NOT NULL constraints on existing columns, so we
  * use an explicit ALTER TABLE guarded by a flag option.
+ *
+ * The flag is only set once the column is confirmed nullable. If the ALTER
+ * fails (insufficient privileges, locked table, etc.) the migration is retried
+ * later instead of being marked as done, otherwise every registration on that
+ * site would keep failing to save. A transient throttles the retries so a
+ * permanently failing ALTER is not attempted on every page load.
  */
 function wcusage_migrate_register_dateaccepted_column() {
     if ( get_option( 'wcusage_register_dateaccepted_nullable' ) ) {
+        return;
+    }
+    if ( get_transient( 'wcusage_register_dateaccepted_retry' ) ) {
         return;
     }
     global $wpdb;
@@ -53,9 +62,33 @@ function wcusage_migrate_register_dateaccepted_column() {
     if ( $wpdb->get_var( "SHOW TABLES LIKE '{$table_name}'" ) !== $table_name ) {
         return;
     }
-    $wpdb->query( "ALTER TABLE {$table_name} MODIFY COLUMN dateaccepted datetime DEFAULT NULL" );
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    if ( !wcusage_register_dateaccepted_is_nullable() ) {
+        $wpdb->query( "ALTER TABLE {$table_name} MODIFY COLUMN dateaccepted datetime DEFAULT NULL" );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        if ( !wcusage_register_dateaccepted_is_nullable() ) {
+            // Try again on a later page load rather than marking the migration complete.
+            error_log( 'CA: Could not make the wcusage_register.dateaccepted column nullable: ' . $wpdb->last_error );
+            set_transient( 'wcusage_register_dateaccepted_retry', 1, HOUR_IN_SECONDS );
+            return;
+        }
+    }
     update_option( 'wcusage_register_dateaccepted_nullable', '1' );
+}
+
+/**
+ * Whether the registration table's dateaccepted column currently allows NULL.
+ *
+ * @return bool
+ */
+function wcusage_register_dateaccepted_is_nullable() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'wcusage_register';
+    $column = $wpdb->get_row( "SHOW COLUMNS FROM {$table_name} LIKE 'dateaccepted'" );
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+    if ( !$column || !isset( $column->Null ) ) {
+        return false;
+    }
+    return strtoupper( $column->Null ) === 'YES';
 }
 
 /**
@@ -96,8 +129,13 @@ function wcusage_install_register_data(
     $website = sanitize_text_field( $website );
     $type = sanitize_text_field( $type );
     $info = sanitize_text_field( $info );
-    // Check already submission for user id within the last 10 seconds
-    $query = $wpdb->prepare( "SELECT id FROM {$table_name} WHERE userid = %d AND date > DATE_SUB(NOW(), INTERVAL 10 SECOND) LIMIT 1", $userid );
+    // Check already submission for user id within the last 10 seconds.
+    // The cutoff is worked out in site time to match the stored date, which is
+    // written with current_time(). Comparing against the database server's NOW()
+    // instead would widen this window to the site's UTC offset (e.g. two hours),
+    // silently discarding genuine repeat applications.
+    $cutoff = gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) - 10 );
+    $query = $wpdb->prepare( "SELECT id FROM {$table_name} WHERE userid = %d AND date > %s LIMIT 1", $userid, $cutoff );
     // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
     $result = $wpdb->get_results( $query );
     // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter

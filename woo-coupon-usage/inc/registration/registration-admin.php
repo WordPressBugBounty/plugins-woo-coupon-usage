@@ -116,12 +116,16 @@ function wcusage_admin_registrations_page_html() {
                 ob_start();
                 wcusage_post_submit_application( 1 );
                 ob_end_clean();
-                // Redirect to admin.php?page=wcusage_affiliates
-                $redirect_user = ( isset( $_POST['wcu-input-username'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-input-username'] ) ) : '' );
-                $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . urlencode( $redirect_user ) );
-                // Redirect via PHP
-                wp_safe_redirect( $redirect_url );
-                exit;
+                // Only redirect to the success page if the application was actually stored.
+                // Otherwise fall through so the error notice is displayed on this page.
+                if ( empty( $GLOBALS['wcusage_registration_storage_failed'] ) ) {
+                    // Redirect to admin.php?page=wcusage_affiliates
+                    $redirect_user = ( isset( $_POST['wcu-input-username'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-input-username'] ) ) : '' );
+                    $redirect_url = admin_url( 'admin.php?page=wcusage_affiliates&success=1&user=' . urlencode( $redirect_user ) );
+                    // Redirect via PHP
+                    wp_safe_redirect( $redirect_url );
+                    exit;
+                }
             }
         }
     }
@@ -795,7 +799,15 @@ function wcusage_set_registration_status(
         }
         update_post_meta( $new_post_id, 'wcu_text_unpaid_commission', '0' );
         update_post_meta( $new_post_id, 'wcu_text_pending_payment_commission', '0' );
-        update_post_meta( $new_post_id, 'usage_count', '0' );
+        // Clear the usage history inherited from the template coupon ('usage_count' and '_used_by'),
+        // otherwise customers on the template's '_used_by' list are blocked by "Usage limit per user"
+        // on a coupon that has never been redeemed.
+        if ( function_exists( 'wcusage_reset_coupon_usage_meta' ) ) {
+            wcusage_reset_coupon_usage_meta( $new_post_id );
+        } else {
+            delete_post_meta( $new_post_id, '_used_by' );
+            update_post_meta( $new_post_id, 'usage_count', '0' );
+        }
         delete_post_meta( $new_post_id, 'wcu_alltime_stats' );
         delete_post_meta( $new_post_id, 'wcu_last_refreshed' );
         if ( wcu_fs()->is_free_plan() ) {
@@ -1287,9 +1299,17 @@ function wcusage_admin_new_registration_page() {
                       lastNameRow.hide();
                       // Show a message saying the username exists
                       $('.username-exists-message').remove(); // Remove any existing message
-                      usernameField.after('<p class="username-exists-message" style="color: green; font-size: 12px; margin: 0;"><span class="fa fa-check-circle" style="color: green;"></span> ' + '<?php 
-    echo esc_js( __( 'This is an existing user.', 'woo-coupon-usage' ) );
-    ?>' + '</p>');
+                      var $userMsg = $('<p class="username-exists-message" style="color: green; font-size: 12px; margin: 0;"><span class="fa fa-check-circle" style="color: green;"></span> </p>');
+                      $userMsg.append(document.createTextNode('<?php 
+    echo esc_js( __( 'This is an existing user, and will be used for this registration.', 'woo-coupon-usage' ) );
+    ?>'));
+                      if (response.data.edit_url) {
+                          $userMsg.append(document.createTextNode(' '));
+                          $('<a target="_blank"></a>').attr('href', response.data.edit_url).text('<?php 
+    echo esc_js( __( 'View user', 'woo-coupon-usage' ) );
+    ?>').appendTo($userMsg);
+                      }
+                      usernameField.after($userMsg);
                       // Hide .wcu-input-username-text
                       $('.wcu-input-username-text').hide();
                       // Make email and first name not required
@@ -1372,9 +1392,20 @@ function wcusage_admin_new_registration_page() {
                           // Email exists but doesn't match username
                           $('.email-exists-message').remove();
                           $('.wcu-input-email-text').hide();
-                          emailField.after('<p class="email-exists-message" style="color: red; font-size: 12px; margin: 0;"><span class="fa fa-times-circle" style="color: red;"></span> ' + '<?php 
+                          var $msg = $('<p class="email-exists-message" style="color: red; font-size: 12px; margin: 0;"><span class="fa fa-times-circle" style="color: red;"></span> </p>');
+                          $msg.append(document.createTextNode('<?php 
     echo esc_js( __( 'This email address is already associated with username: ', 'woo-coupon-usage' ) );
-    ?>' + response.data.username + '</p>');
+    ?>'));
+                          if (response.data.edit_url) {
+                              $('<a target="_blank"></a>').attr('href', response.data.edit_url).text(response.data.username).appendTo($msg);
+                              $msg.append(document.createTextNode(' '));
+                              $msg.append($('<span></span>').text('<?php 
+    echo esc_js( __( '(enter that username above to add them as an affiliate)', 'woo-coupon-usage' ) );
+    ?>'));
+                          } else {
+                              $msg.append(document.createTextNode(response.data.username));
+                          }
+                          emailField.after($msg);
                           $('#wcu-register-button').prop('disabled', true);
                       } else {
                           // Email exists and matches username (or no username entered yet)
@@ -1533,9 +1564,12 @@ function wcusage_check_username_exists() {
         wp_send_json_error();
     }
     $username = ( isset( $_POST['username'] ) ? sanitize_user( wp_unslash( $_POST['username'] ) ) : '' );
-    if ( username_exists( $username ) ) {
+    $user_id = username_exists( $username );
+    if ( $user_id ) {
         wp_send_json_success( [
-            'exists' => true,
+            'exists'   => true,
+            'user_id'  => $user_id,
+            'edit_url' => get_edit_user_link( $user_id ),
         ] );
     } else {
         wp_send_json_success( [
@@ -1580,6 +1614,8 @@ function wcusage_check_email_exists() {
             'exists'           => true,
             'username'         => $user->user_login,
             'matches_username' => $matches_username,
+            'user_id'          => $user->ID,
+            'edit_url'         => get_edit_user_link( $user->ID ),
         ] );
     } else {
         wp_send_json_success( [

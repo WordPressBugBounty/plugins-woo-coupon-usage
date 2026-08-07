@@ -44,7 +44,6 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
             $remove_order = 0;
             $wcusage_all_updated = wcusage_order_meta( $order_id, 'wcusage_all_updated' );
             if ( $check_status_from_show && !$check_status_to_show && $wcusage_all_updated ) {
-                wcusage_delete_order_meta( $order_id, 'wcusage_all_updated' );
                 $remove_order = 1;
             }
             // Check if refresh
@@ -212,6 +211,13 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
                 if ( $coupon_refresh_prev ) {
                     wcusage_delete_order_meta( $order_id, 'wcusage_referrer_refresh_prev' );
                 }
+            }
+            // Clear the "counted" flag only now that the remove has run. The flag is what
+            // tells wcusage_update_all_stats_single() the order's saved stats are still in
+            // the all-time totals and may be subtracted - deleting it beforehand left the
+            // removal with nothing to subtract for a status the calculation reports as zero.
+            if ( $remove_order ) {
+                wcusage_delete_order_meta( $order_id, 'wcusage_all_updated' );
             }
         }
         if ( !empty( $meta_data ) ) {

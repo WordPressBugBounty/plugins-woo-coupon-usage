@@ -124,10 +124,13 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
     $action_free_coupon = isset($reward_meta['action_free_coupon'][0]) ? $reward_meta['action_free_coupon'][0] : '';
     $action_send_email = isset($reward_meta['action_send_email'][0]) ? $reward_meta['action_send_email'][0] : '';
     $action_assign_role = isset($reward_meta['action_assign_role'][0]) ? $reward_meta['action_assign_role'][0] : '';
+    $action_remove_role = isset($reward_meta['action_remove_role'][0]) ? $reward_meta['action_remove_role'][0] : '';
     $bonus_amount = isset($reward_meta['bonus_amount'][0]) ? $reward_meta['bonus_amount'][0] : '';
     $credit_amount = isset($reward_meta['credit_amount'][0]) ? $reward_meta['credit_amount'][0] : '';
     $commission_increase = isset($reward_meta['commission_increase'][0]) ? $reward_meta['commission_increase'][0] : '';
     $new_user_role = isset($reward_meta['new_user_role'][0]) ? $reward_meta['new_user_role'][0] : '';
+    $remove_user_roles = isset($reward_meta['remove_user_roles'][0]) ? maybe_unserialize($reward_meta['remove_user_roles'][0]) : array();
+    if(!is_array($remove_user_roles)) { $remove_user_roles = $remove_user_roles ? array($remove_user_roles => 1) : array(); }
     $product_id = isset($reward_meta['free_product'][0]) ? $reward_meta['free_product'][0] : '';
     $product_quantity = isset($reward_meta['free_product_quantity'][0]) ? $reward_meta['free_product_quantity'][0] : 1;
   }
@@ -292,6 +295,9 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
       }
       if ($action_assign_role) {
         $event_message .= "<br/>User role added to user: ".esc_html($new_user_role);
+      }
+      if ($action_remove_role && $remove_user_roles) {
+        $event_message .= "<br/>User removed from role(s): ".esc_html(implode(', ', array_keys(array_filter($remove_user_roles))));
       }
       break;
   }

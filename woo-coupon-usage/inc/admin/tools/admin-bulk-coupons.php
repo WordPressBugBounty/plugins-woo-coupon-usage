@@ -510,6 +510,15 @@ function wcusage_bulk_create_coupons() {
                     update_post_meta( $coupon_id, $key, maybe_unserialize( $value[0] ) );
                 }
             }
+            // Clear the usage history inherited from the template coupon ('usage_count' and '_used_by'),
+            // otherwise customers on the template's '_used_by' list are blocked by "Usage limit per user"
+            // on a coupon that has never been redeemed.
+            if ( function_exists( 'wcusage_reset_coupon_usage_meta' ) ) {
+                wcusage_reset_coupon_usage_meta( $coupon_id );
+            } else {
+                delete_post_meta( $coupon_id, '_used_by' );
+                update_post_meta( $coupon_id, 'usage_count', '0' );
+            }
             // Store coupon code for rows without errors
             $success_rows[] = array(
                 'data' => $row_data,

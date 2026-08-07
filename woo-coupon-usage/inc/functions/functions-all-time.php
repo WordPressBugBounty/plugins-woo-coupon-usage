@@ -108,9 +108,38 @@ if ( !function_exists( 'wcusage_update_all_stats_single' ) ) {
                     0
                 );
             }
-            $order_total = $order_data['totalorders'];
-            $order_discounts = $order_data['totaldiscounts'];
-            $order_commission = $order_data['totalcommission'];
+            $order_total = ( isset( $order_data['totalorders'] ) ? $order_data['totalorders'] : 0 );
+            $order_discounts = ( isset( $order_data['totaldiscounts'] ) ? $order_data['totaldiscounts'] : 0 );
+            $order_commission = ( isset( $order_data['totalcommission'] ) ? $order_data['totalcommission'] : 0 );
+            // By the time an order is removed from the stats its status has usually already
+            // changed to cancelled/refunded/failed, and wcusage_calculate_order_data() returns
+            // zero for those statuses - so there was nothing to subtract, and the order's sales
+            // and commission stayed in the all-time totals for good while only the usage count
+            // came back down. Fall back to the order's own saved stats, which hold the amounts
+            // that were added in the first place.
+            //
+            // Gated on 'wcusage_all_updated', which marks an order as currently counted. The
+            // matching $type=1 branch has nothing to fall back to - it must keep adding zero
+            // for a status that does not count - so without this gate the two directions are
+            // asymmetric, and any remove-then-add on an order that is already cancelled or
+            // refunded (changing the affiliate on the order edit screen, or the Bulk Assign
+            // Orders tool) would subtract amounts that are no longer in the totals and add
+            // nothing back. The flag is deliberately cleared only after the remove has run -
+            // see wcusage_new_order_update_stats() and wcusage_order_update_stats_refund().
+            if ( !$type && !(float) $order_total && !(float) $order_commission && wcusage_order_meta( $order_id, 'wcusage_all_updated' ) ) {
+                $saved_stats = wcusage_order_meta( $order_id, 'wcusage_stats', true );
+                if ( is_array( $saved_stats ) ) {
+                    if ( isset( $saved_stats['order'] ) ) {
+                        $order_total = $saved_stats['order'];
+                    }
+                    if ( isset( $saved_stats['discount'] ) ) {
+                        $order_discounts = $saved_stats['discount'];
+                    }
+                    if ( isset( $saved_stats['commission'] ) ) {
+                        $order_commission = $saved_stats['commission'];
+                    }
+                }
+            }
             // Update
             $allstats = array();
             if ( $type ) {
@@ -123,9 +152,12 @@ if ( !function_exists( 'wcusage_update_all_stats_single' ) ) {
                     $allstats['total_count'] = $total_count;
                 }
             } else {
-                $allstats['total_orders'] = $total_orders - $order_total;
-                $allstats['full_discount'] = $total_discount - $order_discounts;
-                $allstats['total_commission'] = $total_commission - $order_commission;
+                // Floored at zero, the same as the usage count below - an all-time total can
+                // never legitimately be negative, and rounding differences between what was
+                // added and what is subtracted could otherwise leave a small minus figure.
+                $allstats['total_orders'] = max( 0, (float) $total_orders - (float) $order_total );
+                $allstats['full_discount'] = max( 0, (float) $total_discount - (float) $order_discounts );
+                $allstats['total_commission'] = max( 0, (float) $total_commission - (float) $order_commission );
                 if ( $change ) {
                     $allstats['total_count'] = max( 0, $total_count - 1 );
                 } else {
@@ -712,7 +744,7 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
 
     function getOrders() {
 
-    // Every window has been calculated, so the totals can now be saved.
+    /* Every window has been calculated, so the totals can now be saved. */
     if (wcuIndex >= wcuWindows.length) {
       updateAllStats(allstats);
       return;
@@ -764,8 +796,8 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
         }
       },
       error: function(jqXHR, textStatus, errorThrown) {
-        // A single dropped request (a timeout, or a brief server hiccup) should
-        // not abandon the whole run - retry the same window before giving up.
+        /* A single dropped request (a timeout, or a brief server hiccup) should
+           not abandon the whole run - retry the same window before giving up. */
         if (wcuRetries < wcuMaxRetries) {
           wcuRetries++;
           setTimeout(getOrders, 1500 * wcuRetries);

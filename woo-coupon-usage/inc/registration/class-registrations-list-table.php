@@ -311,12 +311,7 @@ class wcusage_registrations_List_Table extends WP_List_Table {
     // Status filter dropdown (matches affiliate users page pattern)
     function extra_tablenav( $which ) {
         if ( $which === 'top' ) {
-            $current_status = '';
-            if ( isset($_POST['filter_status']) ) {
-                $current_status = sanitize_text_field( $_POST['reg_status'] );
-            } elseif ( isset($_GET['status']) ) {
-                $current_status = sanitize_text_field( wp_unslash( $_GET['status'] ) );
-            }
+            $current_status = $this->get_filter_status();
             ?>
             <div class="alignleft actions">
                 <label for="wcusage-bulk-select" class="screen-reader-text"><?php esc_html_e('Bulk actions', 'woo-coupon-usage'); ?></label>
@@ -329,25 +324,65 @@ class wcusage_registrations_List_Table extends WP_List_Table {
                 <button type="button" id="wcusage-bulk-apply" class="button action"><?php esc_html_e('Apply', 'woo-coupon-usage'); ?></button>
             </div>
             <div class="alignleft actions" style="margin-left: 8px;">
-                <?php
-                // Retain other $_GET parameters in the form submission
-                foreach ($_GET as $key => $value) {
-                    if ($key !== 'status' && $key !== 'filter_status') {
-                        echo '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr( is_array($value) ? '' : wp_unslash( $value ) ) . '">';
-                    }
-                }
-                ?>
-                <select name="reg_status">
+                <label for="wcusage-reg-status" class="screen-reader-text"><?php esc_html_e('Filter by status', 'woo-coupon-usage'); ?></label>
+                <select name="reg_status" id="wcusage-reg-status">
                     <option value=""><?php esc_html_e('All Statuses', 'woo-coupon-usage'); ?></option>
                     <option value="accepted" <?php selected('accepted', $current_status); ?>><?php esc_html_e('Accepted', 'woo-coupon-usage'); ?></option>
                     <option value="pending" <?php selected('pending', $current_status); ?>><?php esc_html_e('Pending', 'woo-coupon-usage'); ?></option>
-                    <option value="parent_approved" <?php selected('parent_approved', $current_status); ?>><?php esc_html_e('MLA Parent Approved', 'woo-coupon-usage'); ?></option>
+                    <?php
+                    // No "MLA Parent Approved" option: nothing ever writes 'parent_approved' to the
+                    // status column. An MLA parent approving a sub-affiliate registration records
+                    // the approval in user meta ('wcu_mla_parent_approved') and then accepts the
+                    // registration outright - see wcusage_ajax_mla_sub_reg_action() - so the row
+                    // goes straight from 'pending' to 'accepted'. Offering it here only ever
+                    // returned an empty list. The status column still renders 'parent_approved' if
+                    // a row somehow carries it.
+                    ?>
                     <option value="declined" <?php selected('declined', $current_status); ?>><?php esc_html_e('Declined', 'woo-coupon-usage'); ?></option>
                 </select>
-                <input type="submit" name="filter_status" id="post-query-submit" class="button" value="<?php esc_html_e('Filter', 'woo-coupon-usage'); ?>">
+                <button type="button" id="wcusage-reg-filter-apply" class="button"><?php esc_html_e('Filter', 'woo-coupon-usage'); ?></button>
             </div>
+            <script type="text/javascript">
+            // The table is not inside a form (each row renders its own accept/decline/delete
+            // form, which cannot be nested), so the filter navigates to the filtered URL.
+            jQuery(document).ready(function($){
+                function wcusageApplyRegFilter(){
+                    var status = $('#wcusage-reg-status').val();
+                    var url = new URL(window.location.href);
+                    if (status) {
+                        url.searchParams.set('status', status);
+                    } else {
+                        url.searchParams.delete('status');
+                    }
+                    url.searchParams.delete('paged');
+                    window.location.href = url.toString();
+                }
+                $('#wcusage-reg-filter-apply').on('click', function(e){ e.preventDefault(); wcusageApplyRegFilter(); });
+                $('#wcusage-reg-status').on('change', function(){ wcusageApplyRegFilter(); });
+            });
+            </script>
             <?php
         }
+    }
+
+    // Status currently being filtered on, from the URL (or a legacy POST submission).
+    function get_filter_status() {
+        $filter_status = '';
+        if ( isset($_GET['status']) ) {
+            $filter_status = sanitize_text_field( wp_unslash( $_GET['status'] ) );
+        } elseif ( isset($_POST['filter_status']) && isset($_POST['reg_status']) ) {
+            $filter_status = sanitize_text_field( wp_unslash( $_POST['reg_status'] ) );
+        }
+
+        // Kept in step with the dropdown above, so an unrecognised ?status= (including the
+        // 'parent_approved' value nothing writes) falls back to showing everything rather
+        // than filtering the list to nothing while the dropdown reads "All Statuses".
+        $allowed = array( 'accepted', 'pending', 'declined' );
+        if ( ! in_array( $filter_status, $allowed, true ) ) {
+            return '';
+        }
+
+        return $filter_status;
     }
 
     function prepare_items() {
@@ -364,13 +399,8 @@ class wcusage_registrations_List_Table extends WP_List_Table {
 
         $table_name = $wpdb->prefix . 'wcusage_register';
 
-        // Determine status filter from POST (dropdown) or GET (URL)
-        $filter_status = '';
-        if ( isset($_POST['filter_status']) ) {
-            $filter_status = sanitize_text_field( $_POST['reg_status'] );
-        } elseif ( isset($_GET['status']) ) {
-            $filter_status = sanitize_text_field( wp_unslash( $_GET['status'] ) );
-        }
+        // Determine status filter from the URL (or a legacy POST submission)
+        $filter_status = $this->get_filter_status();
 
         if ( !empty($filter_status) ) {
             $sql = $wpdb->prepare("SELECT * FROM $table_name WHERE status = %s ORDER BY id DESC", $filter_status ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter

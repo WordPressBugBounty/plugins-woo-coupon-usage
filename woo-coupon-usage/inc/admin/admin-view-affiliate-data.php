@@ -105,7 +105,7 @@ function wcusage_affiliate_referrals_table($user_id, $page = 1, $per_page = 20, 
             <?php foreach ($orders as $order): ?>
                 <?php
                 $order_id = $order->get_id();
-                $commission = wcusage_order_meta($order_id, 'wcusage_total_commission');
+                $commission = wcusage_get_order_saved_commission($order_id);
                 $billing_first_name = $order->get_billing_first_name();
                 $billing_last_name = $order->get_billing_last_name();
                 $customer_name = trim($billing_first_name . ' ' . $billing_last_name);

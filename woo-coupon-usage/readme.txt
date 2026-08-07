@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 7.0
-Stable tag: 8.1.0
+Stable tag: 8.1.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -292,6 +292,35 @@ Please report security bugs found in the source code of the plugin through the [
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 8.1.1 - 7th August 2026 =
+- New: (PRO) Added a "Remove from a user role or affiliate group" reward to performance bonuses, so affiliates can be moved up through your tiers.
+- Tweak: (PRO) The affiliate portal now always redirects away when the coupon in the page address is not the viewer's own.
+- Tweak: The "Add New Affiliate" page now links to the existing user when the username or email address entered is already taken.
+- Tweak: (PRO) The leaderboard is now built from its shortcode settings rather than values sent by the visitor. Clear any full page cache after updating.
+- Tweak: Tightened the security checks on a number of admin and dashboard requests.
+- Tweak: (PRO) An affiliate group commission rate now always takes priority for affiliates who hold more than one user role.
+- Tweak: (PRO) The commission rate fields on an affiliate group now accept decimals.
+- Tweak: The commission shown against an order in the admin now includes fixed amounts, and shows 0.00 once an order is cancelled, refunded or failed.
+- Tweak: The "Total Sales" column on the admin "Coupons" page now has the coupon discount taken off, matching every other screen.
+- Tweak: (PRO) The "Commission" column on the dashboard "Rates" tab now accounts for tax. Enable "Include taxes in % commission calculations" for the previous behaviour.
+- Tweak: (PRO) The "Price" column on the dashboard "Rates" tab now shows the tax included in (or added to) each price.
+- Tweak: (PRO) An information icon on the "Rates" tab now explains the commission figure where it is not simply the price times the rate.
+- Fix: (PRO) Custom commission rates set on products and categories were ignored unless "Commission Priority" was set to products. This changes the commission calculated on new orders for affected stores.
+- Fix: (PRO) "Commission Priority" now defaults to "Product Commission Settings" as documented, for stores that never saved the Commission settings tab.
+- Fix: (PRO) A "fixed commission per product" amount set on an affiliate group or user role was ignored when the product had its own amount.
+- Fix: (PRO) The dashboard "Rates" tab could show a rate an order would not pay. It now resolves rates exactly as the order does.
+- Fix: (PRO) The dashboard "Rates" tab ignored the "Include taxes in 'fixed' commission calculations" setting.
+- Fix: (PRO) Orders paying a fixed commission with no percentage were skipped by the automatic commission payouts.
+- Fix: Cancelled and refunded orders left their sales and commission in the coupon's all-time statistics. Run "Refresh Statistics" to correct existing coupons.
+- Fix: The affiliate dashboard could stay on "Calculating statistics..." and never finish loading, introduced in 8.1.0.
+- Fix: Affiliates on two coupons whose codes differ only by letter case could be left with a blank dashboard, or "No affiliate dashboard found".
+- Fix: Coupon error messages could be blanked out at the cart and checkout, so a rejected coupon disappeared with no explanation.
+- Fix: New coupons created from a template inherited its usage count and history, so customers could be told the usage limit had been reached.
+- Fix: An affiliate application that cannot be saved to the database no longer leaves the applicant with a user account but no application.
+- Fix: Two registration failures on servers running MySQL or MariaDB in strict mode.
+- Fix: The duplicate application check compared the site's time against the database server's time, discarding genuine applications on sites not set to UTC.
+- Fix: The status filter on the Registrations screen did nothing. It now filters immediately and is kept in the page address.
 
 = Version 8.1.0 - 29th July 2026 =
 - New: (PRO) The "Coupon Affiliate" box on the order edit screen now flags when the commission already granted to an affiliate is higher than the current calculated commission for the order (for example, after a partial refund), with a one-click "Deduct" link that removes the difference from the affiliate's unpaid commission balance and updates the granted amount for the order. This also detects refunds that were not allocated to specific line items (amount-only refunds), which the automatic recalculation cannot see.

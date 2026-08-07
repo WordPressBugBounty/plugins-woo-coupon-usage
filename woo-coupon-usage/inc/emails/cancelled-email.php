@@ -56,17 +56,12 @@ function wcusage_order_refund_email($order_id, $coupon_code, $status) {
     $calculateorder = wcusage_calculate_order_data( $order_id, $coupon_code, 0, 1 );
     $totalcommission = isset($calculateorder['totalcommission']) ? $calculateorder['totalcommission'] : 0;
 
-    // Fallback to get saved commission if 0 (e.g. if order status changed to cancelled/refunded)
+    // Fall back to the saved commission if 0 (the order status has changed to
+    // cancelled/refunded by this point, which the calculation reports as zero). The
+    // status is deliberately ignored here - this email tells the affiliate how much
+    // commission has been removed, so it needs the amount they had been given.
     if( empty($totalcommission) ) {
-        $totalcommission = wcusage_order_meta( $order_id, 'wcusage_total_commission', true );
-    }
-
-    // Fallback to wcusage_stats if still empty
-    if( empty($totalcommission) ) {
-        $stats = wcusage_order_meta( $order_id, 'wcusage_stats', true );
-        if( is_array($stats) && isset($stats['commission']) ) {
-            $totalcommission = $stats['commission'];
-        }
+        $totalcommission = wcusage_get_order_saved_commission( $order_id, false );
     }
 
     $valuecommission = wcusage_format_price( number_format((float)$totalcommission, 2, '.', '') );

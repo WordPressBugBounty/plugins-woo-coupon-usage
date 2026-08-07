@@ -82,36 +82,53 @@ function wcusage_getting_started_registration() {
     $registration_shortcode_page = wcusage_get_registration_shortcode_page_id();
     if(!$registration_shortcode_page) {
 
-      if ( isset( $_GET['action'] ) ) {
+      // Only act on the explicit "generate" request from the button below. This used to
+      // fire on ANY ?action= value with no nonce and no capability check behind it, so
+      // merely following a crafted link published a page and repointed the
+      // wcusage_registration_page setting at it.
+      $action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
+      $nonce  = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 
-        $current_user_id = get_current_user_id();
+      if ( 'generate' === $action && wcusage_check_admin_access() && wp_verify_nonce( $nonce, 'wcusage_generate_registration_page' ) ) {
 
-        global $wpdb;
-    		$table_name = $wpdb->prefix . 'posts';
-    		$wpdb->insert(
-    			$table_name,
-    			array(
-            'post_title'     => 'Affiliate Registration',
-            'post_type'      => 'page',
-            'post_name'      => 'affiliate-registration',
-            'comment_status' => 'closed',
-            'ping_status'    => 'closed',
-            'post_content'   => '[couponaffiliates-register]',
-            'post_status'    => 'publish',
-            'post_author'    => $current_user_id,
-    			)
-    		);
-    		$new_page_id = $wpdb->insert_id;
+        // Create the page through the WordPress API rather than writing to the posts
+        // table directly. The direct insert supplied no post_date, so the row was stored
+        // with a zero date - which MySQL/MariaDB running in strict mode (NO_ZERO_DATE)
+        // rejects outright, meaning the page was silently never created on those
+        // servers. It also skipped slug de-duplication, left the guid empty, and never
+        // fired save_post - so wcusage_clear_shortcode_page_caches() did not run and the
+        // cached "registration page" lookup kept returning the previous result.
+        $new_page_id = wp_insert_post( array(
+          'post_title'     => 'Affiliate Registration',
+          'post_type'      => 'page',
+          'post_name'      => 'affiliate-registration',
+          'comment_status' => 'closed',
+          'ping_status'    => 'closed',
+          'post_content'   => '[couponaffiliates-register]',
+          'post_status'    => 'publish',
+          'post_author'    => get_current_user_id(),
+        ), true );
 
-        if(isset($_GET['action']) && $_GET['action'] == "generate" && $new_page_id) {
+        if ( is_wp_error( $new_page_id ) || ! $new_page_id ) {
 
-          echo "<p style='color: green;'><strong>Registration form page created. (ID #" . esc_html($new_page_id) . ")</strong></p>";
+          // Previously the new id was saved to the settings whether or not the insert
+          // worked, which pointed wcusage_registration_page at post 0.
+          echo "<p style='color: #b32d2e;'><strong>" . esc_html__( 'The registration page could not be created. Please create a page containing the [couponaffiliates-register] shortcode, then select it below.', 'woo-coupon-usage' ) . "</strong></p>";
+
+        } else {
+
+          echo "<p style='color: green;'><strong>" . sprintf( esc_html__( 'Registration form page created. (ID #%d)', 'woo-coupon-usage' ), (int) $new_page_id ) . "</strong></p>";
+
+          if ( function_exists( 'wcusage_update_options_merge' ) ) {
+            wcusage_update_options_merge( array( 'wcusage_registration_page' => $new_page_id ) );
+          } else {
+            $option_group = get_option('wcusage_options');
+            if ( ! is_array( $option_group ) ) { $option_group = array(); }
+            $option_group['wcusage_registration_page'] = $new_page_id;
+            update_option( 'wcusage_options', $option_group );
+          }
 
         }
-
-        $option_group = get_option('wcusage_options');
-        $option_group['wcusage_registration_page'] = $new_page_id;
-        update_option( 'wcusage_options', $option_group );
 
       }
 
@@ -211,7 +228,7 @@ function wcusage_getting_started3() {
 add_action( 'wcusage_hook_getting_started_registration', 'wcusage_getting_started_registration_post' );
 function wcusage_getting_started_registration_post() {
 ?>
-  <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_setup&step=2&action=generate')); ?>">
+  <a href="<?php echo esc_url( wp_nonce_url( admin_url('admin.php?page=wcusage_setup&step=2&action=generate'), 'wcusage_generate_registration_page' ) ); ?>">
       <button type="button" class="submit-generate-page"><?php echo esc_html__( "Generate Registration Page", "woo-coupon-usage" ); ?> <span class="fa-solid fa-arrow-right"></span></button>
   </a>
   <br/>

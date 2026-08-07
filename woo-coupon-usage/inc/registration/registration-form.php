@@ -644,6 +644,7 @@ add_shortcode(
 /*
 * Create a new registration submission
 *
+* @return int|false The new registration ID, or false if it could not be stored.
 */
 function wcusage_create_new_registration(
     $couponcode = "",
@@ -677,6 +678,12 @@ function wcusage_create_new_registration(
             $type,
             $info
         );
+        // If the application could not be stored, stop here. Accepting it (which creates
+        // the coupon) or emailing the applicant would tell everyone the application was
+        // received when there is no record of it to accept or review.
+        if ( !$getregisterid ) {
+            return false;
+        }
         // If auto accept is enabled, then instantly accept
         $auto_accept = "";
         $do_auto_accept = $auto_accept && wcusage_registration_auto_accept_allowed( $userid, $type );
@@ -728,7 +735,9 @@ function wcusage_create_new_registration(
                 $info
             );
         }
+        return $getregisterid;
     }
+    return false;
 }
 
 /*
@@ -877,6 +886,8 @@ function wcusage_post_submit_application(  $adminpost  ) {
                                 );
                                 if ( isset( $new_affiliate_user['userid'] ) ) {
                                     $user_id = $new_affiliate_user['userid'];
+                                    // Allows the account to be removed again if storing the application fails.
+                                    $GLOBALS['wcusage_registration_new_user_id'] = $user_id;
                                 }
                             }
                         }
@@ -903,6 +914,23 @@ function wcusage_post_submit_application(  $adminpost  ) {
                             $role,
                             $send_email
                         );
+                        if ( !$createregistration ) {
+                            // The application could not be stored (for example a database error).
+                            // Remove the account created for this submission so the applicant can
+                            // try again, rather than being told they applied when nothing was saved.
+                            wcusage_registration_rollback_new_user();
+                            $GLOBALS['wcusage_registration_storage_failed'] = true;
+                            if ( $adminpost ) {
+                                $GLOBALS['wcusage_admin_registration_error'] = esc_html__( 'The registration could not be saved to the database, so no application was created. Please check your site error log for more information.', 'woo-coupon-usage' );
+                            } else {
+                                echo "<p style='margin-top: 20px; font-weight: bold; color: red;'>" . esc_html__( 'We could not complete your affiliate registration. Please try again or contact the site administrator.', 'woo-coupon-usage' ) . "</p>";
+                            }
+                            return;
+                        }
+                        // Stored successfully, so the account is no longer a candidate for rollback.
+                        // Leaving the id set would let a later failure in the same request delete the
+                        // user this submission created.
+                        unset($GLOBALS['wcusage_registration_new_user_id']);
                         // Get MLA fields
                         $mla = "";
                         $wcusage_field_mla_enable = wcusage_get_setting_value( 'wcusage_field_mla_enable', '0' );
@@ -1179,13 +1207,17 @@ function wcusage_login_after_registration() {
                         $website,
                         $info
                     );
-                    $userid = $new_affiliate_user['userid'];
-                    $new_password = $new_affiliate_user['new_password'];
+                    $userid = ( isset( $new_affiliate_user['userid'] ) ? $new_affiliate_user['userid'] : '' );
+                    $new_password = ( isset( $new_affiliate_user['new_password'] ) ? $new_affiliate_user['new_password'] : '' );
                     if ( $new_password ) {
                         $password = $new_password;
                     }
                     if ( $userid ) {
                         $_SESSION['wcu_registration_user_created'] = wp_hash( $username . '|' . $email );
+                        // Remember the account created for this submission. The application itself is
+                        // stored later in the same request (when the form is processed), so this allows
+                        // the account to be removed again if that storage fails.
+                        $GLOBALS['wcusage_registration_new_user_id'] = $userid;
                     }
                     // Login
                     $auto_login = wcusage_get_setting_value( 'wcusage_field_registration_auto_login', '1' );
@@ -1227,6 +1259,56 @@ function wcusage_cfturnstile_wp_login_checks(  $checks  ) {
         return true;
     }
     return $checks;
+}
+
+/*
+* Remove the affiliate account created earlier in this request.
+*
+* Used when the application itself could not be stored, so that the applicant is
+* not left with an account (and a taken email address) but no application. Only
+* ever deletes an account created moments ago by this submission.
+*
+* @return bool Whether an account was removed.
+*/
+function wcusage_registration_rollback_new_user() {
+    $user_id = ( isset( $GLOBALS['wcusage_registration_new_user_id'] ) ? absint( $GLOBALS['wcusage_registration_new_user_id'] ) : 0 );
+    if ( !$user_id ) {
+        return false;
+    }
+    unset($GLOBALS['wcusage_registration_new_user_id']);
+    $user = get_user_by( 'id', $user_id );
+    if ( !$user ) {
+        return false;
+    }
+    // Safety check: only remove accounts registered within the last minute, so an
+    // existing user is never deleted if the account was not created by this request.
+    // user_registered is stored in GMT, and WordPress runs PHP in UTC.
+    if ( abs( time() - strtotime( $user->user_registered ) ) >= 60 ) {
+        return false;
+    }
+    // The new account may already have been logged in at this point. The cookie can
+    // only be cleared before output has started, but it stops being valid once the
+    // account is deleted below in any case.
+    if ( get_current_user_id() === $user_id ) {
+        if ( !headers_sent() ) {
+            wp_clear_auth_cookie();
+        }
+        wp_set_current_user( 0 );
+    }
+    if ( !function_exists( 'wp_delete_user' ) ) {
+        require_once ABSPATH . 'wp-admin/includes/user.php';
+    }
+    wp_delete_user( $user_id );
+    if ( isset( $_SESSION['wcu_registration_user_created'] ) ) {
+        unset($_SESSION['wcu_registration_user_created']);
+    }
+    if ( isset( $_SESSION['wcu_login_success'] ) ) {
+        unset($_SESSION['wcu_login_success']);
+    }
+    if ( isset( $_SESSION['wcu_login_username'] ) ) {
+        unset($_SESSION['wcu_login_username']);
+    }
+    return true;
 }
 
 /*

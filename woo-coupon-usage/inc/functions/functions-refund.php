@@ -135,8 +135,16 @@ function wcusage_order_update_stats_refund_delete($refund_id, $order_id) {
 
   wcusage_delete_order_meta($order_id, 'wcusage_stats');
   wcusage_delete_order_meta($order_id, 'wcusage_commission_summary');
-  wcusage_delete_order_meta($order_id, 'wcusage_total_commission');
   wcusage_delete_order_meta($order_id, 'wcu_mla_commission');
+
+  // All three commission keys, not just the percentage one. Commission is stored
+  // across "wcusage_total_commission" (percentage), "wcusage_fixed_order_commission"
+  // and "wcusage_product_commission", and wcusage_get_order_saved_commission() adds
+  // the three together when "wcusage_stats" is absent - as it is here. Leaving any of
+  // them behind reports a stale part of the old commission as if it were the whole.
+  wcusage_delete_order_meta($order_id, 'wcusage_total_commission');
+  wcusage_delete_order_meta($order_id, 'wcusage_fixed_order_commission');
+  wcusage_delete_order_meta($order_id, 'wcusage_product_commission');
 
 }
 add_action( 'woocommerce_refund_deleted', 'wcusage_order_update_stats_refund_delete', 5, 2 );

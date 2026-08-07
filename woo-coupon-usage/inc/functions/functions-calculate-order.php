@@ -161,6 +161,92 @@ if ( !function_exists( 'wcusage_delete_order_meta' ) ) {
 
 }
 /**
+ * Gets an order's saved commission, combining every part of it.
+ *
+ * The calculation splits an order's commission across separate meta keys:
+ * "wcusage_total_commission" (the percentage part only), "wcusage_fixed_order_commission"
+ * (the fixed amount per order) and "wcusage_product_commission" (the fixed amount per
+ * product). Reading only the first shows less than the affiliate actually earned, and
+ * shows nothing at all where commission is a fixed amount with no percentage, since that
+ * key is not written when the percentage part is zero.
+ *
+ * "wcusage_stats" already stores the three combined, so it is used when available, with
+ * the individual keys as the fallback. The fallback finishes with the same capping,
+ * filtering and rounding wcusage_calculate_order_data() applies before it writes
+ * "wcusage_stats", so the two paths cannot report different amounts for one order.
+ *
+ * @param int  $order_id
+ * @param bool $respect_status Return 0 for cancelled/refunded/failed orders, matching
+ *                             wcusage_calculate_order_data() and the affiliate dashboard.
+ *
+ * @return float
+ *
+ */
+if ( !function_exists( 'wcusage_get_order_saved_commission' ) ) {
+    function wcusage_get_order_saved_commission(  $order_id, $respect_status = true  ) {
+        if ( !$order_id ) {
+            return 0;
+        }
+        $order = wc_get_order( $order_id );
+        if ( $respect_status ) {
+            if ( $order && is_a( $order, 'WC_Order' ) ) {
+                $status = $order->get_status();
+                if ( $status == "refunded" || $status == "cancelled" || $status == "failed" ) {
+                    return 0;
+                }
+            }
+        }
+        $stats = wcusage_order_meta( $order_id, 'wcusage_stats', true );
+        if ( is_array( $stats ) && isset( $stats['commission'] ) && $stats['commission'] !== "" ) {
+            return (float) $stats['commission'];
+        }
+        $commission = (float) wcusage_order_meta( $order_id, 'wcusage_total_commission', true );
+        $commission += (float) wcusage_order_meta( $order_id, 'wcusage_fixed_order_commission', true );
+        $commission += (float) wcusage_order_meta( $order_id, 'wcusage_product_commission', true );
+        // The three keys hold the raw parts. "wcusage_stats" holds them capped, filtered
+        // and rounded, so the fallback has to repeat that or an order whose commission
+        // exceeds the per-order maximum would be reported above the cap purely because
+        // its saved stats happened to be missing.
+        $max_commission = wcusage_get_setting_value( 'wcusage_field_order_max_commission', '' );
+        if ( $max_commission && $commission > (float) $max_commission ) {
+            $commission = (float) $max_commission;
+        }
+        if ( $commission && has_filter( 'wcusage_calculate_edit_commission' ) ) {
+            // Resolved the same way, and in the same order of preference, as the paths
+            // that credit the commission (see wcusage_order_update_stats_refund_complete()).
+            // Only looked up when something is actually listening, so the ordinary case
+            // stays a plain meta read - this runs per row on the referrals list and its
+            // CSV export.
+            $coupon_code = wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer' );
+            if ( !$coupon_code ) {
+                $coupon_code = wcusage_order_meta( $order_id, 'wcusage_referrer_coupon' );
+            }
+            if ( !$coupon_code && $order && is_a( $order, 'WC_Order' ) ) {
+                $order_coupons = $order->get_coupon_codes();
+                if ( !empty( $order_coupons ) ) {
+                    $coupon_code = reset( $order_coupons );
+                }
+            }
+            $couponid = 0;
+            $couponuser = 0;
+            if ( $coupon_code ) {
+                $coupon_info = wcusage_get_coupon_info( $coupon_code );
+                $couponuser = ( isset( $coupon_info[1] ) ? $coupon_info[1] : 0 );
+                $couponid = ( isset( $coupon_info[2] ) ? $coupon_info[2] : 0 );
+            }
+            $commission = apply_filters(
+                'wcusage_calculate_edit_commission',
+                $commission,
+                $order_id,
+                $couponid,
+                $couponuser
+            );
+        }
+        return (float) wcusage_round_commission_amount( $commission, 2 );
+    }
+
+}
+/**
  * Check if commission disabled for coupon id
  *
  * @param int $coupon_id
@@ -862,20 +948,29 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         }
         // Get Default Commission %
         $option_affiliate = wcusage_get_setting_value( 'wcusage_field_affiliate', '0' );
+        // Was a rate actually chosen for THIS affiliate, as opposed to falling back to the
+        // shop-wide default? "Commission Priority" only decides the winner when a custom
+        // amount exists on both the coupon side and the product side - see its description
+        // in Settings > Commission. The default rate is not a custom amount, so it must not
+        // beat a per-product rate. Tested against $option_affiliate being empty instead,
+        // which it never is (the default is "0"), so a per-product percentage was ignored
+        // on every order unless priority was set to "product".
+        $has_custom_affiliate_rate = false;
         $wcu_text_coupon_commission = get_post_meta( $couponid, 'wcu_text_coupon_commission', true );
         if ( $wcu_text_coupon_commission != "" && $wcu_text_coupon_commission >= 0 ) {
             $option_affiliate = $wcu_text_coupon_commission;
+            $has_custom_affiliate_rate = true;
         }
         // Save Currency Conversion Rate?
         $enable_save_rate = wcusage_get_setting_value( 'wcusage_field_enable_currency_save_rate', '0' );
-        $priority_commission = wcusage_get_setting_value( 'wcusage_field_priority_commission', '' );
-        // Check product priority
-        $productpriority = false;
-        if ( $priority_commission == "product" ) {
-            $productpriority = true;
-        } else {
-            $productpriority = false;
-        }
+        // Check product priority. Product is the default, so only an explicit "coupon"
+        // switches it off - testing for == "product" instead meant every other value fell
+        // through to coupon priority. That included the "" this used to default to, and the
+        // "0" the settings page can save from the hidden input that shares the select's
+        // name, so a store showing "Product Commission Settings" could be calculating the
+        // other way round.
+        $priority_commission = wcusage_get_setting_value( 'wcusage_field_priority_commission', 'product' );
+        $productpriority = $priority_commission !== "coupon";
         // Withhold commission on line items the coupon's own usage restrictions excluded?
         // Off by default - the long-standing behaviour is to pay on the whole order, since
         // the affiliate drove the sale regardless of which lines the discount touched.
@@ -1001,6 +1096,16 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         }
                         $wcu_text_coupon_commission_fixed_product = get_post_meta( $couponid, 'wcu_text_coupon_commission_fixed_product', true );
                         // Get Coupon Fixed Per Product
+                        // Same rule as the percentage: a fixed amount set on the affiliate's user
+                        // role / group counts as a coupon-side amount, so it competes with a
+                        // per-product one and "Commission Priority" decides. Only the coupon's own
+                        // override used to count, so a group's fixed amount was quietly beaten by
+                        // any product that had one, whatever the priority was set to.
+                        $fixed_product_role_amount = "";
+                        if ( wcu_fs()->is__premium_only() && $affiliate_per_user ) {
+                            $fixed_product_role_amount = wcusage_get_role_rate( $user, 'wcusage_field_affiliate_fixed_product_role_' );
+                        }
+                        $has_custom_fixed_product = $fixed_product_role_amount !== "" || $wcu_text_coupon_commission_fixed_product != "" && $wcu_text_coupon_commission_fixed_product >= 0;
                         $product_percent = "";
                         $fixed_product_commission = "";
                         // Get Product Categories
@@ -1113,7 +1218,11 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         // ***** Get Commission Percentage Amount ***** //
                         if ( $item_coupon_restricted ) {
                             // Coupon's usage restrictions excluded this product - it earns no % commission.
-                        } elseif ( $product_percent != "" && $product_percent >= 0 && $productpriority || $product_percent > 0 && $option_affiliate == "" ) {
+                            // A rate set on the product wins whenever product priority is chosen, or when
+                            // nothing on the coupon side competes with it. Note ">= 0", not "> 0": a
+                            // product deliberately set to 0% is a rate, not an absent one, and must not
+                            // fall through to the shop-wide default.
+                        } elseif ( $product_percent != "" && $product_percent >= 0 && ($productpriority || !$has_custom_affiliate_rate) ) {
                             // If product priority or product commission set but no other commmission options available.
                             // Cast to float, not int - the per-product/per-category rate fields use
                             // step="0.01", so an integer cast silently truncated rates like 2.5% to 2%.
@@ -1159,7 +1268,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                             // Coupon's usage restrictions excluded this product - no fixed per-product
                             // commission either, and it must not fall through to the global default below.
                             $fixed_product_commission = 0;
-                        } elseif ( $fixed_product_commission != "" && $fixed_product_commission >= 0 && $productpriority || $fixed_product_commission > 0 && $wcu_text_coupon_commission_fixed_product == "" ) {
+                        } elseif ( $fixed_product_commission != "" && $fixed_product_commission >= 0 && ($productpriority || !$has_custom_fixed_product) ) {
                             if ( $deduct_percent ) {
                                 $fixed_product_commission = $fixed_product_commission * $deduct_percent;
                             }

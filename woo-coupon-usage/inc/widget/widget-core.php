@@ -48,7 +48,11 @@ function wcusage_enqueue_floating_widget_assets() {
     wp_localize_script('wcusage-floating-widget-button', 'wcusage_floating_widget', array(
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('wcusage_floating_widget'),
-        'shorturl_nonce' => wp_create_nonce('wcusage_shorturl_ajax_nonce'),
+        // Only logged-in affiliates ever get the "generate short URL" button (logged-out
+        // visitors are shown the registration form instead), so don't hand this token to
+        // anonymous page views - it is what made wcusage_load_short_url reachable
+        // without an account.
+        'shorturl_nonce' => is_user_logged_in() ? wp_create_nonce('wcusage_shorturl_ajax_nonce') : '',
         'current_page_url' => (is_ssl() ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
         'url_prefix' => wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon'),
         'essential_settings' => $essential_settings,

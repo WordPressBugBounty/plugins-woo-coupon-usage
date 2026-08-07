@@ -288,7 +288,10 @@ class wcusage_Referrals_Table extends WP_List_Table {
             case 'commission':
                 $order_id = $item['order_id'];
                 $order = wc_get_order( $order_id );
-                $total_commission = wcusage_order_meta( $order_id, 'wcusage_total_commission' );
+                // The full commission (percentage + any fixed per order/product amounts),
+                // and 0.00 once an order is cancelled/refunded/failed - matching the
+                // affiliate dashboard and the admin reports.
+                $total_commission = wcusage_get_order_saved_commission( $order_id );
                 $ispaid = wcusage_order_ispaid( $order_id );
                 $wcu_select_coupon_user = wcusage_order_meta( $order_id, 'wcusage_affiliate_user' );
                 if ( $wcu_select_coupon_user ) {

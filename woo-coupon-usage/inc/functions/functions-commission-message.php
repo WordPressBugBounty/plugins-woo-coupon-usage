@@ -23,28 +23,23 @@ if ( !function_exists( 'wcusage_commission_message' ) ) {
         $affiliate_per_user = wcusage_get_setting_value( 'wcusage_field_affiliate_per_user', '0' );
         $apply_role_commission = $affiliate_per_user;
         if ( wcu_fs()->is__premium_only() && $apply_role_commission ) {
-            $done = 0;
-            if ( $affiliate_per_user && $user && isset( $user->roles ) && is_array( $user->roles ) ) {
-                $user_roles = $user->roles;
-                foreach ( $user_roles as $role ) {
-                    $fixed_order_role = wcusage_get_setting_value( 'wcusage_field_affiliate_percent_role_' . $role, '' );
-                    if ( $fixed_order_role != "" ) {
-                        $option_affiliate = $fixed_order_role;
-                        $done = 1;
-                    }
-                    $fixed_product_role = wcusage_get_setting_value( 'wcusage_field_affiliate_fixed_product_role_' . $role, '' );
-                    if ( $fixed_product_role != "" ) {
-                        $option_affiliate_fixed_product = $fixed_product_role;
-                        $done = 1;
-                    }
-                    $percent_role = wcusage_get_setting_value( 'wcusage_field_affiliate_fixed_order_role_' . $role, '' );
-                    if ( $percent_role != "" ) {
-                        $option_affiliate_fixed_order = $percent_role;
-                        $done = 1;
-                    }
-                    if ( $done ) {
-                        break;
-                    }
+            // Each rate is resolved independently through the shared helper. Breaking out
+            // of a role loop on the first match (as this did) meant a role that only set
+            // a fixed-product rate stopped a later role's percentage rate from applying,
+            // and made the rate shown here disagree with the one actually recorded
+            // against the order in wcusage_calculate_order_data().
+            if ( $affiliate_per_user ) {
+                $percent_role = wcusage_get_role_rate( $user, 'wcusage_field_affiliate_percent_role_' );
+                if ( $percent_role !== "" ) {
+                    $option_affiliate = $percent_role;
+                }
+                $fixed_product_role = wcusage_get_role_rate( $user, 'wcusage_field_affiliate_fixed_product_role_' );
+                if ( $fixed_product_role !== "" ) {
+                    $option_affiliate_fixed_product = $fixed_product_role;
+                }
+                $fixed_order_role = wcusage_get_role_rate( $user, 'wcusage_field_affiliate_fixed_order_role_' );
+                if ( $fixed_order_role !== "" ) {
+                    $option_affiliate_fixed_order = $fixed_order_role;
                 }
             }
         }
