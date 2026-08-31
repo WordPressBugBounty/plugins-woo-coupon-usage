@@ -4,6 +4,26 @@ if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
 /**
+ * Meta key holding the commission ONE coupon added to its all-time totals for an
+ * order, so the remove side can take back exactly that figure. Mirrors
+ * wcusage_order_granted_commission_key() in the payouts add-on.
+ *
+ * @param string $coupon_code
+ *
+ * @return string
+ */
+if ( !function_exists( 'wcusage_order_alltime_commission_key' ) ) {
+    function wcusage_order_alltime_commission_key(  $coupon_code  ) {
+        $coupon_code = ( function_exists( 'wc_format_coupon_code' ) ? wc_format_coupon_code( (string) $coupon_code ) : strtolower( (string) $coupon_code ) );
+        $coupon_code = sanitize_text_field( $coupon_code );
+        if ( strlen( $coupon_code ) > 200 ) {
+            $coupon_code = substr( $coupon_code, 0, 160 ) . md5( $coupon_code );
+        }
+        return 'wcu_alltime_commission_' . $coupon_code;
+    }
+
+}
+/**
  * Forces all stats to be refreshed
  *
  * @param string $coupon_code
@@ -16,7 +36,7 @@ if ( !function_exists( 'wcusage_update_all_stats' ) ) {
             $fullorders = wcusage_wh_getOrderbyCouponCode(
                 $coupon_code,
                 "",
-                date( "Y-m-d" ),
+                wcusage_local_date(),
                 '',
                 1,
                 1,
@@ -139,10 +159,44 @@ if ( !function_exists( 'wcusage_update_all_stats_single' ) ) {
                         $order_commission = $saved_stats['commission'];
                     }
                 }
+                // 'wcusage_stats' holds the figures of the coupon that OWNS the order's
+                // commission (see wcusage_coupon_owns_order_commission()). Every coupon's
+                // own commission is snapshotted per coupon when it is added below, so take
+                // back exactly that; failing that, for a non-owner coupon, what it was
+                // granted or has pending - anything but the owner's (larger) amount.
+                $own_key = wcusage_order_alltime_commission_key( $coupon_code );
+                $own_commission = wcusage_order_meta( $order_id, $own_key, true );
+                if ( $own_commission !== '' && $own_commission !== null && $own_commission !== false && is_numeric( $own_commission ) ) {
+                    $order_commission = (float) $own_commission;
+                } elseif ( function_exists( 'wcusage_coupon_owns_order_commission' ) && (string) $coupon_code !== '' && !wcusage_coupon_owns_order_commission( $order_id, $coupon_code ) ) {
+                    $candidates = array();
+                    if ( function_exists( 'wcusage_order_granted_commission_key' ) ) {
+                        $candidates[] = wcusage_order_granted_commission_key( $coupon_code );
+                    }
+                    if ( function_exists( 'wcusage_order_pending_commission_key' ) ) {
+                        $candidates[] = wcusage_order_pending_commission_key( $coupon_code );
+                    }
+                    foreach ( $candidates as $candidate_key ) {
+                        $candidate = wcusage_order_meta( $order_id, $candidate_key, true );
+                        if ( $candidate !== '' && $candidate !== null && $candidate !== false && is_numeric( $candidate ) ) {
+                            $order_commission = (float) $candidate;
+                            break;
+                        }
+                    }
+                }
             }
             // Update
             $allstats = array();
             if ( $type ) {
+                // Snapshot what THIS coupon is adding, so the remove path can take back
+                // exactly that figure later (see the fallback above). Only worth keeping
+                // where more than one coupon can hold statistics against the order - on an
+                // ordinary single-coupon order "wcusage_stats" already holds this coupon's
+                // own figure and the fallback reads it there, so writing this would add a
+                // permanent meta row per order for nothing.
+                if ( !function_exists( 'wcusage_order_has_multiple_commission_coupons' ) || wcusage_order_has_multiple_commission_coupons( $order, $coupon_code ) ) {
+                    wcusage_update_order_meta( $order_id, wcusage_order_alltime_commission_key( $coupon_code ), round( (float) $order_commission, 2 ) );
+                }
                 $allstats['total_orders'] = $total_orders + $order_total;
                 $allstats['full_discount'] = $total_discount + $order_discounts;
                 $allstats['total_commission'] = $total_commission + $order_commission;
@@ -152,6 +206,11 @@ if ( !function_exists( 'wcusage_update_all_stats_single' ) ) {
                     $allstats['total_count'] = $total_count;
                 }
             } else {
+                // The snapshot has done its job by now - the fallback above has already read
+                // it into $order_commission - so it is dropped on every remove, not only on
+                // the branch that used it. Left behind it would outlive the order's counted
+                // state and sit in the meta table for good.
+                wcusage_delete_order_meta( $order_id, wcusage_order_alltime_commission_key( $coupon_code ) );
                 // Floored at zero, the same as the usage count below - an all-time total can
                 // never legitimately be negative, and rounding differences between what was
                 // added and what is subtracted could otherwise leave a small minus figure.
@@ -436,9 +495,9 @@ function wcusage_get_orders_by_coupon_ajax() {
     if ( !is_user_logged_in() ) {
         wp_send_json_error( esc_html__( 'You must be logged in.', 'woo-coupon-usage' ) );
     }
-    $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( $_POST['coupon_code'] ) : '' );
-    $startdate = ( isset( $_POST['start'] ) ? sanitize_text_field( $_POST['start'] ) : '' );
-    $enddate = ( isset( $_POST['end'] ) ? sanitize_text_field( $_POST['end'] ) : '' );
+    $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( wp_unslash( $_POST['coupon_code'] ) ) : '' );
+    $startdate = ( isset( $_POST['start'] ) ? sanitize_text_field( wp_unslash( $_POST['start'] ) ) : '' );
+    $enddate = ( isset( $_POST['end'] ) ? sanitize_text_field( wp_unslash( $_POST['end'] ) ) : '' );
     // Check access: the coupon must belong to the current user (or an MLA parent / admin)
     $coupon = wcusage_get_coupon_info( $coupon_code );
     $coupon_user_id = intval( $coupon[1] );
@@ -484,9 +543,9 @@ function wcusage_update_all_stats_data() {
     if ( !is_user_logged_in() ) {
         wp_send_json_error( esc_html__( 'You must be logged in.', 'woo-coupon-usage' ) );
     }
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     $stats = ( isset( $_POST['stats'] ) && is_array( $_POST['stats'] ) ? wp_unslash( $_POST['stats'] ) : array() );
-    $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( $_POST['coupon_code'] ) : '' );
+    $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( wp_unslash( $_POST['coupon_code'] ) ) : '' );
     $coupon = wcusage_get_coupon_info( $coupon_code );
     $coupon_user_id = intval( $coupon[1] );
     $coupon_id = $coupon[2];
@@ -565,14 +624,14 @@ function wcusage_get_refresh_date_windows(  $coupon_code  ) {
         $post_status = "post_status";
         $post_id = "post_id";
     }
-    // Query to get orders
-    $query = $wpdb->prepare(
-        "SELECT DISTINCT p." . $id . " AS order_id, p." . $post_date . " AS order_date\r\n      FROM {$wpdb->prefix}" . $posts . " AS p\r\n      LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS woi\r\n        ON p." . $id . " = woi.order_id AND woi.order_item_type = 'coupon' AND woi.order_item_name = %s\r\n      LEFT JOIN {$wpdb->prefix}" . $postmeta . " AS woi2\r\n        ON p." . $id . " = woi2." . $post_id . " AND (\r\n          (woi2.meta_key = 'lifetime_affiliate_coupon_referrer' AND woi2.meta_value = %s) OR\r\n          (woi2.meta_key = 'wcusage_referrer_coupon' AND woi2.meta_value = %s)\r\n        )\r\n      WHERE p." . $post_status . " IN ('" . implode( "','", array_keys( $statuses ) ) . "')\r\n      AND (woi.order_id IS NOT NULL OR woi2.meta_value = %s AND woi2.meta_key IS NOT NULL)",
-        $coupon_code,
-        $coupon_code,
-        $coupon_code,
-        $coupon_code
-    );
+    // The orders that used this coupon, matched the same way (and with the same
+    // derived-table shape) as wcusage_wh_getOrderbyCouponCode(). Matching the
+    // coupon inside LEFT JOIN conditions cannot narrow the orders table, so that
+    // form read every order in the store to build the day counts for one coupon.
+    $matched_orders = $wpdb->prepare( "SELECT woi.order_id AS order_id\r\n      FROM {$wpdb->prefix}woocommerce_order_items AS woi\r\n      WHERE woi.order_item_type = 'coupon' AND woi.order_item_name = %s\r\n      UNION\r\n      SELECT woi2." . $post_id . " AS order_id\r\n      FROM {$wpdb->prefix}" . $postmeta . " AS woi2\r\n      WHERE woi2.meta_key IN ( 'lifetime_affiliate_coupon_referrer', 'wcusage_referrer_coupon' )\r\n      AND woi2.meta_value = %s", $coupon_code, $coupon_code );
+    // Query to get orders. UNION returns each order ID once and p.$id is the
+    // primary key, so the rows are already unique without DISTINCT.
+    $query = "SELECT p." . $id . " AS order_id, p." . $post_date . " AS order_date\r\n      FROM {$wpdb->prefix}" . $posts . " AS p\r\n      INNER JOIN ( " . $matched_orders . " ) AS wcu_matched ON wcu_matched.order_id = p." . $id . "\r\n      WHERE p." . $post_status . " IN ('" . implode( "','", array_keys( $statuses ) ) . "')";
     // Count the orders per day. The stored dates are GMT while the batches are
     // given local dates (wcusage_convert_date_to_gmt() converts them back with
     // the same fixed offset), so shift by that offset to group by local day.
@@ -682,7 +741,7 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
     echo wp_json_encode( $coupon_code );
     ?>;
     var wcuAjaxUrl = <?php 
-    echo wp_json_encode( admin_url( 'admin-ajax.php' ) );
+    echo wp_json_encode( wcusage_ajax_url() );
     ?>;
     var wcuRetries = 0;
     var wcuMaxRetries = 2;

@@ -294,12 +294,13 @@ $coupon_code_linked = "<span class='wcusage-users-affiliate-column'>"
     $wcu_referrer = get_user_meta( $user_id, 'wcu_referrer', true );
     $user_info['Referrer'] = $wcu_referrer;
 
-    $wcu_info = get_user_meta( $user_id, 'wcu_info', true );
-    $wcu_info = json_decode($wcu_info, true);
-    if(!$wcu_info) {
-      $wcu_info = array();
-    }
+    // Read through the shared helper so labels and values stored HTML-entity
+    // encoded by older versions are decoded before they are displayed.
+    $wcu_info = function_exists('wcusage_get_user_custom_fields') ? wcusage_get_user_custom_fields( $user_id ) : array();
     foreach ($wcu_info as $key => $value) {
+      if(is_array($value)) {
+        $value = implode(', ', array_filter($value, 'is_scalar'));
+      }
       $user_info[$key] = $value;
     }
 

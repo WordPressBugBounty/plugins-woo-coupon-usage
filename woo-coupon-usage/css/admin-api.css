@@ -1,0 +1,572 @@
+/**
+ * Coupon Affiliates - API & Webhooks admin page.
+ *
+ * Everything is scoped under .wcusage-api-page so these rules cannot reach
+ * any other admin screen.
+ */
+
+.wcusage-api-page {
+	/* Full width of the admin content area. The shared .wcusage-admin-page
+	   rule supplies the page margins, so only the cap is cleared here. */
+	max-width: none;
+	width: auto;
+	box-sizing: border-box;
+}
+
+/* The heading and the way back share one row. Scoped to this page so the
+   shared .wcu-page-header keeps its block layout everywhere else. */
+.wcusage-api-page .wcu-page-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px 20px;
+}
+
+/* "Go back to tools >" - the screen lives under Admin Tools and has no menu
+   entry of its own, so this is the way back. */
+.wcusage-api-page .wcu-api-back {
+	flex: 0 0 auto;
+	margin: 8px 0 0 0;
+	font-size: 13px;
+}
+
+.wcusage-api-page .wcu-api-card,
+.wcusage-api-page .wcu-api-token,
+.wcusage-api-page .wcu-api-summary {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.wcusage-api-page .wcu-api-table {
+	table-layout: auto;
+}
+
+/* ---------------------------------------------------------------- Summary */
+
+.wcusage-api-page .wcu-api-summary {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.wcusage-api-page .wcu-api-stat {
+	background: #fff;
+	border: 1px solid #e5e7eb;
+	border-radius: 5px;
+	box-shadow: 0 1px 3px rgba( 0, 0, 0, 0.04 );
+	padding: 16px 18px;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+}
+
+.wcusage-api-page .wcu-api-stat i {
+	font-size: 18px;
+	color: #2271b1;
+	background: #f0f6fc;
+	border-radius: 50%;
+	width: 38px;
+	height: 38px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.wcusage-api-page .wcu-api-stat-value {
+	font-size: 20px;
+	font-weight: 600;
+	color: #1d2327;
+	line-height: 1.2;
+}
+
+.wcusage-api-page .wcu-api-stat-label {
+	font-size: 12px;
+	color: #646970;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+/* ----------------------------------------------------------- Master switch */
+
+.wcusage-api-page .wcu-api-switch {
+	border-left: 4px solid #c3c4c7;
+}
+
+.wcusage-api-page .wcu-api-switch.is-on {
+	border-left-color: #00a32a;
+}
+
+.wcusage-api-page .wcu-api-switch.is-off {
+	border-left-color: #dba617;
+}
+
+.wcusage-api-page .wcu-api-switch-inner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+	padding: 18px 20px;
+	flex-wrap: wrap;
+}
+
+.wcusage-api-page .wcu-api-switch-text h2 {
+	margin: 0 0 6px 0;
+	font-size: 15px;
+	font-weight: 600;
+	color: #1d2327;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.wcusage-api-page .wcu-api-switch.is-on .wcu-api-switch-text h2 i {
+	color: #00a32a;
+}
+
+.wcusage-api-page .wcu-api-switch.is-off .wcu-api-switch-text h2 i {
+	color: #dba617;
+}
+
+.wcusage-api-page .wcu-api-switch-text p {
+	margin: 0;
+	font-size: 13px;
+	color: #646970;
+	max-width: 760px;
+}
+
+.wcusage-api-page .wcu-api-switch-action {
+	flex-shrink: 0;
+}
+
+.wcusage-api-page .wcu-api-switch-action form {
+	margin: 0;
+}
+
+/* ------------------------------------------------------------------ Cards */
+
+.wcusage-api-page .wcu-api-card {
+	background: #fff;
+	border: 1px solid #e5e7eb;
+	border-radius: 5px;
+	box-shadow: 0 1px 3px rgba( 0, 0, 0, 0.04 );
+	margin-bottom: 24px;
+	overflow: hidden;
+}
+
+.wcusage-api-page .wcu-api-card-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 16px 20px;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.wcusage-api-page .wcu-api-card-head h2 {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	color: #1d2327;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.wcusage-api-page .wcu-api-card-head h2 i {
+	color: #2271b1;
+}
+
+.wcusage-api-page .wcu-api-card-head p {
+	margin: 4px 0 0 0;
+	font-size: 13px;
+	color: #646970;
+	font-weight: 400;
+}
+
+.wcusage-api-page .wcu-api-card-body {
+	padding: 20px;
+}
+
+.wcusage-api-page .wcu-api-card-body > p:first-child {
+	margin-top: 0;
+}
+
+/* ------------------------------------------------------------- Endpoints */
+
+.wcusage-api-page .wcu-api-head-tools {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.wcusage-api-page .wcu-api-count {
+	font-size: 12px;
+	color: #646970;
+	white-space: nowrap;
+}
+
+.wcusage-api-page .wcu-api-filter {
+	min-width: 220px;
+}
+
+.wcusage-api-page .wcu-api-endpoint-table td {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.wcusage-api-page .wcu-api-methods {
+	white-space: nowrap;
+	width: 1%;
+}
+
+.wcusage-api-page .wcu-api-desc {
+	color: #50575e;
+}
+
+.wcusage-api-page .wcu-api-enable-col {
+	width: 1%;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.wcusage-api-page .wcu-api-row-off td:not(.wcu-api-enable-col) {
+	opacity: 0.45;
+}
+
+.wcusage-api-page .wcu-api-endpoint-save {
+	border-top: 1px solid #f0f0f1;
+	padding: 16px 20px;
+}
+
+.wcusage-api-page .wcu-api-endpoint-save .button {
+	margin-right: 6px;
+}
+
+.wcusage-api-page .wcu-api-endpoint-save .description {
+	margin: 10px 0 0 0;
+}
+
+.wcusage-api-page .wcu-api-no-match td {
+	text-align: center;
+	color: #646970;
+	padding: 24px 20px;
+}
+
+/* HTTP method badges, coloured the way API tooling usually shows them. */
+
+.wcusage-api-page .wcu-api-method {
+	display: inline-block;
+	min-width: 54px;
+	text-align: center;
+	padding: 2px 7px;
+	margin: 1px 2px 1px 0;
+	border-radius: 3px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	color: #fff;
+	line-height: 16px;
+}
+
+.wcusage-api-page .wcu-api-method-get {
+	background: #2271b1;
+}
+
+.wcusage-api-page .wcu-api-method-post {
+	background: #007017;
+}
+
+.wcusage-api-page .wcu-api-method-patch,
+.wcusage-api-page .wcu-api-method-put {
+	background: #b26200;
+}
+
+.wcusage-api-page .wcu-api-method-delete {
+	background: #b32d2e;
+}
+
+/* ------------------------------------------------------------------ Tables */
+
+.wcusage-api-page .wcu-api-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.wcusage-api-page .wcu-api-table th {
+	text-align: left;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: #646970;
+	padding: 10px 20px;
+	background: #f6f7f7;
+	border-bottom: 1px solid #e5e7eb;
+	white-space: nowrap;
+}
+
+.wcusage-api-page .wcu-api-table td {
+	padding: 14px 20px;
+	border-bottom: 1px solid #f0f0f1;
+	font-size: 13px;
+	color: #1d2327;
+	vertical-align: middle;
+}
+
+.wcusage-api-page .wcu-api-table tr:last-child td {
+	border-bottom: none;
+}
+
+.wcusage-api-page .wcu-api-table tr:hover td {
+	background: #fbfbfc;
+}
+
+.wcusage-api-page .wcu-api-table code {
+	background: #f6f7f7;
+	font-size: 12px;
+	word-break: break-all;
+}
+
+.wcusage-api-page .wcu-api-empty {
+	padding: 34px 20px;
+	text-align: center;
+	color: #646970;
+	font-size: 13px;
+}
+
+.wcusage-api-page .wcu-api-empty i {
+	display: block;
+	font-size: 26px;
+	color: #c3c4c7;
+	margin-bottom: 10px;
+}
+
+/* ------------------------------------------------------------------ Badges */
+
+.wcusage-api-page .wcu-api-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 18px;
+	white-space: nowrap;
+}
+
+.wcusage-api-page .wcu-api-badge-active {
+	background: #edfaef;
+	color: #007017;
+}
+
+.wcusage-api-page .wcu-api-badge-inactive {
+	background: #f0f0f1;
+	color: #646970;
+}
+
+.wcusage-api-page .wcu-api-badge-error {
+	background: #fcf0f1;
+	color: #b32d2e;
+}
+
+.wcusage-api-page .wcu-api-scope {
+	display: inline-block;
+	padding: 1px 7px;
+	margin: 0 3px 3px 0;
+	border-radius: 3px;
+	background: #f0f6fc;
+	color: #2271b1;
+	font-size: 11px;
+	font-weight: 600;
+}
+
+/* ------------------------------------------------------------- Token notice */
+
+.wcusage-api-page .wcu-api-token {
+	background: #fff;
+	border: 1px solid #dba617;
+	border-left-width: 4px;
+	border-radius: 5px;
+	padding: 16px 20px;
+	margin-bottom: 24px;
+}
+
+.wcusage-api-page .wcu-api-token strong {
+	display: block;
+	margin-bottom: 8px;
+	color: #1d2327;
+}
+
+.wcusage-api-page .wcu-api-token-value {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.wcusage-api-page .wcu-api-token-value code {
+	font-size: 14px;
+	padding: 8px 12px;
+	background: #f6f7f7;
+	border-radius: 3px;
+	user-select: all;
+	word-break: break-all;
+}
+
+/* -------------------------------------------------------------- Copy fields */
+
+.wcusage-api-page .wcu-api-copy {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 10px;
+	flex-wrap: wrap;
+}
+
+.wcusage-api-page .wcu-api-copy code {
+	background: #f6f7f7;
+	padding: 6px 10px;
+	border-radius: 3px;
+	font-size: 13px;
+	word-break: break-all;
+}
+
+.wcusage-api-page .wcu-api-copied {
+	color: #007017;
+	font-size: 12px;
+	display: none;
+}
+
+/* ------------------------------------------------------------------- Forms */
+
+.wcusage-api-page details.wcu-api-form {
+	border-top: 1px solid #f0f0f1;
+}
+
+.wcusage-api-page details.wcu-api-form > summary {
+	cursor: pointer;
+	padding: 14px 20px;
+	font-weight: 600;
+	font-size: 13px;
+	color: #2271b1;
+	list-style: none;
+	user-select: none;
+}
+
+.wcusage-api-page details.wcu-api-form > summary::-webkit-details-marker {
+	display: none;
+}
+
+.wcusage-api-page details.wcu-api-form > summary::before {
+	content: "\f067";
+	font-family: "Font Awesome 6 Free", "Font Awesome 5 Free";
+	font-weight: 900;
+	margin-right: 8px;
+	font-size: 11px;
+}
+
+.wcusage-api-page details.wcu-api-form[open] > summary::before {
+	content: "\f068";
+}
+
+.wcusage-api-page details.wcu-api-form > summary:hover {
+	background: #fbfbfc;
+}
+
+.wcusage-api-page .wcu-api-form-body {
+	padding: 4px 20px 20px 20px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.wcusage-api-page .wcu-api-form-body .form-table th {
+	padding: 14px 10px 14px 0;
+	width: 190px;
+	font-size: 13px;
+}
+
+.wcusage-api-page .wcu-api-form-body .form-table td {
+	padding: 14px 10px;
+}
+
+.wcusage-api-page .wcu-api-checklist {
+	max-height: 220px;
+	overflow-y: auto;
+	border: 1px solid #e5e7eb;
+	border-radius: 3px;
+	padding: 10px 12px;
+	background: #fbfbfc;
+}
+
+.wcusage-api-page .wcu-api-checklist label {
+	display: block;
+	margin-bottom: 6px;
+	font-size: 13px;
+}
+
+.wcusage-api-page .wcu-api-checklist label:last-child {
+	margin-bottom: 0;
+}
+
+.wcusage-api-page .wcu-api-checklist code {
+	font-size: 12px;
+	background: #fff;
+}
+
+.wcusage-api-page .wcu-api-actions .button {
+	margin-right: 4px;
+}
+
+@media screen and ( max-width: 782px ) {
+
+	.wcusage-api-page .wcu-api-table th,
+	.wcusage-api-page .wcu-api-table td {
+		padding: 10px 12px;
+	}
+
+	.wcusage-api-page .wcu-api-card-head {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+/* PRO-only rows, tiles and cards in the free build.
+   Shown rather than hidden so the page reflects the whole API, but faded and
+   inert. Opacity sits on the row/tile/card rather than on each cell so nested
+   badges and buttons fade with it; pointer-events is left alone on the card so
+   its upgrade link is still clickable. */
+.wcusage-api-page .wcu-api-row-pro,
+.wcusage-api-page .wcu-api-stat-pro {
+	opacity: 0.5;
+}
+
+.wcusage-api-page .wcu-api-card-pro > .wcu-api-card-body,
+.wcusage-api-page .wcu-api-card-pro > .wcu-api-empty,
+.wcusage-api-page .wcu-api-card-pro > .wcu-api-form-body {
+	opacity: 0.5;
+}
+
+/* wcu-api-row-off already fades a switched-off row; without this a locked row
+   would stack the two and all but disappear. */
+.wcusage-api-page .wcu-api-row-pro.wcu-api-row-off td:not(.wcu-api-enable-col) {
+	opacity: 1;
+}
+
+.wcusage-api-page .wcu-api-row-pro input[type="checkbox"],
+.wcusage-api-page .wcu-api-row-pro .button {
+	cursor: not-allowed;
+}
+
+.wcusage-api-page .wcu-api-badge-pro {
+	background: #fff4e5;
+	color: #8a5300;
+}
+
+.wcusage-api-page .wcu-api-badge-pro i {
+	font-size: 10px;
+}
+
+/* The badge and heading stay legible; only the body of a locked card fades. */
+.wcusage-api-page .wcu-api-card-pro .wcu-api-card-head .wcu-api-badge-pro {
+	margin-left: 8px;
+}

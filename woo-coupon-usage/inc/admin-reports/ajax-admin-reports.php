@@ -17,7 +17,7 @@ function wcusage_load_admin_reports() {
     }
 
     global $wpdb;
-    $options = get_option('wcusage_options');
+    $options = wcusage_get_options();
     $is_pro = wcu_fs()->can_use_premium_code();
 
     // Sanitize inputs
@@ -208,18 +208,24 @@ function wcusage_load_admin_reports() {
     ); // phpcs:ignore
     $orders = $wpdb->get_results($query); // phpcs:ignore
 
-    // Suspend cache addition to prevent memory issues
-    $previous_cache_state = wp_suspend_cache_addition(true);
-
-    // Process orders
+    // Process orders. Cache addition used to be suspended around this loop, which
+    // meant every wc_get_order() below - and the layers under it re-materialise the
+    // same order several times - went back to the database. It was worth 6,000 of the
+    // screen's 10,800 queries and saved about 1% of peak memory. The orders are
+    // released one at a time at the end of each iteration instead, which keeps memory
+    // flat over long date ranges without paying for the re-reads.
     foreach ($orders as $order_data) {
         try {
             $order_id = $order_data->order_id;
             $order = wc_get_order($order_id);
             if (!$order) continue;
 
-            $lifetime_coupon = strtolower(get_post_meta($order_id, 'lifetime_affiliate_coupon_referrer', true));
-            $referrer_coupon = strtolower(get_post_meta($order_id, 'wcusage_referrer_coupon', true));
+            // Read these off the order object rather than with get_post_meta(). Under
+            // HPOS without post sync they only exist in wc_orders_meta, so a postmeta
+            // read comes back empty and attribution silently falls through to the
+            // applied-coupon path below. The order is already loaded, so this is free.
+            $lifetime_coupon = wcusage_reports_meta_code( $order, 'lifetime_affiliate_coupon_referrer' );
+            $referrer_coupon = wcusage_reports_meta_code( $order, 'wcusage_referrer_coupon' );
             $applied_coupons = array_map('strtolower', $order->get_coupon_codes());
 
             $renewalcheck = wcusage_check_if_renewal_allowed($order_id);
@@ -327,15 +333,16 @@ function wcusage_load_admin_reports() {
                 }
             }
 
-            $order = null;
         } catch (Exception $e) {
             continue;
         } catch (Throwable $e) {
             continue;
+        } finally {
+            // Runs on every exit from the body, including the early continues above.
+            if (isset($order_id)) wcusage_reports_release_order($order_id);
+            $order = null;
         }
     }
-
-    wp_suspend_cache_addition($previous_cache_state);
 
     // ======= COMPARISON DATE RANGE =======
     if ($wcu_compare === 'true' && $is_pro && wcu_fs()->is__premium_only()) {
@@ -360,8 +367,6 @@ function wcusage_load_admin_reports() {
         ); // phpcs:ignore
         $orders_compare = $wpdb->get_results($query_compare); // phpcs:ignore
 
-        $previous_cache_state = wp_suspend_cache_addition(true);
-
         foreach ($orders_compare as $order_data) {
             try {
                 $order_id = $order_data->order_id;
@@ -376,8 +381,9 @@ function wcusage_load_admin_reports() {
                 if ($theorderstatus !== 'completed' && !wcusage_check_status_show($theorderstatus)) continue;
 
                 $applied_coupons = array_map('strtolower', $order->get_coupon_codes());
-                $lifetime_coupon = strtolower(get_post_meta($order_id, 'lifetime_affiliate_coupon_referrer', true));
-                $referrer_coupon = strtolower(get_post_meta($order_id, 'wcusage_referrer_coupon', true));
+                // Off the order object, not postmeta - see the note in the main loop.
+                $lifetime_coupon = wcusage_reports_meta_code( $order, 'lifetime_affiliate_coupon_referrer' );
+                $referrer_coupon = wcusage_reports_meta_code( $order, 'wcusage_referrer_coupon' );
 
                 // Match dashboard logic: if lifetime/referrer is set, only that coupon gets credit
                 if ($lifetime_coupon) {
@@ -405,14 +411,15 @@ function wcusage_load_admin_reports() {
                         $coupon_stats[$coupon_code]['full_discount_compare'] += (float)$calculateorder['totaldiscounts'];
                     }
                 }
-                $order = null;
             } catch (Exception $e) {
                 continue;
             } catch (Throwable $e) {
                 continue;
+            } finally {
+                if (isset($order_id)) wcusage_reports_release_order($order_id);
+                $order = null;
             }
         }
-        wp_suspend_cache_addition($previous_cache_state);
     }
 
     // ======= AGGREGATE STATS & BUILD RESPONSE =======
@@ -821,6 +828,77 @@ function wcusage_load_admin_reports() {
     ]);
 }
 add_action('wp_ajax_wcusage_load_admin_reports', 'wcusage_load_admin_reports');
+
+/**
+ * Read a referral coupon code off an order, HPOS included.
+ *
+ * Deliberately not get_post_meta(): under HPOS without post sync these keys only
+ * exist in wc_orders_meta, so a postmeta read comes back empty and the report
+ * silently stops crediting lifetime and referral orders to the right coupon. The
+ * order object is already loaded by the caller, so reading from it costs nothing.
+ *
+ * Anything that is not a plain string is treated as "no code set". These keys hold
+ * coupon codes, but an array from odd or legacy data would otherwise be a PHP
+ * warning here and used to be a TypeError that skipped the whole order.
+ *
+ * @param WC_Order $order
+ * @param string   $meta_key
+ *
+ * @return string Lower-cased coupon code, or '' when not set.
+ *
+ */
+function wcusage_reports_meta_code( $order, $meta_key ) {
+
+    $value = $order->get_meta( $meta_key, true );
+
+    if ( ! is_scalar( $value ) ) {
+        return '';
+    }
+
+    return strtolower( (string) $value );
+
+}
+
+/**
+ * Drop one order from the caches once the report has finished with it.
+ *
+ * The report walks every order in the date range and never revisits one, so holding
+ * them all is pure growth - roughly 13KB an order measured on a store with HPOS.
+ * Evicting as we go keeps that flat while still letting the object cache absorb the
+ * several reads each order takes *while* it is being processed, which is where
+ * suspending cache addition outright used to cost 6,000 queries a report.
+ *
+ * Targeted deletes only: never wp_cache_flush() here, since with Redis or Memcached
+ * that would evict the whole site's cache, not just this report's orders.
+ *
+ * @param int $order_id
+ *
+ */
+function wcusage_reports_release_order( $order_id ) {
+
+    $order_id = absint( $order_id );
+    if ( ! $order_id ) {
+        return;
+    }
+
+    // HPOS keeps orders in its own cache.
+    if ( function_exists( 'wc_get_container' ) && class_exists( '\Automattic\WooCommerce\Caches\OrderCache' ) ) {
+        try {
+            wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $order_id );
+        } catch ( Exception $e ) {
+            // Container unavailable - nothing to release.
+        } catch ( Throwable $e ) {
+            // Container unavailable - nothing to release.
+        }
+    }
+
+    // Legacy (post table) orders live in the post and post meta caches, and both
+    // storage modes cache order line items under the 'orders' group.
+    wp_cache_delete( $order_id, 'posts' );
+    wp_cache_delete( $order_id, 'post_meta' );
+    wp_cache_delete( 'order-items-' . $order_id, 'orders' );
+
+}
 
 /**
  * Helper: Check a filter condition.

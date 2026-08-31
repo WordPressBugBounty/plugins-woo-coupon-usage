@@ -404,8 +404,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         $view_url = esc_url(admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . $user_id ));
         $alt = isset($item['name']) ? $item['name'] : '';
         $avatar = get_avatar( $user_id, 40, 'identicon', $alt, array( 'class' => 'wcusage-avatar' ) );
-        return '<div class="wcusage-idcell"><a href="' . $view_url . '" class="wcusage-avatar-link" 
-        itle="' . esc_attr__( 'View Affiliate', 'woo-coupon-usage' ) . '">' . $avatar . '</a><a href="' . $view_url . '" class="wcusage-id-link">#' . $item[ $column_name ] . '</a></div>';
+        return '<div class="wcusage-idcell"><a href="' . $view_url . '" class="wcusage-avatar-link" title="' . esc_attr__( 'View Affiliate', 'woo-coupon-usage' ) . '">' . $avatar . '</a><a href="' . $view_url . '" class="wcusage-id-link">#' . $item[ $column_name ] . '</a></div>';
             case 'Username':
                 return wcusage_output_affiliate_tooltip_user_info($user_id);
             case 'roles':
@@ -620,7 +619,7 @@ function wcusage_coupon_users_page() {
 	$coupon_users_table->prepare_items();
 	?>
     
-    <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
+    <?php wcusage_enqueue_font_awesome(); ?>
 
     <style>
     @media screen and (min-width: 782px) {
@@ -634,16 +633,90 @@ function wcusage_coupon_users_page() {
 
         <?php do_action( 'wcusage_hook_dashboard_page_header', ''); ?>
 
-		<h1 class="wp-heading-inline wcusage-admin-title">
+        <?php
+            // Prefill the export panel from the current list filters (the list form posts its
+            // filters, so read POST first and fall back to the query string).
+            $export_role = '';
+            if ( isset($_POST['filter_role']) && isset($_POST['role']) ) {
+                $export_role = sanitize_text_field( wp_unslash( $_POST['role'] ) );
+            } elseif ( isset($_GET['role']) ) {
+                $export_role = sanitize_text_field( wp_unslash( $_GET['role'] ) );
+            }
+            $export_sort = '';
+            if ( isset($_POST['filter_sort']) && isset($_POST['sort_by']) ) {
+                $export_sort = sanitize_text_field( wp_unslash( $_POST['sort_by'] ) );
+            } elseif ( isset($_GET['sort_by']) ) {
+                $export_sort = sanitize_text_field( wp_unslash( $_GET['sort_by'] ) );
+            }
+
+            // Group / Role list: groups (coupon_affiliate*) first and prefixed "(Group)", matching the list filter.
+            $export_roles = get_editable_roles();
+            $export_roles = array_merge(
+                array_filter($export_roles, function($role_key){ return strpos($role_key, 'coupon_affiliate') === 0; }, ARRAY_FILTER_USE_KEY),
+                array_filter($export_roles, function($role_key){ return strpos($role_key, 'coupon_affiliate') !== 0; }, ARRAY_FILTER_USE_KEY)
+            );
+            foreach ($export_roles as $role_key => $details) {
+                if (strpos($role_key, 'coupon_affiliate') === 0) {
+                    $export_roles[$role_key]['name'] = '(Group) ' . $details['name'];
+                }
+            }
+
+            // Sort options, matching the list's "Sort by" filter.
+            $export_sort_options = array(
+                ''                 => __('Default (no sorting)', 'woo-coupon-usage'),
+                'ID'               => __('ID', 'woo-coupon-usage'),
+                'total_referrals'  => __('Total Referrals', 'woo-coupon-usage'),
+                'total_sales'      => __('Total Sales', 'woo-coupon-usage'),
+                'total_commission' => __('Total Commission', 'woo-coupon-usage'),
+            );
+            if ( wcu_fs()->can_use_premium_code() && wcusage_get_setting_value('wcusage_field_tracking_enable', '0') ) {
+                $export_sort_options['unpaid_commission'] = __('Commission Payouts', 'woo-coupon-usage');
+            }
+
+            $export_users_label = sprintf(esc_html__('Export %s Users', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))));
+        ?>
+		<h1 class="wcusage-admin-title">
         <?php echo sprintf(esc_html__('Coupon %s Users', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )))); ?>
         <span class="wcusage-admin-title-buttons">
             <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage_add_affiliate')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Add New <?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' ))); ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
             <a href="<?php echo esc_url(admin_url('admin.php?page=wcusage-bulk-coupon-creator')); ?>" class="wcusage-settings-button" id="wcu-admin-create-registration-link">Bulk Create <?php echo esc_html(wcusage_get_affiliate_text(__( 'Affiliates', 'woo-coupon-usage' ), true)); ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
-            <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin.php?page=wcusage_affiliates&action=export_csv'), 'wcusage_export_users_csv')); ?>" class="wcusage-settings-button" id="wcu-admin-export-csv" style="float: right;">
-                <?php echo sprintf(esc_html__('Export %s Users', 'woo-coupon-usage'), esc_html(wcusage_get_affiliate_text(__( 'Affiliate', 'woo-coupon-usage' )))); ?> <span class="fa-solid fa-download"></span>
-            </a>
+            <div class="wcu-export-dropdown" id="wcu-export-dropdown" style="float: right;">
+              <button type="button" class="wcusage-settings-button" id="wcu-admin-export-csv" aria-haspopup="true" aria-expanded="false">
+                <?php echo $export_users_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above ?> <span class="fa-solid fa-download"></span> <span class="fa-solid fa-chevron-down wcu-export-caret"></span>
+              </button>
+              <div class="wcu-export-panel" id="wcu-export-panel" hidden>
+                <form method="get" action="<?php echo esc_url( admin_url('admin.php') ); ?>" class="wcu-export-form">
+                  <input type="hidden" name="page" value="wcusage_affiliates" />
+                  <input type="hidden" name="action" value="export_csv" />
+                  <?php wp_nonce_field( 'wcusage_export_users_csv', '_wpnonce', false ); ?>
+
+                  <h3 class="wcu-export-panel-title"><?php echo $export_users_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above ?></h3>
+
+                  <label class="wcu-export-field">
+                    <span><?php echo esc_html__('Group / Role', 'woo-coupon-usage'); ?></span>
+                    <select name="role">
+                      <option value="" <?php selected( $export_role, '' ); ?>><?php echo esc_html__('All Groups & Roles', 'woo-coupon-usage'); ?></option>
+                      <?php foreach ( $export_roles as $wcu_rk => $wcu_rd ) { ?>
+                        <option value="<?php echo esc_attr( $wcu_rk ); ?>" <?php selected( $export_role, $wcu_rk ); ?>><?php echo esc_html( $wcu_rd['name'] ); ?></option>
+                      <?php } ?>
+                    </select>
+                  </label>
+                  <label class="wcu-export-field">
+                    <span><?php echo esc_html__('Sort by', 'woo-coupon-usage'); ?></span>
+                    <select name="sort_by">
+                      <?php foreach ( $export_sort_options as $wcu_sk => $wcu_sl ) { ?>
+                        <option value="<?php echo esc_attr( $wcu_sk ); ?>" <?php selected( $export_sort, $wcu_sk ); ?>><?php echo esc_html( $wcu_sl ); ?></option>
+                      <?php } ?>
+                    </select>
+                  </label>
+                  <button type="submit" class="button button-primary wcu-export-submit">
+                    <?php echo esc_html__('Download Export', 'woo-coupon-usage'); ?> <span class="fa-solid fa-download"></span>
+                  </button>
+                </form>
+              </div>
+            </div>
         </span>
-        </h2>
+        </h1>
         
         <!-- Load delete dropdown styles -->
         <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL . 'css/delete-dropdown.css'); ?>" />
@@ -726,8 +799,15 @@ function wcusage_handle_export_csv() {
  * Export coupon users to CSV
  */
 function wcusage_export_coupon_users_csv() {
-    // Get all users without pagination
-    $users = wcusage_get_coupon_users();
+    // Read the filters chosen in the export panel so the file matches the list view.
+    $role    = isset($_GET['role']) ? sanitize_text_field( wp_unslash( $_GET['role'] ) ) : '';
+    $sort_by = isset($_GET['sort_by']) ? sanitize_text_field( wp_unslash( $_GET['sort_by'] ) ) : '';
+    if ( ! in_array( $sort_by, array( 'ID', 'total_referrals', 'total_sales', 'total_commission', 'unpaid_commission' ), true ) ) {
+        $sort_by = '';
+    }
+
+    // Get all matching users without pagination
+    $users = wcusage_get_coupon_users( '', $role, $sort_by );
     
     // Set headers for CSV download
     header('Content-Type: text/csv; charset=utf-8');

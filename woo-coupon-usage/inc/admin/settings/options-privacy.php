@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function wcusage_field_cb_privacy( $args )
 {
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
   ?>
 
   <div id="privacy-settings" class="settings-area">

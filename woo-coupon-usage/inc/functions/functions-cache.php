@@ -328,10 +328,77 @@ add_action( 'remove_user_role', 'wcusage_clear_caches_on_role_change', 10, 1 );
  */
 function wcusage_clear_dashboard_caches() {
     wcusage_cache_flush_ns( 'dashboard' );
+    update_option( 'wcusage_dashboard_cache_last_flush', time(), false );
 }
 
-// Clear dashboard caches when order status changes.
-add_action( 'woocommerce_order_status_changed', 'wcusage_clear_dashboard_caches', 999 );
+/**
+ * Queue a dashboard cache flush for the end of the request.
+ *
+ * Order status changes are the highest-frequency trigger there is - a single
+ * order moving pending -> processing -> completed fires it several times, and a
+ * bulk status change fires it once per order. Each one invalidated the whole
+ * namespace, and what sits behind that namespace is expensive to rebuild (the
+ * admin dashboard aggregates two months of orders; the leaderboard queries once
+ * per affiliate coupon). On a store taking orders continuously the cache was
+ * therefore almost always cold, so every admin page load paid full price and
+ * concurrent loads all rebuilt at once.
+ *
+ * Two things fix that without letting the data go stale indefinitely:
+ * repeated calls within one request collapse into a single flush at shutdown,
+ * and flushes are spaced out. When a flush arrives too soon after the last one
+ * it is not dropped - a single scheduled event carries it out once the interval
+ * has passed, so the change still lands.
+ *
+ * @return void
+ */
+function wcusage_queue_dashboard_cache_flush() {
+    static $queued = false;
+    if ( $queued ) {
+        return;
+    }
+    $queued = true;
+    add_action( 'shutdown', 'wcusage_maybe_flush_dashboard_caches', 99 );
+}
+
+/**
+ * Flush the dashboard caches if enough time has passed, otherwise defer.
+ *
+ * @return void
+ */
+function wcusage_maybe_flush_dashboard_caches() {
+
+    /**
+     * Minimum seconds between dashboard cache flushes.
+     *
+     * Set to 0 to flush on every change, as the plugin did before.
+     *
+     * @param int $interval Seconds.
+     */
+    $interval = (int) apply_filters( 'wcusage_dashboard_cache_flush_interval', MINUTE_IN_SECONDS );
+
+    if ( $interval < 1 ) {
+        wcusage_clear_dashboard_caches();
+        return;
+    }
+
+    $last = (int) get_option( 'wcusage_dashboard_cache_last_flush', 0 );
+    $due  = $last + $interval;
+
+    if ( $last && time() < $due ) {
+        // Too soon. Make sure the change is not lost: one scheduled event picks
+        // it up after the interval, and re-queuing is a no-op while it is armed.
+        if ( ! wp_next_scheduled( 'wcusage_deferred_dashboard_cache_flush' ) ) {
+            wp_schedule_single_event( $due + 1, 'wcusage_deferred_dashboard_cache_flush' );
+        }
+        return;
+    }
+
+    wcusage_clear_dashboard_caches();
+}
+add_action( 'wcusage_deferred_dashboard_cache_flush', 'wcusage_clear_dashboard_caches' );
+
+// Clear dashboard caches when order status changes (coalesced - see above).
+add_action( 'woocommerce_order_status_changed', 'wcusage_queue_dashboard_cache_flush', 999 );
 
 // Clear dashboard caches when a coupon is saved.
 add_action( 'save_post_shop_coupon', 'wcusage_clear_dashboard_caches', 20 );

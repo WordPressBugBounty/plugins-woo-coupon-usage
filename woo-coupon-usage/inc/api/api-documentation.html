@@ -1,0 +1,1510 @@
+<!-- Coupon Affiliates REST API v2 documentation. Formatted for the couponaffiliates.com docs system: h1 = sidebar category, h2 = page, h3 = on-page anchor. HTTP method shortcodes render as coloured badges; note/tip/warning shortcodes render as callout boxes. -->
+
+<h1>Getting Started</h1>
+
+<h2>Introduction</h2>
+<p>The Coupon Affiliates REST API gives external tools, scripts and AI agents structured JSON access to your affiliate program: affiliates, coupons, referred orders, commission, payouts, registrations, click tracking, a change-event feed and store-wide reports. It also delivers outbound <strong>webhooks</strong> (PRO), so other systems can react the moment something happens in your program. On the free version the same ground is covered by polling the <a href="#">change-event feed</a>, which carries a cursor for exactly that.</p>
+<p>Everything lives under one base URL on your own site:</p>
+<pre><code>https://example.com/wp-json/wcusage/v2</code></pre>
+<p>A first request, using a WordPress application password for an admin user:</p>
+<pre><code>curl https://example.com/wp-json/wcusage/v2/me \
+  -u "admin:abcd efgh ijkl mnop qrst uvwx"</code></pre>
+<pre><code>{
+  "user": { "id": 1, "display_name": "Admin", "login": "admin", "email": "admin@example.com" },
+  "is_admin": true,
+  "is_affiliate": false,
+  "auth": { "method": "wordpress", "key_id": null, "scopes": null },
+  "coupons": [],
+  "api_version": "8.2.0"
+}</code></pre>
+
+<h3>What you can do with it</h3>
+<ul>
+<li><strong>Report</strong> &mdash; pull program totals, per-affiliate stats, per-coupon sales and commission, and referred-order lists into a BI tool, spreadsheet or custom dashboard.</li>
+<li><strong>Automate</strong> &mdash; approve or decline affiliate applications, create payout requests, and react to program events in real time.</li>
+<li><strong>Integrate</strong> &mdash; connect Zapier/Make-style automation, a CRM, an accounting system, or an AI agent that answers questions about your affiliates.</li>
+<li><strong>Build affiliate-facing tools</strong> &mdash; an affiliate can authenticate as themselves and read only their own data, so you can build a custom affiliate app without handing out admin access.</li>
+</ul>
+
+<h3>Who can use it</h3>
+<ul>
+<li><strong>Admins</strong> &mdash; any user who passes the plugin's admin access check (usually <code>manage_woocommerce</code>, or whichever capability you configured) can read and manage everything.</li>
+<li><strong>Affiliates</strong> &mdash; can read their own coupons, stats, referred orders, click stats and payouts, and can request a payout for their own coupon. They cannot see other affiliates, store-wide reports or the events feed.</li>
+<li><strong>Multi-level uplines</strong> (PRO) &mdash; can also read a downline affiliate's coupon, stats and referred orders.</li>
+<li><strong>Nobody else.</strong> There are no anonymous endpoints other than the OpenAPI document.</li>
+</ul>
+
+<h3>Requirements</h3>
+<ul>
+<li>Coupon Affiliates <strong>8.2 or later</strong>, with the API switched on (see the next page).</li>
+<li>The WordPress REST API enabled &mdash; it is by default.</li>
+<li><strong>Pretty permalinks</strong>, if you want to use the <code>/wp-json/&hellip;</code> URL form. On a site with plain permalinks, use <code>https://example.com/?rest_route=/wcusage/v2/me</code> instead: the <code>/wp-json/</code> path is not a REST request at all on such a site, and API keys will not authenticate against it.</li>
+<li><strong>HTTPS.</strong> API keys are refused over plain HTTP outside local and development environments.</li>
+<li>Some endpoints depend on features that may not be present (payouts, registrations, clicks, activity log). Those answer <code>501</code> rather than pretending to be empty &mdash; see <a href="#">Availability</a>.</li>
+</ul>
+[warning]Before connecting anything to a live store, read <a href="#">Security &amp; Disclaimers</a>. This API returns personal data about real people and can perform actions that cannot be undone through the API &mdash; and on some configurations, actions that move real money.[/warning]
+
+<h2>Enabling the API</h2>
+<p>The API ships <strong>switched off</strong>. A site never starts answering API requests just because the plugin was updated &mdash; an administrator has to turn it on deliberately.</p>
+<ol>
+<li>Go to <strong>Coupon Affiliates &rarr; Admin Tools &rarr; API</strong> in wp-admin.</li>
+<li>Press <strong>Enable API</strong> at the top of the page.</li>
+<li>Create an API key, or use a WordPress application password.</li>
+</ol>
+<p>The same screen shows your base URL, the OpenAPI URL, every registered endpoint with the access level it needs, your API keys, and &mdash; on PRO &mdash; your webhooks.</p>
+
+<h3>Turning individual endpoints on and off</h3>
+<p>Each endpoint has its own checkbox on the API screen. Unticking one removes it from the route table for every request &mdash; it answers <code>404</code> with the core code <code>rest_no_route</code>, exactly as though it had never been registered. This is the right tool for narrowing what any integration can reach at all, regardless of who authenticates.</p>
+<p>The settings live in the <code>wcusage_api_settings</code> option. Only the exceptions are stored, so an endpoint added in a later release is on by default once the API itself is on.</p>
+
+<h3>What the master switch controls</h3>
+<table><thead><tr><th>Behaviour</th><th>API on</th><th>API off</th></tr></thead><tbody>
+<tr><td><code>wcusage/v2</code> routes</td><td>Registered</td><td>Not registered (<code>404</code>)</td></tr>
+<tr><td>API key authentication</td><td>Works</td><td>Refused everywhere, v1 included</td></tr>
+<tr><td>Webhook deliveries (PRO)</td><td>Queued and sent</td><td>Not queued; already-queued retries are dropped</td></tr>
+<tr><td>Adding and testing webhooks in wp-admin (PRO)</td><td>Works</td><td>Works</td></tr>
+<tr><td>Legacy <code>woo-coupon-usage/v1</code> routes</td><td>Available</td><td>Still available (application password or cookie auth only)</td></tr>
+</tbody></table>
+[warning]Disabling the API stops outbound webhook deliveries as well as inbound requests. If a system depends on webhooks, switching the API off silently stops feeding it.[/warning]
+
+<h2>Authentication</h2>
+<p>Every endpoint except <code>/openapi</code> requires an authenticated WordPress user. Three methods work; each resolves to a user, and that user's capabilities decide what the request may access.</p>
+
+<h3>Application passwords</h3>
+<p>Built into WordPress. Create one under <strong>Users &rarr; Profile &rarr; Application Passwords</strong>, then send it with HTTP Basic auth:</p>
+<pre><code>curl https://example.com/wp-json/wcusage/v2/affiliates \
+  -u "admin:abcd efgh ijkl mnop qrst uvwx"</code></pre>
+<p>An application password carries the user's <strong>full</strong> permissions, on this API and on every other WordPress endpoint. It is the quickest way to get started, and fine for a trusted server-to-server integration you control.</p>
+
+<h3>API keys</h3>
+<p>Plugin API keys are the better choice for anything you do not fully control, because they can be scoped, expired and revoked without touching the WordPress account. Create one under <strong>Coupon Affiliates &rarr; Admin Tools &rarr; API</strong>, or through the <a href="#">key management endpoints</a>.</p>
+<p>A key looks like <code>wcus_9f2c1e4a&hellip;</code> and is shown <strong>once</strong>, at creation &mdash; only a SHA-256 hash is stored. Send it as a bearer token:</p>
+<pre><code>curl https://example.com/wp-json/wcusage/v2/me \
+  -H "Authorization: Bearer wcus_9f2c1e4a7b3d5e6f8a9b0c1d2e3f4a5b6c7d8e9f"</code></pre>
+<p>If your client cannot set the <code>Authorization</code> header (some hosts strip it), an alternative header is accepted:</p>
+<pre><code>X-WCUsage-API-Key: wcus_9f2c1e4a7b3d5e6f8a9b0c1d2e3f4a5b6c7d8e9f</code></pre>
+<p>Every key:</p>
+<ul>
+<li><strong>Acts as one WordPress user.</strong> A key created against an affiliate's account can only ever reach that affiliate's own data, whatever it asks for. A key against an admin account has admin access.</li>
+<li><strong>Carries scopes</strong> that restrict it further, on top of that user's capabilities.</li>
+<li><strong>Works only on this plugin's namespaces</strong> &mdash; <code>wcusage/v2</code> and <code>woo-coupon-usage/v1</code>. Presenting one to a core or WooCommerce endpoint fails with <code>403 wcusage_api_key_wrong_namespace</code>. An API key is not a general-purpose WordPress credential.</li>
+<li>Can have an optional <strong>expiry date</strong>, and can be revoked at any moment. Revocation takes effect on the very next request.</li>
+<li>Records a <strong>last used</strong> timestamp, updated at most once every five minutes &mdash; a liveness signal, not an audit log.</li>
+</ul>
+
+<h3>Scopes</h3>
+<table><thead><tr><th>Scope</th><th>Grants</th></tr></thead><tbody>
+<tr><td><code>read</code></td><td>Every GET endpoint: affiliates, coupons, stats, referred orders, payouts, registrations, clicks, events, reports.</td></tr>
+<tr><td><code>write</code></td><td>Creating and changing data: payout requests, payout status changes, registration approval and decline, and refreshing stored coupon stats.</td></tr>
+<tr><td><code>manage</code></td><td>Managing the API itself: creating and revoking API keys, and &mdash; on PRO &mdash; creating, editing, testing and deleting webhooks.</td></tr>
+</tbody></table>
+[warning]<code>manage</code> is not a peer of the other two. A key holding it can issue itself another key with any scope, and can point a webhook at a server of its choosing. Treat it as full access for the user behind the key, and give it only to integrations that genuinely administer the API.[/warning]
+<p>Scopes apply <strong>only</strong> to API keys. With an application password or a logged-in cookie, <code>auth.scopes</code> is <code>null</code> and access is governed purely by capabilities. A key missing a required scope receives <code>403</code> with the code <code>wcusage_api_insufficient_scope</code>.</p>
+<p>On the legacy <code>woo-coupon-usage/v1</code> namespace, which predates scopes, keys are held to a fail-closed default: <code>GET</code>, <code>HEAD</code> and <code>OPTIONS</code> need <code>read</code>, anything else needs <code>write</code>.</p>
+[tip]When connecting an AI agent or a third-party SaaS, create a dedicated <strong>read-only key on a dedicated account</strong>. It cannot change anything on your site whatever the client does, and you can revoke it without disturbing anything else.[/tip]
+
+<h3>Cookie authentication</h3>
+<p>Same-site JavaScript can use the logged-in cookie with a REST nonce, exactly as with any WordPress REST endpoint:</p>
+<pre><code>fetch( '/wp-json/wcusage/v2/me', {
+  headers: { 'X-WP-Nonce': wpApiSettings.nonce },
+  credentials: 'same-origin'
+} ).then( r =&gt; r.json() );</code></pre>
+
+<h3>HTTPS</h3>
+<p>Bearer tokens are credentials, so they are refused over plain HTTP unless <code>wp_get_environment_type()</code> reports <code>local</code> or <code>development</code>. Such a request fails with <code>401 wcusage_api_https_required</code>. The <code>wcusage_api_require_https</code> filter can override it &mdash; do that only if you know exactly why.</p>
+
+<h3>Failed-attempt lockout</h3>
+<p>An address that presents <strong>20 invalid keys within 15 minutes</strong> is refused further attempts with <code>429 wcusage_api_too_many_auth_failures</code> until the window rolls over. Counts are kept per IP address, so one client cannot lock out another. Adjust with the <code>wcusage_api_max_auth_failures</code> filter.</p>
+
+<h3>Who am I?</h3>
+<p>Whatever method you use, <code>GET /me</code> reports exactly what the request is authenticated as, what access level it has, and which scopes are in force. Call it first when setting up any integration.</p>
+
+<h2>Requests &amp; Responses</h2>
+
+<h3>Conventions</h3>
+<ul>
+<li>All responses are JSON. <code>GET</code> parameters go in the query string; <code>POST</code> and <code>PATCH</code> parameters go in a JSON body with <code>Content-Type: application/json</code> (WordPress also accepts form-encoded bodies).</li>
+<li>Resources are addressed by <strong>numeric ID</strong>. Coupon codes are never identifiers: WooCommerce coupon codes are case-insensitive and are not guaranteed unique.</li>
+<li>Money values are plain JSON numbers in the store's currency &mdash; no symbol, no thousands separators. <code>GET /reports/summary</code> reports the currency code.</li>
+<li>Collections are returned as a bare JSON array, with totals in response headers.</li>
+</ul>
+
+<h3>Pagination</h3>
+<p>Every collection endpoint takes the same two parameters:</p>
+<table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>page</td><td>integer</td><td>Page number, starting at 1. Default <code>1</code>.</td></tr>
+<tr><td>per_page</td><td>integer</td><td>Items per page, 1&ndash;100. Default <code>20</code>.</td></tr>
+</tbody></table>
+<p>And returns the same two headers:</p>
+<ul>
+<li><code>X-WP-Total</code> &mdash; total matching items.</li>
+<li><code>X-WP-TotalPages</code> &mdash; total pages at the current <code>per_page</code>.</li>
+</ul>
+<p>A page past the end of the result set returns an empty array with correct headers, without running the underlying query.</p>
+
+<h3>Dates</h3>
+<ul>
+<li><strong>Request parameters</strong> (<code>from</code>, <code>to</code>, <code>expires</code>) use <code>Y-m-d</code>, e.g. <code>2026-08-01</code>. Anything else is rejected with <code>400 rest_invalid_param</code>.</li>
+<li><strong>Response fields</strong> use ISO&nbsp;8601 in the site's timezone, e.g. <code>2026-08-07T14:03:22</code>. Empty dates are <code>null</code>.</li>
+<li>Ranges include both ends. When <code>from</code> is given without <code>to</code>, <code>to</code> defaults to <strong>today</strong>.</li>
+</ul>
+
+<h3>Errors</h3>
+<p>Errors use the standard WordPress REST shape. Every code raised by this plugin is prefixed <code>wcusage_api_</code>:</p>
+<pre><code>{
+  "code": "wcusage_api_forbidden",
+  "message": "You do not have permission to access this resource.",
+  "data": { "status": 403 }
+}</code></pre>
+<p>Rate-limit and throttle errors add <code>retry_after</code> (seconds) to <code>data</code>.</p>
+<table><thead><tr><th>Status</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>400</td><td>Invalid parameter, or the action is not possible right now (no unpaid balance, status already set, activity log disabled).</td></tr>
+<tr><td>401</td><td>Not authenticated, or the API key is invalid, revoked, expired, or was sent over plain HTTP.</td></tr>
+<tr><td>403</td><td>Authenticated but not permitted &mdash; wrong capability, missing scope, or a key used outside the plugin's namespaces.</td></tr>
+<tr><td>404</td><td>Not found. Also returned for a resource that exists but belongs to somebody else, and for an endpoint switched off in the settings.</td></tr>
+<tr><td>409</td><td>Conflict &mdash; another request is mid-flight, or the resource changed underneath this one.</td></tr>
+<tr><td>429</td><td>Rate limited, throttled, or locked out after repeated authentication failures.</td></tr>
+<tr><td>500</td><td>Server error, e.g. the site could not generate a secure token.</td></tr>
+<tr><td>501</td><td>The feature this endpoint reads is not present on this install (payouts add-on inactive, table missing).</td></tr>
+</tbody></table>
+[note]A resource owned by somebody else answers <code>404</code>, not <code>403</code>. That is deliberate: it stops an authenticated affiliate walking the ID space to learn which coupons, payouts or affiliates exist. So do not read a <code>404</code> as proof that an ID is unused.[/note]
+<p>A full list of plugin error codes is in the <a href="#">Error reference</a>.</p>
+
+<h3>Rate limiting</h3>
+<p>Requests to both plugin namespaces are counted per minute, per identity &mdash; the API key, the logged-in user, or a shared bucket for anonymous callers:</p>
+<ul>
+<li>Authenticated: <strong>120 requests per minute</strong></li>
+<li>Unauthenticated: <strong>30 requests per minute</strong></li>
+</ul>
+<p>Over the limit, requests get <code>429 wcusage_api_rate_limited</code> with <code>retry_after: 60</code>. Malformed requests are counted too, so a client stuck retrying a bad parameter is throttled like any other. Adjust the ceiling with the <code>wcusage_api_rate_limit</code> filter.</p>
+
+<h2>Performance &amp; Caching</h2>
+<p>Most endpoints read cached figures and are cheap enough to poll. A few recalculate from the order history and are deliberately expensive; those are cached and throttled so one client cannot make the database do unbounded work.</p>
+
+<h3>What is cached</h3>
+<table><thead><tr><th>Endpoint</th><th>Behaviour</th></tr></thead><tbody>
+<tr><td><code>/coupons/{id}/stats</code> (all-time)</td><td>Reads the stored snapshot &mdash; the same figures the affiliate dashboard shows. One meta read. Reports <code>source: "cache"</code>.</td></tr>
+<tr><td><code>/coupons/{id}/stats</code> (with <code>from</code>/<code>to</code>, or <code>refresh=true</code>)</td><td>Recalculates from the orders. Each range is cached 60 seconds; an uncached calculation is limited to one per coupon per minute.</td></tr>
+<tr><td><code>/coupons/{id}/orders</code></td><td>The prepared list is cached whole for 60 seconds per coupon + range + status, so paginating through it costs nothing. An uncached combination is limited to one per coupon per minute.</td></tr>
+<tr><td><code>/affiliates/{id}/stats</code> (with dates)</td><td>Cached 60 seconds per range; uncached calculations limited to one per affiliate per minute.</td></tr>
+<tr><td><code>/reports/summary</code></td><td>Cached 5 minutes per <code>top</code> value. <code>refresh=true</code> bypasses it.</td></tr>
+<tr><td>Everything else</td><td>Answered live from indexed queries.</td></tr>
+</tbody></table>
+
+<h3>Throttle responses</h3>
+<p>When an uncached recalculation is asked for inside the one-per-minute window, the response is <code>429</code> with code <code>wcusage_api_throttled</code> and <code>retry_after: 60</code>. The one exception is all-time coupon stats, which return the stored snapshot with <code>source: "throttled"</code> rather than failing.</p>
+[tip]Poll a fixed date range rather than a moving one. A client that keeps asking for <em>yesterday</em> is always served from cache; a client that shifts the range slightly on every call forces a fresh scan each minute and will start seeing <code>429</code>s.[/tip]
+
+<h3>Working efficiently</h3>
+<ul>
+<li>For "what changed?", poll <code>/events?after={id}</code> &mdash; one cheap indexed query &mdash; or use webhooks and stop polling altogether.</li>
+<li>For "how is the program doing?", one call to <code>/reports/summary</code> replaces walking every affiliate.</li>
+<li>Use <code>per_page=100</code> on collections instead of many small pages.</li>
+<li>Prefer all-time stats (no <code>from</code>/<code>to</code>) for frequent reads; ask for a range only when you need one.</li>
+</ul>
+
+<h2>Security &amp; Disclaimers</h2>
+<p>The API hands external systems real access to your affiliate program &mdash; personal data, commission figures and, in some configurations, the ability to move money. Please read this page before building anything against it.</p>
+
+<h3>Your responsibilities</h3>
+<p>Enabling the API is an explicit decision, and everything done with the credentials you issue is done <strong>on your authority and under your account</strong>. In particular, you are responsible for:</p>
+<ul>
+<li><strong>Every key you create.</strong> A key acts as the WordPress user you attached it to, with that user's capabilities. Creating a key against an administrator account and pasting it into a third-party service gives that service administrator-level reach over your affiliate data.</li>
+<li><strong>Where the data goes.</strong> Once a response leaves your server, its handling is governed by whoever received it &mdash; the SaaS platform, the spreadsheet, the AI provider &mdash; not by this plugin.</li>
+<li><strong>What your automations do.</strong> Approving applications, cancelling payouts and creating payout requests are all real, consequential actions. The API performs what it is asked to; it cannot know whether the request reflects what you intended.</li>
+<li><strong>Storing credentials safely.</strong> Keys and webhook secrets belong in a secret store or environment variable, never in a repository, a support ticket, a screenshot or a shared document.</li>
+</ul>
+[warning]<strong>Test on staging first.</strong> Do not point a new integration at a live store until you have watched it run end to end somewhere disposable. Several endpoints write data that cannot be undone through the API &mdash; accepting a registration creates a coupon, and on a store with automatic payouts a payout request may pay real money immediately.[/warning]
+
+<h3>Personal data</h3>
+<p>Several endpoints return personal data about real people: affiliate names, logins and email addresses, registration profile fields such as phone numbers and websites, and any custom registration fields your store collects.</p>
+<ul>
+<li>Under the GDPR, the UK GDPR and comparable regimes, <strong>you</strong> are the data controller for that information. Sending it to a third-party tool generally makes that tool a processor, which usually means you need a lawful basis for the transfer and an appropriate data-processing agreement with the provider.</li>
+<li>Deliberate omissions in this API are safety features, not oversights: order rows carry no customer data, payout destination details are never returned, click IP addresses are never exposed, and logins and emails are withheld from callers who are neither an admin nor the person concerned. If you add fields back with the response filters, you take on responsibility for what you have exposed and to whom.</li>
+<li>Grant the narrowest access that does the job. A read-only key on a dedicated account, scoped to the endpoints you actually call, limits the blast radius of a leak far more effectively than anything you can add afterwards.</li>
+</ul>
+[note]This page is general guidance about how the software behaves, not legal advice. If you are unsure whether a particular integration is lawful in your jurisdiction, take proper advice before building it.[/note]
+
+<h3>Money and financial records</h3>
+<p>Commission figures, payout amounts and report totals come from the plugin's own records and are provided for information. They are <strong>not</strong> an accounting system, a tax record or a substitute for your payment provider's statements.</p>
+<ul>
+<li>Reconcile against your gateway and your books before paying anybody or filing anything. Figures can legitimately change &mdash; refunds, cancellations, manual adjustments and snapshot rebuilds all move them.</li>
+<li>All-time statistics are read from stored snapshots that can lag reality in either direction. Where the number matters, check <code>source</code> and <code>last_refreshed</code>, or request a fresh calculation.</li>
+<li>The plugin's authors accept no responsibility for payments made, withheld or duplicated as a result of an integration you build.</li>
+</ul>
+
+<h3>Treat inbound webhooks as untrusted</h3>
+<p>A webhook receiver is a public HTTP endpoint that anybody on the internet can send a request to. Nothing about a payload proves it came from your store <em>except</em> a valid signature.</p>
+<ul>
+<li>Always verify the HMAC signature and reject stale timestamps before acting on a delivery. If your platform cannot verify signatures, do not let it take consequential action on a payload alone &mdash; read the object back from the API first.</li>
+<li>Deliveries are at-least-once and unordered. Build handlers that tolerate duplicates and out-of-sequence arrivals.</li>
+<li>Validate and escape payload values like any other external input before writing them into your own systems.</li>
+</ul>
+
+<h3>Third-party and AI services</h3>
+<p>Connecting an external platform or an AI assistant means transmitting affiliate data to that provider, where it may be logged, retained or used for their own purposes according to their terms &mdash; not yours. Check what you are agreeing to before you connect it.</p>
+<p>AI agents carry a specific extra risk: an agent acts on text it reads, and some of that text can come from outside your control &mdash; an application's "how will you promote us" field, a campaign name, a website URL. An agent with write access can be steered by content like that into taking actions you never asked for. Give agents read-only keys unless you have a concrete reason not to, and never give one the <code>manage</code> scope.</p>
+
+<h3>Stability and support</h3>
+<ul>
+<li>Endpoints, response fields and defaults may change between plugin versions. Fields may be added at any time, so write clients that ignore unfamiliar keys rather than failing on them.</li>
+<li>Do not depend on anything not documented here &mdash; internal option names, database tables, undocumented fields or the exact wording of a message. The <code>code</code> in an error response is the stable part; the <code>message</code> is not, and is translated.</li>
+<li>Rate limits, cache windows and throttles exist to protect your site and may be adjusted in future releases. Handle <code>429</code> gracefully rather than assuming a fixed budget.</li>
+<li>Support covers the plugin and its own endpoints. Debugging custom integrations, third-party platforms and AI tooling is outside its scope, though the <code>/me</code>, <code>/openapi</code> and <code>/webhooks</code> endpoints are usually enough to work out where a problem lies.</li>
+</ul>
+
+<h3>No warranty</h3>
+<p>Coupon Affiliates is free software, licensed under the <strong>GNU General Public License version 3</strong>. Sections 15 and 16 of that license disclaim all warranties and limit liability, and those terms apply to the API exactly as they apply to the rest of the plugin. The API, the code samples in these docs and the integration patterns they describe are therefore provided <strong>as is</strong>, without warranty of any kind.</p>
+<p>The examples are illustrative starting points, not production-hardened code: they omit the logging, retry policy, input validation and secret management your own environment will need. Review, adapt and test anything you take from here before relying on it.</p>
+<p>To the fullest extent permitted by law, the plugin's authors accept no liability for loss or damage arising from use of the API &mdash; including lost or exposed data, incorrect commission or payout amounts, missed or duplicated webhook deliveries, or the actions of any third-party service or automated agent you connect to it. Nothing here affects any statutory rights that cannot lawfully be excluded.</p>
+
+<h3>Licensing</h3>
+<p>The plugin, its API and its add-ons are distributed under the <a href="https://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>; a copy ships as <code>license.txt</code> in the plugin folder. You are free to use, study, modify and redistribute the code on those terms.</p>
+<ul>
+<li><strong>Nothing on this page restricts those rights.</strong> It is operational guidance and a disclaimer of warranty and liability &mdash; which the GPL expressly permits &mdash; not an additional condition on using the software.</li>
+<li><strong>The code samples in these docs are yours to use.</strong> Copy, adapt and ship them in your own integrations, commercial or otherwise, with no attribution required. They are short illustrative snippets, published so that people can build against the API.</li>
+<li><strong>Your integration is your own work.</strong> A client that talks to this API over HTTP is a separate program; calling a REST endpoint does not make your codebase a derivative of the plugin. If you instead modify or bundle the plugin's own PHP, the GPL applies to what you distribute in the ordinary way.</li>
+<li><strong>The licence covers the software, not your obligations.</strong> It says nothing about data protection, consumer law or your duties to your own affiliates and customers &mdash; those apply regardless of how the plugin is licensed.</li>
+</ul>
+[tip]Two habits prevent most serious incidents: give every integration its own key with the narrowest scope that works, and keep a current backup before running anything that writes in bulk.[/tip]
+
+<h2>Endpoint Index</h2>
+<p>Every route in the API, with the access level and scope it needs. All paths are relative to <code>https://example.com/wp-json/wcusage/v2</code>.</p>
+<table><thead><tr><th>Method &amp; path</th><th>Access</th><th>Scope</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>[get] <code>/me</code></td><td>Any logged-in user</td><td>&mdash;</td><td>Identify the caller, its access level and scopes.</td></tr>
+<tr><td>[get] <code>/affiliates</code></td><td>Admin</td><td>read</td><td>List affiliates with coupons and balances.</td></tr>
+<tr><td>[get] <code>/affiliates/{id}</code></td><td>Admin or self</td><td>read</td><td>One affiliate, with profile fields and groups.</td></tr>
+<tr><td>[get] <code>/affiliates/{id}/stats</code></td><td>Admin or self</td><td>read</td><td>Totals across all of an affiliate's coupons.</td></tr>
+<tr><td>[get] <code>/coupons</code></td><td>Admin</td><td>read</td><td>List affiliate coupons.</td></tr>
+<tr><td>[get] <code>/coupons/{id}</code></td><td>Admin, owner, upline</td><td>read</td><td>One coupon, with commission rates and referral URL.</td></tr>
+<tr><td>[get] <code>/coupons/{id}/stats</code></td><td>Admin, owner, upline</td><td>read (+write to refresh)</td><td>Sales and commission, all-time or by date range.</td></tr>
+<tr><td>[get] <code>/coupons/{id}/orders</code></td><td>Admin, owner, upline</td><td>read</td><td>Orders referred by a coupon, with commission per order.</td></tr>
+<tr><td>[get] <code>/payouts</code></td><td>Any logged-in user</td><td>read</td><td>List payouts. Non-admins see only their own.</td></tr>
+<tr><td>[post] <code>/payouts</code></td><td>Admin or coupon owner</td><td>write</td><td>Request a payout for a coupon's unpaid balance.</td></tr>
+<tr><td>[get] <code>/payouts/{id}</code></td><td>Admin or owner</td><td>read</td><td>One payout.</td></tr>
+<tr><td>[post] <code>/payouts/{id}/status</code></td><td>Admin</td><td>write</td><td>Change a payout status. Bookkeeping only.</td></tr>
+<tr><td>[get] <code>/registrations</code></td><td>Admin</td><td>read</td><td>List affiliate applications.</td></tr>
+<tr><td>[get] <code>/registrations/{id}</code></td><td>Admin</td><td>read</td><td>One application.</td></tr>
+<tr><td>[post] <code>/registrations/{id}/status</code></td><td>Admin</td><td>write</td><td>Approve or decline an application.</td></tr>
+<tr><td>[get] <code>/clicks/stats</code></td><td>Admin, or owner with <code>coupon_id</code></td><td>read</td><td>Clicks, conversions and conversion rate.</td></tr>
+<tr><td>[get] <code>/events</code></td><td>Admin</td><td>read</td><td>Change feed with a cursor for polling.</td></tr>
+<tr><td>[get] <code>/reports/summary</code></td><td>Admin</td><td>read</td><td>Store-wide totals and top affiliates.</td></tr>
+<tr><td>[get] <code>/keys</code></td><td>Admin</td><td>manage</td><td>List API keys.</td></tr>
+<tr><td>[post] <code>/keys</code></td><td>Admin</td><td>manage</td><td>Create an API key.</td></tr>
+<tr><td>[delete] <code>/keys/{id}</code></td><td>Admin</td><td>manage</td><td>Revoke an API key.</td></tr>
+<tr><td>[get] <code>/webhooks</code></td><td>Admin</td><td>manage</td><td><strong>PRO.</strong> List webhook endpoints.</td></tr>
+<tr><td>[post] <code>/webhooks</code></td><td>Admin</td><td>manage</td><td><strong>PRO.</strong> Create a webhook endpoint.</td></tr>
+<tr><td>[patch] <code>/webhooks/{id}</code></td><td>Admin</td><td>manage</td><td><strong>PRO.</strong> Change status or subscribed events.</td></tr>
+<tr><td>[delete] <code>/webhooks/{id}</code></td><td>Admin</td><td>manage</td><td><strong>PRO.</strong> Delete a webhook endpoint.</td></tr>
+<tr><td>[post] <code>/webhooks/{id}/test</code></td><td>Admin</td><td>manage</td><td><strong>PRO.</strong> Send a test delivery.</td></tr>
+<tr><td>[get] <code>/webhooks/events</code></td><td>Admin</td><td>read</td><td><strong>PRO.</strong> The catalog of subscribable events.</td></tr>
+<tr><td>[get] <code>/openapi</code></td><td>Public by default</td><td>&mdash;</td><td>Machine-readable description of this API.</td></tr>
+</tbody></table>
+<p>"Owner" means the affiliate the coupon is assigned to; "upline" means their multi-level parent, which exists in PRO only. Payout and webhook routes are PRO only. Every endpoint can additionally be switched off per site &mdash; see <a href="#">Enabling the API</a>.</p>
+
+<h1>Endpoints</h1>
+
+<h2>Me</h2>
+<p>Identify the authenticated caller, its access level and its scopes. This is the ideal first call for any integration &mdash; an AI agent can use it to discover what it is allowed to do before attempting anything.</p>
+<p>[get] <code>/wp-json/wcusage/v2/me</code></p>
+<p><strong>Permission:</strong> any authenticated user. No scope is needed for the identity fields; the <code>coupons</code> array requires <code>read</code>.</p>
+<pre><code>{
+  "user": { "id": 1456, "display_name": "Sarah J", "login": "sarahj", "email": "sarah@example.com" },
+  "is_admin": false,
+  "is_affiliate": true,
+  "auth": { "method": "api_key", "key_id": 3, "scopes": ["read"] },
+  "coupons": [
+    {
+      "id": 8338,
+      "code": "sarah10",
+      "user_id": 1456,
+      "date_created": "2023-05-02T10:11:12",
+      "unpaid_commission": 40.46,
+      "pending_order_commission": 0,
+      "pending_payout_commission": 0
+    }
+  ],
+  "api_version": "8.2.0"
+}</code></pre>
+<table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>user</td><td>object</td><td><code>id</code> and <code>display_name</code> always; <code>login</code> and <code>email</code> only when the caller is an admin or is that user.</td></tr>
+<tr><td>is_admin</td><td>boolean</td><td>Whether the caller passes the plugin's admin access check.</td></tr>
+<tr><td>is_affiliate</td><td>boolean</td><td>Whether the user has at least one affiliate coupon.</td></tr>
+<tr><td>auth.method</td><td>string</td><td><code>api_key</code> or <code>wordpress</code>.</td></tr>
+<tr><td>auth.key_id</td><td>integer</td><td>The API key's ID, or <code>null</code>.</td></tr>
+<tr><td>auth.scopes</td><td>array</td><td>Scopes in force, or <code>null</code> for capability-based auth (full access for that user).</td></tr>
+<tr><td>coupons</td><td>array</td><td>The caller's own affiliate coupons with balances. Empty for non-affiliates.</td></tr>
+<tr><td>api_version</td><td>string</td><td>The installed Coupon Affiliates version.</td></tr>
+</tbody></table>
+[note]<code>auth.scopes: null</code> means the request is <em>not</em> scope-limited &mdash; it authenticated with an application password or cookie, so the user's capabilities are the only limit.[/note]
+
+<h2>Affiliates</h2>
+<p>An affiliate is a WordPress user with at least one published coupon assigned to them. There is no separate affiliate table; these endpoints derive the entity the same way the admin list table does, and aggregate across all of an affiliate's coupons.</p>
+
+<h3>List affiliates</h3>
+<p>[get] <code>/wp-json/wcusage/v2/affiliates</code></p>
+<p><strong>Permission:</strong> admin, <code>read</code> scope.</p>
+<table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>search</td><td>string</td><td>Partial match against user login, email or display name.</td></tr>
+<tr><td>page / per_page</td><td>integer</td><td>Standard pagination.</td></tr>
+</tbody></table>
+<pre><code>[
+  {
+    "user": { "id": 1456, "display_name": "Sarah J", "login": "sarahj", "email": "sarah@example.com" },
+    "coupons": [
+      { "id": 8338, "code": "sarah10", "user_id": 1456, "date_created": "2023-05-02T10:11:12",
+        "unpaid_commission": 40.46, "pending_order_commission": 0, "pending_payout_commission": 0 }
+    ],
+    "unpaid_commission": 40.46,
+    "pending_payout_commission": 0
+  }
+]</code></pre>
+<p>Results are ordered by user ID ascending. Only users holding at least one <strong>published</strong> assigned coupon appear.</p>
+
+<h3>Get one affiliate</h3>
+<p>[get] <code>/wp-json/wcusage/v2/affiliates/{user_id}</code></p>
+<p><strong>Permission:</strong> admin, or the affiliate themselves. <code>read</code> scope.</p>
+<p>Returns the list shape plus detail fields, and each coupon carries its cached all-time <code>stats</code> block:</p>
+<table><thead><tr><th>Extra field</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>date_registered</td><td>string</td><td>When the WordPress account was created.</td></tr>
+<tr><td>profile</td><td>object</td><td>Registration profile fields: <code>phone</code>, <code>website</code>, <code>promote</code>, <code>referrer</code>.</td></tr>
+<tr><td>groups</td><td>array</td><td>Affiliate group roles the user holds.</td></tr>
+<tr><td>mla_parents</td><td>object</td><td><strong>PRO only.</strong> Multi-level upline chain, keyed by tier. Absent entirely in the free build.</td></tr>
+</tbody></table>
+
+<h3>Affiliate stats</h3>
+<p>[get] <code>/wp-json/wcusage/v2/affiliates/{user_id}/stats</code></p>
+<p><strong>Permission:</strong> admin, or the affiliate themselves. <code>read</code> scope.</p>
+<table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>from</td><td>date</td><td>Optional start date (<code>Y-m-d</code>). When set, figures are recalculated from the orders for the range instead of read from the all-time cache.</td></tr>
+<tr><td>to</td><td>date</td><td>Optional end date. Defaults to today when <code>from</code> is set.</td></tr>
+</tbody></table>
+<pre><code>{
+  "user_id": 1456,
+  "from": null,
+  "to": null,
+  "totals": {
+    "orders_count": 19,
+    "total_sales": 1977.80,
+    "total_discount": 197.78,
+    "total_commission": 181.60,
+    "unpaid_commission": 40.46,
+    "pending_payout_commission": 0
+  },
+  "coupons": [
+    { "id": 8338, "code": "sarah10", "orders_count": 19, "total_sales": 1977.80,
+      "total_discount": 197.78, "total_commission": 181.60 }
+  ]
+}</code></pre>
+<p>The two balance figures in <code>totals</code> are always current balances; they are not affected by <code>from</code>/<code>to</code>.</p>
+[note]A ranged request recalculates every one of the affiliate's coupons from the order history, so one call costs as much as their whole trading history. Results are cached for 60 seconds per range, and an uncached range is limited to one per affiliate per minute &mdash; over that, the response is <code>429 wcusage_api_throttled</code>.[/note]
+
+<h2>Coupons</h2>
+<p>Affiliate coupons, with balances, stats and referred orders. Reads go through the same functions the affiliate dashboard uses, so caps, rounding and commission rules always match what affiliates see.</p>
+
+<h3>List coupons</h3>
+<p>[get] <code>/wp-json/wcusage/v2/coupons</code></p>
+<p><strong>Permission:</strong> admin, <code>read</code> scope.</p>
+<table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>user_id</td><td>integer</td><td>Only coupons assigned to this affiliate. Omit for every assigned affiliate coupon.</td></tr>
+<tr><td>search</td><td>string</td><td>Match against the coupon code.</td></tr>
+<tr><td>page / per_page</td><td>integer</td><td>Standard pagination.</td></tr>
+</tbody></table>
+<p>Returns published coupons that have an affiliate assigned, newest first. Coupons with no assigned affiliate are never listed.</p>
+
+<h3>Get one coupon</h3>
+<p>[get] <code>/wp-json/wcusage/v2/coupons/{id}</code></p>
+<p><strong>Permission:</strong> admin, the assigned affiliate, or their multi-level upline (PRO). <code>read</code> scope.</p>
+<pre><code>{
+  "id": 8338,
+  "code": "sarah10",
+  "user_id": 1456,
+  "user": { "id": 1456, "display_name": "Sarah J" },
+  "date_created": "2023-05-02T10:11:12",
+  "unpaid_commission": 40.46,
+  "pending_order_commission": 0,
+  "pending_payout_commission": 0,
+  "stats": {
+    "orders_count": 19, "total_sales": 1977.80, "total_discount": 197.78,
+    "total_shipping": 0, "total_commission": 181.60, "last_refreshed": "2026-08-01T02:00:00"
+  },
+  "commission": { "percent": 10, "percent_override": "", "fixed_per_order": "", "fixed_per_product": "" },
+  "referral_url": "https://example.com/affiliate-dashboard/?couponid=sarah10"
+}</code></pre>
+<table><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody>
+<tr><td>unpaid_commission</td><td>Commission earned, cleared, and not yet paid out or requested.</td></tr>
+<tr><td>pending_order_commission</td><td>Commission on orders still inside the pending period (not yet payable).</td></tr>
+<tr><td>pending_payout_commission</td><td>Commission tied up in payouts that have been requested but not paid.</td></tr>
+<tr><td>commission.percent</td><td>The percentage rate resolved for this coupon: its own override if it has one, otherwise the store's default rate.</td></tr>
+<tr><td>commission.percent_override</td><td>The per-coupon override itself. Empty when the coupon inherits the store default.</td></tr>
+<tr><td>commission.fixed_per_order</td><td>Fixed amount per referred order, if configured. Empty when unused.</td></tr>
+<tr><td>commission.fixed_per_product</td><td>Fixed amount per product, if configured. Empty when unused.</td></tr>
+<tr><td>referral_url</td><td>The affiliate's referral URL for this coupon, pointing at the affiliate dashboard page.</td></tr>
+<tr><td>stats.last_refreshed</td><td>When the stored snapshot was last rebuilt, or <code>null</code> if it never has been.</td></tr>
+</tbody></table>
+<p>Draft and private coupons are addressable &mdash; a coupon does not have to be published to have an affiliate and a balance. Trashed and auto-draft coupons answer <code>404</code>.</p>
+[note]Always reference coupons by <strong>ID</strong>. WooCommerce coupon codes are case-insensitive and not guaranteed unique, and the stats layer is keyed by code &mdash; see <code>code_ambiguous</code> below.[/note]
+
+<h3>Coupon stats</h3>
+<p>[get] <code>/wp-json/wcusage/v2/coupons/{id}/stats</code></p>
+<p><strong>Permission:</strong> admin, owner, or MLA upline. <code>read</code> scope; <code>refresh=true</code> additionally needs <code>write</code>.</p>
+<table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>from / to</td><td>date</td><td>Optional range. Without dates, the stored all-time snapshot is returned (fast). With dates, the range is calculated from the orders.</td></tr>
+<tr><td>refresh</td><td>boolean</td><td>Recalculate the all-time figures from the orders and save the result. Default <code>false</code>. Ignored when a date range is given, since those are always calculated.</td></tr>
+</tbody></table>
+<pre><code>{
+  "coupon_id": 8338,
+  "code": "sarah10",
+  "from": null,
+  "to": null,
+  "source": "cache",
+  "code_ambiguous": false,
+  "orders_count": 19,
+  "total_sales": 1977.80,
+  "total_discount": 197.78,
+  "total_shipping": 0,
+  "total_commission": 181.60,
+  "status_counts": { "Completed": 17, "Refunded": 2 },
+  "last_refreshed": "2026-08-01T02:00:00",
+  "unpaid_commission": 40.46,
+  "pending_order_commission": 0,
+  "pending_payout_commission": 0
+}</code></pre>
+<table><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody>
+<tr><td>source</td><td><code>cache</code> &mdash; the stored snapshot or a short-lived cached calculation. <code>live</code> &mdash; freshly calculated for this request. <code>throttled</code> &mdash; a rebuild was wanted but the per-coupon budget was spent, so the stored snapshot was returned instead.</td></tr>
+<tr><td>code_ambiguous</td><td><code>true</code> when another published coupon answers to the same code. The stats layer is keyed by code, so figures for this coupon are not reliably addressable and are never saved back to it.</td></tr>
+<tr><td>status_counts</td><td>Order counts by display status name, e.g. <code>{"Completed": 17}</code>. An empty object when the figures came from the stored snapshot, which holds no breakdown.</td></tr>
+<tr><td>last_refreshed</td><td><code>null</code> for ranged requests &mdash; those are always calculated, so there is no "last refreshed" moment to report.</td></tr>
+</tbody></table>
+<p>The response shape is stable regardless of which path answered: <code>status_counts</code> and <code>last_refreshed</code> are always present, even when empty.</p>
+[warning]<code>refresh=true</code> is a write wearing a GET's clothes &mdash; it rescans the coupon's entire order history and saves the result. A read-only key gets <code>403 wcusage_api_insufficient_scope</code>; it still receives figures from the stored snapshot on an ordinary request.[/warning]
+
+<h3>Referred orders</h3>
+<p>[get] <code>/wp-json/wcusage/v2/coupons/{id}/orders</code></p>
+<p><strong>Permission:</strong> admin, owner, or MLA upline. <code>read</code> scope.</p>
+<table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>from / to</td><td>date</td><td>Optional date range.</td></tr>
+<tr><td>status</td><td>string</td><td>Order status slug without the <code>wc-</code> prefix, e.g. <code>completed</code>.</td></tr>
+<tr><td>page / per_page</td><td>integer</td><td>Standard pagination.</td></tr>
+</tbody></table>
+<pre><code>[
+  {
+    "order_id": 8355,
+    "date": "2023-07-28T12:46:58",
+    "status": "completed",
+    "total": 179.80,
+    "discount": 17.98,
+    "commission": 16.18
+  }
+]</code></pre>
+<p>Newest first. Only orders that actually counted towards <em>this</em> coupon are listed &mdash; an order that used the code but was later reassigned to another affiliate is excluded, which keeps this endpoint consistent with <code>/stats</code>.</p>
+<p>One request considers at most <strong>5,000</strong> orders (the newest ones). When that cap is hit, the response carries the header <code>X-WCUsage-Truncated: 1</code>, so a client can tell a capped total from a real one. Raise it with the <code>wcusage_api_max_order_rows</code> filter if your program needs a deeper window.</p>
+[note]Order rows deliberately carry <strong>no customer data</strong> &mdash; only IDs, totals and commission. A trusted server-side integration can add fields with the <code>wcusage_api_order_item</code> filter.[/note]
+
+<h2>Payouts</h2>
+<p>Read payout history and create payout requests. Payouts are a <strong>PRO</strong> feature; on a build or install without them, these endpoints are absent or answer <code>501 wcusage_api_unavailable</code>.</p>
+[warning]Changing a payout's <strong>status</strong> is bookkeeping only &mdash; no payment gateway is ever contacted. <strong>Creating</strong> a payout is different: if your store has automatic payouts enabled, the normal submit flow may pay it immediately through PayPal, Stripe or Wise, exactly as a dashboard request would. The response flags this with <code>gateway_triggered</code>.[/warning]
+<p>These are the highest-consequence endpoints in the API. Prove any automation on a staging store before pointing it at a live one, reconcile amounts against your payment provider rather than treating these figures as an accounting record, and keep the responsibility for verifying payments with a person. If you would rather nothing automated could ever create a payout, switch the <code>/payouts</code> endpoints off on the API screen &mdash; everything else keeps working.</p>
+
+<h3>List payouts</h3>
+<p>[get] <code>/wp-json/wcusage/v2/payouts</code></p>
+<p><strong>Permission:</strong> any authenticated user, <code>read</code> scope. Non-admins are always restricted to their own payouts, whatever <code>user_id</code> they send.</p>
+<table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>user_id</td><td>integer</td><td>Filter by affiliate. Admin only &mdash; overridden for everyone else.</td></tr>
+<tr><td>coupon_id</td><td>integer</td><td>Filter by coupon.</td></tr>
+<tr><td>status</td><td>string</td><td>One of <code>pending</code>, <code>created</code>, <code>paid</code>, <code>cancel</code>.</td></tr>
+<tr><td>from / to</td><td>date</td><td>Filter by request date.</td></tr>
+<tr><td>page / per_page</td><td>integer</td><td>Standard pagination.</td></tr>
+</tbody></table>
+<pre><code>{
+  "id": 321,
+  "user": { "id": 1456, "display_name": "Sarah J" },
+  "coupon_id": 8338,
+  "coupon_code": "sarah10",
+  "amount": 40.46,
+  "method": "PayPal",
+  "method_type": "paypal",
+  "status": "pending",
+  "has_details": true,
+  "transaction_id": "",
+  "invoice_id": 0,
+  "date": "2026-08-07T09:00:00",
+  "date_paid": null
+}</code></pre>
+[note]Payout destination details &mdash; PayPal addresses, bank accounts, wallet addresses &mdash; are <strong>never</strong> returned by the API. Only the boolean <code>has_details</code> tells you whether any are stored.[/note]
+
+<h3>Get one payout</h3>
+<p>[get] <code>/wp-json/wcusage/v2/payouts/{id}</code></p>
+<p><strong>Permission:</strong> admin or the payout's owner. <code>read</code> scope. Somebody else's payout answers <code>404</code>.</p>
+
+<h3>Request a payout</h3>
+<p>[post] <code>/wp-json/wcusage/v2/payouts</code></p>
+<p><strong>Permission:</strong> admin (any coupon), or the coupon's affiliate (their own). <code>write</code> scope.</p>
+<table><thead><tr><th>Body param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>coupon_id</td><td>integer</td><td>Required. The coupon's <strong>full unpaid balance</strong> is requested; there is no partial-amount parameter.</td></tr>
+</tbody></table>
+<pre><code>curl -X POST https://example.com/wp-json/wcusage/v2/payouts \
+  -H "Authorization: Bearer wcus_..." \
+  -H "Content-Type: application/json" \
+  -d '{"coupon_id": 8338}'</code></pre>
+<p>Returns <code>201</code> with the created payout, plus two extra fields:</p>
+<ul>
+<li><code>gateway_triggered</code> &mdash; <code>true</code> when auto-accept moved the payout straight to <code>created</code> or <code>paid</code>, meaning a real gateway may have been called.</li>
+<li><code>gateway_notice</code> &mdash; present only when a gateway handler produced a message worth passing on.</li>
+</ul>
+
+<h4>Idempotency</h4>
+<p>Only one open request can exist per coupon at a time. If one already exists (<code>pending</code>, <code>created</code> or <code>processing</code>), the existing payout is returned with <code>200</code> and the header <code>X-WCUsage-Existing: 1</code> &mdash; so a retrying client can never create duplicates. Concurrent requests for the same coupon are serialised with a lock; the loser gets <code>409 wcusage_api_in_progress</code>.</p>
+
+<h4>Rules that are enforced</h4>
+<p>Requests are held to the same rules as the affiliate dashboard, so the API cannot be used to route around a store's configuration:</p>
+<table><thead><tr><th>Error code</th><th>Condition</th></tr></thead><tbody>
+<tr><td><code>payouts_disabled</code></td><td>Payouts are switched off in the plugin settings.</td></tr>
+<tr><td><code>requests_disabled</code></td><td>Affiliate self-service requests are switched off; only the store owner creates payouts. Not applied to admin callers.</td></tr>
+<tr><td><code>no_affiliate</code></td><td>The coupon has no affiliate assigned.</td></tr>
+<tr><td><code>no_balance</code></td><td>The unpaid balance is zero or less.</td></tr>
+<tr><td><code>below_threshold</code></td><td>The unpaid balance is under the store's minimum payout threshold. Enforced for admins too.</td></tr>
+<tr><td><code>no_payout_details</code></td><td>The affiliate has not saved payout details and the store requires them.</td></tr>
+<tr><td><code>method_disabled</code></td><td>The affiliate's saved payout method is no longer enabled on the store. Not applied to admin callers.</td></tr>
+<tr><td><code>invoice_required</code></td><td>The store requires an invoice upload for this payout method. Invoices cannot be uploaded through the API, so the request must be made from the affiliate dashboard.</td></tr>
+<tr><td><code>not_created</code></td><td>Everything checked out but the site refused the request &mdash; typically a custom <code>wcusage_before_payout_submit</code> filter, or a failed write.</td></tr>
+</tbody></table>
+
+<h3>Update payout status</h3>
+<p>[post] <code>/wp-json/wcusage/v2/payouts/{id}/status</code></p>
+<p><strong>Permission:</strong> admin, <code>write</code> scope.</p>
+<table><thead><tr><th>Body param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>status</td><td>string</td><td>Required. One of <code>pending</code>, <code>created</code>, <code>paid</code>, <code>cancel</code>.</td></tr>
+</tbody></table>
+<p>This runs the same status flow as the admin screen: balances move between the unpaid, pending-payout and paid pools, the activity log records the change, notification emails are sent and webhooks fire. <strong>No payment gateway is contacted.</strong></p>
+
+<h4>Permitted transitions</h4>
+<table><thead><tr><th>From</th><th>To</th></tr></thead><tbody>
+<tr><td><code>pending</code></td><td><code>paid</code>, <code>cancel</code>, <code>created</code></td></tr>
+<tr><td><code>created</code></td><td><code>paid</code>, <code>cancel</code>, <code>pending</code></td></tr>
+<tr><td><code>paid</code></td><td><code>cancel</code>, <code>pending</code>, <code>created</code></td></tr>
+<tr><td><code>cancel</code></td><td><code>pending</code>, <code>created</code></td></tr>
+</tbody></table>
+<p>Anything else is refused with <code>400 wcusage_api_invalid_transition</code> rather than leaving the balances inconsistent. Setting the status a payout already has returns <code>400 wcusage_api_no_change</code>.</p>
+[note]<code>processing</code> and <code>failed</code> are deliberately not accepted. Nothing in the plugin writes them and the status arithmetic has no branch for them, so moving a payout through either one would strand its balance with no way back.[/note]
+<p>Two further guards:</p>
+<ul>
+<li><strong>Re-opening a cancelled payout</strong> takes its amount back out of the unpaid balance. If that money is no longer there &mdash; already paid out, or the balance was edited &mdash; the request is refused with <code>409 wcusage_api_insufficient_unpaid</code> rather than letting the ledger drift.</li>
+<li><strong>Concurrent status changes</strong> are settled by a conditional update. Only the request that actually changes the row runs the balance arithmetic; the loser gets <code>409 wcusage_api_conflict</code>.</li>
+</ul>
+
+<h2>Registrations</h2>
+<p>Read and moderate affiliate applications. These endpoints read the plugin's registration table, and approval goes through the same function the admin screen calls, so the full accept flow runs identically.</p>
+
+<h3>List registrations</h3>
+<p>[get] <code>/wp-json/wcusage/v2/registrations</code></p>
+<p><strong>Permission:</strong> admin, <code>read</code> scope.</p>
+<table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>status</td><td>string</td><td><code>pending</code>, <code>accepted</code> or <code>declined</code>.</td></tr>
+<tr><td>user_id</td><td>integer</td><td>Filter by WordPress user.</td></tr>
+<tr><td>page / per_page</td><td>integer</td><td>Standard pagination.</td></tr>
+</tbody></table>
+<pre><code>{
+  "id": 512,
+  "user": { "id": 2201, "display_name": "New Affiliate", "login": "newaffiliate", "email": "new@example.com" },
+  "coupon_code": "newaff15",
+  "status": "pending",
+  "type": "",
+  "promote": "Instagram and my newsletter",
+  "referrer": "",
+  "website": "https://blog.example.net",
+  "custom_fields": { "Audience size": "12000" },
+  "date": "2026-08-05T18:22:41",
+  "date_accepted": null
+}</code></pre>
+<p><code>custom_fields</code> holds whatever extra registration fields the store has configured, as a flat object. It is an empty object when there are none.</p>
+
+<h3>Get one registration</h3>
+<p>[get] <code>/wp-json/wcusage/v2/registrations/{id}</code></p>
+<p><strong>Permission:</strong> admin, <code>read</code> scope.</p>
+
+<h3>Approve or decline</h3>
+<p>[post] <code>/wp-json/wcusage/v2/registrations/{id}/status</code></p>
+<p><strong>Permission:</strong> admin, <code>write</code> scope.</p>
+<table><thead><tr><th>Body param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>status</td><td>string</td><td>Required. <code>accepted</code> or <code>declined</code>.</td></tr>
+<tr><td>message</td><td>string</td><td>Optional message included in the notification email.</td></tr>
+<tr><td>send_email</td><td>boolean</td><td>Whether to send the notification email. Default <code>true</code>.</td></tr>
+</tbody></table>
+<p>Returns the updated registration.</p>
+[warning]Accepting runs the <strong>full approval flow</strong>: the affiliate coupon is created from the template, roles are assigned, emails are sent and hooks fire &mdash; exactly as if approved from the admin screen.[/warning]
+<table><thead><tr><th>Error code</th><th>Condition</th></tr></thead><tbody>
+<tr><td><code>no_change</code> (400)</td><td>The registration already has that status.</td></tr>
+<tr><td><code>already_accepted</code> (400)</td><td>The registration was already accepted. Accepting is not reversible through the API, because an accept &rarr; decline &rarr; accept cycle would create a second published coupon with the same code and its own separate balance. Reverse it from the admin screens if you really must.</td></tr>
+<tr><td><code>no_coupon_code</code> (409)</td><td>The registration carries no coupon code, so its status cannot be changed. Add one from the admin screens first.</td></tr>
+<tr><td><code>not_updated</code> (409)</td><td>Something on the site refused the change. The response reports what the row actually says rather than what was asked for.</td></tr>
+<tr><td><code>unavailable</code> (501)</td><td>The registrations table does not exist on this install.</td></tr>
+</tbody></table>
+
+<h2>Clicks</h2>
+<p>Aggregated referral-link click statistics, counted in SQL rather than loaded row by row.</p>
+<p>[get] <code>/wp-json/wcusage/v2/clicks/stats</code></p>
+<p><strong>Permission:</strong> admin for store-wide figures; affiliates must pass a <code>coupon_id</code> they own. <code>read</code> scope.</p>
+<table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>coupon_id</td><td>integer</td><td>Limit to one coupon. Required for non-admin users &mdash; omitting it returns <code>400 wcusage_api_coupon_required</code>.</td></tr>
+<tr><td>campaign</td><td>string</td><td>Filter by campaign name (exact match).</td></tr>
+<tr><td>from / to</td><td>date</td><td>Optional date range.</td></tr>
+</tbody></table>
+<pre><code>{
+  "coupon_id": 8338,
+  "campaign": null,
+  "from": "2026-07-01",
+  "to": "2026-07-31",
+  "clicks": 412,
+  "conversions": 19,
+  "conversion_rate": 4.61
+}</code></pre>
+<p><code>conversion_rate</code> is a percentage rounded to two decimals, and is <code>0</code> when there were no clicks.</p>
+[note]The IP addresses stored with clicks are never exposed through the API. If the clicks table does not exist on the install, the endpoint answers <code>501 wcusage_api_unavailable</code>.[/note]
+
+<h2>Events</h2>
+<p>A cursor-based change feed over the plugin's activity log. This is the polling counterpart to webhooks: ask "what happened since event X" and act on the answer. Webhooks are PRO, so on the free version this endpoint is how you keep an external system in step.</p>
+<p>[get] <code>/wp-json/wcusage/v2/events</code></p>
+<p><strong>Permission:</strong> admin, <code>read</code> scope.</p>
+<table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>after</td><td>integer</td><td>Cursor. Returns only events with a higher ID, <strong>oldest first</strong>. Without it, newest first.</td></tr>
+<tr><td>event</td><td>string</td><td>Filter by event type.</td></tr>
+<tr><td>user_id</td><td>integer</td><td>Filter by the acting user.</td></tr>
+<tr><td>page / per_page</td><td>integer</td><td>Standard pagination. <code>page</code> is ignored in cursor mode.</td></tr>
+</tbody></table>
+<pre><code>[
+  { "id": 9911, "event": "payout_paid", "event_id": 321, "user_id": 1, "info": "40.46", "date": "2026-08-07T10:15:00" },
+  { "id": 9912, "event": "referral", "event_id": 8355, "user_id": 0, "info": "sarah10", "date": "2026-08-07T10:16:31" }
+]</code></pre>
+<p>The response header <code>X-WCUsage-Last-Event</code> carries the highest event ID returned. Store it and pass it as <code>after</code> on the next poll:</p>
+<pre><code>GET /wp-json/wcusage/v2/events?after=9912&amp;per_page=100
+&rarr; X-WCUsage-Last-Event: 9987</code></pre>
+
+<h3>Event types</h3>
+<table><thead><tr><th>Event</th><th><code>event_id</code> refers to</th></tr></thead><tbody>
+<tr><td><code>referral</code></td><td>Order</td></tr>
+<tr><td><code>commission_added</code>, <code>commission_removed</code></td><td>Coupon</td></tr>
+<tr><td><code>mla_commission_added</code>, <code>mla_commission_removed</code></td><td>Coupon (PRO)</td></tr>
+<tr><td><code>registration</code>, <code>registration_accept</code></td><td>Registration</td></tr>
+<tr><td><code>payout_request</code>, <code>payout_paid</code>, <code>payout_reversed</code>, <code>payout_cancelled</code></td><td>Payout (PRO)</td></tr>
+<tr><td><code>reward_earned</code></td><td>Reward (PRO)</td></tr>
+<tr><td><code>new_campaign</code></td><td>Campaign (PRO)</td></tr>
+<tr><td><code>direct_link_domain</code></td><td>Direct link (PRO)</td></tr>
+<tr><td><code>mla_invite</code></td><td>Invite (PRO)</td></tr>
+<tr><td><code>lifetime_link_edited</code></td><td>Customer (PRO)</td></tr>
+<tr><td><code>api_key_created</code>, <code>api_key_revoked</code></td><td>API key</td></tr>
+</tbody></table>
+<p><code>user_id</code> is the acting user, and is <code>0</code> for system and guest actions such as a referral from a logged-out shopper. <code>info</code> is free-form context whose meaning depends on the event type.</p>
+[note]Declined registrations are <strong>not</strong> written to the activity log, so they never appear in this feed. Subscribe to the <code>registration.declined</code> webhook (PRO) if you need them.[/note]
+[warning]The feed needs the <strong>activity log</strong> enabled in the plugin settings (it is by default). When it is off, this endpoint answers <code>400 wcusage_api_log_disabled</code>. Webhooks are unaffected &mdash; they fire from the same funnel, before the log setting is consulted.[/warning]
+
+<h2>Reports</h2>
+<p>A store-wide program summary, built for dashboards and AI assistants that need the whole picture in one call.</p>
+<p>[get] <code>/wp-json/wcusage/v2/reports/summary</code></p>
+<p><strong>Permission:</strong> admin, <code>read</code> scope.</p>
+<table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>top</td><td>integer</td><td>How many top affiliates to include, by all-time commission. 0&ndash;50, default <code>10</code>.</td></tr>
+<tr><td>refresh</td><td>boolean</td><td>Bypass the 5-minute report cache. Default <code>false</code>.</td></tr>
+</tbody></table>
+<pre><code>{
+  "generated": "2026-08-07T14:05:00",
+  "currency": "USD",
+  "totals": {
+    "affiliates": 448,
+    "coupons": 512,
+    "orders_count": 10231,
+    "total_sales": 812337.20,
+    "total_discount": 79110.55,
+    "total_commission": 81233.71,
+    "unpaid_commission": 6120.44,
+    "pending_payout_commission": 1240.00
+  },
+  "payouts": { "pending_count": 12, "pending_amount": 1240.00, "paid_count": 981, "paid_amount": 73873.27 },
+  "pending_registrations": 7,
+  "top_affiliates": [
+    { "user_id": 1456, "orders_count": 19, "total_sales": 1977.80, "total_commission": 181.60,
+      "user": { "id": 1456, "display_name": "Sarah J", "login": "sarahj", "email": "sarah@example.com" } }
+  ],
+  "cached": false
+}</code></pre>
+<p><code>cached: true</code> means the response came from the 5-minute cache. The <code>payouts</code> block is present only when the payouts add-on is available &mdash; the free build omits it entirely rather than reporting four zeros as though the program had simply never paid anybody.</p>
+[note]Totals are summed from the same stored per-coupon snapshots the affiliate dashboards show, so they move when those snapshots are rebuilt rather than order by order. Balances (<code>unpaid_commission</code>, <code>pending_payout_commission</code>) are always current.[/note]
+
+<h2>API Key Management</h2>
+<p>Keys can be managed in the admin UI (<strong>Coupon Affiliates &rarr; Admin Tools &rarr; API</strong>) or programmatically. Every route here requires an admin with the <code>manage</code> scope.</p>
+
+<h3>List keys</h3>
+<p>[get] <code>/wp-json/wcusage/v2/keys</code></p>
+<p>Standard pagination. Returns metadata only &mdash; never tokens or hashes:</p>
+<pre><code>[
+  {
+    "id": 4,
+    "user_id": 1456,
+    "description": "Zapier integration",
+    "key_prefix": "wcus_9f2c1e",
+    "scopes": ["read"],
+    "status": "active",
+    "last_used": "2026-08-07T13:55:00",
+    "date_created": "2026-08-01T09:12:00",
+    "date_expires": null
+  }
+]</code></pre>
+<p><code>key_prefix</code> is the first 12 characters of the token &mdash; enough to recognise a key in your own logs, useless as a credential.</p>
+
+<h3>Create a key</h3>
+<p>[post] <code>/wp-json/wcusage/v2/keys</code></p>
+<table><thead><tr><th>Body param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>user_id</td><td>integer</td><td>The user the key acts as. Defaults to the current user. Use an affiliate's user ID to create a key limited to their own data.</td></tr>
+<tr><td>description</td><td>string</td><td>Label, e.g. "Zapier integration". Up to 200 characters.</td></tr>
+<tr><td>scopes</td><td>array</td><td>Any of <code>read</code>, <code>write</code>, <code>manage</code>. Default <code>["read"]</code>.</td></tr>
+<tr><td>expires</td><td>date</td><td>Optional expiry (<code>Y-m-d</code>). The key stops working at the end of that day, in the site's timezone.</td></tr>
+</tbody></table>
+<pre><code>{
+  "id": 4,
+  "token": "wcus_9f2c1e4a7b3d5e6f8a9b0c1d2e3f4a5b6c7d8e9f",
+  "notice": "Store this token now - it cannot be shown again.",
+  "user_id": 1456
+}</code></pre>
+[warning]The token is returned <strong>only once</strong>, at creation, with <code>201</code>. Only a SHA-256 hash is stored on the server, so a lost token cannot be recovered &mdash; revoke it and create another.[/warning]
+<p>You may always create a key for <strong>yourself</strong>. Creating one for another user requires the capability to edit that user, so a lower-privileged manager cannot mint a key that acts as a full administrator. Otherwise the response is <code>403 wcusage_api_cannot_create_for_user</code>.</p>
+
+<h3>Revoke a key</h3>
+<p>[delete] <code>/wp-json/wcusage/v2/keys/{id}</code></p>
+<pre><code>{ "revoked": true }</code></pre>
+<p>Revocation is immediate: clients using the key receive <code>401</code> on their next request. It is idempotent &mdash; revoking an already-revoked key reports success. The same "could you edit that user" rule applies, so one plugin admin cannot destroy an administrator's integration credential.</p>
+<p>Key creation and revocation are both recorded in the activity log (<code>api_key_created</code>, <code>api_key_revoked</code>), so they show up in <code>/events</code>.</p>
+[note]Permanent deletion of a key row is available on the admin screen only. The API offers revocation, which keeps the audit trail intact.[/note]
+
+<h1>Webhooks</h1>
+
+<h2>Webhooks Overview</h2>
+[note]Webhooks are a <strong>PRO</strong> feature. In the free build the delivery layer is not shipped at all: the <code>/webhooks*</code> routes are not registered and the Webhooks card does not appear on the API screen. The free equivalent is to poll <a href="#">/events</a>, which carries a cursor so you only ever fetch what is new.[/note]
+<p>Webhooks push signed JSON notifications to a URL you choose, the moment something happens in your affiliate program &mdash; no polling required. Set them up under <strong>Coupon Affiliates &rarr; Admin Tools &rarr; API &rarr; Webhooks</strong>, or through the <a href="#">management API</a>.</p>
+<p>Every lifecycle event in the plugin already flows through one funnel, and the webhook dispatcher listens to it. Deliveries are queued (Action Scheduler when WooCommerce provides it, otherwise WP-Cron), so your endpoint never slows down a checkout or an admin action.</p>
+
+<h3>Available events</h3>
+<p>Every event below needs PRO, since webhooks themselves do. These first ones are raised by the core plugin, so they arrive on any PRO install:</p>
+<table><thead><tr><th>Event</th><th>Fires when</th></tr></thead><tbody>
+<tr><td><code>referral.created</code></td><td>A referred order is attributed to an affiliate.</td></tr>
+<tr><td><code>registration.created</code></td><td>A new affiliate registration is submitted.</td></tr>
+<tr><td><code>registration.accepted</code></td><td>A registration is approved.</td></tr>
+<tr><td><code>registration.declined</code></td><td>A registration is declined.</td></tr>
+<tr><td><code>commission.added</code></td><td>Commission is credited to an affiliate.</td></tr>
+<tr><td><code>commission.removed</code></td><td>Commission is removed (refund, cancellation, manual deduction).</td></tr>
+<tr><td><code>affiliate.created</code></td><td>An affiliate's coupon has been created and is ready to use. Fires after approval, and also when an admin creates an affiliate directly.</td></tr>
+</tbody></table>
+<p>These further events come from individual PRO add-ons, so they need that add-on to be active as well:</p>
+<table><thead><tr><th>Event</th><th>Fires when</th><th>Add-on</th></tr></thead><tbody>
+<tr><td><code>payout.requested</code></td><td>An affiliate requests a payout.</td><td>Payouts</td></tr>
+<tr><td><code>payout.paid</code></td><td>A payout is marked as paid.</td><td>Payouts</td></tr>
+<tr><td><code>payout.reversed</code></td><td>A payout is reversed.</td><td>Payouts</td></tr>
+<tr><td><code>payout.cancelled</code></td><td>A payout is cancelled and its amount returned to the unpaid balance.</td><td>Payouts</td></tr>
+<tr><td><code>affiliate.payout_details_updated</code></td><td>An affiliate changes their payout method or details.</td><td>Payouts</td></tr>
+<tr><td><code>reward.earned</code></td><td>An affiliate earns a reward or bonus.</td><td>Rewards</td></tr>
+<tr><td><code>campaign.created</code></td><td>An affiliate creates a campaign.</td><td>Campaigns</td></tr>
+<tr><td><code>directlink.created</code></td><td>An affiliate registers a direct-link domain.</td><td>Direct Link</td></tr>
+<tr><td><code>commission.mla_added</code></td><td>Multi-level commission is credited to an upline.</td><td>Multi-Level</td></tr>
+<tr><td><code>commission.mla_removed</code></td><td>Multi-level commission is removed from an upline.</td><td>Multi-Level</td></tr>
+<tr><td><code>mla.invite_created</code></td><td>A multi-level affiliate invite is created.</td><td>Multi-Level</td></tr>
+<tr><td><code>mla.sub_registered</code></td><td>Someone registers as a sub-affiliate under an existing affiliate.</td><td>Multi-Level</td></tr>
+</tbody></table>
+<p>Subscribe an endpoint to specific events, or to <code>*</code> for everything. The live catalog for <em>your</em> install is always available at [get] <code>/wp-json/wcusage/v2/webhooks/events</code> &mdash; it lists only events this build can actually raise, so you never subscribe to a notification that could never arrive.</p>
+[tip]<code>affiliate.payout_details_updated</code> arriving shortly before <code>payout.requested</code> is a well-known fraud pattern. It is worth watching even if you do nothing else with webhooks.[/tip]
+
+<h3>Endpoint requirements</h3>
+<ul>
+<li>The delivery URL must be <strong>HTTPS</strong> and publicly reachable. Loopback and private-network addresses are rejected at creation. Local development environments may use HTTP &mdash; see the <code>wcusage_api_webhook_require_https</code> filter.</li>
+<li>Respond with any <strong>2xx</strong> status within <strong>8 seconds</strong>. Anything else counts as a failed delivery.</li>
+<li>Do the real work asynchronously. Acknowledge first, process afterwards.</li>
+</ul>
+[note]Webhook events fire from the plugin's activity funnel <em>before</em> the activity-log setting is consulted, so they keep working even on stores that have database logging switched off. They do stop when the API master switch is off.[/note]
+
+<h2>Deliveries &amp; Security</h2>
+
+<h3>Payload format</h3>
+<p>Every delivery is a JSON <code>POST</code> with the same envelope. The <code>data</code> block is rebuilt from the live object at delivery time, so a retry never carries stale figures:</p>
+<pre><code>POST /your-endpoint HTTP/1.1
+Content-Type: application/json
+User-Agent: CouponAffiliates-Webhook/8.2.0
+X-WCUsage-Event: payout.paid
+X-WCUsage-Delivery: whd_66b4a1e2c3d4f5.12345678
+X-WCUsage-Signature: t=1786457100,v1=5f8a2b...
+
+{
+  "event": "payout.paid",
+  "created": "2026-08-07T14:05:00+00:00",
+  "site": "https://example.com",
+  "data": {
+    "payout_id": 321,
+    "user_id": 1456,
+    "coupon_id": 8338,
+    "amount": 40.46,
+    "method": "PayPal",
+    "method_type": "paypal",
+    "status": "paid",
+    "date": "2026-08-07T09:00:00",
+    "date_paid": "2026-08-07T14:04:58"
+  }
+}</code></pre>
+<table><thead><tr><th>Envelope field</th><th>Description</th></tr></thead><tbody>
+<tr><td>event</td><td>The webhook event name, e.g. <code>payout.paid</code>.</td></tr>
+<tr><td>created</td><td>When the delivery was built, RFC&nbsp;3339 in UTC.</td></tr>
+<tr><td>site</td><td>The sending site's home URL &mdash; useful when one receiver serves several stores.</td></tr>
+<tr><td>data</td><td>Event-specific payload; shapes below.</td></tr>
+</tbody></table>
+
+<h3>Payload shapes by event</h3>
+<table><thead><tr><th>Event(s)</th><th><code>data</code> fields</th></tr></thead><tbody>
+<tr><td><code>referral.created</code></td><td><code>order_id</code>, <code>coupon</code>, <code>user_id</code>, <code>commission</code></td></tr>
+<tr><td><code>commission.added</code>, <code>commission.removed</code>, <code>commission.mla_added</code>, <code>commission.mla_removed</code></td><td><code>coupon_id</code>, <code>coupon</code>, <code>user_id</code>, <code>note</code>, <code>order_id</code> (parsed from the note; <code>null</code> when there is none)</td></tr>
+<tr><td><code>payout.requested</code>, <code>payout.paid</code>, <code>payout.reversed</code>, <code>payout.cancelled</code></td><td><code>payout_id</code>, <code>user_id</code>, <code>coupon_id</code>, <code>amount</code>, <code>method</code>, <code>method_type</code>, <code>status</code>, <code>date</code>, <code>date_paid</code></td></tr>
+<tr><td><code>registration.created</code>, <code>registration.accepted</code>, <code>registration.declined</code></td><td><code>registration_id</code>, <code>user_id</code>, <code>coupon_code</code>, <code>status</code>, <code>type</code>, <code>date</code></td></tr>
+<tr><td><code>affiliate.created</code></td><td><code>user_id</code>, <code>coupon</code>, <code>coupon_id</code>, <code>coupon_ids</code> (every coupon they now hold)</td></tr>
+<tr><td><code>affiliate.payout_details_updated</code></td><td><code>user_id</code>, <code>method_type</code>, <code>has_details</code></td></tr>
+<tr><td><code>directlink.created</code></td><td><code>directlink_id</code>, <code>coupon_id</code>, <code>coupon</code>, <code>user_id</code>, <code>website</code>, <code>campaign</code>, <code>status</code></td></tr>
+<tr><td><code>mla.invite_created</code></td><td><code>invite_id</code>, <code>user_id</code>, <code>status</code>, <code>date</code></td></tr>
+<tr><td><code>mla.sub_registered</code></td><td><code>user_id</code>, <code>parent_user_id</code>, <code>coupon</code></td></tr>
+<tr><td><code>reward.earned</code>, <code>campaign.created</code></td><td><code>object_id</code>, <code>info</code></td></tr>
+<tr><td><code>ping</code> (test delivery)</td><td><code>message</code></td></tr>
+</tbody></table>
+[note]Payloads never carry customer personal data, payout destination details, or the email address of a person who is not a user of the site. <code>mla.invite_created</code>, for example, deliberately omits the invitee's email address. Add fields for your own trusted receiver with the <code>wcusage_api_webhook_payload</code> filter.[/note]
+
+<h3>Verifying signatures</h3>
+<p>Each webhook has a secret (<code>whsec_&hellip;</code>), shown in the admin UI and returned once on creation through the API. Every delivery is signed with HMAC-SHA256 over <code>"&lt;timestamp&gt;.&lt;raw body&gt;"</code>:</p>
+<pre><code>X-WCUsage-Signature: t=&lt;unix timestamp&gt;,v1=&lt;hex hmac&gt;</code></pre>
+<p>Verify it before trusting anything in the payload:</p>
+<pre><code>&lt;?php
+$secret = 'whsec_your_webhook_secret';
+$body   = file_get_contents( 'php://input' );
+$header = $_SERVER['HTTP_X_WCUSAGE_SIGNATURE'] ?? '';
+
+$parts = [];
+foreach ( explode( ',', $header ) as $pair ) {
+    [ $k, $v ] = array_pad( explode( '=', $pair, 2 ), 2, '' );
+    $parts[ trim( $k ) ] = trim( $v );
+}
+
+$expected = hash_hmac( 'sha256', ( $parts['t'] ?? '' ) . '.' . $body, $secret );
+
+if ( ! hash_equals( $expected, $parts['v1'] ?? '' ) ) {
+    http_response_code( 401 );
+    exit; // signature mismatch
+}
+
+if ( abs( time() - (int) ( $parts['t'] ?? 0 ) ) &gt; 300 ) {
+    http_response_code( 401 );
+    exit; // replayed or stale delivery
+}
+
+http_response_code( 200 );
+// then process json_decode( $body, true ) out of band</code></pre>
+[tip]Always compare with a constant-time function (<code>hash_equals</code>), sign over the <strong>raw</strong> body rather than a re-encoded copy, and reject timestamps older than a few minutes to prevent replay.[/tip]
+
+<h3>Retries and automatic disabling</h3>
+<ul>
+<li>Deliveries are queued asynchronously, so your endpoint is never in the critical path of a checkout or an admin action.</li>
+<li>A failed delivery is retried up to <strong>5 attempts</strong> with exponential backoff: roughly 1 minute, 4 minutes, 16 minutes, then about an hour.</li>
+<li>After <strong>25 consecutive failures</strong> the endpoint is automatically disabled. Re-enable it from the admin page or with a <code>PATCH</code> request; either resets the failure counter and clears the last error.</li>
+<li>Delivery is <strong>at-least-once</strong>. Duplicates are possible, so use <code>X-WCUsage-Delivery</code> to deduplicate if your handler is not idempotent.</li>
+<li>Ordering is not guaranteed. Two events raised close together may arrive in either order, and a retried delivery may land after a newer one.</li>
+<li>The last failure message and the failure count are visible on the admin page and in <code>GET /webhooks</code>.</li>
+</ul>
+<p>Tune the two limits with the <code>wcusage_api_webhook_max_attempts</code> and <code>wcusage_api_webhook_max_failures</code> filters.</p>
+
+<h2>Webhook Management API</h2>
+<p>All routes require an admin with the <code>manage</code> scope, except the event catalog, which needs <code>read</code>. <strong>PRO only</strong> &mdash; none of these routes are registered in the free build, so they answer <code>404 rest_no_route</code> there.</p>
+
+<h3>List webhooks</h3>
+<p>[get] <code>/wp-json/wcusage/v2/webhooks</code></p>
+<pre><code>[
+  {
+    "id": 1,
+    "name": "Ops Slack relay",
+    "url": "https://hooks.example.net/coupon-affiliates",
+    "events": ["payout.requested", "payout.paid"],
+    "status": "active",
+    "failures": 0,
+    "last_delivery": "2026-08-07T14:05:01",
+    "last_error": "",
+    "date_created": "2026-07-30T11:00:00"
+  }
+]</code></pre>
+<p>Signing secrets are not included in list responses. Full administrators can read them on the admin page; other plugin admins see them masked.</p>
+
+<h3>Create a webhook</h3>
+<p>[post] <code>/wp-json/wcusage/v2/webhooks</code></p>
+<table><thead><tr><th>Body param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>name</td><td>string</td><td>Label for the webhook. Up to 100 characters.</td></tr>
+<tr><td>url</td><td>string</td><td>Required. HTTPS delivery URL. Validated against loopback and private addresses.</td></tr>
+<tr><td>events</td><td>array</td><td>Required. Event names from the catalog, or <code>["*"]</code> for all. Unknown names are dropped; if nothing valid remains the request fails with <code>400 wcusage_api_no_events</code>.</td></tr>
+</tbody></table>
+<p>Returns <code>201</code> including the signing <code>secret</code>. Store it &mdash; it is the only way to verify deliveries, and this is the only response that carries it.</p>
+
+<h3>Update a webhook</h3>
+<p>[patch] <code>/wp-json/wcusage/v2/webhooks/{id}</code></p>
+<table><thead><tr><th>Body param</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>status</td><td>string</td><td><code>active</code> or <code>disabled</code>. Re-activating resets the failure counter and clears the last error.</td></tr>
+<tr><td>events</td><td>array</td><td>Replaces the subscribed events entirely.</td></tr>
+</tbody></table>
+<p>Sending neither returns <code>400 wcusage_api_no_fields</code>.</p>
+[note]The delivery <strong>URL cannot be changed</strong> after creation, by design &mdash; it is validated against SSRF only on the way in. To point a webhook somewhere else, delete it and create a new one. The signing secret is likewise fixed.[/note]
+
+<h3>Test a webhook</h3>
+<p>[post] <code>/wp-json/wcusage/v2/webhooks/{id}/test</code></p>
+<p>Sends a signed <code>ping</code> delivery immediately and synchronously, and returns the HTTP status your endpoint answered with:</p>
+<pre><code>{ "code": 200 }</code></pre>
+<p>A transport-level failure (DNS, TLS, timeout) returns <code>502 wcusage_api_delivery_failed</code> with the underlying message. Test deliveries do not count towards the failure counter.</p>
+
+<h3>Delete a webhook</h3>
+<p>[delete] <code>/wp-json/wcusage/v2/webhooks/{id}</code></p>
+<pre><code>{ "deleted": true }</code></pre>
+
+<h3>Event catalog</h3>
+<p>[get] <code>/wp-json/wcusage/v2/webhooks/events</code></p>
+<p><strong>Permission:</strong> admin, <code>read</code> scope.</p>
+<pre><code>[
+  { "event": "referral.created", "description": "A referred order was attributed to an affiliate." },
+  { "event": "payout.paid", "description": "A payout was marked as paid." }
+]</code></pre>
+<p>Read this rather than hard-coding the list: it reflects exactly which add-ons are active on the install.</p>
+
+<h1>Integrations</h1>
+
+<h2>Code Samples</h2>
+<p>Nothing here needs a client library &mdash; the API is plain HTTP with a bearer token. These are complete, working starting points.</p>
+[note]The samples on this page are illustrative and provided <strong>as is</strong>. They deliberately keep to the shortest thing that works, so they omit the logging, retry policy, input validation and secret handling a production integration needs. Review and adapt them before relying on them &mdash; see <a href="#">Security &amp; Disclaimers</a>.[/note]
+
+<h3>PHP (inside WordPress)</h3>
+<p>Talking to another store from a WordPress site, using the HTTP API that is already loaded:</p>
+<pre><code>$response = wp_remote_get(
+    'https://example.com/wp-json/wcusage/v2/reports/summary?top=5',
+    array(
+        'timeout' =&gt; 15,
+        'headers' =&gt; array(
+            'Authorization' =&gt; 'Bearer ' . WCUSAGE_API_KEY,
+            'Accept'        =&gt; 'application/json',
+        ),
+    )
+);
+
+if ( is_wp_error( $response ) ) {
+    error_log( 'Coupon Affiliates API unreachable: ' . $response-&gt;get_error_message() );
+    return;
+}
+
+$code = wp_remote_retrieve_response_code( $response );
+$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+if ( 200 !== $code ) {
+    // Every plugin error carries a machine-readable code.
+    error_log( 'API error ' . $code . ': ' . ( $body['code'] ?? 'unknown' ) );
+    return;
+}
+
+printf( 'Unpaid commission: %s %.2f', $body['currency'], $body['totals']['unpaid_commission'] );</code></pre>
+
+<h3>PHP (standalone, with pagination)</h3>
+<p>Walking a collection to the end, using the pagination headers rather than guessing:</p>
+<pre><code>&lt;?php
+function wcu_api_get( $path, $params = [] ) {
+    $url = 'https://example.com/wp-json/wcusage/v2' . $path;
+    if ( $params ) {
+        $url .= '?' . http_build_query( $params );
+    }
+
+    $ch = curl_init( $url );
+    curl_setopt_array( $ch, [
+        CURLOPT_RETURNTRANSFER =&gt; true,
+        CURLOPT_HEADER         =&gt; true,
+        CURLOPT_HTTPHEADER     =&gt; [ 'Authorization: Bearer ' . getenv( 'WCUSAGE_KEY' ) ],
+        CURLOPT_TIMEOUT        =&gt; 20,
+    ] );
+
+    $raw         = curl_exec( $ch );
+    $status      = curl_getinfo( $ch, CURLINFO_RESPONSE_CODE );
+    $header_size = curl_getinfo( $ch, CURLINFO_HEADER_SIZE );
+    curl_close( $ch );
+
+    $headers = substr( $raw, 0, $header_size );
+    $body    = json_decode( substr( $raw, $header_size ), true );
+
+    $pages = 1;
+    if ( preg_match( '/^X-WP-TotalPages:\s*(\d+)/mi', $headers, $m ) ) {
+        $pages = (int) $m[1];
+    }
+
+    return [ 'status' =&gt; $status, 'body' =&gt; $body, 'pages' =&gt; $pages ];
+}
+
+$page = 1;
+do {
+    $result = wcu_api_get( '/affiliates', [ 'page' =&gt; $page, 'per_page' =&gt; 100 ] );
+
+    if ( 200 !== $result['status'] ) {
+        throw new RuntimeException( 'API error: ' . ( $result['body']['code'] ?? $result['status'] ) );
+    }
+
+    foreach ( $result['body'] as $affiliate ) {
+        printf( "%-30s %8.2f unpaid\n",
+            $affiliate['user']['display_name'],
+            $affiliate['unpaid_commission']
+        );
+    }
+
+    $page++;
+} while ( $page &lt;= $result['pages'] );</code></pre>
+
+<h3>JavaScript / Node</h3>
+<p>Including the one piece of error handling that matters most in practice &mdash; honouring <code>retry_after</code>:</p>
+<pre><code>const BASE = 'https://example.com/wp-json/wcusage/v2';
+const KEY  = process.env.WCUSAGE_KEY;
+
+async function api( path, params = {} ) {
+  const url = new URL( BASE + path );
+  Object.entries( params ).forEach( ( [ k, v ] ) =&gt; url.searchParams.set( k, v ) );
+
+  const res  = await fetch( url, { headers: { Authorization: `Bearer ${KEY}` } } );
+  const body = await res.json();
+
+  if ( res.status === 429 ) {
+    const wait = ( body?.data?.retry_after ?? 60 ) * 1000;
+    await new Promise( r =&gt; setTimeout( r, wait ) );
+    return api( path, params );           // one retry after the window
+  }
+
+  if ( ! res.ok ) {
+    throw new Error( `${body.code}: ${body.message}` );
+  }
+
+  return { body, total: Number( res.headers.get( 'X-WP-Total' ) || 0 ) };
+}
+
+const { body: me } = await api( '/me' );
+console.log( `Authenticated as ${me.user.display_name}, admin: ${me.is_admin}, scopes:`, me.auth.scopes );</code></pre>
+
+<h3>Python</h3>
+<pre><code>import os, requests
+
+BASE = "https://example.com/wp-json/wcusage/v2"
+SESSION = requests.Session()
+SESSION.headers["Authorization"] = f"Bearer {os.environ['WCUSAGE_KEY']}"
+
+def get(path, **params):
+    r = SESSION.get(f"{BASE}{path}", params=params, timeout=20)
+    if r.status_code != 200:
+        raise RuntimeError(f"{r.status_code} {r.json().get('code', '')}")
+    return r
+
+# All referred orders for one coupon last month, newest first.
+page, orders = 1, []
+while True:
+    r = get("/coupons/8338/orders", **{"from": "2026-07-01", "to": "2026-07-31",
+                                       "page": page, "per_page": 100})
+    orders += r.json()
+    if r.headers.get("X-WCUsage-Truncated") == "1":
+        print("Warning: order window was capped; narrow the date range.")
+    if page &gt;= int(r.headers.get("X-WP-TotalPages", 1)):
+        break
+    page += 1
+
+print(f"{len(orders)} orders, {sum(o['commission'] for o in orders):.2f} commission")</code></pre>
+
+<h3>Command line</h3>
+<pre><code># Quick health check
+curl -s https://example.com/wp-json/wcusage/v2/me \
+  -H "Authorization: Bearer $WCUSAGE_KEY" | jq
+
+# Top 5 affiliates by all-time commission
+curl -s "https://example.com/wp-json/wcusage/v2/reports/summary?top=5" \
+  -H "Authorization: Bearer $WCUSAGE_KEY" \
+  | jq -r '.top_affiliates[] | "\(.user.display_name)\t\(.total_commission)"'
+
+# Anything that needs paying out
+curl -s "https://example.com/wp-json/wcusage/v2/payouts?status=pending&amp;per_page=100" \
+  -H "Authorization: Bearer $WCUSAGE_KEY" \
+  | jq -r '.[] | "#\(.id)\t\(.user.display_name)\t\(.amount)\t\(.method)"'</code></pre>
+[tip]Keep the key in an environment variable or your platform's secret store, never in the script. If a key does leak, revoke it on the API screen &mdash; the WordPress account behind it is untouched.[/tip]
+
+<h2>No-Code Platforms</h2>
+<p>Zapier, Make, n8n, Pabbly Connect, Activepieces and similar tools all speak plain HTTP, so no special connector is needed. There are two ways to wire them up.</p>
+
+<h3>Push: webhook trigger (recommended, PRO)</h3>
+<ol>
+<li>In your automation tool, create a scenario starting with a <strong>Webhook / Catch Hook</strong> trigger and copy the URL it gives you.</li>
+<li>In WordPress, go to <strong>Coupon Affiliates &rarr; Admin Tools &rarr; API &rarr; Webhooks</strong> and add an endpoint with that URL, subscribed to the events you care about.</li>
+<li>Press <strong>Test</strong>. Your tool receives a <code>ping</code> payload and learns the structure.</li>
+<li>Map the fields from <code>data</code> into whatever comes next &mdash; a Slack message, a spreadsheet row, a CRM record.</li>
+</ol>
+<p>This is instant, costs no polling quota, and scales to any program size.</p>
+[warning]Most no-code tools cannot verify the HMAC signature. Treat the catch-hook URL itself as a secret: it is long and unguessable, so do not publish it, and never let the automation perform a destructive or financial action purely on the say-so of an unverified payload. Where the action matters, have the scenario read the object back from the API (for example <code>GET /payouts/{id}</code>) before acting on it.[/warning]
+
+<h3>Pull: scheduled polling</h3>
+<p>If you are on the free version, or your tool cannot receive webhooks, poll the change feed on a schedule instead:</p>
+<ol>
+<li>Add a <strong>Scheduled</strong> trigger (every 5&ndash;15 minutes is plenty).</li>
+<li>Add an <strong>HTTP GET</strong> module pointed at <code>https://example.com/wp-json/wcusage/v2/events</code> with the query <code>after={{ last_id }}&amp;per_page=100</code>, and a header <code>Authorization: Bearer wcus_&hellip;</code>.</li>
+<li>Store the response header <code>X-WCUsage-Last-Event</code> in a data store / variable, and feed it back as <code>last_id</code> next run.</li>
+<li>Iterate the returned array and branch on <code>event</code>.</li>
+</ol>
+<p>Starting from <code>after=0</code> would replay the whole history, so seed the cursor once with a single unfiltered call and store the highest <code>id</code> you see.</p>
+
+<h3>Writing back</h3>
+<p>Actions such as approving an application are ordinary HTTP requests:</p>
+<pre><code>Method:  POST
+URL:     https://example.com/wp-json/wcusage/v2/registrations/512/status
+Headers: Authorization: Bearer wcus_...
+         Content-Type: application/json
+Body:    { "status": "accepted", "send_email": true }</code></pre>
+<p>Use a key with <code>write</code> for this, and keep it separate from any read-only key you use elsewhere so you can revoke one without breaking the other.</p>
+
+<h2>Reporting &amp; Dashboards</h2>
+
+<h3>Google Sheets</h3>
+<p>An Apps Script bound to a sheet, refreshing a leaderboard on a timer:</p>
+<pre><code>function refreshAffiliates() {
+  const key   = PropertiesService.getScriptProperties().getProperty( 'WCUSAGE_KEY' );
+  const url   = 'https://example.com/wp-json/wcusage/v2/reports/summary?top=50';
+  const res   = UrlFetchApp.fetch( url, {
+    headers: { Authorization: 'Bearer ' + key },
+    muteHttpExceptions: true
+  } );
+
+  if ( res.getResponseCode() !== 200 ) {
+    throw new Error( res.getContentText() );
+  }
+
+  const data  = JSON.parse( res.getContentText() );
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName( 'Affiliates' );
+
+  sheet.clear();
+  sheet.appendRow( [ 'Affiliate', 'Orders', 'Sales', 'Commission' ] );
+  data.top_affiliates.forEach( function ( a ) {
+    sheet.appendRow( [ a.user.display_name, a.orders_count, a.total_sales, a.total_commission ] );
+  } );
+
+  sheet.getRange( 'A1:D1' ).setFontWeight( 'bold' );
+}</code></pre>
+<p>Add a time-driven trigger for <code>refreshAffiliates</code> and store the key under <strong>Project Settings &rarr; Script Properties</strong>, not in the code.</p>
+
+<h3>Looker Studio, Power BI, Metabase</h3>
+<p>All three can read a JSON/REST source with a bearer header. Point them at:</p>
+<ul>
+<li><code>/reports/summary?top=50</code> for the program overview &mdash; one row of totals plus a leaderboard, already aggregated and cached for five minutes.</li>
+<li><code>/affiliates?per_page=100</code> for a per-affiliate table, walking pages with <code>X-WP-TotalPages</code>.</li>
+<li><code>/coupons/{id}/orders?from=&amp;to=</code> for transaction-level detail, one coupon at a time.</li>
+</ul>
+[tip]Refresh no more often than every five minutes. <code>/reports/summary</code> is cached for exactly that long, so a faster schedule returns identical data (<code>cached: true</code>) while still spending rate limit.[/tip]
+
+<h3>Warehousing the data</h3>
+<p>For an incremental ETL, drive it from <code>/events</code> rather than re-reading collections. Store the last event ID alongside your data, pull only what is new, and reconcile occasionally with a full pass over <code>/affiliates</code>. That keeps a nightly job to a handful of requests regardless of program size.</p>
+
+<h2>Notifications</h2>
+<p>A small receiver that verifies the signature and relays events into Slack. The same shape works for Discord, Teams, Telegram or an SMS gateway &mdash; only the last few lines change.</p>
+[warning]Your receiver is a public URL that anyone can post to. Nothing proves a payload came from your store except a valid signature, so verify it and reject stale timestamps <em>before</em> doing anything with the contents &mdash; and escape those contents like any other external input when you pass them on.[/warning]
+<pre><code>&lt;?php
+// webhook-receiver.php
+$secret = getenv( 'WCUSAGE_WEBHOOK_SECRET' );
+$body   = file_get_contents( 'php://input' );
+$header = $_SERVER['HTTP_X_WCUSAGE_SIGNATURE'] ?? '';
+
+$parts = [];
+foreach ( explode( ',', $header ) as $pair ) {
+    [ $k, $v ] = array_pad( explode( '=', $pair, 2 ), 2, '' );
+    $parts[ trim( $k ) ] = trim( $v );
+}
+
+$expected = hash_hmac( 'sha256', ( $parts['t'] ?? '' ) . '.' . $body, $secret );
+
+if ( ! hash_equals( $expected, $parts['v1'] ?? '' ) || abs( time() - (int) ( $parts['t'] ?? 0 ) ) &gt; 300 ) {
+    http_response_code( 401 );
+    exit;
+}
+
+// Acknowledge immediately - the sender allows 8 seconds and retries on anything else.
+http_response_code( 200 );
+fastcgi_finish_request();
+
+$payload = json_decode( $body, true );
+$data    = $payload['data'] ?? [];
+
+switch ( $payload['event'] ) {
+    case 'payout.requested':
+        $text = sprintf( ':moneybag: Payout requested: %s asked for %.2f via %s (payout #%d)',
+            get_display_name( $data['user_id'] ), $data['amount'], $data['method'], $data['payout_id'] );
+        break;
+
+    case 'registration.created':
+        $text = sprintf( ':wave: New affiliate application for code *%s*', $data['coupon_code'] );
+        break;
+
+    case 'affiliate.payout_details_updated':
+        $text = sprintf( ':warning: Affiliate %d changed their payout details (%s)',
+            $data['user_id'], $data['method_type'] ?: 'none set' );
+        break;
+
+    default:
+        return; // not interested
+}
+
+$ch = curl_init( getenv( 'SLACK_WEBHOOK_URL' ) );
+curl_setopt_array( $ch, [
+    CURLOPT_POST       =&gt; true,
+    CURLOPT_HTTPHEADER =&gt; [ 'Content-Type: application/json' ],
+    CURLOPT_POSTFIELDS =&gt; json_encode( [ 'text' =&gt; $text ] ),
+    CURLOPT_RETURNTRANSFER =&gt; true,
+] );
+curl_exec( $ch );</code></pre>
+<p>Two details worth copying:</p>
+<ul>
+<li><strong>Acknowledge before working.</strong> <code>fastcgi_finish_request()</code> (or a queue) returns the 2xx immediately, so a slow Slack call never turns into a retry storm.</li>
+<li><strong>Ignore unknown events.</strong> New event types appear in later releases; a receiver that throws on them will disable itself after 25 failures.</li>
+</ul>
+[tip]Subscribing to <code>*</code> and filtering in your receiver is easier to maintain than editing the subscription list every time you want another event &mdash; as long as your handler ignores what it does not recognise.[/tip]
+
+<h2>AI Agents &amp; Assistants</h2>
+<p>The API was designed with agents in mind: stable numeric IDs, plain JSON, self-describing errors, a machine-readable spec and a single "who am I" call.</p>
+
+<h3>Setting one up</h3>
+<ol>
+<li>Create a WordPress user for the agent, at the access level it genuinely needs &mdash; an affiliate account for an affiliate-facing assistant, an admin account only for a program-management assistant.</li>
+<li>Create an API key against that user with the <strong><code>read</code> scope only</strong>, and an expiry date.</li>
+<li>Give the tool the OpenAPI URL: <code>https://example.com/wp-json/wcusage/v2/openapi</code>. Custom GPT Actions, most agent frameworks and any OpenAPI-aware tool builder import it directly, generating one callable function per endpoint.</li>
+<li>Configure bearer authentication with the key.</li>
+</ol>
+<p>For frameworks without OpenAPI import, hand-define a handful of tools instead &mdash; <code>/me</code>, <code>/reports/summary</code>, <code>/affiliates/{id}/stats</code>, <code>/coupons/{id}/orders</code> and <code>/events</code> cover the overwhelming majority of questions.</p>
+
+<h3>Prompting notes</h3>
+<ul>
+<li>Tell the agent to call <code>/me</code> first. It learns whether it is an admin or a single affiliate, and which scopes it holds, instead of guessing and hitting <code>403</code>s.</li>
+<li>Tell it to reference coupons by ID, not code.</li>
+<li>Tell it that <code>404</code> can mean "not yours", so it should not conclude an ID is unused.</li>
+<li>Tell it to respect <code>retry_after</code> on <code>429</code> rather than retrying immediately &mdash; otherwise a loop burns the whole rate limit.</li>
+<li>Point it at <code>/reports/summary</code> for "how are we doing" questions. Left to itself an agent will happily page through every affiliate to compute a total the API already has.</li>
+</ul>
+
+<h3>Safety</h3>
+<p>An agent acts on the text it reads, and some of that text comes from outside your control &mdash; an applicant's "how will you promote us" answer, a campaign name, a website URL an affiliate typed in. An agent with write access can be steered by content like that into doing something you never asked for. Read-only access removes the problem entirely; anything more needs a person in the loop on the actions that matter.</p>
+[warning]Never give an agent the <code>manage</code> scope. A key holding it can mint further keys with any scope and point a webhook at any server &mdash; that is full account access, in the hands of something driven by text it reads from the outside world.[/warning]
+<p>If an agent must act, grant <code>write</code> deliberately and remember what it can then do: approve or decline applications, create payout requests, and change payout statuses. Payout <em>status</em> changes never contact a gateway, but on a store with automatic payouts a <em>created</em> payout request can pay real money immediately. If that is a concern, switch the <code>/payouts</code> endpoints off on the API screen and let the agent read everything else.</p>
+[tip]An affiliate-facing assistant is the safest deployment by construction: give it a read-only key on the affiliate's own account, and the API itself guarantees it can never see anybody else's data, however it is prompted.[/tip]
+
+<h2>Recipes</h2>
+
+<h3>Sync new referrals into another system</h3>
+<p>Poll the change feed and keep a cursor &mdash; one indexed query per poll, no matter how busy the program is:</p>
+<pre><code>curl -s "https://example.com/wp-json/wcusage/v2/events?after=9912&amp;event=referral&amp;per_page=100" \
+  -H "Authorization: Bearer $WCUSAGE_KEY" -D headers.txt
+
+# the new cursor for next time
+grep -i '^X-WCUsage-Last-Event' headers.txt</code></pre>
+<p>On PRO, subscribe a webhook to <code>referral.created</code> and skip the polling entirely.</p>
+
+<h3>Build a monthly affiliate statement</h3>
+<pre><code># totals for the month
+GET /wp-json/wcusage/v2/affiliates/1456/stats?from=2026-07-01&amp;to=2026-07-31
+
+# the orders behind them, one coupon at a time
+GET /wp-json/wcusage/v2/coupons/8338/orders?from=2026-07-01&amp;to=2026-07-31&amp;per_page=100</code></pre>
+<p>Keep the range fixed between calls so both are served from cache rather than rescanned.</p>
+
+<h3>Auto-approve applications that meet your criteria</h3>
+<pre><code># 1. find pending applications
+GET /wp-json/wcusage/v2/registrations?status=pending&amp;per_page=100
+
+# 2. approve the ones that qualify
+POST /wp-json/wcusage/v2/registrations/512/status
+{ "status": "accepted", "message": "Welcome aboard!", "send_email": true }</code></pre>
+<p>Needs an admin key with <code>write</code>. Remember that accepting is one-way through the API, so apply your criteria before calling, not after.</p>
+
+<h3>Give an affiliate read-only API access to their own data</h3>
+<pre><code>POST /wp-json/wcusage/v2/keys
+{ "user_id": 1456, "description": "Sarah's reporting script", "scopes": ["read"], "expires": "2027-01-01" }</code></pre>
+<p>The resulting key can call <code>/me</code>, <code>/affiliates/1456/stats</code>, its own coupons, their orders and click stats, and <code>/payouts</code> filtered to itself &mdash; and nothing else. Creating it requires <code>manage</code> plus the capability to edit that user.</p>
+
+<h3>Reconcile payouts with your accounting system</h3>
+<pre><code># everything paid in a period
+GET /wp-json/wcusage/v2/payouts?status=paid&amp;from=2026-07-01&amp;to=2026-07-31&amp;per_page=100</code></pre>
+<p>Match on <code>transaction_id</code> where your gateway provides one, and on <code>id</code> otherwise. <code>date</code> is when the payout was requested and <code>date_paid</code> when it was settled &mdash; use the latter for period allocation.</p>
+
+<h3>Flag a payout-fraud pattern</h3>
+<p>Subscribe a webhook to <code>affiliate.payout_details_updated</code> and <code>payout.requested</code>. When both arrive for the same <code>user_id</code> within a short window, hold the payout for manual review:</p>
+<pre><code>POST /wp-json/wcusage/v2/payouts/321/status
+{ "status": "cancel" }</code></pre>
+<p>Cancelling returns the amount to the affiliate's unpaid balance, so nothing is lost; re-open it with <code>pending</code> once you are satisfied.</p>
+
+<h3>Refresh stale coupon statistics nightly</h3>
+<pre><code>GET /wp-json/wcusage/v2/coupons/8338/stats?refresh=true</code></pre>
+<p>Rebuilds the stored snapshot from the order history and saves it, so the affiliate's dashboard and every later API read are current. Needs the <code>write</code> scope, and is limited to one rebuild per coupon per minute &mdash; space the calls out, and treat <code>source: "throttled"</code> as "try this one again later".</p>
+
+<h3>Check the health of your integration</h3>
+<pre><code>GET /wp-json/wcusage/v2/me            # what am I, and what may I do?
+GET /wp-json/wcusage/v2/webhooks      # failures, last_error, last_delivery
+GET /wp-json/wcusage/v2/keys          # last_used, status, date_expires</code></pre>
+<p>A webhook with a rising <code>failures</code> count, or a key whose <code>last_used</code> has gone stale, is usually the first sign that something upstream broke.</p>
+
+<h1>Developer Reference</h1>
+
+<h2>OpenAPI Document</h2>
+
+<h3>Fetching the spec</h3>
+<p>[get] <code>/wp-json/wcusage/v2/openapi</code></p>
+<p>Returns an <strong>OpenAPI 3.1</strong> document generated live from the registered routes &mdash; every path, parameter, enum, default and required flag, plus both security schemes (bearer API key and Basic application password). Because it is generated from the actual route definitions, it never drifts from the implementation, and it automatically reflects which endpoints you have switched off and which add-ons are active.</p>
+<p>The document is public by default, since the WordPress REST index already enumerates routes. Restrict it to admins with:</p>
+<pre><code>add_filter( 'wcusage_api_openapi_public', '__return_false' );</code></pre>
+<p>Amend the generated spec &mdash; to add descriptions, tags or examples &mdash; with the <code>wcusage_api_openapi_spec</code> filter.</p>
+
+<h3>What it contains</h3>
+<pre><code>{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Coupon Affiliates REST API",
+    "description": "Affiliate data for WooCommerce: affiliates, coupons, referred orders, commission, payouts, registrations, clicks, events and reports.",
+    "version": "8.2.0"
+  },
+  "servers": [ { "url": "https://example.com/wp-json/wcusage/v2" } ],
+  "paths": {
+    "/coupons/{id}/stats": {
+      "get": {
+        "operationId": "get_coupons_id_stats",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "from", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "refresh", "in": "query", "required": false, "schema": { "type": "boolean", "default": false } }
+        ],
+        "security": [ { "bearerApiKey": [] }, { "basicAppPassword": [] } ],
+        "responses": { "200": { "description": "Success." }, "401": { "description": "Authentication required or invalid." }, "403": { "description": "Insufficient permissions or scope." } }
+      }
+    }
+  },
+  "components": { "securitySchemes": { "bearerApiKey": { "type": "http", "scheme": "bearer" }, "basicAppPassword": { "type": "http", "scheme": "basic" } } }
+}</code></pre>
+<p>Path parameters, query parameters and JSON request bodies are all derived from the routes' own argument definitions, including types, enums, defaults and required flags. Because the document is built per request, it reflects exactly what <em>this</em> install exposes: endpoints switched off in the settings are absent, and so are routes belonging to add-ons that are not active.</p>
+<p>Using it is covered under <a href="#">AI Agents &amp; Assistants</a> and <a href="#">No-Code Platforms</a> &mdash; most tools that accept an OpenAPI URL will generate a working client from it directly.</p>
+
+<h2>Availability</h2>
+<p>Not every endpoint exists on every install. Three things decide it: the plugin edition, which add-ons are active, and which endpoints an administrator has switched on.</p>
+<table><thead><tr><th>Endpoint</th><th>Free</th><th>PRO</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>/me</code>, <code>/openapi</code></td><td>Yes</td><td>Yes</td><td></td></tr>
+<tr><td><code>/affiliates</code>, <code>/coupons</code>, <code>/reports/summary</code></td><td>Yes</td><td>Yes</td><td>PRO adds <code>mla_parents</code> to the affiliate detail view and the <code>payouts</code> block to the report.</td></tr>
+<tr><td><code>/registrations</code></td><td>Yes</td><td>Yes</td><td><code>501</code> when the registrations table is absent.</td></tr>
+<tr><td><code>/clicks/stats</code></td><td>Yes</td><td>Yes</td><td><code>501</code> when the clicks table is absent.</td></tr>
+<tr><td><code>/events</code></td><td>Yes</td><td>Yes</td><td><code>501</code> when the activity table is absent; <code>400</code> when the activity log is switched off.</td></tr>
+<tr><td><code>/keys</code></td><td>Yes</td><td>Yes</td><td></td></tr>
+<tr><td><code>/webhooks</code></td><td>&mdash;</td><td>Yes</td><td>Not registered at all in the free build. Poll <code>/events</code> instead.</td></tr>
+<tr><td><code>/payouts</code></td><td>&mdash;</td><td>Yes</td><td>Not registered at all in the free build; <code>501</code> when the add-on is inactive.</td></tr>
+</tbody></table>
+<p>MLA-related access (an upline reading a downline's coupon) and the add-on webhook events likewise exist only where those add-ons do. The safest way to discover what a given install offers is to read <code>/openapi</code> and <code>/webhooks/events</code> rather than assuming.</p>
+
+<h2>Error Reference</h2>
+<p>All codes are prefixed <code>wcusage_api_</code> in the response. Core WordPress codes such as <code>rest_no_route</code>, <code>rest_invalid_param</code> and <code>rest_missing_callback_param</code> can also appear.</p>
+<table><thead><tr><th>Code</th><th>Status</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>unauthorized</code></td><td>401</td><td>No authenticated user. Send an application password or an API key.</td></tr>
+<tr><td><code>forbidden</code></td><td>403</td><td>Authenticated, but this user may not access the resource.</td></tr>
+<tr><td><code>invalid_key</code></td><td>401</td><td>The API key is unknown, revoked or expired.</td></tr>
+<tr><td><code>invalid_key_user</code></td><td>401</td><td>The user the key acts as no longer exists.</td></tr>
+<tr><td><code>https_required</code></td><td>401</td><td>API keys may only be used over HTTPS.</td></tr>
+<tr><td><code>too_many_auth_failures</code></td><td>429</td><td>Too many invalid keys from this address; wait for the window to roll over.</td></tr>
+<tr><td><code>insufficient_scope</code></td><td>403</td><td>The key lacks the scope this route needs.</td></tr>
+<tr><td><code>key_wrong_namespace</code></td><td>403</td><td>An API key was presented to an endpoint outside the plugin's namespaces.</td></tr>
+<tr><td><code>rate_limited</code></td><td>429</td><td>Per-minute request limit exceeded. See <code>retry_after</code>.</td></tr>
+<tr><td><code>throttled</code></td><td>429</td><td>An expensive recalculation was requested again too soon. See <code>retry_after</code>.</td></tr>
+<tr><td><code>not_found</code></td><td>404</td><td>No such resource &mdash; or it belongs to somebody else.</td></tr>
+<tr><td><code>unavailable</code></td><td>501</td><td>The feature or table this endpoint reads is not present on this install.</td></tr>
+<tr><td><code>log_disabled</code></td><td>400</td><td>The activity log is switched off, so the events feed is empty.</td></tr>
+<tr><td><code>coupon_required</code></td><td>400</td><td>Non-admin callers must pass a <code>coupon_id</code> to <code>/clicks/stats</code>.</td></tr>
+<tr><td><code>no_change</code></td><td>400</td><td>The payout or registration already has the requested status.</td></tr>
+<tr><td><code>already_accepted</code></td><td>400</td><td>The registration was already accepted; reversal is admin-only.</td></tr>
+<tr><td><code>no_coupon_code</code></td><td>409</td><td>The registration has no coupon code, so its status cannot change.</td></tr>
+<tr><td><code>not_updated</code></td><td>409</td><td>Something on the site refused the registration status change.</td></tr>
+<tr><td><code>payouts_disabled</code></td><td>400</td><td>Payout requests are switched off in the plugin settings.</td></tr>
+<tr><td><code>requests_disabled</code></td><td>403</td><td>Affiliates cannot self-request payouts on this store.</td></tr>
+<tr><td><code>no_affiliate</code></td><td>400</td><td>The coupon has no affiliate assigned.</td></tr>
+<tr><td><code>no_balance</code></td><td>400</td><td>There is no unpaid commission to request.</td></tr>
+<tr><td><code>below_threshold</code></td><td>400</td><td>The unpaid balance is under the store's minimum payout threshold.</td></tr>
+<tr><td><code>no_payout_details</code></td><td>400</td><td>The affiliate has not saved payout details.</td></tr>
+<tr><td><code>method_disabled</code></td><td>400</td><td>The saved payout method is no longer enabled on the store.</td></tr>
+<tr><td><code>invoice_required</code></td><td>400</td><td>This payout method requires an invoice upload; use the affiliate dashboard.</td></tr>
+<tr><td><code>in_progress</code></td><td>409</td><td>A payout request for this coupon is already being processed.</td></tr>
+<tr><td><code>not_created</code></td><td>409</td><td>The payout request was refused by a filter or a failed write.</td></tr>
+<tr><td><code>invalid_transition</code></td><td>400</td><td>That payout status change is not permitted through the API.</td></tr>
+<tr><td><code>insufficient_unpaid</code></td><td>409</td><td>A cancelled payout cannot be re-opened; its amount is no longer in the unpaid balance.</td></tr>
+<tr><td><code>conflict</code></td><td>409</td><td>The payout status changed while this request was in flight.</td></tr>
+<tr><td><code>cannot_create_for_user</code></td><td>403</td><td>You may not create an API key acting as that user.</td></tr>
+<tr><td><code>cannot_manage_key</code></td><td>403</td><td>You may not revoke that user's API key.</td></tr>
+<tr><td><code>invalid_user</code></td><td>400</td><td>The user for this API key does not exist.</td></tr>
+<tr><td><code>invalid_expiry</code></td><td>400</td><td>The expiry date is not in <code>Y-m-d</code> format.</td></tr>
+<tr><td><code>invalid_url</code></td><td>400</td><td>The webhook URL is invalid or points at a disallowed host.</td></tr>
+<tr><td><code>no_events</code></td><td>400</td><td>No valid webhook events were supplied.</td></tr>
+<tr><td><code>no_fields</code></td><td>400</td><td>A webhook update supplied nothing to change.</td></tr>
+<tr><td><code>delivery_failed</code></td><td>502</td><td>A test delivery could not reach the endpoint.</td></tr>
+<tr><td><code>no_entropy</code></td><td>500</td><td>The server could not generate a secure token or secret.</td></tr>
+<tr><td><code>db_error</code></td><td>500</td><td>The API key could not be saved.</td></tr>
+</tbody></table>
+
+<h2>Hooks &amp; Filters</h2>
+
+<h3>Behaviour filters</h3>
+<table><thead><tr><th>Filter</th><th>Default</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>wcusage_api_rate_limit</code></td><td>120 / 30</td><td>Requests per minute. Receives the default and the bucket identity (<code>key_*</code>, <code>user_*</code>, <code>ip_*</code>).</td></tr>
+<tr><td><code>wcusage_api_max_auth_failures</code></td><td>20</td><td>Invalid-key attempts allowed per address per 15 minutes. Zero or less disables the check.</td></tr>
+<tr><td><code>wcusage_api_require_https</code></td><td>true outside local/dev</td><td>Whether bearer keys require HTTPS.</td></tr>
+<tr><td><code>wcusage_api_max_order_rows</code></td><td>5000</td><td>How many referred orders one <code>/coupons/{id}/orders</code> request may consider.</td></tr>
+<tr><td><code>wcusage_api_report_batch_size</code></td><td>200</td><td>How many coupons <code>/reports/summary</code> primes meta for at a time. Lower it on very large programs with tight memory.</td></tr>
+<tr><td><code>wcusage_api_openapi_public</code></td><td>true</td><td>Whether <code>/openapi</code> is publicly readable.</td></tr>
+<tr><td><code>wcusage_api_webhook_require_https</code></td><td>true outside local/dev</td><td>Whether webhook URLs must be HTTPS.</td></tr>
+<tr><td><code>wcusage_api_webhook_max_attempts</code></td><td>5</td><td>Delivery attempts per event.</td></tr>
+<tr><td><code>wcusage_api_webhook_max_failures</code></td><td>25</td><td>Consecutive failures before an endpoint is auto-disabled.</td></tr>
+<tr><td><code>wcusage_api_webhook_events</code></td><td>&mdash;</td><td>Extend or modify the webhook event catalog.</td></tr>
+<tr><td><code>wcusage_api_auth_failure_buckets</code>, <code>wcusage_api_ip_buckets</code></td><td>256</td><td>How many buckets failed attempts and anonymous callers are spread across.</td></tr>
+</tbody></table>
+<p>Enabling the API, and enabling individual endpoints, is done from <strong>Coupon Affiliates &rarr; Admin Tools &rarr; API</strong> rather than by a filter. Those settings live in the <code>wcusage_api_settings</code> option.</p>
+
+<h3>Response filters</h3>
+<table><thead><tr><th>Filter</th><th>Applies to</th></tr></thead><tbody>
+<tr><td><code>wcusage_api_coupon_summary</code></td><td>Every coupon object the API returns.</td></tr>
+<tr><td><code>wcusage_api_prepare_affiliate</code></td><td>Affiliate objects. Receives the detailed flag.</td></tr>
+<tr><td><code>wcusage_api_prepare_payout</code></td><td>Payout objects.</td></tr>
+<tr><td><code>wcusage_api_prepare_registration</code></td><td>Registration objects.</td></tr>
+<tr><td><code>wcusage_api_order_item</code></td><td>Referred-order rows &mdash; the place to add extra fields for a trusted integration.</td></tr>
+<tr><td><code>wcusage_api_report_summary</code></td><td>The <code>/reports/summary</code> payload.</td></tr>
+<tr><td><code>wcusage_api_openapi_spec</code></td><td>The generated OpenAPI document.</td></tr>
+<tr><td><code>wcusage_api_webhook_payload</code></td><td>Webhook payloads, just before delivery.</td></tr>
+</tbody></table>
+<pre><code>// Add the affiliate's country to every coupon the API returns.
+add_filter( 'wcusage_api_coupon_summary', function ( $data, $coupon_id ) {
+    $user_id = (int) $data['user_id'];
+    $data['country'] = $user_id ? get_user_meta( $user_id, 'billing_country', true ) : '';
+    return $data;
+}, 10, 2 );</code></pre>
+[warning]These filters run for <strong>every</strong> caller of the affected endpoint, not only for your own integration. Several of them cover endpoints an affiliate or a multi-level upline can reach, so anything you add there is disclosed to them too. Check who can call the endpoint before adding customer data, payout details or another affiliate's information &mdash; the omissions in the default responses are deliberate.[/warning]
+
+<h3>Actions</h3>
+<table><thead><tr><th>Action</th><th>Fires</th></tr></thead><tbody>
+<tr><td><code>wcusage_activity_recorded</code></td><td>For every lifecycle event, with <code>( $event, $event_id, $info, $actor_id )</code>. This is the same funnel the webhook dispatcher listens to, and it fires whether or not database logging is enabled &mdash; hook it to build a custom integration with no polling and no HTTP.</td></tr>
+</tbody></table>
+<pre><code>add_action( 'wcusage_activity_recorded', function ( $event, $event_id, $info, $actor_id ) {
+    if ( 'payout_request' === $event ) {
+        // $event_id is the payout ID.
+    }
+}, 10, 4 );</code></pre>
+
+<h2>Legacy v1 API</h2>
+<p>The original three endpoints under <code>woo-coupon-usage/v1</code> remain available for backwards compatibility. They predate scopes, pagination and schemas, and they require a full <strong>administrator</strong> account &mdash; not merely the plugin's configurable admin capability.</p>
+<p>[get] <code>/wp-json/woo-coupon-usage/v1/coupon-info?coupon_id={id}</code></p>
+<pre><code>{
+  "coupon_name": "sarah10",
+  "unpaid_commission": 40.46,
+  "pending_payouts": 0,
+  "coupon_user_id": 1456,
+  "referral_url": "https://example.com/affiliate-dashboard/?couponid=sarah10"
+}</code></pre>
+<p>[get] <code>/wp-json/woo-coupon-usage/v1/users-coupons?user={login}</code> &mdash; an array of coupon IDs assigned to that login. An unknown login returns an empty array.</p>
+<p>[post] <code>/wp-json/woo-coupon-usage/v1/request-payout</code> &mdash; body <code>coupon_id</code> and <code>user</code> (login). Returns <code>1</code> when a payout request was submitted and <code>0</code> otherwise, with no explanation of why. PRO only.</p>
+<h3>How v1 relates to v2</h3>
+<ul>
+<li>The v1 routes are <strong>not</strong> affected by the API master switch, so existing integrations keep working whether or not v2 is enabled.</li>
+<li>API keys, however, belong to v2: while the API is switched off they authenticate nothing at all, v1 included. v1 remains reachable with an application password or cookie.</li>
+<li>When a key <em>is</em> used on v1, scopes are enforced with a fail-closed default: reads need <code>read</code>, writes need <code>write</code>.</li>
+<li>Both namespaces share the same rate limiter.</li>
+</ul>
+[note]New integrations should use <code>wcusage/v2</code>. It adds affiliate self-service access, API keys and scopes, pagination and filtering, meaningful error codes, webhooks and an OpenAPI document. The v1 routes exist for existing integrations only and will not gain features.[/note]

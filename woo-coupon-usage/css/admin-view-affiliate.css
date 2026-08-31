@@ -1345,3 +1345,203 @@
 .wcusage-border-radius-3 {
     border-radius: 3px;
 }
+
+/* Lifetime Customers tab */
+.wcusage-lifetime-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 0 0 20px;
+}
+
+.wcusage-lifetime-summary-box {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px 8px;
+    text-align: center;
+}
+
+.wcusage-lifetime-summary-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1d2327;
+    line-height: 1.2;
+}
+
+.wcusage-lifetime-summary-label {
+    margin-top: 3px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #6b7280;
+}
+
+.wcusage-lifetime-muted {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+@media screen and (max-width: 782px) {
+    .wcusage-lifetime-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Lifetime Customers: inline editing */
+.wcusage-lifetime-actions a {
+    text-decoration: none;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.wcusage-lifetime-actions a + a {
+    margin-left: 12px;
+}
+
+.wcusage-lifetime-remove-button {
+    color: #b52828;
+}
+
+.wcusage-lifetime-cancel-button {
+    color: #6b7280;
+}
+
+.wcusage-lifetime-customers-table tr.wcusage-lifetime-row-editing > td {
+    background: #f6f9fc;
+}
+
+.wcusage-lifetime-customers-table .wcusage-lifetime-coupon-input,
+.wcusage-lifetime-customers-table .wcusage-lifetime-expiry-input {
+    width: 100%;
+    max-width: 190px;
+}
+
+.wcusage-lifetime-customers-table tr.wcusage-loading {
+    opacity: 0.5;
+}
+
+#wcusage-lifetime-message {
+    margin: 0 0 15px;
+}
+
+/* Lifetime Customers: "Link a Customer" form.
+   The toggle shares the status filter row, pushed to the far right of it.
+
+   Scoped through the row's ID on purpose: core's ".wp-core-ui .button" sets
+   both "display: inline-block" and "margin: 0", and it out-specifies a lone
+   class - without the extra weight the icon does not line up and the button
+   sits next to Filter instead of at the end of the row.
+
+   Nothing here sets a colour: core themes .button through
+   --wp-admin-theme-color, so the icon inherits the right colour for whichever
+   admin colour scheme the user has picked, and the open state uses core's own
+   pressed style (the "active" class, applied by the JS) rather than a
+   hardcoded grey that only matches the default scheme. */
+#wcusage-lifetime-filters {
+    flex-wrap: wrap;
+}
+
+#wcusage-lifetime-filters .wcusage-lifetime-add-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.wcusage-lifetime-add-form {
+    background: #f6f7f7;
+    border: 1px solid #dcdcde;
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 0 0 16px;
+}
+
+.wcusage-lifetime-add-desc {
+    margin: 0 0 14px;
+    color: #50575e;
+    font-size: 13px;
+}
+
+.wcusage-lifetime-add-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+/* Each field is sized by its flex basis rather than by its content, so the
+   hint text underneath wraps inside its own column instead of widening it and
+   pushing the submit button onto a second row. */
+.wcusage-lifetime-add-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.wcusage-lifetime-add-field label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1d2327;
+}
+
+.wcusage-lifetime-add-field .regular-text,
+.wcusage-lifetime-add-field select,
+.wcusage-lifetime-add-field input[type="date"] {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+}
+
+.wcusage-lifetime-add-customer-field {
+    flex: 1 1 260px;
+}
+
+.wcusage-lifetime-add-coupon-field {
+    flex: 0 1 230px;
+}
+
+.wcusage-lifetime-add-expiry-field {
+    flex: 0 0 195px;
+}
+
+/* Keeps the button on the same baseline as the inputs, below their labels. */
+.wcusage-lifetime-add-submit-field {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding-top: 22px;
+}
+
+.wcusage-lifetime-add-spinner {
+    float: none !important;
+    margin: 0 !important;
+}
+
+/* Reserved so the row does not jump when a hint appears. */
+.wcusage-lifetime-add-hint {
+    display: block;
+    min-height: 16px;
+    line-height: 16px;
+}
+
+.wcusage-lifetime-add-hint a {
+    text-decoration: none;
+}
+
+.wcusage-lifetime-warn {
+    color: #b26200;
+}
+
+@media screen and (max-width: 782px) {
+    .wcusage-lifetime-add-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .wcusage-lifetime-add-submit-field {
+        padding-top: 6px;
+    }
+}

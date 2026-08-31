@@ -20,7 +20,7 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
         $combined_commission,
         $force_refresh_stats = ""
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $couponinfo = wcusage_get_coupon_info_by_id( $postid );
         $couponuser = $couponinfo[1];
         $currentuserid = get_current_user_id();
@@ -98,12 +98,12 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
           <?php 
             // Get statistics data
             if ( !$wcusage_field_which_toggle ) {
-                $date7 = date( 'Y-m-d', strtotime( '-7 days' ) );
-                $date14 = date( 'Y-m-d', strtotime( '-14 days' ) );
+                $date7 = wcusage_local_date( '-7 days' );
+                $date14 = wcusage_local_date( '-14 days' );
                 $this7orders = wcusage_wh_getOrderbyCouponCode(
                     $coupon_code,
                     $date7,
-                    date( "Y-m-d" ),
+                    wcusage_local_date(),
                     '',
                     1
                 );
@@ -114,12 +114,12 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                     '',
                     1
                 );
-                $date30 = date( 'Y-m-d', strtotime( '-30 days' ) );
-                $date60 = date( 'Y-m-d', strtotime( '-60 days' ) );
+                $date30 = wcusage_local_date( '-30 days' );
+                $date60 = wcusage_local_date( '-60 days' );
                 $this30orders = wcusage_wh_getOrderbyCouponCode(
                     $coupon_code,
                     $date30,
-                    date( "Y-m-d" ),
+                    wcusage_local_date(),
                     '',
                     1
                 );
@@ -135,24 +135,32 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                 $this7text = esc_html__( "Last 7 Days", "woo-coupon-usage" );
             } else {
                 // Current Month
-                $date1month = date( 'Y-m-01' );
+                $date1month = wcusage_local_date( '', 'Y-m-01' );
                 // Last Month
-                $date2month = date( 'Y-m-d', strtotime( "first day of last month" ) );
-                $date2monthend = date( 'Y-m-d', strtotime( "last day of last month" ) );
+                $date2month = wcusage_local_date( 'first day of last month' );
+                $date2monthend = wcusage_local_date( 'last day of last month' );
                 // Month Before
-                $date3month = date( 'Y-m-d', strtotime( "first day of -2 month" ) );
-                $date3monthend = date( 'Y-m-d', strtotime( "last day of -2 month" ) );
+                $date3month = wcusage_local_date( 'first day of -2 month' );
+                $date3monthend = wcusage_local_date( 'last day of -2 month' );
                 // Get Monthly Statistics
                 $wcusage_monthly_summary_data_orders = get_post_meta( $postid, 'wcusage_monthly_summary_data_orders', true );
-                if ( !$wcusage_monthly_summary_data_orders ) {
+                if ( !$wcusage_monthly_summary_data_orders || !is_array( $wcusage_monthly_summary_data_orders ) ) {
                     $wcusage_monthly_summary_data_orders = array();
                 }
-                // Delete old months that are not needed
-                if ( is_array( $wcusage_monthly_summary_data_orders ) && count( $wcusage_monthly_summary_data_orders ) > 12 ) {
-                    foreach ( $wcusage_monthly_summary_data_orders as $key => $value ) {
-                        if ( $key != strtotime( $date1month ) && $key != strtotime( $date2month ) && $key != strtotime( $date3month ) ) {
-                            $wcusage_monthly_summary_data_orders[strtotime( $key )] = "";
-                        }
+                // Whether anything below actually changed. Without this the meta was
+                // rewritten on every dashboard view, so simply LOOKING at the page
+                // was a database write - and a large one, see the trim below.
+                $monthly_cache_dirty = false;
+                $month_keys = array(strtotime( $date1month ), strtotime( $date2month ), strtotime( $date3month ));
+                // Delete old months that are not needed.
+                // The keys here are already timestamps, so the unset has to use $key
+                // as it stands. Running it back through strtotime() left every stale
+                // month in place and added one junk entry instead, which is why this
+                // meta could grow without bound.
+                foreach ( array_keys( $wcusage_monthly_summary_data_orders ) as $key ) {
+                    if ( !in_array( (int) $key, $month_keys, true ) ) {
+                        unset($wcusage_monthly_summary_data_orders[$key]);
+                        $monthly_cache_dirty = true;
                     }
                 }
                 // This Month - use a short TTL cache (10 minutes) since current month data changes
@@ -164,13 +172,14 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                     $thismonthorders = wcusage_wh_getOrderbyCouponCode(
                         $coupon_code,
                         $date1month,
-                        date( "Y-m-d" ),
+                        wcusage_local_date(),
                         '',
                         1,
                         0
                     );
-                    $wcusage_monthly_summary_data_orders[strtotime( $date1month )] = $thismonthorders;
+                    $wcusage_monthly_summary_data_orders[strtotime( $date1month )] = wcusage_trim_monthly_summary( $thismonthorders );
                     update_post_meta( $postid, 'wcusage_monthly_cache_time_current', time() );
+                    $monthly_cache_dirty = true;
                 } else {
                     $thismonthorders = $current_month_cache;
                 }
@@ -184,7 +193,8 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                         1,
                         0
                     );
-                    $wcusage_monthly_summary_data_orders[strtotime( $date2month )] = $pastmonthorders;
+                    $wcusage_monthly_summary_data_orders[strtotime( $date2month )] = wcusage_trim_monthly_summary( $pastmonthorders );
+                    $monthly_cache_dirty = true;
                 } else {
                     $pastmonthorders = $wcusage_monthly_summary_data_orders[strtotime( $date2month )];
                 }
@@ -198,12 +208,16 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                         1,
                         0
                     );
-                    $wcusage_monthly_summary_data_orders[strtotime( $date3month )] = $pastoldmonthorders;
+                    $wcusage_monthly_summary_data_orders[strtotime( $date3month )] = wcusage_trim_monthly_summary( $pastoldmonthorders );
+                    $monthly_cache_dirty = true;
                 } else {
                     $pastoldmonthorders = $wcusage_monthly_summary_data_orders[strtotime( $date3month )];
                 }
-                // Persist the monthly summary data to post meta so it survives across requests
-                update_post_meta( $postid, 'wcusage_monthly_summary_data_orders', $wcusage_monthly_summary_data_orders );
+                // Persist the monthly summary data to post meta so it survives across
+                // requests - but only when a month was actually recomputed.
+                if ( $monthly_cache_dirty ) {
+                    update_post_meta( $postid, 'wcusage_monthly_summary_data_orders', $wcusage_monthly_summary_data_orders );
+                }
                 $this7orders = $pastmonthorders;
                 $past14orders = $pastoldmonthorders;
                 $this30orders = $thismonthorders;
@@ -219,7 +233,7 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                         $fullorders = wcusage_wh_getOrderbyCouponCode(
                             $coupon_code,
                             "",
-                            date( "Y-m-d" ),
+                            wcusage_local_date(),
                             '',
                             1,
                             1
@@ -327,8 +341,26 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                             echo '<a href="javascript:void(0);" id="wcusage-last-days30" style="color: #a6a6a6;">' . esc_html( $this30text ) . '</a> <span style="color: #f3f3f3;">|</span> <a href="javascript:void(0);" id="wcusage-last-days7" style="color: #a6a6a6;">' . esc_html( $this7text ) . '</a>';
                             $wcusage_show_refresh_stats = wcusage_get_setting_value( 'wcusage_field_show_refresh_stats', '1' );
                             $wcusage_show_refresh_button = wcusage_get_setting_value( 'wcusage_field_show_refresh_stats_button', '1' );
+                            // Whether the hourly background re-check is actually due.
+                            //
+                            // wcusage_refresh_dashboard_stats() applies this same cooldown and
+                            // answers "rate_limited" when it has not elapsed - but only after
+                            // admin-ajax.php has booted the whole of WordPress in wp-admin
+                            // context, which costs about a second more than a front-end request
+                            // because every installed plugin loads its admin side. That was
+                            // being paid on every dashboard view to be told there was nothing
+                            // to do. The timestamp is readable here, so ask first and only
+                            // print the request when the answer can be useful. Resolved the way
+                            // the handler resolves it so the two cannot disagree
+                            // (wcusage_get_coupon_info() is memoised per request).
+                            $wcusage_refresh_check_info = wcusage_get_coupon_info( strtolower( $coupon_code ) );
+                            $wcusage_refresh_check_postid = ( isset( $wcusage_refresh_check_info[2] ) ? (int) $wcusage_refresh_check_info[2] : (int) $postid );
+                            $wcusage_last_fast_refresh = (int) get_post_meta( $wcusage_refresh_check_postid, 'wcu_last_fast_refresh', true );
+                            $wcusage_refresh_check_due = !$wcusage_last_fast_refresh || time() - $wcusage_last_fast_refresh >= 3600;
                             if ( $wcusage_show_refresh_stats ) {
-                                echo ' <span id="wcusage-refresh-stats-check" class="wcusage-refresh-stats-icon" style="display:none;" title="' . esc_attr__( 'Checking statistics...', 'woo-coupon-usage' ) . '"><i class="fa-solid fa-arrows-rotate fa-spin"></i></span>';
+                                if ( $wcusage_refresh_check_due ) {
+                                    echo ' <span id="wcusage-refresh-stats-check" class="wcusage-refresh-stats-icon" style="display:none;" title="' . esc_attr__( 'Checking statistics...', 'woo-coupon-usage' ) . '"><i class="fa-solid fa-arrows-rotate fa-spin"></i></span>';
+                                }
                                 if ( $wcusage_show_refresh_button ) {
                                     echo ' <a href="javascript:void(0);" id="wcusage-refresh-stats" class="wcusage-refresh-stats-btn" title="' . esc_attr__( 'Refresh Statistics', 'woo-coupon-usage' ) . '"><i class="fa-solid fa-arrows-rotate"></i></a>';
                                 }
@@ -379,26 +411,45 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                               var $refreshBtn = $('#wcusage-refresh-stats');
                               var $statsContainer = $('.wcusage-sales-stats-toggles').next('.wcusage-sales-stats');
 
-                              /* === Background auto-check (once per hour, on page load) === */
+                              <?php 
+                                if ( $wcusage_refresh_check_due ) {
+                                    ?>
+                              /* === Background auto-check (once per hour, on page load) ===
+                                 Only printed at all when the hourly cooldown has actually
+                                 elapsed - see where $wcusage_refresh_check_due is worked out.
+                                 Otherwise this fired on every single dashboard view and spent
+                                 a full admin-ajax.php boot to be answered "rate_limited". */
                               if ($checkIcon.length) {
                                   $refreshBtn.hide();
                                   $checkIcon.show();
+                                  /* global:false keeps this out of jQuery's ajax counter
+                                     and its global ajaxStart/ajaxStop events. Both stats
+                                     requests here only re-render the info boxes - nothing
+                                     else on the dashboard waits on their result - but while
+                                     they counted, starting one re-fired ajaxStart, which puts
+                                     the "Loading statistics" block back on a dashboard that
+                                     had already finished loading, and delayed ajaxStop, which
+                                     is what un-hides the Commission Graph. This one starts by
+                                     itself on page load and recalculates all-time plus monthly
+                                     figures, so it did that for seconds at a time, once an
+                                     hour, with no user action to explain it. */
                                   $.ajax({
+                                      global: false,
                                       type: 'POST',
                                       url: '<?php 
-                                echo esc_url( admin_url( 'admin-ajax.php' ) );
-                                ?>',
+                                    echo esc_url( wcusage_ajax_url() );
+                                    ?>',
                                       data: {
                                           action: 'wcusage_refresh_dashboard_stats',
                                           _ajax_nonce: '<?php 
-                                echo esc_js( wp_create_nonce( 'wcusage_dashboard_ajax_nonce' ) );
-                                ?>',
+                                    echo esc_js( wp_create_nonce( 'wcusage_dashboard_ajax_nonce' ) );
+                                    ?>',
                                           postid: '<?php 
-                                echo esc_js( $postid );
-                                ?>',
+                                    echo esc_js( $postid );
+                                    ?>',
                                           couponcode: '<?php 
-                                echo esc_js( $coupon_code );
-                                ?>'
+                                    echo esc_js( $coupon_code );
+                                    ?>'
                                       },
                                       dataType: 'json',
                                       success: function(response) {
@@ -421,6 +472,9 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                                       }
                                   });
                               }
+                              <?php 
+                                }
+                                ?>
 
                               /* === Manual refresh button (reads cached meta only — instant) === */
                               $refreshBtn.on('click', function(e) {
@@ -431,9 +485,10 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                                   $btn.addClass('wcusage-refreshing');
                                   $icon.addClass('fa-spin');
                                   $.ajax({
+                                      global: false,
                                       type: 'POST',
                                       url: '<?php 
-                                echo esc_url( admin_url( 'admin-ajax.php' ) );
+                                echo esc_url( wcusage_ajax_url() );
                                 ?>',
                                       data: {
                                           action: 'wcusage_reload_dashboard_stats',
@@ -486,7 +541,11 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                         } else {
                             $margintop = "";
                         }
-                        echo '<div ' . (( $wcusage_field_load_ajax ? 'class="wcu-loading-hide" style="visibility: hidden; height: 0;"' : '' )) . '>';
+                        // Printed hidden only when something will later un-hide it.
+                        // Rendered with the page there is no ajax response to do that,
+                        // and the figures are already on screen, so it goes out visible.
+                        $wcusage_graphs_hidden = $wcusage_field_load_ajax && !wcusage_statistics_render_inline( $postid, $coupon_code, $force_refresh_stats );
+                        echo '<div ' . (( $wcusage_graphs_hidden ? 'class="wcu-loading-hide" style="visibility: hidden; height: 0;"' : '' )) . '>';
                         echo '</div>';
                         break;
                     case 'section_latestreferrals':
@@ -519,7 +578,7 @@ if ( !function_exists( 'wcusage_tab_statistics' ) ) {
                                 $postid,
                                 $coupon_code,
                                 '',
-                                date( "Y-m-d" ),
+                                wcusage_local_date(),
                                 false,
                                 "",
                                 5,
@@ -619,7 +678,7 @@ if ( !function_exists( 'wcusage_get_main_info_boxes' ) ) {
             $orders = get_post_meta( $postid, 'wcu_alltime_stats', true );
         }
         if ( $orders && is_array( $orders ) ) {
-            $options = get_option( 'wcusage_options' );
+            $options = wcusage_get_options();
             $wcusage_show_commission = wcusage_get_setting_value( 'wcusage_field_show_commission', '1' );
             $wcusage_show_tax = wcusage_get_setting_value( 'wcusage_field_show_tax', '' );
             if ( $wcusage_show_tax == 1 && isset( $orders['full_discount_tax'] ) ) {
@@ -771,6 +830,143 @@ add_action(
     4
 );
 /**
+ * Reduce a wcusage_wh_getOrderbyCouponCode() result to what the monthly cache needs.
+ *
+ * The full result carries an 'orders' entry holding one row per order. Storing
+ * three months of those in a single post meta value meant a coupon with a busy
+ * quarter serialised a very large blob on write and unserialised it again on
+ * every dashboard view, for rows nothing ever reads back out of this cache.
+ *
+ * Everything else is kept as-is, so any consumer reading another key still works.
+ *
+ * @param mixed $orders Result array from wcusage_wh_getOrderbyCouponCode().
+ *
+ * @return mixed
+ */
+if ( !function_exists( 'wcusage_trim_monthly_summary' ) ) {
+    function wcusage_trim_monthly_summary(  $orders  ) {
+        if ( !is_array( $orders ) ) {
+            return $orders;
+        }
+        unset($orders['orders']);
+        return $orders;
+    }
+
+}
+/**
+ * Whether the Statistics tab can just be printed with the page.
+ *
+ * The tab is normally fetched over a second request, and that request is the
+ * "Loading statistics..." wait: the affiliate's browser asks for a page, gets
+ * one, and then asks for the same WordPress to boot all over again. The tab
+ * itself is 69 ms of work once its figures are cached - far less than the
+ * bootstrap of the request that goes to collect it.
+ *
+ * So the spinner is kept for the case it was meant for - work that takes long
+ * enough to be worth showing progress for - and everything else is rendered
+ * inline. "Long enough" is decided from what is already stored, never by doing
+ * the work first:
+ *
+ *   - a refresh is pending            -> ajax (this is the seconds-long path)
+ *   - all-time figures not yet stored -> ajax (a full history walk)
+ *   - the 7/30-day toggle             -> ajax (that mode keeps no cache at all,
+ *                                        so every view walks 90 days of orders)
+ *   - a month missing from the cache  -> ajax
+ *   - current month cache still warm  -> INLINE, no work at all
+ *   - current month cache expired     -> INLINE only if the month it last held
+ *                                        was small enough that recomputing it
+ *                                        cannot hold the page up
+ *
+ * Memoised per coupon because rendering populates the very caches this reads:
+ * asked a second time, mid-render, it would answer differently, and the wrapper
+ * and the tab body have to agree on whether the graph section is printed hidden.
+ *
+ * @param int    $postid
+ * @param string $coupon_code
+ * @param mixed  $force_refresh_stats
+ *
+ * @return bool
+ *
+ */
+if ( !function_exists( 'wcusage_statistics_render_inline' ) ) {
+    function wcusage_statistics_render_inline(  $postid, $coupon_code = '', $force_refresh_stats = ''  ) {
+        static $decision = array();
+        $postid = (int) $postid;
+        if ( isset( $decision[$postid] ) ) {
+            return $decision[$postid];
+        }
+        $decision[$postid] = false;
+        if ( !$postid || $force_refresh_stats ) {
+            return $decision[$postid];
+        }
+        // Inside the request that was sent to fetch this tab the question is moot -
+        // and answering "yes" there would print the graph section un-hidden in a
+        // response whose own success handler is about to reveal it.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the routed action, not trusting it.
+        $current_action = ( isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : '' );
+        if ( 'wcusage_load_page_statistics' === $current_action ) {
+            return $decision[$postid];
+        }
+        // Ajax loading off already means inline; there is no decision to make.
+        if ( !wcusage_get_setting_value( 'wcusage_field_load_ajax', 1 ) ) {
+            return $decision[$postid];
+        }
+        if ( !apply_filters(
+            'wcusage_statistics_render_inline',
+            true,
+            $postid,
+            $coupon_code
+        ) ) {
+            return $decision[$postid];
+        }
+        // All-time figures have to be stored already - working them out means walking
+        // the coupon's whole order history, which is the slowest thing the tab does.
+        if ( !wcusage_get_setting_value( 'wcusage_field_hide_all_time', '0' ) ) {
+            $alltime = get_post_meta( $postid, 'wcu_alltime_stats', true );
+            if ( empty( $alltime ) ) {
+                return $decision[$postid];
+            }
+        }
+        // Only the monthly toggle keeps period figures; the last-7/last-30 mode
+        // recalculates four windows on every single view.
+        if ( !wcusage_get_setting_value( 'wcusage_field_which_toggle', '1' ) ) {
+            return $decision[$postid];
+        }
+        $months = get_post_meta( $postid, 'wcusage_monthly_summary_data_orders', true );
+        if ( !is_array( $months ) ) {
+            return $decision[$postid];
+        }
+        $this_month = strtotime( wcusage_local_date( '', 'Y-m-01' ) );
+        $needed = array($this_month, strtotime( wcusage_local_date( 'first day of last month' ) ), strtotime( wcusage_local_date( 'first day of -2 month' ) ));
+        foreach ( $needed as $month_key ) {
+            if ( empty( $months[$month_key] ) ) {
+                return $decision[$postid];
+            }
+        }
+        // Past months never change, so only the current one can need recalculating.
+        $cache_time = (int) get_post_meta( $postid, 'wcusage_monthly_cache_time_current', true );
+        if ( !$cache_time || time() - $cache_time > 600 ) {
+            // Expired. Recomputing it costs roughly what it cost last time, and the
+            // stored summary says how many orders that was. Under the limit it is
+            // cheaper than the round trip it would take to do the same work elsewhere;
+            // over it, the affiliate gets the spinner and the page is not held up.
+            $last_count = ( isset( $months[$this_month]['total_count'] ) ? (int) $months[$this_month]['total_count'] : -1 );
+            $limit = (int) apply_filters(
+                'wcusage_statistics_inline_order_limit',
+                250,
+                $postid,
+                $coupon_code
+            );
+            if ( $last_count < 0 || $last_count > $limit ) {
+                return $decision[$postid];
+            }
+        }
+        $decision[$postid] = true;
+        return $decision[$postid];
+    }
+
+}
+/**
  * Gets statistics tab for shortcode page
  *
  * @param int $postid
@@ -795,13 +991,18 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
         $force_refresh_stats
     ) {
         // *** GET SETTINGS *** /
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $language = wcusage_get_language_code();
         $wcusage_field_load_ajax = wcusage_get_setting_value( 'wcusage_field_load_ajax', 1 );
         $wcusage_field_load_ajax_per_page = wcusage_get_setting_value( 'wcusage_field_load_ajax_per_page', 1 );
         if ( !$wcusage_field_load_ajax ) {
             $wcusage_field_load_ajax_per_page = 0;
         }
+        // Everything this tab needs may already be worked out, in which case fetching
+        // it over a second request costs a whole WordPress bootstrap to save 69 ms of
+        // rendering. Decide once, here, before anything is printed.
+        $wcusage_stats_inline = wcusage_statistics_render_inline( $postid, $coupon_code, $force_refresh_stats );
+        $wcusage_stats_use_ajax = $wcusage_field_load_ajax && !$wcusage_stats_inline;
         $wcusage_show_tabs = wcusage_get_setting_value( 'wcusage_field_show_tabs', '1' );
         $wcusage_show_graphs = wcusage_get_setting_value( 'wcusage_field_show_graphs', '1' );
         $wcusage_justcoupon = wcusage_get_setting_value( 'wcusage_field_justcoupon', '1' );
@@ -836,7 +1037,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
             ?>>
 
       <?php 
-            if ( $wcusage_field_load_ajax ) {
+            if ( $wcusage_stats_use_ajax ) {
                 ?>
 
         <script>
@@ -885,7 +1086,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
               jQuery.ajax({
               type: 'POST',
               url: '<?php 
-                echo esc_url( admin_url( 'admin-ajax.php' ) );
+                echo esc_url( wcusage_ajax_url() );
                 ?>',
               data: data,
               success: function(data) {
@@ -898,7 +1099,15 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
                   <?php 
                     if ( $wcusage_show_graphs ) {
                         ?>
-                  setTimeout( function() { wcusage_run_tab_page_stats_graph_update(); }, 500);
+                  /* The graph markup arrives with this response and reveals and
+                     draws itself as soon as the charts loader is ready (see
+                     wcusage_charts_reveal_and_draw in charts.php). Call it here too
+                     so the reveal never depends on ajaxStop, and guard on typeof:
+                     the graph section is not printed at all when commission
+                     display is switched off for this coupon. */
+                  if (typeof wcusage_charts_reveal_and_draw === 'function') {
+                    wcusage_charts_reveal_and_draw();
+                  }
                   <?php 
                     }
                     ?>
@@ -944,6 +1153,24 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
                 ?>
         </div>
 
+        <?php 
+                if ( $wcusage_stats_inline ) {
+                    ?>
+        <script>
+        /* Rendered with the page, so no request will finish to trigger the reveal.
+           The graph section is printed visible in this mode (see the
+           section_commissiongraphs case above), but Google Charts still has to be
+           told to draw - normally the ajax success handler does that. */
+        jQuery(document).ready(function(){
+          if (typeof wcusage_charts_reveal_and_draw === 'function') {
+            wcusage_charts_reveal_and_draw();
+          }
+        });
+        </script>
+        <?php 
+                }
+                ?>
+
       <?php 
             }
             ?>
@@ -951,7 +1178,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
         <div style="width: 100%; clear: both;"></div>
 
         <?php 
-            if ( $wcusage_field_load_ajax ) {
+            if ( $wcusage_stats_use_ajax ) {
                 ?>
 
         <div class="wcu-loading-image wcu-loading-stats wcu-loading-stats-main">

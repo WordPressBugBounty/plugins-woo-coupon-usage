@@ -46,7 +46,7 @@ function wcusage_enqueue_floating_widget_assets() {
     
     // Localize script with minimal necessary data
     wp_localize_script('wcusage-floating-widget-button', 'wcusage_floating_widget', array(
-        'ajax_url' => admin_url('admin-ajax.php'),
+        'ajax_url' => wcusage_ajax_url(),
         'nonce' => wp_create_nonce('wcusage_floating_widget'),
         // Only logged-in affiliates ever get the "generate short URL" button (logged-out
         // visitors are shown the registration form instead), so don't hand this token to

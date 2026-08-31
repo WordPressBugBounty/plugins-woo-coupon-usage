@@ -161,10 +161,16 @@
     transform: translateY(-1px) !important;
     box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3) !important;
 }
-/* Vertically center all table cell contents on this page */
+/* Vertically center all table cell contents on this page.
+   The ID column is the primary column, so WordPress renders it as <th scope="row">
+   (not <td>) and core sets .widefat tbody th { vertical-align: top } -- include it. */
 .wp-list-table tbody td,
+.wp-list-table tbody th,
 .wp-list-table thead th {
     vertical-align: middle;
+}
+.wp-list-table.affiliateusers .column-ID {
+    vertical-align: middle !important;
 }
 .wp-list-table.mlausers tbody td,
 .wp-list-table.mlausers thead th {

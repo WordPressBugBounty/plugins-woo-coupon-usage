@@ -13,7 +13,7 @@ $registration_shortcode_page = wcusage_get_registration_shortcode_page('0');
 ?>
 
 <!--- Font Awesome -->
-<link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
+<?php wcusage_enqueue_font_awesome(); ?>
 
 <style>
 .wcusage-admin-page-help-col { width: calc(50% - 80px); margin: 10px; padding: 20px 30px; background: #fff; float: left; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.2s ease, border-color 0.2s ease; }

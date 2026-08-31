@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wcusage_field_cb_pro_details( $args )
 {
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
 
   $ispro = true;
   if( !wcu_fs()->can_use_premium_code() || !wcu_fs()->is_plan('pro') || !wcu_fs()->is_premium() ) { $ispro = false; }
@@ -84,7 +84,6 @@ function wcusage_field_cb_pro_details( $args )
 <br/>
 
 <div class="wcu-pro-modules-search-wrap">
-  <i class="fas fa-search wcu-pro-modules-search-icon" aria-hidden="true"></i>
   <input type="text" id="wcu-pro-modules-search" placeholder="<?php echo esc_attr__( 'Search modules...', 'woo-coupon-usage' ); ?>" autocomplete="off" />
 </div>
 <p id="wcu-pro-modules-no-results" style="display:none;"><?php echo esc_html__( 'No modules found matching your search.', 'woo-coupon-usage' ); ?></p>
@@ -725,7 +724,7 @@ jQuery(document).ready(function($) {
 
 function wcusage_output_addon_box($title, $id, $text, $link, $icon, $default, $always, $soon, $settings1, $settings2) {
 
-$options = get_option( 'wcusage_options' );
+$options = wcusage_get_options();
 
 $ispro = true;
 if( !wcu_fs()->can_use_premium_code() || !wcu_fs()->is_plan('pro') ) { $ispro = false; }

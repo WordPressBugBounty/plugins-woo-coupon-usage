@@ -4,7 +4,7 @@ if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
 global $wcusage_clicks_db_version;
-$wcusage_clicks_db_version = "4";
+$wcusage_clicks_db_version = "5";
 /**
  * CREATE THE TABLES
  *
@@ -14,12 +14,29 @@ if ( !function_exists( 'wcusage_install_clicks_tables' ) ) {
         global $wpdb;
         global $wcusage_clicks_db_version;
         $installed_ver = get_option( "wcusage_clicks_db_version" );
-        if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wcusage_clicks'" ) != $wpdb->prefix . 'wcusage_clicks' ) {
-            $installed_ver = 0;
+        $table_name = $wpdb->prefix . 'wcusage_clicks';
+        $table_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$table_name}'" ) === $table_name;
+        // Version 5 turned couponid / orderid from text into bigint and added
+        // indexes. On an EXISTING table that change is made by
+        // wcusage_migrate_clicks_table() (functions-db-indexes.php): it runs from
+        // a scheduled event, checks every value is numeric first, and stamps this
+        // version only once it has succeeded. It is deliberately NOT left to
+        // dbDelta() here - dbDelta does issue the CHANGE COLUMN (it only refuses
+        // to narrow within the text/blob families), and that is a full rebuild
+        // of the plugin's largest table inside whichever visitor's request came
+        // first after the update.
+        if ( $table_exists ) {
+            return;
         }
         if ( !$installed_ver || $installed_ver != $wcusage_clicks_db_version ) {
-            $table_name = $wpdb->prefix . 'wcusage_clicks';
-            $sql = "CREATE TABLE {$table_name} (\r\n\t\t\tid bigint NOT NULL AUTO_INCREMENT,\r\n\t\t\tcouponid text(9) NOT NULL,\r\n\t\t\tcampaign text(9) NOT NULL,\r\n\t\t\tpage text(9) NOT NULL,\r\n\t\t\treferrer text(9) NOT NULL,\r\n\t\t\tipaddress text(9) NOT NULL,\r\n\t\t\torderid text(9) NOT NULL,\r\n\t\t\tconverted boolean DEFAULT false,\r\n\t\t\tdate datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\r\n\t\t\tPRIMARY KEY  (id)\r\n\t\t\t);";
+            // Fresh install: create the table in its final shape.
+            //
+            // couponid / orderid are IDs, declared as bigint rather than text.
+            // As text they could not be compared to an integer without MySQL
+            // casting the whole column, which makes any index on them unusable.
+            // This is the fastest-growing table the plugin owns (one row per
+            // referral link visit).
+            $sql = "CREATE TABLE {$table_name} (\r\n\t\t\tid bigint NOT NULL AUTO_INCREMENT,\r\n\t\t\tcouponid bigint unsigned NOT NULL DEFAULT 0,\r\n\t\t\tcampaign tinytext NOT NULL,\r\n\t\t\tpage tinytext NOT NULL,\r\n\t\t\treferrer tinytext NOT NULL,\r\n\t\t\tipaddress tinytext NOT NULL,\r\n\t\t\torderid bigint unsigned NOT NULL DEFAULT 0,\r\n\t\t\tconverted boolean DEFAULT false,\r\n\t\t\tdate datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\r\n\t\t\tPRIMARY KEY  (id),\r\n\t\t\tKEY couponid_date (couponid,date),\r\n\t\t\tKEY date (date),\r\n\t\t\tKEY orderid (orderid)\r\n\t\t\t);";
             require_once ABSPATH . 'wp-admin/includes/upgrade.php';
             dbDelta( $sql );
             update_option( "wcusage_clicks_db_version", $wcusage_clicks_db_version );
@@ -34,7 +51,7 @@ if ( !function_exists( 'wcusage_install_clicks_tables' ) ) {
 if ( !function_exists( 'wcusage_update_clicks_db_check' ) ) {
     function wcusage_update_clicks_db_check() {
         global $wcusage_clicks_db_version;
-        if ( get_site_option( 'wcusage_clicks_db_version' ) != $wcusage_clicks_db_version ) {
+        if ( get_option( 'wcusage_clicks_db_version' ) != $wcusage_clicks_db_version ) {
             wcusage_install_clicks_tables();
         }
     }
@@ -132,6 +149,9 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
             $show_converted = 0;
             $show_converted_col = 0;
         }
+        // Cast here too: this is a public action, so the page number is only as
+        // trustworthy as whoever fired the hook.
+        $page = absint( $page );
         $offset = $page * $wcusage_field_show_click_history_amount;
         if ( $campaign && $campaign != "all" ) {
             $campaignline = " AND campaign = %s";

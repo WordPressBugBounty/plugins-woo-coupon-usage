@@ -153,6 +153,24 @@ if ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php'
 /**
  * Check order to see if renewal allowed
  *
+ * Called once per order by every stats loop (dashboard, leaderboard, payouts,
+ * reports), so the cost of the subscription lookups below is multiplied by the
+ * affiliate's order count. Two things keep that in check:
+ *
+ *  1. The settings are read FIRST. When renewals are enabled and no renewal
+ *     limit is set - the shipped defaults - every branch below returns true,
+ *     so the subscription lookups cannot change the answer and are skipped.
+ *     They are not cheap: wcs_get_subscriptions_for_order() and
+ *     wcs_order_contains_subscription() each run their own wc_get_orders()
+ *     query, and profiling an all-time refresh of a 656-order coupon put this
+ *     one function at ~3.9k of its ~8.4k queries.
+ *  2. The computed result is memoised per order for the rest of the request,
+ *     because callers ask more than once for the same order.
+ *
+ * The 'wcusage_is_renewal_allowed' filter is deliberately applied on every
+ * call rather than being memoised with the rest, so a filter that varies its
+ * answer keeps working exactly as before.
+ *
  * @param int $order_id
  *
  * @return bool
@@ -160,8 +178,25 @@ if ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php'
  */
 if ( !function_exists( 'wcusage_check_if_renewal_allowed' ) ) {
     function wcusage_check_if_renewal_allowed(  $order_id  ) {
+        static $memo = array();
+        static $subs_active = null;
+        $memo_key = (string) $order_id;
+        if ( isset( $memo[$memo_key] ) ) {
+            return apply_filters( 'wcusage_is_renewal_allowed', $memo[$memo_key], $order_id );
+        }
+        $wcusage_field_subscriptions_renewals_limit = "0";
+        $wcusage_field_subscriptions_enable_renewals = wcusage_get_setting_value( 'wcusage_field_subscriptions_enable_renewals', '1' );
+        // Renewals allowed, with no limit on how many: nothing the subscription
+        // lookups could return changes the outcome, so don't run them.
+        if ( $wcusage_field_subscriptions_enable_renewals && !$wcusage_field_subscriptions_renewals_limit ) {
+            $memo[$memo_key] = true;
+            return apply_filters( 'wcusage_is_renewal_allowed', true, $order_id );
+        }
+        if ( null === $subs_active ) {
+            $subs_active = is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' );
+        }
         $renewalcheck = true;
-        if ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ) ) {
+        if ( $subs_active ) {
             $subscriptions_ids = wcs_get_subscriptions_for_order( $order_id, array(
                 'order_type' => 'any',
             ) );
@@ -170,11 +205,10 @@ if ( !function_exists( 'wcusage_check_if_renewal_allowed' ) ) {
                 // Allow parent orders
             }
             if ( $subscriptions_ids ) {
-                $wcusage_field_subscriptions_renewals_limit = "0";
+                // Check if is part of subscription
                 $this_order_renewal_number = wcusage_check_renewal_order_number( $order_id );
                 if ( !$wcusage_field_subscriptions_renewals_limit || $wcusage_field_subscriptions_renewals_limit >= $this_order_renewal_number ) {
                     // This checks if order is within the renewal limit set in settings
-                    $wcusage_field_subscriptions_enable_renewals = wcusage_get_setting_value( 'wcusage_field_subscriptions_enable_renewals', '1' );
                     if ( $wcusage_field_subscriptions_enable_renewals ) {
                         // Renewals enabled - allow all.
                         $renewalcheck = true;
@@ -197,6 +231,7 @@ if ( !function_exists( 'wcusage_check_if_renewal_allowed' ) ) {
             $renewalcheck = true;
             // subs off
         }
+        $memo[$memo_key] = $renewalcheck;
         // Custom filter
         $renewalcheck = apply_filters( 'wcusage_is_renewal_allowed', $renewalcheck, $order_id );
         return $renewalcheck;

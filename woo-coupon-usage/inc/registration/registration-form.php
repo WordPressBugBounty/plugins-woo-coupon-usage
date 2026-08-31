@@ -89,7 +89,7 @@ function wcusage_couponusage_register(  $atts  ) {
     // Used to hide the form after a successful submit (avoids relying on <style> output that may be sanitized).
     unset($GLOBALS['wcusage_registration_hide_form']);
     unset($GLOBALS['wcusage_registration_prefill']);
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     $current_user_id = get_current_user_id();
     $user_info = get_userdata( $current_user_id );
     $wcusage_registration_enable_logout = wcusage_get_setting_value( 'wcusage_field_registration_enable_logout', '1' );
@@ -213,9 +213,9 @@ function wcusage_couponusage_register(  $atts  ) {
                 echo esc_html( $form_title );
                 ?>:</strong></p>
 
-      <link rel="stylesheet" href="<?php 
-                echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
-                ?>" crossorigin="anonymous">
+      <?php 
+                wcusage_enqueue_font_awesome();
+                ?>
 
       <?php 
                 // Disable form for existing affiliates?
@@ -749,7 +749,7 @@ function wcusage_post_submit_application(  $adminpost  ) {
     if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
         return;
     }
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     $wcusage_registration_enable_logout = wcusage_get_setting_value( 'wcusage_field_registration_enable_logout', '1' );
     $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
     $wcusage_registration_recaptcha_key = wcusage_get_setting_value( 'wcusage_registration_recaptcha_key', '' );
@@ -899,7 +899,15 @@ function wcusage_post_submit_application(  $adminpost  ) {
                         }
                         $send_email = true;
                         if ( $adminpost ) {
-                            $send_email = isset( $_POST['wcu-send-email'] ) && $_POST['wcu-send-email'] === '1';
+                            // The admin "Add New Affiliate" form posts WHICH email to send
+                            // ('accepted', 'coupon_assigned' or 'none'), not a checkbox value.
+                            // This is the path taken whenever the coupon code is new, which is
+                            // the usual case - the handler in registration-admin.php only runs
+                            // when the code already exists and is being reassigned.
+                            $send_email = wcusage_normalise_send_email_choice( ( isset( $_POST['wcu-send-email'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-send-email'] ) ) : '' ) );
+                            if ( isset( $_POST['wcu-send-email'] ) ) {
+                                wcusage_save_send_email_preference( 'add_affiliate', $send_email );
+                            }
                         }
                         $createregistration = wcusage_create_new_registration(
                             $couponcode,

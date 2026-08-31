@@ -43,12 +43,22 @@ function wcusage_ajax_submit_registration() {
     $info = array();
     for ($x = 1; $x <= $tiersnumber; $x++) {
         if ( isset( $_POST['wcu-input-custom-' . $x] ) ) {
-            $label = sanitize_text_field( htmlentities( wcusage_get_setting_value( 'wcusage_field_registration_custom_label_' . $x, '' ) ) );
-            if ( is_array( $_POST['wcu-input-custom-' . $x] ) ) {
-                $info_array = $_POST['wcu-input-custom-' . $x];
-                $info[$label] = sanitize_text_field( implode( ', ', $info_array ) );
+            // Keyed by the decoded label, because that is how every reader looks the
+            // value up. Encoding it here keyed "Recipient's full name" as
+            // "Recipient&#039;s full name", which never matched and always read blank.
+            $label = sanitize_text_field( wcusage_decode_custom_field_text( wcusage_get_setting_value( 'wcusage_field_registration_custom_label_' . $x, '' ) ) );
+            if ( $label === '' ) {
+                continue;
+            }
+            $custom_value = wp_unslash( $_POST['wcu-input-custom-' . $x] );
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized on the lines below.
+            if ( is_array( $custom_value ) ) {
+                $info[$label] = sanitize_text_field( implode( ', ', array_map( 'sanitize_text_field', $custom_value ) ) );
             } else {
-                $info[$label] = sanitize_text_field( htmlentities( $_POST['wcu-input-custom-' . $x] ) );
+                // sanitize_text_field() strips tags on its own, so the htmlentities()
+                // this replaces added no protection - it only stored the escaped form,
+                // which displayed as a literal "&#039;" once escaped again on output.
+                $info[$label] = sanitize_text_field( $custom_value );
             }
         }
     }

@@ -78,4 +78,39 @@ jQuery(document).ready(function($) {
             });
         }
     });
+
+    // Export Affiliate Users dropdown: toggle the panel with the customise-export fields.
+    // Same behaviour as the Export Orders / Export Payouts dropdowns.
+    var $exportWrap = $('#wcu-export-dropdown');
+    if ($exportWrap.length) {
+        var $exportToggle = $('#wcu-admin-export-csv');
+        var $exportPanel  = $('#wcu-export-panel');
+
+        function closeExportPanel(){
+            $exportPanel.prop('hidden', true);
+            $exportToggle.attr('aria-expanded', 'false');
+            $exportWrap.removeClass('is-open');
+        }
+
+        $exportToggle.on('click', function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            if (!$exportPanel.prop('hidden')) {
+                closeExportPanel();
+            } else {
+                $exportPanel.prop('hidden', false);
+                $exportToggle.attr('aria-expanded', 'true');
+                $exportWrap.addClass('is-open');
+            }
+        });
+
+        // Keep clicks inside the panel from closing it.
+        $exportPanel.on('click', function(e){ e.stopPropagation(); });
+
+        // Close on outside click or Escape.
+        $(document).on('click', function(){ closeExportPanel(); });
+        $(document).on('keydown', function(e){
+            if (e.key === 'Escape' || e.keyCode === 27) { closeExportPanel(); }
+        });
+    }
 });

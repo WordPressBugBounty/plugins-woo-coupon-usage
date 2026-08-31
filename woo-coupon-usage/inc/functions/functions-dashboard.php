@@ -19,7 +19,7 @@ function wcusage_dashboard_normal_tabs(  $wcusage_page_load  ) {
     // ------------------------------------------------------------------
     // Optimized tab rendering
     // ------------------------------------------------------------------
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     $show_tabs_icons = wcusage_get_setting_value( 'wcusage_field_show_tabs_icons', '1' );
     $wcusage_field_mobile_menu = wcusage_get_setting_value( 'wcusage_field_mobile_menu', 'dropdown' );
     $custom_order = ( isset( $options['wcusage_dashboard_tabs_layout'] ) ? $options['wcusage_dashboard_tabs_layout'] : '' );
@@ -528,7 +528,7 @@ function wcusage_requests_session_check(  $postid  ) {
  */
 if ( !function_exists( 'wcusage_do_after_dashboard' ) ) {
     function wcusage_do_after_dashboard() {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $wcusage_field_load_ajax = wcusage_get_setting_value( 'wcusage_field_load_ajax', 1 );
         $wcusage_field_load_ajax_per_page = wcusage_get_setting_value( 'wcusage_field_load_ajax_per_page', 1 );
         if ( !$wcusage_field_load_ajax ) {

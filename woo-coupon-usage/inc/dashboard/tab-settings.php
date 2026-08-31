@@ -153,25 +153,52 @@ function wcusage_ajax_update_settings() {
     }
 
     if (!empty($updated_payout_fields)) {
-        do_action('wcusage_hook_dash_update_payment_methods');
+        // Pass the affiliate the details belong to: the admin screens fire this
+        // too, where the current user is the admin rather than the affiliate.
+        do_action('wcusage_hook_dash_update_payment_methods', $couponuserid);
     }
 
-    // Update statement (billing) settings
-    $billing_fields = [
-        'wcu-company' => 'wcu_billing_company',
-        'wcu-billing1' => 'wcu_billing_address_1',
-        'wcu-billing2' => 'wcu_billing_address_2',
-        'wcu-billing3' => 'wcu_billing_address_3',
-        'wcu-taxid' => 'wcu_billing_taxid'
-    ];
+    // Update statement (billing) settings. The field list (labels, required,
+    // show/hide and any admin-added extra fields) comes from the statements
+    // add-on when it is available; free builds keep the original five.
+    if (function_exists('wcusage_get_statement_affiliate_fields_visible')) {
+        $billing_definitions = wcusage_get_statement_affiliate_fields_visible();
+    } else {
+        $billing_definitions = [
+            'company'   => ['name' => 'wcu-company',  'meta' => 'wcu_billing_company',   'label' => esc_html__('Company Name', 'woo-coupon-usage'),   'required' => false],
+            'address_1' => ['name' => 'wcu-billing1', 'meta' => 'wcu_billing_address_1', 'label' => esc_html__('Address Line 1', 'woo-coupon-usage'), 'required' => false],
+            'address_2' => ['name' => 'wcu-billing2', 'meta' => 'wcu_billing_address_2', 'label' => esc_html__('Address Line 2', 'woo-coupon-usage'), 'required' => false],
+            'address_3' => ['name' => 'wcu-billing3', 'meta' => 'wcu_billing_address_3', 'label' => esc_html__('Address Line 3', 'woo-coupon-usage'), 'required' => false],
+            'taxid'     => ['name' => 'wcu-taxid',    'meta' => 'wcu_billing_taxid',     'label' => esc_html__('Tax/VAT Number', 'woo-coupon-usage'), 'required' => false],
+        ];
+    }
+
+    // Collect and check the submitted values before writing any of them, so a
+    // required field left blank cannot leave the section half saved. A field that
+    // is absent was not part of this submission (e.g. the affiliate saved another
+    // card), so its stored value is left alone.
+    $submitted_billing = [];
+    foreach($billing_definitions as $billing_field) {
+        $post_key = $billing_field['name'];
+        if(!isset($_POST[$post_key])) {
+            continue;
+        }
+        $value = sanitize_text_field($_POST[$post_key]);
+        if(!empty($billing_field['required']) && $value === '') {
+            wp_send_json_error(sprintf(
+                // translators: %s: the name of the required field.
+                esc_html__('%s is required.', 'woo-coupon-usage'),
+                esc_html( $billing_field['label'] )
+            ));
+            wp_die();
+        }
+        $submitted_billing[$post_key] = ['meta' => $billing_field['meta'], 'value' => $value];
+    }
 
     $updated_billing_fields = [];
-    foreach($billing_fields as $post_key => $meta_key) {
-        if(isset($_POST[$post_key])) {
-            $value = sanitize_text_field($_POST[$post_key]);
-            update_user_meta($couponuserid, $meta_key, $value);
-            $updated_billing_fields[$post_key] = $value;
-        }
+    foreach($submitted_billing as $post_key => $billing) {
+        update_user_meta($couponuserid, $billing['meta'], $billing['value']);
+        $updated_billing_fields[$post_key] = $billing['value'];
     }
 
     // Update custom account details
@@ -427,11 +454,73 @@ if (!function_exists('wcusage_settings_toggle')) {
 }
 
 /**
+ * Decodes HTML entities in a registration custom-field label or value.
+ *
+ * Applications stored the label and the value HTML-entity encoded, so a field
+ * labelled "Recipient's full name" was keyed as "Recipient&#039;s full name"
+ * while every reader looks the value up by the decoded label - the field then
+ * always read as blank. Values are decoded for the same reason: they were
+ * escaped again on output, so an apostrophe displayed as a literal "&#039;".
+ *
+ * ENT_QUOTES is passed explicitly because the default flags did not decode
+ * &#039; before PHP 8.1.
+ *
+ * @param mixed $text
+ * @return mixed
+ */
+if (!function_exists('wcusage_decode_custom_field_text')) {
+    function wcusage_decode_custom_field_text($text) {
+        if (!is_string($text) || $text === '') {
+            return $text;
+        }
+        return html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+/**
+ * Normalises a set of registration custom fields so legacy (entity encoded) and
+ * current keys resolve to the same label.
+ *
+ * Decoding can make two stored keys collide - an encoded one written at
+ * registration and a decoded one written by a later profile save. The non-empty
+ * value wins, so a blank legacy entry can never erase a value the affiliate or
+ * the admin entered afterwards.
+ *
+ * @param mixed $info
+ * @return array label => value
+ */
+if (!function_exists('wcusage_normalize_custom_fields')) {
+    function wcusage_normalize_custom_fields($info) {
+        if (!is_array($info)) {
+            return array();
+        }
+        $out = array();
+        foreach ($info as $key => $value) {
+            $label = wcusage_decode_custom_field_text((string) $key);
+            if (is_array($value)) {
+                $value = array_map('wcusage_decode_custom_field_text', $value);
+            } elseif (is_scalar($value)) {
+                $value = wcusage_decode_custom_field_text((string) $value);
+            } else {
+                $value = '';
+            }
+            $is_empty = ($value === '' || $value === array());
+            if ($is_empty && isset($out[$label]) && $out[$label] !== '') {
+                continue;
+            }
+            $out[$label] = $value;
+        }
+        return $out;
+    }
+}
+
+/**
  * Returns the affiliate's saved registration custom-field values.
  *
  * At registration these are stored in the 'wcu_info' user meta as a JSON object
  * keyed by the field label. This normalises that (JSON / serialized / array) into
- * a plain array.
+ * a plain array, with entity-encoded labels and values decoded so applications
+ * stored by older versions still resolve.
  *
  * @param int $user_id
  * @return array label => value
@@ -453,7 +542,7 @@ if (!function_exists('wcusage_get_user_custom_fields')) {
                 }
             }
         }
-        return $info;
+        return wcusage_normalize_custom_fields($info);
     }
 }
 
@@ -600,7 +689,7 @@ if (!function_exists('wcusage_settings_output_custom_fields')) {
  */
 if (!function_exists('wcusage_tab_settings')) {
     function wcusage_tab_settings($postid, $couponuserid) {
-        $options = get_option('wcusage_options');
+        $options = wcusage_get_options();
         $currentuserid = get_current_user_id();
 
         // Notifications
@@ -686,6 +775,10 @@ if (!function_exists('wcusage_tab_settings')) {
                             <?php
                             $wcu_enable_statements = wcusage_get_setting_value('wcusage_field_payouts_enable_statements', '0');
                             $wcu_enable_statements_data = wcusage_get_setting_value('wcusage_field_payouts_enable_statements_data', '1');
+                            // All statement detail fields can be hidden in the settings.
+                            if ($wcu_enable_statements && $wcu_enable_statements_data && function_exists('wcusage_get_statement_affiliate_fields_visible') && !wcusage_get_statement_affiliate_fields_visible()) {
+                                $wcu_enable_statements_data = 0;
+                            }
                             if($wcu_enable_statements && $wcu_enable_statements_data) { ?>
                             <li><a href="#tab-statement-settings"><?php echo esc_html__("Statement Settings", "woo-coupon-usage"); ?></a></li>
                             <?php } ?>
@@ -712,7 +805,7 @@ if (!function_exists('wcusage_tab_settings')) {
                                 $global_unsub_enabled = wcusage_get_setting_value('wcusage_field_newsletter_enable_unsubscribe', 1);
                                 if($newsletters_enabled &&$global_unsub_enabled) { ?>
                                     <p><input type="checkbox" id="wcu_newsletter_subscribed" name="wcu_newsletter_subscribed" value="1" <?php if(!$is_unsub) { ?>checked<?php } ?>>
-                                    <?php echo esc_html__("Subscribe to Affiliate Newsletters", "woo-coupon-usage"); ?>
+                                    <?php echo sprintf( esc_html__("Subscribe to %s Newsletters", "woo-coupon-usage"), esc_html( wcusage_get_affiliate_text( __("Affiliate", "woo-coupon-usage") ) ) ); ?>
                                 <?php } ?>
                             <?php } ?>
 
@@ -849,7 +942,7 @@ if (!function_exists('wcusage_tab_settings')) {
                                     <p><?php echo esc_html__("Sorry, this coupon is not assigned to you. You can only edit your own account details.", "woo-coupon-usage"); ?></p>
                                     <?php if (wcusage_check_admin_access() && current_user_can('edit_users')) { ?>
                                         <p><?php echo sprintf(esc_html__("[Admin] You can edit the account details for this user in the admin area: %s", "woo-coupon-usage"),
-                                            "<a href='" . esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $couponuserid) ) . "' target='_blank'>" . esc_html__("View Affiliate", "woo-coupon-usage") . "</a>"); ?></p>
+                                            "<a href='" . esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $couponuserid) ) . "' target='_blank'>" . sprintf( esc_html__("View %s", "woo-coupon-usage"), esc_html( wcusage_get_affiliate_text( __("Affiliate", "woo-coupon-usage") ) ) ) . "</a>"); ?></p>
                                         <br/>
                                         <span class='admin-edit-account'>
                                             <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
@@ -908,6 +1001,11 @@ if (!function_exists('wcusage_tab_settings')) {
             $wcu_enable_statements        = wcusage_get_setting_value('wcusage_field_payouts_enable_statements', '0');
             $wcu_enable_statements_data   = wcusage_get_setting_value('wcusage_field_payouts_enable_statements_data', '1');
             $wcu_show_statements          = ($wcu_is_pro && $wcu_enable_statements && $wcu_enable_statements_data);
+            // Every statement detail field can be hidden in the settings; when they
+            // all are, there is nothing to put in the card.
+            if ($wcu_show_statements && function_exists('wcusage_get_statement_affiliate_fields_visible')) {
+                $wcu_show_statements = (bool) wcusage_get_statement_affiliate_fields_visible();
+            }
 
             $wcu_sections = array();
             if ($wcusage_field_payouts_enable) {
@@ -1033,7 +1131,7 @@ if (!function_exists('wcusage_tab_settings')) {
                                     <p><?php echo esc_html__("Sorry, this coupon is not assigned to you. You can only edit your own account details.", "woo-coupon-usage"); ?></p>
                                     <?php if (wcusage_check_admin_access() && current_user_can('edit_users')) { ?>
                                         <p><?php echo sprintf(esc_html__("[Admin] You can edit the account details for this user in the admin area: %s", "woo-coupon-usage"),
-                                            "<a href='" . esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $couponuserid) ) . "' target='_blank'>" . esc_html__("View Affiliate", "woo-coupon-usage") . "</a>"); ?></p>
+                                            "<a href='" . esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $couponuserid) ) . "' target='_blank'>" . sprintf( esc_html__("View %s", "woo-coupon-usage"), esc_html( wcusage_get_affiliate_text( __("Affiliate", "woo-coupon-usage") ) ) ) . "</a>"); ?></p>
                                         <span class='admin-edit-account'>
                                             <div class="wcu-settings-field"><label><?php echo esc_html__('First Name', 'woo-coupon-usage'); ?>: <?php echo esc_html($first_name); ?></label></div>
                                             <div class="wcu-settings-field"><label><?php echo esc_html__('Last Name', 'woo-coupon-usage'); ?>: <?php echo esc_html($last_name); ?></label></div>
@@ -1076,7 +1174,7 @@ if (!function_exists('wcusage_tab_settings')) {
                                     $newsletters_enabled = wcusage_get_setting_value('wcusage_field_email_newsletter_enable', 0);
                                     $global_unsub_enabled = wcusage_get_setting_value('wcusage_field_newsletter_enable_unsubscribe', 1);
                                     if ($newsletters_enabled && $global_unsub_enabled) {
-                                        wcusage_settings_toggle('wcu_newsletter_subscribed', 'wcu_newsletter_subscribed', !$is_unsub, esc_html__("Subscribe to Affiliate Newsletters", "woo-coupon-usage"));
+                                        wcusage_settings_toggle('wcu_newsletter_subscribed', 'wcu_newsletter_subscribed', !$is_unsub, sprintf( esc_html__("Subscribe to %s Newsletters", "woo-coupon-usage"), esc_html( wcusage_get_affiliate_text( __("Affiliate", "woo-coupon-usage") ) ) ));
                                     }
                                 }
 
@@ -1150,7 +1248,7 @@ if (!function_exists('wcusage_dashboard_tab_content_settings')) {
             $coupon_user_id = $other_affiliate;
         }
 
-        $options = get_option('wcusage_options');
+        $options = wcusage_get_options();
         $currentuserid = get_current_user_id();
 
         if (isset($_POST['page-settings']) || isset($_POST['ml-page-settings']) || !isset($_POST['load-page']) || $wcusage_page_load == false) { ?>

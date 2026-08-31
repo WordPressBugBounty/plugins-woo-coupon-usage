@@ -400,7 +400,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
 
         switch ( $column_name ) {
             case 'ID':
-                return '<a href="' . esc_url( admin_url( 'post.php?post=' . $item->ID . '&action=edit' ) ) . '"><span class="dashicons dashicons-edit" style="font-size: 15px; margin-top: 4px;"></span> ' . esc_html( $item->ID ) . '</a>';
+                return '<a class="wcusage-coupon-id-link" href="' . esc_url( admin_url( 'post.php?post=' . $item->ID . '&action=edit' ) ) . '"><span class="dashicons dashicons-edit"></span>' . esc_html( $item->ID ) . '</a>';
             case 'post_title':
                 return '<a href="' . esc_url( admin_url( 'post.php?post=' . $item->ID . '&action=edit' ) ) . '">' . esc_html( $coupon_code ) . '</a>';
             case 'coupon_type':
@@ -1136,8 +1136,11 @@ function wcusage_coupons_page() {
         </form>
     </div>
     <style>
-    /* Vertically center all table cell contents on this page */
+    /* Vertically center all table cell contents on this page.
+       The ID column is the primary column, so WordPress renders it as <th scope="row">
+       (not <td>) and core sets .widefat tbody th { vertical-align: top } -- include it. */
     .wp-list-table tbody td,
+    .wp-list-table tbody th,
     .wp-list-table thead th {
         vertical-align: middle;
     }

@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin settings UI: echoed values are internal pre-escaped helper markup and static strings; verified safe in manual audit.
 
 function wcusage_field_cb( $args ) {
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
 
     $ispro = ( wcu_fs()->can_use_premium_code() ? 1 : 0 );
     $probrackets = ( $ispro ? "" : " (PRO)" );
@@ -175,7 +175,7 @@ function wcusage_field_cb( $args ) {
       });
       </script>
       <?php
-      $options = get_option('wcusage_options');
+      $options = wcusage_get_options();
       $stored_tabs_order = isset($options['wcusage_dashboard_tabs_layout']) ? $options['wcusage_dashboard_tabs_layout'] : '';
 
       // Build dynamic list of potential tabs (keys align with button IDs in functions-dashboard & portal template for consistency)
@@ -410,7 +410,7 @@ function wcusage_field_cb( $args ) {
             })(jQuery);
             </script>
             <?php
-            $options = get_option('wcusage_options');
+            $options = wcusage_get_options();
             $section_order = isset($options['wcusage_statistics_layout']) ? $options['wcusage_statistics_layout'] : '';
             $sections = array(
                 'section_couponinfo' => esc_html__('Coupon Info', 'woo-coupon-usage'),
@@ -1965,7 +1965,7 @@ add_action( 'wcusage_hook_setting_section_ordersalestracking', 'wcusage_setting_
 if( !function_exists( 'wcusage_setting_section_ordersalestracking' ) ) {
   function wcusage_setting_section_ordersalestracking($type = "") {
 
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
   if ( ! is_array( $options ) ) {
     $options = array();
   }

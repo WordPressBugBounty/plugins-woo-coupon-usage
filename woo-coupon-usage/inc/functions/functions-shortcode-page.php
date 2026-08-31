@@ -177,7 +177,7 @@ if( !function_exists( 'wcusage_get_affiliate_dashboard_preview_url' ) ) {
 if( !function_exists( 'wcusage_get_coupon_shortcode_page_id' ) ) {
 	function wcusage_get_coupon_shortcode_page_id() {
 
-		$options = get_option( 'wcusage_options' );
+		$options = wcusage_get_options();
 
 		if ( isset($options['wcusage_dashboard_page']) && get_post_status ( $options['wcusage_dashboard_page'] ) == 'publish' ) {
 
@@ -288,7 +288,7 @@ if( !function_exists( 'wcusage_get_registration_shortcode_page' ) ) {
 if( !function_exists( 'wcusage_get_registration_shortcode_page_id' ) ) {
 	function wcusage_get_registration_shortcode_page_id() {
 
-		$options = get_option( 'wcusage_options' );
+		$options = wcusage_get_options();
 
 		$thepageid = "";
 
@@ -339,7 +339,7 @@ if( !function_exists( 'wcusage_get_registration_shortcode_page_id' ) ) {
 if( !function_exists( 'wcusage_get_mla_shortcode_page_id' ) ) {
 	function wcusage_get_mla_shortcode_page_id() {
 
-		$options = get_option( 'wcusage_options' );
+		$options = wcusage_get_options();
 
 		$thepageid = "";
 
@@ -395,7 +395,7 @@ if( !function_exists( 'wcusage_get_mla_shortcode_page_id' ) ) {
 if( !function_exists( 'wcusage_get_mla_shortcode_page' ) ) {
 	function wcusage_get_mla_shortcode_page() {
 
-		$options = get_option( 'wcusage_options' );
+		$options = wcusage_get_options();
 
     if ( $options['wcusage_mla_dashboard_page'] && get_post_status ( $options['wcusage_mla_dashboard_page'] ) == 'publish' ) {
 

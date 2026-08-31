@@ -55,17 +55,17 @@ if ( !function_exists( 'wcusage_edit_order_meta' ) ) {
         if ( !$order ) {
             return;
         }
-        // Get current value (HPOS compatible)
-        $current_value = $order->get_meta( $meta_key, true );
-        if ( $current_value === $meta_value ) {
-            return;
-        }
         // If Array
         if ( is_array( $meta_value ) ) {
             $meta_value = json_encode( $meta_value );
         }
         // Make lowercase if certain meta
         $meta_value = wcusage_order_meta_lowercase( $meta_key, $meta_value );
+        // Nothing to do if the stored value already matches.
+        $current_value = $order->get_meta( $meta_key, true );
+        if ( $current_value === $meta_value ) {
+            return;
+        }
         // Update meta (HPOS compatible)
         $order->update_meta_data( $meta_key, $meta_value );
         $order->save_meta_data();
@@ -92,7 +92,8 @@ if ( !function_exists( 'wcusage_update_order_meta' ) ) {
         $never_update_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_never_update_commission_meta', '0' );
         if ( $never_update_commission_meta && !$force_commission_meta_update ) {
             if ( $item == "wcusage_commission_summary" || $item == "wcusage_total_commission" || $item == "wcusage_product_commission" || $item == "wcusage_fixed_order_commission" || $item == "wcusage_stats" || $item == "wcusage_currency_conversion" || $item == "wcu_mla_commission" ) {
-                if ( wcusage_order_meta( $order_id, $item ) ) {
+                $existing = $order->get_meta( $item, true );
+                if ( $existing !== '' && $existing !== null ) {
                     return;
                 }
             }
@@ -108,23 +109,102 @@ if ( !function_exists( 'wcusage_update_order_meta' ) ) {
  */
 function wcusage_update_order_meta_bulk(  $order_id, $meta_data = [], $force_update = 0  ) {
     $order = wc_get_order( $order_id );
-    $update = 0;
-    if ( $order && is_a( $order, 'WC_Order' ) ) {
-        $force_commission_meta_update = $force_update && ($order->get_status() == "refunded" || !empty( $order->get_refunds() ));
-        foreach ( $meta_data as $key => $value ) {
-            $never_update_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_never_update_commission_meta', '0' );
-            if ( $never_update_commission_meta && !$force_commission_meta_update ) {
-                if ( $key == "wcusage_commission_summary" || $key == "wcusage_total_commission" || $key == "wcusage_product_commission" || $key == "wcusage_fixed_order_commission" || $key == "wcusage_stats" || $key == "wcusage_currency_conversion" || $key == "wcu_mla_commission" ) {
-                    if ( wcusage_order_meta( $order_id, $key ) ) {
-                        continue;
-                    }
-                }
+    if ( !$order || !is_a( $order, 'WC_Order' ) ) {
+        return;
+    }
+    $force_commission_meta_update = $force_update && ($order->get_status() == "refunded" || !empty( $order->get_refunds() ));
+    $never_update_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_never_update_commission_meta', '0' );
+    $protected_keys = array(
+        'wcusage_commission_summary',
+        'wcusage_total_commission',
+        'wcusage_product_commission',
+        'wcusage_fixed_order_commission',
+        'wcusage_stats',
+        'wcusage_currency_conversion',
+        'wcu_mla_commission'
+    );
+    // Write into the one order object and save once at the end.
+    //
+    // This used to call wcusage_edit_order_meta() per key, and each of those
+    // loaded the order again with wc_get_order() and called save_meta_data() -
+    // so a "bulk" update of six keys was six order reads and six saves. On a
+    // full stats refresh that happens for every order in the result set.
+    $changed = false;
+    foreach ( $meta_data as $key => $value ) {
+        if ( $never_update_commission_meta && !$force_commission_meta_update && in_array( $key, $protected_keys, true ) ) {
+            // Same "already written" test as wcusage_update_order_meta().
+            $existing = $order->get_meta( $key, true );
+            if ( $existing !== '' && $existing !== null ) {
+                continue;
             }
-            wcusage_edit_order_meta( $order_id, $key, $value );
         }
+        if ( empty( $key ) ) {
+            continue;
+        }
+        // Same normalisation wcusage_edit_order_meta() applies.
+        if ( is_array( $value ) ) {
+            $value = json_encode( $value );
+        }
+        $value = wcusage_order_meta_lowercase( $key, $value );
+        if ( $order->get_meta( $key, true ) === $value ) {
+            continue;
+        }
+        $order->update_meta_data( $key, $value );
+        $changed = true;
+    }
+    if ( $changed ) {
+        $order->save_meta_data();
     }
 }
 
+/**
+ * The commission rates set on a product's categories.
+ *
+ * Memoised per product for the request. The category terms and their two rate
+ * meta values were previously re-read for every line item of every order, and
+ * the same handful of products recur throughout an affiliate's order history.
+ *
+ * Where a product sits in several categories that each set a rate, the last one
+ * iterated wins - the same behaviour as before.
+ *
+ * @param int $product_id Parent product ID.
+ *
+ * @return array
+ */
+if ( !function_exists( 'wcusage_get_product_category_rates' ) ) {
+    function wcusage_get_product_category_rates(  $product_id  ) {
+        static $cache = array();
+        $product_id = (int) $product_id;
+        if ( isset( $cache[$product_id] ) ) {
+            return $cache[$product_id];
+        }
+        $rates = array(
+            'percent' => "",
+            'fixed'   => "",
+        );
+        if ( $product_id ) {
+            $product_cats = get_the_terms( $product_id, 'product_cat' );
+            if ( is_array( $product_cats ) || is_object( $product_cats ) ) {
+                foreach ( $product_cats as $product_cat ) {
+                    if ( !isset( $product_cat->term_id ) ) {
+                        continue;
+                    }
+                    $product_cat_percent = get_term_meta( $product_cat->term_id, 'wcu_product_cat_commission_percent', true );
+                    $product_cat_fixed = get_term_meta( $product_cat->term_id, 'wcu_product_cat_commission_fixed', true );
+                    if ( $product_cat_percent != "" ) {
+                        $rates['percent'] = $product_cat_percent;
+                    }
+                    if ( $product_cat_fixed != "" ) {
+                        $rates['fixed'] = $product_cat_fixed;
+                    }
+                }
+            }
+        }
+        $cache[$product_id] = $rates;
+        return $rates;
+    }
+
+}
 /*
  * Make order meta lower case if certain meta
  *
@@ -152,11 +232,234 @@ function wcusage_order_meta_lowercase(  $key, $value  ) {
  */
 if ( !function_exists( 'wcusage_delete_order_meta' ) ) {
     function wcusage_delete_order_meta(  $order_id, $item = ''  ) {
-        if ( !empty( wcusage_order_meta( $order_id, $item ) ) ) {
-            $order = wc_get_order( $order_id );
-            $order->delete_meta_data( $item );
-            $order->save();
+        if ( !$order_id || !$item ) {
+            return;
         }
+        $order = wc_get_order( $order_id );
+        if ( !$order instanceof WC_Order ) {
+            return;
+        }
+        // meta_exists(), not the value. A key holding "0" is still a key, and reading it
+        // back through wcusage_order_meta() json_decodes "0" to int 0, so the old
+        // !empty() guard quietly left those rows behind - and loaded the whole order a
+        // second time to decide. wcusage_delete_order_meta_bulk() has always used
+        // meta_exists(), so the two helpers disagreed on the same input.
+        if ( !$order->meta_exists( $item ) ) {
+            return;
+        }
+        $order->delete_meta_data( $item );
+        // save_meta_data(), not save(). Nothing but meta has changed, and a full save
+        // fires woocommerce_update_order and everything hooked to it - measured at 58
+        // queries per delete against 7 for the meta-only save.
+        $order->save_meta_data();
+    }
+
+}
+/**
+ * Deletes several order meta keys in one load and one save.
+ *
+ * Order meta does NOT live in the post meta table once High-Performance Order
+ * Storage is on, so delete_post_meta() silently does nothing for an order there
+ * - it reports success while the value stays exactly where it was. Anything
+ * clearing order meta has to go through the order object.
+ *
+ * @param int   $order_id
+ * @param array $keys
+ *
+ */
+if ( !function_exists( 'wcusage_delete_order_meta_bulk' ) ) {
+    function wcusage_delete_order_meta_bulk(  $order_id, $keys = array()  ) {
+        if ( !$order_id || empty( $keys ) || !is_array( $keys ) ) {
+            return;
+        }
+        $order = wc_get_order( $order_id );
+        if ( !$order instanceof WC_Order ) {
+            return;
+        }
+        $changed = false;
+        foreach ( $keys as $key ) {
+            if ( !$key ) {
+                continue;
+            }
+            if ( $order->meta_exists( $key ) ) {
+                $order->delete_meta_data( $key );
+                $changed = true;
+            }
+        }
+        if ( $changed ) {
+            // Meta only - see wcusage_delete_order_meta() for why this is not save().
+            $order->save_meta_data();
+        }
+    }
+
+}
+/**
+ * The one coupon on an order that owns the order's commission.
+ *
+ * An order's commission is saved in order-scoped meta ("wcusage_stats",
+ * "wcusage_total_commission", "wcusage_commission_summary" ...) rather than per
+ * coupon, so where several coupons are stacked on one order only one of them can
+ * be the author of those values. Every caller that loops an order's coupons - the
+ * new-order hook, refunds, payouts, the all-time stats - used to let each coupon
+ * overwrite them in turn, so the last coupon applied won.
+ *
+ * That mattered because a coupon with no affiliate assigned still calculates a
+ * commission: its rate falls back to the shop-wide default. Stacking an ordinary
+ * coupon after an affiliate's own therefore replaced the affiliate's rate with the
+ * default one, and the order was saved paying the wrong amount.
+ *
+ * Preference order: the lifetime referrer, then a manually set referrer coupon
+ * (both already documented as overriding everything else), then the first coupon
+ * that actually has an affiliate assigned, then the first coupon.
+ *
+ * @param int|WC_Order $order_id
+ *
+ * @return string Coupon code, or "" when there is nothing to choose between.
+ *
+ */
+if ( !function_exists( 'wcusage_get_order_commission_coupon' ) ) {
+    function wcusage_get_order_commission_coupon(  $order_id  ) {
+        if ( $order_id instanceof WC_Order ) {
+            $order_id = $order_id->get_id();
+        }
+        if ( !$order_id ) {
+            return "";
+        }
+        $order = wc_get_order( $order_id );
+        if ( !$order instanceof WC_Order ) {
+            return "";
+        }
+        // Read straight off the order rather than through wcusage_order_meta(), which
+        // runs values through json_decode() and so hands back an int for a numeric
+        // coupon code such as "2025". This is also the one and only wc_get_order()
+        // call the lookup needs - it runs on every recalculation.
+        $coupon_code = $order->get_meta( 'lifetime_affiliate_coupon_referrer', true );
+        if ( !$coupon_code ) {
+            $coupon_code = $order->get_meta( 'wcusage_referrer_coupon', true );
+        }
+        if ( !$coupon_code ) {
+            $order_coupons = $order->get_coupon_codes();
+            if ( !empty( $order_coupons ) ) {
+                // Only a coupon with an affiliate assigned to it can pay anyone, so
+                // one without an affiliate must never decide the order's commission.
+                foreach ( $order_coupons as $order_coupon_code ) {
+                    $coupon_info = wcusage_get_coupon_info( $order_coupon_code );
+                    if ( !empty( $coupon_info[1] ) && get_userdata( $coupon_info[1] ) ) {
+                        $coupon_code = $order_coupon_code;
+                        break;
+                    }
+                }
+                // No affiliate coupon on the order at all - keep the previous
+                // behaviour of the first coupon standing for the order.
+                if ( !$coupon_code ) {
+                    $coupon_code = reset( $order_coupons );
+                }
+            }
+        }
+        // Coupon codes are compared as strings, and wcusage_coupon_codes_match()
+        // rejects anything that is not one.
+        if ( !is_scalar( $coupon_code ) ) {
+            return "";
+        }
+        return (string) $coupon_code;
+    }
+
+}
+/**
+ * Whether a coupon is the one allowed to write an order's commission meta.
+ *
+ * See wcusage_get_order_commission_coupon(). Coupons that lose are still
+ * calculated and still keep their own all-time statistics - they just no longer
+ * overwrite what the owning coupon saved on the order itself.
+ *
+ * @param int|WC_Order $order_id
+ * @param string $coupon_code
+ *
+ * @return bool
+ *
+ */
+if ( !function_exists( 'wcusage_coupon_owns_order_commission' ) ) {
+    function wcusage_coupon_owns_order_commission(  $order_id, $coupon_code  ) {
+        // Callers read the code straight out of order meta, which can hand back an
+        // int for a numeric coupon code - see wcusage_get_order_commission_coupon().
+        if ( !is_scalar( $coupon_code ) ) {
+            return true;
+        }
+        $coupon_code = (string) $coupon_code;
+        $owner = wcusage_get_order_commission_coupon( $order_id );
+        // Nothing to choose between: an order with no coupons on it at all is still
+        // calculated (lifetime commission, manually assigned referrers), and must
+        // still be able to save what it worked out.
+        if ( !$owner ) {
+            return true;
+        }
+        // Some read-only screens calculate an order without naming a coupon at all.
+        // That falls back to the shop-wide default rate and no affiliate, so it must
+        // not be saved over an order that does have an affiliate's coupon on it.
+        if ( $coupon_code === "" ) {
+            return false;
+        }
+        return wcusage_coupon_codes_match( $owner, $coupon_code );
+    }
+
+}
+/**
+ * Whether more than one coupon can ever hold a commission amount against an order.
+ *
+ * Every caller that records commission - granted, pending or all-time - processes the
+ * lifetime coupon, else the referrer coupon, else every coupon on the order, and the
+ * admin's "change the affiliate" screens remove one while adding another, so a
+ * referrer counts even when it is not applied to the order itself.
+ *
+ * The per-coupon meta keys exist only to tell those coupons apart. With a single
+ * possible holder there is nothing to tell apart: that coupon owns the order's
+ * commission by definition (this is the same priority order as
+ * wcusage_get_order_commission_coupon()), so the order-scoped key already holds its
+ * figure and every read falls back to it. Writing a per-coupon copy as well would
+ * leave a permanent duplicate row on every ordinary single-coupon order in the shop.
+ *
+ * Only the write side asks - reads fall back on their own - so being conservative
+ * here (anything unrecognised counts as ambiguous) can never lose an amount, it only
+ * writes a row that goes unread.
+ *
+ * @param int|WC_Order $order
+ * @param string       $coupon_code
+ *
+ * @return bool
+ *
+ */
+if ( !function_exists( 'wcusage_order_has_multiple_commission_coupons' ) ) {
+    function wcusage_order_has_multiple_commission_coupons(  $order, $coupon_code  ) {
+        if ( !$order instanceof WC_Order ) {
+            $order = wc_get_order( $order );
+        }
+        if ( !$order instanceof WC_Order ) {
+            return true;
+        }
+        $holders = $order->get_coupon_codes();
+        // Read straight off the order, not through wcusage_order_meta(), which runs
+        // values through json_decode() and hands back an int for a numeric code.
+        foreach ( array('lifetime_affiliate_coupon_referrer', 'wcusage_referrer_coupon') as $referrer_key ) {
+            $referrer = $order->get_meta( $referrer_key, true );
+            if ( is_scalar( $referrer ) && (string) $referrer !== '' ) {
+                $holders[] = (string) $referrer;
+            }
+        }
+        $unique = array();
+        foreach ( $holders as $holder ) {
+            if ( !is_scalar( $holder ) || (string) $holder === '' ) {
+                continue;
+            }
+            $unique[( function_exists( 'wc_format_coupon_code' ) ? wc_format_coupon_code( (string) $holder ) : strtolower( (string) $holder ) )] = true;
+        }
+        if ( count( $unique ) !== 1 ) {
+            return true;
+        }
+        // The one holder has to be this coupon. Anything else - a referrer being
+        // assigned for the first time, say - is a second holder the order does not
+        // know about yet, and its own amount has to be recorded separately.
+        $own = ( function_exists( 'wc_format_coupon_code' ) ? wc_format_coupon_code( (string) $coupon_code ) : strtolower( (string) $coupon_code ) );
+        return !isset( $unique[$own] );
     }
 
 }
@@ -213,20 +516,11 @@ if ( !function_exists( 'wcusage_get_order_saved_commission' ) ) {
         }
         if ( $commission && has_filter( 'wcusage_calculate_edit_commission' ) ) {
             // Resolved the same way, and in the same order of preference, as the paths
-            // that credit the commission (see wcusage_order_update_stats_refund_complete()).
+            // that credit the commission - the coupon that owns the order's commission.
             // Only looked up when something is actually listening, so the ordinary case
             // stays a plain meta read - this runs per row on the referrals list and its
             // CSV export.
-            $coupon_code = wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer' );
-            if ( !$coupon_code ) {
-                $coupon_code = wcusage_order_meta( $order_id, 'wcusage_referrer_coupon' );
-            }
-            if ( !$coupon_code && $order && is_a( $order, 'WC_Order' ) ) {
-                $order_coupons = $order->get_coupon_codes();
-                if ( !empty( $order_coupons ) ) {
-                    $coupon_code = reset( $order_coupons );
-                }
-            }
+            $coupon_code = wcusage_get_order_commission_coupon( $order_id );
             $couponid = 0;
             $couponuser = 0;
             if ( $coupon_code ) {
@@ -289,9 +583,12 @@ function wcusage_coupon_disable_commission(  $coupon_id  ) {
  */
 if ( !function_exists( 'wcusage_get_order_totals' ) ) {
     function wcusage_get_order_totals(  $orderid  ) {
-        // Ensure $orderid is an integer ID, not a WC_Order object
-        if ( $orderid instanceof WC_Order ) {
-            $orderid = $orderid->get_id();
+        // Callers that already hold the order hand the object in. Keep it: this
+        // used to reduce it to an ID and immediately load the order again, which
+        // is one of the ways a single order got read several times per loop pass.
+        $order = ( $orderid instanceof WC_Order ? $orderid : null );
+        if ( $order ) {
+            $orderid = $order->get_id();
         }
         // Static cache to avoid recalculating totals for the same order
         static $order_totals_cache = array();
@@ -304,7 +601,9 @@ if ( !function_exists( 'wcusage_get_order_totals' ) ) {
                 'error' => 'Invalid order ID',
             ];
         }
-        $order = wc_get_order( $orderid );
+        if ( !$order ) {
+            $order = wc_get_order( $orderid );
+        }
         // Check if order object is valid
         if ( !$order instanceof WC_Order ) {
             return [
@@ -426,9 +725,11 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
         $use_saved = "0",
         $force_update = "0"
     ) {
-        // Ensure $orderid is an integer ID, not a WC_Order object
-        if ( $orderid instanceof WC_Order ) {
-            $orderid = $orderid->get_id();
+        // Callers that already hold the order hand the object in; keep it rather than
+        // reducing it to an ID and reloading the order further down.
+        $order = ( $orderid instanceof WC_Order ? $orderid : null );
+        if ( $order ) {
+            $orderid = $order->get_id();
         }
         // Use static cache for this request - no database writes
         static $calculation_cache = array();
@@ -454,7 +755,9 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
             $couponuser = "";
             $couponid = "";
         }
-        $order = wc_get_order( $orderid );
+        if ( !$order ) {
+            $order = wc_get_order( $orderid );
+        }
         // if is order
         if ( $order instanceof WC_Order ) {
             $save_order_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_order_commission_meta', '1' );
@@ -465,7 +768,7 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                 wcusage_delete_order_meta( $orderid, 'wcu_mla_commission' );
             }
             $get_affstats = wcusage_order_meta( $orderid, 'wcusage_stats', true );
-            if ( is_array( $get_affstats ) && !empty( $get_affstats ) && !empty( $get_affstats['order'] ) && $get_affstats['order'] > 0 && !empty( $get_affstats['commission'] ) && $get_affstats['commission'] > 0 && !$refresh && !$force_update && $use_saved && $save_order_commission_meta ) {
+            if ( is_array( $get_affstats ) && !empty( $get_affstats ) && !empty( $get_affstats['order'] ) && $get_affstats['order'] > 0 && !empty( $get_affstats['commission'] ) && $get_affstats['commission'] > 0 && !$refresh && !$force_update && $use_saved && $save_order_commission_meta && ((string) $coupon_code === '' || wcusage_coupon_owns_order_commission( $orderid, $coupon_code )) ) {
                 $commission_summary = wcusage_order_meta( $orderid, 'wcusage_commission_summary', true );
                 $totalorders = ( $get_affstats['order'] ?: 0 );
                 $totalordersexcl = ( $get_affstats['orderexcl'] ?: 0 );
@@ -488,15 +791,17 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                 $totalorders = 0;
                 $totaldiscounts = 0;
                 $wcusage_get_order_calculate_data = wcusage_get_order_calculate_data(
-                    $orderid,
+                    $order,
                     $coupon_code,
                     'orders',
                     $refresh,
                     $force_update
                 );
-                if ( $order instanceof WC_Order && !empty( $order->get_refunds() ) && is_array( $order->get_refunds() ) && sizeof( $order->get_refunds() ) > 0 ) {
+                // One get_refunds() call, not three in the same condition.
+                $order_refunds = ( $order instanceof WC_Order ? $order->get_refunds() : array() );
+                if ( is_array( $order_refunds ) && sizeof( $order_refunds ) > 0 ) {
                     $wcusage_get_order_calculate_data_refunds = wcusage_get_order_calculate_data(
-                        $orderid,
+                        $order,
                         $coupon_code,
                         'refunds',
                         $refresh,
@@ -505,7 +810,7 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                 } else {
                     $wcusage_get_order_calculate_data_refunds = array();
                 }
-                $wcusage_get_order_totals = wcusage_get_order_totals( $orderid );
+                $wcusage_get_order_totals = wcusage_get_order_totals( $order );
                 if ( isset( $wcusage_get_order_totals['total_discount'] ) ) {
                     $total_discount = $wcusage_get_order_totals['total_discount'];
                 } else {
@@ -693,7 +998,12 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                     '.',
                     ''
                 );
-                if ( $save_order_commission_meta ) {
+                // Only the coupon that owns this order's commission may save it. Callers
+                // loop every coupon on an order, and these keys are order-scoped, so
+                // without this a stacked non-affiliate coupon would overwrite the
+                // affiliate's amount with one worked out at the shop-wide default rate.
+                $owns_order_commission = wcusage_coupon_owns_order_commission( $orderid, $coupon_code );
+                if ( $save_order_commission_meta && $owns_order_commission ) {
                     wcusage_update_order_meta(
                         $orderid,
                         'wcusage_stats',
@@ -703,7 +1013,7 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                 }
                 $commission_summary = $wcusage_get_order_calculate_data['commission_summary'];
                 $get_commission_summary = wcusage_order_meta( $orderid, 'wcusage_commission_summary', true );
-                if ( !$get_commission_summary && $save_order_commission_meta ) {
+                if ( !$get_commission_summary && $save_order_commission_meta && $owns_order_commission ) {
                     wcusage_update_order_meta(
                         $orderid,
                         'wcusage_commission_summary',
@@ -884,18 +1194,21 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         $refresh,
         $force_update = "0"
     ) {
-        // Ensure $orderid is an integer ID, not a WC_Order object
-        if ( $orderid instanceof WC_Order ) {
-            $orderid = $orderid->get_id();
+        // Callers that already hold the order hand the object in; keep it.
+        $order = ( $orderid instanceof WC_Order ? $orderid : null );
+        if ( $order ) {
+            $orderid = $order->get_id();
         }
         if ( $refresh != "0" ) {
             $refresh = true;
         }
-        $order = wc_get_order( $orderid );
+        if ( !$order ) {
+            $order = wc_get_order( $orderid );
+        }
         if ( !$order instanceof WC_Order ) {
             return array();
         }
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $totalcommission = 0;
         $commission_base_total = 0;
         // Sum of product value that % commission was based on (used for blended custom-discount deduction)
@@ -1012,7 +1325,32 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         }
         if ( $type != "refunds" ) {
             $wcusage_field_enable_order_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_order_commission_meta', '1' );
-            if ( $refresh || !isset( $commission_summary ) || empty( $commission_summary ) || $meta_total_commission == "" || $meta_product_commission == "" || $wcusage_field_enable_order_commission_meta == 0 ) {
+            $owns_order_commission = wcusage_coupon_owns_order_commission( $orderid, $coupon_code );
+            // !$owns_order_commission is part of this test, not just of the write
+            // below: the saved wcusage_total_commission / wcusage_commission_summary
+            // belong to the ONE coupon that owns the order's commission. Without it,
+            // any other coupon on a stacked order read those saved figures back as
+            // its own, so two affiliates were each credited the full amount and the
+            // dashboard's Referred Orders total came out higher than the Statistics
+            // total for the same period - Statistics recalculates, and recalculation
+            // already applied this rule. Same guard as the saved-value fast path in
+            // wcusage_calculate_order_data().
+            if ( $refresh || !$owns_order_commission || !isset( $commission_summary ) || empty( $commission_summary ) || $meta_total_commission == "" || $meta_product_commission == "" || $wcusage_field_enable_order_commission_meta == 0 ) {
+                // Values that cannot change between line items, read once here rather
+                // than once per item. On an order with a dozen lines this was a dozen
+                // post-meta reads, a dozen role-rate lookups and a dozen settings reads
+                // that all returned the same answer.
+                $wcu_text_coupon_commission_fixed_product = get_post_meta( $couponid, 'wcu_text_coupon_commission_fixed_product', true );
+                // Get Coupon Fixed Per Product
+                $fixed_product_role_amount = "";
+                if ( wcu_fs()->is__premium_only() && $affiliate_per_user ) {
+                    $fixed_product_role_amount = wcusage_get_role_rate( $user, 'wcusage_field_affiliate_fixed_product_role_' );
+                }
+                $deduct_percent = wcusage_get_setting_value( 'wcusage_field_affiliate_deduct_percent', '0' );
+                $deduct_percent = (100 - (float) $deduct_percent) / 100;
+                // The order's refunds, fetched once for the whole loop instead of once
+                // per line item.
+                $this_order_refunds = $order->get_refunds();
                 // ***** ORDER ITEMS LOOP - START ***** //
                 foreach ( $order_type as $item_key => $item_values ) {
                     $item_data = $item_values->get_data();
@@ -1041,7 +1379,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                             $item_coupon_restricted = !wcusage_coupon_restrictions_allow_product( $coupon_code, $this_id, $parent_id );
                         }
                         // Count this products refunds
-                        foreach ( $order->get_refunds() as $refund ) {
+                        foreach ( $this_order_refunds as $refund ) {
                             foreach ( $refund->get_items() as $item_id => $item ) {
                                 $this_refund_item_data = $item->get_data();
                                 $this_refund_id = $this_refund_item_data['product_id'];
@@ -1094,36 +1432,20 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         } else {
                             $this_line_total_tax = 0;
                         }
-                        $wcu_text_coupon_commission_fixed_product = get_post_meta( $couponid, 'wcu_text_coupon_commission_fixed_product', true );
-                        // Get Coupon Fixed Per Product
                         // Same rule as the percentage: a fixed amount set on the affiliate's user
                         // role / group counts as a coupon-side amount, so it competes with a
                         // per-product one and "Commission Priority" decides. Only the coupon's own
                         // override used to count, so a group's fixed amount was quietly beaten by
                         // any product that had one, whatever the priority was set to.
-                        $fixed_product_role_amount = "";
-                        if ( wcu_fs()->is__premium_only() && $affiliate_per_user ) {
-                            $fixed_product_role_amount = wcusage_get_role_rate( $user, 'wcusage_field_affiliate_fixed_product_role_' );
-                        }
+                        // (Both amounts are read once above the loop.)
                         $has_custom_fixed_product = $fixed_product_role_amount !== "" || $wcu_text_coupon_commission_fixed_product != "" && $wcu_text_coupon_commission_fixed_product >= 0;
-                        $product_percent = "";
-                        $fixed_product_commission = "";
-                        // Get Product Categories
-                        $product_cats = get_the_terms( $parent_id, 'product_cat' );
-                        // Check product categories for "wcu_product_cat_commission_percent" meta
-                        if ( is_array( $product_cats ) || is_object( $product_cats ) ) {
-                            foreach ( $product_cats as $product_cat ) {
-                                $product_cat_id = $product_cat->term_id;
-                                $product_cat_percent = get_term_meta( $product_cat_id, 'wcu_product_cat_commission_percent', true );
-                                $product_cat_fixed = get_term_meta( $product_cat_id, 'wcu_product_cat_commission_fixed', true );
-                                if ( $product_cat_percent != "" ) {
-                                    $product_percent = $product_cat_percent;
-                                }
-                                if ( $product_cat_fixed != "" ) {
-                                    $fixed_product_commission = $product_cat_fixed;
-                                }
-                            }
-                        }
+                        // Category rates for this product, resolved once per product for the
+                        // request. The same products recur constantly across an affiliate's
+                        // orders, and this was a term lookup plus two term-meta reads for
+                        // every line item of every order.
+                        $product_cat_rates = wcusage_get_product_category_rates( $parent_id );
+                        $product_percent = $product_cat_rates['percent'];
+                        $fixed_product_commission = $product_cat_rates['fixed'];
                         // Default Per Product Rates
                         $this_product_percent = get_post_meta( $this_id, 'wcu_product_commission_percent', true );
                         $this_product_percent_parent = get_post_meta( $parent_id, 'wcu_product_commission_percent', true );
@@ -1194,9 +1516,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                                 }
                             }
                         }
-                        // Deduct custom percent
-                        $deduct_percent = wcusage_get_setting_value( 'wcusage_field_affiliate_deduct_percent', '0' );
-                        $deduct_percent = (100 - (float) $deduct_percent) / 100;
+                        // Deduct custom percent - $deduct_percent is computed once above the loop.
                         // Get Commission Amount Percentage (Decimal)
                         if ( is_numeric( $option_affiliate ) ) {
                             $affiliate_commission_amount = (float) $option_affiliate / 100;
@@ -1505,7 +1825,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                 $meta_product_commission = wcusage_order_meta( $orderid, 'wcusage_product_commission', true );
                 $wcusage_field_enable_order_commission_meta = wcusage_get_setting_value( 'wcusage_field_enable_order_commission_meta', '1' );
                 if ( $wcusage_field_enable_order_commission_meta ) {
-                    if ( $type != "refunds" ) {
+                    if ( $type != "refunds" && $owns_order_commission ) {
                         if ( $totalcommission || $meta_total_commission ) {
                             if ( $meta_total_commission == "" || !$never_update_commission_meta ) {
                                 if ( $save_order_commission_meta ) {
@@ -1558,7 +1878,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                 }
                 $commission_summary = wcusage_order_meta( $orderid, 'wcusage_commission_summary', true );
             }
-            if ( $orderid ) {
+            if ( $orderid && $owns_order_commission ) {
                 $wcusage_affiliate_user = wcusage_order_meta( $orderid, 'wcusage_affiliate_user', true );
                 if ( isset( $getcoupon[1] ) && $getcoupon[1] != "" ) {
                     if ( $wcusage_affiliate_user != $getcoupon[1] ) {
@@ -1636,19 +1956,50 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
 if ( !function_exists( 'wcusage_calculate_currency' ) ) {
     function wcusage_calculate_currency(  $currency, $amount, $default  ) {
         // Calculate the new total for an amount based on currency code
-        $options = get_option( 'wcusage_options' );
+        if ( $default ) {
+            return (float) $amount * $default;
+        }
+        $options = wcusage_get_options();
         $currencynumber = wcusage_get_setting_value( 'wcusage_field_currency_number', '5' );
-        if ( !$default ) {
+        // The configured currencies are the same for every value converted in a
+        // request, but this used to rebuild them from wcusage_get_default_currency_settings()
+        // on every call - one call per configured currency, each re-reading the
+        // settings blob and get_woocommerce_currency(). The stats loops convert
+        // tens of thousands of values, so the table is built once and reused.
+        //
+        // The table stays an ordered list of [code, rate] pairs compared with ==,
+        // rather than a map keyed by code: the original compared loosely, so a
+        // blank configured name matches an empty or null $currency, and a code
+        // configured twice is applied twice, in order. Keeping the list and the
+        // comparison identical preserves both - and the multiplications happen in
+        // the same sequence, so the floating point result is unchanged too. The
+        // cost that mattered was rebuilding the list, not walking it.
+        static $rate_table = null;
+        static $key_currencies = null;
+        static $key_number = null;
+        static $key_default = null;
+        $currencies = ( isset( $options['wcusage_field_currencies'] ) ? $options['wcusage_field_currencies'] : null );
+        // get_woocommerce_currency() is filterable, so a currency switcher can
+        // change it; it is part of the key rather than assumed constant.
+        $defaultcurrency = get_woocommerce_currency();
+        if ( null === $rate_table || $key_currencies !== $currencies || $key_number !== $currencynumber || $key_default !== $defaultcurrency ) {
+            $rate_table = array();
             for ($i = 1; $i <= $currencynumber; $i++) {
                 $get_default_currency_settings = wcusage_get_default_currency_settings( $i );
                 $wcusage_field_currency_name = $get_default_currency_settings['wcusage_field_currency_name'];
                 $wcusage_field_currency_rate = $get_default_currency_settings['wcusage_field_currency_rate'];
-                if ( $wcusage_field_currency_name == $currency && $wcusage_field_currency_rate ) {
-                    $amount = (float) $amount * $wcusage_field_currency_rate;
+                if ( $wcusage_field_currency_rate ) {
+                    $rate_table[] = array($wcusage_field_currency_name, $wcusage_field_currency_rate);
                 }
             }
-        } else {
-            $amount = (float) $amount * $default;
+            $key_currencies = $currencies;
+            $key_number = $currencynumber;
+            $key_default = $defaultcurrency;
+        }
+        foreach ( $rate_table as $wcusage_rate_entry ) {
+            if ( $wcusage_rate_entry[0] == $currency ) {
+                $amount = (float) $amount * $wcusage_rate_entry[1];
+            }
         }
         return $amount;
     }
@@ -1665,7 +2016,7 @@ if ( !function_exists( 'wcusage_calculate_currency' ) ) {
 if ( !function_exists( 'wcusage_get_currency_rate' ) ) {
     function wcusage_get_currency_rate(  $currency  ) {
         // Get the set rates for currency code
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $currencynumber = wcusage_get_setting_value( 'wcusage_field_currency_number', '5' );
         $rate = "";
         for ($i = 0; $i <= $currencynumber; $i++) {
@@ -1697,7 +2048,7 @@ if ( !function_exists( 'wcusage_get_default_currency_settings' ) ) {
     function wcusage_get_default_currency_settings(  $i  ) {
         // Get the default settings for currency
         $return_array = [];
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $defaultcurrency = get_woocommerce_currency();
         if ( isset( $options['wcusage_field_currencies'][$i]['name'] ) ) {
             $wcusage_field_currency_name = $options['wcusage_field_currencies'][$i]['name'];
@@ -1851,16 +2202,17 @@ function wcusage_format_price_plain(  $price  ) {
  */
 if ( !function_exists( 'wcusage_get_order_tax_percent' ) ) {
     function wcusage_get_order_tax_percent(  $orderid  ) {
-        // Ensure $orderid is an integer ID, not a WC_Order object
-        if ( $orderid instanceof WC_Order ) {
-            $orderid = $orderid->get_id();
+        // Keep the object when one is handed in, rather than reloading it below.
+        $passed_order = ( $orderid instanceof WC_Order ? $orderid : null );
+        if ( $passed_order ) {
+            $orderid = $passed_order->get_id();
         }
         // Static cache to avoid redundant wc_get_order() calls for the same order
         static $tax_percent_cache = array();
         if ( isset( $tax_percent_cache[$orderid] ) ) {
             return $tax_percent_cache[$orderid];
         }
-        $order = wc_get_order( $orderid );
+        $order = ( $passed_order ? $passed_order : wc_get_order( $orderid ) );
         if ( $order ) {
             $theordertotal = $order->get_total();
             $theordertotaltax = $order->get_total_tax();
@@ -1885,16 +2237,17 @@ if ( !function_exists( 'wcusage_get_order_tax_percent' ) ) {
  */
 if ( !function_exists( 'wcusage_get_total_fees' ) ) {
     function wcusage_get_total_fees(  $orderid  ) {
-        // Ensure $orderid is an integer ID, not a WC_Order object
-        if ( $orderid instanceof WC_Order ) {
-            $orderid = $orderid->get_id();
+        // Keep the object when one is handed in, rather than reloading it below.
+        $passed_order = ( $orderid instanceof WC_Order ? $orderid : null );
+        if ( $passed_order ) {
+            $orderid = $passed_order->get_id();
         }
         // Static cache to avoid redundant wc_get_order() and fee iteration
         static $fees_cache = array();
         if ( isset( $fees_cache[$orderid] ) ) {
             return $fees_cache[$orderid];
         }
-        $order = wc_get_order( $orderid );
+        $order = ( $passed_order ? $passed_order : wc_get_order( $orderid ) );
         $taxpercent = wcusage_get_order_tax_percent( $orderid );
         $fee_total_remove = 0;
         $fee_total_add = 0;

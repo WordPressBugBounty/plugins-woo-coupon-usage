@@ -22123,3 +22123,189 @@ msgstr ""
 #: inc/admin/settings/options-sms__premium_only.php:128
 msgid "✗ Request failed."
 msgstr ""
+
+#: inc/dashboard/tab-settings.php:319
+msgid "A password reset email was just sent. Please check your inbox, or try again in a minute."
+msgstr ""
+
+#: inc/dashboard/tab-settings.php:717 inc/dashboard/tab-settings.php:1081
+#, php-format
+msgid "Subscribe to %s Newsletters"
+msgstr ""
+
+#: inc/dashboard/tab-settings.php:845 inc/dashboard/tab-settings.php:1030
+msgid "Are you sure you want to reset your password? A password reset link will be emailed to you."
+msgstr ""
+
+#: inc/dashboard/tab-settings.php:851 inc/dashboard/tab-settings.php:1035
+msgid "Sorry, this coupon is not assigned to you. You can only edit your own account details."
+msgstr ""
+
+#: inc/dashboard/tab-settings.php:853 inc/dashboard/tab-settings.php:1037
+#, php-format
+msgid "[Admin] You can edit the account details for this user in the admin area: %s"
+msgstr ""
+
+#: inc/functions/functions-shortcode.php:318
+#, php-format
+msgid "jQuery is required to load the affiliate dashboard. It looks like you have a performance tool that is disabling jQuery from loading. Please exclude this page from your optimisations, or <a href='%s' target='_blank'>see here for other solutions</a>."
+msgstr ""
+
+#: inc/functions/functions-shortcode.php:549
+#, php-format
+msgid "No %s dashboard found."
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:113
+msgid "Loading leaderboard..."
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:144
+msgid "Please enter a valid custom date range."
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:197
+msgid "Leaderboard is currently unavailable. No affiliates found."
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:341
+#, php-format
+msgid "Leaderboard is currently unavailable. No %s found."
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:353
+msgid "Rank"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:478
+msgid "Leaderboard updated once per hour."
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:480
+#, php-format
+msgid "Leaderboard updated every %d minutes."
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1015
+#, php-format
+msgid "%s Leaderboard"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1017
+#, php-format
+msgid "Use the generator below to create a leaderboard of all your %s referrals."
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1019
+msgid "Leaderboard Generator:"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1024
+#, php-format
+msgid "Amount of %s:"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1027
+msgid "Type of Leaderboard:"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1033
+msgid "Order By:"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1040
+msgid "Timeframe:"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1056
+msgid "Cache Duration (minutes):"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1058
+msgid "How long to cache results. Set to 0 to disable caching."
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1078
+msgid "Show Total Referrals:"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1084
+msgid "Show Total Sales:"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1091
+msgid "Show Total Commission:"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1097
+#, php-format
+msgid "%s Name:"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1104
+msgid "Highlight logged in user:"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1110
+msgid "Load leaderboard via AJAX:"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1122
+msgid "You can also add the provided shortcode to any page or post to display the leaderboard to your users."
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1361
+msgid "Leaderboard"
+msgstr ""
+
+#: premium-files/pro-addons/leaderboard/functions-leaderboard.php:1416
+msgid "Unable to load leaderboard. Please refresh the page and try again."
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/functions-mla.php:125 premium-files/pro-addons/multi-level/functions-mla.php:194 premium-files/pro-addons/multi-level/portal/mla-template.php:336 premium-files/pro-addons/multi-level/portal/mla-template.php:489
+#, php-format
+msgid "Sub-%s"
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/functions-mla.php:431
+#, php-format
+msgid "This affiliate (%s) is a part of your MLA network. You are viewing their statistics and commission earnings."
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:70
+#, php-format
+msgid "Invite new members to your %s network:"
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:147
+#, php-format
+msgid "Sub-%s Registrations:"
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/functions-mla-invite.php:150
+msgid "The following affiliates registered via your invite link. You can approve or decline their applications below."
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:31
+#, php-format
+msgid "Your sub-%s coupons:"
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:160
+msgid "You don't currently have any sub-affiliates. Use the Invite tab to invite new members to your network."
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/functions-mla-network.php:222
+#, php-format
+msgid "Your %s network:"
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:80
+#, php-format
+msgid "Multi-Level %s Portal"
+msgstr ""
+
+#: premium-files/pro-addons/multi-level/portal/mla-template.php:83
+msgid "Access your multi-level affiliate portal to view your sub-affiliates, referral statistics, commission, and affiliate resources."
+msgstr ""
+

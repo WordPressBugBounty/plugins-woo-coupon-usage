@@ -1,0 +1,408 @@
+/* ------------------------------------------------------------------
+   "Coupon Affiliate" metabox - WooCommerce order edit screen.
+
+   Deliberately built from the WordPress admin palette (#1d2327 text,
+   #646970 secondary, #dcdcde borders, #2271b1 links) rather than the
+   plugin's own brand colours, so the panel reads as part of the order
+   screen it sits next to.
+
+   Nothing here may set "overflow: hidden" on an ancestor of the
+   commission amount: the breakdown tooltip in admin-coupons.css is
+   drawn outside the panel and would be clipped away.
+   ------------------------------------------------------------------ */
+
+.wcusage-orderbox {
+    color: #1d2327;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* ---------- Panel toolbar: verdict left, order-scoped action right ---------- */
+
+.wcusage-orderbox-toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 10px;
+    justify-content: space-between;
+    margin: 0 0 10px;
+}
+.wcusage-orderbox-toolbar .wcusage-orderbox-action {
+    margin-left: auto;
+}
+
+.wcusage-orderbox-verdict {
+    align-items: center;
+    border-radius: 4px;
+    display: inline-flex;
+    font-size: 11px;
+    font-weight: 600;
+    gap: 3px;
+    line-height: 1.7;
+    padding: 1px 8px 1px 6px;
+    white-space: nowrap;
+}
+.wcusage-orderbox-verdict .dashicons {
+    font-size: 13px;
+    height: 13px;
+    width: 13px;
+}
+.wcusage-orderbox-verdict.is-success {
+    background: #c6e1c6;
+    color: #2c4700;
+}
+.wcusage-orderbox-verdict.is-pending {
+    background: #f8dda7;
+    color: #94660c;
+}
+.wcusage-orderbox-verdict.is-alert {
+    background: #eba3a3;
+    color: #761919;
+}
+.wcusage-orderbox-verdict.is-neutral {
+    background: #e5e5e5;
+    color: #50575e;
+}
+
+/* ---------- Referral card ---------- */
+
+.wcusage-orderbox-card {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    margin: 0 0 10px;
+    /* No top padding: the header band below is pulled out to the card edges. */
+    padding: 0 11px 9px;
+}
+.wcusage-orderbox-card:last-of-type {
+    margin-bottom: 0;
+}
+
+/* A titled band, the way the postbox around it is built, rather than an accent
+   rule down one edge. The negative margins take it back out to the card's own
+   border; the radius is 1px inside the card's so the corners sit flush. */
+.wcusage-orderbox-card-head {
+    align-items: center;
+    background: #f6f7f7;
+    border-bottom: 1px solid #dcdcde;
+    border-radius: 3px 3px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 -11px;
+    padding: 5px 8px 5px 11px;
+}
+.wcusage-orderbox-card.is-lifetime .wcusage-orderbox-card-head {
+    background: #f8f5fc;
+}
+.wcusage-orderbox-card.is-referral .wcusage-orderbox-card-head {
+    background: #f4faf5;
+}
+
+.wcusage-orderbox-code {
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+}
+.wcusage-orderbox-code.is-missing {
+    color: #646970;
+    text-decoration: line-through;
+}
+
+.wcusage-orderbox-badge {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 3px;
+    color: #50575e;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.6;
+    padding: 0 5px;
+    white-space: nowrap;
+}
+.wcusage-orderbox-card.is-lifetime .wcusage-orderbox-badge {
+    border-color: #cfc0e6;
+    color: #5f3f96;
+}
+.wcusage-orderbox-card.is-referral .wcusage-orderbox-badge {
+    border-color: #b5ddbe;
+    color: #2c6b3f;
+}
+
+/* Sits at the far end of the header so it never competes with the code. */
+.wcusage-orderbox-remove {
+    background: none;
+    border: 0;
+    border-radius: 3px;
+    color: #a7aaad;
+    cursor: pointer;
+    display: inline-flex;
+    height: 22px;
+    justify-content: center;
+    align-items: center;
+    margin-left: auto;
+    padding: 0;
+    width: 22px;
+}
+.wcusage-orderbox-remove:hover,
+.wcusage-orderbox-remove:focus {
+    background: #fff;
+    box-shadow: inset 0 0 0 1px #e6c5c5;
+    color: #d63638;
+}
+.wcusage-orderbox-remove .dashicons {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+}
+.wcusage-orderbox-remove.is-busy {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* ---------- Label / value rows ---------- */
+
+.wcusage-orderbox-rows {
+    margin-top: 8px;
+}
+.wcusage-orderbox-row {
+    align-items: baseline;
+    border-top: 1px solid #f0f0f1;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+.wcusage-orderbox-rows > .wcusage-orderbox-row:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+.wcusage-orderbox-row-label {
+    color: #646970;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.wcusage-orderbox-row-value {
+    font-weight: 600;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-align: right;
+}
+.wcusage-orderbox-row-value a {
+    text-decoration: none;
+}
+.wcusage-orderbox-muted {
+    color: #646970;
+    font-weight: 400;
+}
+
+/* ---------- Grant status ---------- */
+
+/* The same pills WooCommerce uses for order status on the orders list, so the
+   panel speaks the screen's own visual language. */
+.wcusage-orderbox-status {
+    border-radius: 4px;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.7;
+    margin-left: 6px;
+    padding: 0 7px;
+    vertical-align: 1px;
+    white-space: nowrap;
+}
+.wcusage-orderbox-status.is-granted {
+    background: #c6e1c6;
+    color: #2c4700;
+}
+.wcusage-orderbox-status.is-pending {
+    background: #f8dda7;
+    color: #94660c;
+}
+.wcusage-orderbox-status.is-unpaid {
+    background: #eba3a3;
+    color: #761919;
+}
+.wcusage-orderbox-status.is-void {
+    background: #e5e5e5;
+    color: #50575e;
+}
+
+/* ---------- Notices (grant / deduct) ---------- */
+
+.wcusage-orderbox-notice {
+    border: 1px solid #e8c98b;
+    background: #fdf7e7;
+    border-radius: 4px;
+    display: flex;
+    gap: 7px;
+    margin-top: 9px;
+    padding: 8px 9px;
+}
+.wcusage-orderbox-notice .dashicons {
+    color: #94660c;
+    flex: 0 0 auto;
+    font-size: 16px;
+    height: 16px;
+    margin-top: 1px;
+    width: 16px;
+}
+.wcusage-orderbox-notice-body {
+    display: block;
+    min-width: 0;
+}
+.wcusage-orderbox-notice-text {
+    color: #50575e;
+    display: block;
+    font-size: 12px;
+    line-height: 1.45;
+}
+/* Prefixed with .wp-core-ui to match the specificity of core's own ".button"
+   rules; this sheet is enqueued after "buttons", so these win on source order. */
+.wp-core-ui .wcusage-orderbox-notice-button {
+    font-size: 11px;
+    line-height: 2.1;
+    margin: 7px 0 1px;
+    min-height: 0;
+    padding: 0 8px;
+}
+
+/* ---------- Multi-level commission ---------- */
+
+.wcusage-orderbox-sub {
+    border-top: 1px solid #f0f0f1;
+    margin-top: 9px;
+    padding-top: 8px;
+}
+.wcusage-orderbox-sub-title {
+    color: #646970;
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+.wcusage-orderbox-sub .wcusage-orderbox-rows {
+    margin-top: 3px;
+}
+
+/* ---------- Actions ---------- */
+
+/* No rule above it: the rows are already hairline-separated, and a third line of
+   the same weight made the action read as one more row. */
+.wcusage-orderbox-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 10px;
+}
+.wcusage-orderbox-action {
+    align-items: center;
+    display: inline-flex;
+    font-size: 12px;
+    gap: 4px;
+    text-decoration: none;
+}
+.wcusage-orderbox-action .dashicons {
+    font-size: 15px;
+    height: 15px;
+    width: 15px;
+}
+
+/* ---------- Referrer coupon field ---------- */
+
+.wcusage-orderbox-field {
+    margin-top: 14px;
+}
+.wcusage-orderbox-field-label {
+    align-items: center;
+    display: flex;
+    font-weight: 600;
+    gap: 3px;
+    margin-bottom: 4px;
+}
+/* WooCommerce ships this with a -5px top margin for its own inline labels, which
+   is wrong in a flex row. Clearing it centres the 16px box on the text - but the
+   Dashicons "?" is drawn high within that box, so the mark itself still floated
+   about 3px above the label. Nudged down to line up what is actually visible.
+   Position and display are pinned because WooCommerce turns the tip into an
+   absolutely positioned block below 783px, which would take the offset as a
+   placement instead of a nudge. */
+.wcusage-orderbox-field-label .woocommerce-help-tip {
+    display: block;
+    height: 16px;
+    margin: 0;
+    position: relative;
+    top: 2px;
+    width: 16px;
+}
+.wcusage-orderbox-input {
+    width: 100%;
+}
+.wcusage-orderbox-input[readonly] {
+    background: #f6f7f7;
+    color: #646970;
+}
+.wcusage-orderbox-note {
+    align-items: flex-start;
+    color: #646970;
+    display: flex;
+    font-size: 11px;
+    gap: 4px;
+    line-height: 1.45;
+    margin: 5px 0 0;
+}
+.wcusage-orderbox-note .dashicons {
+    font-size: 13px;
+    height: 13px;
+    margin-top: 1px;
+    width: 13px;
+}
+
+/* ---------- Add a referrer coupon ---------- */
+
+.wcusage-orderbox-add {
+    margin-top: 12px;
+}
+.wcusage-orderbox-addform {
+    background: #f6f7f7;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    margin-top: 8px;
+    padding: 9px 10px 10px;
+}
+.wcusage-orderbox-addform p {
+    color: #646970;
+    font-size: 11px;
+    line-height: 1.5;
+    margin: 0 0 8px;
+}
+.wcusage-orderbox-addrow {
+    display: flex;
+    gap: 6px;
+}
+.wcusage-orderbox-addrow input[type="text"] {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* ---------- Empty state ---------- */
+
+.wcusage-orderbox-empty {
+    align-items: flex-start;
+    color: #646970;
+    display: flex;
+    gap: 6px;
+    margin: 2px 0 0;
+}
+.wcusage-orderbox-empty .dashicons {
+    color: #a7aaad;
+    flex: 0 0 auto;
+    font-size: 16px;
+    height: 16px;
+    margin-top: 2px;
+    width: 16px;
+}

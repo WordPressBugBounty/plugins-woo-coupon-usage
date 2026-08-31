@@ -56,7 +56,7 @@ if ( !function_exists( 'wcusage_tab_latest_orders' ) ) {
             }
             // Check to make sure not set to private, coupon is assigned to current user, or is admin
             if ( $is_mla_parent || !$couponuser && !$wcusage_urlprivate || $couponuser == $currentuserid || wcusage_check_admin_access() ) {
-                $options = get_option( 'wcusage_options' );
+                $options = wcusage_get_options();
                 $option_show_orderid = wcusage_get_setting_value( 'wcusage_field_orderid', '0' );
                 $option_show_status = wcusage_get_setting_value( 'wcusage_field_status', '1' );
                 $option_show_ordercountry = wcusage_get_setting_value( 'wcusage_field_ordercountry', '0' );
@@ -99,7 +99,7 @@ if ( !function_exists( 'wcusage_tab_latest_orders' ) ) {
                         $isordersstartset = true;
                     }
                     if ( $wcu_orders_end == "" ) {
-                        $wcu_orders_end = date( "Y-m-d" );
+                        $wcu_orders_end = wcusage_local_date();
                     }
                 }
                 // "All Time" mode: start date is empty but isordersstartset is true
@@ -122,16 +122,31 @@ if ( !function_exists( 'wcusage_tab_latest_orders' ) ) {
                 // Some orders may be skipped in rendering due to coupon ownership
                 // checks or other filters. The rendering loop breaks at the actual
                 // $option_coupon_orders / $per_page.
+                /**
+                 * Hard ceiling on how many orders one dashboard request will fetch.
+                 *
+                 * "Show All" and a status filter without a date range both used to clear
+                 * the limit entirely, so an affiliate with tens of thousands of orders
+                 * could ask the site to build an order object for every one of them in a
+                 * single page load. The cap keeps those paths bounded; raise it on a site
+                 * that genuinely wants larger exports.
+                 *
+                 * @param int $max Maximum orders fetched for one dashboard request.
+                 */
+                $wcusage_max_orders_per_request = (int) apply_filters( 'wcusage_max_orders_per_request', 2000 );
                 $query_limit = $option_coupon_orders;
+                $query_limit_capped = false;
                 if ( $page === 'all' ) {
-                    // Show All: remove query limit so all orders are fetched
-                    $query_limit = "";
+                    // Show All: fetch up to the ceiling rather than everything.
+                    $query_limit = $wcusage_max_orders_per_request;
+                    $query_limit_capped = true;
                 } elseif ( $show_status && !$wcu_orders_start ) {
                     // When a status filter is active without a date range, the SQL query
                     // fetches all statuses but the rendering loop only shows matching ones.
-                    // Remove the query limit so enough matching orders can be found to fill
-                    // the page; the rendering loop still breaks at $per_page.
-                    $query_limit = "";
+                    // Fetch generously so enough matching orders can be found to fill the
+                    // page - but still bounded; the rendering loop breaks at $per_page.
+                    $query_limit = $wcusage_max_orders_per_request;
+                    $query_limit_capped = true;
                 } elseif ( $query_limit && intval( $query_limit ) > 0 ) {
                     // For non-date-range page 2+, fetch enough orders to cover all pages
                     $int_page = max( 1, intval( $page ) );
@@ -162,6 +177,15 @@ if ( !function_exists( 'wcusage_tab_latest_orders' ) ) {
                         $cache_key = 'wcu_orders_' . md5( $coupon_code . $wcu_orders_start . $wcu_orders_end . $option_coupon_orders . $show_status );
                         set_transient( $cache_key, $orders, 5 * MINUTE_IN_SECONDS );
                     }
+                }
+                // Say so when the ceiling actually bit, rather than quietly showing a
+                // truncated list that reads as the complete one.
+                if ( $query_limit_capped && isset( $orders['orders'] ) && is_array( $orders['orders'] ) && count( $orders['orders'] ) >= $wcusage_max_orders_per_request ) {
+                    echo '<p class="wcusage-orders-truncated-notice"><em>' . sprintf( 
+                        /* translators: %s: number of orders shown. */
+                        esc_html__( 'Showing the most recent %s orders. Narrow the date range to see older ones.', 'woo-coupon-usage' ),
+                        esc_html( number_format_i18n( $wcusage_max_orders_per_request ) )
+                     ) . '</em></p>';
                 }
                 // Show Table
                 if ( $wcusage_field_show_order_tab && ($option_coupon_orders > 0 || $option_coupon_orders == "") ) {
@@ -214,7 +238,7 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
         $page = 1,
         $limit = ""
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         if ( !$user_id ) {
             $user_id = get_current_user_id();
         }
@@ -1533,7 +1557,7 @@ if ( !function_exists( 'wcusage_tab_latest_orders_filters' ) ) {
         $coupon_code,
         $mla = 0
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $wcusage_field_load_ajax = wcusage_get_setting_value( 'wcusage_field_load_ajax', '1' );
         ?>
 
@@ -1809,7 +1833,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
         $wcusage_page_load
     ) {
         // *** GET SETTINGS *** /
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $language = wcusage_get_language_code();
         $wcusage_field_load_ajax = wcusage_get_setting_value( 'wcusage_field_load_ajax', 1 );
         $wcusage_field_load_ajax_per_page = wcusage_get_setting_value( 'wcusage_field_load_ajax_per_page', 1 );
@@ -1933,7 +1957,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
     jQuery.ajax({
       type: 'POST',
       url: '<?php 
-        echo esc_url( admin_url( 'admin-ajax.php' ) );
+        echo esc_url( wcusage_ajax_url() );
         ?>',
       data: data,
       success: function(response) {
@@ -2014,7 +2038,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
     jQuery.ajax({
       type: 'POST',
       url: '<?php 
-        echo esc_url( admin_url( 'admin-ajax.php' ) );
+        echo esc_url( wcusage_ajax_url() );
         ?>',
       data: data,
       success: function(response) {
@@ -2180,7 +2204,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
         jQuery.ajax({
           type: 'POST',
           url: '<?php 
-        echo esc_url( admin_url( 'admin-ajax.php' ) );
+        echo esc_url( wcusage_ajax_url() );
         ?>',
           data: {
             action: 'wcusage_load_page_orders',
@@ -2261,7 +2285,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_latest_orders' ) ) {
                 $isordersstartset = true;
             }
             if ( $wcu_orders_end == "" ) {
-                $wcu_orders_end = date( "Y-m-d" );
+                $wcu_orders_end = wcusage_local_date();
             }
             ?>
 

@@ -161,6 +161,13 @@ function wcusage_install_register_data(
         return false;
     }
     $last_id = $wpdb->insert_id;
+    // Copy the submitted custom-field values onto the applicant's user profile.
+    // Only accounts the registration form created itself had these stored (they
+    // were written by wcusage_add_new_affiliate_user()), so an applicant who was
+    // already logged in ended up with the values on the application but never on
+    // their profile - leaving the dashboard "Account Details" fields and the
+    // admin user screens blank even after the application was accepted.
+    wcusage_sync_custom_fields_to_user( $userid, $info );
     // Activity Log
     $user_info = get_userdata( $userid );
     $username = $user_info->user_login;
@@ -189,7 +196,7 @@ function wcusage_registration_auto_accept_allowed(  $user_id, $type_num = ''  ) 
     if ( !$limit_enabled ) {
         return true;
     }
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     $selected_roles = array();
     if ( isset( $options['wcusage_field_registration_auto_accept_roles'] ) && is_array( $options['wcusage_field_registration_auto_accept_roles'] ) ) {
         foreach ( $options['wcusage_field_registration_auto_accept_roles'] as $role_key => $enabled ) {
@@ -228,6 +235,13 @@ function wcusage_registration_auto_accept_allowed(  $user_id, $type_num = ''  ) 
     return false;
 }
 
+/*
+ * The one-off backfill that copies answers from existing applications onto
+ * affiliate profiles lives in inc/admin/tools/admin-restore-registration-fields.php,
+ * with the tool screen that drives it. Only wcusage_sync_custom_fields_to_user()
+ * below is shared with it - that one is on the live registration path, so it stays
+ * here where the front end can reach it.
+ */
 /**
  * Registration custom fields on the admin user screens.
  *
@@ -254,6 +268,60 @@ if ( !function_exists( 'wcusage_has_custom_fields' ) ) {
             }
         }
         return false;
+    }
+
+}
+/**
+ * Merges submitted registration custom-field values into an affiliate's
+ * 'wcu_info' user meta.
+ *
+ * Values already on the profile are kept unless the submission supplies a new
+ * one for that field, so re-applying with a partly filled form cannot wipe
+ * details the affiliate entered from their dashboard.
+ *
+ * @param int          $user_id
+ * @param string|array $info      JSON string (as stored on the application) or array.
+ * @param bool         $overwrite Whether a value already on the profile may be
+ *                                replaced. False for the one-off backfill of old
+ *                                applications, so an affiliate who has since
+ *                                corrected a field keeps their correction.
+ * @return bool Whether the profile was updated.
+ */
+if ( !function_exists( 'wcusage_sync_custom_fields_to_user' ) ) {
+    function wcusage_sync_custom_fields_to_user(  $user_id, $info, $overwrite = true  ) {
+        $user_id = absint( $user_id );
+        if ( !$user_id || !function_exists( 'wcusage_get_user_custom_fields' ) ) {
+            return false;
+        }
+        if ( is_string( $info ) ) {
+            $decoded = json_decode( $info, true );
+            $info = ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ? $decoded : array() );
+        }
+        if ( !is_array( $info ) || !$info ) {
+            return false;
+        }
+        $info = wcusage_normalize_custom_fields( $info );
+        $existing = wcusage_get_user_custom_fields( $user_id );
+        $changed = false;
+        foreach ( $info as $label => $value ) {
+            if ( $label === '' || $value === '' || $value === null || $value === array() ) {
+                continue;
+            }
+            $has_existing = isset( $existing[$label] ) && $existing[$label] !== '' && $existing[$label] !== array();
+            if ( $has_existing && !$overwrite ) {
+                continue;
+            }
+            if ( isset( $existing[$label] ) && $existing[$label] === $value ) {
+                continue;
+            }
+            $existing[$label] = $value;
+            $changed = true;
+        }
+        if ( !$changed ) {
+            return false;
+        }
+        update_user_meta( $user_id, 'wcu_info', wp_json_encode( $existing ) );
+        return true;
     }
 
 }

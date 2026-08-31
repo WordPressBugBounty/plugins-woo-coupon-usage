@@ -92,7 +92,7 @@ if ( !function_exists( 'wcusage_get_the_commission_message' ) ) {
     ) {
         $combined_commission = "";
         $multitypes = "";
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $coupon_commission_message = get_post_meta( $postid, 'wcu_text_coupon_commission_message', true );
         if ( $coupon_commission_message == "" && $wcu_text_coupon_commission == "" && $wcu_text_coupon_commission_fixed_order == "" && $wcu_text_coupon_commission_fixed_product == "" ) {
             $coupon_commission_message = wcusage_get_setting_value( 'wcusage_field_affiliate_custom_message', '' );

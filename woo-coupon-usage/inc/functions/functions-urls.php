@@ -340,7 +340,7 @@ add_action('plugins_loaded', 'wcusage_url_cookie', 1);
  if( !function_exists( 'wcusage_do_url_cookie' ) ) {
 	function wcusage_do_url_cookie($cookie, $thereferral, $campaigncookie, $campaign) {
 
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
 
     $wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
 
@@ -1041,7 +1041,7 @@ add_action( 'woocommerce_thankyou', 'wcusage_clicks_log_converted', 1, 1  );
 if( !function_exists( 'wcusage_get_referral_url_stats' ) ) {
 	function wcusage_get_referral_url_stats($postid, $coupon_code, $campaign) {
 
-			$options = get_option( 'wcusage_options' );
+			$options = wcusage_get_options();
 
 			$wcusage_hide_all_time = wcusage_get_setting_value('wcusage_field_hide_all_time', '');
 

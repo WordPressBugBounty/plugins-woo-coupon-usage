@@ -41,7 +41,7 @@ if( !function_exists( 'wcusage_new_order_affiliate_email' ) ) {
         return;
     }
 
-  	$options = get_option( 'wcusage_options' );
+  	$options = wcusage_get_options();
 
     // Email Enabled
     $wcusage_email_enable = wcusage_get_setting_value('wcusage_field_email_enable', '1');

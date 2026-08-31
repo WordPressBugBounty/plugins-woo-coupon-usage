@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( !function_exists( 'wcusage_field_cb_commission' ) ) {
 function wcusage_field_cb_commission( $args )
 {
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
   $ispro = ( wcu_fs()->can_use_premium_code() ? 1 : 0 );
   $probrackets = ( $ispro ? "" : " (PRO)" );
   ?>
@@ -75,10 +75,37 @@ function wcusage_field_cb_commission( $args )
     <br/>
   </span>
 
+  <br/><hr/>
+
+  <!-- ********** Non-Affiliate Coupons ********** -->
+  <h3 id="wcu-setting-header-non-affiliate"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Non-Affiliate Coupon Settings', 'woo-coupon-usage' ); ?>:</h3>
+
+  <p><?php echo esc_html__( 'These settings apply to any coupon that does not have an affiliate user assigned to it, such as your own store-wide discount coupons.', 'woo-coupon-usage' ); ?></p>
+
+  <br/>
+
+  <!-- Disable commission statistics for non-affiliate coupons. -->
+  <?php wcusage_setting_toggle_option('wcusage_field_commission_disable_non_affiliate', 0, esc_html__( 'Hide commission statistics for non-affiliate coupons.', 'woo-coupon-usage' ), '0px'); ?>
+  <i><?php echo esc_html__( 'When enabled, commission statistics are disabled/hidden for coupons that are not assigned to an affiliate user.', 'woo-coupon-usage' ); ?></i>
+
+  <?php wcusage_setting_toggle('.wcusage_field_commission_disable_non_affiliate', '.wcu-field-section-non-affiliate'); // Show or Hide ?>
+  <span class="wcu-field-section-non-affiliate">
+
+    <span <?php if( !wcu_fs()->can_use_premium_code() || !wcu_fs()->is_premium() ) { ?>style="opacity: 0.4; display: block; pointer-events: none;" class="wcu-settings-pro-only"<?php } ?>>
+
+    <br/><br/>
+
+    <?php wcusage_setting_toggle_option('wcusage_field_commission_disable_non_affiliate_unpaid', 1, esc_html__( 'Stop "unpaid commission" from being earned for non-affiliate coupons.', 'woo-coupon-usage' ) . esc_html($probrackets), '40px'); ?>
+    <i style="margin-left: 40px;"><?php echo esc_html__( 'When enabled, the unpaid commission will also not be added to non-affiliate coupons.', 'woo-coupon-usage' ); ?></i>
+
+    </span>
+
+  </span>
+
 	<span <?php if( !wcu_fs()->can_use_premium_code() || !wcu_fs()->is_premium() ) { ?>style="opacity: 0.4; display: block; pointer-events: none;" class="wcu-settings-pro-only"<?php } ?>>
 
     <!-- Priority Commission Field -->
-    <br/><hr style="margin-top: 20px;">
+    <br/><br/><hr style="margin-top: 20px;">
     <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Commission Priority', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?>:</h3>
 
 		<?php
@@ -244,24 +271,6 @@ function wcusage_field_cb_commission( $args )
 
     <div style="clear: both;"></div>
 
-    <br/><hr/>
-
-    <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Non-Affiliate Coupon Settings', 'woo-coupon-usage' ); ?>:</h3>
-
-    <!-- Disable commission statistics for non-affiliate coupons. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_commission_disable_non_affiliate', 0, esc_html__( 'Hide commission statistics for non-affiliate coupons.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'When enabled, commission statistics are disabled/hidden for coupons that are not assigned to an affiliate user.', 'woo-coupon-usage' ); ?></i>
-
-    <?php wcusage_setting_toggle('.wcusage_field_commission_disable_non_affiliate', '.wcu-field-section-non-affiliate'); // Show or Hide ?>
-    <span class="wcu-field-section-non-affiliate">
-    <?php if( wcu_fs()->can_use_premium_code() ) { ?>
-    <br/><br/>
-
-    <?php wcusage_setting_toggle_option('wcusage_field_commission_disable_non_affiliate_unpaid', 1, esc_html__( 'Stop "unpaid commission" from being earned for non-affiliate coupons.', 'woo-coupon-usage' ), '40px'); ?>
-    <i style="margin-left: 40px;"><?php echo esc_html__( 'When enabled, the unpaid commission will also not be added to non-affiliate coupons.', 'woo-coupon-usage' ); ?></i>
-    <?php } ?>
-    </span>
-
   </span>
 
 	</div>
@@ -277,7 +286,7 @@ add_action( 'wcusage_hook_setting_section_commission_amounts', 'wcusage_setting_
 if( !function_exists( 'wcusage_setting_section_commission_amounts' ) ) {
   function wcusage_setting_section_commission_amounts() {
 
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
   ?>
 
   <p>- <?php echo esc_html__( 'Enter your commission amounts below (0 to disable). If you enter multiple types, they will be combined. For example you could have: 10% of total order, plus an extra $2 per product.', 'woo-coupon-usage' ); ?></p>
@@ -319,7 +328,7 @@ add_action( 'wcusage_hook_setting_section_calculations', 'wcusage_setting_sectio
 if( !function_exists( 'wcusage_setting_section_calculations' ) ) {
   function wcusage_setting_section_calculations() {
 
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
   ?>
 
   <p><?php echo esc_html__( 'By default the order totals displayed on the dashboard, and used for % commission calculations exclude shipping costs, fees, taxes, and discounts (recommended).', 'woo-coupon-usage' ); ?></p>
@@ -406,7 +415,7 @@ add_action( 'wcusage_hook_setting_section_tax', 'wcusage_setting_section_tax' );
 if( !function_exists( 'wcusage_setting_section_tax' ) ) {
   function wcusage_setting_section_tax() {
 
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
   ?>
 
   <!-- Include tax in orders and commission calculations. -->

@@ -16,7 +16,7 @@ function wcusage_setup_page_html() {
 
   do_action('wcusage_hook_setup_page_update'); // Update on Post
 
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
 
   if(isset($_GET['step'])) {
     $step = $_GET['step'];
@@ -39,7 +39,7 @@ function wcusage_setup_page_html() {
   }
   </style>
 
-  <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
+  <?php wcusage_enqueue_font_awesome(); ?>
 
   <div class="wrap plugin-setup-settings">
 
@@ -163,9 +163,8 @@ function wcusage_setup_page_html() {
           
           // wcusage_field_portal_enable
           $wcusage_field_portal_enable = wcusage_get_setting_value('wcusage_field_portal_enable', '0');
-          if($wcusage_field_portal_enable) {
-              $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
-              add_rewrite_rule('^' . $wcusage_portal_slug . '/?$', 'index.php?affiliate_portal=1', 'top');
+          if($wcusage_field_portal_enable && function_exists('wcusage_get_affiliate_portal_rewrite_regex')) {
+              add_rewrite_rule( wcusage_get_affiliate_portal_rewrite_regex(), 'index.php?affiliate_portal=1', 'top');
           }
           flush_rewrite_rules();
           ?>
@@ -674,7 +673,7 @@ function wcusage_setup_page_update() {
   return;
   }
 
-  $option_group = get_option('wcusage_options');
+  $option_group = wcusage_get_options();
 
   // 1
   if( isset( $_POST['submit_step1'] ) ) {
@@ -687,10 +686,10 @@ function wcusage_setup_page_update() {
     // wcusage_field_portal_enable
     if( isset( $_POST['wcusage_options']['wcusage_field_portal_enable'] ) ) {
       $option_group['wcusage_field_portal_enable'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_field_portal_enable'] );
-      if( $option_group['wcusage_field_portal_enable'] == 1 ) {
-        $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
-        add_rewrite_rule('^' . $wcusage_portal_slug . '/?$', 'index.php?affiliate_portal=1', 'top');
+      if( $option_group['wcusage_field_portal_enable'] == 1 && function_exists('wcusage_get_affiliate_portal_rewrite_regex') ) {
+        add_rewrite_rule( wcusage_get_affiliate_portal_rewrite_regex(), 'index.php?affiliate_portal=1', 'top');
       }
+      delete_option('wcusage_portal_rules_flushed');
       flush_rewrite_rules();
     }
 

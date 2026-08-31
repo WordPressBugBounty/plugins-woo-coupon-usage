@@ -16,6 +16,20 @@
   max-width: 250px;
   min-width: 125px;
 }
+/* Cap tall tooltips (affiliates with lots of custom fields) and scroll instead.
+   Two class selectors are needed to beat the blanket
+   ".custom-tooltip *{ overflow: visible !important }" rule in admin-style.css,
+   and the second selector has to stand on its own because
+   admin-affiliate-users-table.js clones coupon tooltips out of .custom-tooltip. */
+.tooltip-content.wcusage-tooltip-content,
+.custom-tooltip .tooltip-content.wcusage-tooltip-content {
+  box-sizing: border-box !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #646970 #1d2327;
+}
 .wcusage-tooltip-inner {
   font-size: 12px;
 }

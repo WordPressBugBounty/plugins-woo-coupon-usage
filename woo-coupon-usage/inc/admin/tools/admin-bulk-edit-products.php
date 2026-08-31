@@ -44,7 +44,7 @@ function wcusage_bulk_product_page() {
     $nonce = wp_create_nonce('bulk_product_update');
     ?>
 
-    <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
+    <?php wcusage_enqueue_font_awesome(); ?>
 
     <div class="wrap wcusage-admin-page">
         <?php do_action('wcusage_hook_dashboard_page_header', ''); ?>

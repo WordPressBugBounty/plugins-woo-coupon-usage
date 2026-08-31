@@ -210,14 +210,17 @@ jQuery(document).ready(function($) {
             wisebank_postcode: $settingsForm.find('[name="wisebank_postcode"]').val() || '',
             wisebank_state: $settingsForm.find('[name="wisebank_state"]').val() || '',
             wisebank_recipient_country: $settingsForm.find('[name="wisebank_recipient_country"]').val() || '',
-            'wcu-company': $settingsForm.find('#wcu-company').val() || '',
-            'wcu-billing1': $settingsForm.find('#wcu-billing1').val() || '',
-            'wcu-billing2': $settingsForm.find('#wcu-billing2').val() || '',
-            'wcu-billing3': $settingsForm.find('#wcu-billing3').val() || '',
-            'wcu-taxid': $settingsForm.find('#wcu-taxid').val() || '',
             wcusage_sms_phone: $settingsForm.find('#wcusage_sms_phone').val() || '',
             wcusage_sms_opted_out: $settingsForm.find('#wcusage_sms_opted_out').is(':checked') ? '1' : '0'
         };
+
+        // Payout statement detail fields. The admin can relabel, hide, require or
+        // add fields, so collect whatever was rendered rather than a fixed list.
+        // Omitting a hidden field lets the server's isset() check preserve its value.
+        $settingsForm.find('.wcu-statement-input').each(function () {
+            var statementName = $(this).attr('name');
+            if (statementName) { formData[statementName] = $(this).val() || ''; }
+        });
 
         // Only include Account Details fields when that section is actually rendered.
         // When the "Account Details" settings tab is disabled these inputs are absent
@@ -259,6 +262,16 @@ jQuery(document).ready(function($) {
             formData.wisebank_account_number_intl = $settingsForm.find('[name="wisebank_account_number_intl"]').val() || '';
         }
 
+        // Payout statement details the admin marked as required. These do not use
+        // the native "required" attribute, because in the legacy (tabbed) layout
+        // the statement pane is display:none and the browser will not submit a form
+        // holding an invalid control it cannot focus - which would block saving from
+        // every other tab. The server checks these again.
+        var missingField = null;
+        $settingsForm.find('.wcu-statement-input[data-wcu-required="1"]').each(function() {
+            if (!missingField && !$.trim($(this).val() || '')) { missingField = $(this); }
+        });
+
         // Target the saved section's button + message (fall back to the first button
         // and its message, e.g. when submitting via the Enter key).
         var $clickedBtn = ($activeSaveBtn && $activeSaveBtn.length)
@@ -271,6 +284,17 @@ jQuery(document).ready(function($) {
         if (!$btnMsg.length) {
             // Legacy (tabs) layout uses a single shared message area.
             $btnMsg = $settingsForm.find('#wcu-settings-ajax-message');
+        }
+
+        if (missingField) {
+            var missingLabel = missingField.data('wcu-label') || missingField.attr('name');
+            var requiredText = (wcusage_ajax.required_text || '%s is required.').replace('%s', missingLabel);
+            $btnMsg.stop(true, true).empty()
+                .append($('<span/>').css('color', 'red').text(requiredText))
+                .show();
+            missingField.trigger('focus');
+            $activeSaveBtn = null;
+            return false;
         }
 
         $.ajax({

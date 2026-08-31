@@ -12,7 +12,7 @@ if ( !defined( 'ABSPATH' ) ) {
 if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
     function wcusage_new_order_update_stats(  $order_id, $status_from = "", $status_to = ""  ) {
         $order = wc_get_order( $order_id );
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         // For new orders, status_to might be empty, so get current status
         if ( $status_to == "" && $order ) {
             $status_to = $order->get_status();

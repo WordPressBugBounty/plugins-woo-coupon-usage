@@ -49,7 +49,7 @@ function affiliate_page_generator_admin_page() {
         $wcusage_options = get_option('wcusage_options', array());
         $wcusage_options['wcusage_signup_landing_page'] = "";
         update_option('wcusage_options', $wcusage_options);
-        $wcusage_options = get_option('wcusage_options', array());
+        $wcusage_options = wcusage_get_options();
     }
 
     // Get default commission rate from original logic
@@ -383,7 +383,7 @@ $page_content = '<!-- wp:group {"layout":{"type":"constrained","contentSize":"12
     }
     ?>
 
-    <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
+    <?php wcusage_enqueue_font_awesome(); ?>
 
     <?php do_action('wcusage_hook_dashboard_page_header', ''); ?>
 
@@ -574,7 +574,7 @@ $page_content = '<!-- wp:group {"layout":{"type":"constrained","contentSize":"12
 
 // Add some basic CSS to style the generated page
 function affiliate_page_styles() {
-    $wcusage_options = get_option('wcusage_options', array());
+    $wcusage_options = wcusage_get_options();
     $page_id = isset($wcusage_options['wcusage_signup_landing_page']) ? $wcusage_options['wcusage_signup_landing_page'] : 0;
     if ($page_id && is_page($page_id)) {
         ?>

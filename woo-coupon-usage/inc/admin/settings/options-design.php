@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function wcusage_field_cb_design( $args )
 {
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     ?>
 
 	<div id="design-settings" class="settings-area">
@@ -399,7 +399,7 @@ add_action( 'wcusage_hook_setting_section_colours', 'wcusage_setting_section_col
 if( !function_exists( 'wcusage_setting_section_colours' ) ) {
   function wcusage_setting_section_colours() {
 
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
   ?>
 
   <style>

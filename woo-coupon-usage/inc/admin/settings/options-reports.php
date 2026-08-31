@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function wcusage_field_cb_reports( $args )
 {
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     ?>
 
   <div id="affiliate-reports-settings" class="settings-area" <?php if ( !wcu_fs()->can_use_premium_code() ) { ?>title="<?php echo esc_attr__( 'Available with Pro version.', 'woo-coupon-usage' ); ?>" style="pointer-events:none; opacity: 0.6;"<?php } ?>>

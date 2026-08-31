@@ -24,7 +24,7 @@ class wcusage_registrations_List_Table extends WP_List_Table {
 
     function column_default($item, $column_name){
 
-		$options = get_option( 'wcusage_options' );
+		$options = wcusage_get_options();
 
     $wcusage_coupon_multiple = wcusage_get_setting_value('wcusage_field_registration_multiple_template', '0');
     if( !$wcusage_coupon_multiple || !wcu_fs()->can_use_premium_code() ) { echo "<style>.column-type { display: none; }</style>"; }
@@ -140,9 +140,17 @@ class wcusage_registrations_List_Table extends WP_List_Table {
 
 
           if(isset($item[$column_name])) {
-            $info_array = json_decode($item[$column_name]);
-            if($info_array) {
+            $info_array = json_decode($item[$column_name], true);
+            // Decodes labels and values stored HTML-entity encoded by older
+            // versions, so they are not shown as a literal "&#039;".
+            if(is_array($info_array) && function_exists('wcusage_normalize_custom_fields')) {
+              $info_array = wcusage_normalize_custom_fields($info_array);
+            }
+            if(is_array($info_array)) {
               foreach($info_array as $key => $value) {
+                if(is_array($value)) {
+                  $value = implode(', ', array_filter($value, 'is_scalar'));
+                }
                 $info .= "<p><strong>".esc_html($key)."</strong><br/>".esc_html($value)."</p>";
               }
             }

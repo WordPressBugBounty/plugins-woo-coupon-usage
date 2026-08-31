@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( !function_exists( 'wcusage_field_cb_notifications' ) ) {
 function wcusage_field_cb_notifications( $args )
 {
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
   $ispro = ( wcu_fs()->can_use_premium_code() ? 1 : 0 );
   $probrackets = ( $ispro ? "" : "(PRO) " );
   ?>
@@ -514,7 +514,7 @@ add_action( 'wcusage_hook_setting_section_email_free', 'wcusage_setting_section_
 if( !function_exists( 'wcusage_setting_sectio_email_free' ) ) {
   function wcusage_setting_section_email_free($type = "") {
 
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
 
   if(isset($_SERVER['SERVER_NAME'])) {
     $admin_email = "admin@" . $_SERVER['SERVER_NAME'];
@@ -624,7 +624,7 @@ add_action( 'wcusage_hook_setting_section_email_registration', 'wcusage_setting_
 if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
   function wcusage_setting_section_email_registration($type = "") {
 
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
   ?>
 
       <h3 class="wcu-setting-email-header">
@@ -788,6 +788,44 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
 
       </div>
 
+      <div class="wcu-setting-email-notification-box">
+
+        <!--
+        ********************
+        ** [User Email] New Coupon Assigned
+        ********************
+        -->
+        <?php wcusage_setting_toggle_option('wcusage_field_email_coupon_assigned_enable', 1, esc_html__( 'New Coupon Assigned', 'woo-coupon-usage' ), '0px'); ?>
+
+        <i><?php echo esc_html__( 'Send an email to an existing affiliate when an admin assigns them an additional coupon.', 'woo-coupon-usage' ); ?></i>
+
+        <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ); ?></p>
+
+        <br/><p><span class="fa-solid fa-envelope-open-text"></span> <strong><?php echo esc_html__( 'Email Customizer', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_email_coupon_assigned_customise"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
+
+        <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_coupon_assigned_customise", "wcu_email_coupon_assigned_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
+        <div id="wcu_email_coupon_assigned_customise" style="display: none;">
+
+          <br/>
+
+          <!-- Email Notification Subject -->
+          <?php wcusage_setting_text_option('wcusage_field_email_coupon_assigned_subject', wcusage_email_coupon_assigned_default_subject(), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
+
+          <br/>
+
+          <!-- Email Notification Message -->
+          <?php
+          wcusage_setting_tinymce_option('wcusage_field_email_coupon_assigned_message', wcusage_email_coupon_assigned_default_message(), esc_html__( 'Email Notification Message', 'woo-coupon-usage' ), '0px');
+          ?>
+
+          <br/>
+
+          <?php echo wcusage_email_merge_tags(array("coupon", "dashboardurl", "referralurl", "message-coupon", "username", "name", "email")); ?>
+
+        </div>
+
+      </div>
+
       <div class="wcu-setting-email-notification-box setup-hide">
 
         <!--
@@ -887,6 +925,9 @@ if( !function_exists( 'wcusage_email_merge_tags' ) ) {
               break;
           case "message":
               echo "<p>- <strong>{message}</strong> ".esc_html__( 'to show the custom message entered when admins accept/decline affiliate registrations.', 'woo-coupon-usage' )."</p>";
+              break;
+          case "message-coupon":
+              echo "<p>- <strong>{message}</strong> ".esc_html__( 'to show the custom message entered by the admin when assigning the coupon.', 'woo-coupon-usage' )."</p>";
               break;
           case "amount":
               echo "<p>- <strong>{amount}</strong> ".esc_html__( 'to show the amount.', 'woo-coupon-usage' )."</p>";

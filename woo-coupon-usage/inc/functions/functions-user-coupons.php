@@ -69,7 +69,7 @@ add_action( 'admin_enqueue_scripts', 'wcusage_enqueue_coupon_edit_assets' );
 if ( !function_exists( 'add_wcusage_coupon_data_fields' ) ) {
     function add_wcusage_coupon_data_fields(  $coupon_get_id  ) {
         echo '<div id="wcusage_coupon_data" class="panel woocommerce_options_panel">';
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $wcusage_lifetime = wcusage_get_setting_value( 'wcusage_field_lifetime', '0' );
         $wcusage_field_lifetime_all = wcusage_get_setting_value( 'wcusage_field_lifetime_all', '0' );
         $post_id = ( isset( $_GET['post'] ) ? absint( $_GET['post'] ) : '' );

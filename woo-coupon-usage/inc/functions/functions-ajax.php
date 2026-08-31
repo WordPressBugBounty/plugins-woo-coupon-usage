@@ -149,8 +149,13 @@ if ( !function_exists( 'wcusage_load_referral_url_stats' ) ) {
         ?>
     <?php 
         $campaign = ( isset( $_POST["campaign"] ) ? sanitize_text_field( $_POST["campaign"] ) : '' );
-        $page = ( isset( $_POST["page"] ) ? sanitize_text_field( $_POST["page"] ) : '' );
-        $converted = ( isset( $_POST["converted"] ) ? sanitize_text_field( $_POST["converted"] ) : '' );
+        // Numbers, not text. Both are read as numbers downstream - the page number is
+        // multiplied by the page size to make the SQL offset - and sanitize_text_field()
+        // leaves an absent field as "", which is a string. On PHP 8 that multiplication
+        // is a TypeError, so a request that simply omitted "page" killed the whole
+        // response rather than showing the first page.
+        $page = ( isset( $_POST["page"] ) ? absint( $_POST["page"] ) : 0 );
+        $converted = ( isset( $_POST["converted"] ) ? absint( $_POST["converted"] ) : 0 );
         do_action(
             'wcusage_hook_tab_referral_url_stats',
             $resolved_postid,
@@ -255,7 +260,7 @@ if ( !function_exists( 'wcusage_refresh_dashboard_stats' ) ) {
         $fullorders = wcusage_wh_getOrderbyCouponCode(
             $coupon_code,
             '',
-            date( 'Y-m-d' ),
+            wcusage_local_date(),
             '',
             1,
             0,
@@ -288,15 +293,15 @@ if ( !function_exists( 'wcusage_refresh_dashboard_stats' ) ) {
         $past14orders = '';
         if ( !$wcusage_field_which_toggle ) {
             // Days mode
-            $date7 = date( 'Y-m-d', strtotime( '-7 days' ) );
-            $date14 = date( 'Y-m-d', strtotime( '-14 days' ) );
-            $date30 = date( 'Y-m-d', strtotime( '-30 days' ) );
-            $date60 = date( 'Y-m-d', strtotime( '-60 days' ) );
+            $date7 = wcusage_local_date( '-7 days' );
+            $date14 = wcusage_local_date( '-14 days' );
+            $date30 = wcusage_local_date( '-30 days' );
+            $date60 = wcusage_local_date( '-60 days' );
             // "Last 30 Days" toggle
             $thismonthorders = wcusage_wh_getOrderbyCouponCode(
                 $coupon_code,
                 $date30,
-                date( 'Y-m-d' ),
+                wcusage_local_date(),
                 '',
                 1,
                 0,
@@ -315,7 +320,7 @@ if ( !function_exists( 'wcusage_refresh_dashboard_stats' ) ) {
             $this7orders = wcusage_wh_getOrderbyCouponCode(
                 $coupon_code,
                 $date7,
-                date( 'Y-m-d' ),
+                wcusage_local_date(),
                 '',
                 1,
                 0,
@@ -332,14 +337,14 @@ if ( !function_exists( 'wcusage_refresh_dashboard_stats' ) ) {
             );
         } else {
             // Monthly mode
-            $date1month = date( 'Y-m-01' );
-            $date2month = date( 'Y-m-d', strtotime( 'first day of last month' ) );
-            $date2monthend = date( 'Y-m-d', strtotime( 'last day of last month' ) );
+            $date1month = wcusage_local_date( '', 'Y-m-01' );
+            $date2month = wcusage_local_date( 'first day of last month' );
+            $date2monthend = wcusage_local_date( 'last day of last month' );
             // "This Month" toggle
             $thismonthorders = wcusage_wh_getOrderbyCouponCode(
                 $coupon_code,
                 $date1month,
-                date( 'Y-m-d' ),
+                wcusage_local_date(),
                 '',
                 1,
                 0,
@@ -357,8 +362,8 @@ if ( !function_exists( 'wcusage_refresh_dashboard_stats' ) ) {
             );
             $past60orders = $pastmonthorders;
             // Month before last (comparison for Last Month)
-            $date3month = date( 'Y-m-d', strtotime( 'first day of -2 month' ) );
-            $date3monthend = date( 'Y-m-d', strtotime( 'last day of -2 month' ) );
+            $date3month = wcusage_local_date( 'first day of -2 month' );
+            $date3monthend = wcusage_local_date( 'last day of -2 month' );
             $pastoldmonthorders = wcusage_wh_getOrderbyCouponCode(
                 $coupon_code,
                 $date3month,
@@ -376,9 +381,9 @@ if ( !function_exists( 'wcusage_refresh_dashboard_stats' ) ) {
             delete_post_meta( $coupon_post_id, 'wcusage_monthly_summary_data' );
             // Rebuild monthly summary cache
             $wcusage_monthly_summary_data_orders = array();
-            $wcusage_monthly_summary_data_orders[strtotime( $date1month )] = $thismonthorders;
-            $wcusage_monthly_summary_data_orders[strtotime( $date2month )] = $pastmonthorders;
-            $wcusage_monthly_summary_data_orders[strtotime( $date3month )] = $pastoldmonthorders;
+            $wcusage_monthly_summary_data_orders[strtotime( $date1month )] = wcusage_trim_monthly_summary( $thismonthorders );
+            $wcusage_monthly_summary_data_orders[strtotime( $date2month )] = wcusage_trim_monthly_summary( $pastmonthorders );
+            $wcusage_monthly_summary_data_orders[strtotime( $date3month )] = wcusage_trim_monthly_summary( $pastoldmonthorders );
             update_post_meta( $coupon_post_id, 'wcusage_monthly_summary_data_orders', $wcusage_monthly_summary_data_orders );
             update_post_meta( $coupon_post_id, 'wcusage_monthly_cache_time_current', time() );
         }
@@ -499,14 +504,14 @@ if ( !function_exists( 'wcusage_reload_dashboard_stats' ) ) {
         $past14orders = '';
         if ( !$wcusage_field_which_toggle ) {
             // Days mode — read from standard cache (refresh=0 uses cache)
-            $date7 = date( 'Y-m-d', strtotime( '-7 days' ) );
-            $date14 = date( 'Y-m-d', strtotime( '-14 days' ) );
-            $date30 = date( 'Y-m-d', strtotime( '-30 days' ) );
-            $date60 = date( 'Y-m-d', strtotime( '-60 days' ) );
+            $date7 = wcusage_local_date( '-7 days' );
+            $date14 = wcusage_local_date( '-14 days' );
+            $date30 = wcusage_local_date( '-30 days' );
+            $date60 = wcusage_local_date( '-60 days' );
             $thismonthorders = wcusage_wh_getOrderbyCouponCode(
                 $coupon_code,
                 $date30,
-                date( 'Y-m-d' ),
+                wcusage_local_date(),
                 '',
                 0,
                 0,
@@ -524,7 +529,7 @@ if ( !function_exists( 'wcusage_reload_dashboard_stats' ) ) {
             $this7orders = wcusage_wh_getOrderbyCouponCode(
                 $coupon_code,
                 $date7,
-                date( 'Y-m-d' ),
+                wcusage_local_date(),
                 '',
                 0,
                 0,
@@ -545,11 +550,11 @@ if ( !function_exists( 'wcusage_reload_dashboard_stats' ) ) {
             if ( !is_array( $monthly_data ) ) {
                 $monthly_data = array();
             }
-            $date1month = date( 'Y-m-01' );
-            $date2month = date( 'Y-m-d', strtotime( 'first day of last month' ) );
-            $date2monthend = date( 'Y-m-d', strtotime( 'last day of last month' ) );
-            $date3month = date( 'Y-m-d', strtotime( 'first day of -2 month' ) );
-            $date3monthend = date( 'Y-m-d', strtotime( 'last day of -2 month' ) );
+            $date1month = wcusage_local_date( '', 'Y-m-01' );
+            $date2month = wcusage_local_date( 'first day of last month' );
+            $date2monthend = wcusage_local_date( 'last day of last month' );
+            $date3month = wcusage_local_date( 'first day of -2 month' );
+            $date3monthend = wcusage_local_date( 'last day of -2 month' );
             // This Month — use cached if still within 10-min TTL, otherwise re-query
             $current_month_cache_time = get_post_meta( $coupon_post_id, 'wcusage_monthly_cache_time_current', true );
             $current_month_cache_expired = !$current_month_cache_time || time() - (int) $current_month_cache_time > 600;
@@ -559,7 +564,7 @@ if ( !function_exists( 'wcusage_reload_dashboard_stats' ) ) {
                 $thismonthorders = wcusage_wh_getOrderbyCouponCode(
                     $coupon_code,
                     $date1month,
-                    date( 'Y-m-d' ),
+                    wcusage_local_date(),
                     '',
                     1,
                     0,
@@ -670,7 +675,7 @@ if ( !function_exists( 'wcusage_reload_dashboard_stats' ) ) {
                 $coupon_post_id,
                 $coupon_code,
                 '',
-                date( 'Y-m-d' ),
+                wcusage_local_date(),
                 false,
                 '',
                 5,

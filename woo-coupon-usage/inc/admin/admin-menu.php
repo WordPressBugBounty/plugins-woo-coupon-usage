@@ -209,6 +209,19 @@ function wcusage_options_page() {
             'wcusage-bulk-edit-coupon',
             'wcusage_bulk_coupon_page'
         );
+        // One-off recovery tool. Registered only while there are answers left to
+        // copy, so it disappears once it has been run (see
+        // wcusage_custom_fields_backfill_needed()).
+        if ( function_exists( 'wcusage_custom_fields_backfill_needed' ) && wcusage_custom_fields_backfill_needed() ) {
+            add_submenu_page(
+                'wcusage_tools',
+                esc_html__( 'Restore Registration Field Answers', 'woo-coupon-usage' ),
+                esc_html__( 'Restore Registration Field Answers', 'woo-coupon-usage' ),
+                $admin_perms,
+                'wcusage-restore-registration-fields',
+                'wcusage_restore_registration_fields_page'
+            );
+        }
         add_submenu_page(
             'wcusage',
             'Coupon Affiliates Admin Tools',

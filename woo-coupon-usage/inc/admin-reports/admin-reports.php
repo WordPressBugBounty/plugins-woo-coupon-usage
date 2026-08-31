@@ -51,7 +51,7 @@ if( !function_exists( 'wcusage_admin_reports_page_html' ) ) {
     $nonce = wp_create_nonce( 'wcusage_admin_ajax_nonce' );
     ?>
 
-    <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
+    <?php wcusage_enqueue_font_awesome(); ?>
 
     <div class="wrap wcusage-admin-page wcusage-reports-modern">
 

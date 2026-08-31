@@ -20,7 +20,7 @@ add_action(
 );
 if ( !function_exists( 'wcusage_tab_referral_url' ) ) {
     function wcusage_tab_referral_url(  $postid, $coupon_code  ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $option_text_urls = wcusage_get_setting_value( 'wcusage_field_text_urls', '' );
         $wcusage_urls_prefix = wcusage_get_setting_value( 'wcusage_field_urls_prefix', 'coupon' );
         $wcusage_hide_all_time = wcusage_get_setting_value( 'wcusage_field_hide_all_time', '' );
@@ -197,7 +197,7 @@ add_action(
 );
 if ( !function_exists( 'wcusage_scripts_tab_referral_url_stats' ) ) {
     function wcusage_scripts_tab_referral_url_stats() {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $wcusage_field_default_ref_url = wcusage_get_default_ref_url();
         if ( isset( $options['wcusage_field_page_load'] ) ) {
             $wcusage_page_load = $options['wcusage_field_page_load'];
@@ -286,7 +286,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_referral_url_stats' ) ) {
         $wcusage_page_load
     ) {
         // *** GET SETTINGS *** /
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $language = wcusage_get_language_code();
         $wcusage_field_load_ajax = wcusage_get_setting_value( 'wcusage_field_load_ajax', 1 );
         $wcusage_field_load_ajax_per_page = wcusage_get_setting_value( 'wcusage_field_load_ajax_per_page', 1 );
@@ -409,7 +409,7 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_referral_url_stats' ) ) {
         jQuery.ajax({
             type: 'POST',
             url: '<?php 
-                echo esc_url( admin_url( 'admin-ajax.php' ) );
+                echo esc_url( wcusage_ajax_url() );
                 ?>',
             data: data,
             success: function(data){

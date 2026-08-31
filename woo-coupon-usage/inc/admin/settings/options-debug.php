@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function wcusage_field_cb_debug( $args )
 {
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     ?>
 
 	<div id="debug-settings" class="settings-area">
@@ -153,7 +153,7 @@ function wcusage_field_cb_debug( $args )
   <span class="wcu-field-section-show-ajax-batch">
 
     <p>
-      <?php wcusage_setting_number_option('wcusage_field_enable_coupon_all_stats_batch_amount', '50', esc_html__( 'Batch size:', 'woo-coupon-usage' ), '70px'); ?>
+      <?php wcusage_setting_number_option('wcusage_field_enable_coupon_all_stats_batch_amount', '100', esc_html__( 'Batch size:', 'woo-coupon-usage' ), '70px'); ?>
       <i style="margin-left: 70px;"><?php echo esc_html__( 'This is the number of orders that will be calculated at a time. If you experience issues with the ajax loading, try lowering this number (will use more requests, but each one is quicker).', 'woo-coupon-usage' ); ?></i><br/>
     </p>
 
@@ -165,6 +165,12 @@ function wcusage_field_cb_debug( $args )
     <!-- Load each page individually with ajax. -->
     <?php wcusage_setting_toggle_option('wcusage_field_load_ajax_per_page', 1, esc_html__( 'Load tabs individually with Ajax.', 'woo-coupon-usage' ), '0px'); ?>
     <i><?php echo esc_html__( 'This will further increase initial loading speed/performance. It will only start loading content for each tab when the tab is clicked, showing the "loading..." animation whilst it loads.', 'woo-coupon-usage' ); ?></i><br/>
+  </p>
+
+  <p>
+    <!-- Front-end ajax endpoint. -->
+    <?php wcusage_setting_toggle_option('wcusage_field_frontend_ajax', 1, esc_html__( 'Use the front-end ajax endpoint.', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( 'The dashboard loads its data from the front-end instead of "wp-admin/admin-ajax.php", which does not have to load every plugin\'s admin code first. This is usually around twice as fast. Only turn this off if your host or a security plugin blocks the requests - the dashboard will detect that on its own and fall back, so you should not normally need to.', 'woo-coupon-usage' ); ?></i><br/>
   </p>
 
   </span>

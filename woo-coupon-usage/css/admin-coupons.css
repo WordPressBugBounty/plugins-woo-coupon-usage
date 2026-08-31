@@ -1,6 +1,22 @@
 .wp-list-table .column-ID {
     width: 75px;
 }
+/* The edit dashicon is 20px tall and "vertical-align: top", which made the ID
+   cell's line box taller than every other column and left the number sitting
+   below their centre line. Flex the link instead so icon and number are
+   centred on each other, and on the rest of the row. */
+.wp-list-table .column-ID .wcusage-coupon-id-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.wp-list-table .column-ID .wcusage-coupon-id-link .dashicons {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+    line-height: 1;
+    vertical-align: middle;
+}
 .wcusage-coupon-rate-subline {
     color: #646970;
     font-size: 12px;
@@ -94,6 +110,27 @@
 }
 .wcusage-rate-tooltip:hover .wcusage-rate-tooltip-panel,
 .wcusage-rate-tooltip:focus-within .wcusage-rate-tooltip-panel {
+    display: block;
+}
+/* Covers the gap between the trigger and the panel, so moving the pointer down
+   into the panel does not cross un-hovered space and close it on the way.
+   Hovering it counts as hovering the wrapper, since it is the wrapper's own
+   pseudo-element - which is also why it cannot live on the panel: the order-box
+   panel scrolls its content and would clip anything above its top edge. It is
+   only in the page while the tooltip is open. */
+.wcusage-rate-tooltip::before {
+    content: "";
+    display: none;
+    height: 12px;
+    left: 50%;
+    max-width: 96vw;
+    position: absolute;
+    top: 100%;
+    transform: translateX(-50%);
+    width: 360px;
+}
+.wcusage-rate-tooltip:hover::before,
+.wcusage-rate-tooltip:focus-within::before {
     display: block;
 }
 .wcusage-rate-tooltip-title {
@@ -341,4 +378,159 @@
 
 .ui-autocomplete li:hover {
     background-color: #f9fafb;
+}
+
+/* ------------------------------------------------------------------
+   Commission breakdown tooltip - order edit screen, "Coupon Affiliate" panel.
+   Reuses the Commission Levels tooltip above, with the amount itself as the
+   trigger instead of a "?" button.
+   ------------------------------------------------------------------ */
+
+/* The panel is drawn outside the metabox, so nothing in its way may clip it. */
+#wcusage_affiliate_info,
+#wcusage_affiliate_info .inside,
+#wcusage_affiliate_info .postbox-header {
+    overflow: visible;
+}
+
+/* The shared wrapper above is an inline-flex box aligned to the middle of the
+   line. In the metabox that put the commission amount a couple of pixels clear
+   of the row's baseline while the label beside it stayed where it was, so the
+   figure read as misaligned. An inline-block takes its baseline from the amount
+   inside it, which is the line the label is already sitting on. */
+.wcusage-rate-tooltip--orderbox {
+    display: inline-block;
+    margin-left: 0;
+    max-width: 100%;
+    vertical-align: baseline;
+}
+.wcusage-commission-trigger {
+    border-bottom: 1px dotted #787c82;
+    cursor: help;
+}
+.wcusage-commission-trigger:focus {
+    outline: 1px solid #2271b1;
+    outline-offset: 2px;
+}
+
+/* Opens to the left. The metabox sits in the narrow admin sidebar, so a panel
+   centred on the trigger would run off the right-hand edge of the screen. */
+.wcusage-rate-tooltip--orderbox .wcusage-rate-tooltip-panel {
+    left: auto;
+    right: 0;
+    transform: none;
+    min-width: 260px;
+    max-width: 320px;
+    /* The title below is sticky, so the panel's own top padding is moved onto it -
+       otherwise the padding scrolls away and leaves the title floating. */
+    padding: 0 10px 10px;
+    /* An order with a lot of line items builds a very tall panel, which would run
+       off the bottom of the screen with no way to reach the totals. Capped against
+       the window as well as absolutely, so a long breakdown scrolls on a big screen
+       and any breakdown scrolls on a short one. */
+    max-height: 60vh;
+    max-height: min(60vh, 380px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+/* The bridge follows the panel: right-aligned rather than centred on the amount. */
+.wcusage-rate-tooltip--orderbox::before {
+    left: auto;
+    right: -6px;
+    transform: none;
+    width: 320px;
+}
+
+/* Compact spacing throughout, since this panel can carry a row per product and
+   lives in a 280px sidebar. */
+.wcusage-rate-tooltip--orderbox .wcusage-rate-tooltip-title {
+    background: #fff;
+    border-bottom: 1px solid #f0f0f1;
+    font-size: 12px;
+    /* Held in view while the rows below it scroll. The negative side margins take
+       its background out to the panel's edges so nothing shows through beside it,
+       and the shadow separates it from whatever has scrolled up underneath - the
+       margin below it is gone by then. */
+    box-shadow: 0 4px 6px -4px rgba(0, 0, 0, 0.16);
+    margin: 0 -10px 7px;
+    padding: 9px 10px 6px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.wcusage-rate-tooltip--orderbox .wcusage-rate-tooltip-section {
+    margin-top: 7px;
+}
+.wcusage-rate-tooltip--orderbox .wcusage-rate-tooltip-section-title {
+    font-size: 10px;
+    margin-bottom: 3px;
+}
+.wcusage-rate-tooltip--orderbox .wcusage-rate-tooltip-row {
+    border-radius: 4px;
+    gap: 6px;
+    margin-top: 3px;
+    padding: 4px 7px;
+}
+.wcusage-rate-tooltip--orderbox .wcusage-rate-tooltip-empty {
+    font-size: 11px;
+    padding: 1px 0;
+}
+/* The arrow is drawn on the container rather than the panel, because the panel
+   scrolls its own content and would clip an arrow sitting above its top edge. */
+.wcusage-rate-tooltip--orderbox .wcusage-rate-tooltip-panel::after {
+    display: none;
+}
+.wcusage-rate-tooltip--orderbox::after {
+    background: #fff;
+    border-left: 1px solid #dcdcde;
+    border-top: 1px solid #dcdcde;
+    content: "";
+    display: none;
+    height: 10px;
+    position: absolute;
+    right: 14px;
+    top: calc(100% + 3px);
+    transform: rotate(45deg);
+    width: 10px;
+    z-index: 100000;
+}
+.wcusage-rate-tooltip--orderbox:hover::after,
+.wcusage-rate-tooltip--orderbox:focus-within::after {
+    display: block;
+}
+
+/* Label/value rows, as opposed to the three-column rate rows that carry a
+   "Using" / "Overridden" chip. */
+.wcusage-rate-tooltip-row.is-plain {
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+.wcusage-rate-tooltip-row.is-plain .wcusage-rate-tooltip-value {
+    text-align: right;
+    white-space: normal;
+}
+.wcusage-rate-tooltip-row.is-negative .wcusage-rate-tooltip-value {
+    color: #b32d2e;
+}
+.wcusage-rate-tooltip-row.is-total {
+    background: #f0f6fc;
+    border-color: #72aee6;
+    font-size: 13px;
+}
+.wcusage-rate-tooltip-row.is-total .wcusage-rate-tooltip-level {
+    font-weight: 700;
+}
+
+/* The order value a line's percentage was worked out on, shown before the
+   commission it produced, so the arithmetic can be followed. */
+.wcusage-breakdown-base {
+    color: #646970;
+    font-weight: 400;
+}
+
+.wcusage-rate-tooltip-panel code {
+    background: #f0f0f1;
+    border-radius: 3px;
+    font-size: 11px;
+    padding: 1px 5px;
 }

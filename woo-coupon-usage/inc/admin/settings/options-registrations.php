@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function wcusage_field_cb_registration( $args )
 {
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
 
     $ispro = ( wcu_fs()->can_use_premium_code() ? 1 : 0 );
     $probrackets = ( $ispro ? "" : " (PRO)" );
@@ -1334,7 +1334,7 @@ add_action( 'wcusage_hook_setting_section_registration_template', 'wcusage_setti
 if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
   function wcusage_setting_section_registration_template() {
 
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
 
     $ispro = ( wcu_fs()->can_use_premium_code() ? 1 : 0 );
     $probrackets = ( $ispro ? "" : " (PRO)" );
@@ -1517,7 +1517,7 @@ add_action( 'wcusage_hook_setting_section_registration_template2', 'wcusage_sett
 if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
   function wcusage_setting_section_registration_template2() {
 
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
 
     $ispro = ( wcu_fs()->can_use_premium_code() ? 1 : 0 );
     $probrackets = ( $ispro ? "" : " (PRO)" );

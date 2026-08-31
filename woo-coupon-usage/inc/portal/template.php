@@ -16,7 +16,7 @@ $force_refresh_stats = 0;
 $wcusage_field_load_ajax = 0;
 $combined_commission = 0;
 $user_no_coupons = 0;
-$options = get_option( 'wcusage_options' );
+$options = wcusage_get_options();
 $wcusage_urlprivate = wcusage_get_setting_value( 'wcusage_field_urlprivate', '1' );
 // Check if user is logged in
 $current_user_id = get_current_user_id();
@@ -220,7 +220,7 @@ wp_enqueue_script(
     true
 );
 wp_localize_script( 'wcusage-register-ajax', 'wcusage_ajax_object', array(
-    'ajax_url' => admin_url( 'admin-ajax.php' ),
+    'ajax_url' => wcusage_ajax_url(),
     'nonce'    => wp_create_nonce( 'wcusage_verify_submit_registration_form1' ),
 ) );
 // Enqueue custom settings script
@@ -240,9 +240,10 @@ wp_enqueue_style(
 );
 // Localize custom settingsscript with necessary data
 wp_localize_script( 'wcusage-tab-settings', 'wcusage_ajax', array(
-    'ajax_url'    => admin_url( 'admin-ajax.php' ),
-    'saving_text' => __( 'Saving...', 'woo-coupon-usage' ),
-    'save_text'   => __( 'Save changes', 'woo-coupon-usage' ),
+    'ajax_url'      => wcusage_ajax_url(),
+    'saving_text'   => __( 'Saving...', 'woo-coupon-usage' ),
+    'save_text'     => __( 'Save changes', 'woo-coupon-usage' ),
+    'required_text' => __( '%s is required.', 'woo-coupon-usage' ),
 ) );
 /*** REFRESH STATS? ***/
 $force_refresh_stats = wcusage_check_if_refresh_needed( $postid );
@@ -939,7 +940,7 @@ function wcusage_portal_tabs(
     $is_mla_parent,
     $force_refresh_stats
 ) {
-    $options = get_option( 'wcusage_options', array() );
+    $options = wcusage_get_options();
     $options = ( is_array( $options ) ? $options : array() );
     $custom_order = ( isset( $options['wcusage_dashboard_tabs_layout'] ) ? $options['wcusage_dashboard_tabs_layout'] : '' );
     $show_tabs_icons = wcusage_get_setting_value( 'wcusage_field_show_tabs_icons', '1' );

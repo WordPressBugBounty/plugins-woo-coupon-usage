@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( !function_exists( 'wcusage_field_cb_subscriptions' ) ) {
 function wcusage_field_cb_subscriptions( $args )
 {
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
   $ispro = ( wcu_fs()->can_use_premium_code() ? 1 : 0 );
   $probrackets = ( $ispro ? "" : "(PRO) " );
 ?>

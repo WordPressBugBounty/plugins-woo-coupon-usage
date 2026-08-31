@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin settings UI: echoed values are internal pre-escaped helper markup and static strings; verified safe in manual audit.
 
 function wcusage_field_cb_payouts( $args ) {
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     ?>
 
 	<div id="payouts-settings" class="settings-area<?php
@@ -1581,7 +1581,7 @@ function wcusage_field_cb_payouts( $args ) {
 add_action('wcusage_hook_payouts_user_role_select', 'wcusage_payouts_user_role_select', 10, 1);
 function wcusage_payouts_user_role_select($thisid) {
 
-  $options = get_option('wcusage_options');
+  $options = wcusage_get_options();
 
   if(!empty($options[$thisid])) {
     $current_roles = $options[$thisid];

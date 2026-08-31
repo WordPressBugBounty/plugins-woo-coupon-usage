@@ -5,7 +5,7 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 if ( !function_exists( 'wcusage_field_cb_currency' ) ) {
     function wcusage_field_cb_currency(  $args  ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         ?>
 
 	<h1><?php 
@@ -146,7 +146,7 @@ if ( !function_exists( 'wcusage_field_cb_currency' ) ) {
     checktype="customnumber" custom1="<?php 
             echo esc_attr( $i );
             ?>" custom2="rate" placeholder="1.00"
-    step="0.01" min="0"
+    step="any" min="0"
     value="<?php 
             echo esc_attr( $wcusage_field_currency_rate );
             ?>" oninput="this.value = this.value.replace(/,/g, '')"> <span style="font-size: 12px;"><?php 
@@ -323,7 +323,7 @@ if ( !function_exists( 'wcusage_field_cb_currency' ) ) {
         ?>';"
     class="show_field_currency_button button button-primary" style="background: green; font-size: 12px; font-weight: bold;"><?php 
         echo esc_html__( 'Get Rates', 'woo-coupon-usage' );
-        ?>&nbsp;<span class="dashicons dashicons-update" style="font-size:15px;margin-top:7px;height:12px;width:12px;"></span></a>
+        ?></a>
 
   <span>
 

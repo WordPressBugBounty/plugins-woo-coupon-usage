@@ -14,7 +14,7 @@ if ( function_exists( 'wcu_fs' ) ) {
 if( !function_exists( 'wcu_fs_uninstall_cleanup' ) ) {
   function wcu_fs_uninstall_cleanup() {
 
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     if(isset($options['wcusage_field_deactivate_delete'])) {
       $wcusage_field_deactivate_delete = $options['wcusage_field_deactivate_delete'];
     } else {

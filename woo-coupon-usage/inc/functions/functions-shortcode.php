@@ -36,13 +36,42 @@ function wcusage_couponusage(  $atts  ) {
                 }
             }
             $wcusage_field_show_graphs = wcusage_get_setting_value( 'wcusage_field_show_graphs', 1 );
-            ?>
-
-		<link rel="stylesheet" href="<?php 
-            echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
-            ?>" crossorigin="anonymous">
-
-		<?php 
+            // Font Awesome (96 KB) and the Google Charts loader are enqueued rather
+            // than printed as raw tags. They used to be echoed here, inside the
+            // shortcode's output buffer, which put two render-blocking resources in
+            // the middle of <body> where no optimisation plugin could see them to
+            // defer, combine or preload them.
+            //
+            // wp_enqueue_style() still works this late: WordPress prints anything
+            // enqueued after wp_head() in the footer instead of dropping it.
+            if ( !wp_style_is( 'wcusage-font-awesome', 'enqueued' ) ) {
+                wp_enqueue_style(
+                    'wcusage-font-awesome',
+                    WCUSAGE_UNIQUE_PLUGIN_URL . 'fonts/font-awesome/css/all.min.css',
+                    array(),
+                    WCUSAGE_VERSION
+                );
+            }
+            if ( wcu_fs()->is__premium_only() && $wcusage_field_show_graphs ) {
+                // Normally already printed in <head> by wcusage_enqueue_google_charts_loader().
+                // When it is not - the shortcode rendering somewhere the page check could
+                // not see - an enqueue this late would only reach the footer, after the
+                // inline google.charts.load() each chart prints, so print it here,
+                // synchronously, exactly as this shortcode always used to.
+                if ( !wp_script_is( 'wcusage-google-charts', 'done' ) ) {
+                    echo '<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>' . "\n";
+                    if ( !wp_script_is( 'wcusage-google-charts', 'registered' ) ) {
+                        wp_register_script(
+                            'wcusage-google-charts',
+                            'https://www.gstatic.com/charts/loader.js',
+                            array(),
+                            null,
+                            false
+                        );
+                    }
+                    wp_scripts()->done[] = 'wcusage-google-charts';
+                }
+            }
             ?>
 
     	<?php 
@@ -53,7 +82,7 @@ function wcusage_couponusage(  $atts  ) {
       	<?php 
             // Get Language
             $language = wcusage_get_language_code();
-            $options = get_option( 'wcusage_options' );
+            $options = wcusage_get_options();
             $urlid = "";
             $coupon_code = "";
             $couponvisible = 0;
@@ -116,9 +145,20 @@ function wcusage_couponusage(  $atts  ) {
                         'p'         => $the_coupon_id,
                     );
                 } else {
+                    // Nothing to look at. This used to fetch EVERY coupon in the store
+                    // (posts_per_page => -1) and compare titles in PHP, from a URL any
+                    // visitor can request.
+                    //
+                    // The loop below only ever matches a coupon whose title equals the
+                    // urlid, or equals it with the post ID appended either directly or
+                    // after a hyphen. wcusage_get_dashboard_coupon_id() resolves all three
+                    // forms, so when it comes back empty no coupon in that full result set
+                    // could have matched either - the query was pure cost.
                     $args = array(
                         'post_type'      => 'shop_coupon',
-                        'posts_per_page' => -1,
+                        'post__in'       => array(0),
+                        'posts_per_page' => 1,
+                        'no_found_rows'  => true,
                         'cache_results'  => false,
                     );
                 }
@@ -277,7 +317,7 @@ function wcusage_couponusage(  $atts  ) {
                                 }
                             }
                             $coupon_code = sanitize_text_field( $coupon_code );
-                            $get_options = get_option( 'wcusage_options' );
+                            $get_options = wcusage_get_options();
                             $discount_type_original = get_post_meta( $postid, 'discount_type', true );
                             $discount_type = get_post_meta( $postid, 'discount_type', true );
                             if ( $discount_type == "fixed_cart" ) {
@@ -550,12 +590,12 @@ function wcusage_couponusage(  $atts  ) {
             }
             // If unique URL but no coupon/page found show message
             if ( !$coupon_code && !$couponnotassigned && $urlid ) {
-                echo esc_html__( "No affiliate dashboard found.", "woo-coupon-usage" );
+                echo sprintf( esc_html__( "No %s dashboard found.", "woo-coupon-usage" ), esc_html( wcusage_get_affiliate_text( __( "affiliate", "woo-coupon-usage" ) ) ) );
             }
             ?>
 
       	<?php 
-            $get_options = get_option( 'wcusage_options' );
+            $get_options = wcusage_get_options();
             if ( !$singlecoupon && !isset( $_GET['couponid'] ) ) {
                 echo do_shortcode( '[couponaffiliates-user]' );
             } else {

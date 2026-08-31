@@ -1,6 +1,18 @@
 (function($){
   'use strict';
 
+  // The saving-mode select is read by isLegacyEnabled(), so by the time a change
+  // handler runs it already holds the newly picked value. Switching *to* manual
+  // saving would therefore bail out before it was written and the mode silently
+  // reverted to automatic on the next page load - which is what made "Manual
+  // Saving" look like it never took effect. This one field always saves by AJAX.
+  var WCU_LEGACY_FIELD = 'wcusage_field_settings_legacy';
+  var isLegacySelfField = function(el) {
+    if (!el) { return false; }
+    var id = (typeof el === 'string') ? el : $(el).attr('id');
+    return id === WCU_LEGACY_FIELD;
+  };
+
   // Detect whether legacy (manual) saving mode is enabled
   var isLegacyEnabled = function() {
     var $select = $('#wcusage_field_settings_legacy');
@@ -12,6 +24,32 @@
       return $checkbox.is(':checked');
     }
     return false;
+  };
+
+  // =====================================================
+  // Keep duplicate copies of the same setting in step
+  // =====================================================
+  // 38 settings are deliberately drawn on more than one tab - the "Creatives"
+  // toggle appears six times, "Login Form" three. Each one is a separate control
+  // posting the same name, so a bulk save sends every copy and PHP keeps the LAST
+  // one: switching a toggle off on the tab you are looking at was undone by a copy
+  // on another tab that still said on. (Automatic saving was unaffected, but the
+  // other copies still showed the stale value until the page was reloaded.)
+  var wcuSyncDuplicates = function(el) {
+    if (!el || !el.getAttribute) { return; }
+    var name = el.getAttribute('name');
+    if (!name || name.indexOf('wcusage_options[') !== 0) { return; }
+    // A radio group legitimately shares one name across its own options.
+    if (el.type === 'radio') { return; }
+    // getElementsByName matches the raw name, so the square brackets in
+    // wcusage_options[...] need no selector escaping.
+    var $others = $(document.getElementsByName(name)).not(el).not('[type=hidden]');
+    if (!$others.length) { return; }
+    if (el.type === 'checkbox') { $others.filter(':checkbox').prop('checked', !!el.checked); }
+    else { $others.val($(el).val()); }
+    // Let the show/hide handlers bound to those copies react. The event carries no
+    // originalEvent, so shouldProcessChange() keeps it from starting another save.
+    $others.trigger('change');
   };
 
   // Debounce helper
@@ -28,11 +66,123 @@
     };
   }
 
+  // =====================================================
+  // Failure reporting
+  // =====================================================
+  // Every failed save used to end in the same "Failed to update. Please try
+  // again." alert, whether the request was blocked before it left the browser,
+  // refused by a firewall, or answered with a PHP error - so a site owner could
+  // only report "an error". Say which it was.
+  var WCU_FALLBACK_I18N = {
+    save_failed: 'This setting could not be saved.',
+    fail_blocked: 'The request never reached the server. It was blocked by the browser or the network - usually mixed HTTP/HTTPS content or a different domain to your WordPress Address, a firewall, or an ad blocker.',
+    fail_forbidden: 'The server refused the request (HTTP 403). Reload this page in case your login session has expired; if it keeps happening, a security plugin or web application firewall is blocking admin-ajax.php.',
+    fail_not_found: 'The server did not recognise the save action (HTTP %s). Something on this site is restricting admin-ajax.php.',
+    fail_server: 'The server returned an error (HTTP %s). Check your PHP error log for the cause.',
+    fail_parse: 'The server sent back something other than the expected data - usually a PHP notice or warning printed by another plugin. The raw response is in the browser console.',
+    fail_generic: 'Unexpected response: %s',
+    bulk_saving: 'Saving all settings (batch %1$s of %2$s)...',
+    bulk_saved: 'All settings have been saved.',
+    bulk_failed: 'Saving stopped at batch %1$s of %2$s: %3$s',
+    max_input_vars_warning: 'This settings form posts %1$s fields, but the PHP "max_input_vars" limit on your server is %2$s, so PHP would silently discard everything after the limit. "Save All Settings" and "Save Settings" therefore save in smaller batches automatically. Settings saved automatically as you change them are not affected. To save everything in one request, ask your host to raise "max_input_vars" to %3$s or higher.'
+  };
+  var wcuI18n = function(key){
+    var s = (window.wcusageUpdate && window.wcusageUpdate.i18n) ? window.wcusageUpdate.i18n[key] : '';
+    return s || WCU_FALLBACK_I18N[key] || key;
+  };
+  // Minimal sprintf: %1$s style positional and plain %s placeholders.
+  var wcuFormat = function(str){
+    var args = Array.prototype.slice.call(arguments, 1), i = 0;
+    return String(str).replace(/%(\d+)\$s|%s/g, function(m, n){
+      var v = n ? args[n - 1] : args[i++];
+      return (v === undefined) ? m : String(v);
+    });
+  };
+  var wcuDescribeFailure = function(xhr, status, error){
+    var code = (xhr && typeof xhr.status === 'number') ? xhr.status : 0;
+    if (status === 'parsererror') { return wcuI18n('fail_parse'); }
+    if (code === 0) { return wcuI18n('fail_blocked'); }
+    if (code === 403) { return wcuI18n('fail_forbidden'); }
+    if (code === 400 || code === 404) { return wcuFormat(wcuI18n('fail_not_found'), code); }
+    if (code >= 500) { return wcuFormat(wcuI18n('fail_server'), code); }
+    return wcuFormat(wcuI18n('fail_generic'), code + ' ' + (error || status || ''));
+  };
+  // Persistent red note beside the field; cleared by the next successful save.
+  var wcuShowFieldError = function(field, message){
+    $('#wcu-update-text-' + field).remove();
+    $('#wcu-update-text2-' + field).remove();
+    var $p = $('<p/>', { id: 'wcu-update-text-' + field, 'class': 'wcu-update-text wcu-update-text-error' })
+      .css({ color: '#b32d2e', fontWeight: '600' }).text(message);
+    var $anchor = $('#' + field + '_p');
+    if ($anchor.length) { $anchor.after($p); } else { $('#' + field).after($p); }
+    $('.wcu-addons-box .' + field).after($p.clone().attr('id', 'wcu-update-text2-' + field));
+  };
+
+  // =====================================================
+  // Bulk save (the whole form to options.php), in batches
+  // =====================================================
+  // PHP counts every posted name/value pair against max_input_vars and drops the
+  // rest without telling anyone; the server merges what arrives over the stored
+  // options, so the tabs past the cut simply "did not save". The form is well past
+  // PHP's default of 1000 on a site with the PRO tabs, so post it in batches that
+  // fit. Each batch carries the Settings API fields (option page, action, nonce,
+  // referer) and the server-side merge keeps everything a batch leaves out.
+  var WCU_BASE_FIELDS = { option_page: 1, action: 1, _wpnonce: 1, _wp_http_referer: 1 };
+  var wcuMaxInputVars = function(){
+    var n = parseInt(window.wcusageUpdate && window.wcusageUpdate.max_input_vars, 10);
+    if (!(n > 0)) { n = parseInt($('#wcu-max-input-vars-warning').attr('data-limit'), 10); }
+    return (n > 0) ? n : 0;
+  };
+  var wcuPostedFields = function($form){
+    try { if (window.tinyMCE && typeof tinyMCE.triggerSave === 'function') { tinyMCE.triggerSave(); } } catch (e) {}
+    return $form.serializeArray(); // exactly what a native submit would post
+  };
+  var wcuBulkBatches = function($form){
+    var fields = wcuPostedFields($form);
+    var base = [], groups = {}, order = [];
+    $.each(fields, function(_, f){
+      if (WCU_BASE_FIELDS[f.name]) { base.push(f); return; }
+      // Keep every input of one option in the same batch: the server replaces an
+      // option's array wholesale, so a multi-checkbox split across two batches
+      // would lose its first half, and a toggle's hidden "0" must travel with it.
+      var m = /^[^\[]+\[[^\]]*\]/.exec(f.name);
+      var key = m ? m[0] : f.name;
+      if (!groups[key]) { groups[key] = []; order.push(key); }
+      groups[key].push(f);
+    });
+    var limit = wcuMaxInputVars();
+    var perBatch = limit ? Math.max(20, Math.floor(limit * 0.9) - base.length) : Infinity;
+    var batches = [], current = [];
+    $.each(order, function(_, key){
+      var g = groups[key];
+      if (current.length && current.length + g.length > perBatch) { batches.push(current); current = []; }
+      current = current.concat(g);
+    });
+    if (current.length || !batches.length) { batches.push(current); }
+    return { base: base, batches: batches, total: fields.length, limit: limit };
+  };
+  var wcuBulkSave = function($form, onProgress, onDone){
+    var plan = wcuBulkBatches($form);
+    var url = $form.attr('action') || 'options.php';
+    var i = 0;
+    var next = function(){
+      if (i >= plan.batches.length) { onDone(null, plan); return; }
+      var n = i + 1;
+      if (onProgress) { onProgress(n, plan.batches.length); }
+      $.ajax({ type: 'POST', url: url, data: $.param(plan.base.concat(plan.batches[i])) })
+        .done(function(){ i++; next(); })
+        .fail(function(xhr, status, error){
+          console.error('Coupon Affiliates: bulk save failed at batch ' + n + '/' + plan.batches.length + ' (' + (xhr && xhr.status) + ' ' + status + ')', error, xhr && xhr.responseText);
+          onDone({ batch: n, of: plan.batches.length, why: wcuDescribeFailure(xhr, status, error) }, plan);
+        });
+    };
+    next();
+  };
+
   // AJAX helper
   window.wcu_ajax_update_the_options = function(thisObj, type, action, val, thekey, ids){
-    var legacy = isLegacyEnabled();
     if (!thekey) { thekey = ""; }
-    if (legacy) { return; }
+    if (isLegacyEnabled() && !isLegacySelfField(thisObj)) { return; }
 
     var checktype = $(thisObj).attr('checktype');
     var myClass, myVal, checktype2;
@@ -147,13 +297,13 @@
         }
         $("#wcu-number-settings-saved").text(settingsupdatenew);
       } else {
-        // Handle error response
+        // The server answered but declined - it says why (capability, missing
+        // data, or a database write that did not land).
         $(".wcu-update-icon").remove();
         $(".wcu-update-text").remove();
-        $("#" + myClass + "_p").after("<p id='wcu-update-text-"+ myClass +"' class='wcu-update-text' style='color:red;'>Update failed!</p>");
-        setTimeout(function(){
-          $(".wcu-update-text").remove();
-        }, 1000);
+        var why = (json && json.data && json.data.message) ? json.data.message : '';
+        console.error('Coupon Affiliates: settings save rejected for "' + myClass + '":', why || json);
+        wcuShowFieldError(myClass, wcuI18n('save_failed') + (why ? ' ' + why : ''));
       }
     }).fail(function(xhr, status, error){
       // Reset UI state
@@ -162,9 +312,11 @@
       $(document.body).css({'cursor':'default'});
       $(".wcu-update-icon").remove();
       $(".wcu-update-text").remove();
-      
-      console.error('AJAX update failed:', status, error, xhr.responseText);
-      alert('Failed to update. Please try again.');
+
+      var why = wcuDescribeFailure(xhr, status, error);
+      console.error('Coupon Affiliates: settings save failed for "' + myClass + '" (' + (xhr && xhr.status) + ' ' + status + ')', error, xhr && xhr.responseText);
+      wcuShowFieldError(myClass, wcuI18n('save_failed') + ' ' + why);
+      alert(wcuI18n('save_failed') + '\n\n' + why);
     });
   };
 
@@ -181,8 +333,8 @@
   var addHandlers = function(selector, action, val, gettype){
     $(document).on('change', selector, wcusettingsdelay(function(e){
       if (!shouldProcessChange(e, $(this))) { return; }
-      var legacy = isLegacyEnabled();
-      if (legacy) { return; }
+      wcuSyncDuplicates(this);
+      if (isLegacyEnabled() && !isLegacySelfField(this)) { return; }
       var checktype = $(this).attr('checktype');
       if (checktype !== 'ignore') {
         if (checktype !== 'multi') {
@@ -202,6 +354,7 @@
   // For TinyMCE-backed textareas, trigger on change of the textarea; the AJAX helper will switch to data-id path
   $(document).on('change', 'textarea', wcusettingsdelay(function(e){
     if (!shouldProcessChange(e, $(this))) { return; }
+    wcuSyncDuplicates(this);
     var id = $(this).attr('id');
     if (!id) { return; }
     window.wcu_ajax_update_the_options(id, 'data-id', 'wcu-update-text', 1, '', 'textarea');
@@ -219,7 +372,7 @@
     } catch (e) {}
   });
 
-  // Bulk Save All handler (submits the full settings form to options.php via AJAX)
+  // Bulk Save All handler (posts the full settings form to options.php in batches)
   $(document).on('click', '#wcu-save-all-button', function(){
     if (isLegacyEnabled()) {
       // In legacy/manual mode, this button should not act.
@@ -230,36 +383,84 @@
     var $status = $('#wcu-save-all-status');
     try {
       $btn.prop('disabled', true);
-      $status.text('Saving all settings...').show();
+      $status.stop(true, true).css('color', '#666').text(wcuFormat(wcuI18n('bulk_saving'), 1, 1)).show();
       // Hide and reset the per-field saved counter/message
       try {
         $('#wcu-number-settings-saved').text('0');
         $('#wcu-number-settings-saved-message').hide();
       } catch(e) {}
 
-  var $form = $('.wcusage-settings-form');
-  // Ensure TinyMCE-backed textareas write content back to underlying <textarea>
-  try { if (window.tinyMCE && typeof tinyMCE.triggerSave === 'function') { tinyMCE.triggerSave(); } } catch (e) {}
-      var formData = $form.serialize();
-      var actionUrl = $form.attr('action') || 'options.php';
-
-      $.ajax({
-        type: 'POST',
-        url: actionUrl,
-        data: formData
-      }).done(function(){
-        // Keep the per-field counter hidden; show a generic success status instead
-        $status.text('All settings have been saved.').show();
-      }).fail(function(){
-        $status.text('Failed to save settings. Please try again.').show();
-      }).always(function(){
-        setTimeout(function(){ $status.fadeOut(400); }, 2500);
+      wcuBulkSave($('.wcusage-settings-form'), function(n, of){
+        $status.text(wcuFormat(wcuI18n('bulk_saving'), n, of));
+      }, function(err){
+        if (err) {
+          var msg = wcuFormat(wcuI18n('bulk_failed'), err.batch, err.of, err.why);
+          $status.css('color', '#b32d2e').text(msg).show();
+          alert(msg);
+        } else {
+          // Keep the per-field counter hidden; show a generic success status instead
+          $status.text(wcuI18n('bulk_saved')).show();
+          setTimeout(function(){ $status.fadeOut(400); }, 2500);
+        }
         $btn.prop('disabled', false);
       });
     } catch (e) {
-      $status.text('Save All failed to start.').show();
+      $status.css('color', '#b32d2e').text('Save All failed to start.').show();
       $btn.prop('disabled', false);
     }
+  });
+
+  // Native submit (the legacy "Save Settings" button, or Enter in a text field).
+  // Let it through when the form fits in one request; otherwise post it in batches
+  // and then land where options.php would have sent the browser.
+  $(document).on('submit', '.wcusage-settings-form', function(e){
+    var $form = $(this);
+    var limit = wcuMaxInputVars();
+    if (!limit) { return; }
+    var count = wcuPostedFields($form).length;
+    if (count < limit) { return; }
+    e.preventDefault();
+
+    var $button = $form.find('#submit, input[type=submit], button[type=submit]').first();
+    var $status = $('#wcu-legacy-save-status');
+    if (!$status.length) {
+      $status = $('<p id="wcu-legacy-save-status" style="font-size:14px;"></p>');
+      if ($button.length) { $button.closest('p.submit').length ? $button.closest('p.submit').after($status) : $button.after($status); }
+      else { $form.append($status); }
+    }
+    $button.prop('disabled', true);
+    $status.css('color', '#666').text(wcuFormat(wcuI18n('bulk_saving'), 1, 1)).show();
+
+    wcuBulkSave($form, function(n, of){
+      $status.text(wcuFormat(wcuI18n('bulk_saving'), n, of));
+    }, function(err){
+      if (err) {
+        var msg = wcuFormat(wcuI18n('bulk_failed'), err.batch, err.of, err.why);
+        $status.css('color', '#b32d2e').text(msg);
+        $button.prop('disabled', false);
+        alert(msg);
+        return;
+      }
+      $status.text(wcuI18n('bulk_saved'));
+      var back = $form.find('input[name="_wp_http_referer"]').val() || window.location.href;
+      back = back.replace(/([?&])settings-updated=[^&]*&?/, '$1').replace(/[?&]$/, '');
+      back += (back.indexOf('?') === -1 ? '?' : '&') + 'settings-updated=true';
+      window.location.href = back;
+    });
+  });
+
+  // Tell the site owner when the form is bigger than PHP will accept in one go.
+  $(function(){
+    var $warn = $('#wcu-max-input-vars-warning');
+    var $form = $('.wcusage-settings-form');
+    if (!$warn.length || !$form.length) { return; }
+    var limit = wcuMaxInputVars();
+    if (!limit) { return; }
+    var count = $form.serializeArray().length;
+    if (count < limit) { return; }
+    var suggested = Math.ceil((count + 100) / 500) * 500;
+    $warn.find('.wcu-max-input-vars-text').text(wcuFormat(wcuI18n('max_input_vars_warning'), count, limit, suggested));
+    $warn.show();
   });
 
   // =====================================================
@@ -334,13 +535,14 @@
       var wrap = document.getElementById('wp-' + id + '-wrap');
       if (!wrap || wrap.className.indexOf('tmce-active') === -1) { return; } // left in Text mode on purpose
       var editor = tinymce.get(id);
-      if (editor) {
-        // Never interrupt a field that is being worked in.
-        if (editor.initialized && (editor.isDirty() || editor === tinymce.focusedEditor)) { return; }
-        try { editor.save(); } catch (e) {}
-        try { tinymce.remove('#' + id); } catch (e) {}
-        delete wcuBoundEditors[id]; // the replacement instance needs its own change binding
-      }
+      // Editors are built lazily as they scroll into view, so one that does not exist
+      // yet has nothing to rebuild - it picks up the reloaded plugins when it is built.
+      if (!editor) { return; }
+      // Never interrupt a field that is being worked in.
+      if (editor.initialized && (editor.isDirty() || editor === tinymce.focusedEditor)) { return; }
+      try { editor.save(); } catch (e) {}
+      try { tinymce.remove('#' + id); } catch (e) {}
+      delete wcuBoundEditors[id]; // the replacement instance needs its own change binding
       try { tinymce.init(tinyMCEPreInit.mceInit[id]); } catch (e) {}
     });
   };

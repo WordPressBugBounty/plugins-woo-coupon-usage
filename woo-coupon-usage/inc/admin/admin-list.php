@@ -37,7 +37,7 @@ function wcusage_woo_display_customer_order_coupon_in_column_for_orders( $column
   global $the_coupon, $post;
 	if(isset($post->ID)) {
 
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
 
 		$couponid = $post->ID;
     $coupon_info = "";

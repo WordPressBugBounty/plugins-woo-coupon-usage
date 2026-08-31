@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( !function_exists( 'wcusage_field_cb_custom_tabs' ) ) {
 function wcusage_field_cb_custom_tabs( $args )
 {
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     ?>
 
 	<div id="custom-tabs-settings" class="settings-area"<?php if ( !wcu_fs()->can_use_premium_code() ) { ?> title="<?php echo esc_attr__( 'Available with Pro version.', 'woo-coupon-usage' ); ?>" style="pointer-events:none; opacity: 0.6;"<?php } ?>>
@@ -212,7 +212,8 @@ function wcusage_field_cb_custom_tabs( $args )
         'editor_height' => 300,
         'textarea_rows' => 5,
         'editor_class' => 'wcusage_field_cb_custom_tabs_content',
-        'tinymce' => true,
+        // Built on demand - see wcusage_tinymce_lazy_init_script().
+        'tinymce' => array( 'wp_skip_init' => true ),
     );
     echo wcusage_tinymce_ajax_script('wcusage_field_custom_tabs_content_' . esc_html($i));
     wp_editor( $wcusage_field_custom_tabs_content, 'wcusage_field_custom_tabs_content_' . esc_html($i), $settingstabscontent );

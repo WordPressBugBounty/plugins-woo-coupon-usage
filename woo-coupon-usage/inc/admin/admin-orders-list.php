@@ -11,7 +11,7 @@ function wusage_add_order_column_header(  $columns  ) {
     if ( !$wcusage_show_column_code ) {
         return $columns;
     }
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     $new_columns = array();
     foreach ( $columns as $column_name => $column_info ) {
         $new_columns[$column_name] = $column_info;
@@ -92,7 +92,7 @@ function wcusage_add_order_column_content(  $column, $order_id  ) {
         if ( !$affiliate ) {
             $affiliate = "-";
         }
-        $coupon_codes = implode( '<br>', $coupon_codes );
+        $coupon_codes = implode( '', $coupon_codes );
         if ( !$coupon_codes ) {
             $coupon_codes = "-";
         }
@@ -180,7 +180,7 @@ function wcusage_get_the_order_coupon_info(
     }
     $order = wc_get_order( $order_id );
     if ( $coupon_code ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         $commission = 0;
         $coupon_id = wcusage_get_coupon_id( $coupon_code );
         // Commission

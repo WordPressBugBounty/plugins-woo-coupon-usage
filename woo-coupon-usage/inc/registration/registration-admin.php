@@ -8,7 +8,7 @@ function wcusage_admin_registrations_page_html() {
     if ( !wcusage_check_admin_access() ) {
         return;
     }
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     $setstatus = "";
     $coupon_code = "";
     // Post Submit Add Registration Form
@@ -29,20 +29,7 @@ function wcusage_admin_registrations_page_html() {
             }
             // Resolve the coupon code (manual or auto-generated) and check for duplicates before processing
             $couponcode = sanitize_text_field( $post_field_values['couponcode'] );
-            $coupon_exists = false;
-            if ( !empty( $couponcode ) && function_exists( 'wc_get_coupon_id_by_code' ) && wc_get_coupon_id_by_code( $couponcode ) ) {
-                $coupon_exists = true;
-            }
-            // Also check the registrations table for pending/accepted entries with this coupon code
-            if ( !$coupon_exists && !empty( $couponcode ) ) {
-                global $wpdb;
-                $reg_table = $wpdb->prefix . 'wcusage_register';
-                $reg_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$reg_table} WHERE couponcode = %s AND status != 'declined'", $couponcode ) );
-                // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-                if ( $reg_count > 0 ) {
-                    $coupon_exists = true;
-                }
-            }
+            $coupon_exists = wcusage_admin_registration_coupon_code_taken( $couponcode );
             // Allow override: assign user to existing coupon if checkbox was checked
             $assign_existing = isset( $_POST['wcu-assign-existing-coupon'] ) && $_POST['wcu-assign-existing-coupon'] === '1';
             if ( $coupon_exists && !$assign_existing ) {
@@ -92,7 +79,11 @@ function wcusage_admin_registrations_page_html() {
                         $info = ( isset( $post_field_values['info'] ) ? sanitize_text_field( $post_field_values['info'] ) : '' );
                         $message = ( isset( $post_field_values['message'] ) ? sanitize_text_field( $post_field_values['message'] ) : '' );
                         $role = ( isset( $post_field_values['role'] ) ? sanitize_text_field( $post_field_values['role'] ) : '' );
-                        $send_email = isset( $_POST['wcu-send-email'] ) && $_POST['wcu-send-email'] === '1';
+                        $send_email = wcusage_normalise_send_email_choice( ( isset( $_POST['wcu-send-email'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-send-email'] ) ) : '' ) );
+                        // Remember the choice so this admin does not have to re-pick it every time.
+                        if ( isset( $_POST['wcu-send-email'] ) ) {
+                            wcusage_save_send_email_preference( 'add_affiliate', $send_email );
+                        }
                         wcusage_create_new_registration(
                             $couponcode,
                             $username,
@@ -435,9 +426,9 @@ function wcusage_admin_registrations_page_html() {
 .column-date, .column-datepaid { width: 200px; }
 </style>
 
-<link rel="stylesheet" href="<?php 
-    echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
-    ?>" crossorigin="anonymous">
+<?php 
+    wcusage_enqueue_font_awesome();
+    ?>
 
 <div id="wcu-create-new-registration" class="wrap wcusage-admin-page plugin-settings">
 
@@ -688,7 +679,7 @@ function wcusage_set_registration_status(
     if ( !$coupon_code ) {
         return;
     }
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     global $wpdb;
     $table_name = $wpdb->prefix . 'wcusage_register';
     $data = [
@@ -738,7 +729,19 @@ function wcusage_set_registration_status(
             $status
         );
         $activity_log = wcusage_add_activity( $id, 'registration_accept', $username );
-        if ( $send_email ) {
+        // $send_email carries which email the admin picked on the Add New Affiliate form
+        // ('accepted', 'coupon_assigned', or '' for none). Legacy bool callers normalise to
+        // 'accepted', which is what this always used to send.
+        $send_email_type = wcusage_normalise_send_email_choice( $send_email );
+        if ( $send_email_type === 'coupon_assigned' ) {
+            wcusage_email_affiliate_coupon_assigned(
+                $user_email,
+                $coupon_code,
+                $name,
+                $username,
+                $message
+            );
+        } elseif ( $send_email_type ) {
             wcusage_email_affiliate_register_accepted(
                 $user_email,
                 $coupon_code,
@@ -844,7 +847,13 @@ function wcusage_set_registration_status(
             $message,
             $status
         );
-        wcusage_email_affiliate_register_declined( $user_email, $coupon_code, $message );
+        // Honour $send_email here as well as on the accept branch above. The REST
+        // API exposes it as a documented parameter on POST /registrations/{id}/status,
+        // and without this a caller asking to decline silently still emailed the
+        // applicant.
+        if ( $send_email ) {
+            wcusage_email_affiliate_register_declined( $user_email, $coupon_code, $message );
+        }
     }
 }
 
@@ -923,20 +932,7 @@ function wcusage_admin_new_registration_page() {
             }
             // Resolve the coupon code (manual or auto-generated) and check for duplicates before processing
             $couponcode = sanitize_text_field( $post_field_values['couponcode'] );
-            $coupon_exists = false;
-            if ( !empty( $couponcode ) && function_exists( 'wc_get_coupon_id_by_code' ) && wc_get_coupon_id_by_code( $couponcode ) ) {
-                $coupon_exists = true;
-            }
-            // Also check the registrations table for pending/accepted entries with this coupon code
-            if ( !$coupon_exists && !empty( $couponcode ) ) {
-                global $wpdb;
-                $reg_table = $wpdb->prefix . 'wcusage_register';
-                $reg_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$reg_table} WHERE couponcode = %s AND status != 'declined'", $couponcode ) );
-                // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-                if ( $reg_count > 0 ) {
-                    $coupon_exists = true;
-                }
-            }
+            $coupon_exists = wcusage_admin_registration_coupon_code_taken( $couponcode );
             // Allow override: assign user to existing coupon if checkbox was checked
             $assign_existing = isset( $_POST['wcu-assign-existing-coupon'] ) && $_POST['wcu-assign-existing-coupon'] === '1';
             if ( $coupon_exists && !$assign_existing ) {
@@ -986,7 +982,11 @@ function wcusage_admin_new_registration_page() {
                         $info = ( isset( $post_field_values['info'] ) ? sanitize_text_field( $post_field_values['info'] ) : '' );
                         $message = ( isset( $post_field_values['message'] ) ? sanitize_text_field( $post_field_values['message'] ) : '' );
                         $role = ( isset( $post_field_values['role'] ) ? sanitize_text_field( $post_field_values['role'] ) : '' );
-                        $send_email = isset( $_POST['wcu-send-email'] ) && $_POST['wcu-send-email'] === '1';
+                        $send_email = wcusage_normalise_send_email_choice( ( isset( $_POST['wcu-send-email'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-send-email'] ) ) : '' ) );
+                        // Remember the choice so this admin does not have to re-pick it every time.
+                        if ( isset( $_POST['wcu-send-email'] ) ) {
+                            wcusage_save_send_email_preference( 'add_affiliate', $send_email );
+                        }
                         wcusage_create_new_registration(
                             $couponcode,
                             $username,
@@ -1024,9 +1024,9 @@ function wcusage_admin_new_registration_page() {
     // (enqueue moved to separate hook defined after this function)
     ?>
 
-  <link rel="stylesheet" href="<?php 
-    echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
-    ?>" crossorigin="anonymous">
+  <?php 
+    wcusage_enqueue_font_awesome();
+    ?>
   
   <div class="wrap wcusage-admin-page">
 
@@ -1214,37 +1214,77 @@ function wcusage_admin_new_registration_page() {
         }
         ?>
 
-        <tr>
-          <?php 
+        <?php 
+        // Which notification emails can be sent from here. $send_email is threaded through
+        // wcusage_create_new_registration() as an email key rather than a bool now, so the
+        // admin can pick the wording that fits: the application-accepted email for someone
+        // being onboarded, or the coupon-assigned email when they are already an affiliate.
         $wcusage_field_email_registration_accept_enable = wcusage_get_setting_value( 'wcusage_field_email_registration_accept_enable', '1' );
+        $wcusage_field_email_coupon_assigned_enable = wcusage_get_setting_value( 'wcusage_field_email_coupon_assigned_enable', '1' );
+        $wcu_send_email_options = array();
         if ( $wcusage_field_email_registration_accept_enable ) {
+            $wcu_send_email_options['accepted'] = esc_html__( 'Affiliate Application Accepted', 'woo-coupon-usage' );
+        }
+        if ( $wcusage_field_email_coupon_assigned_enable ) {
+            $wcu_send_email_options['coupon_assigned'] = esc_html__( 'New Coupon Assigned', 'woo-coupon-usage' );
+        }
+        if ( $wcu_send_email_options ) {
+            // Pre-select whatever this admin picked last time, falling back to the first
+            // available email (and dropping a remembered choice whose email has since been
+            // switched off in the settings).
+            $wcu_send_email_default = key( $wcu_send_email_options );
+            $wcu_send_email_selected = wcusage_get_send_email_preference( 'add_affiliate', $wcu_send_email_options, $wcu_send_email_default );
             ?>
+        <tr>
           <th scope="row"><label for="wcu-send-email"><?php 
             echo esc_html__( 'Send Notification Email', 'woo-coupon-usage' );
             ?></label></th>
           <td>
-            <input type="checkbox" name="wcu-send-email" id="wcu-send-email" value="1" checked onchange="wcuToggleMessageRow(this)">
-            <label for="wcu-send-email"><?php 
-            echo esc_html__( 'Send the "Affiliate Application Accepted" email to this affiliate.', 'woo-coupon-usage' );
-            ?></label>
+            <select name="wcu-send-email" id="wcu-send-email" onchange="wcuToggleMessageRow(this)">
+              <?php 
+            foreach ( $wcu_send_email_options as $wcu_send_email_key => $wcu_send_email_label ) {
+                ?>
+              <option value="<?php 
+                echo esc_attr( $wcu_send_email_key );
+                ?>"<?php 
+                selected( $wcu_send_email_selected, $wcu_send_email_key );
+                ?>><?php 
+                echo esc_html( $wcu_send_email_label );
+                ?></option>
+              <?php 
+            }
+            ?>
+              <option value="none"<?php 
+            selected( $wcu_send_email_selected, 'none' );
+            ?>><?php 
+            echo esc_html__( 'Do not send an email', 'woo-coupon-usage' );
+            ?></option>
+            </select>
+            <br/><i style="font-size: 10px;"><?php 
+            echo esc_html__( 'Choose which email this affiliate receives. Your choice is remembered for next time. The wording of each one can be edited under Settings > Notifications.', 'woo-coupon-usage' );
+            ?></i>
           </td>
         </tr>
-        <tr id="wcu-message-row">
+        <tr id="wcu-message-row"<?php 
+            echo ( $wcu_send_email_selected === 'none' ? ' style="display: none;"' : '' );
+            ?>>
           <th scope="row"><label for="wcu-message"><?php 
             echo esc_html__( 'Custom Message', 'woo-coupon-usage' );
             ?></label></th>
           <td><input name="wcu-message" type="text" id="wcu-message" class="regular-text" value="">
-          <br/><i style="font-size: 10px;">A custom message sent to the affiliate in the welcome/accepted email.</i></td>
+          <br/><i style="font-size: 10px;">A custom message sent to the affiliate in the selected email, shown by the {message} merge tag.</i></td>
         </tr>
-          <?php 
+        <?php 
         }
         ?>
 
       </table>
       <script>
-      function wcuToggleMessageRow(checkbox) {
+      function wcuToggleMessageRow(field) {
         var row = document.getElementById('wcu-message-row');
-        if (row) row.style.display = checkbox.checked ? '' : 'none';
+        if (!row) { return; }
+        var sending = (field.type === 'checkbox') ? field.checked : (field.value !== 'none');
+        row.style.display = sending ? '' : 'none';
       }
       </script>
 
@@ -1623,4 +1663,34 @@ function wcusage_check_email_exists() {
         ] );
     }
     wp_die();
+}
+
+/**
+ * Whether a coupon code is still taken, for the admin "Add New Affiliate" form.
+ *
+ * A code is taken when a published coupon uses it, or when a registration that has not been
+ * declined has claimed it. Registrations that were already accepted are ignored once no published
+ * coupon exists: their coupon has since been deleted, so the code is free to use again. This
+ * mirrors the front-end registration form.
+ *
+ * @param string $couponcode
+ * @return bool
+ */
+function wcusage_admin_registration_coupon_code_taken(  $couponcode  ) {
+    if ( empty( $couponcode ) ) {
+        return false;
+    }
+    if ( function_exists( 'wc_get_coupon_id_by_code' ) && wc_get_coupon_id_by_code( $couponcode ) ) {
+        return true;
+    }
+    global $wpdb;
+    $reg_table = $wpdb->prefix . 'wcusage_register';
+    $reg_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$reg_table} WHERE couponcode = %s AND status != 'declined'", $couponcode ) );
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    if ( $reg_count <= 0 ) {
+        return false;
+    }
+    $accepted_count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$reg_table} WHERE couponcode = %s AND status = 'accepted'", $couponcode ) );
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+    return $accepted_count <= 0;
 }

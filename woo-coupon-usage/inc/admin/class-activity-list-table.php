@@ -26,7 +26,7 @@ class wcusage_activity_List_Table extends WP_List_Table {
 
     function column_default($item, $column_name){
 
-		$options = get_option( 'wcusage_options' );
+		$options = wcusage_get_options();
 
       switch($column_name){
         default:
@@ -104,6 +104,7 @@ class wcusage_activity_List_Table extends WP_List_Table {
             'payout_request'                            => __( 'Payout Request', 'woo-coupon-usage' ),
             'payout_paid'                               => __( 'Payout Paid', 'woo-coupon-usage' ),
             'payout_reversed'                           => __( 'Payout Reversed', 'woo-coupon-usage' ),
+            'payout_cancelled'                          => __( 'Payout Cancelled', 'woo-coupon-usage' ),
             'new_campaign'                              => __( 'New Campaign', 'woo-coupon-usage' ),
             'commission_added'                          => __( 'Commission Added', 'woo-coupon-usage' ),
             'commission_removed'                        => __( 'Commission Removed', 'woo-coupon-usage' ),
@@ -115,11 +116,16 @@ class wcusage_activity_List_Table extends WP_List_Table {
             'manual_coupon_commission_edit'              => __( 'Manual Coupon Commission Edit', 'woo-coupon-usage' ),
             'manual_coupon_commission_fixed_order_edit'  => __( 'Manual Fixed Order Commission Edit', 'woo-coupon-usage' ),
             'manual_coupon_commission_fixed_product_edit'=> __( 'Manual Fixed Product Commission Edit', 'woo-coupon-usage' ),
+            'lifetime_link_added'                       => __( 'Lifetime Link Added', 'woo-coupon-usage' ),
+            'lifetime_link_edited'                      => __( 'Lifetime Link Edited', 'woo-coupon-usage' ),
+            'lifetime_link_removed'                     => __( 'Lifetime Link Removed', 'woo-coupon-usage' ),
             'reward_earned'                             => __( 'Reward Earned', 'woo-coupon-usage' ),
             'reward_earned_bonus_amount'                => __( 'Reward Bonus Amount', 'woo-coupon-usage' ),
             'reward_earned_commission_increase'         => __( 'Reward Commission Increase', 'woo-coupon-usage' ),
             'reward_earned_email_sent'                  => __( 'Reward Email Sent', 'woo-coupon-usage' ),
             'reward_earned_role_assigned'               => __( 'Reward Role Assigned', 'woo-coupon-usage' ),
+            'api_key_created'                           => __( 'API Key Created', 'woo-coupon-usage' ),
+            'api_key_revoked'                           => __( 'API Key Revoked', 'woo-coupon-usage' ),
         );
     }
 

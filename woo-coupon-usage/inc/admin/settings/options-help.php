@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function wcusage_field_cb_help( $args )
 {
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     ?>
 
 <style>

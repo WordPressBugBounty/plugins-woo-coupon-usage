@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if( !function_exists( 'wcusage_custom_styles' ) ) {
   function wcusage_custom_styles() {
 
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
 
   	$wcusage_color_tab = wcusage_get_setting_value('wcusage_field_color_tab', '#1b3e47');
   	$wcusage_color_tab_font = wcusage_get_setting_value('wcusage_field_color_tab_font', '#fff');

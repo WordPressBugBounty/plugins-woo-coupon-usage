@@ -24,15 +24,196 @@ function wcusage_add_custom_box() {
 
 add_action( 'add_meta_boxes', 'wcusage_add_custom_box' );
 /**
+ * One label/value line inside a referral card.
+ *
+ * @param string $label
+ * @param string $value_html Already-escaped HTML.
+ * @param string $class      Extra class for the row.
+ *
+ * @return string
+ */
+if ( !function_exists( 'wcusage_order_box_row' ) ) {
+    function wcusage_order_box_row(  $label, $value_html, $class = ''  ) {
+        return '<div class="' . esc_attr( trim( 'wcusage-orderbox-row ' . $class ) ) . '">' . '<span class="wcusage-orderbox-row-label">' . esc_html( $label ) . '</span>' . '<span class="wcusage-orderbox-row-value">' . $value_html . '</span>' . '</div>';
+    }
+
+}
+/**
+ * Collects what each referral card worked out to as it is drawn, so the panel can
+ * state one verdict for the order above them all.
+ *
+ * @param string $push 'reset' to clear, a state key to record, or '' to just read.
+ *
+ * @return array
+ */
+if ( !function_exists( 'wcusage_order_box_states' ) ) {
+    function wcusage_order_box_states(  $push = ''  ) {
+        static $states = array();
+        if ( $push === 'reset' ) {
+            $states = array();
+        } elseif ( $push !== '' ) {
+            $states[] = $push;
+        }
+        return $states;
+    }
+
+}
+/**
+ * Turns those per-coupon states into the single chip shown at the top of the panel.
+ *
+ * Only one coupon can own an order's commission even when several are stacked on
+ * it, so the most significant state wins rather than the last one seen.
+ *
+ * @param array $states
+ * @param bool  $has_order Whether there is an order to describe at all.
+ *
+ * @return array label, class and dashicon.
+ */
+if ( !function_exists( 'wcusage_order_box_verdict' ) ) {
+    function wcusage_order_box_verdict(  $states, $has_order = true  ) {
+        if ( !$has_order || empty( $states ) ) {
+            return array(
+                'label' => __( 'No Referral', 'woo-coupon-usage' ),
+                'class' => 'is-neutral',
+                'icon'  => 'minus',
+                'title' => __( 'No affiliate coupon or referral was recorded for this order.', 'woo-coupon-usage' ),
+            );
+        }
+        if ( in_array( 'refunded', $states, true ) ) {
+            return array(
+                'label' => __( 'Refunded', 'woo-coupon-usage' ),
+                'class' => 'is-neutral',
+                'icon'  => 'undo',
+                'title' => __( 'The order was refunded, so it earns no commission.', 'woo-coupon-usage' ),
+            );
+        }
+        // "granted" and "referral" are the same verdict: the second is what the free
+        // version reaches, where commission is shown but never granted to a balance.
+        if ( in_array( 'granted', $states, true ) || in_array( 'referral', $states, true ) ) {
+            return array(
+                'label' => __( 'Successful Referral', 'woo-coupon-usage' ),
+                'class' => 'is-success',
+                'icon'  => 'yes-alt',
+                'title' => __( 'This order was referred by an affiliate coupon and has earned commission.', 'woo-coupon-usage' ),
+            );
+        }
+        if ( in_array( 'pending', $states, true ) ) {
+            return array(
+                'label' => __( 'Pending Referral', 'woo-coupon-usage' ),
+                'class' => 'is-pending',
+                'icon'  => 'clock',
+                'title' => __( 'Commission will be granted to the affiliate once the order reaches the payout status.', 'woo-coupon-usage' ),
+            );
+        }
+        if ( in_array( 'unpaid', $states, true ) ) {
+            return array(
+                'label' => __( 'Not Credited', 'woo-coupon-usage' ),
+                'class' => 'is-alert',
+                'icon'  => 'warning',
+                'title' => __( 'The order is finished but its commission was never granted to the affiliate.', 'woo-coupon-usage' ),
+            );
+        }
+        if ( in_array( 'void', $states, true ) ) {
+            return array(
+                'label' => __( 'Not Earned', 'woo-coupon-usage' ),
+                'class' => 'is-neutral',
+                'icon'  => 'dismiss',
+                'title' => __( 'The order was cancelled or failed, so it will not grant commission.', 'woo-coupon-usage' ),
+            );
+        }
+        return array(
+            'label' => __( 'Tracked Only', 'woo-coupon-usage' ),
+            'class' => 'is-neutral',
+            'icon'  => 'visibility',
+            'title' => __( 'A coupon was used, but it earns no commission - it has no affiliate assigned, or commission is disabled for it.', 'woo-coupon-usage' ),
+        );
+    }
+
+}
+/**
+ * The "nothing to show" block, so an order with no referral reads as a deliberate
+ * state rather than as an empty panel.
+ *
+ * @param string $message
+ * @param string $icon Dashicon suffix.
+ *
+ * @return string
+ */
+if ( !function_exists( 'wcusage_order_box_empty' ) ) {
+    function wcusage_order_box_empty(  $message, $icon = 'tickets-alt'  ) {
+        return '<p class="wcusage-orderbox-empty">' . '<span class="dashicons dashicons-' . esc_attr( $icon ) . '"></span>' . '<span>' . esc_html( $message ) . '</span>' . '</p>';
+    }
+
+}
+/**
+ * Handles the "recalculate stats" action for an order.
+ *
+ * Runs on admin_init rather than while the metabox is drawn, because it finishes
+ * with a redirect: from inside the metabox the headers have long since been sent,
+ * so the redirect was dropped and the exit() left the page half-rendered.
+ *
+ * It is also order-scoped, and it used to live inside the per-coupon renderer,
+ * where a stacked order ran it - and drew its button - once per coupon.
+ */
+if ( !function_exists( 'wcusage_order_box_refresh_stats' ) ) {
+    function wcusage_order_box_refresh_stats() {
+        if ( empty( $_GET['refresh_stats'] ) ) {
+            return;
+        }
+        // "post" on the legacy post table, "id" with High-Performance Order Storage.
+        $order_id = 0;
+        if ( !empty( $_GET['post'] ) ) {
+            $order_id = absint( $_GET['post'] );
+        } elseif ( !empty( $_GET['id'] ) ) {
+            $order_id = absint( $_GET['id'] );
+        }
+        if ( !$order_id ) {
+            return;
+        }
+        // Nothing happens without our own nonce, so a "refresh_stats" parameter that
+        // belongs to something else is left alone rather than redirected away.
+        $nonce = ( isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '' );
+        if ( !wp_verify_nonce( $nonce, 'wcusage_refresh_order_stats_' . $order_id ) || !current_user_can( 'edit_shop_orders' ) ) {
+            return;
+        }
+        if ( function_exists( 'wcusage_update_pending_commission_action' ) ) {
+            wcusage_update_pending_commission_action( $order_id, 'remove' );
+        }
+        // All three commission keys, so nothing is left to be read back as a stale
+        // partial figure by wcusage_get_order_saved_commission() before the
+        // recalculation runs - "wcusage_product_commission" was being kept.
+        //
+        // Deleted through the order object, not delete_post_meta(): with
+        // High-Performance Order Storage enabled the order's meta is not in the
+        // post meta table, so delete_post_meta() cleared nothing at all and this
+        // button silently did nothing on those stores.
+        wcusage_delete_order_meta_bulk( $order_id, array(
+            'wcusage_commission_summary',
+            'wcusage_stats',
+            'wcu_mla_commission',
+            'wcusage_total_commission',
+            'wcusage_fixed_order_commission',
+            'wcusage_product_commission'
+        ) );
+        wp_safe_redirect( remove_query_arg( array('refresh_stats', '_wpnonce') ) );
+        exit;
+    }
+
+}
+add_action( 'admin_init', 'wcusage_order_box_refresh_stats' );
+/**
  * Custom box HTML
  *
  * @param object $post The post object.
  */
 function wcusage_custom_box_html(  $post  ) {
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     $wcusage_show_column_code = wcusage_get_setting_value( 'wcusage_field_show_orders_aff_info', '1' );
     $coupon_code = "";
     $lifetimeaffiliate = "";
+    $affiliatereferrer = "";
+    $coupon_codes = array();
+    $wcusage_referrer_coupon = "";
     if ( !empty( $post ) && $post instanceof WP_Post && property_exists( $post, 'ID' ) ) {
         $post_id = $post->ID;
     } else {
@@ -43,10 +224,14 @@ function wcusage_custom_box_html(  $post  ) {
         }
     }
     $order = wc_get_order( $post_id );
+    $order_status = ( $order ? $order->get_status() : "" );
+    echo '<div class="wcusage-orderbox">';
+    // The cards are drawn into a buffer first: each one records what it worked out
+    // to, and the verdict chip built from those has to print above them.
+    wcusage_order_box_states( 'reset' );
+    ob_start();
     if ( $order ) {
         if ( $wcusage_show_column_code ) {
-            $affiliate = array();
-            $coupon_codes = array();
             $lifetimeaffiliate = wcusage_order_meta( $post_id, 'lifetime_affiliate_coupon_referrer' );
             $affiliatereferrer = wcusage_order_meta( $post_id, 'wcusage_referrer_coupon' );
             if ( $lifetimeaffiliate ) {
@@ -82,10 +267,10 @@ function wcusage_custom_box_html(  $post  ) {
                 }
             }
             if ( !$order->get_coupon_codes() && !$lifetimeaffiliate && !$affiliatereferrer ) {
-                echo "<p>" . esc_html__( "No coupons were used for this order.", "woo-coupon-usage" ) . "</p>";
+                echo wp_kses_post( wcusage_order_box_empty( esc_html__( 'No coupons were used for this order.', 'woo-coupon-usage' ) ) );
             }
         } else {
-            echo "<p>" . esc_html__( "Affiiliate Info not available.", "woo-coupon-usage" ) . "</p>";
+            echo wp_kses_post( wcusage_order_box_empty( esc_html__( 'Affiliate info for orders is turned off in the Coupon Affiliates settings.', 'woo-coupon-usage' ), 'hidden' ) );
         }
         $wcusage_referrer_coupon = wcusage_order_meta( $post_id, 'wcusage_referrer_coupon', true );
         if ( $lifetimeaffiliate ) {
@@ -93,16 +278,23 @@ function wcusage_custom_box_html(  $post  ) {
         }
         wp_nonce_field( basename( __FILE__ ), 'wcusage_referrer_coupon_nonce' );
     } else {
-        echo "<p>" . esc_html__( "Affiiliate Info not available.", "woo-coupon-usage" ) . "</p>";
+        echo wp_kses_post( wcusage_order_box_empty( esc_html__( 'Affiliate info is not available for this order.', 'woo-coupon-usage' ), 'info-outline' ) );
     }
-    if ( $order ) {
-        $order_status = $order->get_status();
-    } else {
-        $order_status = "";
+    $cards = ob_get_clean();
+    // ***** Toolbar: what happened on the left, what you can do about it on the right *****
+    if ( $order && $wcusage_show_column_code ) {
+        $has_referral = $lifetimeaffiliate || $affiliatereferrer || !empty( $coupon_codes );
+        $verdict = wcusage_order_box_verdict( wcusage_order_box_states(), true );
+        echo '<div class="wcusage-orderbox-toolbar">';
+        echo '<span class="wcusage-orderbox-verdict ' . esc_attr( $verdict['class'] ) . '" title="' . esc_attr( $verdict['title'] ) . '">' . '<span class="dashicons dashicons-' . esc_attr( $verdict['icon'] ) . '" aria-hidden="true"></span>' . esc_html( $verdict['label'] ) . '</span>';
+        if ( $has_referral ) {
+            $refresh_url = wp_nonce_url( add_query_arg( 'refresh_stats', '1', $order->get_edit_order_url() ), 'wcusage_refresh_order_stats_' . $order->get_id() );
+            echo '<a href="' . esc_url( $refresh_url ) . '" class="wcusage-orderbox-action"' . ' onClick="return confirm(\'' . esc_js( __( 'Are you sure you want to refresh the affiliate stats for this order? This will delete the current referral stats/commission and recalculate them.', 'woo-coupon-usage' ) ) . '\');"' . ' title="' . esc_attr__( 'Recalculate the affiliate stats for this order.', 'woo-coupon-usage' ) . '">' . '<span class="dashicons dashicons-update" aria-hidden="true"></span>' . esc_html__( 'Recalculate', 'woo-coupon-usage' ) . '</a>';
+        }
+        echo '</div>';
     }
-    ?>
-
-    <?php 
+    echo $cards;
+    // Escaped as each card is built.
     do_action(
         'wcusage_hook_order_box_before_custom_referrer',
         $post_id,
@@ -111,52 +303,67 @@ function wcusage_custom_box_html(  $post  ) {
         $lifetimeaffiliate,
         $affiliatereferrer
     );
-    ?>
-
-    <?php 
     if ( $order_status != 'completed' || $wcusage_referrer_coupon ) {
+        // Only meaningful as a placeholder when a single coupon could take the slot.
+        $referrer_placeholder = '';
+        if ( !$wcusage_referrer_coupon && $coupon_code && count( $coupon_codes ) <= 1 ) {
+            $referrer_placeholder = $coupon_code;
+        }
+        $referrer_readonly = '';
+        $referrer_note = '';
+        if ( $lifetimeaffiliate ) {
+            $referrer_readonly = esc_html__( 'This can not be edited for a lifetime affiliate referral.', 'woo-coupon-usage' );
+        } elseif ( $order_status == 'completed' ) {
+            $referrer_readonly = esc_html__( 'This can not be edited when the order is completed.', 'woo-coupon-usage' );
+        } else {
+            $referrer_note = esc_html__( 'Leave empty to use the coupons applied to the order.', 'woo-coupon-usage' );
+        }
         ?>
-    <p>
-        <label for="wcusage_referrer_coupon"><?php 
+        <div class="wcusage-orderbox-field">
+            <label class="wcusage-orderbox-field-label" for="wcusage_referrer_coupon">
+                <span><?php 
         echo esc_html__( 'Affiliate Referrer Coupon', 'woo-coupon-usage' );
-        ?>: <?php 
+        ?></span>
+                <?php 
         echo wp_kses_post( wc_help_tip( esc_html__( 'Set the primary referral coupon for this order. This will override all other settings, as the default and only coupon that will earn commission from this order.', 'woo-coupon-usage' ), false ) );
         ?>
-        </label>
-        <input type="text" id="wcusage_referrer_coupon" name="wcusage_referrer_coupon" value="<?php 
+            </label>
+            <input type="text" id="wcusage_referrer_coupon" name="wcusage_referrer_coupon" class="wcusage-orderbox-input"
+                value="<?php 
         echo esc_attr( $wcusage_referrer_coupon );
-        ?>" style="width: 100%;"
-        <?php 
-        if ( !$wcusage_referrer_coupon && $coupon_code ) {
-            if ( count( $coupon_codes ) > 1 ) {
-                $coupon_code = "";
-            }
+        ?>"
+                <?php 
+        if ( $referrer_placeholder ) {
             ?>placeholder="<?php 
-            echo esc_html( $coupon_code );
+            echo esc_attr( $referrer_placeholder );
             ?>"<?php 
         }
         ?>
-        <?php 
-        if ( $lifetimeaffiliate ) {
+                <?php 
+        if ( $referrer_readonly ) {
             ?>title="<?php 
-            echo esc_html__( 'This can not be edited for a lifetime affiliate referral.', 'woo-coupon-usage' );
-            ?>" readonly<?php 
-        }
-        ?>
-        <?php 
-        if ( !$lifetimeaffiliate && $order_status == 'completed' ) {
-            ?>title="<?php 
-            echo esc_html__( 'This can not be edited when the order is completed.', 'woo-coupon-usage' );
+            echo esc_attr( $referrer_readonly );
             ?>" readonly<?php 
         }
         ?>>
-        <br/>
-    </p>
-    <?php 
+            <?php 
+        if ( $referrer_readonly ) {
+            ?>
+                <span class="wcusage-orderbox-note is-locked"><span class="dashicons dashicons-lock"></span><?php 
+            echo esc_html( $referrer_readonly );
+            ?></span>
+            <?php 
+        } elseif ( $referrer_note ) {
+            ?>
+                <span class="wcusage-orderbox-note"><?php 
+            echo esc_html( $referrer_note );
+            ?></span>
+            <?php 
+        }
+        ?>
+        </div>
+        <?php 
     }
-    ?>
-
-    <?php 
     do_action(
         'wcusage_hook_order_box_after_custom_referrer',
         $post_id,
@@ -165,9 +372,7 @@ function wcusage_custom_box_html(  $post  ) {
         $lifetimeaffiliate,
         $affiliatereferrer
     );
-    ?>
-
-    <?php 
+    echo '</div>';
 }
 
 /**
@@ -188,99 +393,140 @@ function wcusage_custom_box_html_content(
     $order = wc_get_order( $order_id );
     $paidcommission = wcusage_order_meta( $order_id, 'wcu_commission_paid', true );
     $lifetimeaffiliatedone = false;
-    if ( !empty( $_GET['update_unpaid_commission'] ) && $_GET['update_unpaid_commission'] ) {
-        $paidcommission = wcusage_order_meta( $order_id, 'wcu_commission_paid', true );
-        $lifetimeaffiliate = wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer' );
-        if ( $lifetimeaffiliate && !$lifetimeaffiliatedone ) {
-            wcusage_do_action_order_update_commission(
-                $order,
-                $order_id,
-                $lifetimeaffiliate,
-                $paidcommission
-            );
-            $lifetimeaffiliatedone = true;
-        }
-        if ( !$lifetimeaffiliate ) {
-            $affiliatereferrer = wcusage_order_meta( $order_id, 'wcusage_referrer_coupon' );
-            if ( $affiliatereferrer ) {
+    // One card is drawn per coupon on a stacked order, and the block below walks
+    // every coupon itself - without the guard a two-coupon order granted the
+    // commission twice, since $paidcommission is read before the first grant.
+    static $unpaid_commission_done = false;
+    if ( !$unpaid_commission_done && !empty( $_GET['update_unpaid_commission'] ) ) {
+        $update_nonce = ( isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '' );
+        if ( wp_verify_nonce( $update_nonce, 'wcusage_update_unpaid_commission_' . $order_id ) && current_user_can( 'edit_shop_orders' ) ) {
+            $unpaid_commission_done = true;
+            $paidcommission = wcusage_order_meta( $order_id, 'wcu_commission_paid', true );
+            $lifetimeaffiliate = wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer' );
+            if ( $lifetimeaffiliate && !$lifetimeaffiliatedone ) {
                 wcusage_do_action_order_update_commission(
                     $order,
                     $order_id,
-                    $affiliatereferrer,
+                    $lifetimeaffiliate,
                     $paidcommission
                 );
-            } else {
-                foreach ( $order->get_coupon_codes() as $coupon_code ) {
+                $lifetimeaffiliatedone = true;
+            }
+            if ( !$lifetimeaffiliate ) {
+                $affiliatereferrer = wcusage_order_meta( $order_id, 'wcusage_referrer_coupon' );
+                if ( $affiliatereferrer ) {
                     wcusage_do_action_order_update_commission(
                         $order,
                         $order_id,
-                        $coupon_code,
+                        $affiliatereferrer,
                         $paidcommission
                     );
+                } else {
+                    foreach ( $order->get_coupon_codes() as $order_coupon_code ) {
+                        wcusage_do_action_order_update_commission(
+                            $order,
+                            $order_id,
+                            $order_coupon_code,
+                            $paidcommission
+                        );
+                    }
                 }
             }
         }
     }
     $getinfo = wcusage_get_the_order_coupon_info( $coupon_code, "", $order_id );
+    // Returns nothing at all when the coupon column is turned off in the settings.
+    if ( !is_array( $getinfo ) ) {
+        $getinfo = array(
+            'thecommission'    => '',
+            'thecommissionnum' => 0,
+            'uniqueurl'        => '',
+            'theuserid'        => 0,
+        );
+    }
     $coupon_info = wcusage_get_coupon_info( $coupon_code );
     $coupon_id = $coupon_info[2];
+    $order_status = $order->get_status();
     // Check if pending commission needs to be added
     if ( function_exists( 'wcusage_check_and_add_pending_commission' ) ) {
         wcusage_check_and_add_pending_commission( $order_id );
     }
-    echo "<p style='position: absolute; right: 10px; top: -2px; margin: 0; padding: 0;'>";
-    echo "<a href='" . esc_url( admin_url( 'post.php?post=' . esc_attr( $order_id ) . '&action=edit&refresh_stats=1' ) ) . "' style='text-decoration: none;'\r\n    onClick='return confirm(\"" . esc_html__( 'Are you sure you want to refresh the affiliate stats for this order? This will delete the current referral stats/commission and recalculate them.', 'woo-coupon-usage' ) . "\");'\r\n    title='" . esc_html__( 'Recalculate the affiliate stats for this order.', 'woo-coupon-usage' ) . "'\r\n    ><span class='dashicons dashicons-update' style='font-size: 14px; height: 14px; display: inline-block; margin-top: 4px;'></span></a>";
-    if ( isset( $_GET['refresh_stats'] ) && $_GET['refresh_stats'] ) {
-        if ( function_exists( 'wcusage_update_pending_commission_action' ) ) {
-            wcusage_update_pending_commission_action( $order_id, 'remove' );
-        }
-        delete_post_meta( $order_id, 'wcusage_commission_summary' );
-        delete_post_meta( $order_id, 'wcusage_stats' );
-        delete_post_meta( $order_id, 'wcu_mla_commission' );
-        // All three commission keys, so nothing is left to be read back as a stale
-        // partial figure by wcusage_get_order_saved_commission() before the
-        // recalculation runs - "wcusage_product_commission" was being kept.
-        delete_post_meta( $order_id, 'wcusage_total_commission' );
-        delete_post_meta( $order_id, 'wcusage_fixed_order_commission' );
-        delete_post_meta( $order_id, 'wcusage_product_commission' );
-        $url = remove_query_arg( 'refresh_stats' );
-        wp_safe_redirect( $url );
-        exit;
+    // No amount to show, so no grant prompt or status either - the panel used to
+    // offer "Grant commission" directly under "Commission: disabled for this coupon".
+    $commission_disabled = $order_status == 'refunded' || wcusage_coupon_disable_commission( $coupon_id );
+    // ***** Grant / deduct state *****
+    $status_class = '';
+    $status_label = '';
+    $status_title = '';
+    $grant_url = '';
+    $deduct_notice = '';
+    // ***** Card *****
+    $card_class = 'wcusage-orderbox-card';
+    $badge = '';
+    if ( (int) $type === 1 ) {
+        $card_class .= ' is-lifetime';
+        $badge = __( 'Lifetime', 'woo-coupon-usage' );
+    } elseif ( (int) $type === 2 ) {
+        $card_class .= ' is-referral';
+        $badge = __( 'URL / Custom', 'woo-coupon-usage' );
     }
-    echo "</p>";
-    echo "<p>";
-    if ( $type == 1 ) {
-        echo '(' . esc_html__( 'Lifetime Referrer', 'woo-coupon-usage' ) . ')<br/>';
-    }
-    if ( $type == 2 ) {
-        echo '<strong>(' . esc_html__( 'Custom / URL Referral', 'woo-coupon-usage' ) . ')</strong><br/>';
-    }
-    $ispaid = "";
-    $deduct_notice = "";
-    if ( isset( $coupon_id ) && $coupon_id ) {
-        echo 'Referral Code: <a href="' . esc_url( admin_url( 'post.php?post=' . esc_attr( $coupon_id ) . '&action=edit' ) ) . '" target="_blank" style="color: #07bbe3;">' . esc_html( $coupon_code ) . '</a>';
-        $order_status = $order->get_status();
-        if ( $order_status == 'processing' || $order_status == 'completed' ) {
-            echo ' <span class="delete-coupon dashicons dashicons-no" style="color:rgb(92, 7, 7); cursor: pointer; font-size: 10px; height: 10px; width: 10px; vertical-align: middle;" data-order-id="' . esc_attr( $order_id ) . '" data-coupon-code="' . esc_attr( $coupon_code ) . '" title="Remove this coupon from order"></span>';
-        }
-        echo '<br/>';
-    }
-    $wcusage_affiliate_user = $coupon_info[1];
-    if ( $wcusage_affiliate_user ) {
-        $affiliate = get_user_by( 'ID', $wcusage_affiliate_user );
-        $affiliate_username = $affiliate->user_login;
-        echo esc_html__( 'Affiliate User', 'woo-coupon-usage' ) . ": <a href='" . esc_url( admin_url( "admin.php?page=wcusage_view_affiliate&user_id=" . $wcusage_affiliate_user ) ) . "' target='_blank' style='color: #07bbe3;'>" . esc_html( $affiliate_username ) . "</a><br/>";
-    }
-    if ( $order->get_status() != "refunded" && !wcusage_coupon_disable_commission( $coupon_id ) ) {
-        echo esc_html__( 'Commission', 'woo-coupon-usage' ) . ": " . wp_kses_post( $getinfo['thecommission'] ) . wp_kses_post( $ispaid ) . "<br/>";
-        if ( !empty( $deduct_notice ) ) {
-            echo $deduct_notice;
-            // Escaped when built; wp_kses_post would strip the onClick confirm.
-        }
-    }
-    // Get discount amount
     $applied_coupons = $order->get_coupon_codes();
-    if ( in_array( $coupon_code, $applied_coupons ) ) {
+    $is_applied = false;
+    foreach ( $applied_coupons as $applied_coupon ) {
+        if ( wcusage_coupon_codes_match( $applied_coupon, $coupon_code ) ) {
+            $is_applied = true;
+            break;
+        }
+    }
+    echo '<div class="' . esc_attr( $card_class ) . '">';
+    // Header: the code itself is the heading, since it is what identifies the card.
+    echo '<div class="wcusage-orderbox-card-head">';
+    if ( $coupon_id ) {
+        echo '<a class="wcusage-orderbox-code" href="' . esc_url( admin_url( 'post.php?post=' . absint( $coupon_id ) . '&action=edit' ) ) . '" target="_blank"' . ' title="' . esc_attr__( 'Edit this coupon', 'woo-coupon-usage' ) . '">' . esc_html( $coupon_code ) . '</a>';
+    } else {
+        echo '<span class="wcusage-orderbox-code is-missing" title="' . esc_attr__( 'This coupon no longer exists.', 'woo-coupon-usage' ) . '">' . esc_html( $coupon_code ) . '</span>';
+    }
+    if ( $badge ) {
+        echo '<span class="wcusage-orderbox-badge">' . esc_html( $badge ) . '</span>';
+    }
+    // Only offered where there is something to remove. A lifetime or URL referral
+    // coupon need not be applied to the order at all, and the request for one that
+    // is not would come back as "Coupon not found in order".
+    if ( $coupon_id && $is_applied && ($order_status == 'processing' || $order_status == 'completed') ) {
+        echo '<button type="button" class="wcusage-orderbox-remove delete-coupon"' . ' data-order-id="' . esc_attr( $order_id ) . '" data-coupon-code="' . esc_attr( $coupon_code ) . '"' . ' title="' . esc_attr__( 'Remove this coupon from the order', 'woo-coupon-usage' ) . '">' . '<span class="dashicons dashicons-no-alt" aria-hidden="true"></span>' . '<span class="screen-reader-text">' . esc_html__( 'Remove this coupon from the order', 'woo-coupon-usage' ) . '</span>' . '</button>';
+    }
+    echo '</div>';
+    // Rows
+    $rows = '';
+    $wcusage_affiliate_user = $coupon_info[1];
+    $affiliate = ( $wcusage_affiliate_user ? get_user_by( 'ID', $wcusage_affiliate_user ) : false );
+    if ( $affiliate ) {
+        $affiliate_label = ( function_exists( 'wcusage_get_affiliate_text' ) ? wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) : __( 'Affiliate', 'woo-coupon-usage' ) );
+        $rows .= wcusage_order_box_row( $affiliate_label, '<a href="' . esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . absint( $wcusage_affiliate_user ) ) ) . '" target="_blank">' . esc_html( $affiliate->user_login ) . '</a>' );
+    } elseif ( $coupon_id ) {
+        $rows .= wcusage_order_box_row( __( 'Affiliate', 'woo-coupon-usage' ), '<span class="wcusage-orderbox-muted">' . esc_html__( 'Not assigned', 'woo-coupon-usage' ) . '</span>' );
+    }
+    if ( $order_status == 'refunded' ) {
+        $rows .= wcusage_order_box_row( __( 'Commission', 'woo-coupon-usage' ), '<span class="wcusage-orderbox-muted">' . esc_html__( 'None (order refunded)', 'woo-coupon-usage' ) . '</span>' );
+    } elseif ( wcusage_coupon_disable_commission( $coupon_id ) ) {
+        $rows .= wcusage_order_box_row( __( 'Commission', 'woo-coupon-usage' ), '<span class="wcusage-orderbox-muted">' . esc_html__( 'Disabled', 'woo-coupon-usage' ) . '</span>' );
+    } else {
+        // Every part of the breakdown is escaped where it is built. Passing it back
+        // through wp_kses_post here would strip the trigger's tabindex, which is what
+        // opens the panel for keyboard users.
+        $commission_value = wcusage_get_order_commission_breakdown(
+            $order_id,
+            $coupon_code,
+            $coupon_id,
+            $type,
+            wp_kses_post( $getinfo['thecommission'] )
+        );
+        if ( $status_label ) {
+            $commission_value .= '<span class="wcusage-orderbox-status ' . esc_attr( $status_class ) . '" title="' . esc_attr( $status_title ) . '">' . esc_html( $status_label ) . '</span>';
+        }
+        $rows .= wcusage_order_box_row( __( 'Commission', 'woo-coupon-usage' ), $commission_value, 'is-commission' );
+    }
+    if ( $is_applied ) {
         $discount_amount = 0;
         foreach ( $order->get_items( 'coupon' ) as $item_id => $item ) {
             if ( $item->get_code() === $coupon_code ) {
@@ -289,13 +535,46 @@ function wcusage_custom_box_html_content(
             }
         }
         if ( $discount_amount > 0 ) {
-            echo esc_html__( 'Discount', 'woo-coupon-usage' ) . ": " . wp_kses_post( wcusage_format_price( $discount_amount ) ) . "<br/>";
+            $rows .= wcusage_order_box_row( __( 'Discount', 'woo-coupon-usage' ), wp_kses_post( wcusage_format_price( $discount_amount ) ) );
         } else {
-            echo esc_html__( 'No Discount (Tracking Only)', 'woo-coupon-usage' ) . "<br/>";
+            $rows .= wcusage_order_box_row( __( 'Discount', 'woo-coupon-usage' ), '<span class="wcusage-orderbox-muted">' . esc_html__( 'None (tracking only)', 'woo-coupon-usage' ) . '</span>' );
         }
     }
-    echo "<a href='" . esc_url( $getinfo['uniqueurl'] ) . "' target='_blank' style='color: #07bbe3;' title='" . esc_html__( 'View the affiliate dashboard for this affiliate coupon.', 'woo-coupon-usage' ) . "'>" . esc_html__( 'View Dashboard', 'woo-coupon-usage' ) . "</a>";
-    echo "</p>";
+    echo '<div class="wcusage-orderbox-rows">' . $rows . '</div>';
+    // Escaped as each row is built.
+    // What this card amounts to, for the verdict chip at the top of the panel.
+    // $status_class is only ever set by the premium block, so the free version
+    // falls through to "referral" - it shows commission but never grants it.
+    if ( $commission_disabled || !$affiliate ) {
+        wcusage_order_box_states( ( $order_status == 'refunded' ? 'refunded' : 'tracked' ) );
+    } elseif ( $status_class === 'is-granted' ) {
+        wcusage_order_box_states( 'granted' );
+    } elseif ( $status_class === 'is-pending' ) {
+        wcusage_order_box_states( 'pending' );
+    } elseif ( $status_class === 'is-unpaid' ) {
+        wcusage_order_box_states( 'unpaid' );
+    } elseif ( $status_class === 'is-void' ) {
+        wcusage_order_box_states( 'void' );
+    } else {
+        wcusage_order_box_states( 'referral' );
+    }
+    // Anything that needs acting on, given its own block rather than a bare link
+    // tucked in beside the amount.
+    if ( $grant_url ) {
+        echo '<div class="wcusage-orderbox-notice is-warning">' . '<span class="dashicons dashicons-info-outline" aria-hidden="true"></span>' . '<span class="wcusage-orderbox-notice-body">' . '<span class="wcusage-orderbox-notice-text">' . esc_html__( 'This commission has not been granted to the affiliate yet.', 'woo-coupon-usage' ) . '</span>' . '<a class="button button-small wcusage-orderbox-notice-button" href="' . esc_url( $grant_url ) . '"' . ' onClick="return confirm(\'' . esc_js( sprintf( 
+            /* translators: %s: commission amount */
+            __( 'Give %s unpaid commission to this affiliate coupon?', 'woo-coupon-usage' ),
+            wp_strip_all_tags( $getinfo['thecommission'] )
+         ) ) . '\');"' . ' title="' . esc_attr__( 'Give unpaid commission to affiliate.', 'woo-coupon-usage' ) . '">' . esc_html__( 'Grant commission', 'woo-coupon-usage' ) . '</a></span></div>';
+    }
+    if ( !empty( $deduct_notice ) ) {
+        echo $deduct_notice;
+        // Escaped when built; wp_kses_post would strip the onClick confirm.
+    }
+    if ( !$is_applied && (int) $type === 0 ) {
+        echo '<p class="wcusage-orderbox-note">' . esc_html__( 'This coupon is no longer applied to the order.', 'woo-coupon-usage' ) . '</p>';
+    }
+    // ***** Multi-level commission *****
     if ( wcu_fs()->can_use_premium_code() ) {
         $wcusage_field_mla_enable = wcusage_get_setting_value( 'wcusage_field_mla_enable', '0' );
         if ( $wcusage_field_mla_enable && !wcusage_coupon_disable_commission( $coupon_id ) ) {
@@ -306,7 +585,7 @@ function wcusage_custom_box_html_content(
                 $stored_mla_raw = ( $order_obj ? $order_obj->get_meta( 'wcu_mla_commission', true ) : '' );
                 $stored_mla = ( is_string( $stored_mla_raw ) ? json_decode( $stored_mla_raw, true ) : $stored_mla_raw );
                 $needs_mla_meta_save = false;
-                echo "<p><strong>MLA Commission:</strong>";
+                $mla_rows = '';
                 foreach ( $get_parents as $key => $parent_id ) {
                     $parent_user_info = get_user_by( 'ID', $parent_id );
                     $parent_user_name = ( $parent_user_info ? $parent_user_info->user_login : '#' . $parent_id );
@@ -338,9 +617,19 @@ function wcusage_custom_box_html_content(
                         );
                         $needs_mla_meta_save = true;
                     }
-                    echo "<br/>(" . esc_html( $key ) . ") <a href='" . esc_url( admin_url( "admin.php?page=wcusage_view_affiliate&user_id=" . $parent_user_id ) ) . "' target='_blank' style='color: #07bbe3;'>" . esc_html( $parent_user_name ) . "</a>: " . wp_kses_post( wcusage_format_price( esc_html( $parent_commission ) ) );
+                    $mla_rows .= wcusage_order_box_row( sprintf( 
+                        /* translators: %s: multi-level tier number */
+                        __( 'Tier %s', 'woo-coupon-usage' ),
+                        $key
+                     ) . ' - ' . $parent_user_name, '<a href="' . esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . absint( $parent_user_id ) ) ) . '" target="_blank">' . wp_kses_post( wcusage_format_price( $parent_commission ) ) . '</a>' );
                 }
-                echo "</p>";
+                if ( $mla_rows ) {
+                    echo '<div class="wcusage-orderbox-sub">';
+                    echo '<span class="wcusage-orderbox-sub-title">' . esc_html__( 'Multi-level commission', 'woo-coupon-usage' ) . '</span>';
+                    echo '<div class="wcusage-orderbox-rows">' . $mla_rows . '</div>';
+                    // Escaped as each row is built.
+                    echo '</div>';
+                }
                 // Persist recalculated MLA data for old orders so it won't recalculate again
                 if ( $needs_mla_meta_save && $order_obj && !empty( $stored_mla ) ) {
                     $order_obj->update_meta_data( 'wcu_mla_commission', json_encode( $stored_mla ) );
@@ -349,6 +638,13 @@ function wcusage_custom_box_html_content(
             }
         }
     }
+    // Card actions
+    if ( !empty( $getinfo['uniqueurl'] ) ) {
+        echo '<div class="wcusage-orderbox-actions">';
+        echo '<a class="wcusage-orderbox-action" href="' . esc_url( $getinfo['uniqueurl'] ) . '" target="_blank"' . ' title="' . esc_attr__( 'View the affiliate dashboard for this affiliate coupon.', 'woo-coupon-usage' ) . '">' . '<span class="dashicons dashicons-chart-bar" aria-hidden="true"></span>' . esc_html__( 'View dashboard', 'woo-coupon-usage' ) . '</a>';
+        echo '</div>';
+    }
+    echo '</div>';
 }
 
 /**
@@ -527,119 +823,154 @@ add_action(
 );
 function add_coupon_link_below_coupons(  $order_id  ) {
     $order = wc_get_order( $order_id );
+    if ( !$order ) {
+        return;
+    }
     $order_status = $order->get_status();
     $wcusage_referrer_coupon = wcusage_order_meta( $order_id, 'wcusage_referrer_coupon', true );
+    $show_add_form = ($order_status == 'completed' || $order_status == 'processing') && !$wcusage_referrer_coupon;
     ?>
 
     <?php 
-    if ( ($order_status == 'completed' || $order_status == 'processing') && !$wcusage_referrer_coupon ) {
+    if ( $show_add_form ) {
         ?>
-    <div>
-        <a href="#" class="add-coupon-link" style="font-size: 10px; text-decoration: none;"><?php 
-        echo esc_html__( 'Add a referrer coupon to this order', 'woo-coupon-usage' );
-        ?> <i class="fa fa-plus" style="font-size: 10px;"></i></a>
-        <div class="add-coupon-form" style="display: none; margin-top: 10px; border: 1px solid #ccc; padding: 10px 10px 12px 10px; background-color: #f9f9f9;">
-            <p style="font-size: 10px; margin: 0 0 7px 0;"><?php 
+    <div class="wcusage-orderbox-add">
+        <a href="#" class="wcusage-orderbox-action add-coupon-link" aria-expanded="false">
+            <span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span><?php 
+        echo esc_html__( 'Add a referrer coupon', 'woo-coupon-usage' );
+        ?>
+        </a>
+        <div class="wcusage-orderbox-addform add-coupon-form" style="display: none;">
+            <p><?php 
         echo sprintf( esc_html__( 'Add a coupon to this order for tracking. Since the order is already %s, the coupon will be added with a zero discount.', 'woo-coupon-usage' ), esc_html( $order_status ) );
         ?>
             <?php 
         if ( $order_status == 'completed' ) {
+            ?> <?php 
             echo esc_html__( 'Unpaid commission will also NOT be automatically granted to this affiliate coupon and should be done manually.', 'woo-coupon-usage' );
         }
         ?></p>
-            <input type="text" id="add_coupon_code" name="add_coupon_code" placeholder="Coupon code" style="width: 150px;" />
-            <button type="button" class="button add-coupon-to-order" style="margin-left: 10px;"><?php 
+            <div class="wcusage-orderbox-addrow">
+                <label class="screen-reader-text" for="add_coupon_code"><?php 
+        echo esc_html__( 'Coupon code', 'woo-coupon-usage' );
+        ?></label>
+                <input type="text" id="add_coupon_code" name="add_coupon_code" placeholder="<?php 
+        echo esc_attr__( 'Coupon code', 'woo-coupon-usage' );
+        ?>" />
+                <button type="button" class="button button-small add-coupon-to-order"><?php 
         echo esc_html__( 'Add', 'woo-coupon-usage' );
         ?></button>
+            </div>
         </div>
     </div>
+    <?php 
+    }
+    ?>
+
     <script>
         jQuery(document).ready(function($) {
             $('.add-coupon-link').on('click', function(e) {
                 e.preventDefault();
-                $('.add-coupon-form').toggle();
+                var $form = $('.add-coupon-form');
+                var opening = !$form.is(':visible');
+                $form.slideToggle(120);
+                $(this).attr('aria-expanded', opening ? 'true' : 'false');
+                if (opening) {
+                    $('#add_coupon_code').trigger('focus');
+                }
             });
 
             $('.add-coupon-to-order').on('click', function() {
-
-                // Change button to spinner
-                $(this).html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
-
+                var $button = $(this);
                 var couponCode = $('#add_coupon_code').val();
                 if (!couponCode) {
-                    alert('Please enter a coupon code.');
+                    $('#add_coupon_code').trigger('focus');
                     return;
                 }
 
+                $button.data('label', $button.text()).text('<?php 
+    echo esc_js( __( 'Adding...', 'woo-coupon-usage' ) );
+    ?>').prop('disabled', true);
+
                 $.ajax({
                     url: '<?php 
-        echo esc_url( admin_url( 'admin-ajax.php' ) );
-        ?>',
+    echo esc_url( admin_url( 'admin-ajax.php' ) );
+    ?>',
                     type: 'POST',
                     data: {
                         action: 'add_coupon_to_order',
                         order_id: '<?php 
-        echo esc_js( $order->get_id() );
-        ?>',
+    echo esc_js( $order->get_id() );
+    ?>',
                         coupon_code: couponCode,
                         security: '<?php 
-        echo esc_js( wp_create_nonce( 'add_coupon_nonce' ) );
-        ?>'
+    echo esc_js( wp_create_nonce( 'add_coupon_nonce' ) );
+    ?>'
                     },
                     success: function(response) {
                         if (response.success) {
                             location.reload();
                         } else {
-                            alert('Error: ' + response.data.message);
+                            $button.text($button.data('label')).prop('disabled', false);
+                            window.alert('Error: ' + response.data.message);
                         }
+                    },
+                    error: function() {
+                        $button.text($button.data('label')).prop('disabled', false);
+                        window.alert('<?php 
+    echo esc_js( __( 'Error adding coupon.', 'woo-coupon-usage' ) );
+    ?>');
                     }
                 });
             });
 
             $('.delete-coupon').on('click', function() {
-                var couponCode = $(this).data('coupon-code');
-                var orderId = $(this).data('order-id');
-                
+                var $button = $(this);
+                var couponCode = $button.data('coupon-code');
+                var orderId = $button.data('order-id');
+
                 if (confirm('<?php 
-        echo esc_js( esc_html__( 'Are you sure you want to remove this coupon from the order?', 'woo-coupon-usage' ) );
-        ?> - <?php 
-        echo esc_js( esc_html__( 'This will NOT affect the discount that has already been applied unless you recalculate the order.', 'woo-coupon-usage' ) );
-        if ( $order_status == 'completed' && wcu_fs()->can_use_premium_code() ) {
-            ?> <?php 
-            echo esc_js( esc_html__( 'This will only affect the affiliate dashboard statistics. Any unpaid commission already granted will NOT be deducted.', 'woo-coupon-usage' ) );
-        }
-        ?>')) {
+    echo esc_js( esc_html__( 'Are you sure you want to remove this coupon from the order?', 'woo-coupon-usage' ) );
+    ?> - <?php 
+    echo esc_js( esc_html__( 'This will NOT affect the discount that has already been applied unless you recalculate the order.', 'woo-coupon-usage' ) );
+    if ( $order_status == 'completed' && wcu_fs()->can_use_premium_code() ) {
+        ?> <?php 
+        echo esc_js( esc_html__( 'This will only affect the affiliate dashboard statistics. Any unpaid commission already granted will NOT be deducted.', 'woo-coupon-usage' ) );
+    }
+    ?>')) {
+                    $button.prop('disabled', true).addClass('is-busy');
                     $.ajax({
                         url: '<?php 
-        echo esc_url( admin_url( 'admin-ajax.php' ) );
-        ?>',
+    echo esc_url( admin_url( 'admin-ajax.php' ) );
+    ?>',
                         type: 'POST',
                         data: {
                             action: 'remove_coupon_from_order',
                             order_id: orderId,
                             coupon_code: couponCode,
                             security: '<?php 
-        echo esc_js( wp_create_nonce( 'remove_coupon_nonce' ) );
-        ?>'
+    echo esc_js( wp_create_nonce( 'remove_coupon_nonce' ) );
+    ?>'
                         },
                         success: function(response) {
                             if (response.success) {
                                 location.reload();
                             } else {
-                                alert('Error: ' + response.data.message);
+                                $button.prop('disabled', false).removeClass('is-busy');
+                                window.alert('Error: ' + response.data.message);
                             }
                         },
                         error: function() {
-                            alert('Error removing coupon.');
+                            $button.prop('disabled', false).removeClass('is-busy');
+                            window.alert('<?php 
+    echo esc_js( __( 'Error removing coupon.', 'woo-coupon-usage' ) );
+    ?>');
                         }
                     });
                 }
             });
         });
     </script>
-    <?php 
-    }
-    ?>
     <?php 
 }
 
@@ -754,4 +1085,270 @@ function handle_remove_coupon_from_order() {
     wp_send_json_success( [
         'message' => 'Coupon removed from order.',
     ] );
+}
+
+/**
+ * Loads the shared admin styles on the order edit screen.
+ *
+ * The commission breakdown tooltip reuses the "Commission Levels" tooltip styles
+ * from the coupons list, which were previously only loaded on the plugin's own
+ * admin pages.
+ */
+function wcusage_enqueue_order_box_styles() {
+    if ( !function_exists( 'get_current_screen' ) ) {
+        return;
+    }
+    $screen = get_current_screen();
+    if ( !$screen || !isset( $screen->id ) ) {
+        return;
+    }
+    $order_screen = ( function_exists( 'wc_get_page_screen_id' ) ? wc_get_page_screen_id( 'shop-order' ) : 'shop_order' );
+    if ( $screen->id !== $order_screen && $screen->id !== 'shop_order' ) {
+        return;
+    }
+    $css_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-coupons.css';
+    $css_ver = ( file_exists( $css_path ) ? filemtime( $css_path ) : WCUSAGE_VERSION );
+    wp_enqueue_style(
+        'wcusage-admin-coupons',
+        WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-coupons.css',
+        array(),
+        $css_ver
+    );
+    // The panel itself. Kept out of admin-coupons.css, which is also loaded on the
+    // coupons list and the affiliate view, where none of it applies.
+    $box_css_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-order-box.css';
+    $box_css_ver = ( file_exists( $box_css_path ) ? filemtime( $box_css_path ) : WCUSAGE_VERSION );
+    wp_enqueue_style(
+        'wcusage-admin-order-box',
+        WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-order-box.css',
+        array('buttons', 'wcusage-admin-coupons'),
+        $box_css_ver
+    );
+    wp_enqueue_style( 'dashicons' );
+}
+
+add_action( 'admin_enqueue_scripts', 'wcusage_enqueue_order_box_styles' );
+/**
+ * One row of the commission breakdown tooltip.
+ *
+ * @param string $label
+ * @param string $value Already-formatted HTML.
+ * @param string $class Extra class for the row.
+ *
+ * @return string
+ *
+ */
+if ( !function_exists( 'wcusage_commission_breakdown_row' ) ) {
+    function wcusage_commission_breakdown_row(  $label, $value, $class = ''  ) {
+        return '<span class="' . esc_attr( trim( 'wcusage-rate-tooltip-row is-plain ' . $class ) ) . '">' . '<span class="wcusage-rate-tooltip-level">' . esc_html( $label ) . '</span>' . '<span class="wcusage-rate-tooltip-value">' . wp_kses_post( $value ) . '</span>' . '</span>';
+    }
+
+}
+/**
+ * Wraps an order's commission amount in a hover panel explaining exactly where
+ * that figure came from: which coupon earned it and how it was attributed, which
+ * of the configured rates won, what each line of the order contributed, and how
+ * the parts add up to the saved total.
+ *
+ * Everything is read from what was saved against the order at calculation time
+ * ("wcusage_commission_summary" and the three commission keys), so the panel
+ * explains the figure actually on screen rather than recalculating a second
+ * opinion that could disagree with it.
+ *
+ * @param int    $order_id
+ * @param string $coupon_code
+ * @param int    $coupon_id
+ * @param int    $type        1 = lifetime, 2 = custom/URL referral, otherwise a coupon on the order.
+ * @param string $amount_html The formatted commission amount to wrap.
+ *
+ * @return string
+ *
+ */
+if ( !function_exists( 'wcusage_get_order_commission_breakdown' ) ) {
+    function wcusage_get_order_commission_breakdown(
+        $order_id,
+        $coupon_code,
+        $coupon_id,
+        $type,
+        $amount_html
+    ) {
+        $order = wc_get_order( $order_id );
+        if ( !$order instanceof WC_Order ) {
+            return $amount_html;
+        }
+        $panel = '';
+        // The figure on screen is the order's saved commission, which only one coupon
+        // authors even when several are stacked on the order - and the metabox prints
+        // an entry per coupon. So the panel describes the coupon that actually earned
+        // it, and says so when that is not the coupon this entry is listed under.
+        $owner_code = ( function_exists( 'wcusage_get_order_commission_coupon' ) ? wcusage_get_order_commission_coupon( $order_id ) : '' );
+        if ( !$owner_code ) {
+            $owner_code = $coupon_code;
+        }
+        $is_owner = wcusage_coupon_codes_match( $owner_code, $coupon_code );
+        if ( !$is_owner ) {
+            $owner_info = wcusage_get_coupon_info( $owner_code );
+            $coupon_id = ( isset( $owner_info[2] ) ? $owner_info[2] : 0 );
+        }
+        // ***** Where this commission was attributed *****
+        $order_coupons = $order->get_coupon_codes();
+        $on_order = false;
+        foreach ( $order_coupons as $order_coupon_code ) {
+            if ( wcusage_coupon_codes_match( $order_coupon_code, $owner_code ) ) {
+                $on_order = true;
+                break;
+            }
+        }
+        if ( (int) $type === 1 ) {
+            $attribution = __( 'Lifetime commission', 'woo-coupon-usage' );
+        } elseif ( (int) $type === 2 ) {
+            $attribution = __( 'Referral URL / custom referrer', 'woo-coupon-usage' );
+        } else {
+            $attribution = __( 'Coupon used on this order', 'woo-coupon-usage' );
+        }
+        $panel .= '<span class="wcusage-rate-tooltip-section">';
+        $panel .= '<span class="wcusage-rate-tooltip-section-title">' . esc_html__( 'Earned by', 'woo-coupon-usage' ) . '</span>';
+        $panel .= wcusage_commission_breakdown_row( __( 'Coupon', 'woo-coupon-usage' ), '<code>' . esc_html( $owner_code ) . '</code>' );
+        $panel .= wcusage_commission_breakdown_row( __( 'Attributed by', 'woo-coupon-usage' ), esc_html( $attribution ) );
+        $coupon_user_id = ( $coupon_id ? get_post_meta( $coupon_id, 'wcu_select_coupon_user', true ) : '' );
+        $affiliate = ( $coupon_user_id ? get_userdata( $coupon_user_id ) : false );
+        if ( $affiliate ) {
+            $panel .= wcusage_commission_breakdown_row( __( 'Affiliate', 'woo-coupon-usage' ), esc_html( $affiliate->user_login ) );
+        }
+        // The rate comes from the coupon above, which is not always one the customer
+        // actually entered - a referral link sets the referrer to its own coupon. Saying
+        // so here is the difference between "the rate is wrong" and "the rate came from
+        // a different coupon than the one you were looking at".
+        if ( !$is_owner ) {
+            $panel .= '<span class="wcusage-rate-tooltip-empty">' . sprintf( 
+                /* translators: %s: the coupon code that earns the order's commission */
+                esc_html__( 'The commission for this order is earned by %s, so its rates are the ones shown below.', 'woo-coupon-usage' ),
+                esc_html( $owner_code )
+             ) . '</span>';
+        }
+        if ( !$on_order ) {
+            $applied = ( !empty( $order_coupons ) ? implode( ', ', $order_coupons ) : __( 'none', 'woo-coupon-usage' ) );
+            $panel .= '<span class="wcusage-rate-tooltip-empty">' . sprintf( 
+                /* translators: %s: the coupon codes applied to the order */
+                esc_html__( 'This coupon was not applied to the order. Coupons used: %s', 'woo-coupon-usage' ),
+                esc_html( $applied )
+             ) . '</span>';
+        }
+        $panel .= '</span>';
+        // ***** Which configured rate won *****
+        // The same resolution, and the same "Using / Overridden" levels, as the
+        // "Commission Levels" tooltip on the coupons list.
+        if ( $coupon_id && function_exists( 'wcusage_coupons_get_rate_details' ) ) {
+            $rate_details = wcusage_coupons_get_rate_details( $coupon_id );
+            if ( !empty( $rate_details['sections'] ) ) {
+                foreach ( $rate_details['sections'] as $section ) {
+                    $panel .= '<span class="wcusage-rate-tooltip-section">';
+                    $panel .= '<span class="wcusage-rate-tooltip-section-title">' . sprintf( 
+                        /* translators: %s: rate component name, e.g. "Percent" */
+                        esc_html__( 'Rate: %s', 'woo-coupon-usage' ),
+                        esc_html( $section['label'] )
+                     ) . '</span>';
+                    foreach ( $section['rows'] as $row ) {
+                        $row_class = ( $row['active'] ? ' is-active' : ' is-overridden' );
+                        $status = ( $row['active'] ? esc_html__( 'Using', 'woo-coupon-usage' ) : esc_html__( 'Overridden', 'woo-coupon-usage' ) );
+                        $panel .= '<span class="wcusage-rate-tooltip-row' . esc_attr( $row_class ) . '">';
+                        $panel .= '<span class="wcusage-rate-tooltip-level">' . esc_html( $row['level'] ) . '</span>';
+                        $panel .= '<span class="wcusage-rate-tooltip-value">' . esc_html( $row['value'] ) . '</span>';
+                        $panel .= '<span class="wcusage-rate-tooltip-status">' . esc_html( $status ) . '</span>';
+                        $panel .= '</span>';
+                    }
+                    $panel .= '</span>';
+                }
+            }
+        }
+        // ***** What each line of the order contributed *****
+        $summary = wcusage_order_meta( $order_id, 'wcusage_commission_summary', true );
+        if ( is_array( $summary ) && !empty( $summary ) ) {
+            $before_discount = wcusage_get_setting_value( 'wcusage_field_commission_before_discount', '0' );
+            $lines = '';
+            foreach ( $summary as $key => $value ) {
+                $line_commission = ( isset( $value['commission'] ) ? (float) $value['commission'] : 0 );
+                if ( is_numeric( $key ) ) {
+                    // A product line, named as it is on the order and showing the value
+                    // the percentage was worked out on so the arithmetic can be followed.
+                    $product = wc_get_product( $key );
+                    $label = ( $product ? $product->get_name() : get_the_title( $key ) );
+                    if ( !$label ) {
+                        $label = '#' . $key;
+                    }
+                    if ( !empty( $value['number'] ) && (int) $value['number'] > 1 ) {
+                        $label .= ' x' . (int) $value['number'];
+                    }
+                    $line_base = ( $before_discount ? ( isset( $value['subtotal'] ) ? (float) $value['subtotal'] : 0 ) : (( isset( $value['total'] ) ? (float) $value['total'] : 0 )) );
+                    $line_value = wcusage_format_price( $line_commission );
+                    if ( $line_base ) {
+                        $line_value = '<span class="wcusage-breakdown-base">' . wcusage_format_price( $line_base ) . ' &rarr; </span>' . $line_value;
+                    }
+                    $lines .= wcusage_commission_breakdown_row( $label, $line_value );
+                } else {
+                    // "Fees", "Custom Discounts", "Shipping", "Store Credit" - the
+                    // adjustments the calculation adds to or takes off the order overall.
+                    if ( !$line_commission ) {
+                        continue;
+                    }
+                    $lines .= wcusage_commission_breakdown_row( $key, wcusage_format_price( $line_commission ), ( $line_commission < 0 ? 'is-negative' : '' ) );
+                }
+            }
+            if ( $lines ) {
+                $panel .= '<span class="wcusage-rate-tooltip-section">';
+                $panel .= '<span class="wcusage-rate-tooltip-section-title">' . esc_html__( 'Order lines', 'woo-coupon-usage' ) . '</span>';
+                $panel .= $lines;
+                $panel .= '</span>';
+            }
+        }
+        // ***** How the parts add up *****
+        $percent_part = (float) wcusage_order_meta( $order_id, 'wcusage_total_commission', true );
+        $fixed_order_part = (float) wcusage_order_meta( $order_id, 'wcusage_fixed_order_commission', true );
+        $fixed_product_part = (float) wcusage_order_meta( $order_id, 'wcusage_product_commission', true );
+        $total = wcusage_get_order_saved_commission( $order_id );
+        $totals = '';
+        if ( $percent_part ) {
+            $totals .= wcusage_commission_breakdown_row( __( 'Percentage', 'woo-coupon-usage' ), wcusage_format_price( $percent_part ) );
+        }
+        if ( $fixed_order_part ) {
+            $totals .= wcusage_commission_breakdown_row( __( 'Fixed per order', 'woo-coupon-usage' ), wcusage_format_price( $fixed_order_part ) );
+        }
+        if ( $fixed_product_part ) {
+            $totals .= wcusage_commission_breakdown_row( __( 'Fixed per product', 'woo-coupon-usage' ), wcusage_format_price( $fixed_product_part ) );
+        }
+        // Only worth naming the cap when it actually bit.
+        $max_commission = wcusage_get_setting_value( 'wcusage_field_order_max_commission', '' );
+        if ( $max_commission && $percent_part + $fixed_order_part + $fixed_product_part > (float) $max_commission ) {
+            $totals .= wcusage_commission_breakdown_row( __( 'Capped at maximum', 'woo-coupon-usage' ), wcusage_format_price( $max_commission ), 'is-negative' );
+        }
+        // What the panel has added up is the CALCULATED commission. Once an amount has
+        // been granted to the affiliate the metabox shows that granted figure instead,
+        // and the two can differ - after a partial refund, or where the order was
+        // recalculated after the grant. Showing both is the point of the panel: the
+        // number being hovered is always the last row.
+        $granted = $order->get_meta( 'wcu_commission_paid' );
+        $has_granted = $granted !== '' && $granted !== null;
+        $granted_differs = $has_granted && abs( (float) $granted - (float) $total ) >= 0.005;
+        $totals .= wcusage_commission_breakdown_row( ( $granted_differs ? __( 'Calculated', 'woo-coupon-usage' ) : __( 'Total', 'woo-coupon-usage' ) ), wcusage_format_price( $total ), ( $granted_differs ? '' : 'is-total' ) );
+        if ( $granted_differs ) {
+            $totals .= wcusage_commission_breakdown_row( __( 'Granted to affiliate', 'woo-coupon-usage' ), wcusage_format_price( $granted ), 'is-total' );
+        }
+        $panel .= '<span class="wcusage-rate-tooltip-section">';
+        $panel .= '<span class="wcusage-rate-tooltip-section-title">' . esc_html__( 'Total', 'woo-coupon-usage' ) . '</span>';
+        $panel .= $totals;
+        $panel .= '</span>';
+        // ***** Wrap the amount *****
+        // One entry per coupon is printed for a stacked order, so the id has to vary
+        // with the coupon or aria-describedby would point at a duplicate element.
+        $panel_id = 'wcusage-commission-breakdown-' . absint( $order_id ) . '-' . substr( md5( strtolower( (string) $coupon_code ) ), 0, 8 );
+        $output = '<span class="wcusage-rate-tooltip wcusage-rate-tooltip--orderbox">';
+        $output .= '<span class="wcusage-commission-trigger" tabindex="0" aria-describedby="' . esc_attr( $panel_id ) . '">' . $amount_html . '</span>';
+        $output .= '<span class="wcusage-rate-tooltip-panel" id="' . esc_attr( $panel_id ) . '" role="tooltip">';
+        $output .= '<span class="wcusage-rate-tooltip-title">' . esc_html__( 'Commission Breakdown', 'woo-coupon-usage' ) . '</span>';
+        $output .= $panel;
+        $output .= '</span>';
+        $output .= '</span>';
+        return $output;
+    }
+
 }

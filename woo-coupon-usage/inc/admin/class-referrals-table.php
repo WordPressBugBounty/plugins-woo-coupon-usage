@@ -206,6 +206,58 @@ class wcusage_Referrals_Table extends WP_List_Table {
         return sprintf( '<input type="checkbox" name="bulk-delete[]" value="%s" />', $item['order_id'] );
     }
 
+    /**
+     * Coupon code cell, with the same hover tooltip as the Affiliates list:
+     * unpaid commission, dashboard link, copyable referral link, and the edit /
+     * unassign links.
+     *
+     * Falls back to the plain dashboard link when the code no longer matches a
+     * coupon, since an order keeps its codes after the coupon itself is deleted.
+     *
+     * @param string $coupon_code Coupon code on the order.
+     * @param array  $getcoupon   wcusage_get_coupon_info() result (index 2 is the coupon ID).
+     * @param mixed  $getinfo     wcusage_get_the_order_coupon_info() result, used for the fallback link.
+     *
+     * @return string
+     */
+    private function wcusage_coupon_tooltip_cell( $coupon_code, $getcoupon, $getinfo ) {
+        $coupon_id = ( isset( $getcoupon[2] ) ? (int) $getcoupon[2] : 0 );
+        if ( $coupon_id && function_exists( 'wcusage_output_affiliate_tooltip_users' ) ) {
+            return wcusage_output_affiliate_tooltip_users( $coupon_id );
+        }
+        $url = ( isset( $getinfo['uniqueurl'] ) ? sanitize_text_field( $getinfo['uniqueurl'] ) : '' );
+        if ( $url ) {
+            return '<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $coupon_code ) . '</a><br/>';
+        }
+        return esc_html( $coupon_code ) . '<br/>';
+    }
+
+    /**
+     * Affiliate user cell: the username linking to View Affiliate, with the same
+     * user details tooltip as the Affiliates list.
+     *
+     * Empty when the coupon has no affiliate user, or that user has since been
+     * deleted - the caller decides what to show in its place.
+     *
+     * @param int|string $affiliate_id
+     *
+     * @return string
+     */
+    private function wcusage_affiliate_tooltip_cell( $affiliate_id ) {
+        $affiliate_id = (int) $affiliate_id;
+        if ( !$affiliate_id ) {
+            return '';
+        }
+        $affiliate = get_userdata( $affiliate_id );
+        if ( !$affiliate ) {
+            return '';
+        }
+        if ( function_exists( 'wcusage_output_affiliate_tooltip_user_info' ) ) {
+            return wcusage_output_affiliate_tooltip_user_info( $affiliate_id );
+        }
+        return '<a href="' . esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate->user_login ) . '</a><br/>';
+    }
+
     function column_default( $item, $column_name ) {
         $order_id = $item['order_id'];
         $order = wc_get_order( $order_id );
@@ -216,48 +268,29 @@ class wcusage_Referrals_Table extends WP_List_Table {
         if ( $lifetimeaffiliate ) {
             $getinfo = wcusage_get_the_order_coupon_info( $lifetimeaffiliate, "", $order_id );
             $getcoupon = wcusage_get_coupon_info( $lifetimeaffiliate );
-            $url = $getinfo['uniqueurl'];
-            $url = sanitize_text_field( $url );
             $typeicon = "<span title='Lifetime Commission' style='font-size: 12px;'><i class='fa-solid fa-star'></i></span> ";
-            $coupons .= '<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $lifetimeaffiliate ) . '</a><br/>';
-            if ( isset( $getcoupon[1] ) ) {
-                $affiliate_id = $getcoupon[1];
-                $affiliate_username = get_userdata( $affiliate_id )->user_login;
-                $affiliate_ids .= '<a href="' . esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate_username ) . '</a><br/>';
-            }
+            $coupons .= $this->wcusage_coupon_tooltip_cell( $lifetimeaffiliate, $getcoupon, $getinfo );
+            $affiliate_ids .= $this->wcusage_affiliate_tooltip_cell( ( isset( $getcoupon[1] ) ? $getcoupon[1] : 0 ) );
         } elseif ( $affiliatereferrer ) {
             $getinfo = wcusage_get_the_order_coupon_info( $affiliatereferrer, "", $order_id );
             $getcoupon = wcusage_get_coupon_info( $affiliatereferrer );
-            $url = $getinfo['uniqueurl'];
             $typeicon = "<span title='Custom / URL Referral' style='font-size: 12px;'><i class='fa-solid fa-link'></i></span> ";
-            $coupons .= '<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $affiliatereferrer ) . '</a><br/>';
-            if ( isset( $getcoupon[1] ) ) {
-                $affiliate_id = $getcoupon[1];
-                if ( $affiliate_id ) {
-                    $affiliate_username = get_userdata( $affiliate_id )->user_login;
-                    $affiliate_ids .= '<a href="' . esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate_username ) . '</a><br/>';
-                }
-            }
+            $coupons .= $this->wcusage_coupon_tooltip_cell( $affiliatereferrer, $getcoupon, $getinfo );
+            $affiliate_ids .= $this->wcusage_affiliate_tooltip_cell( ( isset( $getcoupon[1] ) ? $getcoupon[1] : 0 ) );
         } elseif ( !$lifetimeaffiliate && !$affiliatereferrer && class_exists( 'WooCommerce' ) ) {
             if ( version_compare( WC_VERSION, 3.7, ">=" ) ) {
                 foreach ( $order->get_coupon_codes() as $coupon_code ) {
                     $getinfo = wcusage_get_the_order_coupon_info( $coupon_code, "", $order_id );
                     $getcoupon = wcusage_get_coupon_info( $coupon_code );
-                    $url = sanitize_text_field( $getinfo['uniqueurl'] );
-                    $coupons .= '<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $coupon_code ) . '</a><br/>';
-                    if ( isset( $getcoupon[1] ) && $getcoupon[1] != '' ) {
-                        $affiliate_id = $getcoupon[1];
-                        $affiliate_username = get_userdata( $affiliate_id )->user_login;
-                        $affiliate_ids .= '<a href="' . esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . $affiliate_id ) ) . '">' . esc_html( $affiliate_username ) . '</a><br/>';
-                    } else {
-                        $affiliate_ids .= '-<br/>';
-                    }
+                    $coupons .= $this->wcusage_coupon_tooltip_cell( $coupon_code, $getcoupon, $getinfo );
+                    $affiliate_cell = $this->wcusage_affiliate_tooltip_cell( ( isset( $getcoupon[1] ) ? $getcoupon[1] : 0 ) );
+                    $affiliate_ids .= ( $affiliate_cell ? $affiliate_cell : '-<br/>' );
                 }
             }
         }
         switch ( $column_name ) {
             case 'order_id':
-                return '<a href="' . esc_url( admin_url( 'post.php?post=' . $item[$column_name] . '&action=edit' ) ) . '"><span class="dashicons dashicons-edit" style="font-size: 15px; margin-top: 4px;"></span> #' . $item[$column_name] . '</a>';
+                return '<a class="wcusage-referral-id-link" href="' . esc_url( admin_url( 'post.php?post=' . $item[$column_name] . '&action=edit' ) ) . '"><span class="dashicons dashicons-edit"></span>#' . $item[$column_name] . '</a>';
             case 'status':
                 $item[$column_name] = ucfirst( $item[$column_name] );
                 $statusname = strtolower( $item[$column_name] );
@@ -322,6 +355,26 @@ function wcusage_orders_page() {
     );
     // For username autocomplete in filters
     wp_enqueue_script( 'jquery-ui-autocomplete' );
+    // Coupon code / affiliate user hover tooltips, as used on the Affiliates list.
+    // admin-affiliate-users.css styles the trigger and tooltip contents, and
+    // admin.js handles the hover and the "copy referral link" button.
+    $wcusage_tooltip_css_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-affiliate-users.css';
+    $wcusage_tooltip_css_ver = ( file_exists( $wcusage_tooltip_css_path ) ? filemtime( $wcusage_tooltip_css_path ) : WCUSAGE_VERSION );
+    wp_enqueue_style(
+        'wcusage-admin-affiliate-users',
+        WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-affiliate-users.css',
+        array(),
+        $wcusage_tooltip_css_ver
+    );
+    $wcusage_admin_common_js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin.js';
+    $wcusage_admin_common_js_ver = ( file_exists( $wcusage_admin_common_js_path ) ? filemtime( $wcusage_admin_common_js_path ) : WCUSAGE_VERSION );
+    wp_enqueue_script(
+        'wcusage-admin-common',
+        WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin.js',
+        array('jquery'),
+        $wcusage_admin_common_js_ver,
+        true
+    );
     // Enqueue external script for this page (moved inline JS)
     $wcusage_referrals_js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin-referrals.js';
     $wcusage_referrals_js_ver = ( file_exists( $wcusage_referrals_js_path ) ? filemtime( $wcusage_referrals_js_path ) : WCUSAGE_VERSION );
@@ -370,6 +423,35 @@ function wcusage_orders_page() {
     .checkbox-disabled {
         opacity: 0.5;
         pointer-events: none;
+    }
+    /* Coupon code / affiliate user tooltips: give each entry its own line (an
+       order can carry several coupons) and let the tooltip escape the cell. */
+    .wp-list-table .column-coupon,
+    .wp-list-table .column-affiliate {
+        overflow: visible !important;
+    }
+    .wp-list-table .column-coupon .wcusage-users-affiliate-column,
+    .wp-list-table .column-affiliate .wcusage-users-affiliate-column {
+        display: block;
+        margin: 4px 0;
+    }
+    /* The edit dashicon keeps a 20px box whatever its font-size, and sits
+       "vertical-align: top", so it hung 4-5px below the number it labels and made
+       the row taller than it needed to be. Flex the link so the icon is sized to
+       its glyph and centred on the number. (The ID column's alignment with the
+       rest of the row is handled in admin-style.css -- it is the primary column,
+       so WordPress renders it as <th> and the <td> padding rules miss it.) */
+    .column-order_id .wcusage-referral-id-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .column-order_id .wcusage-referral-id-link .dashicons {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+        line-height: 1;
+        vertical-align: middle;
     }
     /* "Only assigned affiliates" toggle (sits beside the bulk actions Apply button) */
     .wcusage-only-assigned-filter {
@@ -428,9 +510,9 @@ function wcusage_orders_page() {
     .wcusage-only-assigned-filter.is-active .wcu-switch { background: #07bbe3; }
     .wcusage-only-assigned-filter.is-active .wcu-switch::after { transform: translateX(16px); }
     </style>
-    <link rel="stylesheet" href="<?php 
-    echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
-    ?>" crossorigin="anonymous">
+    <?php 
+    wcusage_enqueue_font_awesome();
+    ?>
     <div class="wrap wcusage-admin-page">
     <?php 
     do_action( 'wcusage_hook_dashboard_page_header', '' );

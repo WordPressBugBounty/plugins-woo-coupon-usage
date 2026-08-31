@@ -1178,6 +1178,8 @@ body.wcusage-admin-page {
 
 .wcusage-orders-affiliate-column {
     font-size: 10px;
+    padding: 5px 0;
+    display: block;
 }
 
 .wcusage-orders-affiliate-column .wcusage-order-affiliate-inline,
@@ -1236,7 +1238,8 @@ body.wcusage-admin-page {
         display: block;
     }
 
-    .wcusage-admin-title-buttons a {
+    .wcusage-admin-title-buttons a,
+    .wcusage-admin-title-buttons .wcu-export-dropdown {
         margin-bottom: 0;
         margin-top: 20px;
         display: flex;
@@ -2017,6 +2020,19 @@ body.wcusage-admin-page input[type="submit"].button:not(.button-primary):hover {
 .wcusage-admin-page .widefat tr td {
     border-bottom: 1px solid #e5e7eb;
     padding: 22px 5px !important;
+}
+
+/* The first column of a list table is the primary column, which WordPress renders
+   as <th scope="row"> instead of <td>, so none of the <td> rules above reach it:
+   it keeps core's 8px padding and 1.3em line-height while every other cell in the
+   row gets 22px and 1.5em, leaving its text sitting ~18px too high. Match the body
+   cells. Scoped to tbody so the <thead> keeps its own compact padding. */
+.wp-list-table.groups tbody tr th,
+.wp-list-table.referrals tbody tr th {
+    padding: 22px 5px;
+    font-size: 13px;
+    line-height: 1.5em;
+    border-right: 1px solid #f0f0f1;
 }
 
 .wp-list-table.mlausers tr td.column-ID {
@@ -4125,6 +4141,19 @@ p label {
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* Cap tall affiliate tooltips (lots of custom fields) and scroll instead of
+   growing off-screen. Mirrored in admin-affiliate-users.css, which is the
+   stylesheet that is loaded on the affiliate users / orders list tables. */
+.tooltip-content.wcusage-tooltip-content,
+.custom-tooltip .tooltip-content.wcusage-tooltip-content {
+    box-sizing: border-box !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #646970 #1d2327;
+}
+
 .custom-tooltip .tooltip-content p {
     color: #f0f0f1 !important;
     margin: 0 0 12px 0;
@@ -4336,62 +4365,162 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
 
 /* Tools */
 
-.wcusage-tools-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    max-width: 900px;
+.wcusage-tools-page .wcu-page-header h1 i {
+    color: #2271b1;
+    margin-right: 10px;
 }
 
+.wcusage-tools-section {
+    margin: 0 0 32px 0;
+    /* Matches the card grid, so the section rule does not run past the cards. */
+    max-width: 1240px;
+}
+
+.wcusage-tools-section .wcu-section-title {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.wcusage-tools-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    max-width: 1240px;
+}
+
+/* Whole card is the link, so there is no separate button to aim for. */
 .wcusage-tools-box {
-    padding: 22px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 20px;
     border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    border-radius: 8px;
     background: #fff;
-    border-radius: 5px;
-    text-align: center;
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    text-align: left;
+    text-decoration: none;
+    color: #1d2327;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .wcusage-tools-box:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    border-color: #d0d5dd;
+    border-color: #2271b1;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+    transform: translateY(-2px);
+    color: #1d2327;
 }
 
-.wcusage-tools-box h2 {
-    margin: 0 0 8px 0;
-    font-size: 15px;
+.wcusage-tools-box:focus-visible {
+    outline: 2px solid #2271b1;
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+.wcusage-tools-box-icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #eef3ff;
+    color: #2271b1;
+    font-size: 16px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.wcusage-tools-box:hover .wcusage-tools-box-icon {
+    background: #2271b1;
+    color: #fff;
+}
+
+/* min-width lets the text wrap instead of stretching the grid column. */
+.wcusage-tools-box-content {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.wcusage-tools-box h3 {
+    margin: 1px 0 5px 0;
+    font-size: 14px;
     font-weight: 600;
+    line-height: 1.4;
     color: #1d2327;
 }
 
 .wcusage-tools-box p {
+    margin: 0;
     font-size: 13px;
-    color: #646970;
-    margin: 0 0 14px 0;
     line-height: 1.5;
+    color: #646970;
 }
 
-.wcusage-tools-box .button {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 18px;
+.wcusage-tools-box-arrow {
+    flex: 0 0 auto;
+    align-self: center;
+    color: #c3c4c7;
     font-size: 13px;
-    font-weight: 500;
-    color: #374151;
-    background: #fff;
-    border: 1px solid #d0d5dd;
-    border-radius: 5px;
-    text-decoration: none;
-    transition: all 0.15s ease;
-    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.wcusage-tools-box .button:hover {
-    background: #eef3ff;
-    border-color: #2271b1;
+.wcusage-tools-box:hover .wcusage-tools-box-arrow {
     color: #2271b1;
+    transform: translateX(3px);
+}
+
+.wcusage-tools-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 7px;
+    border: 1px solid #f5d9a8;
+    border-radius: 999px;
+    background: #fff4e5;
+    color: #8a5300;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    vertical-align: middle;
+}
+
+/* PRO tools this install cannot open: still listed so the feature is
+   discoverable, but deliberately inert rather than a faded live link. */
+.wcusage-tools-box.is-locked {
+    background: #fafafa;
+    border-style: dashed;
+    box-shadow: none;
+    cursor: default;
+}
+
+.wcusage-tools-box.is-locked:hover {
+    border-color: #e5e7eb;
+    box-shadow: none;
+    transform: none;
+}
+
+.wcusage-tools-box.is-locked .wcusage-tools-box-icon,
+.wcusage-tools-box.is-locked:hover .wcusage-tools-box-icon {
+    background: #f0f0f1;
+    color: #8c8f94;
+}
+
+.wcusage-tools-box.is-locked h3 {
+    color: #50575e;
+}
+
+.wcusage-tools-box.is-locked p {
+    color: #8c8f94;
+}
+
+.wcusage-tools-box.is-locked .wcusage-tools-box-arrow {
+    display: none;
+}
+
+@media screen and (max-width: 782px) {
+    .wcusage-tools-container {
+        grid-template-columns: 1fr;
+    }
 }
 
 #wcusage-tools-rows td,
@@ -5015,8 +5144,9 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
 }
 
 /* ---- Export dropdown (customise the export before downloading) ----
-   Shared by the Payouts (page=wcusage_payouts) and Referrals (page=wcusage_referrals)
-   export buttons. Toggled by the export-dropdown JS on each page. */
+   Shared by the Payouts (page=wcusage_payouts), Referrals (page=wcusage_referrals) and
+   Affiliate Users (page=wcusage_affiliates) export buttons. Toggled by the export-dropdown
+   JS on each page. */
 .wcu-export-dropdown { position: relative; display: inline-block; }
 .wcu-export-dropdown .wcu-export-caret { font-size: 10px; margin-left: 2px; transition: transform .2s ease; }
 .wcu-export-dropdown.is-open .wcu-export-caret { transform: rotate(180deg); }

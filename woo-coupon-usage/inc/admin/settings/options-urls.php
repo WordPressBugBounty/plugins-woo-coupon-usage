@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( !function_exists( 'wcusage_field_cb_urls' ) ) {
 function wcusage_field_cb_urls( $args )
 {
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
 
     $wcusage_urls_prefix = wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon');
     $wcusage_src_prefix = wcusage_get_setting_value('wcusage_field_src_prefix', 'src');

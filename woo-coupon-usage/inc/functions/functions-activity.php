@@ -63,6 +63,11 @@ add_action( 'plugins_loaded', 'wcusage_update_activity_db_check' );
  */
 function wcusage_add_activity($event_id, $event, $info) {
 
+    // Fires for every lifecycle event, before the enable-check, so consumers
+    // (e.g. the REST API webhooks) receive events even when database logging
+    // is turned off in the settings.
+    do_action( 'wcusage_activity_recorded', sanitize_text_field($event), sanitize_text_field($event_id), $info, get_current_user_id() );
+
     $enable_activity_log = wcusage_get_setting_value('wcusage_enable_activity_log', '1');
     if($enable_activity_log) {
 
@@ -175,6 +180,16 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
     case 'payout_reversed':
       $event_message = "Payout request reversed (#".esc_html($event_id)."):" . " " . wcusage_format_price(wp_kses_post($info));
       break;
+    case 'payout_cancelled':
+      $event_message = "Payout request cancelled (#".esc_html($event_id)."):" . " " . wcusage_format_price(wp_kses_post($info));
+      break;
+    case 'api_key_created':
+      // $info is the key prefix (the first 12 characters), never the token.
+      $event_message = "API key created:" . " " . esc_html($info) . "&hellip;";
+      break;
+    case 'api_key_revoked':
+      $event_message = "API key revoked (#".esc_html($event_id).")";
+      break;
     case 'new_campaign':
       $event_message = "New campaign added by an affiliate:" . " " . wp_kses_post($info);
       break;
@@ -255,6 +270,23 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
       $coupon_info = wcusage_get_coupon_info_by_id($event_id);
       $coupon_name = $coupon_info[3];
       $event_message = "Coupon commission (fixed per product) edited for coupon '".esc_html($coupon_name)."':" . " " . wp_kses_post($info);
+      break;
+    // For the lifetime link events the event_id is the CUSTOMER's user ID
+    // (the person linked to the coupon), not a coupon or order ID.
+    case 'lifetime_link_added':
+      $customer = get_userdata($event_id);
+      $customer_name = $customer ? $customer->user_email : ( 'user #' . $event_id );
+      $event_message = "Lifetime commission link added for customer '".esc_html($customer_name)."':" . " " . wp_kses_post($info);
+      break;
+    case 'lifetime_link_edited':
+      $customer = get_userdata($event_id);
+      $customer_name = $customer ? $customer->user_email : ( 'user #' . $event_id );
+      $event_message = "Lifetime commission link edited for customer '".esc_html($customer_name)."':" . " " . wp_kses_post($info);
+      break;
+    case 'lifetime_link_removed':
+      $customer = get_userdata($event_id);
+      $customer_name = $customer ? $customer->user_email : ( 'user #' . $event_id );
+      $event_message = "Lifetime commission link removed from customer '".esc_html($customer_name)."':" . " " . wp_kses_post($info);
       break;
     case 'reward_earned':
       $coupon_info = wcusage_get_coupon_info_by_id($info);

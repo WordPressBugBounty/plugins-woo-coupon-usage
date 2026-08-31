@@ -98,13 +98,23 @@ if ( isset( $_POST['add_new_coupon'] ) && isset( $_POST['add_coupon_nonce'] ) ) 
         $coupon_code = sanitize_text_field( $_POST['new_coupon_code'] );
         $affiliate_username = sanitize_text_field( $_POST['affiliate_username'] );
         $message = ( isset( $_POST['wcu-message'] ) ? sanitize_text_field( $_POST['wcu-message'] ) : '' );
+        // Which notification email the admin chose on the form: 'coupon_assigned',
+        // 'accepted', or '' for none. Defaults to the coupon-assigned email so a form
+        // submitted without the field (or by an older cached page) still notifies.
+        $send_email = wcusage_normalise_send_email_choice( ( isset( $_POST['wcu-send-email'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-send-email'] ) ) : 'coupon_assigned' ) );
+        // Remember the choice so this admin does not have to re-pick it every time. Only
+        // when the field was actually submitted, so an older cached form cannot reset it.
+        if ( isset( $_POST['wcu-send-email'] ) ) {
+            wcusage_save_send_email_preference( 'add_coupon', $send_email );
+        }
         // Verify the affiliate username matches the current user
         if ( $affiliate_username !== $user_info->user_login ) {
             echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid affiliate username.', 'woo-coupon-usage' ) . '</p></div>';
         } else {
-            // Check if coupon already exists
-            $existing_coupon = get_page_by_title( $coupon_code, OBJECT, 'shop_coupon' );
-            if ( $existing_coupon ) {
+            // Check if coupon already exists. wc_get_coupon_id_by_code() only matches published
+            // coupons, so a code whose coupon was deleted (moved to the trash) can be used again.
+            $existing_coupon_id = ( function_exists( 'wc_get_coupon_id_by_code' ) ? wc_get_coupon_id_by_code( $coupon_code ) : 0 );
+            if ( $existing_coupon_id ) {
                 echo '<div class="notice notice-error"><p>' . sprintf( esc_html__( 'Coupon "%s" already exists.', 'woo-coupon-usage' ), esc_html( $coupon_code ) ) . '</p></div>';
             } else {
                 // Get template coupon settings
@@ -113,12 +123,12 @@ if ( isset( $_POST['add_new_coupon'] ) && isset( $_POST['add_coupon_nonce'] ) ) 
                     echo '<div class="notice notice-error"><p>' . esc_html__( 'No template coupon configured. Please set up a template coupon in the settings.', 'woo-coupon-usage' ) . '</p></div>';
                 } else {
                     // Create new coupon based on template
-                    $template_coupon = get_page_by_title( $template_coupon_code, OBJECT, 'shop_coupon' );
-                    if ( !$template_coupon ) {
+                    $template_coupon_id = ( function_exists( 'wc_get_coupon_id_by_code' ) ? wc_get_coupon_id_by_code( $template_coupon_code ) : 0 );
+                    if ( !$template_coupon_id ) {
                         echo '<div class="notice notice-error"><p>' . sprintf( esc_html__( 'Template coupon "%s" not found.', 'woo-coupon-usage' ), esc_html( $template_coupon_code ) ) . '</p></div>';
                     } else {
                         // Get template coupon data
-                        $template_coupon_obj = new WC_Coupon($template_coupon->ID);
+                        $template_coupon_obj = new WC_Coupon($template_coupon_id);
                         $template_data = array(
                             'discount_type'              => $template_coupon_obj->get_discount_type(),
                             'coupon_amount'              => $template_coupon_obj->get_amount(),
@@ -147,7 +157,7 @@ if ( isset( $_POST['add_new_coupon'] ) && isset( $_POST['add_coupon_nonce'] ) ) 
                         $new_coupon_id = wp_insert_post( $new_coupon );
                         if ( $new_coupon_id ) {
                             // Copy meta from template coupon
-                            $template_meta = get_post_custom( $template_coupon->ID );
+                            $template_meta = get_post_custom( $template_coupon_id );
                             if ( is_array( $template_meta ) ) {
                                 foreach ( $template_meta as $key => $values ) {
                                     foreach ( $values as $value ) {
@@ -174,20 +184,47 @@ if ( isset( $_POST['add_new_coupon'] ) && isset( $_POST['add_coupon_nonce'] ) ) 
                             // Clear stats meta
                             delete_post_meta( $new_coupon_id, 'wcu_alltime_stats' );
                             delete_post_meta( $new_coupon_id, 'wcu_last_refreshed' );
-                            // Send notification email to affiliate
-                            if ( function_exists( 'wcusage_email_affiliate_register' ) ) {
-                                $user_email = $user_info->user_email;
-                                $firstname = get_user_meta( $user_id, 'first_name', true );
-                                if ( empty( $firstname ) ) {
-                                    $firstname = $user_info->display_name;
-                                }
-                                wcusage_email_affiliate_register(
+                            // Send the "New Coupon Assigned" notification to the affiliate.
+                            // This used to call wcusage_email_affiliate_register(), which is the
+                            // "Affiliate Application Submitted" email - wrong here, because the
+                            // affiliate already exists, is already approved, and the new coupon is
+                            // already active with nothing left for an admin to review. That call
+                            // also passed $message to a three-parameter function, so the Custom
+                            // Message field below was silently dropped (and that template has no
+                            // {message} merge tag anyway).
+                            $user_email = $user_info->user_email;
+                            $firstname = get_user_meta( $user_id, 'first_name', true );
+                            if ( empty( $firstname ) ) {
+                                $firstname = $user_info->display_name;
+                            }
+                            if ( $send_email === 'coupon_assigned' && function_exists( 'wcusage_email_affiliate_coupon_assigned' ) ) {
+                                wcusage_email_affiliate_coupon_assigned(
                                     $user_email,
                                     $coupon_code,
                                     $firstname,
+                                    $user_info->user_login,
                                     $message
                                 );
+                            } elseif ( $send_email === 'accepted' && function_exists( 'wcusage_email_affiliate_register_accepted' ) ) {
+                                // Passes $skip_registration_check: an admin adding a coupon by hand
+                                // has nothing to do with whether the public registration form is on.
+                                wcusage_email_affiliate_register_accepted(
+                                    $user_email,
+                                    $coupon_code,
+                                    $message,
+                                    $user_info->user_login,
+                                    $firstname,
+                                    true
+                                );
                             }
+                            do_action(
+                                'wcusage_hook_admin_coupon_assigned',
+                                $new_coupon_id,
+                                $user_id,
+                                $coupon_code,
+                                $message,
+                                $send_email
+                            );
                             echo '<div class="notice notice-success"><p>' . sprintf( esc_html__( 'Coupon "%s" created successfully and assigned to affiliate.', 'woo-coupon-usage' ), esc_html( $coupon_code ) ) . '</p></div>';
                             // Refresh coupons list
                             $coupons = wcusage_get_users_coupons_ids( $user_id );
@@ -288,9 +325,9 @@ $current_tab = ( isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : '
 ?>
 
 <!--- Font Awesome -->
-<link rel="stylesheet" href="<?php 
-echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
-?>" crossorigin="anonymous">
+<?php 
+wcusage_enqueue_font_awesome();
+?>
 
     <?php 
 // Enqueue admin view affiliate styles with cache-busting
@@ -324,10 +361,12 @@ wp_enqueue_style(
 wp_enqueue_script( 'jquery-ui-autocomplete' );
 $wcusage_admin_aff_js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin-view-affiliate.js';
 $wcusage_admin_aff_js_ver = ( file_exists( $wcusage_admin_aff_js_path ) ? filemtime( $wcusage_admin_aff_js_path ) : WCUSAGE_VERSION );
+// jquery-ui-autocomplete is a hard dependency, not just an enqueue-order
+// coincidence: the Lifetime tab's customer search calls .autocomplete().
 wp_enqueue_script(
     'wcusage-admin-view-affiliate',
     WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-view-affiliate.js',
-    array('jquery'),
+    array('jquery', 'jquery-ui-autocomplete'),
     $wcusage_admin_aff_js_ver,
     true
 );
@@ -369,6 +408,15 @@ wp_localize_script( 'wcusage-admin-view-affiliate', 'WCUAdminAffiliateView', arr
     'nonce_visits'               => wp_create_nonce( 'wcusage_affiliate_visits' ),
     'nonce_payouts'              => wp_create_nonce( 'wcusage_affiliate_payouts' ),
     'nonce_activity'             => wp_create_nonce( 'wcusage_affiliate_activity' ),
+    'nonce_lifetime'             => wp_create_nonce( 'wcusage_affiliate_lifetime' ),
+    'lifetime_i18n'              => array(
+        'confirm_remove'  => __( 'Remove this lifetime link? The customer will no longer be attributed to this affiliate on future orders.', 'woo-coupon-usage' ),
+        'error'           => __( 'Could not save the lifetime link. Please try again.', 'woo-coupon-usage' ),
+        'select_customer' => __( 'Search for a customer and pick them from the list first.', 'woo-coupon-usage' ),
+        'already_linked'  => __( 'Already linked to coupon "%s" - saving will replace that link.', 'woo-coupon-usage' ),
+        'no_expiry'       => __( 'Leave blank for no expiry.', 'woo-coupon-usage' ),
+        'use_default'     => __( 'Use default (%s days)', 'woo-coupon-usage' ),
+    ),
     'nonce_add_sub_affiliate'    => wp_create_nonce( 'wcusage_add_sub_affiliate_nonce' ),
     'nonce_remove_sub_affiliate' => wp_create_nonce( 'wcusage_remove_sub_affiliate_nonce' ),
     'nonce_refresh'              => wp_create_nonce( 'wcusage_admin_refresh_nonce' ),
@@ -509,6 +557,20 @@ echo ( $current_tab === 'referrals' ? 'nav-tab-active' : '' );
 echo esc_html__( 'Referred Orders', 'woo-coupon-usage' );
 ?>
                     </a>
+                    <?php 
+if ( function_exists( 'wcusage_lifetime_customers_enabled' ) && wcusage_lifetime_customers_enabled() ) {
+    ?>
+                    <a href="#tab-lifetime" class="nav-tab <?php 
+    echo ( $current_tab === 'lifetime' ? 'nav-tab-active' : '' );
+    ?>">
+                        <i class="fas fa-infinity" style="margin-right: 8px;"></i>
+                        <?php 
+    echo esc_html__( 'Lifetime', 'woo-coupon-usage' );
+    ?>
+                    </a>
+                    <?php 
+}
+?>
                     <a href="#tab-visits" class="nav-tab <?php 
 echo ( $current_tab === 'visits' ? 'nav-tab-active' : '' );
 ?>">
@@ -579,7 +641,14 @@ echo ( $current_tab === 'referrals' ? 'active' : '' );
 echo esc_html__( 'Referred Orders', 'woo-coupon-usage' );
 ?>
                         </h3>
-                        <div class="wcusage-filters" id="wcusage-referrals-filters" style="margin: 0 0 15px; display:flex; gap:8px; align-items: center;">
+                        <?php 
+// The list already stops at today when the end date is left empty, so
+// pre-filling it only makes the range on screen match the one being shown.
+$referrals_end_date = current_time( 'Y-m-d' );
+$referrals_coupon_codes = wcusage_get_affiliate_coupon_codes( $user_id );
+$referrals_statuses = wcusage_get_affiliate_referral_status_options();
+?>
+                        <div class="wcusage-filters" id="wcusage-referrals-filters" style="margin: 0 0 15px; display:flex; gap:8px; align-items: center; flex-wrap: wrap;">
                             <label>
                                 <?php 
 echo esc_html__( 'From', 'woo-coupon-usage' );
@@ -590,7 +659,74 @@ echo esc_html__( 'From', 'woo-coupon-usage' );
                                 <?php 
 echo esc_html__( 'To', 'woo-coupon-usage' );
 ?>
-                                <input type="date" id="referrals-end-date" />
+                                <input type="date" id="referrals-end-date" value="<?php 
+echo esc_attr( $referrals_end_date );
+?>" />
+                            </label>
+                            <?php 
+// Only offered when there is more than one status to choose between.
+?>
+                            <?php 
+if ( count( $referrals_statuses ) > 1 ) {
+    ?>
+                            <label>
+                                <?php 
+    echo esc_html__( 'Status', 'woo-coupon-usage' );
+    ?>
+                                <select id="referrals-status">
+                                    <option value=""><?php 
+    echo esc_html__( 'Any Status', 'woo-coupon-usage' );
+    ?></option>
+                                    <?php 
+    foreach ( $referrals_statuses as $referrals_status_key => $referrals_status_label ) {
+        ?>
+                                        <option value="<?php 
+        echo esc_attr( $referrals_status_key );
+        ?>"><?php 
+        echo esc_html( $referrals_status_label );
+        ?></option>
+                                    <?php 
+    }
+    ?>
+                                </select>
+                            </label>
+                            <?php 
+}
+?>
+                            <?php 
+if ( count( $referrals_coupon_codes ) > 1 ) {
+    ?>
+                            <label>
+                                <?php 
+    echo esc_html__( 'Coupon', 'woo-coupon-usage' );
+    ?>
+                                <select id="referrals-coupon">
+                                    <option value=""><?php 
+    echo esc_html__( 'All Coupons', 'woo-coupon-usage' );
+    ?></option>
+                                    <?php 
+    foreach ( $referrals_coupon_codes as $referrals_coupon_code ) {
+        ?>
+                                        <option value="<?php 
+        echo esc_attr( $referrals_coupon_code );
+        ?>"><?php 
+        echo esc_html( $referrals_coupon_code );
+        ?></option>
+                                    <?php 
+    }
+    ?>
+                                </select>
+                            </label>
+                            <?php 
+}
+?>
+                            <label>
+                                <?php 
+echo esc_html__( 'Search', 'woo-coupon-usage' );
+?>
+                                <input type="search" id="referrals-search" placeholder="<?php 
+echo esc_attr__( 'Order # or customer...', 'woo-coupon-usage' );
+?>" />
                             </label>
                             <button class="button" id="referrals-apply-filters"><?php 
 echo esc_html__( 'Filter', 'woo-coupon-usage' );
@@ -603,11 +739,87 @@ wcusage_display_affiliate_referrals(
     1,
     20,
     '',
-    ''
+    $referrals_end_date
 );
 ?>
                         </div>
                     </div>
+
+                    <!-- Lifetime Customers Tab -->
+                    <?php 
+if ( function_exists( 'wcusage_lifetime_customers_enabled' ) && wcusage_lifetime_customers_enabled() ) {
+    ?>
+                    <div id="tab-lifetime" class="tab-content <?php 
+    echo ( $current_tab === 'lifetime' ? 'active' : '' );
+    ?>">
+                        <h3 style="color: #1d2327; font-size: 22px; font-weight: 600; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+                            <i class="fas fa-infinity" style="color: #2271b1; margin-right: 10px;"></i>
+                            <?php 
+    echo esc_html__( 'Lifetime Customers', 'woo-coupon-usage' );
+    ?>
+                        </h3>
+                        <p style="margin: -10px 0 20px; color: #6b7280;">
+                            <?php 
+    echo esc_html__( 'Customers linked to this affiliate for lifetime commission. While a link is active, all of that customer\'s orders are attributed to the affiliate, even if they do not re-use the coupon code.', 'woo-coupon-usage' );
+    ?>
+                            <?php 
+    echo esc_html__( 'Editing or removing a link only affects future orders - commission already granted on past orders is not changed.', 'woo-coupon-usage' );
+    ?>
+                        </p>
+                        <div class="wcusage-filters" id="wcusage-lifetime-filters" style="margin: 0 0 15px; display:flex; gap:8px; align-items: center;">
+                            <label>
+                                <?php 
+    echo esc_html__( 'Status', 'woo-coupon-usage' );
+    ?>
+                                <select id="lifetime-status">
+                                    <option value=""><?php 
+    echo esc_html__( 'All', 'woo-coupon-usage' );
+    ?></option>
+                                    <option value="active"><?php 
+    echo esc_html__( 'Active', 'woo-coupon-usage' );
+    ?></option>
+                                    <option value="expired"><?php 
+    echo esc_html__( 'Expired', 'woo-coupon-usage' );
+    ?></option>
+                                    <option value="never"><?php 
+    echo esc_html__( 'Never Expires', 'woo-coupon-usage' );
+    ?></option>
+                                </select>
+                            </label>
+                            <button class="button" id="lifetime-apply-filters"><?php 
+    echo esc_html__( 'Filter', 'woo-coupon-usage' );
+    ?></button>
+                            <?php 
+    // Pushed to the right of the filter row by margin-left:auto.
+    ?>
+                            <?php 
+    wcusage_affiliate_lifetime_add_button( $user_id );
+    ?>
+                        </div>
+                        <?php 
+    // Opens directly under the row its button sits on, and outside the table container so it is not wiped by the AJAX reload that follows a save.
+    ?>
+                        <?php 
+    wcusage_affiliate_lifetime_add_form( $user_id );
+    ?>
+                        <?php 
+    // Lives outside the table container so it survives the AJAX reload that follows a save.
+    ?>
+                        <div id="wcusage-lifetime-message" style="display: none;"></div>
+                        <div id="wcusage-lifetime-table-container">
+                            <?php 
+    wcusage_affiliate_lifetime_customers_table(
+        $user_id,
+        1,
+        20,
+        ''
+    );
+    ?>
+                        </div>
+                    </div>
+                    <?php 
+}
+?>
 
                     <!-- Visits Tab -->
                     <div id="tab-visits" class="tab-content <?php 
@@ -1253,7 +1465,7 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
             echo '</p>';
         }
         $mla_tiersnumber = wcusage_get_setting_value( 'wcusage_field_mla_number_tiers', '5' );
-        $options_check = get_option( 'wcusage_options' );
+        $options_check = wcusage_get_options();
         ?>
 
                                 <form method="post" action="">
@@ -1609,24 +1821,12 @@ if ( !empty( $user_roles ) ) {
                         </div>
                         <?php 
 // Extra registration details inline
-$wcu_info_meta = get_user_meta( $user_id, 'wcu_info', true );
 $wcu_promote = get_user_meta( $user_id, 'wcu_promote', true );
 $wcu_referrer = get_user_meta( $user_id, 'wcu_referrer', true );
-// Normalize wcu_info into an associative array
-$wcu_info = array();
-if ( is_array( $wcu_info_meta ) ) {
-    $wcu_info = $wcu_info_meta;
-} elseif ( is_string( $wcu_info_meta ) && strlen( $wcu_info_meta ) ) {
-    $decoded = json_decode( $wcu_info_meta, true );
-    if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
-        $wcu_info = $decoded;
-    } elseif ( function_exists( 'is_serialized' ) && is_serialized( $wcu_info_meta ) ) {
-        $maybe = maybe_unserialize( $wcu_info_meta );
-        if ( is_array( $maybe ) ) {
-            $wcu_info = $maybe;
-        }
-    }
-}
+// Shared helper: normalizes the meta (JSON / serialized / array)
+// and decodes labels and values stored HTML-entity encoded by
+// older versions, so they are not displayed as "&#039;".
+$wcu_info = ( function_exists( 'wcusage_get_user_custom_fields' ) ? wcusage_get_user_custom_fields( $user_id ) : array() );
 if ( !empty( $wcu_promote ) ) {
     ?>
                             <div class="info-row">
@@ -2133,19 +2333,81 @@ function wcusage_display_affiliate_stats(  $user_id, $coupon_id = 'all'  ) {
         echo esc_html__( 'Enter the name of the coupon code that will be created.', 'woo-coupon-usage' );
         ?></i>
                         </td>
-                    </tr>
+                    <?php 
+        // Same email picker as the Add New Affiliate form, defaulting to the
+        // coupon-assigned wording since this affiliate already exists. Options are
+        // limited to whichever emails are enabled under Settings > Notifications.
+        $wcusage_field_email_coupon_assigned_enable = wcusage_get_setting_value( 'wcusage_field_email_coupon_assigned_enable', '1' );
+        $wcusage_field_email_registration_accept_enable = wcusage_get_setting_value( 'wcusage_field_email_registration_accept_enable', '1' );
+        $wcu_send_email_options = array();
+        if ( $wcusage_field_email_coupon_assigned_enable ) {
+            $wcu_send_email_options['coupon_assigned'] = esc_html__( 'New Coupon Assigned', 'woo-coupon-usage' );
+        }
+        if ( $wcusage_field_email_registration_accept_enable ) {
+            $wcu_send_email_options['accepted'] = esc_html__( 'Affiliate Application Accepted', 'woo-coupon-usage' );
+        }
+        if ( $wcu_send_email_options ) {
+            // Pre-select whatever this admin picked last time, falling back to the
+            // first available email (and dropping a remembered choice whose email
+            // has since been switched off in the settings).
+            $wcu_send_email_default = key( $wcu_send_email_options );
+            $wcu_send_email_selected = wcusage_get_send_email_preference( 'add_coupon', $wcu_send_email_options, $wcu_send_email_default );
+            ?>
                     <tr>
+                        <th scope="row"><label for="wcu-send-email"><?php 
+            echo esc_html__( 'Send Notification Email', 'woo-coupon-usage' );
+            ?></label></th>
+                        <td>
+                            <select name="wcu-send-email" id="wcu-send-email" onchange="wcuToggleCouponMessageRow(this)">
+                                <?php 
+            foreach ( $wcu_send_email_options as $wcu_send_email_key => $wcu_send_email_label ) {
+                ?>
+                                <option value="<?php 
+                echo esc_attr( $wcu_send_email_key );
+                ?>"<?php 
+                selected( $wcu_send_email_selected, $wcu_send_email_key );
+                ?>><?php 
+                echo esc_html( $wcu_send_email_label );
+                ?></option>
+                                <?php 
+            }
+            ?>
+                                <option value="none"<?php 
+            selected( $wcu_send_email_selected, 'none' );
+            ?>><?php 
+            echo esc_html__( 'Do not send an email', 'woo-coupon-usage' );
+            ?></option>
+                            </select>
+                            <br/><i style="font-size: 10px;"><?php 
+            echo esc_html__( 'Choose which email this affiliate receives. Your choice is remembered for next time. The wording of each one can be edited under Settings > Notifications.', 'woo-coupon-usage' );
+            ?></i>
+                        </td>
+                    </tr>
+                    <tr id="wcu-coupon-message-row"<?php 
+            echo ( $wcu_send_email_selected === 'none' ? ' style="display: none;"' : '' );
+            ?>>
                         <th scope="row"><label for="wcu-message"><?php 
-        echo esc_html__( 'Custom Message', 'woo-coupon-usage' );
-        ?></label></th>
+            echo esc_html__( 'Custom Message', 'woo-coupon-usage' );
+            ?></label></th>
                         <td>
                             <input name="wcu-message" type="text" id="wcu-message" class="regular-text" value="">
                             <br/><i style="font-size: 10px;"><?php 
-        echo esc_html__( 'Optional custom message to include in the notification email.', 'woo-coupon-usage' );
-        ?></i>
+            echo esc_html__( 'Optional custom message to include in the notification email, shown by the {message} merge tag.', 'woo-coupon-usage' );
+            ?></i>
                         </td>
                     </tr>
+                    <?php 
+        }
+        ?>
                 </table>
+
+                <script>
+                function wcuToggleCouponMessageRow(field) {
+                    var row = document.getElementById('wcu-coupon-message-row');
+                    if (!row) { return; }
+                    row.style.display = (field.value !== 'none') ? '' : 'none';
+                }
+                </script>
 
                 <p class="submit">
                     <input type="submit" name="add_new_coupon" class="button button-primary" value="<?php 
@@ -2179,190 +2441,27 @@ function wcusage_display_affiliate_stats(  $user_id, $coupon_id = 'all'  ) {
 
 /**
  * Display affiliate referrals
+ *
+ * The list itself lives in wcusage_affiliate_referrals_table(), which also answers the
+ * AJAX reloads behind the filters and the pagination - so the first render and every
+ * later one go through the same code.
  */
 function wcusage_display_affiliate_referrals(
     $user_id,
     $page = 1,
     $per_page = 20,
     $start_date = '',
-    $end_date = ''
+    $end_date = '',
+    $filters = array()
 ) {
-    // Get all coupons assigned to this affiliate
-    $coupons = wcusage_get_users_coupons_ids( $user_id );
-    if ( empty( $coupons ) ) {
-        echo '<p>' . esc_html__( 'No coupons assigned to this affiliate.', 'woo-coupon-usage' ) . '</p>';
-        return;
-    }
-    // Get coupon codes for these coupons
-    $coupon_codes = array();
-    foreach ( $coupons as $coupon_id ) {
-        $coupon_code = get_the_title( $coupon_id );
-        if ( $coupon_code ) {
-            $coupon_codes[] = $coupon_code;
-        }
-    }
-    if ( empty( $coupon_codes ) ) {
-        echo '<p>' . esc_html__( 'No valid coupon codes found for this affiliate.', 'woo-coupon-usage' ) . '</p>';
-        return;
-    }
-    // Pagination
-    $page = max( 1, intval( $page ) );
-    $per_page = max( 1, intval( $per_page ) );
-    $offset = ($page - 1) * $per_page;
-    $orders_by_id = array();
-    foreach ( $coupon_codes as $coupon_code ) {
-        $coupon_orders = wcusage_wh_getOrderbyCouponCode(
-            $coupon_code,
-            $start_date,
-            ( $end_date ? $end_date : date( 'Y-m-d' ) ),
-            '',
-            1
-        );
-        if ( !is_array( $coupon_orders ) ) {
-            continue;
-        }
-        foreach ( $coupon_orders as $coupon_order ) {
-            if ( is_array( $coupon_order ) && !empty( $coupon_order['order_id'] ) ) {
-                $orders_by_id[$coupon_order['order_id']] = $coupon_order['order_id'];
-            }
-        }
-    }
-    $all_orders = array();
-    foreach ( $orders_by_id as $order_id ) {
-        $order = wc_get_order( $order_id );
-        if ( $order ) {
-            $all_orders[] = $order;
-        }
-    }
-    usort( $all_orders, function ( $a, $b ) {
-        $a_date = ( $a->get_date_created() ? $a->get_date_created()->getTimestamp() : 0 );
-        $b_date = ( $b->get_date_created() ? $b->get_date_created()->getTimestamp() : 0 );
-        return $b_date - $a_date;
-    } );
-    $total = count( $all_orders );
-    $orders = array_slice( $all_orders, $offset, $per_page );
-    if ( empty( $orders ) ) {
-        echo '<p>' . esc_html__( 'No recent referrals found for this affiliate\'s coupons. This could mean that the assigned coupons have not been used in any orders yet, or the orders are still pending.', 'woo-coupon-usage' ) . '</p>';
-        return;
-    }
-    ?>
-    <table class="wp-list-table widefat fixed striped">
-        <thead>
-            <tr>
-                <th><?php 
-    echo esc_html__( 'Order ID', 'woo-coupon-usage' );
-    ?></th>
-                <th><?php 
-    echo esc_html__( 'Date', 'woo-coupon-usage' );
-    ?></th>
-                <th><?php 
-    echo esc_html__( 'Customer', 'woo-coupon-usage' );
-    ?></th>
-                <th><?php 
-    echo esc_html__( 'Coupon Code', 'woo-coupon-usage' );
-    ?></th>
-                <th><?php 
-    echo esc_html__( 'Total', 'woo-coupon-usage' );
-    ?></th>
-                <th><?php 
-    echo esc_html__( 'Commission', 'woo-coupon-usage' );
-    ?></th>
-                <th><?php 
-    echo esc_html__( 'Status', 'woo-coupon-usage' );
-    ?></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php 
-    foreach ( $orders as $order ) {
-        ?>
-                <?php 
-        $order_id = $order->get_id();
-        $commission = wcusage_get_order_saved_commission( $order_id );
-        $billing_first_name = $order->get_billing_first_name();
-        $billing_last_name = $order->get_billing_last_name();
-        $customer_name = trim( $billing_first_name . ' ' . $billing_last_name );
-        if ( empty( $customer_name ) ) {
-            $customer_name = esc_html__( 'Guest', 'woo-coupon-usage' );
-        }
-        // Get coupon code used in this order
-        $coupon_code = '';
-        $lifetime_coupon = wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer' );
-        $referrer_coupon = wcusage_order_meta( $order_id, 'wcusage_referrer_coupon' );
-        $used_coupons = $order->get_coupon_codes();
-        if ( $lifetime_coupon ) {
-            $coupon_code = $lifetime_coupon;
-        } elseif ( $referrer_coupon ) {
-            $coupon_code = $referrer_coupon;
-        } elseif ( !empty( $used_coupons ) ) {
-            $coupon_code = $used_coupons[0];
-            // Get first coupon code
-        }
-        ?>
-                <tr>
-                    <td><a href="<?php 
-        echo esc_url( admin_url( 'post.php?post=' . $order_id . '&action=edit' ) );
-        ?>">#<?php 
-        echo esc_html( $order_id );
-        ?></a></td>
-                    <td><?php 
-        echo esc_html( $order->get_date_created()->date_i18n( get_option( 'date_format' ) ) );
-        ?></td>
-                    <td><?php 
-        echo esc_html( $customer_name );
-        ?></td>
-                    <td><?php 
-        echo esc_html( $coupon_code );
-        ?></td>
-                    <td><?php 
-        echo wcusage_format_price( $order->get_total() );
-        ?></td>
-                    <td><?php 
-        echo wcusage_format_price( $commission );
-        ?></td>
-                    <td><?php 
-        $order_status = $order->get_status();
-        $order_status_class = '';
-        switch ( $order_status ) {
-            case 'completed':
-                $order_status_class = 'status-completed';
-                break;
-            case 'processing':
-                $order_status_class = 'status-processing';
-                break;
-            case 'on-hold':
-                $order_status_class = 'status-on-hold';
-                break;
-            case 'cancelled':
-            case 'refunded':
-            case 'failed':
-                $order_status_class = 'status-cancelled';
-                break;
-            default:
-                $order_status_class = 'status-processing';
-                break;
-        }
-        ?><span class="order-status <?php 
-        echo esc_attr( $order_status_class );
-        ?>"><?php 
-        echo esc_html( wc_get_order_status_name( $order_status ) );
-        ?></span></td>
-                </tr>
-            <?php 
-    }
-    ?>
-        </tbody>
-    </table>
-
-    <?php 
-    wcusage_render_pagination(
-        'referrals',
+    wcusage_affiliate_referrals_table(
+        $user_id,
         $page,
         $per_page,
-        $total
+        $start_date,
+        $end_date,
+        $filters
     );
-    ?>
-    <?php 
 }
 
 /**

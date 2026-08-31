@@ -158,6 +158,124 @@ if( !function_exists( 'wcusage_coupon_id_has_code' ) ) {
 }
 
 /**
+ * Answers "is this coupon's code ambiguous?" for every published coupon at once.
+ *
+ * wc_get_coupon_id_by_code() matches on LOWER(post_title), which no index can
+ * serve, so asking it per coupon full-scans wp_posts every time. On a store with
+ * 1,200 coupons and 32,000 posts that measured 1,145 queries / 3.0s on the admin
+ * reports screen alone. Two queries answer it for the whole set instead.
+ *
+ * The grouping is done in MySQL rather than PHP on purpose: post_title's collation
+ * (utf8mb4_unicode_520_ci) is case- AND accent-insensitive, so "korperkur" and
+ * "körperkur" are one code to the lookup this replaces. Lower-casing and comparing
+ * in PHP would treat them as two and under-report ambiguity. Note this is the
+ * opposite choice to wcusage_coupon_codes_match() above, and deliberately so: that
+ * one asks "is this the same code", where folding accents is too loose, while this
+ * asks "could this code resolve to a different coupon", which is exactly the
+ * question wc_get_coupon_id_by_code() answers under the collation's rules.
+ *
+ * Coupons with an empty code are left out - no code resolves to them, and the
+ * per-coupon lookup this replaces returned false for them too.
+ *
+ * Only published coupons are covered - they are the only ones a code can resolve
+ * to. Callers asking about a draft or trashed coupon fall back to the per-coupon
+ * lookup, which is correct for them and rare enough not to matter.
+ *
+ * @return array Map of published coupon ID => bool.
+ *
+ */
+if( !function_exists( 'wcusage_get_coupon_ambiguity_map' ) ) {
+	function wcusage_get_coupon_ambiguity_map() {
+
+		global $wpdb, $wcusage_coupon_ambiguity_map;
+
+		if ( is_array( $wcusage_coupon_ambiguity_map ) ) {
+			return $wcusage_coupon_ambiguity_map;
+		}
+
+		// Codes that more than one published coupon answers to.
+		//
+		// Cached: this is the expensive half of the pair. The GROUP BY LOWER()
+		// cannot use the type_status_date index for grouping, so MySQL reads every
+		// shop_coupon row into a temporary table and sorts it - measured at 28 ms of
+		// the 31 ms this function costs, on a site with 1,192 coupons, and the cost
+		// grows with the coupon count rather than with anything about the affiliate
+		// whose dashboard is being drawn. Affiliate stores tend to have one coupon
+		// per affiliate, so that is the number that grows.
+		//
+		// The answer only changes when a coupon code does, which is exactly what
+		// wcusage_flush_coupon_ambiguity_map() below is hooked to; it deletes this
+		// alongside the per-request memo. The day-long TTL is a backstop for a code
+		// changed some other way (direct SQL, an importer that does not fire the
+		// post hooks).
+		$dupe_codes_transient = 'wcusage_coupon_dupe_codes';
+		$dupe_codes = get_transient( $dupe_codes_transient );
+
+		if ( ! is_array( $dupe_codes ) ) {
+
+			$dupe_codes = $wpdb->get_col(
+				"SELECT LOWER(post_title) FROM {$wpdb->posts}
+				 WHERE post_type = 'shop_coupon' AND post_status = 'publish' AND post_title <> ''
+				 GROUP BY LOWER(post_title) HAVING COUNT(*) > 1"
+			); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+			if ( ! is_array( $dupe_codes ) ) {
+				$dupe_codes = array();
+			}
+
+			set_transient( $dupe_codes_transient, $dupe_codes, DAY_IN_SECONDS );
+
+		}
+
+		if ( $dupe_codes ) {
+			// IN () is evaluated by MySQL under the same collation as the GROUP BY
+			// above, so a code that grouped with another one also matches here.
+			$placeholders = implode( ',', array_fill( 0, count( $dupe_codes ), '%s' ) );
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT ID, CASE WHEN LOWER(post_title) IN ($placeholders) THEN 1 ELSE 0 END AS ambiguous
+					 FROM {$wpdb->posts}
+					 WHERE post_type = 'shop_coupon' AND post_status = 'publish' AND post_title <> ''", // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+					$dupe_codes
+				)
+			); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+		} else {
+			// No code is shared, so every published coupon is unambiguous. The map is
+			// still built so that lookups can tell "published, not ambiguous" apart
+			// from "not a published coupon" without another query.
+			$rows = $wpdb->get_results(
+				"SELECT ID, 0 AS ambiguous FROM {$wpdb->posts}
+				 WHERE post_type = 'shop_coupon' AND post_status = 'publish' AND post_title <> ''"
+			); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+		}
+
+		$wcusage_coupon_ambiguity_map = array();
+		foreach ( $rows as $row ) {
+			$wcusage_coupon_ambiguity_map[ (int) $row->ID ] = (bool) $row->ambiguous;
+		}
+
+		return $wcusage_coupon_ambiguity_map;
+
+	}
+}
+
+/**
+ * Drop the cached ambiguity map after anything that could change a coupon code.
+ *
+ */
+if( !function_exists( 'wcusage_flush_coupon_ambiguity_map' ) ) {
+	function wcusage_flush_coupon_ambiguity_map() {
+		global $wcusage_coupon_ambiguity_map;
+		$wcusage_coupon_ambiguity_map = null;
+		delete_transient( 'wcusage_coupon_dupe_codes' );
+	}
+}
+add_action( 'save_post_shop_coupon', 'wcusage_flush_coupon_ambiguity_map' );
+add_action( 'deleted_post', 'wcusage_flush_coupon_ambiguity_map' );
+add_action( 'trashed_post', 'wcusage_flush_coupon_ambiguity_map' );
+add_action( 'untrashed_post', 'wcusage_flush_coupon_ambiguity_map' );
+
+/**
  * Whether another coupon shares this coupon's code.
  *
  * Two coupons whose codes differ only by letter case are a single code to
@@ -172,34 +290,43 @@ if( !function_exists( 'wcusage_coupon_id_has_code' ) ) {
 if( !function_exists( 'wcusage_coupon_code_is_ambiguous' ) ) {
 	function wcusage_coupon_code_is_ambiguous( $couponid ) {
 
-		// Called once per row on the coupons and affiliate orders lists, and again for
-		// every dashboard URL built on those pages. wc_get_coupon_id_by_code() runs a
-		// direct query for any code not already in the object cache, so without this the
-		// check adds a query per row - see wcusage_get_coupon_id(), which caches the same
-		// way. Keyed on the coupon ID, which is what callers pass.
-		static $ambiguous_cache = array();
-
 		$couponid = absint( $couponid );
 
-		if ( isset( $ambiguous_cache[ $couponid ] ) ) {
-			return $ambiguous_cache[ $couponid ];
+		if ( ! $couponid ) {
+			return false;
 		}
 
-		if ( ! $couponid || ! function_exists( 'wc_get_coupon_id_by_code' ) || get_post_type( $couponid ) !== 'shop_coupon' ) {
+		// Two queries cover every published coupon, which is what the callers - the
+		// coupons and affiliate orders lists, the reports screen, the portal - iterate.
+		$map = wcusage_get_coupon_ambiguity_map();
+		if ( isset( $map[ $couponid ] ) ) {
+			return $map[ $couponid ];
+		}
+
+		// Not a published coupon (draft, trashed, or created since the map was built),
+		// so ask about this one on its own. A code still resolves to a published
+		// coupon, so a draft sharing one is ambiguous and does need its ID suffix.
+		if ( ! function_exists( 'wc_get_coupon_id_by_code' ) || get_post_type( $couponid ) !== 'shop_coupon' ) {
 			return false;
 		}
 
 		$coupon_code = get_post_field( 'post_title', $couponid, 'raw' );
 		if ( ! $coupon_code ) {
-			$ambiguous_cache[ $couponid ] = false;
 			return false;
 		}
 
 		// $exclude is applied after the lookup, so this returns a *different*
 		// coupon that answers to the same code, when there is one.
-		$ambiguous_cache[ $couponid ] = (bool) wc_get_coupon_id_by_code( $coupon_code, $couponid );
+		$ambiguous = (bool) wc_get_coupon_id_by_code( $coupon_code, $couponid );
 
-		return $ambiguous_cache[ $couponid ];
+		// Memoise onto the map so repeated asks about the same unpublished coupon
+		// do not repeat the scan. Cleared by wcusage_flush_coupon_ambiguity_map().
+		global $wcusage_coupon_ambiguity_map;
+		if ( is_array( $wcusage_coupon_ambiguity_map ) ) {
+			$wcusage_coupon_ambiguity_map[ $couponid ] = $ambiguous;
+		}
+
+		return $ambiguous;
 
 	}
 }
@@ -241,7 +368,43 @@ if( !function_exists( 'wcusage_get_dashboard_coupon_id' ) ) {
 				return $suffix_id;
 			}
 
-			return absint( wcusage_get_coupon_id( $matches[1] ) );
+			$hyphen_match = absint( wcusage_get_coupon_id( $matches[1] ) );
+			if ( $hyphen_match ) {
+				return $hyphen_match;
+			}
+
+		}
+
+		// The dashboard also links coupons as "<code><id>" with no separator, so a
+		// urlid ending in digits may be a code with the post ID stuck on the end.
+		// Where the digit run could split more than one way ("summer12" being
+		// "summer" + 12 or "summer1" + 2) every split is tried, longest ID first,
+		// and each candidate is confirmed to really carry that code.
+		//
+		// This replaces a fallback that loaded EVERY coupon in the store with
+		// posts_per_page => -1 and compared titles in PHP. That query was reachable
+		// from an ordinary dashboard URL, so on a store with tens of thousands of
+		// coupons any visitor could trigger it.
+		if ( preg_match( '/^(.*?)(\d+)$/', $urlid, $digit_matches ) ) {
+
+			$prefix = $digit_matches[1];
+			$digits = $digit_matches[2];
+			$length = strlen( $digits );
+
+			for ( $take = $length; $take >= 1; $take-- ) {
+
+				$candidate_id   = absint( substr( $digits, $length - $take ) );
+				$candidate_code = $prefix . substr( $digits, 0, $length - $take );
+
+				if ( ! $candidate_id || '' === $candidate_code ) {
+					continue;
+				}
+
+				if ( wcusage_coupon_id_has_code( $candidate_id, $candidate_code ) && get_post_status( $candidate_id ) === 'publish' ) {
+					return $candidate_id;
+				}
+
+			}
 
 		}
 
@@ -332,7 +495,7 @@ function wcusage_ajax_get_coupon_id() {
 if( !function_exists( 'wcusage_get_coupon_info_by_id' ) ) {
 	function wcusage_get_coupon_info_by_id($couponid) {
 
-		$options = get_option( 'wcusage_options' );
+		$options = wcusage_get_options();
 
 		$coupon_commission_percent = get_post_meta( $couponid, 'wcu_text_coupon_commission', true );
 			if(!$coupon_commission_percent) { $coupon_commission_percent = wcusage_get_setting_value('wcusage_field_affiliate', '0'); }

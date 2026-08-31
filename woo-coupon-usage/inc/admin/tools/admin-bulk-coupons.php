@@ -55,9 +55,9 @@ function wcusage_bulk_coupon_creator_page() {
     ?>
     </div>
 
-    <link rel="stylesheet" href="<?php 
-    echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
-    ?>" crossorigin="anonymous">
+    <?php 
+    wcusage_enqueue_font_awesome();
+    ?>
 
     <div class="wrap wcusage-tools wcusage-page">
 

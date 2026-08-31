@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( !function_exists( 'wcusage_field_cb_fraud' ) ) {
 function wcusage_field_cb_fraud( $args )
 {
-  $options = get_option( 'wcusage_options' );
+  $options = wcusage_get_options();
   $ispro = ( wcu_fs()->can_use_premium_code() ? 1 : 0 );
   $probrackets1 = ( $ispro ? "" : " (PRO)" );
   $probrackets2 = ( $ispro ? "" : "(PRO) " );

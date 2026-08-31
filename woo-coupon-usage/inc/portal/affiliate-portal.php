@@ -20,20 +20,50 @@ function wcusage_affiliate_portal_redirect_registration() {
     }
 }
 
+// Normalise the configured portal slug.
+//
+// The raw setting used to go straight into a rewrite regex registered at 'top' priority,
+// ahead of every core and WooCommerce rule. An empty value produced '^/?$', which claims
+// the site root, and regex metacharacters in the slug were interpreted as pattern syntax
+// rather than matched literally - '.' matching any character, and so on.
+//
+// Deliberately not sanitize_title(): around thirty other places build the portal link
+// straight from this setting, and the field can legitimately hold a nested path such as
+// "account/affiliates" - the settings screen auto-fills it from the old dashboard page
+// URL. Normalising the slug here but not there would leave every link pointing at a URL
+// the rule no longer matches. Only the separators that would claim the site root are
+// stripped; preg_quote() in the regex below neutralises everything else.
+//
+// Pass $wcusage_portal_slug explicitly from the settings save handlers, which hold the
+// value that was just written and must not depend on when the options cache refreshes.
+function wcusage_get_affiliate_portal_slug( $wcusage_portal_slug = null ) {
+    if ( null === $wcusage_portal_slug ) {
+        $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+    }
+    $wcusage_portal_slug = trim( trim( (string) $wcusage_portal_slug ), '/' );
+    if ( '' === $wcusage_portal_slug ) {
+        $wcusage_portal_slug = 'affiliate-portal';
+    }
+    return $wcusage_portal_slug;
+}
+
+// Build the rewrite regex. Shared, so the rule that gets registered and the rule that
+// wcusage_check_affiliate_portal_rewrite_rule() looks for can never drift apart.
+function wcusage_get_affiliate_portal_rewrite_regex( $wcusage_portal_slug = null ) {
+    return '^' . preg_quote( wcusage_get_affiliate_portal_slug( $wcusage_portal_slug ), '/' ) . '/?$';
+}
+
 // Register rewrite rule for affiliate portal
 add_action('init', 'wcusage_add_affiliate_portal_rewrite_rule');
 function wcusage_add_affiliate_portal_rewrite_rule() {
-    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
-    add_rewrite_rule('^' . $wcusage_portal_slug . '/?$', 'index.php?affiliate_portal=1', 'top');
+    add_rewrite_rule( wcusage_get_affiliate_portal_rewrite_regex(), 'index.php?affiliate_portal=1', 'top');
 }
 
 // Function to check if rewrite rule exists
 function wcusage_check_affiliate_portal_rewrite_rule() {
     global $wp_rewrite;
     $rules = $wp_rewrite->wp_rewrite_rules();
-    $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
-    $rule = '^' . $wcusage_portal_slug . '/?$';
-    return isset($rules[$rule]);
+    return isset( $rules[ wcusage_get_affiliate_portal_rewrite_regex() ] );
 }
 
 // Suppress default query entirely
@@ -67,10 +97,25 @@ function wcusage_prevent_affiliate_portal_404($preempt, $wp_query) {
     return $preempt;
 }
 
-// Flush rewrite rules on plugin activation
-register_activation_hook(__FILE__, 'wcusage_flush_rewrite_rules1');
+// Install the rewrite rule whenever it is missing.
+//
+// This was register_activation_hook(__FILE__, ...), which never fired: WordPress only ever
+// fires activate_{plugin} for the main plugin file, and __FILE__ here is an include. The
+// rule therefore only reached the database if settings happened to be saved afterwards,
+// leaving the portal 404ing on sites that never touched them. Testing the stored rules
+// instead covers activation, upgrades and slug changes alike.
+add_action('wp_loaded', 'wcusage_flush_rewrite_rules1');
 function wcusage_flush_rewrite_rules1() {
-    wcusage_add_affiliate_portal_rewrite_rule();
+    if ( wcusage_check_affiliate_portal_rewrite_rule() ) {
+        return;
+    }
+    // Only attempt this once per slug. Rebuilding the rules is expensive, and without the
+    // marker a flush that cannot persist would run again on every single request.
+    $wcusage_portal_slug = wcusage_get_affiliate_portal_slug();
+    if ( get_option('wcusage_portal_rules_flushed') === $wcusage_portal_slug ) {
+        return;
+    }
+    update_option('wcusage_portal_rules_flushed', $wcusage_portal_slug);
     flush_rewrite_rules();
 }
 

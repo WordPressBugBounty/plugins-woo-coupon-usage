@@ -12,7 +12,7 @@ if ( ! wcusage_check_admin_access() ) {
 }
 ?>
 
-<link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
+<?php wcusage_enqueue_font_awesome(); ?>
 
 <!-- Check Website Field Enabled -->
 <?php

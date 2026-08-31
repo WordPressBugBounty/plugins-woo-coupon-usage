@@ -1,0 +1,257 @@
+/*
+ * RTL overrides for the affiliate dashboard (Hebrew, Arabic, Farsi, Urdu...).
+ *
+ * WordPress loads this file *in addition to* style.css, and only when
+ * is_rtl() is true - see wcusage_include_plugin_css() in woo-coupon-usage.php.
+ * So this file only needs to contain the declarations that differ, not a
+ * mirrored copy of the whole stylesheet. Keep the rules below in the same
+ * order as style.css so the two stay easy to diff.
+ */
+
+/* ---------------------------------------------------------------------
+ * 1. Bidirectional text
+ *
+ * Several labels are built as __( 'Total Sales' ) . ':', which leaves the
+ * colon outside the translated string. A colon is a bidi-neutral character,
+ * so in an RTL paragraph it takes the paragraph direction and jumps to the
+ * *left* of a Latin run - the label renders as ":Total Sales".
+ *
+ * "plaintext" resolves each element's direction from its own first strong
+ * character instead of from the paragraph. An untranslated English label
+ * stays LTR and keeps its colon on the right; a translated Hebrew label
+ * stays RTL and keeps its colon on the left. Both are correct, and it keeps
+ * working as strings get translated, so we do not have to special-case any
+ * particular locale.
+ *
+ * Do not swap this for "direction: ltr" - that fixes English by breaking
+ * every translated label.
+ * ------------------------------------------------------------------ */
+
+/* Applied to the inline elements that carry labels rather than to a list of
+   individual classes, because the colon sits outside __() in 38 places on the
+   dashboard and new ones get written all the time. Deliberately not applied to
+   <p> or <div>: those hold running prose, and a sentence that happens to open
+   with a Latin brand name would be resolved LTR and flipped. Short labels do
+   not have that problem. A span holding only digits or a currency symbol has
+   no strong character at all, so it falls back to LTR and renders "\20AA 125.00"
+   either way. */
+.wcu-dash-coupon-area span,
+.wcu-dash-coupon-area strong,
+.wcu-dash-coupon-area b,
+.wcu-dash-coupon-area em,
+.wcu-dash-coupon-area label,
+.wcu-dash-coupon-area th,
+.wcu-dash-coupon-area h1,
+.wcu-dash-coupon-area h2,
+.wcu-dash-coupon-area h3,
+.wcu-dash-coupon-area h4,
+/* The stacked-table column labels are generated content, printed as
+   td:nth-of-type(n):before { content: "Orders:" } by the inline <style> in
+   tab-latest-orders.php, so they need the same treatment as a real label. */
+.wcu-dash-coupon-area .wcuTable td:before {
+	unicode-bidi: plaintext;
+}
+
+/* URLs, coupon codes and e-mail addresses are always LTR, even when they sit
+   inside a Hebrew sentence. "isolate" stops the surrounding RTL text from
+   reordering the punctuation inside them (?, =, &, /, :). */
+.wcu-dash-coupon-area .wcu-urllink,
+.wcu-dash-coupon-area code,
+.wcu-dash-coupon-area .wcu-coupon-title,
+.wcu-dash-coupon-area input[type="url"],
+.wcu-dash-coupon-area input[type="email"],
+.wcu-dash-coupon-area .wcusage_creativelink {
+	direction: ltr;
+	text-align: left;
+	unicode-bidi: isolate;
+}
+
+/* ---------------------------------------------------------------------
+ * 2. Mirrored layout
+ * ------------------------------------------------------------------ */
+
+.wcutablinks .fas {
+	margin-right: 0;
+	margin-left: 1px;
+}
+
+.rates-pagination {
+	float: left;
+}
+
+.wcu-dash-coupon-area .wcusage-dash-logout {
+	margin-left: 0;
+}
+
+.wcutab button {
+	float: right;
+}
+
+.wcu-orders-search,
+.wcu-summary-search {
+	margin-right: 0;
+	margin-left: 10px;
+}
+
+.wcusage-search-form {
+	float: left;
+}
+
+.wcu_form_style_columns .wcu-register-field-col-1,
+.wcu_form_style_columns .wcu-register-field-col-2 {
+	float: right;
+}
+
+.wcu_form_style_columns .wcu-register-field-col-1 {
+	margin-right: 0;
+	margin-left: 1%;
+}
+
+/* Statistics cards: the icon is absolutely positioned in a 105px gutter that
+   the padding reserves for it. Both have to move to the right together, or
+   the text runs over the icon. */
+.wcusage-info-box {
+	padding: 25px 105px 25px 15px;
+}
+
+.wcusage-info-box:before {
+	left: auto;
+	right: 30px;
+}
+
+.wcusage-orders-date-stats .wcusage-info-box {
+	padding: 15px 85px 15px 10px;
+}
+
+.wcusage-orders-date-stats .wcusage-info-box:before {
+	left: auto;
+	right: 20px;
+}
+
+.wcusage-refresh-stats-icon,
+.wcusage-refresh-stats-btn {
+	margin-left: 0 !important;
+	margin-right: 6px !important;
+}
+
+.show_statistics .wcusage-stats-title {
+	margin-left: 0;
+	margin-right: 5px;
+}
+
+.wcusage-num-pos,
+.wcusage-num-neg {
+	margin-left: 0;
+	margin-right: 10px;
+}
+
+.wcusage-social-icon {
+	margin: 0 0 0 4px;
+}
+
+.wcu-user-coupon-list {
+	float: right;
+}
+
+.wcusage-login-form-col {
+	float: right;
+}
+
+.creatives-box img {
+	left: auto;
+	right: 0;
+}
+
+.wcu-mla-network-tier {
+	margin-left: 0 !important;
+	margin-right: -7px !important;
+}
+
+#mla_chart_div td.google-visualization-orgchart-node {
+	margin-left: 0;
+	margin-right: -2px;
+}
+
+.wcusage-reward-box {
+	float: right;
+}
+
+/* ---------------------------------------------------------------------
+ * 3. Mirrored layout inside media queries
+ *
+ * These have to repeat their original @media conditions, otherwise the
+ * unprefixed rules above would leak into breakpoints they never applied to.
+ * ------------------------------------------------------------------ */
+
+@media only screen and (min-width: 760px) {
+
+	.wcu-campaigns-col1 {
+		float: right;
+	}
+
+	.wcu-campaigns-col2 {
+		float: right;
+		text-align: left;
+	}
+
+	#wcu-referral-campaign {
+		float: left;
+	}
+
+	#wcu-add-campaign-button {
+		float: right;
+	}
+
+}
+
+@media only screen and (min-width: 940px) {
+
+	.wcu-filters-col1,
+	.wcu-filters-col2 {
+		float: right;
+	}
+
+}
+
+@media only screen and (min-width: 1060px) {
+
+	.wcusage-info-box {
+		float: right;
+	}
+
+}
+
+@media only screen and (max-width: 1020px) {
+
+	.wcusage-login-form-col {
+		float: right;
+	}
+
+}
+
+/* Responsive tables collapse to one row per record, with the column heading
+   injected through td:before into a 50% gutter. Gutter, heading and the
+   off-screen <thead> all mirror together. */
+@media only screen and (max-width: 760px),
+(min-device-width: 768px) and (max-device-width: 1024px) {
+
+	.wcuTable thead tr {
+		left: auto;
+		right: -9999px;
+	}
+
+	.wcuTable td {
+		/* 10px is the base .wcuTableCell side padding that style.css leaves
+		   untouched on the non-gutter side. */
+		padding-left: 10px !important;
+		padding-right: 50% !important;
+	}
+
+	.wcuTable td:before {
+		left: auto;
+		right: 6px;
+		padding-right: 0;
+		padding-left: 10px;
+	}
+
+}

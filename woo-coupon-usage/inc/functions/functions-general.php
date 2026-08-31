@@ -169,10 +169,22 @@ function wcusage_fix_cache() {
     $dashboard_page = wcusage_get_setting_value('wcusage_dashboard_page', '');
     $mla_dashboard_page = wcusage_get_setting_value('wcusage_mla_dashboard_page', '');
     $wcusage_portal_slug = wcusage_get_setting_value('wcusage_portal_slug', 'affiliate-portal');
+
+    // My Account only counts when the affiliate tab is the page being viewed.
+    // Testing is_account_page() alone applied all of this to every My Account
+    // screen - orders, addresses, downloads - on every store, including those
+    // that never switched the affiliate tab on.
+    $is_affiliate_account_tab = false;
+    if ( is_account_page() && wcusage_get_setting_value( 'wcusage_field_account_tab', 0 ) ) {
+      $is_affiliate_account_tab = function_exists( 'is_wc_endpoint_url' )
+        ? is_wc_endpoint_url( 'coupon-affiliate' )
+        : true;
+    }
+
     $is_affiliate_page = (
       $post_id == $dashboard_page
       || $post_id == $mla_dashboard_page
-      || is_account_page()
+      || $is_affiliate_account_tab
       || ( !is_admin() && isset($_SERVER['REQUEST_URI']) && strpos( $_SERVER['REQUEST_URI'], $wcusage_portal_slug ) !== false )
     );
   }
@@ -181,14 +193,16 @@ function wcusage_fix_cache() {
     return;
   }
 
+  // Page caching must be off: the dashboard is per-affiliate content.
+  //
+  // The OBJECT and DB caches are deliberately NOT disabled here. They are what
+  // makes the page affordable - the stats path reads options, coupon meta and
+  // orders many times over, and turning off the object cache sends every one of
+  // those reads to MySQL on the single heaviest page the plugin has. Page
+  // caching and object caching are different things; only the first would serve
+  // one affiliate's figures to another.
   if ( ! defined( 'DONOTCACHEPAGE' ) ) {
     define( 'DONOTCACHEPAGE', true );
-  }
-  if ( ! defined( 'DONOTCACHEDB' ) ) {
-    define( 'DONOTCACHEDB', true );
-  }
-  if ( ! defined( 'DONOTCACHEOBJECT' ) ) {
-    define( 'DONOTCACHEOBJECT', true );
   }
   if ( ! defined( 'DONOTMINIFY' ) ) {
     define( 'DONOTMINIFY', true );
@@ -409,7 +423,7 @@ if ( ! function_exists( 'wcusage_get_admin_menu_capability' ) ) {
   function wcusage_get_admin_menu_capability() {
 
     $default_capability = 'administrator';
-    $options = get_option( 'wcusage_options', array() );
+    $options = wcusage_get_options();
 
     $configured_capability = $default_capability;
     if ( isset( $options['wcusage_field_admin_permission'] ) && is_string( $options['wcusage_field_admin_permission'] ) ) {
@@ -527,17 +541,27 @@ if( !function_exists( 'wcusage_convert_order_value_to_currency' ) ) {
 
     if($orderinfo) {
 
-      $currencycode = $orderinfo->get_currency();
-      $wcusage_currency_conversion = wcusage_order_meta( $orderinfo->get_id(), 'wcusage_currency_conversion', true );
-
-      $enable_save_rate = wcusage_get_setting_value('wcusage_field_enable_currency_save_rate', '0');
-      if(!$wcusage_currency_conversion || !$enable_save_rate) {
-        $wcusage_currency_conversion = "";
-      }
-
+      // Nothing below changes the value unless multi-currency is switched on, so
+      // decide that first. This runs several times per order in the stats loops
+      // and the reads under it are not cheap.
       $enablecurrency = wcusage_get_setting_value('wcusage_field_enable_currency', '0');
+      $currencycode = $enablecurrency ? $orderinfo->get_currency() : '';
 
       if($enablecurrency && $currencycode) {
+
+        // The saved per-order rate is only used when the save-rate setting is on.
+        // Reading it regardless meant wcusage_order_meta() - which takes an id and
+        // re-materialises the whole order through wc_get_order() - ran on every
+        // call only for the result to be thrown away on the next line.
+        $enable_save_rate = wcusage_get_setting_value('wcusage_field_enable_currency_save_rate', '0');
+        $wcusage_currency_conversion = "";
+        if($enable_save_rate) {
+          $wcusage_currency_conversion = wcusage_order_meta( $orderinfo->get_id(), 'wcusage_currency_conversion', true );
+          if(!$wcusage_currency_conversion) {
+            $wcusage_currency_conversion = "";
+          }
+        }
+
         $the_value = wcusage_calculate_currency($currencycode, $the_value, $wcusage_currency_conversion);
       }
 
@@ -677,16 +701,60 @@ function wcusage_get_username_by_id($user_id) {
 }
 
 /**
+ * Record why a coupon was flagged for a full statistics refresh.
+ *
+ * Four separate conditions can put an affiliate on the "Calculating
+ * statistics..." screen and they are indistinguishable from the outside, so
+ * this writes the deciding one to the PHP error log. Off by default; enable
+ * with either
+ *
+ *   define( 'WCUSAGE_DEBUG_REFRESH', true );                  // wp-config.php
+ *   add_filter( 'wcusage_debug_refresh_trigger', '__return_true' );
+ *
+ * @param int    $postid  Coupon post ID.
+ * @param string $reason  Which condition fired.
+ * @param array  $context Values that decided it.
+ * @return void
+ */
+if( !function_exists( 'wcusage_log_refresh_trigger' ) ) {
+  function wcusage_log_refresh_trigger( $postid, $reason, $context = array() ) {
+
+    $enabled = defined( 'WCUSAGE_DEBUG_REFRESH' ) && WCUSAGE_DEBUG_REFRESH;
+    if ( ! apply_filters( 'wcusage_debug_refresh_trigger', $enabled, $postid, $reason ) ) {
+      return;
+    }
+
+    $parts = array();
+    foreach ( $context as $name => $value ) {
+      if ( ! is_scalar( $value ) ) {
+        $value = wp_json_encode( $value );
+      }
+      $parts[] = $name . '=' . $value;
+    }
+
+    error_log( 'CA: full stats refresh for coupon ' . (int) $postid . ' - ' . $reason
+      . ( $parts ? ' [' . implode( ', ', $parts ) . ']' : '' ) );
+
+  }
+}
+
+/**
  * Check if a coupon needs stats refresh
  */
 if (!function_exists('wcusage_check_if_refresh_needed')) {
     function wcusage_check_if_refresh_needed($postid) {
 
         // Get options
-        $options = get_option('wcusage_options');
+        $options = wcusage_get_options();
 
 				/*** REFRESH STATS? ***/
 				$force_refresh_stats = 0;
+
+				// Which condition asked for the refresh. Recorded rather than logged on
+				// the spot because a later branch can still cancel the request, and a log
+				// naming a reason for a refresh that never happened is worse than none.
+				$refresh_reason = '';
+				$refresh_context = array();
         $never_update_commission_meta = wcusage_get_setting_value('wcusage_field_enable_never_update_commission_meta', '0');
 
 				$wcu_last_refreshed = get_post_meta( $postid, 'wcu_last_refreshed', true );
@@ -707,6 +775,11 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
           update_post_meta( $postid, 'wcu_commission_message', $combined_commission );
           if(!$never_update_commission_meta) {
             $force_refresh_stats = 1;
+            $refresh_reason = 'commission message changed';
+            $refresh_context = array(
+              'was' => $current_commission_message,
+              'now' => $combined_commission,
+            );
           }
         }
 
@@ -724,6 +797,8 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
 							// start the whole calculation again.
 							if(!$wcu_last_refreshed) {
 								$force_refresh_stats = 1;
+								$refresh_reason = 'usage above 10 but no saved all-time stats';
+								$refresh_context = array( 'usage' => $the_coupon_usage );
 							}
 						}
 					}
@@ -740,6 +815,15 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
 
 				// Check if force refresh needed
         if( $force_refresh_stats || ( !$never_update_commission_meta && $wcusage_refresh_date && ($wcusage_refresh_date > $wcu_last_refreshed) ) ) {
+					// Only record when the site-wide date is what decided it - otherwise an
+					// earlier condition already named its own reason.
+					if( !$force_refresh_stats ) {
+						$refresh_reason = 'site-wide wcusage_refresh_date is newer than this coupon';
+						$refresh_context = array(
+							'refresh_date'   => $wcusage_refresh_date,
+							'last_refreshed' => $wcu_last_refreshed ? $wcu_last_refreshed : '(none)',
+						);
+					}
 					$force_refresh_stats = 1;
 					if(!$wcusage_field_enable_coupon_all_stats_batch) {
 						update_post_meta( $postid, 'wcu_last_refreshed', $wcusage_refresh_date );
@@ -763,8 +847,19 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
 						$force_refresh_stats = 0;
 					} else {
 						$force_refresh_stats = 1;
+						$refresh_reason = 'wcu_last_refreshed is not set';
+						$refresh_context = array(
+							'usage'             => $the_coupon_usage,
+							'has_alltime_stats' => empty($wcu_alltime_stats) ? 'no' : 'yes',
+						);
 					}
 				}
+
+        // Log the deciding condition, but only for a refresh that is actually
+        // going ahead - see wcusage_log_refresh_trigger() to switch this on.
+        if( $force_refresh_stats && $refresh_reason ) {
+          wcusage_log_refresh_trigger( $postid, $refresh_reason, $refresh_context );
+        }
 
         // Return force refresh status
         return $force_refresh_stats;

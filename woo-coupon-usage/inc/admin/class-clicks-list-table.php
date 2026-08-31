@@ -26,7 +26,7 @@ class wcusage_clicks_List_Table extends WP_List_Table {
 
     function column_default($item, $column_name){
 
-		$options = get_option( 'wcusage_options' );
+		$options = wcusage_get_options();
 
       switch($column_name){
         default:

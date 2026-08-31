@@ -67,9 +67,23 @@ function wcusage_dashboard_page_header() {
         $wcusage_field_order_type_custom = wcusage_get_setting_value('wcusage_field_order_type_custom', '');
         $statuses = !$wcusage_field_order_type_custom ? array_diff_key(wc_get_order_statuses(), ['wc-refunded' => '']) : $wcusage_field_order_type_custom;
 
-        // Get ALL affiliate orders from last 2 months (no limit)
+        /**
+         * Ceiling on how many orders the admin dashboard chart reads.
+         *
+         * This was limit => -1, so rebuilding the widget loaded every affiliate
+         * order from the last two months as a full order object and ran the
+         * commission calculation over each one. On a busy store that is tens of
+         * thousands of orders in a single admin page load - and because the
+         * dashboard cache is invalidated whenever an order changes status, the
+         * rebuild happened far more often than the one-hour TTL suggests.
+         *
+         * @param int $max Maximum orders read for the dashboard chart.
+         */
+        $wcusage_dashboard_orders_limit = (int) apply_filters( 'wcusage_dashboard_chart_max_orders', 5000 );
+
+        // Get affiliate orders from the last 2 months, newest first.
         $orders = wc_get_orders(array(
-            'limit' => -1,
+            'limit' => $wcusage_dashboard_orders_limit,
             'orderby' => 'date',
             'order' => 'DESC',
             'post_status' => array_keys($statuses),
@@ -234,6 +248,7 @@ jQuery(document).ready(function($) {
         );
         $other_items = array(
             array('label' => __( 'Admin Tools', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
+            array('label' => __( 'API & Webhooks', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_api'), 'icon' => 'fa-solid fa-plug', 'disabled' => false),
             array(
                 'label' => __( 'Email Newsletters', 'woo-coupon-usage' ),
                 'url' => admin_url('admin.php?page=wcusage_email_newsletters'),
@@ -307,6 +322,7 @@ jQuery(document).ready(function($) {
         );
         $other_items = array(
             array('label' => __( 'Admin Tools', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
+            array('label' => __( 'API & Webhooks', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_api'), 'icon' => 'fa-solid fa-plug', 'disabled' => false),
             array('label' => __( 'Manage Payouts', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_payouts'), 'icon' => 'fa-solid fa-money-bill', 'disabled' => true),
             array('label' => __( 'PDF Statements', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_statements'), 'icon' => 'fa-solid fa-file-invoice-dollar', 'disabled' => true),
             array('label' => __( 'Email Newsletters', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_email_newsletters'), 'icon' => 'fa-solid fa-envelope', 'disabled' => true),
@@ -946,7 +962,7 @@ function wcusage_dashboard_paginate_ajax() {
                 $status = $orderinfo ? $orderinfo->get_status() : '';
                 $total_excl = $calculateorder['totalordersexcl'];
                 $commission = $calculateorder['totalcommission'];
-                $user_id = wcusage_order_meta($order_id, 'wcusage_affiliate_user');
+                $user_id = (int) wcusage_order_meta($order_id, 'wcusage_affiliate_user');
                 $user = get_userdata($user_id);
                 $name = '';
                 if ($user) {
@@ -1021,7 +1037,7 @@ function wcusage_dashboard_paginate_ajax() {
             foreach ($coupons as $coupon) {
                 $coupon_id = $coupon->ID;
                 $date = date_i18n('F jS (H:i)', strtotime($coupon->post_date));
-                $user_id = get_post_meta($coupon_id, 'wcu_select_coupon_user', true);
+                $user_id = (int) get_post_meta($coupon_id, 'wcu_select_coupon_user', true);
                 $user = get_userdata($user_id);
                 $name = '';
                 if ($user) {
@@ -1401,13 +1417,16 @@ function wcusage_dashboard_page_section_referrals() {
                 $status = $orderinfo->get_status();
                 $total = $calculateorder['totalordersexcl'];
                 $commission = $calculateorder['totalcommission'];
-                $user_id = wcusage_order_meta($order_id, 'wcusage_affiliate_user');
+                $user_id = (int) wcusage_order_meta($order_id, 'wcusage_affiliate_user');
                 $user = get_userdata($user_id);
 
-                $name = trim($user->first_name . ' ' . $user->last_name) ?: $user->user_login;
+                $name = '';
+                if ($user) {
+                    $name = trim($user->first_name . ' ' . $user->last_name) ?: $user->user_login;
+                }
             ?>
             <tr class="wcusage-admin-table-col-row">
-                <td><a href="<?php echo esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $user_id) ); ?>" title="<?php echo esc_html($user->user_login); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
+                <td><a href="<?php echo esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $user_id) ); ?>" title="<?php echo esc_html($user ? $user->user_login : ''); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
                 <td><?php echo esc_html($order_date); ?></td>
                 <td><a href="<?php echo esc_url(admin_url('post.php?post=' . $order_id . '&action=edit')); ?>">#<?php echo esc_html($order_id); ?></a></td>
                 <td><?php echo wp_kses_post(wcusage_format_price(number_format($total, 2, '.', ''))); ?></td>
@@ -1537,9 +1556,16 @@ function wcusage_dashboard_page_section_coupons() {
             foreach ($coupons as $coupon) {
                 $coupon_id = $coupon->ID;
                 $date = date_i18n('F jS (H:i)', strtotime($coupon->post_date));
-                $user_id = get_post_meta($coupon_id, 'wcu_select_coupon_user', true);
+                // Cast before use. A coupon can carry a non-numeric value in this meta
+                // (a stale or corrupt write), and concatenating that into the affiliate
+                // URL below is fatal - which kills the rest of the dashboard page, and
+                // with it the footer that prints the dashboard's late-enqueued styles.
+                $user_id = (int) get_post_meta($coupon_id, 'wcu_select_coupon_user', true);
                 $user = get_userdata($user_id);
-                $name = trim($user->first_name . ' ' . $user->last_name) ?: $user->user_login;
+                $name = '';
+                if ($user) {
+                    $name = trim($user->first_name . ' ' . $user->last_name) ?: $user->user_login;
+                }
                 $coupon_info = wcusage_get_coupon_info_by_id($coupon_id);
                 $uniqueurl = $coupon_info[4];
             ?>
@@ -1663,10 +1689,13 @@ function wcusage_dashboard_page_section_payouts() {
                 $user = get_userdata($result->userid);
                 $date = date_i18n('F jS (H:i)', strtotime($result->date));
                 $coupon = get_the_title($result->couponid) ?: "(MLA)";
-                $name = trim($user->first_name . ' ' . $user->last_name) ?: $user->user_login;
+                $name = '';
+                if ($user) {
+                    $name = trim($user->first_name . ' ' . $user->last_name) ?: $user->user_login;
+                }
             ?>
             <tr class="wcusage-admin-table-col-row">
-                <td><a href="<?php echo esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $result->userid) ); ?>" title="<?php echo esc_html($user->user_login); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
+                <td><a href="<?php echo esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $result->userid) ); ?>" title="<?php echo esc_html($user ? $user->user_login : ''); ?>" target="_blank"><?php echo esc_html($name); ?></a></td>
                 <td><?php echo esc_html($date); ?></td>
                 <td><?php echo esc_html($coupon); ?></td>
                 <td><?php echo wp_kses_post(wcusage_format_price(number_format($result->amount, 2, '.', ''))); ?></td>
@@ -1698,7 +1727,7 @@ function wcusage_dashboard_page_html() {
     }
 ?>
 
-<link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL) .'fonts/font-awesome/css/all.min.css'; ?>" crossorigin="anonymous">
+<?php wcusage_enqueue_font_awesome(); ?>
 
 <div class="wrap wcusage-admin-page wcusage-dashboard-modern">
 

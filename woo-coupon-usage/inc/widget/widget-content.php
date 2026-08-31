@@ -716,7 +716,7 @@ function wcusage_get_floating_widget_referrals(  $coupon_id  ) {
         if ( function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
             // Use the same function as the main dashboard
             $wcu_orders_start = '';
-            $wcu_orders_end = date( 'Y-m-d H:i:s', strtotime( 'now' ) );
+            $wcu_orders_end = wcusage_local_date();
             $all_orders = wcusage_wh_getOrderbyCouponCode(
                 $coupon_code,
                 $wcu_orders_start,

@@ -16,7 +16,7 @@ function wcusage_settings_init() {
         'sanitize_callback' => 'wcusage_options_sanitize',
     ) );
     // register a new section in the "wcusage" page
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     add_settings_section(
         'wcusage_section_developers',
         '',
@@ -207,14 +207,79 @@ add_action( 'admin_init', 'wcusage_settings_init' );
 /**
  * Get wcusage_options array safely.
  * Always returns an array, never false.
+ *
+ * The result is memoised for the rest of the request. wcusage_options is a
+ * single autoloaded option holding every setting - around 880 keys and 55 KB
+ * serialized on a configured store - and get_option() runs maybe_unserialize()
+ * over the whole blob on every call. That makes one read of this option roughly
+ * thirty times the cost of reading an ordinary one, and the stats paths read it
+ * tens of thousands of times per request (about sixty times per order), which
+ * measured as a quarter to a third of the runtime of every heavy screen.
+ *
+ * The memo is invalidated whenever the option is written, so a read that follows
+ * a save in the same request still sees the new values. Arrays are returned by
+ * value, so a caller that mutates its copy - the common read, change, save
+ * pattern in the settings screens - cannot corrupt the memo.
  */
 if ( !function_exists( 'wcusage_get_options' ) ) {
     function wcusage_get_options() {
-        $options = get_option( 'wcusage_options', array() );
-        return ( is_array( $options ) ? $options : array() );
+        $options = wcusage_options_memo();
+        if ( $options === null ) {
+            $options = get_option( 'wcusage_options', array() );
+            $options = ( is_array( $options ) ? $options : array() );
+            wcusage_options_memo( $options );
+        }
+        return $options;
     }
 
 }
+/**
+ * Backing store for the wcusage_get_options() memo.
+ *
+ * Call with no argument to read (null means "not cached yet"), with an array to
+ * fill it, or with false to clear it. Kept as its own function rather than a
+ * static inside wcusage_get_options() so the invalidation hooks below can reach
+ * it, and so tests can reset it.
+ */
+if ( !function_exists( 'wcusage_options_memo' ) ) {
+    function wcusage_options_memo(  $set = null  ) {
+        static $memo = null;
+        if ( $set === false ) {
+            $memo = null;
+            return null;
+        }
+        if ( is_array( $set ) ) {
+            $memo = $set;
+        }
+        return $memo;
+    }
+
+}
+/**
+ * Drop the memo whenever the option changes, or the site it belongs to changes.
+ *
+ * update_option() delegates to add_option() when the option does not exist yet
+ * and then fires the add hook rather than the update one, so both are needed to
+ * cover a first save on a fresh install. delete_option() covers uninstall.
+ *
+ * switch_blog matters on multisite. Settings are per site, and get_option()
+ * follows a switch_to_blog() on its own, so without this the first site read in
+ * a request would keep answering for every other one - handing another site's
+ * commission rates, dashboard page and email templates to whatever ran inside
+ * the switch. The hook fires on the way back out of restore_current_blog() too.
+ * Flushing costs nothing here because switching sites is rare, while the read
+ * path this protects runs tens of thousands of times in a single request.
+ */
+if ( !function_exists( 'wcusage_flush_options_memo' ) ) {
+    function wcusage_flush_options_memo() {
+        wcusage_options_memo( false );
+    }
+
+}
+add_action( 'update_option_wcusage_options', 'wcusage_flush_options_memo' );
+add_action( 'add_option_wcusage_options', 'wcusage_flush_options_memo' );
+add_action( 'delete_option_wcusage_options', 'wcusage_flush_options_memo' );
+add_action( 'switch_blog', 'wcusage_flush_options_memo' );
 /**
  * Merge updates into base options array.
  * Arrays are replaced entirely to allow clearing unchecked checkboxes.
@@ -234,13 +299,25 @@ if ( !function_exists( 'wcusage_options_merge' ) ) {
 /**
  * Update options using merge strategy.
  * Use this in AJAX handlers to update specific fields without wiping others.
+ *
+ * Returns the merged options array, or false when the values changed but the
+ * write did not land. update_option() answers false for a failed database
+ * write (read-only or full database, a crashed table) and when a filter on
+ * pre_update_option_wcusage_options hands back the old value. Callers used to
+ * ignore that and report success anyway, so the settings screen showed a green
+ * tick while nothing was stored and the site owner had no way to tell.
  */
 if ( !function_exists( 'wcusage_update_options_merge' ) ) {
     function wcusage_update_options_merge(  $updates  ) {
         $current = wcusage_get_options();
         $merged = wcusage_options_merge( $current, $updates );
         if ( $merged !== $current ) {
-            update_option( 'wcusage_options', $merged );
+            if ( !update_option( 'wcusage_options', $merged ) ) {
+                // The memo was not flushed (no update hook fired), so drop it here in
+                // case a filter altered the stored value without our knowledge.
+                wcusage_flush_options_memo();
+                return false;
+            }
         }
         return $merged;
     }
@@ -433,7 +510,7 @@ function wcusage_section_developers_cb(  $args  ) {
     } else {
         $ispro = true;
     }
-    $options = get_option( 'wcusage_options' );
+    $options = wcusage_get_options();
     if ( function_exists( 'wp_enqueue_media' ) ) {
         wp_enqueue_media();
     } else {
@@ -444,9 +521,9 @@ function wcusage_section_developers_cb(  $args  ) {
     ?>
 
 <!--- Font Awesome -->
-<link rel="stylesheet" href="<?php 
-    echo esc_url( WCUSAGE_UNIQUE_PLUGIN_URL ) . 'fonts/font-awesome/css/all.min.css';
-    ?>" crossorigin="anonymous">
+<?php 
+    wcusage_enqueue_font_awesome();
+    ?>
 
 <?php 
     if ( class_exists( 'WooCommerce' ) ) {
@@ -1197,7 +1274,17 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         ?>
 
   	<!-- Generate Settings Page Area -->
-  	<form class="wcusage_row_setting wcusage-settings-form" action="options.php" method="post">
+  	<?php 
+        // novalidate is deliberate. This single form holds well over a thousand
+        // controls spread across tabs that are hidden with display:none. One control
+        // that fails HTML5 constraint validation - e.g. a number field whose stored
+        // value does not sit on its "step" - makes the browser refuse to submit the
+        // whole form, and because the offending field is inside a hidden tab it can
+        // not be focused or reported either, so "Save Settings" silently does
+        // nothing at all. Automatic (AJAX) saving never ran these checks, so nothing
+        // is lost: every value is sanitised server side in wcusage_options_sanitize().
+        ?>
+  	<form class="wcusage_row_setting wcusage-settings-form" action="options.php" method="post" novalidate>
   	<?php 
         settings_fields( 'wcusage' );
         do_settings_sections( 'wcusage' );
@@ -1257,24 +1344,26 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         });
         </script>
         <span class="wcu-field-section-save">
-          
+
           <?php 
         submit_button( esc_html__( 'Save Settings', 'woo-coupon-usage' ) );
         ?>
 
-          <?php 
-        if ( ini_get( 'max_input_vars' ) < 1000 ) {
-            ?>
-          <p style="font-size: 14px; color: red;"><strong><?php 
-            echo sprintf( esc_html__( 'Settings not saving? Try disabling "legacy" saving, or increasing your PHP "max_input_vars" in your hosting configuration to 1000 or higher (currently %s).', 'woo-coupon-usage' ), esc_html( ini_get( 'max_input_vars' ) ) );
-            ?> <a href="https://couponaffiliates.com/docs/increase-max-input-vars-limit" target="_blank"><?php 
-            echo esc_html__( 'Learn More.', 'woo-coupon-usage' );
-            ?></a></strong><br/></p>
-          <?php 
-        }
-        ?>
-
         </span>
+
+        <?php 
+        // Filled in and shown by js/admin-options-update.js once it has counted what
+        // the form would actually post. This used to warn only when max_input_vars
+        // was below 1000, but the form itself is well past 1000 controls on a site
+        // with the PRO tabs, so a host on PHP's default of exactly 1000 was silently
+        // truncated with no warning at all. It is outside the legacy-only span because
+        // the "Save All Settings" button in automatic mode posts the same form.
+        ?>
+        <p id="wcu-max-input-vars-warning" style="font-size: 14px; color: #b32d2e; display: none;" data-limit="<?php 
+        echo esc_attr( (int) ini_get( 'max_input_vars' ) );
+        ?>"><strong><span class="wcu-max-input-vars-text"></span> <a href="https://couponaffiliates.com/docs/increase-max-input-vars-limit" target="_blank"><?php 
+        echo esc_html__( 'Learn More.', 'woo-coupon-usage' );
+        ?></a></strong></p>
 
       </div>
 
@@ -1635,7 +1724,7 @@ if ( !function_exists( 'wcusage_setting_toggle_option' ) ) {
         $label,
         $margin
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
         ?>
     <p id="<?php 
@@ -1685,7 +1774,7 @@ if ( !function_exists( 'wcusage_setting_textarea_option' ) ) {
         $label,
         $margin
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
         ?>
     <p id="<?php 
@@ -1728,7 +1817,7 @@ if ( !function_exists( 'wcusage_setting_select_option' ) ) {
         $margin,
         $items
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
         ?>
     <p id="<?php 
@@ -1773,7 +1862,7 @@ if ( !function_exists( 'wcusage_setting_text_option' ) ) {
         $label,
         $margin
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
         ?>
   <p id="<?php 
@@ -1814,7 +1903,7 @@ if ( !function_exists( 'wcusage_setting_hidden_option' ) ) {
         $label,
         $margin
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
         ?>
     <p id="<?php 
@@ -1855,7 +1944,7 @@ if ( !function_exists( 'wcusage_setting_password_option' ) ) {
         $label,
         $margin
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
         ?>
   <p id="<?php 
@@ -1892,7 +1981,7 @@ if ( !function_exists( 'wcusage_setting_user_role' ) ) {
         $label = "",
         $margin = ""
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
         if ( !$default ) {
             $default = '';
@@ -1968,7 +2057,7 @@ function wcu_admin_enqueue_scripts(  $hook_suffix  ) {
                 $reg_js_ver,
                 true
             );
-            $wcusage_options = get_option( 'wcusage_options' );
+            $wcusage_options = wcusage_get_options();
             $custom_fields_count = ( isset( $wcusage_options['wcusage_field_registration_custom_fields'] ) ? intval( $wcusage_options['wcusage_field_registration_custom_fields'] ) : 5 );
             wp_localize_script( 'wcusage-registrations-settings', 'wcuRegSettings', array(
                 'ajaxurl'       => admin_url( 'admin-ajax.php' ),
@@ -2041,7 +2130,7 @@ if ( !function_exists( 'wcusage_setting_color_option' ) ) {
         $label,
         $margin
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
         ?>
 
@@ -2105,7 +2194,7 @@ if ( !function_exists( 'wcusage_setting_number_option' ) ) {
         $margin,
         $increment = 1
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
         ?>
   <p style="margin-left: <?php 
@@ -2146,7 +2235,7 @@ if ( !function_exists( 'wcusage_setting_tinymce_option' ) ) {
         $margin,
         $size = "150"
     ) {
-        $options = get_option( 'wcusage_options' );
+        $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
         ?>
     <strong style="margin-bottom: 5px; display: block;"><?php 
@@ -2160,7 +2249,9 @@ if ( !function_exists( 'wcusage_setting_tinymce_option' ) ) {
             'textarea_name' => 'wcusage_options[' . $name . ']',
             'textarea_rows' => 5,
             'editor_class'  => $name,
-            'tinymce'       => true,
+            'tinymce'       => array(
+                'wp_skip_init' => true,
+            ),
             'editor_height' => $size,
         );
         wcusage_tinymce_ajax_script( $name );
@@ -2236,6 +2327,8 @@ if ( !function_exists( 'wcusage_tinymce_ajax_script' ) ) {
         if ( !is_array( $wcusage_tinymce_ajax_fields ) ) {
             $wcusage_tinymce_ajax_fields = array();
             add_action( 'admin_print_footer_scripts', 'wcusage_tinymce_ajax_fields_script', 5 );
+            // After _WP_Editors::editor_js() (priority 50), so tinyMCEPreInit already exists.
+            add_action( 'admin_print_footer_scripts', 'wcusage_tinymce_lazy_init_script', 100 );
         }
         $wcusage_tinymce_ajax_fields[] = $id;
     }
@@ -2257,6 +2350,92 @@ if ( !function_exists( 'wcusage_tinymce_ajax_fields_script' ) ) {
     window.wcusageTinymceFields = <?php 
         echo wp_json_encode( $fields );
         ?>;
+    </script>
+    <?php 
+    }
+
+}
+/**
+ * Build the rich text editors only once they are actually on screen.
+ *
+ * Every settings tab is rendered up front and then hidden with display:none, so all
+ * 29 wp_editor() fields used to be handed to TinyMCE in one burst as soon as the
+ * document reached "interactive". Building 29 editors - and 29 iframes - back to back
+ * blocked the main thread for the best part of a second: the page looked finished and
+ * then went dead to clicks for a few seconds, every load.
+ *
+ * The fields now carry wp_skip_init, which WordPress' own initialiser checks for, and
+ * each editor is created the first time its box comes into view. Core already builds
+ * one on demand exactly this way when you press the "Visual" tab (switchEditor() in
+ * wp-admin/js/editor.js), and an editor that is never built posts the value straight
+ * from its textarea, so saving is unaffected either way.
+ *
+ */
+if ( !function_exists( 'wcusage_tinymce_lazy_init_script' ) ) {
+    function wcusage_tinymce_lazy_init_script() {
+        global $wcusage_tinymce_ajax_fields;
+        if ( empty( $wcusage_tinymce_ajax_fields ) ) {
+            return;
+        }
+        ?>
+    <script>
+    (function(){
+      if ( typeof window.tinymce === 'undefined' || typeof window.tinyMCEPreInit === 'undefined' || ! tinyMCEPreInit.mceInit ) { return; }
+      var ids = window.wcusageTinymceFields || [];
+      var queue = [], draining = false;
+
+      var build = function(id){
+        if ( ! id || tinymce.get(id) ) { return; }
+        var init = tinyMCEPreInit.mceInit[id];
+        var wrap = document.getElementById('wp-' + id + '-wrap');
+        // Missing, or switched to Text mode - the same test WordPress' own initialiser makes.
+        if ( ! init || ! wrap || wrap.className.indexOf('tmce-active') === -1 ) { return; }
+        try { tinymce.init(init); } catch (e) {}
+        if ( ! window.wpActiveEditor ) { window.wpActiveEditor = id; }
+      };
+
+      // One editor per frame. A tall tab (Notifications carries 18 of them) can bring
+      // several into view at once, and building those back to back is the stall this
+      // whole thing exists to avoid.
+      var drain = function(){
+        build(queue.shift());
+        if ( queue.length ) { window.requestAnimationFrame(drain); } else { draining = false; }
+      };
+      var enqueue = function(id){
+        if ( ! id || queue.indexOf(id) > -1 ) { return; }
+        queue.push(id);
+        if ( draining ) { return; }
+        draining = true;
+        window.requestAnimationFrame(drain);
+      };
+
+      if ( ! window.IntersectionObserver || ! window.requestAnimationFrame ) {
+        // No way to tell what is on screen: keep the old behaviour, just after load.
+        window.addEventListener('load', function(){
+          for ( var i = 0; i < ids.length; i++ ) { build(ids[i]); }
+        });
+        return;
+      }
+
+      var observer = new IntersectionObserver(function(entries){
+        for ( var i = 0; i < entries.length; i++ ) {
+          if ( ! entries[i].isIntersecting ) { continue; }
+          observer.unobserve(entries[i].target);
+          enqueue(entries[i].target.getAttribute('data-wcu-editor'));
+        }
+      // Generous margin: an editor that is still blank when it reaches the viewport
+      // reads as an empty field (core paints the raw textarea white on white until
+      // TinyMCE takes over), so build it well before it gets there.
+      }, { rootMargin: '600px' });
+
+      for ( var i = 0; i < ids.length; i++ ) {
+        if ( ! tinyMCEPreInit.mceInit[ ids[i] ] ) { continue; }
+        var wrap = document.getElementById('wp-' + ids[i] + '-wrap');
+        if ( ! wrap ) { continue; }
+        wrap.setAttribute('data-wcu-editor', ids[i]);
+        observer.observe(wrap);
+      }
+    })();
     </script>
     <?php 
     }
