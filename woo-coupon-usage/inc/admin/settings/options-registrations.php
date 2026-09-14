@@ -4,6 +4,58 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Admin settings UI: echoed values are internal pre-escaped helper markup and static strings; verified safe in manual audit.
 
+/**
+ * Check if FluentCRM is installed and active.
+ *
+ * @return bool
+ */
+if( !function_exists( 'wcusage_is_fluentcrm_active' ) ) {
+  function wcusage_is_fluentcrm_active() {
+    return function_exists( 'FluentCrmApi' );
+  }
+}
+
+/**
+ * Get the FluentCRM lists or tags, for the settings dropdowns.
+ *
+ * @param string $type Either "lists" or "tags".
+ * @return array Array of ['id' => int, 'title' => string].
+ */
+if( !function_exists( 'wcusage_get_fluentcrm_items' ) ) {
+  function wcusage_get_fluentcrm_items( $type = 'lists' ) {
+
+    if( !wcusage_is_fluentcrm_active() ) {
+      return [];
+    }
+
+    $items = [];
+
+    try {
+      // FluentCrmApi('lists') / FluentCrmApi('tags') is FluentCRM's documented PHP API.
+      // Its wrapper allows all/get/find/first/paginate only, so sorting is done below.
+      $results = FluentCrmApi( $type === 'tags' ? 'tags' : 'lists' )->all();
+      if( !$results ) {
+        return [];
+      }
+      foreach ( $results as $result ) {
+        $items[] = [
+          'id'    => $result->id,
+          'title' => $result->title,
+        ];
+      }
+    } catch ( \Exception $e ) {
+      return [];
+    }
+
+    usort( $items, function( $a, $b ) {
+      return strcasecmp( $a['title'], $b['title'] );
+    } );
+
+    return $items;
+
+  }
+}
+
 function wcusage_field_cb_registration( $args )
 {
     $options = wcusage_get_options();
@@ -937,6 +989,7 @@ function wcusage_field_cb_registration( $args )
             <option value="0" <?php if($wcusage_mailing_list == "0") { ?>selected<?php } ?>><?php echo esc_html__( '- Disabled -', 'woo-coupon-usage' ); ?></option>
             <option value="newsletter" <?php if($wcusage_mailing_list == "newsletter") { ?>selected<?php } ?>><?php echo esc_html__( 'Built-In Newsletter System', 'woo-coupon-usage' ); ?></option>
             <option value="mailpoet" <?php if($wcusage_mailing_list == "mailpoet") { ?>selected<?php } ?>><?php echo esc_html__( 'Mailpoet', 'woo-coupon-usage' ); ?></option>
+            <option value="fluentcrm" <?php if($wcusage_mailing_list == "fluentcrm") { ?>selected<?php } ?>><?php echo esc_html__( 'FluentCRM', 'woo-coupon-usage' ); ?></option>
             <option value="mailchimp" <?php if($wcusage_mailing_list == "mailchimp") { ?>selected<?php } ?>><?php echo esc_html__( 'Mailchimp', 'woo-coupon-usage' ); ?></option>
             <option value="convertkit" <?php if($wcusage_mailing_list == "convertkit") { ?>selected<?php } ?>><?php echo esc_html__( 'ConvertKit', 'woo-coupon-usage' ); ?></option>
             <option value="mailerlite" <?php if($wcusage_mailing_list == "mailerlite") { ?>selected<?php } ?>><?php echo esc_html__( 'MailerLite', 'woo-coupon-usage' ); ?></option>
@@ -951,7 +1004,7 @@ function wcusage_field_cb_registration( $args )
           jQuery(document).ready(function() {
 
               // Define a list of all possible mailing list types
-              var allMailingLists = ['newsletter', 'mailpoet', 'mailchimp', 'convertkit', 'mailerlite', 'activecampaign', 'sendinblue', 'klaviyo', 'getresponse', 'mailjet'];
+              var allMailingLists = ['newsletter', 'mailpoet', 'fluentcrm', 'mailchimp', 'convertkit', 'mailerlite', 'activecampaign', 'sendinblue', 'klaviyo', 'getresponse', 'mailjet'];
 
               // Hide all sections initially
               allMailingLists.forEach(function(list) {
@@ -1021,6 +1074,38 @@ function wcusage_field_cb_registration( $args )
               <p><?php echo esc_html__( 'You can download MailPoet here:', 'woo-coupon-usage' ); ?> <a href="<?php echo admin_url('plugin-install.php?s=mailpoet&tab=search&type=term'); ?>" target="_blank"><?php echo esc_html__( 'Add Plugin', 'woo-coupon-usage' ); ?></a></p>
               <?php } ?>
               </select>
+            </div>
+
+            <div class="wcu-list-fluentcrm"><br/>
+              <?php if ( wcusage_is_fluentcrm_active() ) { ?>
+              <p><?php echo esc_html__( 'Affiliates will be added to your FluentCRM contacts when they join your affiliate program.', 'woo-coupon-usage' ); ?></p>
+              <br/>
+              <?php
+              // Lists
+              $wcusage_fluentcrm_lists = [ '' => esc_html__( '- None -', 'woo-coupon-usage' ) ];
+              foreach ( wcusage_get_fluentcrm_items( 'lists' ) as $fluentcrm_list ) {
+                $wcusage_fluentcrm_lists[ $fluentcrm_list['id'] ] = $fluentcrm_list['title'];
+              }
+              wcusage_setting_select_option('wcusage_fluentcrm_list_id', '', esc_html__( 'Add subscriber to list', 'woo-coupon-usage' ), '0px', $wcusage_fluentcrm_lists);
+              ?>
+              <?php
+              // Tags
+              $wcusage_fluentcrm_tags = [ '' => esc_html__( '- None -', 'woo-coupon-usage' ) ];
+              foreach ( wcusage_get_fluentcrm_items( 'tags' ) as $fluentcrm_tag ) {
+                $wcusage_fluentcrm_tags[ $fluentcrm_tag['id'] ] = $fluentcrm_tag['title'];
+              }
+              wcusage_setting_select_option('wcusage_fluentcrm_tag_id', '', esc_html__( 'Apply tag to subscriber', 'woo-coupon-usage' ), '0px', $wcusage_fluentcrm_tags);
+              ?>
+              <p><i><?php echo esc_html__( 'You can create lists and tags in FluentCRM under "Contacts > Lists" and "Contacts > Tags".', 'woo-coupon-usage' ); ?></i></p>
+              <br/>
+              <!-- Double Opt-In -->
+              <?php wcusage_setting_toggle_option('wcusage_fluentcrm_double_optin', 0, esc_html__( 'Require double opt-in?', 'woo-coupon-usage' ), '0px'); ?>
+              <i><?php echo esc_html__( 'When enabled, the contact is added with a "pending" status and FluentCRM sends them a confirmation email.', 'woo-coupon-usage' ); ?></i><br/>
+              <?php } else { ?>
+              <p><?php echo esc_html__( 'FluentCRM is not installed or activated.', 'woo-coupon-usage' ); ?></p>
+              <p><?php echo esc_html__( 'Please install and activate the FluentCRM plugin to use this feature.', 'woo-coupon-usage' ); ?></p>
+              <p><?php echo esc_html__( 'You can download FluentCRM here:', 'woo-coupon-usage' ); ?> <a href="<?php echo esc_url( admin_url('plugin-install.php?s=fluentcrm&tab=search&type=term') ); ?>" target="_blank"><?php echo esc_html__( 'Add Plugin', 'woo-coupon-usage' ); ?></a></p>
+              <?php } ?>
             </div>
 
             <div class="wcu-list-mailchimp"><br/>

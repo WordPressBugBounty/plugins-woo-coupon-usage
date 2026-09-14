@@ -363,8 +363,8 @@ function wcusage_mla_users_page() {
         <p class="wcusage_mla_users_page_desc"><?php echo esc_html__('This page shows affiliate users who have access to the Multi-Level Affiliate (MLA) system, along with their MLA statistics.', 'woo-coupon-usage'); ?></p>
 
         <!-- Load admin styles -->
-        <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL . 'css/delete-dropdown.css'); ?>" />
-        <script src="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin.js'); ?>"></script>
+        <link rel="stylesheet" href="<?php echo esc_url(add_query_arg('ver', WCUSAGE_VERSION, WCUSAGE_UNIQUE_PLUGIN_URL . 'css/delete-dropdown.css')); ?>" />
+        <script src="<?php echo esc_url(add_query_arg('ver', WCUSAGE_VERSION, WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin.js')); ?>"></script>
 
         <form method="post">
             <input type="hidden" name="page" value="<?php echo isset($_REQUEST['page']) ? esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) ) : ''; ?>" />

@@ -100,6 +100,8 @@ class wcusage_activity_List_Table extends WP_List_Table {
             'registration'                              => __( 'Registration', 'woo-coupon-usage' ),
             'registration_accept'                       => __( 'Registration Accepted', 'woo-coupon-usage' ),
             'mla_invite'                                => __( 'MLA Invite', 'woo-coupon-usage' ),
+            'affiliate_suspended'                       => __( 'Affiliate Suspended', 'woo-coupon-usage' ),
+            'affiliate_unsuspended'                     => __( 'Affiliate Unsuspended', 'woo-coupon-usage' ),
             'direct_link_domain'                        => __( 'Direct Link Domain', 'woo-coupon-usage' ),
             'payout_request'                            => __( 'Payout Request', 'woo-coupon-usage' ),
             'payout_paid'                               => __( 'Payout Paid', 'woo-coupon-usage' ),

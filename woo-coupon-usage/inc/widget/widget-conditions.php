@@ -10,6 +10,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Quick lightweight check for display conditions
 function wcusage_should_show_floating_widget_quick() {
+
+    // A suspended affiliate has lost their dashboard, so the widget - which is the
+    // same statistics, referral links and payouts on every page of the site - goes
+    // with it. Checked here as well as in the full conditions below so the button,
+    // its assets and its AJAX nonce are never printed for them in the first place.
+    if ( function_exists('wcusage_dashboard_access_suspended') && wcusage_dashboard_access_suspended( get_current_user_id() ) ) {
+        return false;
+    }
+
     // Only check essential conditions that don't require heavy processing
     $display_settings = array(
         'hide_logged_out' => wcusage_get_setting_value('wcusage_field_floating_widget_hide_logged_out', '0'),
@@ -85,9 +94,16 @@ function wcusage_is_affiliate_page_quick() {
 
 // Check if floating widget should be displayed (full conditions check)
 function wcusage_should_show_floating_widget() {
+
+    // See wcusage_should_show_floating_widget_quick(). Repeated here because the
+    // widget's AJAX handlers call this one, not the quick check.
+    if ( function_exists('wcusage_dashboard_access_suspended') && wcusage_dashboard_access_suspended( get_current_user_id() ) ) {
+        return false;
+    }
+
     $settings = wcusage_get_floating_widget_settings();
     $display_settings = $settings['display'];
-    
+
     // Check user login status
     $is_logged_in = is_user_logged_in();
     if ($display_settings['hide_logged_out'] && !$is_logged_in) {

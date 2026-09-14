@@ -5197,3 +5197,554 @@ div[style*="line-height: 1.4"] div:hover .custom-tooltip,
 @media (max-width: 600px) {
   .wcu-export-panel { width: 280px; }
 }
+
+
+/* ===========================================================================
+   AFFILIATE REPORTS SETTINGS TAB
+   The tab carries roughly sixty options. Laid out as one long column of
+   toggles and inputs it read as an undifferentiated wall, so related settings
+   are grouped into titled panels and the short ones sit side by side.
+   =========================================================================== */
+
+#affiliate-reports-settings .wcu-rs-panel {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 8px;
+    padding: 0;
+    margin: 0 0 18px 0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    max-width: 1180px;
+}
+
+#affiliate-reports-settings .wcu-rs-panel__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid #ececed;
+    background: #fbfbfc;
+    border-radius: 8px 8px 0 0;
+}
+
+#affiliate-reports-settings .wcu-rs-panel__head .dashicons {
+    color: #2271b1;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    flex: 0 0 auto;
+}
+
+#affiliate-reports-settings .wcu-rs-panel__title {
+    margin: 0;
+    padding: 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 22px;
+    color: #1d2327;
+}
+
+#affiliate-reports-settings .wcu-rs-panel__desc {
+    margin: 2px 0 0 0;
+    font-size: 13px;
+    line-height: 18px;
+    color: #646970;
+}
+
+#affiliate-reports-settings .wcu-rs-panel__body {
+    padding: 18px;
+}
+
+/* Grids ------------------------------------------------------------------ */
+
+#affiliate-reports-settings .wcu-rs-grid {
+    display: grid;
+    gap: 18px 26px;
+    align-items: start;
+}
+
+#affiliate-reports-settings .wcu-rs-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#affiliate-reports-settings .wcu-rs-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+#affiliate-reports-settings .wcu-rs-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+#affiliate-reports-settings .wcu-rs-grid + .wcu-rs-grid,
+#affiliate-reports-settings .wcu-rs-grid + .wcu-rs-subhead,
+#affiliate-reports-settings .wcu-rs-editor + .wcu-rs-editor {
+    margin-top: 20px;
+}
+
+#affiliate-reports-settings .wcu-rs-span-2 { grid-column: span 2; }
+#affiliate-reports-settings .wcu-rs-span-all { grid-column: 1 / -1; }
+
+/* A heading inside a panel, for a second group of related fields. */
+#affiliate-reports-settings .wcu-rs-subhead {
+    margin: 22px 0 12px 0;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f1;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #50575e;
+}
+
+#affiliate-reports-settings .wcu-rs-panel__body > .wcu-rs-subhead:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+}
+
+/* Fields ----------------------------------------------------------------- */
+
+/* The shared setting helpers wrap every control in a <p> with its own inline
+   margin-left. Inside a grid cell the cell does the spacing, so those are
+   flattened here rather than by passing a margin to each helper. */
+#affiliate-reports-settings .wcu-rs-field > p,
+#affiliate-reports-settings .wcu-rs-toggle > p {
+    margin: 0 !important;
+    margin-left: 0 !important;
+}
+
+#affiliate-reports-settings .wcu-rs-field > p > strong,
+#affiliate-reports-settings .wcu-rs-field > p > strong > label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 13px;
+    color: #1d2327;
+}
+
+#affiliate-reports-settings .wcu-rs-field input[type="text"],
+#affiliate-reports-settings .wcu-rs-field select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* A count of five does not need half the panel to say so. */
+#affiliate-reports-settings .wcu-rs-field input[type="number"] {
+    width: 110px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* The colour picker replaces its input with its own button + swatch markup,
+   which must not be stretched to the full cell width. */
+#affiliate-reports-settings .wcu-rs-field .wp-picker-container input[type="text"] {
+    width: auto;
+}
+
+#affiliate-reports-settings .wcu-rs-hint,
+#affiliate-reports-settings .wcu-rs-field > i,
+#affiliate-reports-settings .wcu-rs-toggle > i {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 17px;
+    color: #646970;
+    font-style: normal;
+}
+
+/* Toggles ---------------------------------------------------------------- */
+
+#affiliate-reports-settings .wcu-rs-toggle {
+    padding: 10px 12px;
+    border: 1px solid #e8e8e9;
+    border-radius: 6px;
+    background: #fdfdfd;
+}
+
+#affiliate-reports-settings .wcu-rs-toggle > p {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#affiliate-reports-settings .wcu-rs-toggle > p > strong {
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 18px;
+}
+
+#affiliate-reports-settings .wcu-rs-toggle > p > strong > label {
+    cursor: pointer;
+}
+
+/* A toggle whose section the dashboard settings rule out. The switch stays
+   usable (the choice is kept for when the feature is turned back on) but the
+   card is dimmed and says why nothing will show. */
+#affiliate-reports-settings .wcu-rs-toggle--capped {
+    background: #fafafa;
+    border-style: dashed;
+}
+
+#affiliate-reports-settings .wcu-rs-toggle--capped > p {
+    opacity: 0.55;
+}
+
+#affiliate-reports-settings .wcu-rs-capped {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    margin-top: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    background: #fcf0f1;
+    border: 1px solid #f1c7cb;
+    color: #8a2424;
+    font-size: 12px;
+    line-height: 16px;
+}
+
+#affiliate-reports-settings .wcu-rs-capped .dashicons {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+    margin-top: 1px;
+    flex: 0 0 auto;
+    color: inherit;
+}
+
+/* A compact toggle list inside a column, e.g. the statistic groups. */
+#affiliate-reports-settings .wcu-rs-togglelist {
+    border: 1px solid #e8e8e9;
+    border-radius: 6px;
+    background: #fdfdfd;
+    overflow: hidden;
+}
+
+#affiliate-reports-settings .wcu-rs-togglelist__head {
+    padding: 9px 12px;
+    background: #f6f7f7;
+    border-bottom: 1px solid #e8e8e9;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #50575e;
+}
+
+#affiliate-reports-settings .wcu-rs-togglelist .wcu-rs-toggle {
+    border: 0;
+    border-bottom: 1px solid #f0f0f1;
+    border-radius: 0;
+    background: transparent;
+    padding: 8px 12px;
+}
+
+#affiliate-reports-settings .wcu-rs-togglelist .wcu-rs-toggle:last-child {
+    border-bottom: 0;
+}
+
+/* An indented block revealed by the toggle above it. */
+#affiliate-reports-settings .wcu-rs-nested {
+    margin-top: 12px;
+    padding-left: 14px;
+    border-left: 3px solid #e8e8e9;
+}
+
+/* A toggle and the options it reveals, read as one card rather than as a boxed
+   toggle with loose fields floating underneath it. */
+#affiliate-reports-settings .wcu-rs-group {
+    border: 1px solid #e8e8e9;
+    border-radius: 6px;
+    background: #fdfdfd;
+}
+
+#affiliate-reports-settings .wcu-rs-group > .wcu-rs-toggle {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+#affiliate-reports-settings .wcu-rs-group .wcu-rs-nested {
+    margin: 0 12px 12px 12px;
+    padding: 12px 0 0 0;
+    border-left: 0;
+    border-top: 1px solid #f0f0f1;
+}
+
+#affiliate-reports-settings .wcu-rs-group .wcu-rs-nested > .wcu-rs-toggle {
+    border: 0;
+    background: transparent;
+    padding: 0;
+}
+
+#affiliate-reports-settings .wcu-rs-group .wcu-rs-nested .wcu-rs-field + .wcu-rs-toggle {
+    margin-top: 10px;
+}
+
+/* Merge tags ------------------------------------------------------------- */
+
+#affiliate-reports-settings .wcu-rs-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+#affiliate-reports-settings .wcu-rs-tags code {
+    background: #f0f6fc;
+    border: 1px solid #d3e3f0;
+    color: #0a4b78;
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 12px;
+}
+
+/* Schedule status -------------------------------------------------------- */
+
+#affiliate-reports-settings .wcu-rs-status {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 4px;
+}
+
+#affiliate-reports-settings .wcu-rs-status__item {
+    background: #f6f7f7;
+    border: 1px solid #e8e8e9;
+    border-radius: 6px;
+    padding: 12px 14px;
+}
+
+#affiliate-reports-settings .wcu-rs-status__label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #787c82;
+    margin-bottom: 4px;
+}
+
+#affiliate-reports-settings .wcu-rs-status__value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d2327;
+    line-height: 19px;
+}
+
+#affiliate-reports-settings .wcu-rs-status__value em {
+    font-weight: 400;
+    color: #646970;
+}
+
+#affiliate-reports-settings .wcu-rs-errors {
+    margin-top: 12px;
+}
+
+#affiliate-reports-settings .wcu-rs-errors summary {
+    cursor: pointer;
+    font-size: 13px;
+    color: #b32d2e;
+}
+
+#affiliate-reports-settings .wcu-rs-errors ul {
+    margin: 8px 0 0 0;
+    max-height: 190px;
+    overflow: auto;
+    border: 1px solid #e8e8e9;
+    border-radius: 6px;
+    background: #fff;
+}
+
+#affiliate-reports-settings .wcu-rs-errors li {
+    margin: 0;
+    padding: 7px 12px;
+    border-bottom: 1px solid #f0f0f1;
+    font-size: 12px;
+    line-height: 17px;
+}
+
+#affiliate-reports-settings .wcu-rs-errors li:last-child { border-bottom: 0; }
+
+/* Preview ---------------------------------------------------------------- */
+
+.wcu-rs-preview {
+    max-width: 1180px;
+    margin: 16px 0 22px 0;
+    border: 1px solid #dcdcde;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.wcu-rs-preview__bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #f6f7f7;
+    border-bottom: 1px solid #dcdcde;
+}
+
+.wcu-rs-preview__bar strong { font-size: 13px; }
+.wcu-rs-preview__bar .wcu-rs-preview__meta { color: #646970; font-size: 13px; }
+.wcu-rs-preview__bar .wcu-rs-preview__actions { margin-left: auto; display: flex; gap: 8px; }
+
+.wcu-rs-preview iframe {
+    display: block;
+    width: 100%;
+    height: 900px;
+    border: 0;
+    background: #fff;
+}
+
+/* Responsive ------------------------------------------------------------- */
+
+@media screen and (max-width: 1100px) {
+    #affiliate-reports-settings .wcu-rs-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #affiliate-reports-settings .wcu-rs-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #affiliate-reports-settings .wcu-rs-status { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media screen and (max-width: 782px) {
+    #affiliate-reports-settings .wcu-rs-grid--2,
+    #affiliate-reports-settings .wcu-rs-grid--3,
+    #affiliate-reports-settings .wcu-rs-grid--4 { grid-template-columns: minmax(0, 1fr); }
+    #affiliate-reports-settings .wcu-rs-span-2,
+    #affiliate-reports-settings .wcu-rs-span-all { grid-column: auto; }
+    #affiliate-reports-settings .wcu-rs-status { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ===========================================================================
+   PREVIEW & TEST DIALOG
+   =========================================================================== */
+
+.wcu-rs-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 20, 28, 0.65);
+    display: none;
+    z-index: 100000;
+    overflow-y: auto;
+    padding: 40px 20px;
+    box-sizing: border-box;
+}
+
+.wcu-rs-modal.is-open { display: block; }
+
+.wcu-rs-modal__dialog {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    position: relative;
+}
+
+.wcu-rs-modal__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #ececed;
+    background: #fbfbfc;
+}
+
+.wcu-rs-modal__head .dashicons {
+    color: #2271b1;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.wcu-rs-modal__head h2 {
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    color: #1d2327;
+}
+
+.wcu-rs-modal__close {
+    margin-left: auto;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: #646970;
+    padding: 4px;
+    line-height: 0;
+    border-radius: 4px;
+}
+
+.wcu-rs-modal__close:hover { background: #f0f0f1; color: #1d2327; }
+.wcu-rs-modal__close .dashicons { color: inherit; }
+
+.wcu-rs-modal__body { padding: 20px; }
+
+.wcu-rs-modal__field { margin-bottom: 18px; }
+.wcu-rs-modal__field:last-child { margin-bottom: 0; }
+
+.wcu-rs-modal__field label {
+    display: block;
+    font-weight: 600;
+    font-size: 13px;
+    color: #1d2327;
+    margin-bottom: 5px;
+}
+
+.wcu-rs-modal__field input[type="text"],
+.wcu-rs-modal__field input[type="email"] {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.wcu-rs-modal__field .wcu-rs-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 17px;
+    color: #646970;
+}
+
+.wcu-rs-modal__note {
+    background: #f0f6fc;
+    border: 1px solid #d3e3f0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 17px;
+    color: #0a4b78;
+    margin-bottom: 18px;
+}
+
+.wcu-rs-modal__foot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid #ececed;
+    background: #fbfbfc;
+}
+
+.wcu-rs-modal__foot .wcu-rs-modal__spacer { margin-left: auto; }
+
+/* The trigger that opens the dialog.
+   Scoped to the tab so it outranks ".wp-core-ui .button", which would otherwise
+   force display:inline-block back on and un-centre the icon. */
+#affiliate-reports-settings .wcu-rs-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+#affiliate-reports-settings .wcu-rs-trigger .dashicons {
+    color: inherit;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    margin: 0;
+}
+
+@media screen and (max-width: 600px) {
+    .wcu-rs-modal { padding: 20px 12px; }
+    .wcu-rs-modal__foot { flex-wrap: wrap; }
+    .wcu-rs-modal__foot .wcu-rs-modal__spacer { margin-left: 0; width: 100%; }
+}

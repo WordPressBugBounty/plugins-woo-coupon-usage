@@ -328,7 +328,18 @@ $coupon_code_linked = "<span class='wcusage-users-affiliate-column'>"
 
     $info .= "</div>
     </div>";
-  
+
+    // Flag suspended affiliates in the list, so a paused account is obvious
+    // without opening it.
+    if ( function_exists('wcusage_get_suspended_badge_html') ) {
+      $suspended_badge = wcusage_get_suspended_badge_html( $user_id );
+      if ( $suspended_badge ) {
+        $info .= '<br/>' . $suspended_badge;
+      }
+    }
+
+    $info .= "</span>";
+
      return $info;
   
    }

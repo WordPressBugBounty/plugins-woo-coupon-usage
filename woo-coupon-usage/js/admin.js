@@ -104,6 +104,59 @@ jQuery(document).ready(function($) {
         }
     });
 
+    // Handle suspend / unsuspend clicks (the button in the View Affiliate header
+    // and the entry in the actions dropdown both use this class).
+    $(document).on('click', '.wcusage-suspend-option', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $trigger = $(this);
+
+        if ($trigger.hasClass('processing')) {
+            return false;
+        }
+
+        var action = $trigger.data('action');
+        var userId = $trigger.data('user-id');
+        var nonce = $trigger.data('nonce');
+
+        var confirmMessage = (action === 'unsuspend_user')
+            ? 'Remove the suspension on this user?\n\nThey will get their affiliate dashboard access back and their coupons will be usable again.'
+            : 'Suspend this user?\n\nThis pauses their affiliate dashboard access and stops their coupons being used.\n\nNothing is deleted - you can remove the suspension at any time.';
+
+        if (!confirm(confirmMessage)) {
+            return false;
+        }
+
+        $trigger.addClass('processing');
+
+        var form = $('<form>', {
+            'method': 'POST',
+            'action': window.location.href
+        });
+
+        form.append($('<input>', {
+            'type': 'hidden',
+            'name': 'wcusage_suspend_action',
+            'value': action
+        }));
+
+        form.append($('<input>', {
+            'type': 'hidden',
+            'name': 'wcusage_suspend_user_id',
+            'value': userId
+        }));
+
+        form.append($('<input>', {
+            'type': 'hidden',
+            'name': '_wpnonce',
+            'value': nonce
+        }));
+
+        $('body').append(form);
+        form.submit();
+    });
+
     // Handle delete option clicks
     $(document).on('click', '.wcusage-delete-option', function(e) {
         e.preventDefault();

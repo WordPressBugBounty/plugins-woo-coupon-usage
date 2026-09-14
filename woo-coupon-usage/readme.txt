@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 4.7
 Requires PHP: 7.0
 Tested up to: 7.1
-Stable tag: 8.2.0
+Stable tag: 8.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -187,7 +187,7 @@ Coupon Affiliates PRO is a paid upgrade which provides a whole bunch of exciting
 * <a href="https://couponaffiliates.com/docs/subscriptions">Subscriptions: Renewal Limit</a> - With the WooCommerce subscriptions plugin installed, optionally set a "limit" on how many renewals are rewarded. For example, you can set this to reward commission on the first 3 months.
 * <a href="https://couponaffiliates.com/docs/pro-automated-conversion-rates">Automated Conversion Rates</a> - Automatically update the multi-currency conversion rates every 12 hours via the Exchangerates API.
 * <a href="https://couponaffiliates.com/docs/pro-custom-tabs">Custom Dashboard Tabs</a> - Create your own tabs, to display custom sections and content on the affiliate dashboard.
-* and <a href="https://couponaffiliates.com/roadmap">more great features</a> coming soon...
+* and <a href="https://couponaffiliates.com/roadmap/">more great features</a> coming soon...
 
 Learn more about Pro and upgrade at <a href="https://couponaffiliates.com">www.couponaffiliates.com</a>
 
@@ -298,6 +298,59 @@ Please report security bugs found in the source code of the plugin through the [
 15. Pro Feature: Example of Admin commission payouts management area.
 
 == Changelog ==
+
+= Version 8.4.0 - 14th September 2026 =
+- New: Suspend Affiliates > You can now suspend an affiliate instead of deleting them, from a "Suspend" button on the View Affiliate page or from the actions dropdown on the affiliates list. A suspended affiliate cannot access their affiliate dashboard, portal or MLA dashboard, and none of their coupons can be applied to a cart, auto-applied from a referral link, or used at checkout. Nothing is deleted - the user, their coupons, statistics, commission and payout history are all kept and stay fully viewable and editable by admins, and the suspension can be lifted at any time.
+- New: Suspend Affiliates > Suspended affiliates are flagged with a "Suspended" badge on the affiliates list and a banner on their View Affiliate page showing when they were suspended and by whom. Their coupons show a "Locked" padlock beside the coupon code on both the Coupon Affiliates coupons list and the WooCommerce Coupons list.
+- New: Suspend Affiliates > Suspending and un-suspending an affiliate is recorded in the activity log.
+- New: (PRO) Affiliate Reports > The scheduled affiliate report has been rebuilt. Alongside the existing figures it can now show a headline earnings banner, a percentage change against the previous period on every statistic, best selling products, where the clicks came from (referring sites, landing pages and campaigns), new versus returning customers, payout activity, leaderboard position, sub-affiliate network totals.
+- New: (PRO) Affiliate Reports > Three templates - "Modern" (the full report), "Minimal" (headline figures and a dashboard link) and "Classic" (the original three blocks of statistics) - plus individual switches for every section and every statistic, so each report can be built exactly as you want it. Anything switched off is no longer calculated, so a shorter report is also a faster one.
+- New: (PRO) Affiliate Reports > A "Preview" button on the settings screen renders the real report for any coupon, email and PDF, without sending anything.
+- New: (PRO) Affiliate Reports > Extra statistics available as cards: average order value, earnings per click, items sold, commission per order, paid this period and paid to date.
+- New: (PRO) Affiliate Reports > New settings for the accent colour, cards per row, paper size, subject line, every section heading, the dashboard button text, and a plain text version of the email for clients that prefer one.
+- New: (PRO) Affiliate Reports > Reports are now sent in batches in the background, with a schedule status panel showing the next run, how many were sent, and why any failed. Previously every affiliate was processed in one cron request, which could run past the PHP time limit on a large programme and leave the remaining affiliates without a report.
+- New: (PRO) Affiliate Reports > Options to skip affiliates with no activity in the period, to delete generated PDFs after a number of months, and to block direct web access to the saved report files.
+- New: (PRO) Mailing List Integrations > FluentCRM is now supported. Choose a list and a tag to apply when an affiliate joins your program, with an option to require double opt-in.
+- New: (PRO) Scheduled Payout Requests > You can now choose which day of the month a monthly schedule runs on, rather than always the 1st. Pick any date from the 1st to the 31st, or "Last day of the month". If the chosen date does not exist in a month (such as the 31st in February), the last day of that month is used instead.
+- Tweak: (PRO) Affiliate Reports > The email and the PDF are now built from one set of figures and one set of layout components shared with payout statements, so the two documents agree with each other and look related.
+- Tweak: (PRO) Affiliate Reports > Report PDFs are saved with an unguessable filename, and a shop manager can view or download any affiliate's current report from the settings screen.
+- Tweak: (PRO) Affiliate Reports > A report never shows an affiliate more than their dashboard does. Sections tied to a dashboard feature you have hidden (commission, referral URLs, products in the orders list, customer names, campaigns, payouts, the multi-level network) are left out of the report automatically.
+- Tweak: (PRO) Affiliate Reports > The Reports settings tab has been reorganised into titled panels with related options side by side, and the preview / test dialog now reports whether the PDF was attached to the test email (and why not, if it was not). Section toggles whose dashboard feature is switched off are shown greyed out with the reason.
+- Tweak: (PRO) Affiliate Reports > Stat cards on the PDF are balanced across rows so a group never ends with a single card, and tables may continue onto the next page instead of leaving the previous page half empty.
+- Fix: (PRO) Affiliate Reports > Weekly reports covered the wrong dates. The date range was built with "first day of last week", which PHP does not understand as a week, so weekly reports were reporting on a range roughly two months wide.
+- Fix: (PRO) Affiliate Reports > Quarterly reports were always empty. The range started at the first day of the UPCOMING quarter, which has no orders in it yet.
+- Fix: (PRO) Affiliate Reports > The subject line, PDF title and saved file path always said "last month", whatever the schedule was set to.
+- Fix: (PRO) Affiliate Reports > The PDF attachment was passed to the mailer as a URL rather than a file path, so some SMTP plugins sent the email without it.
+- Fix: (PRO) Affiliate Reports > Report styling was added to every WooCommerce email the store sent, and once a report email logo was set it replaced the store logo in customer order emails too. Report styling is now applied only while a report is being sent.
+- Fix: (PRO) Affiliate Reports > The statistics grid was laid out with floated columns, which Outlook ignores, so the figures stacked into one long column for many recipients. Everything is now built from tables that render the same in every mail client, and stays readable at phone width.
+- Fix: (PRO) Affiliate Reports > PDFs used a core font that cannot render anything outside Western European characters, so affiliate names and many currency symbols came out wrong. They now use the same embedded Unicode font as payout statements.
+- Fix: (PRO) PDF documents > Bold text in PDF reports and statements was rendering at regular weight, because the embedded Unicode font ships without a bold face. Bold is now synthesised when no bold face is available, so headings, figures and labels have proper weight contrast.
+- Fix: A PHP warning ("Attempt to read property "ID" on false") was logged on every cart and checkout request when "Allow affiliate user to apply their own coupon code at cart / checkout" was switched off and the billing email address did not belong to a registered user account. The coupon check now looks the user up safely and is skipped when there is no matching account.
+
+= Version 8.3.0 - 7th September 2026 =
+- New: (PRO) Creatives > Dynamic creatives have been rebuilt around a new visual designer. Rather than filling in ten fixed text slots and positioning them with margin numbers, you now place text, QR codes, images, profile pictures and shapes on a live canvas by dragging them, with snapping guides, arrow-key nudging, undo and redo, multi-select, copy and paste, and a layer list for ordering. See "Coupon Affiliates > Creatives".
+- New: (PRO) Creatives > A creative no longer needs a background image. Leave the image empty to design on a blank canvas of any size, with a solid colour, gradient or transparent background, and pick from preset sizes for social posts, stories, leaderboards, skyscrapers, mobile banners and email headers.
+- New: (PRO) Creatives > Sixteen ready-made starter layouts, including "Aurora", "Neon night", "Sale flash", "Swing tag", "Corner ribbon", "Creator spotlight", "QR card" and "Voucher". Apply one and change anything you like, or keep your own canvas size and have the layout scaled to fit.
+- New: (PRO) Creatives > Text layers now support letter spacing, line height, wrapping, upper case, lower case and capitalised text, drop shadows, outlines, a background behind the text, gradient fills, rotation and opacity, with normal, bold, italic and serif faces. Extra fonts can be registered with the "wcusage_creative_fonts" filter.
+- New: (PRO) Creatives > Shape layers: rectangle, circle, triangle, diamond, arrow, chevron, star, burst, pentagon and hexagon, each with a solid or gradient fill, an "outline only" mode for rings and frames, corner radius, rotation and opacity.
+- New: (PRO) Creatives > A "Profile image" layer that shows each affiliate their own profile picture (or Gravatar) as a circle or square with an optional border ring, and an "Image" layer for placing a logo or any other upload onto the design.
+- New: (PRO) Creatives > A {store} merge tag for the site name, alongside {coupon}, {discount}, {username}, {first-name} and {company}.
+- New: (PRO) Creatives > "Preview as" fills the design in with a real affiliate's details by searching for their coupon code, and "Preview exact PNG" renders it through the same engine that produces the affiliate's files. A "Things to check" panel points out text that runs off the canvas or is too small to read.
+- New: (PRO) Creatives > Generated creatives are now saved as image files in the uploads folder and served straight from your web server. Previously every dynamic creative on the dashboard was a separate WordPress request on every page view, cached for only 24 hours. Cached images are rebuilt automatically whenever the creative is updated, and are pre-built when you save so the first affiliate to view them does not wait.
+- New: (PRO) Creatives > A creative with nothing affiliate-specific in it (no merge tags, QR code or profile picture) is now generated once and shared, rather than once per affiliate.
+- New: (PRO) Creatives > New options under the creatives settings: "Image Format" (Automatic saves both WebP and PNG and keeps the smaller file), "WebP Quality", "Build missing creatives while the page loads", "Creative Display Width", and a "Clear generated creative images" button.
+- New: (PRO) Creatives > A "Duplicate" link on each row of the admin list.
+- Tweak: (PRO) Creatives > Existing dynamic creatives render exactly as before. Nothing moves until you open one in the designer and save it, and "Preview exact PNG" lets you compare the converted design against the current output first.
+- Tweak: (PRO) Creatives > Background images can now be JPEG, GIF, WebP or AVIF as well as PNG. Previously anything other than PNG failed with "Could not load image!".
+- Tweak: (PRO) Creatives > The admin list now shows a thumbnail of the finished design for dynamic creatives, rather than the background upload alone.
+- Tweak: (PRO) Creatives > Images on the affiliate dashboard now load lazily, with a loading indicator while an image is generated, so creatives further down the page are not generated until they are scrolled into view. The dashboard grid uses a smaller display size, and the full-resolution version is only generated when the affiliate previews or downloads it.
+- Tweak: (PRO) Creatives > Downloaded dynamic creatives now carry the correct file extension.
+- Tweak: (PRO) Creatives > Very large background images are now refused with a clear message rather than exhausting the server's memory mid-render.
+- Tweak: (PRO) Creatives > When the Google Fonts plugin is installed, it no longer overrides the plugin's bundled fonts.
+- Tweak: (PRO) Performance Bonuses > Bonuses are awarded from each coupon's saved "all time" stats, so they depend on the 'Save the calculated "all time" stats for coupons as meta data' option in the "Debug" settings tab. Previously, with that option switched off, the Performance Bonuses menu disappeared, bonuses silently stopped being awarded, and the "Add New Bonus" button in the Bonuses settings led to an "Invalid post type" error. The Bonuses settings tab, the Performance Bonuses admin pages and the Coupon Affiliates dashboard now show a notice explaining this with a one-click "Enable now" button, existing bonuses stay listed while paused, and a bonus cannot be published until the option is enabled.
+- Fix: (PRO) Creatives > A dynamic creative embedded on an affiliate's own website using its embed code could fail to load, as the image endpoint rejected requests from other sites. Access is now controlled by the signed token in the URL alone.
+- Fix: (PRO) Creatives > With the 'Show Creative "Image"' setting turned off, the preview, download and embed-code links for dynamic creatives on the affiliate dashboard were empty.
+- Fix: (PRO) Creatives > The preview popup on the affiliate dashboard showed an empty box, with no loading indicator, while a dynamic creative was being generated.
 
 = Version 8.2.0 - 31st August 2026 =
 - New: A REST API for connecting external tools, dashboards and AI assistants to your affiliate program, with API keys, scopes and an OpenAPI document. See "Coupon Affiliates > Admin Tools > API".

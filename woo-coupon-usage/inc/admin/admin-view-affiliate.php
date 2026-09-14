@@ -484,6 +484,8 @@ $wcusage_tracking_enable = wcusage_get_setting_value( 'wcusage_field_tracking_en
         <?php 
 // Delete dropdown actions for this affiliate (4 options)
 $delete_nonce = wp_create_nonce( 'wcusage_delete_user_' . $user_id );
+$suspend_nonce = wp_create_nonce( 'wcusage_suspend_user_' . $user_id );
+$is_suspended = function_exists( 'wcusage_is_affiliate_suspended' ) && wcusage_is_affiliate_suspended( $user_id );
 ?>
         <div class="wcusage-view-affiliate-header-actions" style="float: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
             <a href="<?php 
@@ -494,7 +496,31 @@ echo esc_url( admin_url( 'admin.php?page=wcusage_affiliates' ) );
 echo esc_html__( 'Back to Affiliates', 'woo-coupon-usage' );
 ?>
             </a>
-            <div class="wcusage-delete-dropdown" style="margin-top: 5px;">
+            <div class="wcusage-view-affiliate-action-row">
+                <button type="button"
+                class="wcusage-suspend-btn wcusage-suspend-option<?php 
+echo ( $is_suspended ? ' wcusage-unsuspend-btn' : '' );
+?>"
+                data-action="<?php 
+echo ( $is_suspended ? 'unsuspend_user' : 'suspend_user' );
+?>"
+                data-user-id="<?php 
+echo esc_attr( $user_id );
+?>"
+                data-nonce="<?php 
+echo esc_attr( $suspend_nonce );
+?>"
+                title="<?php 
+echo ( $is_suspended ? esc_attr__( 'Restore this affiliate\'s dashboard access and unlock their coupons.', 'woo-coupon-usage' ) : esc_attr__( 'Pause this affiliate\'s dashboard access and stop their coupons being used. Nothing is deleted.', 'woo-coupon-usage' ) );
+?>">
+                    <span class="dashicons dashicons-<?php 
+echo ( $is_suspended ? 'unlock' : 'lock' );
+?>"></span>
+                    <?php 
+echo ( $is_suspended ? esc_html__( 'Remove Suspension', 'woo-coupon-usage' ) : esc_html__( 'Suspend', 'woo-coupon-usage' ) );
+?>
+                </button>
+            <div class="wcusage-delete-dropdown">
                 <button type="button" class="wcusage-delete-btn" data-user-id="<?php 
 echo esc_attr( $user_id );
 ?>" title="<?php 
@@ -503,6 +529,9 @@ echo esc_attr__( 'Delete Options', 'woo-coupon-usage' );
                     <span class="dashicons dashicons-trash"></span>
                 </button>
                 <div class="wcusage-delete-menu" style="display: none;">
+                    <?php 
+// Suspending is the dedicated button to the left of this dropdown.
+?>
                     <a href="#" class="wcusage-delete-option" data-action="delete_user" data-user-id="<?php 
 echo esc_attr( $user_id );
 ?>" data-nonce="<?php 
@@ -533,7 +562,49 @@ echo esc_html__( 'Delete Coupons', 'woo-coupon-usage' );
 ?></a>
                 </div>
             </div>
+            </div>
         </div>
+
+        <?php 
+// Suspension banner, so the state of the account is obvious before an
+// admin reads any of the statistics below it.
+if ( $is_suspended ) {
+    $suspended_info = wcusage_get_affiliate_suspended_info( $user_id );
+    $suspended_meta = array();
+    if ( $suspended_info['date'] ) {
+        /* translators: %s: date and time the affiliate was suspended. */
+        $suspended_meta[] = sprintf( __( 'Suspended on %s', 'woo-coupon-usage' ), date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $suspended_info['date'] ) ) );
+    }
+    if ( $suspended_info['by_name'] ) {
+        /* translators: %s: name of the admin who suspended the affiliate. */
+        $suspended_meta[] = sprintf( __( 'by %s', 'woo-coupon-usage' ), $suspended_info['by_name'] );
+    }
+    ?>
+            <div class="wcusage-suspended-banner">
+                <span class="dashicons dashicons-lock"></span>
+                <div>
+                    <strong><?php 
+    echo esc_html__( 'This affiliate is suspended.', 'woo-coupon-usage' );
+    ?></strong>
+                    <p>
+                        <?php 
+    echo esc_html__( 'They cannot access their affiliate dashboard and their coupons cannot be used. Nothing has been deleted - everything below is still fully editable, and the suspension can be lifted at any time.', 'woo-coupon-usage' );
+    ?>
+                        <?php 
+    if ( $suspended_meta ) {
+        ?>
+                            <br/><em><?php 
+        echo esc_html( implode( ' ', $suspended_meta ) );
+        ?>.</em>
+                        <?php 
+    }
+    ?>
+                    </p>
+                </div>
+            </div>
+            <?php 
+}
+?>
 
         <!-- Main Content Layout -->
         <div class="wcusage-main-content">

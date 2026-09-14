@@ -1397,7 +1397,7 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
             ?> <?php 
             echo esc_html( $pluginversion );
         }
-        ?>. <a href="https://roadmap.couponaffiliates.com/updates" target="_blank"><?php 
+        ?>. <a href="https://couponaffiliates.com/changelog/" target="_blank"><?php 
         echo esc_html__( 'View Changelog', 'woo-coupon-usage' );
         ?></a>.
       <br/>
@@ -1707,7 +1707,7 @@ function wcusage_get_plugin_version(  $pluginname  ) {
  */
 if ( !function_exists( 'wcusage_setting_toggle' ) ) {
     function wcusage_setting_toggle(  $toggleclass, $showclass  ) {
-        $script = "<script>\r\n    jQuery( document ).ready(function() {\r\n      if(!jQuery('" . $toggleclass . "').prop('checked')) {\r\n        jQuery('" . $showclass . "').hide();\r\n      }\r\n      jQuery('" . $toggleclass . "').change(function(){\r\n        if(jQuery(this).prop('checked')) {\r\n          jQuery('" . $showclass . "').show();\r\n        } else {\r\n          jQuery('" . $showclass . "').hide();\r\n        }\r\n      });\r\n    });\r\n    </script>";
+        $script = "<script>\n    jQuery( document ).ready(function() {\n      if(!jQuery('" . $toggleclass . "').prop('checked')) {\n        jQuery('" . $showclass . "').hide();\n      }\n      jQuery('" . $toggleclass . "').change(function(){\n        if(jQuery(this).prop('checked')) {\n          jQuery('" . $showclass . "').show();\n        } else {\n          jQuery('" . $showclass . "').hide();\n        }\n      });\n    });\n    </script>";
         echo $script;
         return $script;
     }
@@ -2751,7 +2751,7 @@ function wcusage_admin_faq_toggle(  $id, $class, $title  ) {
  */
 if ( !function_exists( 'wcusage_admin_tooltip' ) ) {
     function wcusage_admin_tooltip(  $text, $icon = 'dashicons-editor-help'  ) {
-        return "<span class='wcusage-users-affiliate-column' style='margin-left: 5px; display: inline-block;'>\r\n    <span class='custom-tooltip'><span class='dashicons " . esc_attr( $icon ) . "' style='color: green;'></span>\r\n        <span class='tooltip-content' style='white-space: normal;'>\r\n        <span style='font-size: 12px;'>" . $text . "</span>\r\n        </span>\r\n    </span>\r\n    </span>";
+        return "<span class='wcusage-users-affiliate-column' style='margin-left: 5px; display: inline-block;'>\n    <span class='custom-tooltip'><span class='dashicons " . esc_attr( $icon ) . "' style='color: green;'></span>\n        <span class='tooltip-content' style='white-space: normal;'>\n        <span style='font-size: 12px;'>" . $text . "</span>\n        </span>\n    </span>\n    </span>";
     }
 
 }

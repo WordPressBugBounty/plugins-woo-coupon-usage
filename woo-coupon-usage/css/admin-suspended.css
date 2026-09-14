@@ -1,0 +1,159 @@
+/**
+ * Suspended affiliates / locked coupons - admin badges and buttons.
+ */
+
+.wcusage-suspended-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 8px 1px 5px;
+    border: 1px solid #e0b000;
+    border-radius: 10px;
+    background: #fff6d9;
+    color: #7a5c00;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.8;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.wcusage-suspended-badge .dashicons {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+    line-height: 13px;
+}
+
+/* The WooCommerce coupons list prints post states inside its own wrapper. */
+.post-state .wcusage-suspended-badge {
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* Affiliates list: badge sits under the username in the same cell. */
+.wcusage-users-affiliate-column .wcusage-suspended-badge {
+    margin-top: 4px;
+}
+
+/* Coupons list: badge sits beside the coupon code. */
+.wcusage-suspended-coupon {
+    margin-left: 6px;
+}
+
+/*
+ * The suspend / unsuspend entry in the actions dropdown. It is not a delete
+ * action, so it is coloured as a warning and separated from the ones below it.
+ */
+.wcusage-delete-menu a.wcusage-suspend-option {
+    color: #7a5c00;
+    font-weight: 600;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+/* Specific enough to beat the generic ":first-child:hover" rule in delete-dropdown.css. */
+.wcusage-delete-dropdown .wcusage-delete-menu a.wcusage-suspend-option:hover {
+    background: #fff6d9;
+    color: #7a5c00;
+}
+
+.wcusage-delete-menu a.wcusage-suspend-option .dashicons {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+    line-height: 15px;
+    margin-right: 4px;
+    vertical-align: text-bottom;
+}
+
+/*
+ * View Affiliate header: the Suspend button and the delete dropdown sit on one
+ * row. delete-dropdown.css nudges the dropdown out of alignment on this page
+ * (it was previously on its own), so that offset is reset here.
+ */
+.wcusage-view-affiliate-action-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 5px;
+}
+
+.wrap.wcusage-affiliate-view-page .wcusage-view-affiliate-action-row .wcusage-delete-dropdown {
+    margin-top: 0;
+    margin-left: 0;
+}
+
+/* Suspend / Unsuspend button in the View Affiliate page header. */
+.wcusage-suspend-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid #e0b000;
+    border-radius: 4px;
+    background: #fff6d9;
+    color: #7a5c00;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wcusage-suspend-btn:hover,
+.wcusage-suspend-btn:focus {
+    background: #ffefb8;
+    border-color: #c99e00;
+    color: #5c4500;
+}
+
+.wcusage-suspend-btn.wcusage-unsuspend-btn {
+    border-color: #46b450;
+    background: #edfaef;
+    color: #1e6b26;
+}
+
+.wcusage-suspend-btn.wcusage-unsuspend-btn:hover,
+.wcusage-suspend-btn.wcusage-unsuspend-btn:focus {
+    background: #dcf5e0;
+    border-color: #35993e;
+    color: #14501b;
+}
+
+/* Banner across the top of a suspended affiliate's View Affiliate page. */
+.wcusage-suspended-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    clear: both;
+    margin: 20px 0;
+    padding: 14px 18px;
+    border: 1px solid #e0b000;
+    border-left: 5px solid #e0b000;
+    border-radius: 4px;
+    background: #fff9e6;
+    color: #5c4500;
+}
+
+.wcusage-suspended-banner .dashicons {
+    margin-top: 1px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #b58900;
+}
+
+.wcusage-suspended-banner strong {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 14px;
+}
+
+.wcusage-suspended-banner p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+}

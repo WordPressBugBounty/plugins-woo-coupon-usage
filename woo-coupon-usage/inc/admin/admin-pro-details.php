@@ -647,7 +647,7 @@ __( 'Get priority support, and your suggestions will have more priority for deve
 <?php wcusage_output_addon_box(
 __( 'All Future Pro Features', 'woo-coupon-usage' ),
 "wcusage_field_addon_default",
-__( 'More features coming soon. Get access to all future features included in the Pro version!', 'woo-coupon-usage' ) . " <a href='https://roadmap.couponaffiliates.com/roadmap' target='_blank'>View Roadmap</a>",
+__( 'More features coming soon. Get access to all future features included in the Pro version!', 'woo-coupon-usage' ) . " <a href='https://couponaffiliates.com/roadmap/' target='_blank'>View Roadmap</a>",
 "",
 "far fa-star",
 1, // Default

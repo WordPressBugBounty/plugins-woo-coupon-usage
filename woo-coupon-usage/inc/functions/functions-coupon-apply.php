@@ -55,15 +55,20 @@ if( !function_exists( 'wcusage_applied_coupon_check_allow_coupons' ) ) {
             /***** Checks if current cart email address matches email of user assigned to coupon *****/
 
             $cart_email = WC()->checkout()->get_value( 'billing_email' );
-            $cart_user_id = get_user_by( 'email', $cart_email )->ID;
-            $iscouponusers2 = wcusage_iscouponusers( $coupon->get_code(), $cart_user_id );
-            if($iscouponusers2) {
+            $cart_user = $cart_email ? get_user_by( 'email', $cart_email ) : false;
+            $cart_user_id = $cart_user ? (int) $cart_user->ID : 0;
+            if($cart_user_id) {
 
-              WC()->cart->remove_coupon( $coupon->get_code() );
+              $iscouponusers2 = wcusage_iscouponusers( $coupon->get_code(), $cart_user_id );
+              if($iscouponusers2) {
 
-              wc_clear_notices();
+                WC()->cart->remove_coupon( $coupon->get_code() );
 
-              wc_add_notice( esc_html__( "Sorry, you can't use this coupon code.", "woo-coupon-usage" ), "error" );
+                wc_clear_notices();
+
+                wc_add_notice( esc_html__( "Sorry, you can't use this coupon code.", "woo-coupon-usage" ), "error" );
+
+              }
 
             }
 

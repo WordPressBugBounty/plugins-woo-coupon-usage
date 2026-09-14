@@ -402,7 +402,9 @@ class wcusage_Coupons_Table extends WP_List_Table {
             case 'ID':
                 return '<a class="wcusage-coupon-id-link" href="' . esc_url( admin_url( 'post.php?post=' . $item->ID . '&action=edit' ) ) . '"><span class="dashicons dashicons-edit"></span>' . esc_html( $item->ID ) . '</a>';
             case 'post_title':
-                return '<a href="' . esc_url( admin_url( 'post.php?post=' . $item->ID . '&action=edit' ) ) . '">' . esc_html( $coupon_code ) . '</a>';
+                // A coupon is locked while the affiliate it belongs to is suspended.
+                $suspended_lock = function_exists( 'wcusage_get_suspended_coupon_lock_html' ) ? wcusage_get_suspended_coupon_lock_html( $item->ID ) : '';
+                return '<a href="' . esc_url( admin_url( 'post.php?post=' . $item->ID . '&action=edit' ) ) . '">' . esc_html( $coupon_code ) . '</a>' . $suspended_lock;
             case 'coupon_type':
                 $coupon_type = get_post_meta( $item->ID, 'discount_type', true ) ?: $c->get_discount_type();
                 $coupon_amount = get_post_meta( $item->ID, 'coupon_amount', true ) ?: $c->get_amount();

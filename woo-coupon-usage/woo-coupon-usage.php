@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
-* Version: 8.2.0
+* Version: 8.4.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -21,7 +21,7 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 // Define plugin version constant
 if ( !defined( 'WCUSAGE_VERSION' ) ) {
-    define( 'WCUSAGE_VERSION', '8.2.0' );
+    define( 'WCUSAGE_VERSION', '8.4.0' );
 }
 if ( function_exists( 'wcu_fs' ) ) {
     wcu_fs()->set_basename( false, __FILE__ );
@@ -920,8 +920,13 @@ if ( function_exists( 'wcu_fs' ) ) {
     include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-all-time.php';
     include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-new-order.php';
     include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-user-coupons.php';
+    // Affiliate suspension. Loaded after functions-urls.php so its
+    // woocommerce_coupon_error filter runs last and its message wins.
+    include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-suspend.php';
     include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-activity.php';
     include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-helper.php';
+    // Shared data layer behind the affiliate reports (email, PDF and preview).
+    include plugin_dir_path( __FILE__ ) . 'inc/functions/functions-report-data.php';
     // Widget - New organized structure
     $wcusage_field_floating_widget_enable = wcusage_get_setting_value( 'wcusage_field_floating_widget_enable', '0' );
     include plugin_dir_path( __FILE__ ) . 'inc/widget/widget-settings.php';
@@ -960,6 +965,9 @@ if ( function_exists( 'wcu_fs' ) ) {
     include plugin_dir_path( __FILE__ ) . 'inc/dashboard/tab-referral-url.php';
     include plugin_dir_path( __FILE__ ) . 'inc/dashboard/tab-settings.php';
     // Emails
+    // Reusable, table-based email building blocks. Loaded before the individual
+    // emails because they draw from it.
+    include plugin_dir_path( __FILE__ ) . 'inc/emails/functions-email-components.php';
     include plugin_dir_path( __FILE__ ) . 'inc/emails/new-order-email.php';
     $wcusage_cancel_email_enable = wcusage_get_setting_value( 'wcusage_field_cancel_email_enable', '0' );
     if ( $wcusage_cancel_email_enable ) {

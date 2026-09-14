@@ -32,6 +32,11 @@ if ( isset( $_GET['userid'] ) && isset( $_GET['preview_nonce'] ) && wcusage_chec
         $is_admin_preview = true;
     }
 }
+// Suspended affiliates keep their account and coupons, but lose access to the
+// portal until an admin lifts the suspension. They still get the portal shell
+// (header, profile menu, logout) with the suspension notice in place of the
+// dashboard, rather than being dumped on a blank page.
+$wcusage_portal_suspended = function_exists( 'wcusage_dashboard_access_suspended' ) && wcusage_dashboard_access_suspended( $current_user_id, $is_admin_preview );
 if ( isset( $_GET['couponid'] ) ) {
     $coupon_code = strtolower( sanitize_text_field( wp_unslash( $_GET['couponid'] ) ) );
     $coupon_code = str_replace( "%20", " ", $coupon_code );
@@ -279,6 +284,19 @@ $wcusage_portal_url = home_url( '/' . wcusage_get_setting_value( 'wcusage_portal
 $portal_footer_text = wcusage_get_setting_value( 'wcusage_portal_footer_text', '' );
 // Convert to html entities
 $portal_footer_text = htmlspecialchars_decode( $portal_footer_text );
+// A suspended affiliate gets the portal shell with the suspension notice in it:
+// no coupon tabs, no statistics, no registration form. Reusing the "no coupons"
+// branch keeps the sidebar collapsed and the header/profile menu intact.
+if ( $wcusage_portal_suspended ) {
+    $user_no_coupons = 1;
+    $postid = 0;
+    $coupons = array();
+    $coupons_total = array();
+    $other_view = 0;
+    $user_info = get_userdata( $current_user_id );
+    $userlogin = ( $user_info ? $user_info->user_login : '' );
+    $username = ( $user_info ? $user_info->display_name : '' );
+}
 // Show login and registration forms
 $register_loggedin = wcusage_get_setting_value( 'wcusage_field_registration_enable_register_loggedin', '1' );
 $wcusage_portal_login_enabled = wcusage_get_setting_value( 'wcusage_field_loginform', '1' );
@@ -592,25 +610,30 @@ if ( !$current_user_id ) {
                 <div class="login-registration-container">
                     <div class="registration-form">
                         <?php 
-    $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
-    if ( $wcusage_field_registration_enable ) {
-        if ( $register_loggedin && is_user_logged_in() ) {
-            echo do_shortcode( '[couponaffiliates-register]' );
-            do_action( 'wcusage_portal_hook_after_registration_form' );
+    if ( $wcusage_portal_suspended ) {
+        echo wp_kses_post( wcusage_get_suspended_dashboard_notice() );
+    } else {
+        $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
+        if ( $wcusage_field_registration_enable ) {
+            if ( $register_loggedin && is_user_logged_in() ) {
+                echo do_shortcode( '[couponaffiliates-register]' );
+                do_action( 'wcusage_portal_hook_after_registration_form' );
+            } else {
+                echo '<p>' . esc_html__( 'No affiliate coupons are assigned to your account.', 'woo-coupon-usage' ) . '</p>';
+            }
+            if ( !is_user_logged_in() ) {
+                $wcusage_field_registration_enable_logout = wcusage_get_setting_value( 'wcusage_field_registration_enable_logout', '1' );
+                $wcusage_field_registration_enable_login = wcusage_get_setting_value( 'wcusage_field_registration_enable_login', '1' );
+                if ( $wcusage_field_registration_enable_logout && $wcusage_field_registration_enable_login ) {
+                    echo do_shortcode( '[couponaffiliates-register]' );
+                    do_action( 'wcusage_portal_hook_after_registration_form' );
+                }
+            }
         } else {
             echo '<p>' . esc_html__( 'No affiliate coupons are assigned to your account.', 'woo-coupon-usage' ) . '</p>';
         }
-        if ( !is_user_logged_in() ) {
-            $wcusage_field_registration_enable_logout = wcusage_get_setting_value( 'wcusage_field_registration_enable_logout', '1' );
-            $wcusage_field_registration_enable_login = wcusage_get_setting_value( 'wcusage_field_registration_enable_login', '1' );
-            if ( $wcusage_field_registration_enable_logout && $wcusage_field_registration_enable_login ) {
-                echo do_shortcode( '[couponaffiliates-register]' );
-                do_action( 'wcusage_portal_hook_after_registration_form' );
-            }
-        }
-    } else {
-        echo '<p>' . esc_html__( 'No affiliate coupons are assigned to your account.', 'woo-coupon-usage' ) . '</p>';
     }
+    // End of the non-suspended branch.
     ?>
                     </div>
                 </div>

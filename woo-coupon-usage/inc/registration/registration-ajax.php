@@ -116,7 +116,7 @@ function wcusage_ajax_submit_registration() {
     // Check if the coupon code is available (not already taken by another registration or existing WooCommerce coupon)
     if ( !empty( $couponcode ) && function_exists( 'wcusage_registration_coupon_available' ) && !wcusage_registration_coupon_available( $couponcode ) ) {
         wp_send_json_error( array(
-            'message' => sprintf( esc_html__( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ), $couponcode ),
+            'message' => sprintf( __( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ), $couponcode ),
         ) );
     }
     $new_user_created = false;
@@ -142,7 +142,7 @@ function wcusage_ajax_submit_registration() {
         }
         if ( empty( $new_affiliate_user ) || !isset( $new_affiliate_user['userid'] ) || !$new_affiliate_user['userid'] ) {
             wp_send_json_error( array(
-                'message' => esc_html__( 'Failed to create user account. Please try again.', 'woo-coupon-usage' ),
+                'message' => __( 'Failed to create user account. Please try again.', 'woo-coupon-usage' ),
             ) );
         }
         $userid = $new_affiliate_user['userid'];
@@ -172,7 +172,7 @@ function wcusage_ajax_submit_registration() {
         }
         error_log( 'CA: Failed to store registration data for user ID: ' . $userid );
         wp_send_json_error( array(
-            'message' => esc_html__( 'We could not complete your affiliate registration. Please try again or contact the site administrator.', 'woo-coupon-usage' ),
+            'message' => __( 'We could not complete your affiliate registration. Please try again or contact the site administrator.', 'woo-coupon-usage' ),
         ) );
     }
     // Stored successfully, so the account is no longer a candidate for rollback. Leaving

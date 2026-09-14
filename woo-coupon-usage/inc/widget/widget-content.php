@@ -1204,6 +1204,8 @@ function wcusage_widget_display_creatives(
         } else {
             $creative_end_date = null;
         }
+        // Guarded: this file loads even when the creatives module does not.
+        $creative_is_generated = ( function_exists( 'wcusage_creative_is_generated' ) ? wcusage_creative_is_generated( $creative_type ) : in_array( $creative_type, array('dynamicimage', 'blankcanvas'), true ) );
         $within_schedule = (!$creative_start_date || $current_date >= $creative_start_date) && (!$creative_end_date || $current_date <= $creative_end_date);
         if ( $within_schedule && $creative_type != "color" ) {
             ?>
@@ -1222,28 +1224,23 @@ function wcusage_widget_display_creatives(
                 echo esc_url( $creative_image );
                 ?>', '_blank')"></div>
                     <?php 
-            } elseif ( $creative_type == 'dynamicimage' ) {
-                $endpoint = 'wcusage/v1/generate_creative';
-                $unique_id = get_post_meta( $post_id, 'creative_unique_id', true );
-                if ( !$unique_id ) {
-                    $unique_id = wp_generate_password( 15, false );
-                    update_post_meta( $post_id, 'creative_unique_id', $unique_id );
-                }
-                $unique_string = $post_id . "-" . $coupon_code . "-" . $unique_id;
-                $token = wp_hash( $unique_string );
-                $parameters = array(
-                    'creative_id' => urlencode( $post_id ),
-                    'coupon_code' => urlencode( $coupon_code ),
-                    'token'       => $token,
-                    'ver'         => strtotime( get_post_field( 'post_modified', $post_id ) ),
-                );
-                $final_image_url = rest_url( $endpoint ) . '?' . http_build_query( $parameters );
+            } elseif ( $creative_is_generated ) {
+                // Returns the cached static file when it exists, so the widget
+                // does not spawn a PHP request per creative on every open.
+                $final_image_url = ( function_exists( 'wcusage_creative_image_url' ) ? wcusage_creative_image_url( $post_id, $coupon_code, false ) : '' );
+                $full_image_url = ( function_exists( 'wcusage_creative_image_url' ) ? wcusage_creative_image_url( $post_id, $coupon_code, true ) : '' );
                 ?>
-                        <div class="wcusage-widget-creative-image" style="background-image: url(<?php 
+                        <div class="wcusage-widget-creative-image" onclick="window.open('<?php 
+                echo esc_url( $full_image_url );
+                ?>', '_blank')">
+                            <img src="<?php 
                 echo esc_url( $final_image_url );
-                ?>);" onclick="window.open('<?php 
-                echo esc_url( $final_image_url );
-                ?>', '_blank')"></div>
+                ?>" alt="<?php 
+                echo esc_attr( $creative_name );
+                ?>"
+                                loading="lazy" decoding="async"
+                                style="width:100%;height:100%;object-fit:contain;display:block;" />
+                        </div>
                     <?php 
             } elseif ( $creative_type == 'pdf' ) {
                 ?>
@@ -1298,8 +1295,8 @@ function wcusage_widget_display_creatives(
                     <!-- Action Buttons -->
                     <div class="wcusage-widget-creative-actions">
                         <?php 
-            if ( !$creative_type || $creative_type == 'image' || $creative_type == 'dynamicimage' ) {
-                $file_url = ( $creative_type == 'dynamicimage' ? $final_image_url : $creative_image );
+            if ( !$creative_type || $creative_type == 'image' || $creative_is_generated ) {
+                $file_url = ( $creative_is_generated ? $full_image_url : $creative_image );
                 ?>
                             <button class="wcusage-widget-creative-btn wcusage-widget-creative-download" onclick="wcusageWidgetDownload('<?php 
                 echo esc_attr( $file_url );
@@ -1353,7 +1350,7 @@ function wcusage_widget_display_creatives(
                 <?php 
             if ( $creative_type != 'pdf' && $creative_type != 'youtube' && $creative_type != 'mp4' ) {
                 $embed_url = $creative_url . '?' . $wcusage_urls_prefix . '=' . $coupon_code;
-                $embed_image = ( $creative_type == 'dynamicimage' ? $final_image_url : $creative_image );
+                $embed_image = ( $creative_is_generated ? $full_image_url : $creative_image );
                 $embed_code = '<a href="' . $embed_url . '" title="' . esc_attr( $creative_alt ) . '"><img src="' . $embed_image . '" alt="' . esc_attr( $creative_alt ) . '"></a>';
                 ?>
                     <input type="hidden" id="wcusage-widget-embed-<?php 

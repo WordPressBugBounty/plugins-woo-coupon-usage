@@ -118,6 +118,15 @@ function wcusage_couponusage(  $atts  ) {
                     $is_admin_preview = true;
                 }
             }
+            // Suspended affiliates keep their account, coupons and statistics, but lose
+            // access to the dashboard until an admin lifts the suspension. Admins (and
+            // admins previewing this affiliate) are not affected.
+            if ( function_exists( 'wcusage_dashboard_access_suspended' ) && wcusage_dashboard_access_suspended( $currentuserid, $is_admin_preview ) ) {
+                echo wp_kses_post( wcusage_get_suspended_dashboard_notice() );
+                $thecontent = ob_get_contents();
+                ob_end_clean();
+                return $thecontent;
+            }
             if ( isset( $_GET['couponid'] ) ) {
                 $urlid = strtolower( sanitize_text_field( wp_unslash( $_GET['couponid'] ) ) );
             }

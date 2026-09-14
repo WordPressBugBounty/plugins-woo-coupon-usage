@@ -327,7 +327,32 @@ function wcusage_field_cb_payouts( $args ) {
               <?php } ?>
               </select>
           </p>
-          <i><?php echo esc_html__( 'Payout requests will be scheduled to send on the first day of the selected schedule.', 'woo-coupon-usage' ); ?></i><br/>
+          <i><?php echo esc_html__( 'Payout requests will be scheduled to send on the first day of the selected schedule, unless a specific day is selected below.', 'woo-coupon-usage' ); ?></i><br/>
+
+          <br/>
+
+          <!-- Monthly Day of Month -->
+          <p class="wcu-field-payoutschedule-monthday" style="<?php echo ( $wcusage_field_payoutschedule_freq === 'monthly' ) ? '' : 'display: none;'; ?>">
+          	<?php
+          	$wcusage_field_payoutschedule_monthday = wcusage_get_setting_value('wcusage_field_payoutschedule_monthday', '1');
+          	$days_of_month = array();
+          	for ($month_day = 1; $month_day <= 31; $month_day++) {
+          		$days_of_month[(string) $month_day] = date_i18n('jS', strtotime('2024-01-' . sprintf('%02d', $month_day)));
+          	}
+          	$days_of_month['last'] = esc_html__( 'Last day of the month', 'woo-coupon-usage' );
+          	if (!isset($days_of_month[$wcusage_field_payoutschedule_monthday])) {
+          		$wcusage_field_payoutschedule_monthday = '1';
+          	}
+          	?>
+          	<input type="hidden" value="0" data-custom="custom" name="wcusage_options[wcusage_field_payoutschedule_monthday]" >
+          	<strong><label for="wcusage_field_payoutschedule_monthday"><?php echo esc_html__( 'Which day of the month should payouts be scheduled for?', 'woo-coupon-usage' ); ?></label></strong><br/>
+          	<select name="wcusage_options[wcusage_field_payoutschedule_monthday]" id="wcusage_field_payoutschedule_monthday">
+          		<?php foreach ($days_of_month as $monthday_key => $monthday_label) { ?>
+          			<option value="<?php echo esc_attr($monthday_key); ?>" <?php selected($wcusage_field_payoutschedule_monthday, $monthday_key); ?>><?php echo esc_html($monthday_label); ?></option>
+          		<?php } ?>
+          	</select><br/>
+          	<i><?php echo esc_html__( 'If the selected day does not exist in a month (e.g. the 31st in February), the last day of that month is used instead.', 'woo-coupon-usage' ); ?></i>
+          </p>
 
           <br/>
 
@@ -361,6 +386,11 @@ function wcusage_field_cb_payouts( $args ) {
           			$('.wcu-field-payoutschedule-day').show();
           		} else {
           			$('.wcu-field-payoutschedule-day').hide();
+          		}
+          		if ($freq.val() === 'monthly') {
+          			$('.wcu-field-payoutschedule-monthday').show();
+          		} else {
+          			$('.wcu-field-payoutschedule-monthday').hide();
           		}
           	}
           	$freq.on('change', wcusageTogglePayoutScheduleDay);
@@ -1395,7 +1425,7 @@ function wcusage_field_cb_payouts( $args ) {
           <br/>
 
           <p style="margin-left: 40px; font-weight: bold;">
-            <?php echo esc_html__( 'Want us to create a new plugin integration?', 'woo-coupon-usage' ); ?> <a href="https://roadmap.couponaffiliates.com/boards/feature-requests" target="_blank"><?php echo esc_html__( 'Submit a feature request.', 'woo-coupon-usage' ); ?></a>
+            <?php echo esc_html__( 'Want us to create a new plugin integration?', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/feature-requests/" target="_blank"><?php echo esc_html__( 'Submit a feature request.', 'woo-coupon-usage' ); ?></a>
           </p>
 
         </span>

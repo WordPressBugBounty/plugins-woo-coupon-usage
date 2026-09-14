@@ -564,7 +564,9 @@ class WC_Coupon_Users_Table extends WP_List_Table {
             case 'view_affiliate':
                 $view_url = esc_url(admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $user_id));
                 $delete_nonce = wp_create_nonce('wcusage_delete_user_' . $user_id);
-                
+                $suspend_nonce = wp_create_nonce('wcusage_suspend_user_' . $user_id);
+                $is_suspended = function_exists('wcusage_is_affiliate_suspended') && wcusage_is_affiliate_suspended($user_id);
+
                 $output = '<div class="wcusage-user-actions">';
                 $output .= '<a href="' . $view_url . '" class="button button-primary">' . esc_html__('View', 'woo-coupon-usage') . '</a> ';
                 $output .= '<div class="wcusage-delete-dropdown">';
@@ -572,6 +574,11 @@ class WC_Coupon_Users_Table extends WP_List_Table {
                 $output .= '<span class="dashicons dashicons-trash"></span>';
                 $output .= '</button>';
                 $output .= '<div class="wcusage-delete-menu" style="display: none;">';
+                // Suspending is the reversible option, so it sits above the ones that delete data.
+                $output .= '<a href="#" class="wcusage-suspend-option" data-action="' . ( $is_suspended ? 'unsuspend_user' : 'suspend_user' ) . '" data-user-id="' . $user_id . '" data-nonce="' . $suspend_nonce . '">'
+                    . '<span class="dashicons dashicons-' . ( $is_suspended ? 'unlock' : 'lock' ) . '"></span>'
+                    . ( $is_suspended ? esc_html__('Remove Suspension', 'woo-coupon-usage') : esc_html__('Suspend User', 'woo-coupon-usage') )
+                    . '</a>';
                 $output .= '<a href="#" class="wcusage-delete-option" data-action="delete_user" data-user-id="' . $user_id . '" data-nonce="' . $delete_nonce . '">' . esc_html__('Delete User', 'woo-coupon-usage') . '</a>';
                 $output .= '<a href="#" class="wcusage-delete-option" data-action="delete_user_coupons" data-user-id="' . $user_id . '" data-nonce="' . $delete_nonce . '">' . esc_html__('Delete User & Coupons', 'woo-coupon-usage') . '</a>';
                 $output .= '<a href="#" class="wcusage-delete-option" data-action="unassign_coupons" data-user-id="' . $user_id . '" data-nonce="' . $delete_nonce . '">' . esc_html__('Unassign Coupons', 'woo-coupon-usage') . '</a>';
@@ -719,10 +726,10 @@ function wcusage_coupon_users_page() {
         </h1>
         
         <!-- Load delete dropdown styles -->
-        <link rel="stylesheet" href="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL . 'css/delete-dropdown.css'); ?>" />
+        <link rel="stylesheet" href="<?php echo esc_url(add_query_arg('ver', WCUSAGE_VERSION, WCUSAGE_UNIQUE_PLUGIN_URL . 'css/delete-dropdown.css')); ?>" />
         
         <!-- Load admin JavaScript -->
-        <script src="<?php echo esc_url(WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin.js'); ?>"></script>
+        <script src="<?php echo esc_url(add_query_arg('ver', WCUSAGE_VERSION, WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin.js')); ?>"></script>
         
         <?php
         // Display success message for individual delete actions

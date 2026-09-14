@@ -44,7 +44,7 @@ function wcusage_dashboard_page_header() {
     );
     $rss_items = array();
     $feed_html = '<p>' . esc_html__( 'View the latest updates and changelog on our website:', 'woo-coupon-usage' ) . ' ' .
-        '<a href="https://roadmap.couponaffiliates.com/updates/" target="_blank" rel="noopener">' . esc_html__( 'Open changelog', 'woo-coupon-usage' ) . '</a></p>';
+        '<a href="https://couponaffiliates.com/changelog/" target="_blank" rel="noopener">' . esc_html__( 'Open changelog', 'woo-coupon-usage' ) . '</a></p>';
     // Show changelog modal markup (styles now in CSS, logic in JS)
     $changelog_new_class = (strpos($feed_html, 'new-update') !== false) ? 'changelog-new' : 'changelog-new hide';
     echo '<div id="changelog-modal" style="display:none;">
@@ -271,7 +271,7 @@ jQuery(document).ready(function($) {
                 'label' => __( 'Performance Bonuses', 'woo-coupon-usage' ),
                 'url' => admin_url('edit.php?post_type=wcu-bonuses'),
                 'icon' => 'fa-solid fa-bolt',
-                'disabled' => !(wcusage_get_setting_value('wcusage_field_bonuses_enable', '0') && wcusage_get_setting_value('wcusage_field_enable_coupon_all_stats_meta', '1')),
+                'disabled' => !wcusage_get_setting_value('wcusage_field_bonuses_enable', '0'), // stays usable while paused: the screens explain the missing stats setting
                 'dropdown' => array(
                     array('label' => __( 'View Bonuses / Rewards', 'woo-coupon-usage' ), 'url' => admin_url('edit.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-bolt'),
                     array('label' => __( 'Add New Bonus / Reward', 'woo-coupon-usage' ), 'url' => admin_url('post-new.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-plus'),
@@ -337,7 +337,7 @@ jQuery(document).ready(function($) {
     $support_items = array(
         array('label' => __( 'Support Forum', 'woo-coupon-usage' ), 'url' => 'https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0', 'icon' => 'fa-solid fa-comments', 'external' => true),
         array('label' => __( 'Documentation', 'woo-coupon-usage' ), 'url' => 'https://couponaffiliates.com/docs?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button', 'icon' => 'fa-solid fa-book', 'external' => true),
-        array('label' => __( 'Roadmap', 'woo-coupon-usage' ), 'url' => 'https://roadmap.couponaffiliates.com/roadmap', 'icon' => 'fa-solid fa-list', 'external' => true),
+        array('label' => __( 'Roadmap', 'woo-coupon-usage' ), 'url' => 'https://couponaffiliates.com/roadmap/', 'icon' => 'fa-solid fa-list', 'external' => true),
         array('label' => __( 'Updates', 'woo-coupon-usage' ), 'url' => 'https://couponaffiliates.com/changelog/?utm_campaign=plugin&utm_source=dashboard-header&utm_medium=button', 'icon' => 'fa-solid fa-rotate', 'external' => true),
     );
     ?>
@@ -595,7 +595,7 @@ function wcusage_changelog_generate_feed_html($rss_items) {
         $output .= '</div>';
     }
 
-    $output .= '<a href="https://roadmap.couponaffiliates.com/updates/" target="_blank" style="display: inline-block; background: #000; color: #fff; text-decoration: none; padding: 5px 10px; margin-bottom: 20px;">View Full Changelog</a>';
+    $output .= '<a href="https://couponaffiliates.com/changelog/" target="_blank" style="display: inline-block; background: #000; color: #fff; text-decoration: none; padding: 5px 10px; margin-bottom: 20px;">View Full Changelog</a>';
     return $output;
 }
 

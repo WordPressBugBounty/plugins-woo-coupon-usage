@@ -316,7 +316,7 @@ function wcusage_custom_box_html(  $post  ) {
         } elseif ( $order_status == 'completed' ) {
             $referrer_readonly = esc_html__( 'This can not be edited when the order is completed.', 'woo-coupon-usage' );
         } else {
-            $referrer_note = esc_html__( 'Leave empty to use the coupons applied to the order.', 'woo-coupon-usage' );
+            $referrer_note = esc_html__( 'Leave empty to use coupons applied to the order.', 'woo-coupon-usage' );
         }
         ?>
         <div class="wcusage-orderbox-field">

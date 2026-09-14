@@ -51,7 +51,7 @@ function wcusage_updated_cache_notice() {
       <div class="notice notice-success"><form style="all: unset !important;" action="" method="post">
       <input type="text" id="wcusage-update-notice-dismissed" name="wcusage-update-notice-dismissed" value="1" style="display: none;">
       <p>
-      Coupon Affiliates <?php echo esc_html__( "was updated", "woo-coupon-usage" ); ?>! (<a href="https://roadmap.couponaffiliates.com/updates" target="_blank"><?php echo esc_html__( "View Changelog", "woo-coupon-usage" ); ?></a>) - <strong><?php echo esc_html__( "Please CLEAR YOUR CACHE to ensure frontend changes are applied.", "woo-coupon-usage" ); ?></strong>
+      Coupon Affiliates <?php echo esc_html__( "was updated", "woo-coupon-usage" ); ?>! (<a href="https://couponaffiliates.com/changelog/" target="_blank"><?php echo esc_html__( "View Changelog", "woo-coupon-usage" ); ?></a>) - <strong><?php echo esc_html__( "Please CLEAR YOUR CACHE to ensure frontend changes are applied.", "woo-coupon-usage" ); ?></strong>
       <input type="submit" value="<?php echo esc_html__( "Dismiss Notice", "woo-coupon-usage" ); ?>" style="cursor: pointer;">
       </p>
       </form>

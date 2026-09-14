@@ -168,6 +168,18 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
     case 'mla_invite':
       $event_message = wp_kses_post($info) . " was invited to an affiliate network.";
       break;
+    // For the suspension events the event_id is the affiliate's user ID.
+    case 'affiliate_suspended':
+    case 'affiliate_unsuspended':
+      $suspended_user = get_userdata($event_id);
+      $suspended_name = $suspended_user ? $suspended_user->user_login : ( 'user #' . $event_id );
+      $suspended_name = '<a href="'. esc_url( admin_url('admin.php?page=wcusage_view_affiliate&user_id=' . $event_id) ) .'">'.esc_html($suspended_name).'</a>';
+      if($event == 'affiliate_suspended') {
+        $event_message = "Affiliate suspended: " . wp_kses_post($suspended_name) . " - dashboard access paused and their coupons can no longer be used.";
+      } else {
+        $event_message = "Affiliate suspension lifted: " . wp_kses_post($suspended_name) . " - dashboard access and their coupons have been restored.";
+      }
+      break;
     case 'direct_link_domain':
       $event_message = "Direct link domain request:" . " " . wp_kses_post($info);
       break;
