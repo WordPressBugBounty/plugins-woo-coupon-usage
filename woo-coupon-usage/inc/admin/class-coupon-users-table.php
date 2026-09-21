@@ -57,7 +57,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
             $credit_enable = wcusage_get_setting_value('wcusage_field_storecredit_enable', 0);
             $system = wcusage_get_setting_value('wcusage_field_storecredit_system', 'default');
             $storecredit_users_col = wcusage_get_setting_value('wcusage_field_tr_payouts_storecredit_users_col', 1);
-            if($credit_enable && $storecredit_users_col && ( function_exists('wcusage_credit_use_builtin') ? wcusage_credit_use_builtin($system) : ($system == "default") )) {
+            if($credit_enable && $storecredit_users_col && apply_filters('wcusage_hook_storecredit_users_col_system', ( function_exists('wcusage_credit_use_builtin') ? wcusage_credit_use_builtin($system) : ($system == "default") ), $system)) {
                 $credit_label = wcusage_get_setting_value('wcusage_field_tr_payouts_storecredit_only', esc_html__( 'Store Credit', 'woo-coupon-usage'));
                 $column['affiliatestorecredit'] = $credit_label;
             }
@@ -853,7 +853,7 @@ function wcusage_export_coupon_users_csv() {
         $credit_enable = wcusage_get_setting_value('wcusage_field_storecredit_enable', 0);
         $system = wcusage_get_setting_value('wcusage_field_storecredit_system', 'default');
         $storecredit_users_col = wcusage_get_setting_value('wcusage_field_tr_payouts_storecredit_users_col', 1);
-        if ($credit_enable && $storecredit_users_col && ( function_exists('wcusage_credit_use_builtin') ? wcusage_credit_use_builtin($system) : ($system == "default") )) {
+        if ($credit_enable && $storecredit_users_col && apply_filters('wcusage_hook_storecredit_users_col_system', ( function_exists('wcusage_credit_use_builtin') ? wcusage_credit_use_builtin($system) : ($system == "default") ), $system)) {
             $credit_label = wcusage_get_setting_value('wcusage_field_tr_payouts_storecredit_only', 'Store Credit');
             $headers[] = $credit_label;
         }
@@ -950,7 +950,7 @@ function wcusage_export_coupon_users_csv() {
             $credit_enable = wcusage_get_setting_value('wcusage_field_storecredit_enable', 0);
             $system = wcusage_get_setting_value('wcusage_field_storecredit_system', 'default');
             $storecredit_users_col = wcusage_get_setting_value('wcusage_field_tr_payouts_storecredit_users_col', 1);
-            if ($credit_enable && $storecredit_users_col && ( function_exists('wcusage_credit_use_builtin') ? wcusage_credit_use_builtin($system) : ($system == "default") ) && function_exists('wcusage_get_credit_users_balance')) {
+            if ($credit_enable && $storecredit_users_col && apply_filters('wcusage_hook_storecredit_users_col_system', ( function_exists('wcusage_credit_use_builtin') ? wcusage_credit_use_builtin($system) : ($system == "default") ), $system) && function_exists('wcusage_get_credit_users_balance')) {
                 $row[] = number_format(wcusage_get_credit_users_balance($user_id), 2, '.', '');
             }
             

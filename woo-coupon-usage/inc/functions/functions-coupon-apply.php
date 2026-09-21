@@ -375,7 +375,11 @@ if( !function_exists( 'wcusage_is_domain_blacklisted' ) ) {
   function wcusage_is_domain_blacklisted($referral_domain = "") {
 
     $block_domains = wcusage_get_setting_value('wcusage_field_fraud_block_domains', '');
-    $referral_domain = "";
+
+    // Normalize the domain the caller gave us the same way as the cookie below.
+    // This used to be overwritten with an empty string, which quietly discarded
+    // the argument and left the callers that pass a referrer checking nothing.
+    $referral_domain = preg_replace( '/^www\./i', '', trim( (string) $referral_domain ) );
 
     if($block_domains) {
 

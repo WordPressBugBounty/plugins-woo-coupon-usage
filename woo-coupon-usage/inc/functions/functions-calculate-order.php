@@ -1853,7 +1853,9 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         if ( $save_order_commission_meta ) {
                             $meta_data['wcusage_commission_summary'] = $commission_summary;
                         }
-                        $fixed_product_commission_total = wcusage_order_meta( $orderid, 'wcusage_product_commission', true );
+                        // Keep the freshly computed per-product commission. Reading it back from meta here
+                        // would return the previous value (the bulk write happens later), causing the
+                        // coupon refresh vs order recalculate flip-flop
                         if ( !$fixed_product_commission_total ) {
                             $fixed_product_commission_total = "0";
                         }

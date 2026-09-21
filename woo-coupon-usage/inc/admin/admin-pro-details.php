@@ -672,6 +672,7 @@ function wcusage_go_to_settings(settings1, settings2) {
   150);
   setTimeout(
     function() {
+      jQuery( settings2 ).trigger('wcusage-goto');
       jQuery('html, body').animate({
           scrollTop: jQuery( settings2 ).offset().top - 70
       }, 300);

@@ -122,6 +122,121 @@ if ( !function_exists( 'wcusage_install_clicks_data' ) ) {
 
 }
 /**
+ * RECORD A REFERRAL CLICK FOR A COUPON
+ *
+ * The public way to record a click from outside the plugin - a headless or
+ * decoupled front end that handles the referral link itself, for example, and
+ * needs the click to reach the affiliate's URL statistics and conversion figures
+ * anyway. It takes a coupon code, fills in the details the plugin would normally
+ * read from the request, and returns the click ID.
+ *
+ * Unlike the plugin's own tracking this does no throttling, so a caller that can
+ * be hit more than once for the same visit (bots, prefetching, a page refresh)
+ * should decide for itself whether a visit is a new click before calling.
+ *
+ * Keep hold of the returned click ID: it is what marks the click as converted
+ * when the visitor orders. See the "wcusage_conversion_click_id" filter.
+ *
+ * @param string|int $coupon Coupon code, or coupon ID.
+ * @param array      $args {
+ *     Optional. Details of the click.
+ *
+ *     @type string     $campaign  Campaign / "src" value. Default empty.
+ *     @type int        $page      Post ID of the landing page, for the click
+ *                                 history table. 0 shows as the homepage.
+ *                                 Default 0.
+ *     @type string     $referrer  Where the visitor came from. A full URL or a
+ *                                 domain; only the domain is stored, without any
+ *                                 "www." prefix. Default empty.
+ *     @type string|null $ip       Visitor IP, or an ID of up to 64 letters,
+ *                                 numbers, "-" or "_" for a site not storing IPs.
+ *                                 Null detects it from the current request the
+ *                                 way the plugin's own tracking does, which is
+ *                                 only meaningful when the visitor's browser is
+ *                                 what made the request. Default null.
+ *     @type bool       $converted Whether the click already led to an order.
+ *                                 Default false.
+ * }
+ *
+ * @return int|false Click ID, or false if the coupon was not found, the referrer
+ *                   is one of the site's blocked domains, or the click could not
+ *                   be saved.
+ *
+ */
+if ( !function_exists( 'wcusage_record_click' ) ) {
+    function wcusage_record_click(  $coupon, $args = array()  ) {
+        $coupon_object = wcusage_get_coupon_object_safe( $coupon );
+        if ( !$coupon_object ) {
+            return false;
+        }
+        $coupon_id = $coupon_object->get_id();
+        if ( !$coupon_id ) {
+            return false;
+        }
+        $args = wp_parse_args( $args, array(
+            'campaign'  => '',
+            'page'      => 0,
+            'referrer'  => '',
+            'ip'        => null,
+            'converted' => false,
+        ) );
+        // Referrers are stored as a bare domain, so accept a full URL and reduce it
+        // to one, matching what the plugin records for its own clicks.
+        $referrer = trim( (string) $args['referrer'] );
+        if ( $referrer ) {
+            if ( strpos( $referrer, '//' ) !== false ) {
+                // A full URL. wp_parse_url() gives back null for one it cannot read.
+                $referrer = (string) wp_parse_url( $referrer, PHP_URL_HOST );
+            }
+            // Otherwise a domain, possibly with a path or query string after it.
+            $referrer = (string) strtok( $referrer, '/' );
+            $referrer = (string) strtok( $referrer, '?' );
+            $referrer = preg_replace( '/^www\\./i', '', $referrer );
+        }
+        // The site's blocked referrer domains apply here too - the plugin's own
+        // tracking drops these clicks rather than recording them, and a click
+        // arriving through this function is no more trustworthy.
+        if ( $referrer && function_exists( 'wcusage_is_domain_blacklisted' ) && wcusage_is_domain_blacklisted( $referrer ) ) {
+            return false;
+        }
+        // Null means "work it out from this request", which is what the plugin does
+        // when the visitor's own browser is the one being tracked.
+        $ipaddress = $args['ip'];
+        if ( $ipaddress === null ) {
+            $ipaddress = wcusage_get_visitor_ip();
+        }
+        // Put the tidied values back, so anything listening below is told what was
+        // actually saved rather than what was passed in.
+        $args['referrer'] = $referrer;
+        $args['ip'] = $ipaddress;
+        $click_id = wcusage_install_clicks_data(
+            $coupon_id,
+            $args['campaign'],
+            $args['page'],
+            $args['referrer'],
+            $args['converted'],
+            $args['ip']
+        );
+        if ( $click_id ) {
+            /**
+             * Fires after a referral click has been recorded.
+             *
+             * @param int    $click_id  ID of the click that was saved.
+             * @param int    $coupon_id Coupon the click was recorded against.
+             * @param array  $args      Details the click was recorded with.
+             */
+            do_action(
+                'wcusage_click_recorded',
+                $click_id,
+                $coupon_id,
+                $args
+            );
+        }
+        return $click_id;
+    }
+
+}
+/**
  * HOOK TO DISPLAY CLICKS FOR COUPON & CAMPAIGN ON AFFILIATE DASHBOARD
  *
  * @param int $postid

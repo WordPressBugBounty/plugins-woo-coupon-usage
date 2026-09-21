@@ -570,20 +570,126 @@ function wcusage_field_cb_payouts( $args ) {
 
   		<br/><hr/>
 
-      <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Payment Methods:</h3>
+      <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Payout Payment Methods:</h3>
 
       <style>
       .wcu-admin-payouts-headers label {
-        font-size: 16px;
+        font-size: 15px;
+      }
+      .wcu-payout-method-accordion {
+        background: #fff;
+        border: 1px solid #ddd;
+        margin: 10px 0;
+      }
+      .wcu-payout-method-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: space-between;
+        padding: 10px 15px;
+        background: #f9f9f9;
+        border-bottom: 1px solid #ddd;
+        cursor: pointer;
+      }
+      .wcu-payout-method-header p {
+        margin: 0;
+      }
+      .wcu-payout-method-header label {
+        cursor: pointer;
+      }
+      .wcu-payout-method-header .wcu-showhide-button {
+        font-size: 14px;
+        padding: 6px 12px;
+        white-space: nowrap;
+      }
+      .wcu-payout-method-content {
+        padding: 20px;
+      }
+      .wcu-payout-method-accordion.wcu-payout-method-disabled {
+        background: #f5f5f5;
+        opacity: 0.6;
+      }
+      .wcu-payout-method-accordion.wcu-payout-method-disabled .wcu-payout-method-header {
+        background: #e9e9e9;
+        cursor: default;
+      }
+      .wcu-payout-method-accordion.wcu-payout-method-disabled .wcu-payout-method-header label {
+        cursor: default;
+      }
+      .wcu-payout-method-accordion.wcu-payout-method-disabled .wcu-payout-method-header .switch,
+      .wcu-payout-method-accordion.wcu-payout-method-disabled .wcu-payout-method-header .switch * {
+        cursor: pointer;
       }
       </style>
+
+      <script>
+      jQuery( document ).ready(function($) {
+        function wcusagePayoutMethodToggle($accordion, forceOpen) {
+          var $content = $accordion.children('.wcu-payout-method-content');
+          var $button = $accordion.find('.wcu-payout-method-toggle').first();
+          var open = ( typeof forceOpen !== 'undefined' ) ? forceOpen : !$content.is(':visible');
+          if( open ) {
+            $content.show();
+            $button.html("<?php echo esc_js( __( 'Hide Settings', 'woo-coupon-usage' ) ); ?> <span class='fa-solid fa-arrow-up'></span>");
+          } else {
+            $content.hide();
+            $button.html("<?php echo esc_js( __( 'Show Settings', 'woo-coupon-usage' ) ); ?> <span class='fa-solid fa-arrow-down'></span>");
+          }
+        }
+        function wcusagePayoutMethodSetState($accordion, enabled) {
+          $accordion.toggleClass('wcu-payout-method-disabled', !enabled);
+          $accordion.find('.wcu-payout-method-toggle').first().prop('disabled', !enabled);
+          if( !enabled ) {
+            wcusagePayoutMethodToggle($accordion, false);
+          }
+        }
+        // Set initial enabled/disabled state per method.
+        $('.wcu-payout-method-accordion').each(function() {
+          var $checkbox = $(this).find('.wcu-payout-method-header input[type="checkbox"]').first();
+          wcusagePayoutMethodSetState( $(this), $checkbox.prop('checked') );
+        });
+        $('.wcu-payout-method-header').on('click', function(e) {
+          if( $(e.target).closest('.switch, input').length ) { return; }
+          var $accordion = $(this).closest('.wcu-payout-method-accordion');
+          if( $accordion.hasClass('wcu-payout-method-disabled') ) { return; }
+          wcusagePayoutMethodToggle( $accordion );
+        });
+        // Update state when the payment method is enabled/disabled, opening when enabled.
+        $('.wcu-payout-method-header input[type="checkbox"]').on('change', function() {
+          var $accordion = $(this).closest('.wcu-payout-method-accordion');
+          var enabled = $(this).prop('checked');
+          wcusagePayoutMethodSetState( $accordion, enabled );
+          if( enabled ) {
+            wcusagePayoutMethodToggle( $accordion, true );
+          }
+        });
+        // Open when scrolled to via the "Go to Settings" buttons.
+        $('.wcu-payout-method-accordion').on('wcusage-goto', function() {
+          if( $(this).hasClass('wcu-payout-method-disabled') ) { return; }
+          wcusagePayoutMethodToggle( $(this), true );
+        });
+        // Open when linked directly via URL hash (e.g. #paypalapi-settings).
+        if( window.location.hash ) {
+          var hashid = window.location.hash.substring(1).replace(/[^a-zA-Z0-9_-]/g, '');
+          var $hashAccordion = $('.wcu-payout-method-accordion').filter('#' + hashid);
+          if( $hashAccordion.length && !$hashAccordion.hasClass('wcu-payout-method-disabled') ) {
+            wcusagePayoutMethodToggle( $hashAccordion, true );
+          }
+        }
+      });
+      </script>
 
       <!-- Enable Manual Payment Method #1 -->
       <div style="margin-bottom: 20px;"></div>
 
+      <div class="wcu-payout-method-accordion">
+      <div class="wcu-payout-method-header">
       <span class="wcu-admin-payouts-headers">
         <?php wcusage_setting_toggle_option('wcusage_field_paypal_enable', 0, esc_html__( 'Custom Payment Method', 'woo-coupon-usage' ) . " #1 (Manual)", '0px'); ?>
       </span>
+      <button type="button" class="wcu-showhide-button wcu-payout-method-toggle"><?php echo esc_html__( 'Show Settings', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button>
+      </div>
+      <div class="wcu-payout-method-content" style="display: none;">
       <i><?php echo esc_html__( 'A custom "manual" payment method of your choice.', 'woo-coupon-usage' ); ?></i><br/>
 
       <?php wcusage_setting_toggle('.wcusage_field_paypal_enable', '.wcu-field-section-tr-payouts-paypal'); // Show or Hide ?>
@@ -621,12 +727,19 @@ function wcusage_field_cb_payouts( $args ) {
 
       </span>
 
-      <!-- Enable Manual Payment Method #2 -->
-      <div style="margin-bottom: 40px;"></div>
+      </div>
+      </div>
 
+      <!-- Enable Manual Payment Method #2 -->
+
+      <div class="wcu-payout-method-accordion">
+      <div class="wcu-payout-method-header">
       <span class="wcu-admin-payouts-headers">
         <?php wcusage_setting_toggle_option('wcusage_field_paypal2_enable', 0, esc_html__( 'Custom Payment Method', 'woo-coupon-usage' ) . " #2 (Manual)", '0px'); ?>
       </span>
+      <button type="button" class="wcu-showhide-button wcu-payout-method-toggle"><?php echo esc_html__( 'Show Settings', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button>
+      </div>
+      <div class="wcu-payout-method-content" style="display: none;">
       <i><?php echo esc_html__( 'A custom "manual" payment method of your choice.', 'woo-coupon-usage' ); ?></i><br/>
 
       <?php wcusage_setting_toggle('.wcusage_field_paypal2_enable', '.wcu-field-section-tr-payouts-paypal2'); // Show or Hide ?>
@@ -662,12 +775,19 @@ function wcusage_field_cb_payouts( $args ) {
 
       </span>
 
-      <!-- Enable Direct Bank Transfer -->
-      <div style="margin-bottom: 40px;"></div>
+      </div>
+      </div>
 
+      <!-- Enable Direct Bank Transfer -->
+
+      <div class="wcu-payout-method-accordion">
+      <div class="wcu-payout-method-header">
       <span class="wcu-admin-payouts-headers">
         <?php wcusage_setting_toggle_option('wcusage_field_banktransfer_enable', 0, esc_html__( 'Direct Bank Transfer (Manual)', 'woo-coupon-usage' ), '0px'); ?>
       </span>
+      <button type="button" class="wcu-showhide-button wcu-payout-method-toggle"><?php echo esc_html__( 'Show Settings', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button>
+      </div>
+      <div class="wcu-payout-method-content" style="display: none;">
       <i><?php echo esc_html__( 'A direct bank transfer payment method (paid manually).', 'woo-coupon-usage' ); ?></i><br/>
 
       <?php wcusage_setting_toggle('.wcusage_field_banktransfer_enable', '.wcu-field-section-tr-payouts-banktransfer'); // Show or Hide ?>
@@ -758,12 +878,19 @@ function wcusage_field_cb_payouts( $args ) {
 
       </span>
 
-      <!-- Enable PayPal Payouts API -->
-      <div style="margin-bottom: 40px;" id="paypalapi-settings"></div>
+      </div>
+      </div>
 
+      <!-- Enable PayPal Payouts API -->
+
+      <div class="wcu-payout-method-accordion" id="paypalapi-settings">
+      <div class="wcu-payout-method-header">
       <span class="wcu-admin-payouts-headers">
         <?php wcusage_setting_toggle_option('wcusage_field_paypalapi_enable', 0, esc_html__( 'PayPal Payouts', 'woo-coupon-usage' ), '0px'); ?>
       </span>
+      <button type="button" class="wcu-showhide-button wcu-payout-method-toggle"><?php echo esc_html__( 'Show Settings', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button>
+      </div>
+      <div class="wcu-payout-method-content" style="display: none;">
       <i><?php echo esc_html__( 'PayPal Payouts payment method will allow you to one-click pay your affiliates directly into their PayPal account.', 'woo-coupon-usage' ); ?>
       <?php echo esc_html__( 'In most cases PayPal Payouts fees are 2%.', 'woo-coupon-usage' ); ?> <a href="https://www.paypal.com/us/webapps/mpp/merchant-fees#paypal-payouts" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
       <i><?php echo esc_html__( 'Prerequisites: To use PayPal Payouts, you will need a PayPal business account and must have access to it’s PayPal Payouts features.', 'woo-coupon-usage' ); ?> <a href="https://developer.paypal.com/docs/payouts/integrate/prerequisites" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
@@ -860,12 +987,19 @@ function wcusage_field_cb_payouts( $args ) {
 
       </span>
 
-      <!-- Enable Stripe Payouts API -->
-      <div style="margin-bottom: 40px;" id="stripeapi-settings"></div>
+      </div>
+      </div>
 
+      <!-- Enable Stripe Payouts API -->
+
+      <div class="wcu-payout-method-accordion" id="stripeapi-settings">
+      <div class="wcu-payout-method-header">
       <span class="wcu-admin-payouts-headers">
         <?php wcusage_setting_toggle_option('wcusage_field_stripeapi_enable', 0, esc_html__( 'Stripe Payouts', 'woo-coupon-usage' ), '0px'); ?>
       </span>
+      <button type="button" class="wcu-showhide-button wcu-payout-method-toggle"><?php echo esc_html__( 'Show Settings', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button>
+      </div>
+      <div class="wcu-payout-method-content" style="display: none;">
       <?php
       $usaicon = '<img src="'.WCUSAGE_UNIQUE_PLUGIN_URL.'images/us.png" style="height: 8px;"> US';
       $ukicon = '<img src="'.WCUSAGE_UNIQUE_PLUGIN_URL.'images/gb.png" style="height: 8px;"> UK';
@@ -963,15 +1097,19 @@ function wcusage_field_cb_payouts( $args ) {
 
       </span>
 
-      <!-- Enable Wise Payouts -->
-      <div style="margin-bottom: 40px;" id="wise-settings"></div>
+      </div>
+      </div>
 
+      <!-- Enable Wise Payouts -->
+
+      <div class="wcu-payout-method-accordion" id="wise-settings">
+      <div class="wcu-payout-method-header">
       <span class="wcu-admin-payouts-headers">
         <?php wcusage_setting_toggle_option('wcusage_field_wise_enable', 0, esc_html__( 'Wise Bank Transfer Payouts', 'woo-coupon-usage' ), '0px'); ?>
       </span>
-
-      <br/>
-
+      <button type="button" class="wcu-showhide-button wcu-payout-method-toggle"><?php echo esc_html__( 'Show Settings', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button>
+      </div>
+      <div class="wcu-payout-method-content" style="display: none;">
       <i><?php echo esc_html__( 'Wise Bank Transfer Payouts allows you to one-click pay your affiliates directly to their bank account through Wise with low transfer fees.', 'woo-coupon-usage' ); ?></i><br/>
       <i><?php echo esc_html__( 'Wise fees vary based on the currency and destination.', 'woo-coupon-usage' ); ?> <a href="https://wise.com/help/articles/2571942/pricing-and-fees" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
       <i><?php echo esc_html__( 'Prerequisites: To use Wise Bank Transfer Payouts, you will need a Wise business account and API access.', 'woo-coupon-usage' ); ?> <a href="https://docs.wise.com/api-docs/features/strong-customer-authentication-sca-for-api" target="_blank"><?php echo esc_html__( 'Learn More', 'woo-coupon-usage' ); ?></a>.</i><br/>
@@ -1279,12 +1417,19 @@ function wcusage_field_cb_payouts( $args ) {
 
       </span>
 
-      <!-- Enable Store Credit -->
-      <div style="margin-bottom: 40px;" id="storecredit-settings"></div>
+      </div>
+      </div>
 
+      <!-- Enable Store Credit -->
+
+      <div class="wcu-payout-method-accordion" id="storecredit-settings">
+      <div class="wcu-payout-method-header">
       <span class="wcu-admin-payouts-headers">
         <?php wcusage_setting_toggle_option('wcusage_field_storecredit_enable', 0, esc_html__( 'Store Credit / Wallet', 'woo-coupon-usage' ), '0px'); ?>
       </span>
+      <button type="button" class="wcu-showhide-button wcu-payout-method-toggle"><?php echo esc_html__( 'Show Settings', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button>
+      </div>
+      <div class="wcu-payout-method-content" style="display: none;">
       <i><?php echo esc_html__( 'Store credit payouts will allow affiliates to have commission paid out into a "wallet" which they can then use as a discount to purchase items/products from your shop.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/pro-store-credit" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a></i><br/>
       <i><?php echo esc_html__( 'If you want to show the logged in users current store credit balance somewhere, use the shortcode', 'woo-coupon-usage' ); ?>: [couponaffiliates_credit]</i><br/>
 
@@ -1329,6 +1474,12 @@ function wcusage_field_cb_payouts( $args ) {
     		<strong style="margin-left: 40px; display: inline-block;"><label for="scales"><?php echo esc_html__( 'Wallet System', 'woo-coupon-usage' ); ?></label></strong><br/>
     		<select style="margin-left: 40px;" name="wcusage_options[wcusage_field_storecredit_system]" id="wcusage_field_storecredit_system" class="wcusage_field_storecredit_system">
           <option value="" <?php if(!$wcusage_field_storecredit_system) { ?>selected<?php } ?>><?php echo esc_html__( 'Select an option...', 'woo-coupon-usage' ); ?></option>
+          <?php
+          // Recommended integrations shown above the built-in system.
+          if( wcu_fs()->can_use_premium_code() ) {
+            do_action('wcusage_hook_settings_store_credit_dropdown_first', $wcusage_field_storecredit_system);
+          }
+          ?>
           <option value="default" <?php if($wcusage_field_storecredit_system == "default") { ?>selected<?php } ?>><?php echo esc_html__( '(Free) Built-in Store Credit & Wallet System', 'woo-coupon-usage' ); ?></option>
           <?php
           // Custom Hook
@@ -1484,12 +1635,19 @@ function wcusage_field_cb_payouts( $args ) {
             <i style="margin-left: 40px;"><?php echo esc_html__( 'This is shown below the message above, next to a checkbox, allowing them to apply some or all of their credit to the cart.', 'woo-coupon-usage' ); ?></i><br/>
             <i style="margin-left: 40px;"><?php echo esc_html__( 'Use merge tag {credit} to show the amount of credit they can apply.', 'woo-coupon-usage' ); ?></i><br/>
 
+          </span>
+
+          <!-- Show "Store Credit" Column on Users List (built-in + Simple Store Credit systems) -->
+          <span class="section-default-credit-system section-default-credit-system-default section-default-credit-system-sscp">
+
             <br/>
 
-
-            <!-- Show "Store Credit" Column on Users List -->
             <?php wcusage_setting_toggle_option('wcusage_field_tr_payouts_storecredit_users_col', 1, esc_html__( 'Show "Store Credit" column on admin users list?', 'woo-coupon-usage' ), '40px'); ?>
             <i style="margin-left: 40px;"><?php echo esc_html__( 'This will show the current "Store Credit" for each user on the "All Users" admin page.', 'woo-coupon-usage' ); ?></i><br/>
+
+          </span>
+
+          <span class="section-default-credit-system section-default-credit-system-default">
 
             <br/>
 
@@ -1497,6 +1655,8 @@ function wcusage_field_cb_payouts( $args ) {
             <?php wcusage_setting_toggle_option('wcusage_field_tr_payouts_storecredit_multicurrency', 1, esc_html__( 'Enable multi-currency support for store credit?', 'woo-coupon-usage' ), '40px'); ?>
             <i style="margin-left: 40px;"><?php echo esc_html__( 'If enabled, store credit will be converted and displayed in the selected currency at checkout. If disabled, all store credit will use the base store currency only.', 'woo-coupon-usage' ); ?></i><br/>
             <i style="margin-left: 40px;"><?php echo sprintf( esc_html__( 'Note: This requires the <a href="%s" target="_blank">multi-currency module</a> to be enabled and configured.', 'woo-coupon-usage' ), 'https://couponaffiliates.com/docs/multi-currency-support/' ); ?></i><br/>
+
+          </span>
 
           <?php
           // Custom Hook
@@ -1515,15 +1675,17 @@ function wcusage_field_cb_payouts( $args ) {
 
           <?php if(get_option("woocommerce_tax_display_cart") == "incl") { ?>
 
+            <span class="section-default-credit-system section-default-credit-system-default">
+
             <br/>
 
             <!-- "Store Credit" Exclude Tax -->
             <?php wcusage_setting_toggle_option('wcusage_field_tr_payouts_storecredit_excl_tax', 0, esc_html__( 'Exclude/Remove taxes from Store Credit in cart.', 'woo-coupon-usage' ), '40px'); ?>
             <i style="margin-left: 40px;"><?php echo esc_html__( 'This will remove/deduct the tax amount from the store credit, if it is added to the credit amount in the cart.', 'woo-coupon-usage' ); ?></i><br/>
 
+            </span>
+
           <?php } ?>
-            
-          </span>
 
         </span>
 
@@ -1532,7 +1694,10 @@ function wcusage_field_cb_payouts( $args ) {
 
       </span>
 
-      <div style="margin-bottom: 40px;"></div>
+      </div>
+      </div>
+
+      <div style="margin-bottom: 30px;"></div>
 
       <hr/>
 

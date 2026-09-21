@@ -1268,6 +1268,7 @@ function wcusage_field_cb( $args ) {
         jQuery(tab).click();
         // Wait a moment then scroll to the section
         setTimeout(function() {
+          jQuery(section).trigger("wcusage-goto");
           jQuery("html, body").animate({
             scrollTop: jQuery(section).offset().top - 100
           }, 500);

@@ -91,9 +91,6 @@ if( !function_exists( 'wcusage_couponusage_referral_urls_shortcode' ) ) {
 
     $coupon_ids = wcusage_get_users_coupons_ids( get_current_user_id() );
 
-    $wcusage_field_default_ref_url = wcusage_get_default_ref_url();
-    $wcusage_urls_prefix = wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon');
-
     $i = 0;
 
     ob_start();
@@ -102,7 +99,7 @@ if( !function_exists( 'wcusage_couponusage_referral_urls_shortcode' ) ) {
 
       $i++;
     
-      $url = $wcusage_field_default_ref_url . "?" . $wcusage_urls_prefix . "=" . get_the_title($coupon);
+      $url = wcusage_get_affiliate_url( get_the_title($coupon) );
       ?>
       <a href="<?php echo esc_url($url); ?>"><?php echo esc_url($url); ?></a>
       <?php

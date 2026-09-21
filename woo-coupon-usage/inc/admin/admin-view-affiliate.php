@@ -1197,21 +1197,46 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
         $pid = $sdata['direct_parent'];
         $mla_children_map[$pid][] = $sid;
     }
-    // Recursive row renderer
+    // Recursive row renderer.
+    //
+    // $seen carries the user IDs already rendered on the way down to this
+    // branch. A looped network (an affiliate who appears in their own
+    // ancestor chain) would otherwise recurse forever and exhaust the
+    // memory limit, taking the whole page down with a fatal error.
     function wcusage_render_mla_sub_rows(
         $parent_id,
         $mla_sub_map,
         $mla_children_map,
         $root_user_id,
-        $depth = 0
+        $depth = 0,
+        $seen = array()
     ) {
         if ( empty( $mla_children_map[$parent_id] ) ) {
             return;
         }
+        if ( $depth > 50 ) {
+            return;
+        }
+        $seen[(int) $parent_id] = true;
         foreach ( $mla_children_map[$parent_id] as $sid ) {
+            // Skip anything that loops back on itself, the affiliate being
+            // viewed, or a sub we somehow have no data for.
+            if ( isset( $seen[(int) $sid] ) ) {
+                continue;
+            }
+            if ( (int) $sid === (int) $root_user_id ) {
+                continue;
+            }
+            if ( !isset( $mla_sub_map[$sid] ) ) {
+                continue;
+            }
             $sdata = $mla_sub_map[$sid];
             $sub_user = $sdata['user'];
             $sub_user_info = get_userdata( $sid );
+            // The account may have been deleted since the network was built.
+            if ( !$sub_user_info ) {
+                continue;
+            }
             $sub_parents = $sdata['parents'];
             $t_num = $sdata['tier_num'];
             // tier key relative to root_user_id
@@ -1317,7 +1342,8 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
                 $mla_sub_map,
                 $mla_children_map,
                 $root_user_id,
-                $depth + 1
+                $depth + 1,
+                $seen
             );
         }
     }
@@ -1402,7 +1428,10 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
                 $mla_parents = array_reverse( $mla_parents );
                 $x = end( $mla_parents );
                 // Link to top-most parent
-                if ( !$super_affiliate ) {
+                // A node whose parent is missing from the chart breaks the
+                // whole chart, not just that branch, so drop it if the parent
+                // account has been deleted - its own node is left out too.
+                if ( !$super_affiliate && get_userdata( $x ) ) {
                     $network_array .= wcusage_get_network_chart_item( $this_user_id, $x, $user_id );
                 }
             }

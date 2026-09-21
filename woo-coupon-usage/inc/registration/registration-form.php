@@ -955,24 +955,29 @@ function wcusage_post_submit_application(  $adminpost  ) {
                             }
                             $mla_user = get_user_by( 'login', $mla );
                             $this_user = get_user_by( 'login', $username );
+                            // A refused assignment means no parent was set, so there is no
+                            // sub-affiliate relationship to record or announce.
+                            $mla_parent_set = true;
                             if ( function_exists( 'wcusage_mla_add_parent_to_user' ) ) {
-                                wcusage_mla_add_parent_to_user( $mla_user->ID, $this_user->ID );
+                                $mla_parent_set = (bool) wcusage_mla_add_parent_to_user( $mla_user->ID, $this_user->ID );
                             }
-                            if ( function_exists( 'wcusage_install_mlainvite_data' ) ) {
-                                wcusage_install_mlainvite_data(
+                            if ( $mla_parent_set ) {
+                                if ( function_exists( 'wcusage_install_mlainvite_data' ) ) {
+                                    wcusage_install_mlainvite_data(
+                                        $mla_user->ID,
+                                        $this_user->user_email,
+                                        'pending',
+                                        1
+                                    );
+                                }
+                                // Notify MLA parent about the new sub-affiliate registration.
+                                do_action(
+                                    'wcusage_hook_mla_sub_registration_new',
                                     $mla_user->ID,
-                                    $this_user->user_email,
-                                    'pending',
-                                    1
+                                    $this_user->ID,
+                                    $couponcode
                                 );
                             }
-                            // Notify MLA parent about the new sub-affiliate registration.
-                            do_action(
-                                'wcusage_hook_mla_sub_registration_new',
-                                $mla_user->ID,
-                                $this_user->ID,
-                                $couponcode
-                            );
                         }
                         $alreadyexists = 0;
                     } else {

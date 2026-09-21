@@ -29,6 +29,9 @@ if ( !function_exists( 'wcusage_tab_referral_url' ) ) {
         $wcusage_field_show_qrcodes = wcusage_get_setting_value( 'wcusage_field_show_qrcodes', 0 );
         $wcusage_field_show_shortlink = wcusage_get_setting_value( 'wcusage_field_show_shortlink', 0 );
         $wcusage_field_default_ref_url = wcusage_get_default_ref_url();
+        // The referral URL can carry a query string of its own once filtered, so the
+        // coupon has to be added to it rather than starting a second query string.
+        $wcusage_default_ref_sep = ( strpos( $wcusage_field_default_ref_url, '?' ) !== false ? '&' : '?' );
         $urls_generator_enable = wcusage_get_setting_value( 'wcusage_field_urls_generator_enable', 1 );
         $urls_statistics_enable = wcusage_get_setting_value( 'wcusage_field_urls_statistics_enable', 1 );
         ?>
@@ -103,7 +106,9 @@ if ( !function_exists( 'wcusage_tab_referral_url' ) ) {
   				<code style="margin: 10px 0 2px 0; padding: 5px; display: inline-block; background: rgba(0,0,0,0.04); color: #1a1a1a;" id="p1" class="wcu-urllink">
             <span id="output-custom-url"><?php 
             echo esc_html( $wcusage_field_default_ref_url );
-            ?></span><span id="output-custom-url-sep">?</span><?php 
+            ?></span><span id="output-custom-url-sep"><?php 
+            echo esc_html( $wcusage_default_ref_sep );
+            ?></span><?php 
             echo esc_html( $wcusage_urls_prefix );
             ?>=<?php 
             echo esc_html( rawurlencode( $coupon_code ) );
@@ -199,6 +204,8 @@ if ( !function_exists( 'wcusage_scripts_tab_referral_url_stats' ) ) {
     function wcusage_scripts_tab_referral_url_stats() {
         $options = wcusage_get_options();
         $wcusage_field_default_ref_url = wcusage_get_default_ref_url();
+        // Matches the separator the markup above starts with - see the note there.
+        $wcusage_default_ref_sep = ( strpos( $wcusage_field_default_ref_url, '?' ) !== false ? '&' : '?' );
         if ( isset( $options['wcusage_field_page_load'] ) ) {
             $wcusage_page_load = $options['wcusage_field_page_load'];
         } else {
@@ -249,7 +256,9 @@ if ( !function_exists( 'wcusage_scripts_tab_referral_url_stats' ) ) {
         ?>
           jQuery('#output-custom-url').text(url);
           if (url.length == 0) {
-            jQuery('#output-custom-url-sep').text("?");
+            jQuery('#output-custom-url-sep').text("<?php 
+        echo esc_js( $wcusage_default_ref_sep );
+        ?>");
             jQuery('#output-custom-url').text("<?php 
         echo esc_html( $wcusage_field_default_ref_url );
         ?>");

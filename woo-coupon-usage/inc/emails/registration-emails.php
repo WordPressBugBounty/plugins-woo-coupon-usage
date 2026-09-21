@@ -36,9 +36,7 @@ function wcusage_email_affiliate_register($user_email, $coupon_code, $firstname)
       $dashboardurl = "<a href='".$dashboardurl."'>" . $dashboardurl . "</a>";
       $body = str_replace("{dashboardurl}", $dashboardurl, $body);
 
-      $wcusage_field_default_ref_url = wcusage_get_default_ref_url();
-      $wcusage_urls_prefix = wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon');
-      $referralurl = esc_html($wcusage_field_default_ref_url . "?" . $wcusage_urls_prefix . "=" . $coupon_code);
+      $referralurl = esc_html( wcusage_get_affiliate_url( $coupon_code ) );
       $referralurl = "<a href='".$referralurl."'>" . $referralurl . "</a>";
       $body = str_replace("{referralurl}", $referralurl, $body);
 
@@ -101,9 +99,7 @@ function wcusage_email_affiliate_register_new($user_email, $coupon_code, $firstn
       if(!$dashboardurl) { $dashboardurl = ""; }
       $body = str_replace("{dashboardurl}", $dashboardurl, $body);
 
-      $wcusage_field_default_ref_url = wcusage_get_default_ref_url();
-      $wcusage_urls_prefix = wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon');
-      $referralurl = esc_html($wcusage_field_default_ref_url . "?" . $wcusage_urls_prefix . "=" . $coupon_code);
+      $referralurl = esc_html( wcusage_get_affiliate_url( $coupon_code ) );
       $referralurl = "<a href='".$referralurl."'>" . $referralurl . "</a>";
       $body = str_replace("{referralurl}", $referralurl, $body);
 
@@ -288,9 +284,7 @@ function wcusage_email_affiliate_register_accepted($user_email, $coupon_code, $m
       $dashboardurl = "<a href='".$dashboardurl."'>" . $dashboardurl . "</a>";
       $body = str_replace("{dashboardurl}", $dashboardurl, $body);
 
-      $wcusage_field_default_ref_url = wcusage_get_default_ref_url();
-      $wcusage_urls_prefix = wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon');
-      $referralurl = esc_html($wcusage_field_default_ref_url . "?" . $wcusage_urls_prefix . "=" . $coupon_code);
+      $referralurl = esc_html( wcusage_get_affiliate_url( $coupon_code ) );
       $referralurl = "<a href='".$referralurl."'>" . $referralurl . "</a>";
       $body = str_replace("{referralurl}", $referralurl, $body);
 
@@ -406,9 +400,7 @@ function wcusage_email_affiliate_coupon_assigned($user_email, $coupon_code, $fir
   $dashboardurl = "<a href='".$dashboardurl."'>" . $dashboardurl . "</a>";
   $body = str_replace("{dashboardurl}", $dashboardurl, $body);
 
-  $wcusage_field_default_ref_url = wcusage_get_default_ref_url();
-  $wcusage_urls_prefix = wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon');
-  $referralurl = esc_html($wcusage_field_default_ref_url . "?" . $wcusage_urls_prefix . "=" . $coupon_code);
+  $referralurl = esc_html( wcusage_get_affiliate_url( $coupon_code ) );
   $referralurl = "<a href='".$referralurl."'>" . $referralurl . "</a>";
   $body = str_replace("{referralurl}", $referralurl, $body);
 

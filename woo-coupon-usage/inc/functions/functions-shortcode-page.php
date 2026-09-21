@@ -343,7 +343,7 @@ if( !function_exists( 'wcusage_get_mla_shortcode_page_id' ) ) {
 
 		$thepageid = "";
 
-		if ( $options['wcusage_mla_dashboard_page'] && get_post_status ( $options['wcusage_mla_dashboard_page'] ) == 'publish' ) {
+		if ( !empty($options['wcusage_mla_dashboard_page']) && get_post_status ( $options['wcusage_mla_dashboard_page'] ) == 'publish' ) {
 
 			if(isset($options['wcusage_mla_dashboard_page'])) {
 				$thepageid = $options['wcusage_mla_dashboard_page'];
@@ -397,7 +397,7 @@ if( !function_exists( 'wcusage_get_mla_shortcode_page' ) ) {
 
 		$options = wcusage_get_options();
 
-    if ( $options['wcusage_mla_dashboard_page'] && get_post_status ( $options['wcusage_mla_dashboard_page'] ) == 'publish' ) {
+    if ( !empty($options['wcusage_mla_dashboard_page']) && get_post_status ( $options['wcusage_mla_dashboard_page'] ) == 'publish' ) {
 
       if(isset($options['wcusage_mla_dashboard_page'])) {
         $thepageid = $options['wcusage_mla_dashboard_page'];
@@ -449,6 +449,38 @@ if( !function_exists( 'wcusage_get_mla_dashboard_page_url' ) ) {
 		}
 
 		return $thepageurl;
+
+	}
+}
+
+/**
+ * Which user login, if any, the "MLA Dashboard" link on an affiliate dashboard
+ * should point at.
+ *
+ * The dashboard can show someone other than the logged-in user: an admin
+ * previewing an affiliate, or an MLA parent opening a sub-affiliate's coupon.
+ * Only the admin should follow through to that affiliate's MLA dashboard; an
+ * MLA parent has no access to it and belongs back on their own, so for them
+ * (and for anyone viewing their own dashboard) this returns '' and the link
+ * falls back to the current user.
+ *
+ * @param string $viewed_login Login of the affiliate the dashboard is showing.
+ *
+ * @return string
+ *
+ */
+if( !function_exists( 'wcusage_get_mla_dashboard_link_user' ) ) {
+	function wcusage_get_mla_dashboard_link_user( $viewed_login ) {
+
+		if ( ! $viewed_login || ! is_user_logged_in() ) {
+			return '';
+		}
+
+		if ( $viewed_login === wp_get_current_user()->user_login ) {
+			return '';
+		}
+
+		return wcusage_check_admin_access() ? $viewed_login : '';
 
 	}
 }

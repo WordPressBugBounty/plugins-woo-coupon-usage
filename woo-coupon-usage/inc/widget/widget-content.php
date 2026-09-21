@@ -1349,7 +1349,11 @@ function wcusage_widget_display_creatives(
                 <!-- Hidden embed code for copying -->
                 <?php 
             if ( $creative_type != 'pdf' && $creative_type != 'youtube' && $creative_type != 'mp4' ) {
-                $embed_url = $creative_url . '?' . $wcusage_urls_prefix . '=' . $coupon_code;
+                // The creative's own URL, or the filtered referral URL, can
+                // already carry a query string - add to it rather than starting
+                // a second one.
+                $embed_sep = ( strpos( $creative_url, '?' ) !== false ? '&' : '?' );
+                $embed_url = $creative_url . $embed_sep . $wcusage_urls_prefix . '=' . $coupon_code;
                 $embed_image = ( $creative_is_generated ? $full_image_url : $creative_image );
                 $embed_code = '<a href="' . $embed_url . '" title="' . esc_attr( $creative_alt ) . '"><img src="' . $embed_image . '" alt="' . esc_attr( $creative_alt ) . '"></a>';
                 ?>

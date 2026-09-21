@@ -965,6 +965,26 @@ if( !function_exists( 'wcusage_clicks_log_converted' ) ) {
         $clickcookie = sanitize_text_field( wp_unslash( $_COOKIE['wcusage_referral_click'] ) );
       }
 
+      /**
+       * Filters which recorded click an order is counted as the conversion of.
+       *
+       * The click is normally identified by a cookie set when the visitor followed
+       * the referral link. A site whose referral links are handled elsewhere - a
+       * headless front end recording its clicks with wcusage_record_click(), for
+       * example - has no such cookie, and can return the click ID it kept (from
+       * order meta, say) so the click is still marked as converted.
+       *
+       * Return an empty value to leave the order unattributed.
+       *
+       * Runs on the WooCommerce order received page, which is where the plugin
+       * marks conversions. A front end that never loads that page will not reach
+       * this filter and has to mark the conversion itself.
+       *
+       * @param string $clickcookie ID of the click to mark as converted.
+       * @param int    $order_id    Order that was placed.
+       */
+      $clickcookie = apply_filters( 'wcusage_conversion_click_id', $clickcookie, $order_id );
+
 			if($clickcookie) {
 
 				if (!$order_id) {
@@ -972,6 +992,9 @@ if( !function_exists( 'wcusage_clicks_log_converted' ) ) {
 		    }
 
 		    $order = wc_get_order( $order_id );
+		    if( !$order ) {
+		        return;
+		    }
 
         $lifetimeaffiliate = wcusage_order_meta($order_id,'lifetime_affiliate_coupon_referrer');
         $affiliatereferrer = wcusage_order_meta($order_id,'wcusage_referrer_coupon');
@@ -1259,55 +1282,122 @@ add_action( 'template_redirect', function() {
 
 /**
  * Gets the default referral URL, updates if wrong domain
+ *
+ * The saved setting is corrected back to the site's own domain whenever the two
+ * disagree, so that a referral URL left behind by a site migration repairs itself
+ * rather than sending every affiliate to a domain that no longer belongs to the
+ * shop. That correction cannot tell a stale URL apart from a deliberate one, so a
+ * site that serves its shop from a different host to the WordPress install - a
+ * front end in front of a subdomain or headless install, for example - should use
+ * the "wcusage_default_ref_url" filter below rather than the setting.
+ *
+ * @return string Referral URL with a trailing slash. Callers append the coupon
+ *                query string to whatever this returns.
  */
 if( !function_exists( 'wcusage_get_default_ref_url' ) ) {
   function wcusage_get_default_ref_url() {
 
     // Get the default referral URL from the settings or use the home URL as a fallback.
     $wcusage_field_default_ref_url = wcusage_get_setting_value('wcusage_field_default_ref_url', get_home_url());
-    
-    // If the saved value is empty, return the home URL.
+
     if ( empty( $wcusage_field_default_ref_url ) ) {
-        return trailingslashit( get_home_url() );
-    }
 
-    // Get the host/domain of the default referral URL.
-    $default_ref_domain = wp_parse_url($wcusage_field_default_ref_url, PHP_URL_HOST);
+        // If the saved value is empty, use the home URL.
+        $url = trailingslashit( get_home_url() );
 
-    // Get the host/domain of the current WordPress site.
-    $site_domain = wp_parse_url(get_home_url(), PHP_URL_HOST);
-
-    // Get the path of the default referral URL.
-    $path = wp_parse_url($wcusage_field_default_ref_url, PHP_URL_PATH);
-
-    // Normalize domains for comparison: strip www prefix and compare case-insensitively.
-    $normalized_default = strtolower( preg_replace( '/^www\./', '', $default_ref_domain ? $default_ref_domain : '' ) );
-    $normalized_site    = strtolower( preg_replace( '/^www\./', '', $site_domain ? $site_domain : '' ) );
-
-    // Check if the domains match (ignoring www prefix).
-    if ( $normalized_default === $normalized_site ) {
-        return trailingslashit($wcusage_field_default_ref_url);
     } else {
-        // Only update if the path is not empty (domain migration scenario).
-        // Rebuild the URL using the current home URL and the saved path.
-        $new_url = trailingslashit(get_home_url()) . ltrim($path, '/');
-        wcusage_update_options_merge( array( 'wcusage_field_default_ref_url' => $new_url ) );
-        return trailingslashit( $new_url );
+
+        // Get the host/domain of the default referral URL.
+        $default_ref_domain = wp_parse_url($wcusage_field_default_ref_url, PHP_URL_HOST);
+
+        // Get the host/domain of the current WordPress site.
+        $site_domain = wp_parse_url(get_home_url(), PHP_URL_HOST);
+
+        // Get the path of the default referral URL. wp_parse_url() gives back null
+        // for a URL with no path at all, which is the usual shape of a stale one.
+        $path = (string) wp_parse_url($wcusage_field_default_ref_url, PHP_URL_PATH);
+
+        // Normalize domains for comparison: strip www prefix and compare case-insensitively.
+        // Lower case first, so that a host saved as "WWW." has its prefix stripped too
+        // and is not mistaken for a different domain.
+        $normalized_default = preg_replace( '/^www\./', '', strtolower( $default_ref_domain ? $default_ref_domain : '' ) );
+        $normalized_site    = preg_replace( '/^www\./', '', strtolower( $site_domain ? $site_domain : '' ) );
+
+        // Check if the domains match (ignoring www prefix).
+        if ( $normalized_default === $normalized_site ) {
+            $url = trailingslashit($wcusage_field_default_ref_url);
+        } else {
+            // Only update if the path is not empty (domain migration scenario).
+            // Rebuild the URL using the current home URL and the saved path.
+            $relative_path = ltrim($path, '/');
+
+            // On a WordPress installed in a subdirectory the saved path usually
+            // starts with that same subdirectory, so appending it to the home URL
+            // would repeat it ("/blog/" + "blog/shop"). Drop the duplicate.
+            $home_path = trim( (string) wp_parse_url(get_home_url(), PHP_URL_PATH), '/' );
+            if ( $home_path !== '' && strpos( $relative_path, $home_path . '/' ) === 0 ) {
+                $relative_path = substr( $relative_path, strlen( $home_path ) + 1 );
+            } elseif ( $home_path !== '' && $relative_path === $home_path ) {
+                $relative_path = '';
+            }
+
+            $new_url = trailingslashit(get_home_url()) . $relative_path;
+            wcusage_update_options_merge( array( 'wcusage_field_default_ref_url' => $new_url ) );
+            $url = trailingslashit( $new_url );
+        }
+
     }
-    
+
+    /**
+     * Filters the default referral URL.
+     *
+     * This is the base URL every referral link is built from, so it is used by the
+     * affiliate dashboard, the referral URL generator, the social share buttons, QR
+     * codes, creatives, the affiliate widget, the referral URL shortcodes and the
+     * registration emails.
+     *
+     * A returned URL is used exactly as given, so include a trailing slash (or a
+     * path) if one is wanted. It is not checked against the site's own domain - a
+     * URL on another host is allowed, on the understanding that requests to it have
+     * to reach this site for referrals to be tracked.
+     *
+     * @param string $url Referral URL, with a trailing slash.
+     */
+    return apply_filters( 'wcusage_default_ref_url', $url );
+
   }
 }
 
 /**
  * Gets the affiliate referral URL
+ *
+ * @param string $coupon_code
+ *
+ * @return string
  */
 if( !function_exists( 'wcusage_get_affiliate_url' ) ) {
   function wcusage_get_affiliate_url($coupon_code) {
 
     $prefix = wcusage_get_setting_value('wcusage_field_urls_prefix', 'coupon');
-    $affiliate_url = wcusage_get_default_ref_url() . "?" . $prefix . "=" . rawurlencode($coupon_code);
+    $base = wcusage_get_default_ref_url();
 
-    return $affiliate_url;
+    // The base URL can carry a query string of its own once filtered, so keep any
+    // parameters it already has rather than starting a second query string.
+    $separator = strpos( $base, '?' ) !== false ? '&' : '?';
+
+    $affiliate_url = $base . $separator . $prefix . "=" . rawurlencode($coupon_code);
+
+    /**
+     * Filters the full referral URL for a coupon.
+     *
+     * Runs after the coupon has been added to the base URL, so this is the place to
+     * change a whole link - a vanity or shortened link, for example - where
+     * "wcusage_default_ref_url" would only change the part before the coupon code.
+     *
+     * @param string $affiliate_url Referral URL including the coupon parameter.
+     * @param string $coupon_code   Coupon code the URL was built for.
+     */
+    return apply_filters( 'wcusage_affiliate_url', $affiliate_url, $coupon_code );
 
   }
 }
