@@ -131,7 +131,7 @@ function wcusage_field_cb_registration( $args )
             <strong><?php echo esc_html__( 'For more information, please see the video below:', 'woo-coupon-usage' ); ?></strong>
 
             <br/>
-            <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/713487822?badge=0&autopause=0&player_id=0&app_id=58479/embed' ); ?>
+            <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/1231989949?badge=0&autopause=0&player_id=0&app_id=58479/embed' ); ?>
 
           </div>
 

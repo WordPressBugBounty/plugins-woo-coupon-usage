@@ -203,8 +203,8 @@ function wcusage_options_page() {
         );
         add_submenu_page(
             'wcusage_tools',
-            'Bulk Edit: Coupon Settings',
-            'Bulk Edit: Coupon Settings',
+            esc_html__( 'Bulk Edit: Coupon Settings', 'woo-coupon-usage' ),
+            esc_html__( 'Bulk Edit: Coupon Settings', 'woo-coupon-usage' ),
             $admin_perms,
             'wcusage-bulk-edit-coupon',
             'wcusage_bulk_coupon_page'
@@ -224,8 +224,8 @@ function wcusage_options_page() {
         }
         add_submenu_page(
             'wcusage',
-            'Coupon Affiliates Admin Tools',
-            'Admin Tools',
+            esc_html__( 'Coupon Affiliates Admin Tools', 'woo-coupon-usage' ),
+            esc_html__( 'Admin Tools', 'woo-coupon-usage' ),
             $admin_perms,
             'wcusage_tools',
             'wcusage_tools_page'

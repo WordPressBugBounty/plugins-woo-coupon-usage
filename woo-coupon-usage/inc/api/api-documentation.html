@@ -47,7 +47,7 @@
 <h2>Enabling the API</h2>
 <p>The API ships <strong>switched off</strong>. A site never starts answering API requests just because the plugin was updated &mdash; an administrator has to turn it on deliberately.</p>
 <ol>
-<li>Go to <strong>Coupon Affiliates &rarr; Admin Tools &rarr; API</strong> in wp-admin.</li>
+<li>Go to <strong>Coupon Affiliates &rarr; API, Webhooks &amp; AI &rarr; REST API</strong> in wp-admin.</li>
 <li>Press <strong>Enable API</strong> at the top of the page.</li>
 <li>Create an API key, or use a WordPress application password.</li>
 </ol>
@@ -77,7 +77,7 @@
 <p>An application password carries the user's <strong>full</strong> permissions, on this API and on every other WordPress endpoint. It is the quickest way to get started, and fine for a trusted server-to-server integration you control.</p>
 
 <h3>API keys</h3>
-<p>Plugin API keys are the better choice for anything you do not fully control, because they can be scoped, expired and revoked without touching the WordPress account. Create one under <strong>Coupon Affiliates &rarr; Admin Tools &rarr; API</strong>, or through the <a href="#">key management endpoints</a>.</p>
+<p>Plugin API keys are the better choice for anything you do not fully control, because they can be scoped, expired and revoked without touching the WordPress account. Create one under <strong>Coupon Affiliates &rarr; API, Webhooks &amp; AI &rarr; REST API</strong>, or through the <a href="#">key management endpoints</a>.</p>
 <p>A key looks like <code>wcus_9f2c1e4a&hellip;</code> and is shown <strong>once</strong>, at creation &mdash; only a SHA-256 hash is stored. Send it as a bearer token:</p>
 <pre><code>curl https://example.com/wp-json/wcusage/v2/me \
   -H "Authorization: Bearer wcus_9f2c1e4a7b3d5e6f8a9b0c1d2e3f4a5b6c7d8e9f"</code></pre>
@@ -731,7 +731,7 @@
 [note]Totals are summed from the same stored per-coupon snapshots the affiliate dashboards show, so they move when those snapshots are rebuilt rather than order by order. Balances (<code>unpaid_commission</code>, <code>pending_payout_commission</code>) are always current.[/note]
 
 <h2>API Key Management</h2>
-<p>Keys can be managed in the admin UI (<strong>Coupon Affiliates &rarr; Admin Tools &rarr; API</strong>) or programmatically. Every route here requires an admin with the <code>manage</code> scope.</p>
+<p>Keys can be managed in the admin UI (<strong>Coupon Affiliates &rarr; API, Webhooks &amp; AI &rarr; REST API</strong>) or programmatically. Every route here requires an admin with the <code>manage</code> scope.</p>
 
 <h3>List keys</h3>
 <p>[get] <code>/wp-json/wcusage/v2/keys</code></p>
@@ -779,7 +779,7 @@
 
 <h2>Webhooks Overview</h2>
 [note]Webhooks are a <strong>PRO</strong> feature. In the free build the delivery layer is not shipped at all: the <code>/webhooks*</code> routes are not registered and the Webhooks card does not appear on the API screen. The free equivalent is to poll <a href="#">/events</a>, which carries a cursor so you only ever fetch what is new.[/note]
-<p>Webhooks push signed JSON notifications to a URL you choose, the moment something happens in your affiliate program &mdash; no polling required. Set them up under <strong>Coupon Affiliates &rarr; Admin Tools &rarr; API &rarr; Webhooks</strong>, or through the <a href="#">management API</a>.</p>
+<p>Webhooks push signed JSON notifications to a URL you choose, the moment something happens in your affiliate program &mdash; no polling required. Set them up under <strong>Coupon Affiliates &rarr; API, Webhooks &amp; AI &rarr; Webhooks</strong>, or through the <a href="#">management API</a>.</p>
 <p>Every lifecycle event in the plugin already flows through one funnel, and the webhook dispatcher listens to it. Deliveries are queued (Action Scheduler when WooCommerce provides it, otherwise WP-Cron), so your endpoint never slows down a checkout or an admin action.</p>
 
 <h3>Available events</h3>
@@ -1131,7 +1131,7 @@ curl -s "https://example.com/wp-json/wcusage/v2/payouts?status=pending&amp;per_p
 <h3>Push: webhook trigger (recommended, PRO)</h3>
 <ol>
 <li>In your automation tool, create a scenario starting with a <strong>Webhook / Catch Hook</strong> trigger and copy the URL it gives you.</li>
-<li>In WordPress, go to <strong>Coupon Affiliates &rarr; Admin Tools &rarr; API &rarr; Webhooks</strong> and add an endpoint with that URL, subscribed to the events you care about.</li>
+<li>In WordPress, go to <strong>Coupon Affiliates &rarr; API, Webhooks &amp; AI &rarr; Webhooks</strong> and add an endpoint with that URL, subscribed to the events you care about.</li>
 <li>Press <strong>Test</strong>. Your tool receives a <code>ping</code> payload and learns the structure.</li>
 <li>Map the fields from <code>data</code> into whatever comes next &mdash; a Slack message, a spreadsheet row, a CRM record.</li>
 </ol>
@@ -1457,7 +1457,7 @@ GET /wp-json/wcusage/v2/keys          # last_used, status, date_expires</code></
 <tr><td><code>wcusage_api_webhook_events</code></td><td>&mdash;</td><td>Extend or modify the webhook event catalog.</td></tr>
 <tr><td><code>wcusage_api_auth_failure_buckets</code>, <code>wcusage_api_ip_buckets</code></td><td>256</td><td>How many buckets failed attempts and anonymous callers are spread across.</td></tr>
 </tbody></table>
-<p>Enabling the API, and enabling individual endpoints, is done from <strong>Coupon Affiliates &rarr; Admin Tools &rarr; API</strong> rather than by a filter. Those settings live in the <code>wcusage_api_settings</code> option.</p>
+<p>Enabling the API, and enabling individual endpoints, is done from <strong>Coupon Affiliates &rarr; API, Webhooks &amp; AI &rarr; REST API</strong> rather than by a filter. Those settings live in the <code>wcusage_api_settings</code> option.</p>
 
 <h3>Response filters</h3>
 <table><thead><tr><th>Filter</th><th>Applies to</th></tr></thead><tbody>

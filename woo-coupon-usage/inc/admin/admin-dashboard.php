@@ -248,7 +248,7 @@ jQuery(document).ready(function($) {
         );
         $other_items = array(
             array('label' => __( 'Admin Tools', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
-            array('label' => __( 'API & Webhooks', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_api'), 'icon' => 'fa-solid fa-plug', 'disabled' => false),
+            array('label' => __( 'API, Webhooks & AI', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_api'), 'icon' => 'fa-solid fa-plug', 'disabled' => false),
             array(
                 'label' => __( 'Email Newsletters', 'woo-coupon-usage' ),
                 'url' => admin_url('admin.php?page=wcusage_email_newsletters'),
@@ -322,7 +322,7 @@ jQuery(document).ready(function($) {
         );
         $other_items = array(
             array('label' => __( 'Admin Tools', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_tools'), 'icon' => 'fa-solid fa-wrench', 'disabled' => false),
-            array('label' => __( 'API & Webhooks', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_api'), 'icon' => 'fa-solid fa-plug', 'disabled' => false),
+            array('label' => __( 'API, Webhooks & AI', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_api'), 'icon' => 'fa-solid fa-plug', 'disabled' => false),
             array('label' => __( 'Manage Payouts', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_payouts'), 'icon' => 'fa-solid fa-money-bill', 'disabled' => true),
             array('label' => __( 'PDF Statements', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_statements'), 'icon' => 'fa-solid fa-file-invoice-dollar', 'disabled' => true),
             array('label' => __( 'Email Newsletters', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_email_newsletters'), 'icon' => 'fa-solid fa-envelope', 'disabled' => true),

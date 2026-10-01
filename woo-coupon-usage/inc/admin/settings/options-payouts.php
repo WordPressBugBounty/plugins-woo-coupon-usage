@@ -1480,7 +1480,7 @@ function wcusage_field_cb_payouts( $args ) {
             do_action('wcusage_hook_settings_store_credit_dropdown_first', $wcusage_field_storecredit_system);
           }
           ?>
-          <option value="default" <?php if($wcusage_field_storecredit_system == "default") { ?>selected<?php } ?>><?php echo esc_html__( '(Free) Built-in Store Credit & Wallet System', 'woo-coupon-usage' ); ?></option>
+          <option value="default" <?php if($wcusage_field_storecredit_system == "default") { ?>selected<?php } ?>><?php echo esc_html__( 'Built-in Store Credit & Wallet System', 'woo-coupon-usage' ); ?></option>
           <?php
           // Custom Hook
           if( wcu_fs()->can_use_premium_code() ) {

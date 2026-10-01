@@ -1408,34 +1408,8 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
                                 <?php 
     if ( empty( $mla_sub_affiliates ) ) {
         echo '<p>' . esc_html__( "This affiliate doesn't currently have any sub-affiliates in their MLA network.", 'woo-coupon-usage' ) . '</p>';
-    } elseif ( function_exists( 'wcusage_get_network_chart_item' ) ) {
-        $network_array = '';
-        // Root node (self)
-        $network_array .= wcusage_get_network_chart_item( $user_id, $user_id, $user_id );
-        $coupon_ids = array();
-        foreach ( $mla_sub_affiliates as $mla_user ) {
-            $this_user_id = $mla_user->ID;
-            $mla_parents = get_user_meta( $this_user_id, 'wcu_ml_affiliate_parents', true );
-            if ( !$mla_parents ) {
-                $mla_parents = array();
-            }
-            $this_users_coupons = wcusage_get_users_coupons_ids( $this_user_id );
-            foreach ( $this_users_coupons as $this_users_coupon_id ) {
-                $coupon_ids[] = $this_users_coupon_id;
-            }
-            $super_affiliate = ( empty( $mla_parents ) ? 1 : 0 );
-            if ( !empty( $this_users_coupons ) && is_array( $mla_parents ) ) {
-                $mla_parents = array_reverse( $mla_parents );
-                $x = end( $mla_parents );
-                // Link to top-most parent
-                // A node whose parent is missing from the chart breaks the
-                // whole chart, not just that branch, so drop it if the parent
-                // account has been deleted - its own node is left out too.
-                if ( !$super_affiliate && get_userdata( $x ) ) {
-                    $network_array .= wcusage_get_network_chart_item( $this_user_id, $x, $user_id );
-                }
-            }
-        }
+    } elseif ( function_exists( 'wcusage_mla_get_network_chart_rows' ) ) {
+        $network_array = wcusage_mla_get_network_chart_rows( $user_id, $mla_sub_affiliates );
         $network_array = rtrim( $network_array, ',' );
         $wcusage_color_tab = wcusage_get_setting_value( 'wcusage_field_color_tab', '#333' );
         // Merge network data into existing WCUAdminAffiliateView object without overwriting other keys

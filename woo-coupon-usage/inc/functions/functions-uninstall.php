@@ -45,6 +45,14 @@ if( !function_exists( 'wcu_fs_uninstall_cleanup' ) ) {
       delete_option( "wcusage_field_order_type_custom_isset" );
       delete_option( "wcusage_setup_complete" );
 
+      // API, Webhooks & AI: the REST API and AI & MCP switches, recent AI
+      // activity, and each admin's dismissal of the "Enable AI tools" notice.
+      // Without removing the switches, a reinstall would bring AI & MCP back
+      // already on, with the old permissions.
+      delete_option( 'wcusage_api_settings' );
+      delete_option( 'wcusage_abilities_log' );
+      delete_metadata( 'user', 0, 'wcusage_ai_notice_dismissed', '', true );
+
       // Delete Register Table
       $table_name1 = $wpdb->prefix . 'wcusage_register';
       $wpdb->query( "DROP TABLE IF EXISTS " . $table_name1 ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter

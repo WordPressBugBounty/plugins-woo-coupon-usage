@@ -528,7 +528,7 @@ $page_content = '<!-- wp:group {"layout":{"type":"constrained","contentSize":"12
                     <th><label for="intro_text"><?php esc_html_e('Intro Text', 'woo-coupon-usage'); ?></label></th>
                     <td>
                         <textarea name="intro_text" id="intro_text" rows="3" class="large-text"><?php echo esc_textarea($default_intro_text); ?></textarea>
-                        <p class="description"><?php esc_html_e('Text to display in the header section', 'woo two-coupon-usage'); ?></p>
+                        <p class="description"><?php esc_html_e('Text to display in the header section', 'woo-coupon-usage'); ?></p>
                     </td>
                 </tr>
                 <tr>

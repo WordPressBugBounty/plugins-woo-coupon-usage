@@ -2,7 +2,7 @@
 /**
  * Coupon Affiliates REST API v2 - Admin page.
  *
- * "Coupon Affiliates > Admin Tools > API" screen: overview of the API,
+ * "Coupon Affiliates > API, Webhooks & AI" screen: overview of the API,
  * application password guidance, API key management and - on PRO - webhook
  * management. Form posts are handled on admin_init (nonce + capability
  * checked) so the page can redirect before output.
@@ -38,28 +38,64 @@ if ( ! function_exists( 'wcusage_api_admin_page_hook' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wcusage_api_admin_menu_position' ) ) {
+	/**
+	 * Where the API screen goes in the Coupon Affiliates menu: straight after
+	 * "Admin Tools".
+	 *
+	 * Worked out from the menu as built rather than fixed, because which items
+	 * come before Admin Tools depends on the build, the licence and the
+	 * settings.
+	 *
+	 * @return int|null Position, or null to add it at the end.
+	 */
+	function wcusage_api_admin_menu_position() {
+
+		global $submenu;
+
+		if ( empty( $submenu['wcusage'] ) || ! is_array( $submenu['wcusage'] ) ) {
+			return null;
+		}
+
+		$index = 0;
+		foreach ( $submenu['wcusage'] as $item ) {
+			++$index;
+			if ( isset( $item[2] ) && 'wcusage_tools' === $item[2] ) {
+				return $index;
+			}
+		}
+
+		return null;
+	}
+}
+
 if ( ! function_exists( 'wcusage_api_admin_menu' ) ) {
 	/**
-	 * Register the API admin page under Admin Tools.
+	 * Register the API admin page in the Coupon Affiliates menu.
 	 *
-	 * The parent slug is "wcusage_tools", which is itself a submenu rather than
-	 * a top-level menu, so WordPress registers the screen without ever drawing
-	 * it in the sidebar. Every other tool screen is registered the same way and
-	 * is reached from the Admin Tools page instead of taking a menu slot.
+	 * Unlike the other tool screens, which are registered under the hidden
+	 * "wcusage_tools" parent and reached only from the Admin Tools page, this
+	 * one has a menu entry of its own, directly below Admin Tools: connecting
+	 * the REST API, webhooks and AI apps is set up once and then revisited,
+	 * rather than run occasionally like a bulk tool.
+	 *
+	 * Runs late (priority 99) so that Admin Tools, added by the main menu at
+	 * priority 1, is already there to be placed after.
 	 */
 	function wcusage_api_admin_menu() {
 		// False when the current user cannot see the page, which leaves the
 		// remembered hook empty and the stylesheet unloaded - correct, since
 		// the screen is unreachable for them.
+		// The same name in every build: the free build lists webhooks too, on
+		// a tab of their own marked PRO.
 		$hook = add_submenu_page(
-			'wcusage_tools',
-			wcusage_api_webhooks_available()
-				? esc_html__( 'Coupon Affiliates: API & Webhooks', 'woo-coupon-usage' )
-				: esc_html__( 'Coupon Affiliates: API', 'woo-coupon-usage' ),
-			esc_html__( 'API', 'woo-coupon-usage' ),
+			'wcusage',
+			esc_html__( 'API, Webhooks & AI', 'woo-coupon-usage' ),
+			esc_html__( 'API, Webhooks & AI', 'woo-coupon-usage' ),
 			wcusage_get_admin_menu_capability(),
 			'wcusage_api',
-			'wcusage_api_admin_page_render'
+			'wcusage_api_admin_page_render',
+			wcusage_api_admin_menu_position()
 		);
 
 		wcusage_api_admin_page_hook( $hook ? $hook : '' );
@@ -113,7 +149,7 @@ if ( ! function_exists( 'wcusage_api_admin_handle_post' ) ) {
 		check_admin_referer( 'wcusage_api_admin', 'wcusage_api_admin_nonce' );
 
 		$action   = sanitize_key( wp_unslash( $_POST['wcusage_api_admin_action'] ) );
-		$redirect = admin_url( 'admin.php?page=wcusage_api' );
+		$redirect = wcusage_api_admin_url( wcusage_api_admin_action_tab( $action ) );
 
 		// Webhooks are PRO, so their handlers are simply not defined in the
 		// free build. The forms that post these actions are not rendered there
@@ -247,6 +283,20 @@ if ( ! function_exists( 'wcusage_api_admin_handle_post' ) ) {
 					$redirect = add_query_arg( 'wcusage_api_notice', rawurlencode( 'webhook_test_' . $result['code'] ), $redirect );
 				}
 				break;
+
+			default:
+				/**
+				 * Handle a form action from another part of the API screen.
+				 *
+				 * Runs after the nonce and capability checks above, so a handler
+				 * only has to act and return where to redirect. Used by the AI
+				 * Agents & MCP card (inc/abilities/abilities-admin.php).
+				 *
+				 * @param string $redirect Redirect target so far.
+				 * @param string $action   Submitted action.
+				 */
+				$redirect = (string) apply_filters( 'wcusage_api_admin_handle_action', $redirect, $action );
+				break;
 		}
 
 		wp_safe_redirect( $redirect );
@@ -346,7 +396,7 @@ if ( ! function_exists( 'wcusage_api_admin_endpoint_meta' ) ) {
 		);
 
 		// Payouts and webhooks are PRO add-ons. Their wording lives here rather
-		// than behind is__premium_only(), which strips its contents out of the
+		// than behind the premium build check, which strips its contents out of the
 		// free build entirely: the free version still lists these endpoints, in
 		// a locked state, so it is clear what upgrading adds.
 		$meta['/payouts']             = array( __( 'List payouts, or request one for a coupon\'s unpaid balance.', 'woo-coupon-usage' ), 'affiliate' );
@@ -366,7 +416,7 @@ if ( ! function_exists( 'wcusage_api_admin_is_pro_build' ) ) {
 	/**
 	 * Whether this is the PRO build of the plugin.
 	 *
-	 * Deliberately is__premium_only() - the build marker - and NOT
+	 * Deliberately the premium build marker check - and NOT
 	 * can_use_premium_code(). The payouts controller and the webhook routes are
 	 * compiled out of the free build, so the build is what decides whether
 	 * those endpoints can exist at all. On a PRO build whose licence has
@@ -577,6 +627,371 @@ if ( ! function_exists( 'wcusage_api_admin_get_endpoints' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wcusage_api_admin_tabs' ) ) {
+	/**
+	 * The screen's tabs.
+	 *
+	 * The REST API, webhooks and AI agents are three different ways of
+	 * connecting to the program - pulling data, being told about events, and
+	 * AI apps using it as tools - each with its own switch and its own way of
+	 * signing in, so each gets a tab of its own, with an overview that
+	 * explains the difference.
+	 *
+	 * @return array Tab key => array( label, icon ).
+	 */
+	function wcusage_api_admin_tabs() {
+		return array(
+			'overview' => array( __( 'Overview', 'woo-coupon-usage' ), 'fa-table-cells-large' ),
+			'rest'     => array( __( 'REST API', 'woo-coupon-usage' ), 'fa-code' ),
+			'webhooks' => array( __( 'Webhooks', 'woo-coupon-usage' ), 'fa-bolt' ),
+			'ai'       => array( __( 'AI & MCP', 'woo-coupon-usage' ), 'fa-robot' ),
+		);
+	}
+}
+
+if ( ! function_exists( 'wcusage_api_admin_current_tab' ) ) {
+	/**
+	 * The tab being viewed.
+	 *
+	 * @return string Tab key; "overview" when none, or an unknown one, is asked for.
+	 */
+	function wcusage_api_admin_current_tab() {
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return array_key_exists( $tab, wcusage_api_admin_tabs() ) ? $tab : 'overview';
+	}
+}
+
+if ( ! function_exists( 'wcusage_api_admin_url' ) ) {
+	/**
+	 * URL of the screen, on a given tab.
+	 *
+	 * @param string $tab Tab key. The overview needs none.
+	 *
+	 * @return string
+	 */
+	function wcusage_api_admin_url( $tab = '' ) {
+		$url = admin_url( 'admin.php?page=wcusage_api' );
+		return ( '' === $tab || 'overview' === $tab ) ? $url : add_query_arg( 'tab', $tab, $url );
+	}
+}
+
+if ( ! function_exists( 'wcusage_api_admin_action_tab' ) ) {
+	/**
+	 * Which tab a form action came from, so saving lands back on it.
+	 *
+	 * @param string $action Submitted action.
+	 *
+	 * @return string Tab key.
+	 */
+	function wcusage_api_admin_action_tab( $action ) {
+
+		if ( false !== strpos( $action, 'webhook' ) ) {
+			return 'webhooks';
+		}
+
+		if ( in_array( $action, array( 'toggle_api', 'save_endpoints', 'create_key', 'revoke_key', 'delete_key' ), true ) ) {
+			return 'rest';
+		}
+
+		// Anything else is handled through the wcusage_api_admin_handle_action
+		// filter, whose handler names its own tab.
+		return 'overview';
+	}
+}
+
+if ( ! function_exists( 'wcusage_api_admin_ai_status' ) ) {
+	/**
+	 * Where AI & MCP stands, for the overview and the tab strip.
+	 *
+	 * @param bool $with_mcp Whether to find out if an MCP adapter is running.
+	 *                       Only the Overview shows that, and finding out can
+	 *                       mean starting the REST server and the adapter, so
+	 *                       the other tabs leave it out.
+	 *
+	 * @return array|null Null when this build has no abilities module.
+	 */
+	function wcusage_api_admin_ai_status( $with_mcp = true ) {
+
+		if ( ! function_exists( 'wcusage_abilities_admin_render_card' ) ) {
+			return null;
+		}
+
+		$supported = wcusage_abilities_supported();
+		$enabled   = wcusage_abilities_enabled();
+
+		return array(
+			'supported' => $supported,
+			'enabled'   => $enabled,
+			'on'        => $supported && $enabled,
+			'count'     => ( $supported && $enabled ) ? count( wcusage_abilities_active_names() ) : 0,
+			'write'     => wcusage_abilities_write_allowed(),
+			'mcp'       => $with_mcp ? wcusage_abilities_mcp_status() : null,
+		);
+	}
+}
+
+if ( ! function_exists( 'wcusage_api_admin_render_tab_nav' ) ) {
+	/**
+	 * Render the tab strip, with each feature's on/off state beside its name.
+	 *
+	 * @param string     $current     Current tab.
+	 * @param bool       $api_enabled Whether the REST API is switched on.
+	 * @param bool       $has_hooks   Whether this build has webhooks.
+	 * @param array|null $ai          AI status, from wcusage_api_admin_ai_status().
+	 */
+	function wcusage_api_admin_render_tab_nav( $current, $api_enabled, $has_hooks, $ai ) {
+
+		// "on" / "off" dots, or a lock for a PRO feature this build lacks.
+		$states = array(
+			'rest'     => $api_enabled ? 'on' : 'off',
+			// Deliveries need the REST API switched on as well.
+			'webhooks' => $has_hooks ? ( $api_enabled ? 'on' : 'off' ) : 'locked',
+			'ai'       => ( $ai && $ai['on'] ) ? 'on' : 'off',
+		);
+		?>
+		<nav class="nav-tab-wrapper wcu-api-tabs" aria-label="<?php esc_attr_e( 'API sections', 'woo-coupon-usage' ); ?>">
+			<?php foreach ( wcusage_api_admin_tabs() as $key => $tab ) : ?>
+				<?php
+				if ( 'ai' === $key && null === $ai ) {
+					continue;
+				}
+				$state = isset( $states[ $key ] ) ? $states[ $key ] : '';
+				?>
+				<a href="<?php echo esc_url( wcusage_api_admin_url( $key ) ); ?>" class="nav-tab <?php echo $current === $key ? 'nav-tab-active' : ''; ?>" <?php echo $current === $key ? 'aria-current="page"' : ''; ?>>
+					<i class="fas <?php echo esc_attr( $tab[1] ); ?>" aria-hidden="true"></i>
+					<?php echo esc_html( $tab[0] ); ?>
+					<?php if ( 'locked' === $state ) : ?>
+						<span class="wcu-api-badge wcu-api-badge-pro"><i class="fas fa-lock" aria-hidden="true"></i> <?php esc_html_e( 'PRO', 'woo-coupon-usage' ); ?></span>
+					<?php elseif ( $state ) : ?>
+						<span class="wcu-api-tab-dot is-<?php echo esc_attr( $state ); ?>" title="<?php echo 'on' === $state ? esc_attr__( 'On', 'woo-coupon-usage' ) : esc_attr__( 'Off', 'woo-coupon-usage' ); ?>"></span>
+						<span class="screen-reader-text"><?php echo 'on' === $state ? esc_html__( '(on)', 'woo-coupon-usage' ) : esc_html__( '(off)', 'woo-coupon-usage' ); ?></span>
+					<?php endif; ?>
+				</a>
+			<?php endforeach; ?>
+		</nav>
+		<?php
+	}
+}
+
+if ( ! function_exists( 'wcusage_api_admin_render_overview' ) ) {
+	/**
+	 * Render the Overview tab: what each way of connecting is for, and where
+	 * each one stands.
+	 *
+	 * @param bool       $api_enabled  Whether the REST API is switched on.
+	 * @param int        $active_keys  Active API keys.
+	 * @param bool       $has_hooks    Whether this build has webhooks.
+	 * @param int        $active_hooks Active webhooks.
+	 * @param array|null $ai           AI status, from wcusage_api_admin_ai_status().
+	 */
+	function wcusage_api_admin_render_overview( $api_enabled, $active_keys, $has_hooks, $active_hooks, $ai ) {
+
+		$pro_url = 'https://couponaffiliates.com/pricing?utm_campaign=plugin&utm_source=api-page&utm_medium=overview-webhooks';
+
+		// Webhooks: locked in the free build; otherwise paused whenever the
+		// REST API is off, because that switch also stops deliveries.
+		if ( ! $has_hooks ) {
+			$hooks_state = 'locked';
+			$hooks_badge = __( 'PRO', 'woo-coupon-usage' );
+		} elseif ( ! $api_enabled ) {
+			$hooks_state = 'off';
+			$hooks_badge = __( 'Paused', 'woo-coupon-usage' );
+		} elseif ( $active_hooks ) {
+			$hooks_state = 'on';
+			$hooks_badge = __( 'Delivering', 'woo-coupon-usage' );
+		} else {
+			$hooks_state = 'off';
+			$hooks_badge = __( 'None set up', 'woo-coupon-usage' );
+		}
+
+		if ( null === $ai ) {
+			$ai_state = '';
+			$ai_badge = '';
+		} elseif ( ! $ai['supported'] ) {
+			$ai_state = 'off';
+			$ai_badge = __( 'Needs WordPress 6.9+', 'woo-coupon-usage' );
+		} else {
+			$ai_state = $ai['on'] ? 'on' : 'off';
+			$ai_badge = $ai['on'] ? __( 'Enabled', 'woo-coupon-usage' ) : __( 'Disabled', 'woo-coupon-usage' );
+		}
+		?>
+
+		<p class="wcu-api-overview-intro">
+			<?php esc_html_e( 'There are three ways to connect other software to your affiliate program. They do different jobs, sign in differently, and are switched on separately - use whichever ones you need.', 'woo-coupon-usage' ); ?>
+		</p>
+
+		<div class="wcu-api-overview">
+
+			<div class="wcu-api-feature is-<?php echo $api_enabled ? 'on' : 'off'; ?>">
+				<div class="wcu-api-feature-head">
+					<span class="wcu-api-feature-icon"><i class="fas fa-code" aria-hidden="true"></i></span>
+					<h2><?php esc_html_e( 'REST API', 'woo-coupon-usage' ); ?></h2>
+					<span class="wcu-api-badge wcu-api-badge-<?php echo $api_enabled ? 'active' : 'inactive'; ?>"><?php echo $api_enabled ? esc_html__( 'Enabled', 'woo-coupon-usage' ) : esc_html__( 'Disabled', 'woo-coupon-usage' ); ?></span>
+				</div>
+				<p class="wcu-api-feature-lead"><?php esc_html_e( 'Other software asks your site for affiliate data, whenever it needs it.', 'woo-coupon-usage' ); ?></p>
+				<dl class="wcu-api-feature-facts">
+					<dt><?php esc_html_e( 'Use it for', 'woo-coupon-usage' ); ?></dt>
+					<dd><?php esc_html_e( 'Custom dashboards, reporting scripts, automation tools such as Zapier or Make, and your own integrations.', 'woo-coupon-usage' ); ?></dd>
+					<dt><?php esc_html_e( 'Signs in with', 'woo-coupon-usage' ); ?></dt>
+					<dd><?php esc_html_e( 'An API key you create here, or a WordPress application password.', 'woo-coupon-usage' ); ?></dd>
+				</dl>
+				<p class="wcu-api-feature-stat">
+					<?php
+					echo esc_html(
+						sprintf(
+							/* translators: %d: number of active API keys */
+							_n( '%d active API key', '%d active API keys', $active_keys, 'woo-coupon-usage' ),
+							$active_keys
+						)
+					);
+					?>
+				</p>
+				<a class="button <?php echo $api_enabled ? '' : 'button-primary'; ?>" href="<?php echo esc_url( wcusage_api_admin_url( 'rest' ) ); ?>">
+					<?php echo $api_enabled ? esc_html__( 'Manage REST API', 'woo-coupon-usage' ) : esc_html__( 'Set up REST API', 'woo-coupon-usage' ); ?> <i class="fas fa-arrow-right" aria-hidden="true"></i>
+				</a>
+			</div>
+
+			<div class="wcu-api-feature is-<?php echo esc_attr( $hooks_state ); ?>">
+				<div class="wcu-api-feature-head">
+					<span class="wcu-api-feature-icon"><i class="fas fa-bolt" aria-hidden="true"></i></span>
+					<h2><?php esc_html_e( 'Webhooks', 'woo-coupon-usage' ); ?></h2>
+					<span class="wcu-api-badge wcu-api-badge-<?php echo 'locked' === $hooks_state ? 'pro' : ( 'on' === $hooks_state ? 'active' : 'inactive' ); ?>">
+						<?php if ( 'locked' === $hooks_state ) : ?>
+							<i class="fas fa-lock" aria-hidden="true"></i>
+						<?php endif; ?>
+						<?php echo esc_html( $hooks_badge ); ?>
+					</span>
+				</div>
+				<p class="wcu-api-feature-lead"><?php esc_html_e( 'Your site tells other software the moment something happens.', 'woo-coupon-usage' ); ?></p>
+				<dl class="wcu-api-feature-facts">
+					<dt><?php esc_html_e( 'Use it for', 'woo-coupon-usage' ); ?></dt>
+					<dd><?php esc_html_e( 'Reacting straight away to a new referral, commission, registration or payout - posting to Slack, updating a CRM, starting an automation.', 'woo-coupon-usage' ); ?></dd>
+					<dt><?php esc_html_e( 'Signs in with', 'woo-coupon-usage' ); ?></dt>
+					<dd><?php esc_html_e( 'Nothing - you give it a URL, and every delivery is signed with a secret so the receiver can trust it. Deliveries need the REST API switched on.', 'woo-coupon-usage' ); ?></dd>
+				</dl>
+				<?php if ( $has_hooks ) : ?>
+					<p class="wcu-api-feature-stat">
+						<?php
+						echo esc_html(
+							sprintf(
+								/* translators: %d: number of active webhooks */
+								_n( '%d active webhook', '%d active webhooks', $active_hooks, 'woo-coupon-usage' ),
+								$active_hooks
+							)
+						);
+						?>
+					</p>
+					<a class="button" href="<?php echo esc_url( wcusage_api_admin_url( 'webhooks' ) ); ?>">
+						<?php esc_html_e( 'Manage webhooks', 'woo-coupon-usage' ); ?> <i class="fas fa-arrow-right" aria-hidden="true"></i>
+					</a>
+				<?php else : ?>
+					<p class="wcu-api-feature-stat"><?php esc_html_e( 'Part of Coupon Affiliates PRO.', 'woo-coupon-usage' ); ?></p>
+					<a class="button" href="<?php echo esc_url( $pro_url ); ?>" target="_blank" rel="noopener noreferrer">
+						<i class="fas fa-star" aria-hidden="true"></i> <?php esc_html_e( 'Upgrade to PRO', 'woo-coupon-usage' ); ?>
+					</a>
+				<?php endif; ?>
+			</div>
+
+			<?php if ( null !== $ai ) : ?>
+				<div class="wcu-api-feature is-<?php echo esc_attr( $ai_state ); ?>">
+					<div class="wcu-api-feature-head">
+						<span class="wcu-api-feature-icon"><i class="fas fa-robot" aria-hidden="true"></i></span>
+						<h2><?php esc_html_e( 'AI & MCP', 'woo-coupon-usage' ); ?></h2>
+						<span class="wcu-api-badge wcu-api-badge-<?php echo 'on' === $ai_state ? 'active' : 'inactive'; ?>"><?php echo esc_html( $ai_badge ); ?></span>
+					</div>
+					<p class="wcu-api-feature-lead"><?php esc_html_e( 'AI assistants use your program as a set of tools, when you ask them something.', 'woo-coupon-usage' ); ?></p>
+					<dl class="wcu-api-feature-facts">
+						<dt><?php esc_html_e( 'Use it for', 'woo-coupon-usage' ); ?></dt>
+						<dd><?php esc_html_e( 'Asking Claude, ChatGPT or Cursor about your affiliates and commission, and letting store assistant plugins work with your program.', 'woo-coupon-usage' ); ?></dd>
+						<dt><?php esc_html_e( 'Signs in with', 'woo-coupon-usage' ); ?></dt>
+						<dd><?php esc_html_e( 'A WordPress application password - AI apps act as that user. API keys are not used here.', 'woo-coupon-usage' ); ?></dd>
+					</dl>
+					<p class="wcu-api-feature-stat">
+						<?php
+						$ai_stat = sprintf(
+							/* translators: %d: number of abilities switched on */
+							_n( '%d ability on', '%d abilities on', $ai['count'], 'woo-coupon-usage' ),
+							$ai['count']
+						);
+						$ai_stat .= ' · ' . ( ! empty( $ai['mcp']['running'] ) ? __( 'MCP running', 'woo-coupon-usage' ) : __( 'MCP not set up', 'woo-coupon-usage' ) );
+						echo esc_html( $ai_stat );
+						?>
+					</p>
+					<a class="button" href="<?php echo esc_url( wcusage_api_admin_url( 'ai' ) ); ?>">
+						<?php esc_html_e( 'Set up AI & MCP', 'woo-coupon-usage' ); ?> <i class="fas fa-arrow-right" aria-hidden="true"></i>
+					</a>
+				</div>
+			<?php endif; ?>
+		</div>
+
+		<div class="wcu-api-card">
+			<div class="wcu-api-card-head">
+				<h2><i class="fas fa-right-left" aria-hidden="true"></i><?php esc_html_e( 'At a glance', 'woo-coupon-usage' ); ?></h2>
+			</div>
+			<table class="wcu-api-table wcu-api-glance">
+				<thead>
+					<tr>
+						<th><span class="screen-reader-text"><?php esc_html_e( 'Question', 'woo-coupon-usage' ); ?></span></th>
+						<th><i class="fas fa-code" aria-hidden="true"></i> <?php esc_html_e( 'REST API', 'woo-coupon-usage' ); ?></th>
+						<th><i class="fas fa-bolt" aria-hidden="true"></i> <?php esc_html_e( 'Webhooks', 'woo-coupon-usage' ); ?></th>
+						<?php if ( null !== $ai ) : ?>
+							<th><i class="fas fa-robot" aria-hidden="true"></i> <?php esc_html_e( 'AI & MCP', 'woo-coupon-usage' ); ?></th>
+						<?php endif; ?>
+					</tr>
+				</thead>
+				<tbody>
+					<?php
+					$rows = array(
+						array(
+							__( 'Who starts it', 'woo-coupon-usage' ),
+							__( 'The other software, when it wants data', 'woo-coupon-usage' ),
+							__( 'Your site, when something happens', 'woo-coupon-usage' ),
+							__( 'An AI app, when you ask it something', 'woo-coupon-usage' ),
+						),
+						array(
+							__( 'Who sets it up', 'woo-coupon-usage' ),
+							__( 'A developer, or an automation tool', 'woo-coupon-usage' ),
+							__( 'A developer, or a service that gives you a URL', 'woo-coupon-usage' ),
+							__( 'You, in your AI app\'s settings', 'woo-coupon-usage' ),
+						),
+						array(
+							__( 'Signs in with', 'woo-coupon-usage' ),
+							__( 'API key or application password', 'woo-coupon-usage' ),
+							__( 'Nothing - deliveries are signed', 'woo-coupon-usage' ),
+							__( 'Application password', 'woo-coupon-usage' ),
+						),
+						array(
+							__( 'Can change data', 'woo-coupon-usage' ),
+							__( 'Only with a key that has the "write" scope', 'woo-coupon-usage' ),
+							__( 'No - it only sends notifications', 'woo-coupon-usage' ),
+							__( 'Only if you allow actions', 'woo-coupon-usage' ),
+						),
+						array(
+							__( 'Switched on', 'woo-coupon-usage' ),
+							__( 'On the REST API tab', 'woo-coupon-usage' ),
+							__( 'Per webhook - and needs the REST API on', 'woo-coupon-usage' ),
+							__( 'On the AI & MCP tab - independent of the REST API', 'woo-coupon-usage' ),
+						),
+					);
+
+					foreach ( $rows as $row ) :
+						?>
+						<tr>
+							<th scope="row"><?php echo esc_html( $row[0] ); ?></th>
+							<td><?php echo esc_html( $row[1] ); ?></td>
+							<td><?php echo esc_html( $row[2] ); ?></td>
+							<?php if ( null !== $ai ) : ?>
+								<td><?php echo esc_html( $row[3] ); ?></td>
+							<?php endif; ?>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+		<?php
+	}
+}
+
 if ( ! function_exists( 'wcusage_api_admin_page_render' ) ) {
 	/**
 	 * Render the API admin page.
@@ -627,6 +1042,8 @@ if ( ! function_exists( 'wcusage_api_admin_page_render' ) ) {
 		}
 
 		$api_enabled = wcusage_api_v2_is_enabled();
+		$tab         = wcusage_api_admin_current_tab();
+		$ai          = wcusage_api_admin_ai_status( 'overview' === $tab );
 		?>
 
 		<div class="wrap wcusage-admin-page wcusage-api-page">
@@ -638,7 +1055,6 @@ if ( ! function_exists( 'wcusage_api_admin_page_render' ) ) {
 					<h1><i class="fas fa-plug" aria-hidden="true"></i><?php echo esc_html( get_admin_page_title() ); ?></h1>
 					<p class="wcu-page-subtitle"><?php esc_html_e( 'Connect external tools, dashboards and AI assistants to your affiliate program.', 'woo-coupon-usage' ); ?></p>
 				</div>
-				<p class="wcu-api-back"><a href="<?php echo esc_url( admin_url( 'admin.php?page=wcusage_tools' ) ); ?>"><?php esc_html_e( 'Go back to tools', 'woo-coupon-usage' ); ?> &gt;</a></p>
 			</div>
 
 			<?php if ( $error ) : ?>
@@ -646,6 +1062,34 @@ if ( ! function_exists( 'wcusage_api_admin_page_render' ) ) {
 			<?php elseif ( $notice ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php echo esc_html( wcusage_api_admin_notice_text( $notice ) ); ?></p></div>
 			<?php endif; ?>
+
+			<?php
+			// Above the tabs rather than on the REST API tab: the key has already
+			// been deleted from storage by now, so wherever this page load lands,
+			// it must be shown.
+			?>
+			<?php if ( $new_token ) : ?>
+				<div class="wcu-api-token">
+					<strong><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> <?php esc_html_e( 'Copy your new API key now - it cannot be shown again.', 'woo-coupon-usage' ); ?></strong>
+					<div class="wcu-api-token-value">
+						<code><?php echo esc_html( $new_token ); ?></code>
+						<button type="button" class="button button-primary wcu-api-copy-btn" data-copy="<?php echo esc_attr( $new_token ); ?>">
+							<i class="fas fa-copy" aria-hidden="true"></i> <?php esc_html_e( 'Copy key', 'woo-coupon-usage' ); ?>
+						</button>
+						<span class="wcu-api-copied"><?php esc_html_e( 'Copied', 'woo-coupon-usage' ); ?></span>
+					</div>
+				</div>
+			<?php endif; ?>
+
+			<?php wcusage_api_admin_render_tab_nav( $tab, $api_enabled, $has_webhooks, $ai ); ?>
+
+			<?php
+			if ( 'overview' === $tab ) {
+				wcusage_api_admin_render_overview( $api_enabled, $active_keys, $has_webhooks, $active_hooks, $ai );
+			}
+			?>
+
+			<?php if ( 'rest' === $tab ) : ?>
 
 			<div class="wcu-api-card wcu-api-switch <?php echo $api_enabled ? 'is-on' : 'is-off'; ?>">
 				<div class="wcu-api-switch-inner">
@@ -686,60 +1130,6 @@ if ( ! function_exists( 'wcusage_api_admin_page_render' ) ) {
 								<?php echo $api_enabled ? esc_html__( 'Disable API', 'woo-coupon-usage' ) : esc_html__( 'Enable API', 'woo-coupon-usage' ); ?>
 							</button>
 						</form>
-					</div>
-				</div>
-			</div>
-
-			<?php if ( $new_token ) : ?>
-				<div class="wcu-api-token">
-					<strong><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> <?php esc_html_e( 'Copy your new API key now - it cannot be shown again.', 'woo-coupon-usage' ); ?></strong>
-					<div class="wcu-api-token-value">
-						<code><?php echo esc_html( $new_token ); ?></code>
-						<button type="button" class="button button-primary wcu-api-copy-btn" data-copy="<?php echo esc_attr( $new_token ); ?>">
-							<i class="fas fa-copy" aria-hidden="true"></i> <?php esc_html_e( 'Copy key', 'woo-coupon-usage' ); ?>
-						</button>
-						<span class="wcu-api-copied"><?php esc_html_e( 'Copied', 'woo-coupon-usage' ); ?></span>
-					</div>
-				</div>
-			<?php endif; ?>
-
-			<div class="wcu-api-summary">
-				<div class="wcu-api-stat">
-					<i class="fas fa-key" aria-hidden="true"></i>
-					<div>
-						<div class="wcu-api-stat-value"><?php echo (int) $active_keys; ?></div>
-						<div class="wcu-api-stat-label"><?php esc_html_e( 'Active keys', 'woo-coupon-usage' ); ?></div>
-					</div>
-				</div>
-				<?php
-				// Without the PRO add-on there are no webhooks to count, but the tiles
-				// still render - greyed out, showing a zero - so the free version shows
-				// the whole shape of the feature rather than a gap.
-				$hooks_class = $has_webhooks ? 'wcu-api-stat' : 'wcu-api-stat wcu-api-stat-pro';
-				?>
-				<div class="<?php echo esc_attr( $hooks_class ); ?>">
-					<i class="fas fa-bolt" aria-hidden="true"></i>
-					<div>
-						<div class="wcu-api-stat-value"><?php echo (int) $active_hooks; ?></div>
-						<div class="wcu-api-stat-label">
-							<?php esc_html_e( 'Active webhooks', 'woo-coupon-usage' ); ?>
-						</div>
-					</div>
-				</div>
-				<div class="<?php echo esc_attr( $hooks_class ); ?>">
-					<i class="fas fa-diagram-project" aria-hidden="true"></i>
-					<div>
-						<div class="wcu-api-stat-value"><?php echo $has_webhooks ? (int) count( wcusage_api_webhook_event_names() ) : 0; ?></div>
-						<div class="wcu-api-stat-label">
-							<?php esc_html_e( 'Webhook events', 'woo-coupon-usage' ); ?>
-						</div>
-					</div>
-				</div>
-				<div class="wcu-api-stat">
-					<i class="fas fa-circle-check" aria-hidden="true"></i>
-					<div>
-						<div class="wcu-api-stat-value"><?php echo $api_enabled ? esc_html__( 'Enabled', 'woo-coupon-usage' ) : esc_html__( 'Disabled', 'woo-coupon-usage' ); ?></div>
-						<div class="wcu-api-stat-label"><?php esc_html_e( 'API status', 'woo-coupon-usage' ); ?></div>
 					</div>
 				</div>
 			</div>
@@ -1008,6 +1398,10 @@ if ( ! function_exists( 'wcusage_api_admin_page_render' ) ) {
 				</details>
 			</div>
 
+			<?php endif; // REST API tab. ?>
+
+			<?php if ( 'webhooks' === $tab ) : ?>
+
 			<?php if ( $has_webhooks ) : ?>
 
 			<div class="wcu-api-card">
@@ -1020,7 +1414,13 @@ if ( ! function_exists( 'wcusage_api_admin_page_render' ) ) {
 					<?php if ( ! $api_enabled ) : ?>
 						<p class="description">
 							<i class="fas fa-circle-pause" aria-hidden="true"></i>
-							<?php esc_html_e( 'The API is switched off, so nothing is being delivered automatically. You can still add endpoints and use "Test" to check them; deliveries begin when you enable the API above.', 'woo-coupon-usage' ); ?>
+							<?php
+							printf(
+								/* translators: %s: link to the REST API tab */
+								esc_html__( 'Deliveries are paused because the REST API is switched off. You can still add endpoints and use "Test" to check them; deliveries begin when you enable the API on the %s tab.', 'woo-coupon-usage' ),
+								'<a href="' . esc_url( wcusage_api_admin_url( 'rest' ) ) . '">' . esc_html__( 'REST API', 'woo-coupon-usage' ) . '</a>'
+							);
+							?>
 						</p>
 					<?php endif; ?>
 				</div>
@@ -1172,11 +1572,21 @@ if ( ! function_exists( 'wcusage_api_admin_page_render' ) ) {
 
 				<div class="wcu-api-form-body">
 					<button type="button" class="button button-primary" disabled="disabled"><?php esc_html_e( 'Add webhook', 'woo-coupon-usage' ); ?></button>
-					<p class="description"><?php esc_html_e( 'The payouts and webhook endpoints above are part of the same add-on, and are listed here so you can see what they cover.', 'woo-coupon-usage' ); ?></p>
+					<p class="description"><?php esc_html_e( 'The payouts and webhook endpoints listed on the REST API tab are part of the same add-on.', 'woo-coupon-usage' ); ?></p>
 				</div>
 			</div>
 
 			<?php endif; ?>
+
+			<?php endif; // Webhooks tab. ?>
+
+			<?php
+			// AI agents & MCP: a switch of its own - abilities do not depend on
+			// the REST API being enabled.
+			if ( 'ai' === $tab && function_exists( 'wcusage_abilities_admin_render_card' ) ) {
+				wcusage_abilities_admin_render_card();
+			}
+			?>
 
 		</div>
 
@@ -1264,16 +1674,20 @@ if ( ! function_exists( 'wcusage_api_admin_notice_text' ) ) {
 		$map = array(
 			// Only reached when the message transient the redirect wrote has
 			// already expired; normally the error branch renders instead.
-			'error'           => __( 'Something went wrong. Please try again.', 'woo-coupon-usage' ),
-			'api_enabled'     => __( 'The API is now enabled.', 'woo-coupon-usage' ),
-			'api_disabled'    => __( 'The API is now disabled. Requests to it will be refused.', 'woo-coupon-usage' ),
-			'endpoints_saved' => __( 'Endpoint settings saved.', 'woo-coupon-usage' ),
-			'key_created'     => __( 'API key created.', 'woo-coupon-usage' ),
-			'key_revoked'     => __( 'API key revoked.', 'woo-coupon-usage' ),
-			'key_deleted'     => __( 'API key deleted.', 'woo-coupon-usage' ),
-			'webhook_added'   => __( 'Webhook added.', 'woo-coupon-usage' ),
-			'webhook_deleted' => __( 'Webhook deleted.', 'woo-coupon-usage' ),
-			'webhook_updated' => __( 'Webhook updated.', 'woo-coupon-usage' ),
+			'error'                 => __( 'Something went wrong. Please try again.', 'woo-coupon-usage' ),
+			'api_enabled'           => __( 'The API is now enabled.', 'woo-coupon-usage' ),
+			'api_disabled'          => __( 'The API is now disabled. Requests to it will be refused.', 'woo-coupon-usage' ),
+			'endpoints_saved'       => __( 'Endpoint settings saved.', 'woo-coupon-usage' ),
+			'key_created'           => __( 'API key created.', 'woo-coupon-usage' ),
+			'key_revoked'           => __( 'API key revoked.', 'woo-coupon-usage' ),
+			'key_deleted'           => __( 'API key deleted.', 'woo-coupon-usage' ),
+			'webhook_added'         => __( 'Webhook added.', 'woo-coupon-usage' ),
+			'webhook_deleted'       => __( 'Webhook deleted.', 'woo-coupon-usage' ),
+			'webhook_updated'       => __( 'Webhook updated.', 'woo-coupon-usage' ),
+			'abilities_enabled'     => __( 'AI abilities are now enabled.', 'woo-coupon-usage' ),
+			'abilities_disabled'    => __( 'AI abilities are now disabled. AI apps and plugins can no longer use them.', 'woo-coupon-usage' ),
+			'abilities_saved'       => __( 'AI settings saved.', 'woo-coupon-usage' ),
+			'abilities_log_cleared' => __( 'Recent AI activity cleared.', 'woo-coupon-usage' ),
 		);
 
 		return isset( $map[ $notice ] ) ? $map[ $notice ] : __( 'Done.', 'woo-coupon-usage' );

@@ -8,7 +8,7 @@
  * Included from woo-coupon-usage.php alongside the legacy v1 API files.
  *
  * The v2 API is off until an administrator switches it on under
- * "Coupon Affiliates > Admin Tools > API". That setting, and the per-endpoint
+ * "Coupon Affiliates > API, Webhooks & AI". That setting, and the per-endpoint
  * switches, live in the "wcusage_api_settings" option. The legacy
  * woo-coupon-usage/v1 routes are not affected by them.
  *

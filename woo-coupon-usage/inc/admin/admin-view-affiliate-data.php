@@ -909,7 +909,7 @@ function wcusage_affiliate_lifetime_customers_table($user_id, $page = 1, $per_pa
                 <th><?php echo esc_html__('Customer', 'woo-coupon-usage'); ?></th>
                 <th><?php echo esc_html__('Linked Coupon', 'woo-coupon-usage'); ?></th>
                 <th><?php echo esc_html__('Expiry Date', 'woo-coupon-usage'); ?></th>
-                <th><?php echo esc_html__('Status', 'woo-coupon-usage'); ?><?php echo wcusage_admin_tooltip(esc_html__('While a link is active, ALL of this customer\'s orders are attributed to the affiliate, even if they do not re-use the coupon. The expiry date is extended each time the customer places another qualifying order on that coupon. An expired link stops attributing straight away, but is only cleared from the customer record when they next place an order.', 'woo-coupon-usage')); ?></th>
+                <th><?php echo esc_html__('Status', 'woo-coupon-usage'); ?><?php echo wcusage_admin_tooltip(esc_html__('While a link is active, ALL of this customer\'s orders are attributed to the affiliate, even if they do not re-use the coupon. The expiry date is extended each time the customer places another qualifying order on that coupon, unless the date was set by hand here or on their user profile, or "Don\'t extend the expiry date" is enabled in the Commission settings. An expired link stops attributing straight away, but is only cleared from the customer record when they next place an order.', 'woo-coupon-usage')); ?></th>
                 <th><?php echo esc_html__('Actions', 'woo-coupon-usage'); ?></th>
             </tr>
         </thead>
@@ -1161,11 +1161,13 @@ add_action('wp_ajax_wcusage_save_lifetime_link', function() {
     update_user_meta($customer_id, 'wcu_lifetime_referrer_expire', $new_expiry);
     // Tells the add-on this date was set by hand, so it is honoured even when no
     // expiry period is configured in the settings - where it would otherwise be
-    // ignored, and shown here as active while never applying.
-    if ($new_expiry !== '') {
-        update_user_meta($customer_id, 'wcu_lifetime_referrer_expire_manual', '1');
-    } else {
+    // ignored, and shown here as active while never applying - and is not moved
+    // when the customer uses the coupon again. Only when the date itself was
+    // changed: saving just a new coupon code leaves the date as it was.
+    if ($new_expiry === '') {
         delete_user_meta($customer_id, 'wcu_lifetime_referrer_expire_manual');
+    } elseif ($new_expiry !== $old_expiry) {
+        update_user_meta($customer_id, 'wcu_lifetime_referrer_expire_manual', '1');
     }
 
     $never = __('never expires', 'woo-coupon-usage');

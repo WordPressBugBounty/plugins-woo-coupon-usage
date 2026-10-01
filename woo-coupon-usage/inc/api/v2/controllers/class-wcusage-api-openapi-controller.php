@@ -195,7 +195,7 @@ if ( ! class_exists( 'WCUsage_API_OpenAPI_Controller' ) ) {
 						'bearerApiKey'     => array(
 							'type'        => 'http',
 							'scheme'      => 'bearer',
-							'description' => 'Plugin API key (wcus_...). Created under Coupon Affiliates > Admin Tools > API.',
+							'description' => 'Plugin API key (wcus_...). Created under Coupon Affiliates > API, Webhooks & AI > REST API.',
 						),
 						'basicAppPassword' => array(
 							'type'        => 'http',

@@ -1,5 +1,5 @@
 /**
- * Coupon Affiliates - API & Webhooks admin page.
+ * Coupon Affiliates - API, Webhooks & AI admin page.
  *
  * Everything is scoped under .wcusage-api-page so these rules cannot reach
  * any other admin screen.
@@ -13,27 +13,8 @@
 	box-sizing: border-box;
 }
 
-/* The heading and the way back share one row. Scoped to this page so the
-   shared .wcu-page-header keeps its block layout everywhere else. */
-.wcusage-api-page .wcu-page-header {
-	display: flex;
-	align-items: flex-start;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	gap: 8px 20px;
-}
-
-/* "Go back to tools >" - the screen lives under Admin Tools and has no menu
-   entry of its own, so this is the way back. */
-.wcusage-api-page .wcu-api-back {
-	flex: 0 0 auto;
-	margin: 8px 0 0 0;
-	font-size: 13px;
-}
-
 .wcusage-api-page .wcu-api-card,
-.wcusage-api-page .wcu-api-token,
-.wcusage-api-page .wcu-api-summary {
+.wcusage-api-page .wcu-api-token {
 	width: 100%;
 	box-sizing: border-box;
 }
@@ -42,51 +23,188 @@
 	table-layout: auto;
 }
 
-/* ---------------------------------------------------------------- Summary */
+/* ------------------------------------------------------------------- Tabs */
 
-.wcusage-api-page .wcu-api-summary {
+/* The same look as the plugin's other tabbed screens (.wcusage-tabs on the
+   affiliate view), which is defined inline there and so is not available
+   here. */
+.wcusage-api-page .wcu-api-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0 0 24px 0;
+	padding: 0 12px;
+	border-bottom: 1px solid #e5e7eb;
+	background: #f9fafb;
+	border-radius: 5px 5px 0 0;
+}
+
+.wcusage-api-page .wcu-api-tabs .nav-tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 4px 0 0;
+	padding: 14px 20px;
+	background: transparent;
+	border: none;
+	border-bottom: 3px solid transparent;
+	border-radius: 0;
+	color: #646970;
+	font-size: 14px;
+	font-weight: 500;
+	text-decoration: none;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+
+.wcusage-api-page .wcu-api-tabs .nav-tab:hover,
+.wcusage-api-page .wcu-api-tabs .nav-tab:focus {
+	background: rgba( 34, 113, 177, 0.06 );
+	color: #135e96;
+}
+
+.wcusage-api-page .wcu-api-tabs .nav-tab-active,
+.wcusage-api-page .wcu-api-tabs .nav-tab-active:hover {
+	background: #fff;
+	border-bottom-color: #2271b1;
+	color: #2271b1;
+	font-weight: 600;
+	margin-bottom: -1px;
+}
+
+/* On/off dot beside each feature's name. */
+.wcusage-api-page .wcu-api-tab-dot {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #c3c4c7;
+}
+
+.wcusage-api-page .wcu-api-tab-dot.is-on {
+	background: #00a32a;
+}
+
+.wcusage-api-page .wcu-api-tab-dot.is-off {
+	background: #dba617;
+}
+
+/* --------------------------------------------------------------- Overview */
+
+.wcusage-api-page .wcu-api-overview-intro {
+	margin: 0 0 16px 0;
+	font-size: 14px;
+	color: #50575e;
+}
+
+.wcusage-api-page .wcu-api-overview {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	grid-template-columns: repeat( auto-fit, minmax( 280px, 1fr ) );
 	gap: 16px;
 	margin-bottom: 24px;
 }
 
-.wcusage-api-page .wcu-api-stat {
+.wcusage-api-page .wcu-api-feature {
+	display: flex;
+	flex-direction: column;
 	background: #fff;
 	border: 1px solid #e5e7eb;
 	border-radius: 5px;
 	box-shadow: 0 1px 3px rgba( 0, 0, 0, 0.04 );
-	padding: 16px 18px;
-	display: flex;
-	align-items: center;
-	gap: 14px;
+	padding: 18px 20px 20px 20px;
+	box-sizing: border-box;
 }
 
-.wcusage-api-page .wcu-api-stat i {
-	font-size: 18px;
-	color: #2271b1;
-	background: #f0f6fc;
-	border-radius: 50%;
-	width: 38px;
-	height: 38px;
+.wcusage-api-page .wcu-api-feature.is-locked {
+	border-top-color: #c3c4c7;
+}
+
+.wcusage-api-page .wcu-api-feature-head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 10px;
+}
+
+.wcusage-api-page .wcu-api-feature-head h2 {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: #1d2327;
+	flex: 1 1 auto;
+}
+
+.wcusage-api-page .wcu-api-feature-icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	background: #f0f6fc;
+	color: #2271b1;
+	font-size: 16px;
 	flex-shrink: 0;
 }
 
-.wcusage-api-page .wcu-api-stat-value {
-	font-size: 20px;
-	font-weight: 600;
+.wcusage-api-page .wcu-api-feature-lead {
+	margin: 0 0 12px 0;
+	font-size: 14px;
+	font-weight: 500;
 	color: #1d2327;
-	line-height: 1.2;
 }
 
-.wcusage-api-page .wcu-api-stat-label {
-	font-size: 12px;
-	color: #646970;
+.wcusage-api-page .wcu-api-feature-facts {
+	margin: 0 0 12px 0;
+	font-size: 13px;
+}
+
+.wcusage-api-page .wcu-api-feature-facts dt {
+	font-size: 11px;
+	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.03em;
+	color: #646970;
+}
+
+.wcusage-api-page .wcu-api-feature-facts dd {
+	margin: 2px 0 10px 0;
+	color: #50575e;
+}
+
+.wcusage-api-page .wcu-api-feature-stat {
+	margin: auto 0 12px 0;
+	padding-top: 10px;
+	border-top: 1px solid #f0f0f1;
+	font-size: 13px;
+	color: #1d2327;
+}
+
+.wcusage-api-page .wcu-api-feature .button {
+	align-self: flex-start;
+}
+
+.wcusage-api-page .wcu-api-feature .button i {
+	margin-left: 4px;
+	font-size: 11px;
+}
+
+/* "At a glance" comparison. */
+.wcusage-api-page .wcu-api-glance tbody th {
+	width: 1%;
+	background: #fbfbfc;
+	color: #1d2327;
+	font-size: 12px;
+	text-transform: none;
+	letter-spacing: 0;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.wcusage-api-page .wcu-api-glance thead th i {
+	color: #2271b1;
+	margin-right: 4px;
+}
+
+.wcusage-api-page .wcu-api-glance td {
+	vertical-align: top;
 }
 
 /* ----------------------------------------------------------- Master switch */
@@ -528,15 +646,23 @@
 		flex-direction: column;
 		align-items: flex-start;
 	}
+
+	.wcusage-api-page .wcu-api-tabs {
+		padding: 0 6px;
+	}
+
+	.wcusage-api-page .wcu-api-tabs .nav-tab {
+		padding: 10px 12px;
+		font-size: 13px;
+	}
 }
 
-/* PRO-only rows, tiles and cards in the free build.
+/* PRO-only rows and cards in the free build.
    Shown rather than hidden so the page reflects the whole API, but faded and
-   inert. Opacity sits on the row/tile/card rather than on each cell so nested
+   inert. Opacity sits on the row/card rather than on each cell so nested
    badges and buttons fade with it; pointer-events is left alone on the card so
    its upgrade link is still clickable. */
-.wcusage-api-page .wcu-api-row-pro,
-.wcusage-api-page .wcu-api-stat-pro {
+.wcusage-api-page .wcu-api-row-pro {
 	opacity: 0.5;
 }
 
@@ -569,4 +695,233 @@
 /* The badge and heading stay legible; only the body of a locked card fades. */
 .wcusage-api-page .wcu-api-card-pro .wcu-api-card-head .wcu-api-badge-pro {
 	margin-left: 8px;
+}
+
+/* ------------------------------------------------------- AI agents & MCP */
+
+/* Same on/off edge as the REST API switch, since this card carries a switch
+   of its own. */
+.wcusage-api-page .wcu-api-ai {
+	border-left: 4px solid #c3c4c7;
+}
+
+.wcusage-api-page .wcu-api-ai.is-on {
+	border-left-color: #00a32a;
+}
+
+.wcusage-api-page .wcu-api-ai.is-off {
+	border-left-color: #dba617;
+}
+
+.wcusage-api-page .wcu-api-ai .wcu-api-card-head p {
+	max-width: 760px;
+}
+
+.wcusage-api-page .wcu-api-ai-toggle {
+	margin: 0;
+	flex-shrink: 0;
+}
+
+/* Connection checklist. */
+.wcusage-api-page .wcu-api-ai-status {
+	margin: 0 0 16px 0;
+	padding: 0;
+	list-style: none;
+}
+
+.wcusage-api-page .wcu-api-ai-status li {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 0;
+	padding: 9px 0;
+	border-bottom: 1px solid #f0f0f1;
+	font-size: 13px;
+}
+
+.wcusage-api-page .wcu-api-ai-status li:last-child {
+	border-bottom: none;
+}
+
+.wcusage-api-page .wcu-api-ai-status li > i {
+	font-size: 16px;
+	margin-top: 1px;
+	width: 18px;
+	text-align: center;
+	flex-shrink: 0;
+}
+
+.wcusage-api-page .wcu-api-ai-status strong {
+	display: block;
+	color: #1d2327;
+	margin-bottom: 2px;
+}
+
+.wcusage-api-page .wcu-api-ai-status span {
+	color: #50575e;
+}
+
+.wcusage-api-page .wcu-api-ai-status-ok > i {
+	color: #00a32a;
+}
+
+.wcusage-api-page .wcu-api-ai-status-missing > i {
+	color: #b32d2e;
+}
+
+.wcusage-api-page .wcu-api-ai-status-pending > i {
+	color: #a7aaad;
+}
+
+/* Client set-up steps and the copyable configuration. */
+.wcusage-api-page .wcu-api-ai-connect ol {
+	margin: 14px 0 12px 18px;
+	font-size: 13px;
+}
+
+.wcusage-api-page .wcu-api-ai-connect li {
+	margin-bottom: 6px;
+}
+
+.wcusage-api-page .wcu-api-ai-connect > p:first-child {
+	margin-top: 14px;
+	font-size: 13px;
+}
+
+/* Suggested MCP connector plugins. */
+.wcusage-api-page .wcu-api-ai-connectors {
+	margin: 0 0 12px 0;
+	padding: 10px 14px;
+	list-style: none;
+	font-size: 13px;
+	background: #fbfbfc;
+	border: 1px solid #e5e7eb;
+	border-radius: 3px;
+}
+
+.wcusage-api-page .wcu-api-ai-connectors li {
+	margin: 0 0 8px 0;
+	color: #50575e;
+}
+
+.wcusage-api-page .wcu-api-ai-connectors li:last-child {
+	margin-bottom: 0;
+}
+
+.wcusage-api-page .wcu-api-ai-connectors .wcu-api-badge {
+	margin-left: 4px;
+}
+
+.wcusage-api-page .wcu-api-ai-config {
+	position: relative;
+	margin-bottom: 12px;
+}
+
+.wcusage-api-page .wcu-api-ai-config pre {
+	margin: 0;
+	padding: 12px 14px;
+	background: #f6f7f7;
+	border: 1px solid #e5e7eb;
+	border-radius: 3px;
+	overflow-x: auto;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.wcusage-api-page .wcu-api-ai-config pre code {
+	background: none;
+	padding: 0;
+	font-size: 12px;
+}
+
+.wcusage-api-page .wcu-api-ai-config .button {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+}
+
+.wcusage-api-page .wcu-api-ai-config .wcu-api-copied {
+	position: absolute;
+	top: 12px;
+	right: 80px;
+}
+
+.wcusage-api-page .wcu-api-ai-connect .description code {
+	font-size: 12px;
+}
+
+/* The two access options above the ability list. */
+.wcusage-api-page .wcu-api-ai-options {
+	padding-top: 16px;
+	padding-bottom: 16px;
+}
+
+.wcusage-api-page .wcu-api-ai-options label {
+	display: block;
+	margin-bottom: 10px;
+	font-size: 13px;
+}
+
+.wcusage-api-page .wcu-api-ai-options label:last-child {
+	margin-bottom: 0;
+}
+
+.wcusage-api-page .wcu-api-ai-options .description {
+	display: block;
+	margin: 2px 0 0 24px;
+}
+
+/* Ability list. */
+.wcusage-api-page .wcu-api-ability-table td {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.wcusage-api-page .wcu-api-ability-table td code {
+	font-size: 11px;
+	color: #646970;
+}
+
+.wcusage-api-page .wcu-api-ai-group th {
+	background: #fbfbfc;
+	color: #1d2327;
+	font-size: 12px;
+	padding-top: 8px;
+	padding-bottom: 8px;
+}
+
+.wcusage-api-page .wcu-api-ai-type {
+	display: inline-block;
+	padding: 1px 7px;
+	margin: 0 3px 3px 0;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.wcusage-api-page .wcu-api-ai-type-read {
+	background: #f0f6fc;
+	color: #2271b1;
+}
+
+.wcusage-api-page .wcu-api-ai-type-write {
+	background: #fff4e5;
+	color: #8a5300;
+}
+
+.wcusage-api-page .wcu-api-ai-type-destructive {
+	background: #fcf0f1;
+	color: #b32d2e;
+}
+
+.wcusage-api-page .wcu-api-ai-note {
+	color: #8a5300;
+	font-size: 12px;
+}
+
+.wcusage-api-page .wcu-api-ai-log .wcu-api-ai-note {
+	display: block;
+	margin-top: 4px;
+	color: #b32d2e;
 }

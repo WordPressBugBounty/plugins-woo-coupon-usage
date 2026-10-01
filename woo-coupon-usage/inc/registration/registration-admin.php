@@ -639,7 +639,7 @@ function wcusage_set_registration_role(  $userid  ) {
         $wcusage_field_registration_pending_role = wcusage_get_setting_value( 'wcusage_field_registration_pending_role', 'subscriber' );
         $wcusage_field_register_role_remove_pending = wcusage_get_setting_value( 'wcusage_field_register_role_remove_pending', '1' );
         if ( $wcusage_field_registration_accepted_role == 'administrator' || $wcusage_field_registration_accepted_role == 'editor' || $wcusage_field_registration_accepted_role == 'author' || $wcusage_field_registration_accepted_role == 'shop_manager' ) {
-            $wcusage_field_registration_accepted_role == "coupon_affiliate";
+            $wcusage_field_registration_accepted_role = "coupon_affiliate";
         }
         if ( $role_object = get_role( $wcusage_field_registration_accepted_role ) ) {
             if ( $role_object->has_cap( 'manage_options' ) ) {
@@ -742,13 +742,43 @@ function wcusage_set_registration_status(
                 $message
             );
         } elseif ( $send_email_type ) {
+            // Passes $skip_registration_check: accepting is an admin's decision (or the
+            // store's auto-accept setting), whether or not the public registration form
+            // is switched on - as when an admin adds a coupon from the affiliate's page.
             wcusage_email_affiliate_register_accepted(
                 $user_email,
                 $coupon_code,
                 $message,
                 $username,
-                $name
+                $name,
+                true
             );
+        }
+        // "Add New Affiliate" can give the applicant a coupon that already exists,
+        // and assigns it to them before accepting. When a published coupon with this
+        // code already belongs to them, that is their coupon: creating another from
+        // the template would leave two coupons with the same code.
+        $existing_coupon = get_posts( array(
+            'post_type'        => 'shop_coupon',
+            'post_status'      => 'publish',
+            'title'            => $coupon_code,
+            'meta_key'         => 'wcu_select_coupon_user',
+            'meta_value'       => (string) $userid,
+            'fields'           => 'ids',
+            'posts_per_page'   => 1,
+            'no_found_rows'    => true,
+            'suppress_filters' => true,
+        ) );
+        if ( !empty( $existing_coupon ) ) {
+            do_action(
+                'wcusage_hook_affiliate_register_added',
+                $id,
+                $userid,
+                $coupon_code,
+                $message,
+                $status
+            );
+            return "<div class='notice notice-success is-dismissible'><p>" . esc_html__( 'Coupon code assigned:', 'woo-coupon-usage' ) . " " . esc_html( $coupon_code ) . "</p></div>";
         }
         $wcusage_coupon_multiple = wcusage_get_setting_value( 'wcusage_field_registration_multiple_template', '0' );
         if ( !$type || !$wcusage_coupon_multiple ) {

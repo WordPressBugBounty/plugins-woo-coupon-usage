@@ -191,7 +191,8 @@ function wcusage_field_cb_help( $args )
   .ca-videos__head p { margin: 0; color: #6b7280; }
   .ca-video-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    /* Max 3 per row: each column is at least a third of the row (minus gaps). */
+    grid-template-columns: repeat(auto-fill, minmax(max(340px, calc((100% - 44px) / 3)), 1fr));
     gap: 22px;
   }
   .ca-video-card {
@@ -306,8 +307,8 @@ function wcusage_field_cb_help( $args )
     <div class="ca-video-grid">
       <?php
       $wcusage_help_videos = array(
-          array( 'id' => '709270929', 'title' => __( 'Setup Guide', 'woo-coupon-usage' ) ),
-          array( 'id' => '713487822', 'title' => __( 'Registration Guide', 'woo-coupon-usage' ) ),
+          array( 'id' => '1231989950', 'title' => __( 'Setup Guide', 'woo-coupon-usage' ) ),
+          array( 'id' => '1231989949', 'title' => __( 'Registration Guide', 'woo-coupon-usage' ) ),
           array( 'id' => '845540018', 'title' => __( 'Affiliate Dashboard Demo', 'woo-coupon-usage' ) ),
           array( 'id' => '837140385', 'title' => __( 'Commission Payouts', 'woo-coupon-usage' ), 'pro' => true ),
           array( 'id' => '837197420', 'title' => __( 'PayPal Payouts', 'woo-coupon-usage' ), 'pro' => true ),

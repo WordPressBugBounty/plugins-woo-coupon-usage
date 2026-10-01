@@ -182,6 +182,13 @@ function wcusage_field_cb_commission( $args )
     <i><?php echo esc_html__( 'Optional: How many days after being assigned as a "lifetime" referral should it expire, and the customer be unlinked from the customer.', 'woo-coupon-usage' ); ?></i><br/>
     <i><?php echo esc_html__( 'Set to "0" for permanent lifetime commission with no expiry time.', 'woo-coupon-usage' ); ?> <?php echo esc_html__( 'Can also be set on a per-coupon basis.', 'woo-coupon-usage' ); ?></i><br/>
 
+    <br/>
+
+    <!-- Don't extend the expiry date when the customer re-uses the coupon. -->
+    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_expire_fixed', 0, esc_html__( 'Don\'t extend the expiry date when the customer uses the coupon again.', 'woo-coupon-usage' ), '0px'); ?>
+    <i><?php echo esc_html__( 'By default, the expiry date is pushed back by the full expiry period each time the customer places another order with the coupon. Enable this to keep a fixed window instead, counted from when the customer was first linked (for example, exactly 365 days from their first order). Once it expires, the customer can be linked again by using an affiliate coupon.', 'woo-coupon-usage' ); ?></i><br/>
+    <i><?php echo esc_html__( 'An expiry date set by hand, on the affiliate\'s "Lifetime" tab or the customer\'s user profile, is always kept as it is.', 'woo-coupon-usage' ); ?></i><br/>
+
     </span>
 
     <br/><hr/>

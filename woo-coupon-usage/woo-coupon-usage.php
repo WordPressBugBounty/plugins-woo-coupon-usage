@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
-* Version: 8.5.0
+* Version: 8.6.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -21,7 +21,7 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 // Define plugin version constant
 if ( !defined( 'WCUSAGE_VERSION' ) ) {
-    define( 'WCUSAGE_VERSION', '8.5.0' );
+    define( 'WCUSAGE_VERSION', '8.6.0' );
 }
 if ( function_exists( 'wcu_fs' ) ) {
     wcu_fs()->set_basename( false, __FILE__ );
@@ -952,6 +952,9 @@ if ( function_exists( 'wcu_fs' ) ) {
     include plugin_dir_path( __FILE__ ) . 'inc/api/users-coupons.php';
     include plugin_dir_path( __FILE__ ) . 'inc/api/request-payout.php';
     include plugin_dir_path( __FILE__ ) . 'inc/api/v2/load.php';
+    // AI agents & MCP: abilities for the WordPress Abilities API, built on the
+    // v2 controllers above, so loaded after them.
+    include plugin_dir_path( __FILE__ ) . 'inc/abilities/load.php';
     // WC Account Tab
     $wcusage_field_account_tab = wcusage_get_setting_value( 'wcusage_field_account_tab', 0 );
     if ( $wcusage_field_account_tab ) {

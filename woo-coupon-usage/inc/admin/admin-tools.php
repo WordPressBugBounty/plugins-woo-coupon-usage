@@ -23,10 +23,8 @@ function wcusage_tools_page_sections() {
     // Setup & Integrations.
     $setup = array(
         array(
-            'title' => function_exists( 'wcusage_api_webhooks_available' ) && wcusage_api_webhooks_available()
-                ? __( 'API & Webhooks', 'woo-coupon-usage' )
-                : __( 'API', 'woo-coupon-usage' ),
-            'desc'  => __( 'Enable the REST API, manage API keys, and connect external apps to your affiliate program.', 'woo-coupon-usage' ),
+            'title' => __( 'API, Webhooks & AI', 'woo-coupon-usage' ),
+            'desc'  => __( 'Enable the REST API, manage API keys, and connect external apps and AI agents (MCP) to your affiliate program.', 'woo-coupon-usage' ),
             'icon'  => 'fa-solid fa-plug',
             'url'   => admin_url( 'admin.php?page=wcusage_api' ),
         ),

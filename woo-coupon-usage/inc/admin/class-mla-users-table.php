@@ -362,6 +362,31 @@ function wcusage_mla_users_page() {
 
         <p class="wcusage_mla_users_page_desc"><?php echo esc_html__('This page shows affiliate users who have access to the Multi-Level Affiliate (MLA) system, along with their MLA statistics.', 'woo-coupon-usage'); ?></p>
 
+        <?php if ( function_exists( 'wcusage_mla_refresh_all_parents' ) ) { ?>
+            <?php
+            $rebuild_result_key = 'wcusage_mla_rebuild_result_' . get_current_user_id();
+            $rebuild_result = get_transient( $rebuild_result_key );
+            if ( is_array( $rebuild_result ) ) {
+                delete_transient( $rebuild_result_key );
+                ?>
+                <div class="notice notice-success is-dismissible">
+                    <p><?php echo esc_html( sprintf(
+                        /* translators: 1: number of sub-affiliates updated, 2: number checked */
+                        __( 'Network tiers rebuilt: %1$d of %2$d sub-affiliates had their parent tiers updated.', 'woo-coupon-usage' ),
+                        absint( $rebuild_result['updated'] ),
+                        absint( $rebuild_result['checked'] )
+                    ) ); ?></p>
+                </div>
+            <?php } ?>
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin: 15px 0 0 0;"
+                onsubmit="return confirm('<?php echo esc_js( __( 'Recalculate the parent tiers of every sub-affiliate from their direct parent? Commission on future orders will follow the rebuilt tiers.', 'woo-coupon-usage' ) ); ?>');">
+                <input type="hidden" name="action" value="wcusage_mla_rebuild_parents" />
+                <?php wp_nonce_field( 'wcusage_mla_rebuild_parents' ); ?>
+                <button type="submit" class="button"><span class="fa-solid fa-rotate"></span> <?php echo esc_html__( 'Rebuild Network Tiers', 'woo-coupon-usage' ); ?></button>
+                <span class="description" style="margin-left: 8px;"><?php echo esc_html__( 'Recalculates every sub-affiliate\'s tier 2 and higher parents from their direct (tier 1) parent. Use this if parts of a network show the wrong parents, or after changing the number of MLA tiers. Past commission is not changed.', 'woo-coupon-usage' ); ?></span>
+            </form>
+        <?php } ?>
+
         <!-- Load admin styles -->
         <link rel="stylesheet" href="<?php echo esc_url(add_query_arg('ver', WCUSAGE_VERSION, WCUSAGE_UNIQUE_PLUGIN_URL . 'css/delete-dropdown.css')); ?>" />
         <script src="<?php echo esc_url(add_query_arg('ver', WCUSAGE_VERSION, WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin.js')); ?>"></script>

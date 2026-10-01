@@ -476,7 +476,7 @@ function wcusage_setup_page_html() {
 
           <br/>
 
-          <iframe width="560" height="315" src="https://www.youtube.com/embed/64Sub5pKf7k?si=oS-OgpSonXAflh8p" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/1231989950?badge=0&autopause=0&player_id=0&app_id=58479/embed#t=2m25.9s' ); ?>
           
           <br/>
 

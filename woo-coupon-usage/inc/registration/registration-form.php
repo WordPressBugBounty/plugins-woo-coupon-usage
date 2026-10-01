@@ -676,7 +676,8 @@ function wcusage_create_new_registration(
             $promote,
             $website,
             $type,
-            $info
+            $info,
+            !$accept
         );
         // If the application could not be stored, stop here. Accepting it (which creates
         // the coupon) or emailing the applicant would tell everyone the application was
@@ -722,8 +723,10 @@ function wcusage_create_new_registration(
             // Send email to affiliate
             wcusage_email_affiliate_register( $email, $couponcode, $firstname );
         }
-        // Send email to admin
-        if ( !is_admin() ) {
+        // Send email to admin. Not for an application created already accepted:
+        // only an admin does that (the "Add New Affiliate" screen, or an AI app
+        // acting as one), so there is nothing new to tell them.
+        if ( !is_admin() && !$accept ) {
             $adminemail = get_bloginfo( 'admin_email' );
             wcusage_email_admin_affiliate_register(
                 $username,

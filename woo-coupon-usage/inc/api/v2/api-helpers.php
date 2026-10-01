@@ -63,7 +63,7 @@ if ( !function_exists( 'wcusage_api_v2_is_enabled' ) ) {
      * Whether the v2 REST API is switched on for this site.
      *
      * Off until an administrator turns it on under "Coupon Affiliates >
-     * Admin Tools > API", so a site never starts answering API requests just
+     * API, Webhooks & AI", so a site never starts answering API requests just
      * because the plugin was updated. This controls the v2 routes and API key
      * authentication; the older woo-coupon-usage/v1 endpoints are unaffected
      * so existing integrations keep working.

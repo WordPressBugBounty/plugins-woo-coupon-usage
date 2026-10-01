@@ -94,6 +94,10 @@ function wcusage_register_dateaccepted_is_nullable() {
 /**
  * Install data into registration table
  *
+ * @param bool $dedupe Treat a second submission from the same user within 10
+ *                     seconds as a double-submit and return the first one. Off for
+ *                     applications an admin creates already accepted, where a
+ *                     second one in quick succession is a second coupon.
  */
 function wcusage_install_register_data(
     $couponcode,
@@ -102,7 +106,8 @@ function wcusage_install_register_data(
     $promote,
     $website,
     $type = "",
-    $info = ""
+    $info = "",
+    $dedupe = true
 ) {
     if ( $type ) {
         if ( $type == "1" || !$type ) {
@@ -134,17 +139,19 @@ function wcusage_install_register_data(
     // written with current_time(). Comparing against the database server's NOW()
     // instead would widen this window to the site's UTC offset (e.g. two hours),
     // silently discarding genuine repeat applications.
-    $cutoff = gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) - 10 );
-    $query = $wpdb->prepare( "SELECT id FROM {$table_name} WHERE userid = %d AND date > %s LIMIT 1", $userid, $cutoff );
-    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-    $result = $wpdb->get_results( $query );
-    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
-    if ( !empty( $result ) ) {
-        $last_id = $result[0]->id;
-        return $last_id;
+    if ( $dedupe ) {
+        $cutoff = gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) - 10 );
+        $query = $wpdb->prepare( "SELECT id FROM {$table_name} WHERE userid = %d AND date > %s LIMIT 1", $userid, $cutoff );
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $result = $wpdb->get_results( $query );
+        // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+        if ( !empty( $result ) ) {
+            $last_id = $result[0]->id;
+            return $last_id;
+        }
     }
     // Insert data
-    $insert_result = $wpdb->insert( $table_name, array(
+    $register_row = array(
         'userid'       => $userid,
         'couponcode'   => $couponcode,
         'promote'      => $promote,
@@ -155,7 +162,18 @@ function wcusage_install_register_data(
         'status'       => 'pending',
         'date'         => current_time( 'mysql' ),
         'dateaccepted' => null,
-    ) );
+    );
+    $insert_result = $wpdb->insert( $table_name, $register_row );
+    // A dateaccepted column that is still NOT NULL refuses the insert. The
+    // migration that makes it nullable only runs once, guarded by a flag, and
+    // a registrations table restored from an older backup leaves that flag
+    // wrong - so run the migration again and retry once.
+    if ( $insert_result === false && stripos( (string) $wpdb->last_error, 'dateaccepted' ) !== false ) {
+        delete_option( 'wcusage_register_dateaccepted_nullable' );
+        delete_transient( 'wcusage_register_dateaccepted_retry' );
+        wcusage_migrate_register_dateaccepted_column();
+        $insert_result = $wpdb->insert( $table_name, $register_row );
+    }
     if ( $insert_result === false ) {
         error_log( 'CA: wcusage_install_register_data() DB insert failed for user ID ' . $userid . ': ' . $wpdb->last_error );
         return false;
