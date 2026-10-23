@@ -418,7 +418,7 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 		$query = "SELECT p.$id AS order_id, p.$post_date AS order_date, p.$post_status AS order_status
 			FROM {$wpdb->prefix}$posts AS p
 			INNER JOIN ( $matched_orders ) AS wcu_matched ON wcu_matched.order_id = p.$id
-			WHERE p.$post_status IN ('" . implode("','", array_keys($statuses)) . "')";
+			WHERE p.$post_status IN ('" . implode("','", array_map('esc_sql', array_keys($statuses))) . "')";
 
 		if ($wcusage_field_order_sort != "completeddate") {
 			$query .= $wpdb->prepare(" AND p.$post_date BETWEEN %s AND %s", $start_date, $end_date);

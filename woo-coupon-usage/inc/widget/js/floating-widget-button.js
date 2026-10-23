@@ -154,12 +154,10 @@ jQuery(document).ready(function($) {
         if (wcusage_floating_widget.qr_enabled === '1') {
             console.log('Loading QR code assets...');
             
-            // Try multiple QR code library paths
+            // The bundled QRCode library (the one widget-qr-codes expects; the
+            // same file the affiliate dashboard uses). No external requests.
             var qrCodePaths = [
-                wcusage_floating_widget.plugin_url + 'js/qrcode.min.js',
-                wcusage_floating_widget.plugin_url + 'assets/js/qrcode.min.js',
-                wcusage_floating_widget.plugin_url + 'inc/assets/js/qrcode.min.js',
-                'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js'
+                wcusage_floating_widget.plugin_url + 'premium-files/pro-addons/qr-codes/qrcode.js'
             ];
             
             loadQRCodeLibraryWithFallback(qrCodePaths, 0, function() {

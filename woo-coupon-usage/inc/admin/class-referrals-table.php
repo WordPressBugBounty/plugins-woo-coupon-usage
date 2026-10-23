@@ -42,9 +42,13 @@ class wcusage_Referrals_Table extends WP_List_Table {
             }
             if ( 'trash' === $this->current_action() ) {
                 // Loop over the array of record IDs and trash them
-                foreach ( $_GET['bulk-delete'] as $id ) {
-                    // Delete WooCommerce Orders
-                    wp_trash_post( $id );
+                foreach ( (array) $_GET['bulk-delete'] as $id ) {
+                    // Trash WooCommerce orders only (wp_trash_post() would trash
+                    // any post ID, and does nothing for HPOS orders).
+                    $order = wc_get_order( absint( $id ) );
+                    if ( $order && $order instanceof WC_Order ) {
+                        $order->delete( false );
+                    }
                 }
             }
             if ( 'processing' === $this->current_action() ) {

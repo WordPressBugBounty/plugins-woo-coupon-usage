@@ -45,7 +45,8 @@ if(isset($_POST['_wpnonce'])) {
   $nonce = sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) );
   if(isset($_POST['wcu-blacklist-ipaddress']) && wp_verify_nonce( $nonce, 'blacklist_url' )  ){
     $option_group = get_option('wcusage_options');
-    $wcusage_field_fraud_block_ips = wc_sanitize_textarea($option_group['wcusage_field_fraud_block_ips'] . "\n" . $_POST['wcu-blacklist-ipaddress']);
+    $existing_block_ips = isset($option_group['wcusage_field_fraud_block_ips']) ? $option_group['wcusage_field_fraud_block_ips'] : '';
+    $wcusage_field_fraud_block_ips = wc_sanitize_textarea($existing_block_ips . "\n" . sanitize_text_field( wp_unslash( $_POST['wcu-blacklist-ipaddress'] ) ));
     $wcusage_field_fraud_block_ips = preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n", $wcusage_field_fraud_block_ips); /* Remove Empty Lines */
     $option_group['wcusage_field_fraud_block_ips'] = $wcusage_field_fraud_block_ips;
     update_option( 'wcusage_options', $option_group );
@@ -59,8 +60,15 @@ if(isset($_POST['_wpnonce'])) {
   $nonce = sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) );
   if(isset($_POST['wcu-blacklist-ipaddress-remove']) && wp_verify_nonce( $nonce, 'blacklist_url' )  ){
     $option_group = get_option('wcusage_options');
-    $wcusage_field_fraud_block_ips = wc_sanitize_textarea( str_replace( $_POST['wcu-blacklist-ipaddress-remove'], '', $option_group['wcusage_field_fraud_block_ips']) );
-    $wcusage_field_fraud_block_ips = preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n", $wcusage_field_fraud_block_ips); /* Remove Empty Lines */
+    // Remove only the line that exactly matches. A plain text replace would also
+    // cut it out of other entries (removing "1.2.3.4" broke "11.2.3.45").
+    $remove_ip = trim( sanitize_text_field( wp_unslash( $_POST['wcu-blacklist-ipaddress-remove'] ) ) );
+    $existing_block_ips = isset($option_group['wcusage_field_fraud_block_ips']) ? $option_group['wcusage_field_fraud_block_ips'] : '';
+    $block_lines = preg_split( "/\r\n|\r|\n/", (string) $existing_block_ips );
+    $block_lines = array_filter( array_map( 'trim', $block_lines ), function( $line ) use ( $remove_ip ) {
+      return $line !== '' && $line !== $remove_ip;
+    } );
+    $wcusage_field_fraud_block_ips = wc_sanitize_textarea( implode( "\n", $block_lines ) );
     $option_group['wcusage_field_fraud_block_ips'] = $wcusage_field_fraud_block_ips;
     update_option( 'wcusage_options', $option_group );
   }

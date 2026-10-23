@@ -30,7 +30,9 @@ if ( ! defined( 'ABSPATH' ) ) {
     }
 
     // If pressed dismiss button then update option to hide it
-    if ( isset( $_POST['wcusage-update-notice-dismissed'] ) ) {
+    if ( isset( $_POST['wcusage-update-notice-dismissed'], $_POST['wcusage_update_notice_nonce'] )
+        && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wcusage_update_notice_nonce'] ) ), 'wcusage_dismiss_update_notice' )
+        && wcusage_check_admin_access() ) {
       update_option( 'wcusage_update_notice_dismissed', '1' );
     }
 
@@ -45,11 +47,12 @@ if ( ! defined( 'ABSPATH' ) ) {
   */
 function wcusage_updated_cache_notice() {
     $notice_dismissed = get_option( 'wcusage_update_notice_dismissed' );
-    if ( !$notice_dismissed ) {
+    if ( !$notice_dismissed && wcusage_check_admin_access() ) {
       ?>
 
       <div class="notice notice-success"><form style="all: unset !important;" action="" method="post">
       <input type="text" id="wcusage-update-notice-dismissed" name="wcusage-update-notice-dismissed" value="1" style="display: none;">
+      <?php wp_nonce_field( 'wcusage_dismiss_update_notice', 'wcusage_update_notice_nonce' ); ?>
       <p>
       Coupon Affiliates <?php echo esc_html__( "was updated", "woo-coupon-usage" ); ?>! (<a href="https://couponaffiliates.com/changelog/" target="_blank"><?php echo esc_html__( "View Changelog", "woo-coupon-usage" ); ?></a>) - <strong><?php echo esc_html__( "Please CLEAR YOUR CACHE to ensure frontend changes are applied.", "woo-coupon-usage" ); ?></strong>
       <input type="submit" value="<?php echo esc_html__( "Dismiss Notice", "woo-coupon-usage" ); ?>" style="cursor: pointer;">

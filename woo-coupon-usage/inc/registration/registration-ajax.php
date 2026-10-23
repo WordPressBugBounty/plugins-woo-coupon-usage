@@ -14,6 +14,15 @@ add_action( 'wp_ajax_nopriv_wcusage_submit_registration', 'wcusage_ajax_submit_r
 function wcusage_ajax_submit_registration() {
     // Verify the AJAX request using the nonce
     check_ajax_referer( 'wcusage_verify_submit_registration_form1', 'wcusage_submit_registration_form1' );
+    // Respect the same settings as the registration form itself: no submissions
+    // when registration is turned off, or from logged out visitors when that is.
+    $wcusage_field_registration_enable = wcusage_get_setting_value( 'wcusage_field_registration_enable', '1' );
+    $wcusage_registration_enable_logout = wcusage_get_setting_value( 'wcusage_field_registration_enable_logout', '1' );
+    if ( !$wcusage_field_registration_enable || !is_user_logged_in() && !$wcusage_registration_enable_logout ) {
+        wp_send_json_error( array(
+            'message' => esc_html__( 'Affiliate registration is not currently available.', 'woo-coupon-usage' ),
+        ) );
+    }
     // Retrieve and sanitize form data from $_POST
     $username = ( isset( $_POST['wcu-input-username'] ) ? sanitize_user( $_POST['wcu-input-username'] ) : '' );
     $wcusage_field_registration_emailusername = wcusage_get_setting_value( 'wcusage_field_registration_emailusername', '0' );
@@ -67,20 +76,18 @@ function wcusage_ajax_submit_registration() {
     // Assume password confirmation is optional based on a setting (adjust as needed)
     $field_password_confirm = wcusage_get_setting_value( 'wcusage_field_registration_password_confirm', '0' );
     // Perform validations
-    if ( !is_user_logged_in() && !wp_get_current_user() ) {
+    // (This used to also test !wp_get_current_user(), which is always an object,
+    // so none of these checks ever ran.) An empty password is allowed, as in the
+    // non-AJAX form: one is generated and emailed when the account is created.
+    if ( !is_user_logged_in() ) {
         if ( empty( $username ) ) {
             wp_send_json_error( array(
-                'message' => 'Username is required: ' . $username,
+                'message' => 'Username is required.',
             ) );
         }
         if ( empty( $email ) || !is_email( $email ) ) {
             wp_send_json_error( array(
                 'message' => 'A valid email is required.',
-            ) );
-        }
-        if ( empty( $password ) ) {
-            wp_send_json_error( array(
-                'message' => 'Password is required.',
             ) );
         }
         if ( $field_password_confirm && $password !== $password_confirm ) {

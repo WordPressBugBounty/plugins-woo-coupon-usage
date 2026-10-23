@@ -34,14 +34,10 @@ if ( !function_exists( 'wcusage_enqueue_coupon_edit_assets' ) ) {
             return;
         }
         $ver = ( defined( 'WCUSAGE_VERSION' ) ? WCUSAGE_VERSION : '1.0.0' );
-        // jQuery UI Autocomplete + its base stylesheet (used by the affiliate-user fields).
+        // jQuery UI Autocomplete + its stylesheet (used by the affiliate-user fields).
+        // The stylesheet is the local copy WooCommerce registers for its admin screens.
         wp_enqueue_script( 'jquery-ui-autocomplete' );
-        wp_enqueue_style(
-            'wcusage-jquery-ui',
-            'https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css',
-            array(),
-            '1.12.1'
-        );
+        wp_enqueue_style( 'jquery-ui-style' );
         wp_enqueue_style(
             'wcusage-coupon-edit',
             WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-coupon-edit.css',

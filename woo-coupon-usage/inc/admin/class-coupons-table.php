@@ -147,7 +147,7 @@ class wcusage_Coupons_Table extends WP_List_Table {
                     }
                 }
                 // Then delete the user
-                if ( $uid && $uid !== get_current_user_id() ) {
+                if ( $uid && $uid !== get_current_user_id() && wcusage_current_user_can_manage_user( $uid, 'delete' ) ) {
                     wp_delete_user( $uid );
                 }
             }

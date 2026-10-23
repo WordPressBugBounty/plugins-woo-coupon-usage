@@ -455,35 +455,35 @@ function wcusage_save_alltime_stats(  $coupon_id, $stats  ) {
 }
 
 /**
- * Store the running totals of an in-progress refresh.
+ * Get the in-progress refresh run for a coupon, if it matches the signature.
  *
- * The browser sends the totals it has accumulated so far together with the
- * index of the window it just asked for. Saving them means a run that is
- * interrupted (a timeout, or the affiliate closing the tab) carries on from
- * the same point next time instead of recalculating every order again.
+ * The run (its date windows, how far it has got and the running totals) is
+ * kept on the server, so the totals that are finally saved can only ever be
+ * ones the server calculated itself. The browser only says which run it is
+ * working on.
  *
- * @param int   $coupon_id
- * @param mixed $batch_stats Stats for the window that just completed.
+ * @param int    $coupon_id
+ * @param string $signature
  *
- * @return void
+ * @return array|false
  *
  */
-function wcusage_save_refresh_progress(  $coupon_id, $batch_stats  ) {
-    if ( !$coupon_id ) {
-        return;
+function wcusage_get_refresh_progress(  $coupon_id, $signature  ) {
+    if ( !$coupon_id || !$signature ) {
+        return false;
     }
-    $index = ( isset( $_POST['index'] ) ? intval( $_POST['index'] ) : -1 );
-    $signature = ( isset( $_POST['signature'] ) ? sanitize_text_field( wp_unslash( $_POST['signature'] ) ) : '' );
-    if ( $index < 0 || !$signature ) {
-        return;
+    $progress = get_post_meta( $coupon_id, 'wcu_alltime_stats_progress', true );
+    if ( !is_array( $progress ) || !isset( 
+        $progress['signature'],
+        $progress['index'],
+        $progress['time'],
+        $progress['windows']
+     ) || !is_array( $progress['windows'] ) || !hash_equals( (string) $progress['signature'], (string) $signature ) || time() - intval( $progress['time'] ) >= HOUR_IN_SECONDS ) {
+        return false;
     }
-    $running = ( isset( $_POST['stats'] ) && is_array( $_POST['stats'] ) ? wp_unslash( $_POST['stats'] ) : array() );
-    update_post_meta( $coupon_id, 'wcu_alltime_stats_progress', array(
-        'signature' => $signature,
-        'index'     => $index + 1,
-        'stats'     => wcusage_merge_alltime_stats( $running, $batch_stats ),
-        'time'      => time(),
-    ) );
+    $progress['index'] = intval( $progress['index'] );
+    $progress['stats'] = wcusage_sanitize_alltime_stats( ( isset( $progress['stats'] ) ? $progress['stats'] : array() ) );
+    return $progress;
 }
 
 /**
@@ -496,8 +496,8 @@ function wcusage_get_orders_by_coupon_ajax() {
         wp_send_json_error( esc_html__( 'You must be logged in.', 'woo-coupon-usage' ) );
     }
     $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( wp_unslash( $_POST['coupon_code'] ) ) : '' );
-    $startdate = ( isset( $_POST['start'] ) ? sanitize_text_field( wp_unslash( $_POST['start'] ) ) : '' );
-    $enddate = ( isset( $_POST['end'] ) ? sanitize_text_field( wp_unslash( $_POST['end'] ) ) : '' );
+    $client_index = ( isset( $_POST['index'] ) ? intval( $_POST['index'] ) : -1 );
+    $signature = ( isset( $_POST['signature'] ) ? sanitize_text_field( wp_unslash( $_POST['signature'] ) ) : '' );
     // Check access: the coupon must belong to the current user (or an MLA parent / admin)
     $coupon = wcusage_get_coupon_info( $coupon_code );
     $coupon_user_id = intval( $coupon[1] );
@@ -508,6 +508,29 @@ function wcusage_get_orders_by_coupon_ajax() {
         wp_send_json_error( esc_html__( 'You do not have permission to access this data.', 'woo-coupon-usage' ) );
         wp_die();
     }
+    $coupon_id = $coupon[2];
+    // The run was set up on the server when the dashboard was loaded
+    // (wcusage_update_all_stats_batch_ajax()), so the window to calculate and the
+    // totals so far come from there, never from the request.
+    $progress = wcusage_get_refresh_progress( $coupon_id, $signature );
+    if ( !$progress ) {
+        wp_send_json_error( esc_html__( 'The statistics refresh has expired. Please reload the page to try again.', 'woo-coupon-usage' ) );
+    }
+    $index = $progress['index'];
+    // A retry of a window the server already finished (the response was lost):
+    // just tell the browser where the run is up to, without counting it again.
+    if ( $client_index >= 0 && $client_index < $index ) {
+        $done = wcusage_sanitize_alltime_stats( array() );
+        $done['next_index'] = $index;
+        echo json_encode( $done );
+        wp_die();
+    }
+    if ( $client_index !== $index || !isset( $progress['windows'][$index] ) ) {
+        wp_send_json_error( esc_html__( 'The statistics refresh is out of step. Please reload the page to try again.', 'woo-coupon-usage' ) );
+    }
+    $window = (array) $progress['windows'][$index];
+    $startdate = ( isset( $window[0] ) ? sanitize_text_field( $window[0] ) : '' );
+    $enddate = ( isset( $window[1] ) ? sanitize_text_field( $window[1] ) : '' );
     // Build the processing commission total in a temporary key while the run is
     // going, so the live value is only replaced once every window has completed.
     $recalculate_pending = wcusage_refresh_recalculates_pending();
@@ -527,8 +550,13 @@ function wcusage_get_orders_by_coupon_ajax() {
         unset($GLOBALS['wcusage_pending_refresh_key']);
     }
     $allstats = ( isset( $fullorders['allstats'] ) && is_array( $fullorders['allstats'] ) ? $fullorders['allstats'] : array() );
-    // Remember how far the run has got so it can be resumed if interrupted.
-    wcusage_save_refresh_progress( $coupon[2], $allstats );
+    // Add this window to the server-side totals and move the run on, so an
+    // interrupted run carries on from the same point next time.
+    $progress['stats'] = wcusage_merge_alltime_stats( $progress['stats'], $allstats );
+    $progress['index'] = $index + 1;
+    $progress['time'] = time();
+    update_post_meta( $coupon_id, 'wcu_alltime_stats_progress', $progress );
+    $allstats['next_index'] = $progress['index'];
     echo json_encode( $allstats );
     wp_die();
 }
@@ -543,8 +571,7 @@ function wcusage_update_all_stats_data() {
     if ( !is_user_logged_in() ) {
         wp_send_json_error( esc_html__( 'You must be logged in.', 'woo-coupon-usage' ) );
     }
-    $options = wcusage_get_options();
-    $stats = ( isset( $_POST['stats'] ) && is_array( $_POST['stats'] ) ? wp_unslash( $_POST['stats'] ) : array() );
+    $signature = ( isset( $_POST['signature'] ) ? sanitize_text_field( wp_unslash( $_POST['signature'] ) ) : '' );
     $coupon_code = ( isset( $_POST['coupon_code'] ) ? sanitize_text_field( wp_unslash( $_POST['coupon_code'] ) ) : '' );
     $coupon = wcusage_get_coupon_info( $coupon_code );
     $coupon_user_id = intval( $coupon[1] );
@@ -557,9 +584,16 @@ function wcusage_update_all_stats_data() {
         wp_send_json_error( esc_html__( 'You do not have permission to access this data.', 'woo-coupon-usage' ) );
         wp_die();
     }
+    // Only a run the server has walked to the end can be saved, and only with the
+    // totals the server calculated. Totals sent by the browser are never trusted:
+    // an affiliate could otherwise set their own sales and commission figures.
+    $progress = wcusage_get_refresh_progress( $coupon_id, $signature );
+    if ( !$progress || $progress['index'] < count( $progress['windows'] ) ) {
+        wp_send_json_error( esc_html__( 'The statistics refresh did not complete. Please reload the page to try again.', 'woo-coupon-usage' ) );
+    }
     // Save the completed run (this is the only point the stored statistics for
     // the coupon are replaced).
-    $allstats = wcusage_save_alltime_stats( $coupon_id, $stats );
+    $allstats = wcusage_save_alltime_stats( $coupon_id, $progress['stats'] );
     echo json_encode( $allstats );
     wp_die();
 }
@@ -631,7 +665,7 @@ function wcusage_get_refresh_date_windows(  $coupon_code  ) {
     $matched_orders = $wpdb->prepare( "SELECT woi.order_id AS order_id\r\n      FROM {$wpdb->prefix}woocommerce_order_items AS woi\r\n      WHERE woi.order_item_type = 'coupon' AND woi.order_item_name = %s\r\n      UNION\r\n      SELECT woi2." . $post_id . " AS order_id\r\n      FROM {$wpdb->prefix}" . $postmeta . " AS woi2\r\n      WHERE woi2.meta_key IN ( 'lifetime_affiliate_coupon_referrer', 'wcusage_referrer_coupon' )\r\n      AND woi2.meta_value = %s", $coupon_code, $coupon_code );
     // Query to get orders. UNION returns each order ID once and p.$id is the
     // primary key, so the rows are already unique without DISTINCT.
-    $query = "SELECT p." . $id . " AS order_id, p." . $post_date . " AS order_date\r\n      FROM {$wpdb->prefix}" . $posts . " AS p\r\n      INNER JOIN ( " . $matched_orders . " ) AS wcu_matched ON wcu_matched.order_id = p." . $id . "\r\n      WHERE p." . $post_status . " IN ('" . implode( "','", array_keys( $statuses ) ) . "')";
+    $query = "SELECT p." . $id . " AS order_id, p." . $post_date . " AS order_date\r\n      FROM {$wpdb->prefix}" . $posts . " AS p\r\n      INNER JOIN ( " . $matched_orders . " ) AS wcu_matched ON wcu_matched.order_id = p." . $id . "\r\n      WHERE p." . $post_status . " IN ('" . implode( "','", array_map( 'esc_sql', array_keys( $statuses ) ) ) . "')";
     // Count the orders per day. The stored dates are GMT while the batches are
     // given local dates (wcusage_convert_date_to_gmt() converts them back with
     // the same fixed offset), so shift by that offset to group by local day.
@@ -702,13 +736,18 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
     // Identifies this exact set of work. If anything changes the windows (a new
     // order, a changed setting), a part-finished run is no longer resumable.
     $signature = md5( wp_json_encode( $windows ) );
+    // Only the dates are needed.
+    $windows_js = array();
+    foreach ( $windows as $window ) {
+        $windows_js[] = array($window['start'], $window['end']);
+    }
     // Pick up where an interrupted run stopped, when it was for the same work.
     $start_index = 0;
     $start_stats = array();
-    $progress = get_post_meta( $post_id, 'wcu_alltime_stats_progress', true );
-    if ( is_array( $progress ) && isset( $progress['signature'], $progress['index'], $progress['time'] ) && $progress['signature'] === $signature && intval( $progress['index'] ) > 0 && intval( $progress['index'] ) <= count( $windows ) && time() - intval( $progress['time'] ) < HOUR_IN_SECONDS ) {
-        $start_index = intval( $progress['index'] );
-        $start_stats = ( isset( $progress['stats'] ) ? $progress['stats'] : array() );
+    $progress = wcusage_get_refresh_progress( $post_id, $signature );
+    if ( $progress && $progress['index'] > 0 && $progress['index'] <= count( $windows ) ) {
+        $start_index = $progress['index'];
+        $start_stats = $progress['stats'];
     }
     $start_stats = wcusage_sanitize_alltime_stats( $start_stats );
     // Start a fresh run. Note that the existing statistics are deliberately NOT
@@ -717,14 +756,18 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
     if ( !$start_index && !empty( $windows ) ) {
         wcusage_begin_refresh_pending( $post_id );
     }
-    // Only the dates are needed in the browser.
-    $windows_js = array();
-    foreach ( $windows as $window ) {
-        $windows_js[] = array($window['start'], $window['end']);
+    // The run (its windows, position and running totals) lives on the server.
+    // Each batch request works on the next window from here and adds to these
+    // totals, so the browser never supplies the figures that get saved.
+    if ( $post_id ) {
+        update_post_meta( $post_id, 'wcu_alltime_stats_progress', array(
+            'signature' => $signature,
+            'windows'   => $windows_js,
+            'index'     => $start_index,
+            'stats'     => $start_stats,
+            'time'      => time(),
+        ) );
     }
-    // Force an object so the commission summary keys survive the round trip.
-    $start_stats_js = $start_stats;
-    $start_stats_js['commission_summary'] = (object) $start_stats['commission_summary'];
     ?>
 
     <script>
@@ -747,9 +790,6 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
     var wcuMaxRetries = 2;
     var the_coupon_usage = <?php 
     echo intval( $the_coupon_usage );
-    ?>;
-    var allstats = <?php 
-    echo wp_json_encode( $start_stats_js );
     ?>;
     var updateStatsNonce = <?php 
     echo wp_json_encode( wp_create_nonce( 'wcusage_update_stats_nonce' ) );
@@ -803,51 +843,29 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
 
     function getOrders() {
 
-    /* Every window has been calculated, so the totals can now be saved. */
+    /* Every window has been calculated, so the server can save its totals. */
     if (wcuIndex >= wcuWindows.length) {
-      updateAllStats(allstats);
+      updateAllStats();
       return;
     }
-
-    var currentWindow = wcuWindows[wcuIndex];
 
     jQuery.ajax({
       url: wcuAjaxUrl,
       type: 'POST',
       data: {
       'action': 'wcusage_get_orders_by_coupon_ajax',
-      'start': currentWindow[0],
-      'end': currentWindow[1],
       'coupon_code': wcuCouponCode,
       'index': wcuIndex,
       'signature': wcuSignature,
-      'stats': allstats,
       'security': updateStatsNonce
       },
       success: function(response) {
         try {
           var responseData = wcusageParseStatsResponse(response);
-          allstats.total_count += Number(responseData.total_count) || 0;
-          allstats.total_orders += Number(responseData.total_orders) || 0;
-          allstats.full_discount += Number(responseData.full_discount) || 0;
-          allstats.total_commission += Number(responseData.total_commission) || 0;
-          allstats.total_shipping += Number(responseData.total_shipping) || 0;
-          for (var key in responseData.commission_summary) {
-            if (!Object.prototype.hasOwnProperty.call(responseData.commission_summary, key)) { continue; }
-            if (allstats.commission_summary[key]) {
-            allstats.commission_summary[key].total += Number(responseData.commission_summary[key].total) || 0;
-            allstats.commission_summary[key].commission += Number(responseData.commission_summary[key].commission) || 0;
-            allstats.commission_summary[key].number += Number(responseData.commission_summary[key].number) || 0;
-            } else {
-            allstats.commission_summary[key] = {
-              total: Number(responseData.commission_summary[key].total) || 0,
-              commission: Number(responseData.commission_summary[key].commission) || 0,
-              number: Number(responseData.commission_summary[key].number) || 0
-            };
-            }
-          }
           wcuRetries = 0;
-          wcuIndex++;
+          /* The server keeps the running totals and says which window is next. */
+          var nextIndex = parseInt(responseData.next_index, 10);
+          wcuIndex = isNaN(nextIndex) ? wcuIndex + 1 : nextIndex;
           updateProgressBar(Math.floor((wcuIndex / wcuWindows.length) * 100));
           getOrders();
         } catch(error) {
@@ -867,13 +885,13 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
     });
     }
 
-    function updateAllStats(allstats) {
+    function updateAllStats() {
     jQuery.ajax({
       url: wcuAjaxUrl,
       type: 'POST',
       data: {
       'action': 'wcusage_update_all_stats_data',
-      'stats': allstats,
+      'signature': wcuSignature,
       'coupon_code': wcuCouponCode,
       'security': updateStatsNonce
       },

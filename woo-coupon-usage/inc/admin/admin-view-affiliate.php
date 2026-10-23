@@ -1,4 +1,5 @@
-﻿<?php 
+<?php
+
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
@@ -60,6 +61,9 @@ if ( !function_exists( 'wcusage_wrap_profile_sections' ) ) {
 // Handle form submission for user updates
 if ( isset( $_POST['update_user'] ) && isset( $_POST['_wpnonce'] ) ) {
     if ( wp_verify_nonce( $_POST['_wpnonce'], 'update-user_' . $user_id ) ) {
+        if ( !wcusage_current_user_can_manage_user( $user_id, 'edit' ) ) {
+            wp_die( esc_html__( 'You do not have permission to edit this user.', 'woo-coupon-usage' ) );
+        }
         // Update basic user information
         $user_data = array(
             'ID'         => $user_id,
@@ -276,6 +280,9 @@ if ( isset( $_POST['wcusage_delete_action'] ) && isset( $_POST['wcusage_user_id'
     }
     if ( $delete_user_id === get_current_user_id() ) {
         wp_die( 'You cannot delete your own account' );
+    }
+    if ( in_array( $action, array('delete_user', 'delete_user_coupons'), true ) && !wcusage_current_user_can_manage_user( $delete_user_id, 'delete' ) ) {
+        wp_die( esc_html__( 'You do not have permission to delete this user.', 'woo-coupon-usage' ) );
     }
     $message = '';
     $coupons_for_user = wcusage_get_users_coupons_ids( $delete_user_id );

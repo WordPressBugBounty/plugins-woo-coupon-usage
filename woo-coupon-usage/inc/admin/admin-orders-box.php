@@ -739,18 +739,6 @@ if ( !function_exists( 'wcusage_get_order_commission_after_refunds' ) ) {
  *
  * @param int $post_id The ID of the post being saved.
  */
-function wcusage_save_postdata(  $post_id  ) {
-    if ( array_key_exists( 'wcusage_field', $_POST ) ) {
-        update_post_meta( $post_id, '_wcusage_meta_key', sanitize_text_field( $_POST['wcusage_field'] ) );
-    }
-}
-
-add_action( 'save_post', 'wcusage_save_postdata' );
-/**
- * Save the custom meta box data
- *
- * @param int $post_id The ID of the post being saved.
- */
 function wcusage_wcusage_referrer_coupon_meta_box_save(  $post_id  ) {
     if ( !isset( $_POST['wcusage_referrer_coupon_nonce'] ) || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wcusage_referrer_coupon_nonce'] ) ), basename( __FILE__ ) ) ) {
         return;

@@ -253,7 +253,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         if ( 'bulk-delete-users' === $this->current_action() ) {
             $delete_ids = isset($_POST['bulk-delete']) ? array_map( 'absint', (array) $_POST['bulk-delete'] ) : array();
             foreach ( $delete_ids as $id ) {
-                if ( $id != get_current_user_id() ) {
+                if ( $id != get_current_user_id() && wcusage_current_user_can_manage_user( $id, 'delete' ) ) {
                     wp_delete_user( $id );
                 }
             }
@@ -262,7 +262,7 @@ class WC_Coupon_Users_Table extends WP_List_Table {
         if ( 'bulk-delete-all' === $this->current_action() ) {
             $delete_ids = isset($_POST['bulk-delete']) ? array_map( 'absint', (array) $_POST['bulk-delete'] ) : array();
             foreach ( $delete_ids as $id ) {
-                if ( $id != get_current_user_id() ) {
+                if ( $id != get_current_user_id() && wcusage_current_user_can_manage_user( $id, 'delete' ) ) {
                     wp_delete_user( $id );
                 }
                 $coupons = wcusage_get_users_coupons_ids( $id );
@@ -318,7 +318,12 @@ class WC_Coupon_Users_Table extends WP_List_Table {
             if ( $user_id == get_current_user_id() ) {
                 wp_die( 'You cannot delete your own account' );
             }
-            
+
+            // Plugin admins (e.g. a Shop Manager) cannot delete more powerful accounts
+            if ( in_array( $action, array( 'delete_user', 'delete_user_coupons' ), true ) && ! wcusage_current_user_can_manage_user( $user_id, 'delete' ) ) {
+                wp_die( esc_html__( 'You do not have permission to delete this user.', 'woo-coupon-usage' ) );
+            }
+
             $coupons = wcusage_get_users_coupons_ids( $user_id );
             
             switch ( $action ) {

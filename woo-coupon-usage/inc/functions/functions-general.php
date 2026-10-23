@@ -515,6 +515,55 @@ if( !function_exists( 'wcusage_check_admin_access' ) ) {
 }
 
 /**
+ * Whether the current user may edit or delete a user account from the plugin's admin pages.
+ *
+ * Plugin admin access can be given to roles such as Shop Manager. Those users may
+ * manage ordinary affiliate accounts, but never an account with more power than an
+ * affiliate: changing an administrator's email would let them take the account over.
+ *
+ * @param int    $user_id The user being edited or deleted.
+ * @param string $action  'edit' or 'delete'.
+ *
+ * @return bool
+ *
+ */
+if( !function_exists( 'wcusage_current_user_can_manage_user' ) ) {
+  function wcusage_current_user_can_manage_user( $user_id, $action = 'edit' ) {
+
+    $user_id = absint( $user_id );
+    if ( ! $user_id || ! wcusage_check_admin_access() ) {
+      return false;
+    }
+
+    // Anyone WordPress itself allows to edit/delete this user.
+    $meta_cap = ( 'delete' === $action ) ? 'delete_user' : 'edit_user';
+    if ( current_user_can( $meta_cap, $user_id ) ) {
+      return true;
+    }
+
+    $target = get_userdata( $user_id );
+    if ( ! $target ) {
+      return false;
+    }
+
+    if ( is_multisite() && is_super_admin( $user_id ) ) {
+      return false;
+    }
+
+    // Otherwise only accounts with no editorial, user or store management powers.
+    $elevated_caps = array( 'edit_posts', 'manage_options', 'edit_users', 'promote_users', 'create_users', 'delete_users', 'manage_woocommerce', 'edit_shop_orders' );
+    foreach ( $elevated_caps as $cap ) {
+      if ( user_can( $target, $cap ) ) {
+        return false;
+      }
+    }
+
+    return true;
+
+  }
+}
+
+/**
  * Check if coupon same as lifetime referrer assigned to it
  *
  * @param int $order_id

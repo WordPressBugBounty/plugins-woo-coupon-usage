@@ -1355,6 +1355,16 @@ function wcusage_add_new_affiliate_user(
         $new_password = wp_generate_password( 15, false );
         $password = $new_password;
     }
+    // A chosen role must be one of the affiliate groups (all the "Affiliate Group"
+    // dropdown offers) with no admin-level powers. It comes from the request, so
+    // without this anyone with plugin admin access could create an administrator.
+    if ( $role ) {
+        $role = sanitize_key( $role );
+        $role_object = get_role( $role );
+        if ( strpos( $role, 'coupon_affiliate' ) !== 0 || !$role_object || $role_object->has_cap( 'manage_options' ) || $role_object->has_cap( 'promote_users' ) || $role_object->has_cap( 'edit_users' ) || $role_object->has_cap( 'create_users' ) || $role_object->has_cap( 'manage_woocommerce' ) || $role_object->has_cap( 'edit_posts' ) ) {
+            $role = '';
+        }
+    }
     if ( !$role ) {
         if ( $wcusage_register_role ) {
             if ( !$wcusage_field_register_role_only_accept ) {
