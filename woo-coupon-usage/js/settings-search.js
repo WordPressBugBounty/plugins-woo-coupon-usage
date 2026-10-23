@@ -49,7 +49,14 @@ jQuery(function($){
     if($elem.is('h1, h2, h3, h4, h5, h6')){
       return;
     }
-    
+
+    // Portal colour groups behind "Show More" are hidden by a class, with no
+    // wcu_show_ button, so open them through their own toggle.
+    var $pd = $elem.closest('.wcu-pd-card-more').closest('.wcu-pd');
+    if($pd.length && !$pd.hasClass('is-showing-more')){
+      $pd.find('.wcu-pd-more-toggle').first().trigger('click');
+    }
+
     // Only open ancestors that actually contain this element as a child
     var ancestors = $elem.parents().filter(function(){
       var id = this.id;
@@ -272,15 +279,15 @@ jQuery(function($){
       if(!pid){ return; }
       var labelText = '';
       var $strong = $p.children('strong').first();
-      if($strong.length){ labelText = $.trim($strong.text()); }
+      if($strong.length){ labelText = $.trim($strong.clone().find('.wcu-setting-info').remove().end().text()); }
       if(!labelText){
         var $lbl = $p.find('label').first();
         if($lbl.length){ labelText = $.trim($lbl.text()); }
       }
       if(!labelText){ labelText = $.trim($p.text()); }
-      // Also search in description text (italic text or text after the main label)
+      // Also search in description text (italic text, or the info icon tooltip next to the label)
       var fullText = labelText;
-      var $italic = $p.find('i');
+      var $italic = $p.find('i, .wcu-setting-info-text');
       if($italic.length){
         $italic.each(function(){
           var italicText = $.trim($(this).text());

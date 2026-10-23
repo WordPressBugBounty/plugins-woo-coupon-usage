@@ -81,6 +81,16 @@ function wcusage_admin_options_update_scripts( $hook_suffix ) {
       'bulk_failed'            => __( 'Saving stopped at batch %1$s of %2$s: %3$s', 'woo-coupon-usage' ),
       /* translators: 1: number of fields the form posts, 2: current max_input_vars, 3: suggested max_input_vars */
       'max_input_vars_warning' => __( 'This settings form posts %1$s fields, but the PHP "max_input_vars" limit on your server is %2$s, so PHP would silently discard everything after the limit. "Save All Settings" and "Save Settings" therefore save in smaller batches automatically. Settings saved automatically as you change them are not affected. To save everything in one request, ask your host to raise "max_input_vars" to %3$s or higher.', 'woo-coupon-usage' ),
+      'updating'               => __( 'Saving...', 'woo-coupon-usage' ),
+      'updated'                => __( 'Saved', 'woo-coupon-usage' ),
+      'status_auto'            => __( 'Changes save automatically', 'woo-coupon-usage' ),
+      'status_saving'          => __( 'Saving...', 'woo-coupon-usage' ),
+      'status_saved'           => __( 'All changes saved', 'woo-coupon-usage' ),
+      'status_failed'          => __( 'A change could not be saved', 'woo-coupon-usage' ),
+      'status_manual'          => __( 'Manual saving is on', 'woo-coupon-usage' ),
+      'status_unsaved'         => __( 'Unsaved changes', 'woo-coupon-usage' ),
+      'leave_unsaved'          => __( 'You have unsaved changes. Leave without saving?', 'woo-coupon-usage' ),
+      'reloading'              => __( 'Updating the settings below...', 'woo-coupon-usage' ),
     ),
   ) );
 }

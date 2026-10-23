@@ -1,0 +1,903 @@
+/* Coupon Affiliates - Migration screen.
+   Follows the Admin Tools look (admin-style.css): full-width header, content
+   capped at the same 1240px as the tools grid, #e5e7eb cards and blue icons. */
+
+.wcusage-migration-page [hidden] {
+	display: none !important;
+}
+
+.wcusage-migration-body {
+	max-width: 1240px;
+}
+
+.wcusage-migration-step {
+	margin: 0 0 32px;
+}
+
+.wcusage-migration-page .wcu-section-title {
+	padding-bottom: 10px;
+	border-bottom: 1px solid #e5e7eb;
+}
+
+.wcusage-migration-step-number {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background: #2271b1;
+	color: #fff;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1;
+}
+
+/* Cards */
+
+.wcusage-migration-card {
+	background: #fff;
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	padding: 18px 20px;
+	margin: 0 0 16px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+	box-sizing: border-box;
+}
+
+.wcusage-migration-card:last-child {
+	margin-bottom: 0;
+}
+
+.wcusage-migration-card .notice.inline {
+	margin: 12px 0 0;
+}
+
+.wcusage-migration-empty {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+}
+
+.wcusage-migration-empty p {
+	margin: 0;
+	font-size: 14px;
+	color: #50575e;
+}
+
+.wcusage-migration-empty-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 40px;
+	height: 40px;
+	border-radius: 8px;
+	background: #f0f0f1;
+	color: #8c8f94;
+	font-size: 16px;
+}
+
+.wcusage-migration-loading {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: #50575e;
+}
+
+.wcusage-migration-loading .spinner {
+	float: none;
+	margin: 0;
+}
+
+/* Step 1: sources */
+
+.wcusage-migration-sources {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+	gap: 16px;
+}
+
+.wcusage-migration-source {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	width: 100%;
+	margin: 0;
+	padding: 16px 18px;
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+	color: #1d2327;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+	transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.wcusage-migration-source:hover {
+	border-color: #2271b1;
+	box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+	transform: translateY(-2px);
+}
+
+.wcusage-migration-source:focus {
+	outline: none;
+}
+
+.wcusage-migration-source:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+}
+
+.wcusage-migration-source.is-selected {
+	border-color: #2271b1;
+	background: #f6f9fd;
+	box-shadow: 0 0 0 1px #2271b1;
+	transform: none;
+}
+
+/* While a migration or undo is in progress. */
+.wcusage-migration-source:disabled,
+.wcusage-migration-source:disabled:hover {
+	border-color: #e5e7eb;
+	box-shadow: none;
+	opacity: 0.6;
+	transform: none;
+	cursor: not-allowed;
+}
+
+.wcusage-migration-source-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 40px;
+	height: 40px;
+	border-radius: 8px;
+	background: #eef3ff;
+	color: #2271b1;
+	font-size: 16px;
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+.wcusage-migration-source:hover .wcusage-migration-source-icon,
+.wcusage-migration-source.is-selected .wcusage-migration-source-icon {
+	background: #2271b1;
+	color: #fff;
+}
+
+.wcusage-migration-source-content {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.wcusage-migration-source-name {
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.wcusage-migration-source-arrow {
+	flex: 0 0 auto;
+	color: #c3c4c7;
+	font-size: 13px;
+	transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.wcusage-migration-source:hover .wcusage-migration-source-arrow {
+	color: #2271b1;
+	transform: translateX(3px);
+}
+
+.wcusage-migration-source.is-selected .wcusage-migration-source-arrow {
+	color: #2271b1;
+	transform: none;
+}
+
+/* A tick in place of the arrow once chosen (fa-check). */
+.wcusage-migration-source.is-selected .wcusage-migration-source-arrow i::before {
+	content: "\f00c";
+}
+
+/* "Beta" pill beside the page title. */
+.wcusage-migration-beta {
+	display: inline-block;
+	margin-left: 8px;
+	padding: 2px 10px;
+	border: 1px solid #c5d9ff;
+	border-radius: 999px;
+	background: #eef3ff;
+	color: #2271b1;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 18px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	vertical-align: middle;
+	white-space: nowrap;
+}
+
+.wcusage-migration-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.wcusage-migration-badge {
+	display: inline-block;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: #f0f0f1;
+	color: #50575e;
+	font-size: 11px;
+	font-weight: 500;
+	line-height: 18px;
+}
+
+.wcusage-migration-badge.is-active {
+	background: #edfaef;
+	color: #007017;
+}
+
+.wcusage-migration-badge.is-data {
+	background: #eef3ff;
+	color: #2271b1;
+}
+
+.wcusage-migration-badge.is-warning {
+	background: #fcf9e8;
+	color: #8a5300;
+}
+
+.wcusage-migration-supported {
+	margin-top: 14px;
+	color: #50575e;
+}
+
+.wcusage-migration-supported summary {
+	color: #2271b1;
+	cursor: pointer;
+}
+
+.wcusage-migration-supported p {
+	margin: 8px 0 0;
+}
+
+/* Step 2: what was found */
+
+.wcusage-migration-counts {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+	gap: 12px;
+}
+
+.wcusage-migration-count {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 16px;
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.wcusage-migration-count-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 36px;
+	height: 36px;
+	border-radius: 8px;
+	background: #eef3ff;
+	color: #2271b1;
+	font-size: 15px;
+}
+
+.wcusage-migration-count-text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.wcusage-migration-count-value {
+	font-size: 20px;
+	font-weight: 600;
+	line-height: 1.2;
+	color: #1d2327;
+}
+
+.wcusage-migration-count-label {
+	color: #646970;
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.wcusage-migration-count.is-empty .wcusage-migration-count-icon {
+	background: #f0f0f1;
+	color: #a7aaad;
+}
+
+.wcusage-migration-count.is-empty .wcusage-migration-count-value {
+	color: #8c8f94;
+}
+
+.wcusage-migration-notices .notice.inline {
+	margin: 12px 0 0;
+}
+
+.wcusage-migration-not-migrated {
+	margin-top: 16px;
+}
+
+.wcusage-migration-not-migrated .wcusage-migration-section-icon {
+	background: #f0f0f1;
+	color: #646970;
+}
+
+.wcusage-migration-not-migrated-body {
+	padding: 14px 20px 16px;
+	color: #50575e;
+}
+
+.wcusage-migration-not-migrated-body p {
+	margin: 0 0 8px;
+}
+
+.wcusage-migration-not-migrated-body ul {
+	margin: 0;
+	padding-left: 20px;
+	list-style: disc;
+	columns: 2 280px;
+	column-gap: 32px;
+}
+
+.wcusage-migration-not-migrated-body li {
+	margin: 0 0 4px;
+	break-inside: avoid;
+}
+
+/* Step 3: options */
+
+.wcusage-migration-section {
+	padding: 0;
+	transition: opacity 0.2s ease;
+}
+
+.wcusage-migration-section-title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+	padding: 14px 20px;
+	border-bottom: 1px solid #f0f0f1;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.wcusage-migration-section-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 28px;
+	height: 28px;
+	border-radius: 6px;
+	background: #eef3ff;
+	color: #2271b1;
+	font-size: 13px;
+}
+
+.wcusage-migration-options {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+	gap: 18px 32px;
+	padding: 18px 20px 20px;
+}
+
+/* Data not being migrated: its options stay editable but recede. */
+.wcusage-migration-section.is-off .wcusage-migration-options {
+	opacity: 0.45;
+}
+
+.wcusage-migration-section.is-off .wcusage-migration-section-icon {
+	background: #f0f0f1;
+	color: #8c8f94;
+}
+
+.wcusage-migration-option {
+	margin: 0;
+	min-width: 0;
+}
+
+/* Lone checkboxes take a full row, so fields stay paired up in the grid. */
+.wcusage-migration-option.is-checkbox {
+	grid-column: 1 / -1;
+}
+
+.wcusage-migration-option > label:not(.wcusage-migration-check) {
+	display: block;
+	margin: 0 0 6px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.wcusage-migration-option select,
+.wcusage-migration-option input[type="text"],
+.wcusage-migration-option input[type="date"] {
+	width: 100%;
+	max-width: 100%;
+	min-height: 36px;
+	margin: 0;
+	border-color: #c3c4c7;
+	border-radius: 5px;
+	box-sizing: border-box;
+}
+
+.wcusage-migration-option input[type="number"] {
+	width: 140px;
+	min-height: 36px;
+	margin: 0;
+	border-color: #c3c4c7;
+	border-radius: 5px;
+}
+
+.wcusage-migration-option .description {
+	display: block;
+	margin: 6px 0 0;
+	font-size: 12.5px;
+	line-height: 1.5;
+	color: #646970;
+}
+
+.wcusage-migration-check {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	cursor: pointer;
+}
+
+.wcusage-migration-check input[type="checkbox"] {
+	flex: 0 0 auto;
+	margin: 1px 0 0;
+}
+
+.wcusage-migration-check-text {
+	display: block;
+	min-width: 0;
+}
+
+.wcusage-migration-check-label {
+	display: block;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.5;
+	color: #1d2327;
+}
+
+.wcusage-migration-check .description {
+	margin-top: 2px;
+}
+
+.wcusage-migration-setting-value {
+	color: #2271b1;
+	font-size: 12px;
+	font-weight: 400;
+}
+
+.wcusage-migration-option.is-locked .wcusage-migration-check,
+.wcusage-migration-check:has(input:disabled) {
+	cursor: default;
+}
+
+.wcusage-migration-option.is-locked .wcusage-migration-check-label,
+.wcusage-migration-option.is-locked > label:not(.wcusage-migration-check) {
+	color: #8c8f94;
+}
+
+/* "What to migrate": a grid of tiles rather than a long list. */
+.wcusage-migration-section[data-section="data"] .wcusage-migration-options {
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+	gap: 12px;
+}
+
+.wcusage-migration-section[data-section="data"] .wcusage-migration-option.is-checkbox {
+	grid-column: auto;
+}
+
+.wcusage-migration-section[data-section="data"] .wcusage-migration-check {
+	box-sizing: border-box;
+	height: 100%;
+	padding: 12px 14px;
+	border: 1px solid #e5e7eb;
+	border-radius: 6px;
+	background: #fff;
+	transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.wcusage-migration-section[data-section="data"] .wcusage-migration-check:hover {
+	border-color: #c3c4c7;
+}
+
+.wcusage-migration-section[data-section="data"] .wcusage-migration-check:has(input:checked) {
+	border-color: #9ec2e6;
+	background: #f6f9fd;
+}
+
+.wcusage-migration-section[data-section="data"] .wcusage-migration-option.is-locked .wcusage-migration-check {
+	border-style: dashed;
+	background: #fafafa;
+}
+
+/* Step 4: start */
+
+.wcusage-migration-start {
+	border-left: 4px solid #2271b1;
+}
+
+.wcusage-migration-start-title {
+	margin: 0 0 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.wcusage-migration-start-title i {
+	margin-right: 6px;
+	color: #2271b1;
+}
+
+.wcusage-migration-start ul {
+	margin: 0 0 16px 20px;
+	list-style: disc;
+	color: #50575e;
+}
+
+.wcusage-migration-start li {
+	margin-bottom: 4px;
+}
+
+.wcusage-migration-backup {
+	display: flex;
+	width: fit-content;
+	max-width: 100%;
+	box-sizing: border-box;
+	margin: 0 0 8px;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 14px;
+	border: 1px solid #f0e2b6;
+	border-radius: 6px;
+	background: #fcf9e8;
+	font-weight: 500;
+	color: #1d2327;
+	cursor: pointer;
+}
+
+.wcusage-migration-backup input[type="checkbox"] {
+	margin: 0;
+}
+
+.wcusage-migration-start-actions {
+	margin: 16px 0 0;
+}
+
+.wcusage-migration-page .button-hero i {
+	margin-right: 8px;
+}
+
+/* Progress */
+
+#wcusage-migration-progress {
+	margin-bottom: 32px;
+}
+
+.wcusage-migration-progress-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.wcusage-migration-progress-head h2 {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.wcusage-migration-progress-head h2 span {
+	color: #646970;
+	font-weight: 400;
+}
+
+/* What to check after a migration completes. */
+.wcusage-migration-checklist {
+	margin: 0 0 16px;
+	padding: 14px 18px;
+	border: 1px solid #f0e2b6;
+	border-left: 4px solid #dba617;
+	border-radius: 6px;
+	background: #fcf9e8;
+	color: #1d2327;
+}
+
+.wcusage-migration-checklist p {
+	margin: 0 0 8px;
+}
+
+.wcusage-migration-checklist .wcusage-migration-checklist-title {
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.wcusage-migration-checklist-title i {
+	margin-right: 6px;
+	color: #8a5300;
+}
+
+.wcusage-migration-checklist ul {
+	margin: 0;
+	padding-left: 20px;
+	list-style: disc;
+}
+
+.wcusage-migration-checklist li {
+	margin: 0 0 6px;
+}
+
+.wcusage-migration-checklist a {
+	white-space: nowrap;
+}
+
+.wcusage-migration-bar {
+	height: 10px;
+	margin: 16px 0;
+	border-radius: 5px;
+	background: #f0f0f1;
+	overflow: hidden;
+}
+
+.wcusage-migration-bar span {
+	display: block;
+	height: 100%;
+	border-radius: 5px;
+	background: linear-gradient(90deg, #2271b1, #4f94d4);
+	transition: width 0.4s;
+}
+
+#wcusage-migration-progress[data-status="completed"] .wcusage-migration-bar span,
+#wcusage-migration-progress[data-status="undone"] .wcusage-migration-bar span {
+	background: #00a32a;
+}
+
+#wcusage-migration-progress[data-status="failed"] .wcusage-migration-bar span {
+	background: #d63638;
+}
+
+#wcusage-migration-progress[data-status="cancelled"] .wcusage-migration-bar span {
+	background: #8c8f94;
+}
+
+.wcusage-migration-steps {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0 0 16px;
+	padding: 0;
+	list-style: none;
+}
+
+.wcusage-migration-steps li {
+	margin: 0;
+	padding: 3px 10px;
+	border-radius: 999px;
+	background: #f6f7f7;
+	color: #8c8f94;
+	font-size: 12px;
+	line-height: 18px;
+}
+
+.wcusage-migration-steps li::before {
+	content: "\25CB";
+	margin-right: 5px;
+}
+
+.wcusage-migration-steps li.is-done {
+	background: #edfaef;
+	color: #007017;
+}
+
+.wcusage-migration-steps li.is-done::before {
+	content: "\2713";
+}
+
+.wcusage-migration-steps li.is-current {
+	background: #eef3ff;
+	color: #2271b1;
+	font-weight: 600;
+}
+
+.wcusage-migration-steps li.is-current::before {
+	content: "\25CF";
+}
+
+/* Own table styles: the shared ".wcusage-admin-page .widefat" rules centre
+   every cell and pad rows to 44px, which suits the list screens, not these. */
+.wcusage-migration-table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+	font-size: 13px;
+	color: #1d2327;
+}
+
+.wcusage-migration-table th,
+.wcusage-migration-table td {
+	padding: 11px 16px;
+	border-bottom: 1px solid #f0f0f1;
+	text-align: left;
+	vertical-align: middle;
+}
+
+.wcusage-migration-table thead th {
+	background: #f9fafb;
+	border-bottom-color: #e5e7eb;
+	font-size: 12px;
+	font-weight: 600;
+	color: #50575e;
+}
+
+.wcusage-migration-table tbody tr:last-child > * {
+	border-bottom: 0;
+}
+
+.wcusage-migration-table tbody tr:hover {
+	background: #f9fafb;
+}
+
+.wcusage-migration-summary {
+	max-width: 760px;
+	margin-bottom: 14px;
+	border: 1px solid #e5e7eb;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.wcusage-migration-summary th {
+	font-weight: 400;
+	color: #50575e;
+}
+
+.wcusage-migration-summary td {
+	font-weight: 600;
+	text-align: right;
+	white-space: nowrap;
+}
+
+.wcusage-migration-log summary {
+	color: #2271b1;
+	cursor: pointer;
+}
+
+.wcusage-migration-log ul {
+	max-height: 280px;
+	overflow: auto;
+	margin: 8px 0 0;
+	padding: 10px 14px;
+	border-radius: 6px;
+	background: #f6f7f7;
+	font-size: 12px;
+}
+
+.wcusage-migration-log li {
+	margin-bottom: 3px;
+}
+
+.wcusage-migration-log li.is-warning {
+	color: #8a5300;
+}
+
+.wcusage-migration-log li.is-error {
+	color: #d63638;
+}
+
+.wcusage-migration-retry {
+	margin: 12px 0 0;
+}
+
+/* History */
+
+#wcusage-migration-history .wcusage-migration-card {
+	padding: 0;
+	overflow: hidden;
+}
+
+.wcusage-migration-runs td .button + .button {
+	margin-left: 4px;
+}
+
+.wcusage-migration-runs .wcusage-migration-undo-note {
+	display: block;
+	margin-top: 4px;
+	font-size: 12px;
+}
+
+.wcusage-migration-history-foot {
+	padding: 14px 16px;
+	border-top: 1px solid #e5e7eb;
+	background: #fbfbfc;
+}
+
+.wcusage-migration-history-foot .description {
+	margin: 0;
+}
+
+.wcusage-migration-undo-users {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 8px;
+}
+
+.wcusage-migration-undo-users input[type="checkbox"] {
+	margin: 0;
+}
+
+.wcusage-migration-status {
+	display: inline-block;
+	padding: 1px 9px;
+	border-radius: 999px;
+	background: #f0f0f1;
+	color: #50575e;
+	font-size: 12px;
+	line-height: 20px;
+}
+
+.wcusage-migration-status.is-completed {
+	background: #edfaef;
+	color: #007017;
+}
+
+.wcusage-migration-status.is-running,
+.wcusage-migration-status.is-undoing {
+	background: #eef3ff;
+	color: #2271b1;
+}
+
+.wcusage-migration-status.is-failed {
+	background: #fcf0f1;
+	color: #d63638;
+}
+
+@media screen and (max-width: 782px) {
+	.wcusage-migration-source:hover {
+		transform: none;
+	}
+
+	.wcusage-migration-options {
+		padding: 16px;
+	}
+
+	.wcusage-migration-section-title {
+		padding: 12px 16px;
+	}
+
+	#wcusage-migration-history .wcusage-migration-card {
+		overflow-x: auto;
+	}
+
+	.wcusage-migration-backup {
+		display: flex;
+	}
+}

@@ -1,0 +1,260 @@
+/*
+ * Settings page: each <hr> divided section inside a settings tab is shown as its own
+ * card. The cards are built by js/admin-settings-sections.js; without it the page keeps
+ * its plain dividers.
+ */
+
+.wcusage-settings-form {
+    --wcu-card-border: #e4e7ec;
+    --wcu-card-border-soft: #eef0f3;
+    --wcu-card-head-bg: #f9fafb;
+    --wcu-card-text: #101828;
+    --wcu-card-muted: #475467;
+    --wcu-card-radius: 12px;
+    --wcu-card-pad-x: 24px;
+    --wcu-card-pad-y: 22px;
+    --wcu-card-gap: 20px;
+    --wcu-card-icon: #1c7a38;
+    --wcu-card-icon-bg: #edf8f0;
+    --wcu-card-icon-border: #d2eedb;
+}
+
+/* -------------------------------------------------------------------------
+ * Tab title and description above the cards.
+ * ---------------------------------------------------------------------- */
+
+.wcusage-settings-form .wcu-settings-cards > h1 {
+    margin-bottom: 8px;
+}
+
+.wcusage-settings-form .wcu-settings-header-text {
+    margin: 0 0 8px;
+    color: var(--wcu-card-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.wcusage-settings-form .wcu-settings-header-end {
+    margin-bottom: 24px !important;
+}
+
+/* Description text that came after a divider; pulled up to sit under the title. */
+.wcusage-settings-form .wcu-settings-intro {
+    margin: -16px 0 24px;
+    color: var(--wcu-card-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.wcusage-settings-form .wcu-settings-intro p {
+    margin: 0 0 6px;
+    font-size: inherit;
+}
+
+.wcusage-settings-form .wcu-settings-intro > :last-child {
+    margin-bottom: 0;
+}
+
+/* The dividers and line breaks the cards replace. */
+.wcusage-settings-form .wcu-settings-card-break {
+    display: none !important;
+}
+
+/* Spans holding several sections (PRO-only and show/hide wrappers) need to be blocks. */
+.wcusage-settings-form span.wcu-settings-card-group {
+    display: block;
+}
+
+.wcusage-settings-form span.wcu-settings-card-group[style*="display: none"],
+.wcusage-settings-form span.wcu-settings-card-group[style*="display:none"] {
+    display: none;
+}
+
+/* -------------------------------------------------------------------------
+ * Card.
+ * ---------------------------------------------------------------------- */
+
+.wcusage-settings-form .wcu-settings-card {
+    position: relative;
+    margin: 0 0 var(--wcu-card-gap);
+    padding: var(--wcu-card-pad-y) var(--wcu-card-pad-x);
+    background: #ffffff;
+    border: 1px solid var(--wcu-card-border);
+    border-radius: var(--wcu-card-radius);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+    box-sizing: border-box;
+}
+
+.wcusage-settings-form .wcu-settings-card::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Everything in it is switched off. */
+.wcusage-settings-form .wcu-settings-card.wcu-settings-card-empty {
+    display: none;
+}
+
+/* Even padding: line breaks and dividers at the top and bottom of a card are hidden,
+   and the outer margins of its first and last content cleared. Inside a card, a run of
+   line breaks that only adds empty lines keeps one (collapseBreaks in the script). */
+.wcusage-settings-form .wcu-settings-card .wcu-card-edge,
+.wcusage-settings-form .wcu-settings-card br.wcu-card-extra-br {
+    display: none !important;
+}
+
+.wcusage-settings-form .wcu-settings-card .wcu-card-first {
+    margin-top: 0 !important;
+}
+
+.wcusage-settings-form .wcu-settings-card .wcu-card-last {
+    margin-bottom: 0 !important;
+}
+
+.wcusage-settings-form .wcu-settings-card .wcu-card-void {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Floated per-role commission tiles: the clearing element sits below the bottom
+   margin of the tallest tile in the last row. */
+.wcusage-settings-form .wcu-settings-card:has(.settings-user-role-fields.wcu-card-last) {
+    padding-bottom: calc(var(--wcu-card-pad-y) - 15px);
+}
+
+/* Between two parts of one section. */
+.wcusage-settings-form .wcu-settings-card hr.wcu-settings-card-divider {
+    height: 0;
+    margin: 22px 0 !important;
+    border: 0;
+    border-top: 1px solid var(--wcu-card-border-soft);
+}
+
+/* Dividers left inside a card (in tables, lists and the like). */
+.wcusage-settings-form .wcu-settings-card hr:not(.wcu-settings-card-break):not(.wcu-settings-card-divider) {
+    height: 0;
+    margin: 22px 0;
+    border: 0;
+    border-top: 1px solid var(--wcu-card-border-soft);
+}
+
+/* -------------------------------------------------------------------------
+ * Card title: the section's <h3> becomes a header strip, its icon a tile in
+ * the plugin's green.
+ * ---------------------------------------------------------------------- */
+
+.wcusage-settings-form .wcu-settings-card h3.wcu-settings-card-title {
+    margin: calc(var(--wcu-card-pad-y) * -1) calc(var(--wcu-card-pad-x) * -1) 22px !important;
+    padding: 14px var(--wcu-card-pad-x);
+    background: linear-gradient(180deg, #fcfcfd 0%, var(--wcu-card-head-bg) 100%);
+    border-bottom: 1px solid var(--wcu-card-border-soft);
+    border-radius: calc(var(--wcu-card-radius) - 1px) calc(var(--wcu-card-radius) - 1px) 0 0;
+    color: var(--wcu-card-text);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+}
+
+/* Section headings further down a card (not its title). */
+.wcusage-settings-form .wcu-settings-card h3.wcu-settings-card-heading:not(.wcu-settings-card-title) {
+    margin: 28px 0 16px !important;
+    padding: 0;
+    color: var(--wcu-card-text);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+}
+
+.wcusage-settings-form .wcu-settings-card h3.wcu-settings-card-heading > .dashicons:first-child {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    margin: -2px 12px 0 0 !important;
+    padding: 0;
+    vertical-align: middle;
+    background: var(--wcu-card-icon-bg);
+    border: 1px solid var(--wcu-card-icon-border);
+    border-radius: 10px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 1px 2px rgba(16, 24, 40, .04);
+    color: var(--wcu-card-icon);
+    font-size: 17px;
+    line-height: 1;
+    box-sizing: border-box;
+}
+
+.wcusage-settings-form .wcu-settings-card h3.wcu-settings-card-heading > .dashicons:first-child::before {
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+    line-height: 1;
+}
+
+.wcusage-settings-form .wcu-settings-card h3.wcu-settings-card-heading:not(.wcu-settings-card-title) > .dashicons:first-child {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px !important;
+    border-radius: 9px;
+}
+
+.wcusage-settings-form .wcu-settings-card h3.wcu-settings-card-heading:not(.wcu-settings-card-title) > .dashicons:first-child::before {
+    width: 15px;
+    height: 15px;
+    font-size: 15px;
+}
+
+/* -------------------------------------------------------------------------
+ * Narrow screens: keep the cards inside the page. Settings inputs are a fixed
+ * 450px wide, which otherwise sizes the whole settings column beyond the screen.
+ * ---------------------------------------------------------------------- */
+
+.wcusage-settings-form table.form-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.wcusage-settings-form .wcu-settings-card input:not([type="checkbox"]):not([type="radio"]),
+.wcusage-settings-form .wcu-settings-card select,
+.wcusage-settings-form .wcu-settings-card textarea {
+    max-width: 100%;
+}
+
+.wcusage-settings-form .wcu-settings-card .wcu-mla-tier-grid > * {
+    min-width: 0;
+}
+
+.wcusage-settings-form .wcu-settings-card a {
+    overflow-wrap: anywhere;
+}
+
+@media screen and (max-width: 1200px) {
+    .wcu-admin-layout-container .wcu-admin-content {
+        align-self: stretch;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+}
+
+@media screen and (max-width: 782px) {
+    .wcusage-settings-form {
+        --wcu-card-pad-x: 16px;
+        --wcu-card-pad-y: 18px;
+    }
+
+    .wcusage-settings-form .wcu-settings-card .button {
+        max-width: 100%;
+        height: auto;
+        white-space: normal;
+    }
+}
+
+/* Some headings set an inline display: inline-block; keep them full width unless a
+   toggle has hidden them. */
+.wcusage-settings-form .wcu-settings-card h3.wcu-settings-card-title:not([style*="display: none"]):not([style*="display:none"]),
+.wcusage-settings-form .wcu-settings-card h3.wcu-settings-card-heading:not([style*="display: none"]):not([style*="display:none"]) {
+    display: block !important;
+}

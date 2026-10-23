@@ -21,8 +21,7 @@ function wcusage_field_cb_commission( $args )
   <hr>
 
   <!-- Enable commission calculation statistics -->
-  <?php wcusage_setting_toggle_option('wcusage_field_show_commission', 1, esc_html__( 'Enable Commission Calculations & Statistics', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'When enabled, commission will be calculated and displayed on the affiliate dashboard.', 'woo-coupon-usage' ); ?></i>
+  <?php wcusage_setting_toggle_option('wcusage_field_show_commission', 1, esc_html__( 'Enable Commission Calculations & Statistics', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, commission will be calculated and displayed on the affiliate dashboard.', 'woo-coupon-usage' )); ?>
 
   <br/><br/><hr/>
 
@@ -34,14 +33,12 @@ function wcusage_field_cb_commission( $args )
 
   <?php if($wcusage_field_affiliate_custom_message) { ?>
 	<br/>
-  <?php wcusage_setting_text_option('wcusage_field_affiliate_custom_message', '', esc_html__( 'Custom Text', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'Custom text shown affiliate dashboard for the "commission" amount. This will be overridden if you enter commission amounts on the coupon level.', 'woo-coupon-usage' ); ?></i>
-  <br/>
+  <?php wcusage_setting_text_option('wcusage_field_affiliate_custom_message', '', esc_html__( 'Custom Text', 'woo-coupon-usage' ), '0px', esc_html__( 'Custom text shown affiliate dashboard for the "commission" amount. This will be overridden if you enter commission amounts on the coupon level.', 'woo-coupon-usage' )); ?>
   <?php } ?>
 
   <br/>
 
-  <p class="setup-hide" style="font-size: 12px;"><?php echo esc_html__( 'Note: When updating these settings saved data will be refreshed for all dashboards automatically (first page load may take longer).', 'woo-coupon-usage' ); ?> <?php echo esc_html__( 'If you do not want past orders to be affected when commission stats are refreshed, you can enable this in the', 'woo-coupon-usage' ); ?>
+  <p class="setup-hide" style="font-size: 12px; max-width: none;"><?php echo esc_html__( 'Note: When updating these settings saved data will be refreshed for all dashboards automatically (first page load may take longer).', 'woo-coupon-usage' ); ?> <?php echo esc_html__( 'If you do not want past orders to be affected when commission stats are refreshed, you can enable this in the', 'woo-coupon-usage' ); ?>
     <a href="#" onclick="wcusage_go_to_settings('#tab-debug', '#wcusage_field_enable_never_update_commission_meta_p');"
     style="margin-top: 10px;"><?php echo esc_html__( 'debug settings tab', 'woo-coupon-usage' ); ?></a>.
   </p>
@@ -85,8 +82,7 @@ function wcusage_field_cb_commission( $args )
   <br/>
 
   <!-- Disable commission statistics for non-affiliate coupons. -->
-  <?php wcusage_setting_toggle_option('wcusage_field_commission_disable_non_affiliate', 0, esc_html__( 'Hide commission statistics for non-affiliate coupons.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'When enabled, commission statistics are disabled/hidden for coupons that are not assigned to an affiliate user.', 'woo-coupon-usage' ); ?></i>
+  <?php wcusage_setting_toggle_option('wcusage_field_commission_disable_non_affiliate', 0, esc_html__( 'Hide commission statistics for non-affiliate coupons.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, commission statistics are disabled/hidden for coupons that are not assigned to an affiliate user.', 'woo-coupon-usage' )); ?>
 
   <?php wcusage_setting_toggle('.wcusage_field_commission_disable_non_affiliate', '.wcu-field-section-non-affiliate'); // Show or Hide ?>
   <span class="wcu-field-section-non-affiliate">
@@ -95,8 +91,7 @@ function wcusage_field_cb_commission( $args )
 
     <br/><br/>
 
-    <?php wcusage_setting_toggle_option('wcusage_field_commission_disable_non_affiliate_unpaid', 1, esc_html__( 'Stop "unpaid commission" from being earned for non-affiliate coupons.', 'woo-coupon-usage' ) . esc_html($probrackets), '40px'); ?>
-    <i style="margin-left: 40px;"><?php echo esc_html__( 'When enabled, the unpaid commission will also not be added to non-affiliate coupons.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_commission_disable_non_affiliate_unpaid', 1, esc_html__( 'Stop "unpaid commission" from being earned for non-affiliate coupons.', 'woo-coupon-usage' ) . esc_html($probrackets), '40px', esc_html__( 'When enabled, the unpaid commission will also not be added to non-affiliate coupons.', 'woo-coupon-usage' )); ?>
 
     </span>
 
@@ -113,50 +108,39 @@ function wcusage_field_cb_commission( $args )
     wcusage_setting_option_set_default($options, 'wcusage_field_priority_commission', 'product');
     ?>
 		<input type="hidden" value="0" id="wcusage_field_priority_commission" data-custom="custom" name="wcusage_options[wcusage_field_priority_commission]" >
-		<strong><label for="scales"><?php echo esc_html__( 'Which custom commission values should be applied as priority?', 'woo-coupon-usage' ); ?></label></strong><br/>
+		<strong><label for="scales"><?php echo esc_html__( 'Which custom commission values should be applied as priority?', 'woo-coupon-usage' ); ?></label></strong><?php echo wcusage_setting_info_icon( esc_html__( 'This setting is required in case you have set custom commission amounts on both a coupon level, and product level.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'It will set one as priority, so if both are set, the commission settings for your chosen priority will be used.', 'woo-coupon-usage' ) ); ?><br/>
 		<select name="wcusage_options[wcusage_field_priority_commission]" id="wcusage_field_priority_commission">
 			<option value="product" <?php if($wcusage_field_priority_commission == "product") { ?>selected<?php } ?>><?php echo esc_html__( 'Product Commission Settings', 'woo-coupon-usage' ); ?></option>
 			<option value="coupon" <?php if($wcusage_field_priority_commission == "coupon") { ?>selected<?php } ?>><?php echo esc_html__( 'Coupon Commission Settings', 'woo-coupon-usage' ); ?></option>
-		</select>
-    <br/><i><?php echo esc_html__( 'This setting is required in case you have set custom commission amounts on both a coupon level, and product level.', 'woo-coupon-usage' ); ?></i>
-    <br/><i><?php echo esc_html__( 'It will set one as priority, so if both are set, the commission settings for your chosen priority will be used.', 'woo-coupon-usage' ); ?></i><br/>
+		</select><br/>
     
     <br/><hr/>
 
     <h3 id="wcu-setting-header-lifetime">
-      <span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Lifetime Commission', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?>:
+      <span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Lifetime Commission', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?>:<?php echo wcusage_setting_info_icon( esc_html__( 'With lifetime commission enabled, once someone uses the affiliates coupon code, that customer will be linked to the affiliate forever, and ALL future purchases from that customer and will count as a referral, even if they dont re-use the coupon code.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Even if the "coupon code" isnt used, the commission and sales will still be tracked on the coupons affiliate dashboard. All future orders by that customer, even with different coupon codes, will only apply to the original coupon affiliate.', 'woo-coupon-usage' ) ); ?>
     </h3>
 
-    <i><?php echo esc_html__( 'With lifetime commission enabled, once someone uses the affiliates coupon code, that customer will be linked to the affiliate forever, and ALL future purchases from that customer and will count as a referral, even if they dont re-use the coupon code.', 'woo-coupon-usage' ); ?></i>
-    <i><?php echo esc_html__( 'Even if the "coupon code" isnt used, the commission and sales will still be tracked on the coupons affiliate dashboard. All future orders by that customer, even with different coupon codes, will only apply to the original coupon affiliate.', 'woo-coupon-usage' ); ?></i>
-
-    <br/><br/>
 
     <!-- Enable "lifetime commission" features. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_lifetime', 0, esc_html__( 'Enable "lifetime commission" features.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'This option will allow you to enable "lifetime commission" either globally, or on a per-coupon basis.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_lifetime', 0, esc_html__( 'Enable "lifetime commission" features.', 'woo-coupon-usage' ), '0px', esc_html__( 'This option will allow you to enable "lifetime commission" either globally, or on a per-coupon basis.', 'woo-coupon-usage' )); ?>
 
-    <br/>
 
     <?php wcusage_setting_toggle('.wcusage_field_lifetime', '.wcu-field-section-lifetime-features'); // Show or Hide ?>
     <span class="wcu-field-section-lifetime-features">
     <br/>
 
     <!-- Enable "lifetime commission" functionality globally for all affiliate coupons. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_all', 0, esc_html__( 'Enable "lifetime commission" functionality globally for all affiliate coupons.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'Enabling this option will enable lifetime commission for ALL your affiliates & coupons. You can alternatively enable lifetime commission on a per-coupon basis, in the individual coupon settings.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_all', 0, esc_html__( 'Enable "lifetime commission" functionality globally for all affiliate coupons.', 'woo-coupon-usage' ), '0px', esc_html__( 'Enabling this option will enable lifetime commission for ALL your affiliates & coupons. You can alternatively enable lifetime commission on a per-coupon basis, in the individual coupon settings.', 'woo-coupon-usage' )); ?>
 
-    <br/><br/>
+    <br/>
 
     <!-- Only trigger lifetime referral if coupon is assigned to user. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_require_user', 1, esc_html__( 'Only trigger lifetime referral if coupon is assigned to user.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'Enable this to only link customer to coupon as "lifetime referral" if the coupon has a user affiliate assigned to it.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_require_user', 1, esc_html__( 'Only trigger lifetime referral if coupon is assigned to user.', 'woo-coupon-usage' ), '0px', esc_html__( 'Enable this to only link customer to coupon as "lifetime referral" if the coupon has a user affiliate assigned to it.', 'woo-coupon-usage' )); ?>
 
-    <br/><br/>
+    <br/>
 
     <!-- Allow applied affiliate coupons to override lifetime commission. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_coupon_priority', 0, esc_html__( 'Allow applied affiliate coupons to override lifetime commission for that order.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'When enabled, if a customer already has a lifetime affiliate but uses another affiliate coupon at checkout, the applied coupon will receive commission for that specific order. The saved lifetime customer link will remain unchanged for future orders unless the option below is enabled.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_coupon_priority', 0, esc_html__( 'Allow applied affiliate coupons to override lifetime commission for that order.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, if a customer already has a lifetime affiliate but uses another affiliate coupon at checkout, the applied coupon will receive commission for that specific order. The saved lifetime customer link will remain unchanged for future orders unless the option below is enabled.', 'woo-coupon-usage' )); ?>
 
     <?php wcusage_setting_toggle('.wcusage_field_lifetime_coupon_priority', '.wcu-field-section-lifetime-coupon-priority'); // Show or Hide ?>
     <span class="wcu-field-section-lifetime-coupon-priority">
@@ -164,30 +148,24 @@ function wcusage_field_cb_commission( $args )
     <br/><br/>
 
     <!-- Replace lifetime referrer when an applied affiliate coupon overrides lifetime commission. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_coupon_priority_replace', 0, esc_html__( 'Also replace the customer lifetime referrer with the new affiliate coupon.', 'woo-coupon-usage' ), '40px'); ?>
-    <i><?php echo esc_html__( 'When enabled, the customer will be linked to the new affiliate coupon for future lifetime commission orders too.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_coupon_priority_replace', 0, esc_html__( 'Also replace the customer lifetime referrer with the new affiliate coupon.', 'woo-coupon-usage' ), '40px', esc_html__( 'When enabled, the customer will be linked to the new affiliate coupon for future lifetime commission orders too.', 'woo-coupon-usage' )); ?>
 
     </span>
 
     <br/><br/>
 
     <!-- Track user registrations as a lifetime referral. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_track_register', 0, esc_html__( 'Track user registrations as a lifetime referral.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'With this enabled, if someone follows a referral link and registers (creates an account), they will then be linked to that affiliate, even without initially placing an order.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_track_register', 0, esc_html__( 'Track user registrations as a lifetime referral.', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, if someone follows a referral link and registers (creates an account), they will then be linked to that affiliate, even without initially placing an order.', 'woo-coupon-usage' )); ?>
 
-    <br/><br/>
+    <br/>
 
     <!-- Lifetime Commission Expiry (Days) -->
-    <?php wcusage_setting_number_option('wcusage_field_lifetime_expire', '0', esc_html__( 'Lifetime Commission Expiry (Days)', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'Optional: How many days after being assigned as a "lifetime" referral should it expire, and the customer be unlinked from the customer.', 'woo-coupon-usage' ); ?></i><br/>
-    <i><?php echo esc_html__( 'Set to "0" for permanent lifetime commission with no expiry time.', 'woo-coupon-usage' ); ?> <?php echo esc_html__( 'Can also be set on a per-coupon basis.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_number_option('wcusage_field_lifetime_expire', '0', esc_html__( 'Lifetime Commission Expiry (Days)', 'woo-coupon-usage' ), '0px', 1, esc_html__( 'Optional: How many days after being assigned as a "lifetime" referral should it expire, and the customer be unlinked from the customer.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Set to "0" for permanent lifetime commission with no expiry time.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Can also be set on a per-coupon basis.', 'woo-coupon-usage' )); ?>
 
     <br/>
 
     <!-- Don't extend the expiry date when the customer re-uses the coupon. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_expire_fixed', 0, esc_html__( 'Don\'t extend the expiry date when the customer uses the coupon again.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'By default, the expiry date is pushed back by the full expiry period each time the customer places another order with the coupon. Enable this to keep a fixed window instead, counted from when the customer was first linked (for example, exactly 365 days from their first order). Once it expires, the customer can be linked again by using an affiliate coupon.', 'woo-coupon-usage' ); ?></i><br/>
-    <i><?php echo esc_html__( 'An expiry date set by hand, on the affiliate\'s "Lifetime" tab or the customer\'s user profile, is always kept as it is.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_toggle_option('wcusage_field_lifetime_expire_fixed', 0, esc_html__( 'Don\'t extend the expiry date when the customer uses the coupon again.', 'woo-coupon-usage' ), '0px', esc_html__( 'By default, the expiry date is pushed back by the full expiry period each time the customer places another order with the coupon. Enable this to keep a fixed window instead, counted from when the customer was first linked (for example, exactly 365 days from their first order). Once it expires, the customer can be linked again by using an affiliate coupon.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'An expiry date set by hand, on the affiliate\'s "Lifetime" tab or the customer\'s user profile, is always kept as it is.', 'woo-coupon-usage' )); ?>
 
     </span>
 
@@ -202,10 +180,8 @@ function wcusage_field_cb_commission( $args )
     <br/>
 
     <!-- Enable "New Customer Bonus" commission. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_new_customer_bonus_enable', 0, esc_html__( 'Enable "New Customer Bonus" commission.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'When enabled, the first order for each customer will be marked and will receive the bonus commission set below.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_new_customer_bonus_enable', 0, esc_html__( 'Enable "New Customer Bonus" commission.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, the first order for each customer will be marked and will receive the bonus commission set below.', 'woo-coupon-usage' )); ?>
 
-    <br/>
 
     <?php wcusage_setting_toggle('.wcusage_field_new_customer_bonus_enable', '.wcu-field-section-new-customer-bonus'); // Show or Hide ?>
     <span class="wcu-field-section-new-customer-bonus">
@@ -225,9 +201,7 @@ function wcusage_field_cb_commission( $args )
     <br/>
 
     <!-- New Customer Bonus Commission % -->
-    <?php wcusage_setting_number_option('wcusage_field_new_customer_bonus_amount', '100', esc_html__( 'Bonus Commission (%)', 'woo-coupon-usage' ), '0px', '0.01'); ?>
-    <i style="margin-left: 0px;"><?php echo esc_html__( 'This increases the commission earned on the customer\'s first order by the percentage entered.', 'woo-coupon-usage' ); ?></i><br/>
-    <i style="margin-left: 0px;"><?php echo esc_html__( 'For example, 100% doubles the commission, so a 10% base commission becomes 20% for the first order.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_number_option('wcusage_field_new_customer_bonus_amount', '100', esc_html__( 'Bonus Commission (%)', 'woo-coupon-usage' ), '0px', '0.01', esc_html__( 'This increases the commission earned on the customer\'s first order by the percentage entered.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'For example, 100% doubles the commission, so a 10% base commission becomes 20% for the first order.', 'woo-coupon-usage' ), '', '%'); ?>
 
     </span>
 
@@ -235,8 +209,7 @@ function wcusage_field_cb_commission( $args )
     <br/><hr/>
     <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;" id="wcu-setting-header-commission-user-role"></span> <?php echo esc_html__( 'Per User Role Commission', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?>:</h3>
 
-    <?php wcusage_setting_toggle_option('wcusage_field_affiliate_per_user', 0, esc_html__( 'Enable "Per User Role" Commission', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'Allows you to set custom commission rates per user role. This will replace the settings set above, if it is set.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_affiliate_per_user', 0, esc_html__( 'Enable "Per User Role" Commission', 'woo-coupon-usage' ), '0px', esc_html__( 'Allows you to set custom commission rates per user role. This will replace the settings set above, if it is set.', 'woo-coupon-usage' )); ?>
 
     <?php wcusage_setting_toggle('.wcusage_field_affiliate_per_user', '.wcu-field-section-per-user'); // Show or Hide ?>
     <span class="wcu-field-section-per-user">
@@ -305,14 +278,14 @@ if( !function_exists( 'wcusage_setting_section_commission_amounts' ) ) {
   <?php $textaffiliatecommission = esc_html__( 'Affiliate commission', 'woo-coupon-usage' ) . ": "; ?>
 
   <!-- Percentage Amount Of Total Order -->
-  <?php wcusage_setting_number_option('wcusage_field_affiliate', '0', esc_html__('Percentage Commission (% Of Total Order)', 'woo-coupon-usage'), '0px', '0.01'); ?>
+  <?php wcusage_setting_number_option('wcusage_field_affiliate', '0', esc_html__('Percentage Commission (% Of Total Order)', 'woo-coupon-usage'), '0px', '0.01', '', '', '%'); ?>
 
   <br/>
 
   <!-- Fixed Amount Per Order -->
   <?php 
   $fixed_order_label = wp_kses_post(sprintf(__('Fixed Commission (%s - Amount Per Order)', 'woo-coupon-usage'), wcusage_get_currency_symbol()));
-  wcusage_setting_number_option('wcusage_field_affiliate_fixed_order', '0', $fixed_order_label, '0px', '0.01'); 
+  wcusage_setting_number_option('wcusage_field_affiliate_fixed_order', '0', $fixed_order_label, '0px', '0.01', '', wcusage_get_currency_symbol()); 
   ?>
 
   <br/>
@@ -320,7 +293,7 @@ if( !function_exists( 'wcusage_setting_section_commission_amounts' ) ) {
   <!-- Fixed Amount Per Product -->
   <?php 
   $fixed_product_label = wp_kses_post(sprintf(__('Fixed Commission (%s - Amount Per Product)', 'woo-coupon-usage'), wcusage_get_currency_symbol()));
-  wcusage_setting_number_option('wcusage_field_affiliate_fixed_product', '0', $fixed_product_label, '0px', '0.01'); 
+  wcusage_setting_number_option('wcusage_field_affiliate_fixed_product', '0', $fixed_product_label, '0px', '0.01', '', wcusage_get_currency_symbol()); 
   ?>
 
   <?php
@@ -344,16 +317,13 @@ if( !function_exists( 'wcusage_setting_section_calculations' ) ) {
   <br/>
 
   <!-- Calculate commission BEFORE the discount is applied (at full price). -->
-  <?php wcusage_setting_toggle_option('wcusage_field_commission_before_discount', 0, esc_html__( 'Include the "coupon discount" in % commission calculations.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'When enabled, % commission will be calculated on the order subtotal (instead of total), before the coupon discount is deducted from it.', 'woo-coupon-usage' ); ?></i>
-
-  <br/><br/>
-
-  <!-- Calculate affiliate commission BEFORE the discount is applied (at full price). -->
-  <?php wcusage_setting_toggle_option('wcusage_field_commission_include_shipping', 0, esc_html__( 'Include "shipping costs" in % commission calculations & order totals.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'When enabled, % commission will be calculated based on the order subtotal/total including "shipping costs".', 'woo-coupon-usage' ); ?></i>
+  <?php wcusage_setting_toggle_option('wcusage_field_commission_before_discount', 0, esc_html__( 'Include the "coupon discount" in % commission calculations.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, % commission will be calculated on the order subtotal (instead of total), before the coupon discount is deducted from it.', 'woo-coupon-usage' )); ?>
 
   <br/>
+
+  <!-- Calculate affiliate commission BEFORE the discount is applied (at full price). -->
+  <?php wcusage_setting_toggle_option('wcusage_field_commission_include_shipping', 0, esc_html__( 'Include "shipping costs" in % commission calculations & order totals.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, % commission will be calculated based on the order subtotal/total including "shipping costs".', 'woo-coupon-usage' )); ?>
+
 
   <br/><p><span class="fa-solid fa-gear"></span> <strong><?php echo esc_html__( 'Advanced Calculation Settings', 'woo-coupon-usage' ); ?>:</strong> <button type="button" class="wcu-showhide-button" id="wcu_show_commission_calc_advanced"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
 
@@ -361,37 +331,29 @@ if( !function_exists( 'wcusage_setting_section_calculations' ) ) {
   <div id="wcu_commission_calc_advanced" style="display: none; padding-top: 10px;">
 
     <!-- Calculate commission BEFORE any custom discounts are applied. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_commission_before_discount_custom', 0, esc_html__( 'Include "custom discounts" in % commission calculations & order totals.', 'woo-coupon-usage' ), ''); ?>
-    <i><?php echo esc_html__( 'When enabled, % commission will be calculated before any custom discounts are deducted from the subtotal/total. It will also be added to the subtotal/total shown in statistics.', 'woo-coupon-usage' ); ?></i>
-    <br/><i><?php echo esc_html__( '(Custom discounts include negative fees, store credit, and discounts added by other plugins.)', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_commission_before_discount_custom', 0, esc_html__( 'Include "custom discounts" in % commission calculations & order totals.', 'woo-coupon-usage' ), '', esc_html__( 'When enabled, % commission will be calculated before any custom discounts are deducted from the subtotal/total. It will also be added to the subtotal/total shown in statistics.', 'woo-coupon-usage' ) . ' ' . esc_html__( '(Custom discounts include negative fees, store credit, and discounts added by other plugins.)', 'woo-coupon-usage' )); ?>
 
-    <br/><br/>
+    <br/>
 
     <!-- Deduct custom discounts / store credit at the order's blended commission rate. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_commission_blended_discount_rate', 1, esc_html__( 'Deduct custom discounts & store credit at each order\'s blended commission rate.', 'woo-coupon-usage' ), ''); ?>
-    <i><?php echo esc_html__( 'Recommended. When enabled, custom discounts and store credit reduce commission at the rate actually earned across the order\'s products (a blend of your per-product and coupon rates), rather than always at the coupon rate. This prevents over-deducting - and negative commission - when products use lower per-product commission rates.', 'woo-coupon-usage' ); ?></i>
-    <br/><i><?php echo esc_html__( 'Disable this to revert to the previous behaviour of always deducting these at the coupon/global commission rate.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_commission_blended_discount_rate', 1, esc_html__( 'Deduct custom discounts & store credit at each order\'s blended commission rate.', 'woo-coupon-usage' ), '', esc_html__( 'Recommended. When enabled, custom discounts and store credit reduce commission at the rate actually earned across the order\'s products (a blend of your per-product and coupon rates), rather than always at the coupon rate. This prevents over-deducting - and negative commission - when products use lower per-product commission rates.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Disable this to revert to the previous behaviour of always deducting these at the coupon/global commission rate.', 'woo-coupon-usage' )); ?>
 
-    <br/><br/>
+    <br/>
 
     <!-- Calculate affiliate commission BEFORE the discount is applied (at full price). -->
-    <?php wcusage_setting_toggle_option('wcusage_field_commission_include_fees', 0, esc_html__( 'Include "fees" in % commission calculations & order totals.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'When enabled, % commission will be calculated based on the order subtotal/total including "fees". It will also be added to the subtotal/total shown in statistics.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_commission_include_fees', 0, esc_html__( 'Include "fees" in % commission calculations & order totals.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, % commission will be calculated based on the order subtotal/total including "fees". It will also be added to the subtotal/total shown in statistics.', 'woo-coupon-usage' )); ?>
 
-    <br/><br/>
+    <br/>
 
     <!-- Withhold commission on products the coupon's usage restrictions excluded. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_commission_exclude_restricted_products', 0, esc_html__( 'Exclude products the coupon does not apply to from commission.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'When enabled, products excluded by the coupon\'s own "Usage restriction" settings will earn no commission - neither percentage nor fixed.', 'woo-coupon-usage' ); ?></i>
-    <br/><i><?php echo esc_html__( 'When disabled, commission is calculated on every product in the order, because the affiliate referred the sale regardless of which items the discount applied to.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_commission_exclude_restricted_products', 0, esc_html__( 'Exclude products the coupon does not apply to from commission.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, products excluded by the coupon\'s own "Usage restriction" settings will earn no commission - neither percentage nor fixed.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'When disabled, commission is calculated on every product in the order, because the affiliate referred the sale regardless of which items the discount applied to.', 'woo-coupon-usage' )); ?>
 
-    <br/><br/>
+    <br/>
 
     <!-- Max Commission -->
-    <?php wcusage_setting_text_option('wcusage_field_order_max_commission', '', esc_html__( 'Maximum commission per order:', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'This allows you to set the maximum commission amount that is calculated and can be earned per order referred by affiliates.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_text_option('wcusage_field_order_max_commission', '', esc_html__( 'Maximum commission per order:', 'woo-coupon-usage' ), '0px', esc_html__( 'This allows you to set the maximum commission amount that is calculated and can be earned per order referred by affiliates.', 'woo-coupon-usage' )); ?>
 
-    <br/><br/>
+    <br/>
 
     <!-- Commission rounding mode -->
     <?php wcusage_setting_select_option(
@@ -402,9 +364,7 @@ if( !function_exists( 'wcusage_setting_section_calculations' ) ) {
       array(
         'standard' => esc_html__( 'Round to nearest pence/cent (default)', 'woo-coupon-usage' ),
         'down'     => esc_html__( 'Round down to nearest pence/cent (floor/truncate)', 'woo-coupon-usage' ),
-      )
-    ); ?>
-    <i><?php echo esc_html__( 'Choose how commission amounts are rounded to currency decimals. "Round down" will always truncate extra decimals instead of rounding up.', 'woo-coupon-usage' ); ?></i>
+      ), esc_html__( 'Choose how commission amounts are rounded to currency decimals. "Round down" will always truncate extra decimals instead of rounding up.', 'woo-coupon-usage' )); ?>
 
   </div>
 
@@ -426,21 +386,18 @@ if( !function_exists( 'wcusage_setting_section_tax' ) ) {
   ?>
 
   <!-- Include tax in orders and commission calculations. -->
-  <?php wcusage_setting_toggle_option('wcusage_field_show_tax', 0, esc_html__( 'Include "taxes" in % commission calculations & order totals.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'If enabled, order tax will be added to the order subtotal/total/discount for orders in the statistics, and when calculating percentage (%) commission calculations.', 'woo-coupon-usage' ); ?></i><br/>
+  <?php wcusage_setting_toggle_option('wcusage_field_show_tax', 0, esc_html__( 'Include "taxes" in % commission calculations & order totals.', 'woo-coupon-usage' ), '0px', esc_html__( 'If enabled, order tax will be added to the order subtotal/total/discount for orders in the statistics, and when calculating percentage (%) commission calculations.', 'woo-coupon-usage' )); ?>
 
   <br/>
 
   <!-- Include tax on fixed commission amounts. -->
   <span class="wcu-field-section-tax-fixed">
-    <?php wcusage_setting_toggle_option('wcusage_field_show_tax_fixed', 0, esc_html__( 'Include "taxes" in "fixed" commission calculations.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'If enabled, order tax will be added to the fixed commission calculations.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_toggle_option('wcusage_field_show_tax_fixed', 0, esc_html__( 'Include "taxes" in "fixed" commission calculations.', 'woo-coupon-usage' ), '0px', esc_html__( 'If enabled, order tax will be added to the fixed commission calculations.', 'woo-coupon-usage' )); ?>
     <br/>
   </span>
 
   <!-- Deduct a custom percentage from order total before calculating commission -->
-  <?php wcusage_setting_number_option('wcusage_field_affiliate_deduct_percent', '0', esc_html__( 'Custom Tax Adjustment (%):', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'Deduct a custom percentage from the order subtotal, before calculating the commission (% commission).', 'woo-coupon-usage' ); ?></i>
+  <?php wcusage_setting_number_option('wcusage_field_affiliate_deduct_percent', '0', esc_html__( 'Custom Tax Adjustment (%):', 'woo-coupon-usage' ), '0px', 1, esc_html__( 'Deduct a custom percentage from the order subtotal, before calculating the commission (% commission).', 'woo-coupon-usage' ), '', '%'); ?>
 
   <script>
   jQuery( document ).ready(function() {
@@ -460,8 +417,7 @@ if( !function_exists( 'wcusage_setting_section_tax' ) ) {
   <br/><br/>
 
   <!-- Display adjusted total and subtotal. -->
-  <?php wcusage_setting_toggle_option('wcusage_field_affiliate_deduct_percent_show', 0, esc_html__( 'Display adjusted total and subtotal.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'When enabled, this will also show the adjusted "total" and "subtotal" (with deducted percentage) on affiliate dashboard. When disabled, only the "commission" stat will be affected by the adjustment.', 'woo-coupon-usage' ); ?></i>
+  <?php wcusage_setting_toggle_option('wcusage_field_affiliate_deduct_percent_show', 0, esc_html__( 'Display adjusted total and subtotal.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, this will also show the adjusted "total" and "subtotal" (with deducted percentage) on affiliate dashboard. When disabled, only the "commission" stat will be affected by the adjustment.', 'woo-coupon-usage' )); ?>
   </span>
 
   <br/>

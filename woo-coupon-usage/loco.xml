@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Loco Translate bundle config. Without it Loco treats the plugin as
+  unconfigured and lists every PO/MO file it finds in the folder, including
+  Freemius's own translations and (on dev sites) the test fixtures in tests/.
+  Names are left out so Loco uses the plugin header name (free or PRO).
+-->
+<bundle>
+  <domain name="woo-coupon-usage">
+    <project slug="woo-coupon-usage">
+      <target>
+        <directory>languages</directory>
+      </target>
+      <template>
+        <file>languages/woo-coupon-usage.pot</file>
+      </template>
+    </project>
+  </domain>
+  <exclude>
+    <directory>tests</directory>
+    <directory>freemius</directory>
+  </exclude>
+</bundle>

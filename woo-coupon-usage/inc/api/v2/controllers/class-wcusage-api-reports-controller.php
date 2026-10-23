@@ -70,7 +70,7 @@ if ( !class_exists( 'WCUsage_API_Reports_Controller' ) ) {
             // All assigned affiliate coupons.
             $coupon_rows = $wpdb->get_results( 
                 // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-                "SELECT pm.post_id, CAST(pm.meta_value AS UNSIGNED) AS uid\n\t\t\t\tFROM {$wpdb->postmeta} pm\n\t\t\t\tINNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id\n\t\t\t\tWHERE pm.meta_key = 'wcu_select_coupon_user'\n\t\t\t\tAND pm.meta_value REGEXP '^[0-9]+\$' AND pm.meta_value != '0'\n\t\t\t\tAND p.post_type = 'shop_coupon' AND p.post_status = 'publish'"
+                "SELECT pm.post_id, CAST(pm.meta_value AS UNSIGNED) AS uid\r\n\t\t\t\tFROM {$wpdb->postmeta} pm\r\n\t\t\t\tINNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id\r\n\t\t\t\tWHERE pm.meta_key = 'wcu_select_coupon_user'\r\n\t\t\t\tAND pm.meta_value REGEXP '^[0-9]+\$' AND pm.meta_value != '0'\r\n\t\t\t\tAND p.post_type = 'shop_coupon' AND p.post_status = 'publish'"
              );
             $coupon_ids = array_map( 'intval', wp_list_pluck( (array) $coupon_rows, 'post_id' ) );
             $user_ids = array_unique( array_map( 'intval', wp_list_pluck( (array) $coupon_rows, 'uid' ) ) );

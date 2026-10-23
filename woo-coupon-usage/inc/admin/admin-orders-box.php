@@ -577,7 +577,27 @@ function wcusage_custom_box_html_content(
     // ***** Multi-level commission *****
     if ( wcu_fs()->can_use_premium_code() ) {
         $wcusage_field_mla_enable = wcusage_get_setting_value( 'wcusage_field_mla_enable', '0' );
-        if ( $wcusage_field_mla_enable && !wcusage_coupon_disable_commission( $coupon_id ) ) {
+        $mla_granted_entries = ( function_exists( 'wcusage_mla_get_order_granted_entries' ) ? wcusage_mla_get_order_granted_entries( $order_id, $coupon_code ) : array() );
+        if ( $wcusage_field_mla_enable && !empty( $mla_granted_entries ) ) {
+            // What the parents were actually granted, which can differ from the chain and
+            // rates as they are now.
+            $mla_rows = '';
+            foreach ( $mla_granted_entries as $entry ) {
+                $parent_user_id = ( isset( $entry['parent_id'] ) ? (int) $entry['parent_id'] : 0 );
+                $parent_user_info = ( $parent_user_id ? get_user_by( 'ID', $parent_user_id ) : false );
+                $parent_user_name = ( $parent_user_info ? $parent_user_info->user_login : '#' . $parent_user_id );
+                $mla_rows .= wcusage_order_box_row( sprintf( 
+                    /* translators: %s: multi-level tier number */
+                    __( 'Tier %s', 'woo-coupon-usage' ),
+                    ( isset( $entry['tier'] ) ? $entry['tier'] : '' )
+                 ) . ' - ' . $parent_user_name, '<a href="' . esc_url( admin_url( 'admin.php?page=wcusage_view_affiliate&user_id=' . absint( $parent_user_id ) ) ) . '" target="_blank">' . wp_kses_post( wcusage_format_price( ( isset( $entry['commission'] ) ? (float) $entry['commission'] : 0 ) ) ) . '</a>' );
+            }
+            echo '<div class="wcusage-orderbox-sub">';
+            echo '<span class="wcusage-orderbox-sub-title">' . esc_html__( 'Multi-level commission', 'woo-coupon-usage' ) . '</span>';
+            echo '<div class="wcusage-orderbox-rows">' . $mla_rows . '</div>';
+            // Escaped as each row is built.
+            echo '</div>';
+        } elseif ( $wcusage_field_mla_enable && !wcusage_coupon_disable_commission( $coupon_id ) ) {
             $get_parents = get_user_meta( $getinfo['theuserid'], 'wcu_ml_affiliate_parents', true );
             if ( !empty( $get_parents ) && is_array( $get_parents ) ) {
                 // Try to read stored MLA commission from order meta (persisted at order time)
@@ -587,6 +607,11 @@ function wcusage_custom_box_html_content(
                 $needs_mla_meta_save = false;
                 $mla_rows = '';
                 foreach ( $get_parents as $key => $parent_id ) {
+                    // A tier saved for the parent who held it when the order was worked out is
+                    // shown as theirs - the chain may have changed since.
+                    if ( is_array( $stored_mla ) && !empty( $stored_mla[$key]['parent_id'] ) ) {
+                        $parent_id = (int) $stored_mla[$key]['parent_id'];
+                    }
                     $parent_user_info = get_user_by( 'ID', $parent_id );
                     $parent_user_name = ( $parent_user_info ? $parent_user_info->user_login : '#' . $parent_id );
                     $parent_user_id = ( $parent_user_info ? $parent_user_info->ID : $parent_id );
@@ -1318,8 +1343,17 @@ if ( !function_exists( 'wcusage_get_order_commission_breakdown' ) ) {
         }
         // Only worth naming the cap when it actually bit.
         $max_commission = wcusage_get_setting_value( 'wcusage_field_order_max_commission', '' );
-        if ( $max_commission && $percent_part + $fixed_order_part + $fixed_product_part > (float) $max_commission ) {
+        $parts_total = $percent_part + $fixed_order_part + $fixed_product_part;
+        if ( $max_commission && $parts_total > (float) $max_commission ) {
             $totals .= wcusage_commission_breakdown_row( __( 'Capped at maximum', 'woo-coupon-usage' ), wcusage_format_price( $max_commission ), 'is-negative' );
+            $parts_total = (float) $max_commission;
+        }
+        // Whatever the commission filters changed on top of the parts - such as the MLA
+        // parents' share taken out of it - so the rows still add up to the total. Not for
+        // a cancelled or failed order, whose total is 0 for that reason alone.
+        $adjustment = round( (float) $total - $parts_total, 2 );
+        if ( $parts_total && abs( $adjustment ) > 0.01 && !in_array( $order->get_status(), array('refunded', 'cancelled', 'failed'), true ) ) {
+            $totals .= wcusage_commission_breakdown_row( __( 'Adjustments', 'woo-coupon-usage' ), wcusage_format_price( $adjustment ), ( $adjustment < 0 ? 'is-negative' : '' ) );
         }
         // What the panel has added up is the CALCULATED commission. Once an amount has
         // been granted to the affiliate the metabox shows that granted figure instead,

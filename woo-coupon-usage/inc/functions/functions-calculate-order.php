@@ -528,12 +528,15 @@ if ( !function_exists( 'wcusage_get_order_saved_commission' ) ) {
                 $couponuser = ( isset( $coupon_info[1] ) ? $coupon_info[1] : 0 );
                 $couponid = ( isset( $coupon_info[2] ) ? $coupon_info[2] : 0 );
             }
+            // "saved": the order's whole commission, rebuilt from its saved parts. See the
+            // "total" call in wcusage_calculate_order_data() for why the figure is named.
             $commission = apply_filters(
                 'wcusage_calculate_edit_commission',
                 $commission,
                 $order_id,
                 $couponid,
-                $couponuser
+                $couponuser,
+                'saved'
             );
         }
         return (float) wcusage_round_commission_amount( $commission, 2 );
@@ -717,6 +720,25 @@ if ( !function_exists( 'wcusage_get_order_totals' ) ) {
  * @return array
  *
  */
+/**
+ * Drop an order's figures from wcusage_calculate_order_data()'s cache.
+ *
+ * That cache lasts for the rest of the request, so code that changes what an
+ * order's commission is mid-request - the migration tool crediting it to an
+ * affiliate, for one - calls this, or a later calculation in the same request
+ * would hand back the figures from before the change.
+ *
+ * @param int $order_id
+ */
+if ( !function_exists( 'wcusage_forget_order_calculation' ) ) {
+    function wcusage_forget_order_calculation(  $order_id  ) {
+        $order_id = absint( $order_id );
+        if ( $order_id ) {
+            $GLOBALS['wcusage_forget_order_calculations'][$order_id] = true;
+        }
+    }
+
+}
 if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
     function wcusage_calculate_order_data(
         $orderid,
@@ -733,6 +755,18 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
         }
         // Use static cache for this request - no database writes
         static $calculation_cache = array();
+        // Orders whose commission changed since they were cached (see
+        // wcusage_forget_order_calculation()) are worked out again.
+        if ( !empty( $GLOBALS['wcusage_forget_order_calculations'] ) ) {
+            foreach ( array_keys( $GLOBALS['wcusage_forget_order_calculations'] ) as $forget_id ) {
+                foreach ( array_keys( $calculation_cache ) as $cached_key ) {
+                    if ( 0 === strpos( (string) $cached_key, $forget_id . '_' ) ) {
+                        unset($calculation_cache[$cached_key]);
+                    }
+                }
+            }
+            $GLOBALS['wcusage_forget_order_calculations'] = array();
+        }
         if ( !$force_update ) {
             $cache_key = $orderid . '_' . md5( $coupon_code . $refresh . $use_saved );
             if ( isset( $calculation_cache[$cache_key] ) ) {
@@ -976,13 +1010,26 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                     }
                 }
                 // Filter to edit all_commission
-                if ( $all_commission ) {
+                //
+                // The percentage part was already filtered on its own in
+                // wcusage_get_order_calculate_data() ("percentage"), and is part of this total
+                // ("total"), so the figure is named for callbacks that must only act once per
+                // order. The order's totals are passed for the ones that need them - asking
+                // this function for them from inside the filter would run it again.
+                // An order whose commission is set by other means (an amount imported from
+                // another affiliate plugin) is passed through even when none is worked out.
+                if ( $all_commission || apply_filters( 'wcusage_filter_zero_order_commission', false, $orderid ) ) {
                     $all_commission = apply_filters(
                         'wcusage_calculate_edit_commission',
                         $all_commission,
                         $orderid,
                         $couponid,
-                        $couponuser
+                        $couponuser,
+                        'total',
+                        array(
+                            'totalorders'    => $totalorders,
+                            'totaldiscounts' => $totaldiscounts,
+                        )
                     );
                 }
                 // Filter to edit allstats
@@ -1811,7 +1858,8 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                         $totalcommission,
                         $orderid,
                         $couponid,
-                        $couponuser
+                        $couponuser,
+                        'percentage'
                     );
                 }
                 // Floor negative commission at 0 BEFORE writing to meta, so large custom discounts /

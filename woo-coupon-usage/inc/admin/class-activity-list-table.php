@@ -128,6 +128,7 @@ class wcusage_activity_List_Table extends WP_List_Table {
             'reward_earned_role_assigned'               => __( 'Reward Role Assigned', 'woo-coupon-usage' ),
             'api_key_created'                           => __( 'API Key Created', 'woo-coupon-usage' ),
             'api_key_revoked'                           => __( 'API Key Revoked', 'woo-coupon-usage' ),
+            'migration_completed'                       => __( 'Migration Completed', 'woo-coupon-usage' ),
         );
     }
 

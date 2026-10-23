@@ -34,12 +34,24 @@ function wcusage_tools_page_sections() {
             'icon'  => 'fa-solid fa-wand-magic-sparkles',
             'url'   => admin_url( 'admin.php?page=wcusage_setup' ),
         ),
-        array(
-            'title' => __( 'Instructions & Plugin Details', 'woo-coupon-usage' ),
-            'desc'  => __( 'A walkthrough of how the plugin fits together, plus a reference for every shortcode it provides.', 'woo-coupon-usage' ),
-            'icon'  => 'fa-solid fa-circle-question',
-            'url'   => admin_url( 'admin.php?page=wcusage_help' ),
-        ),
+    );
+
+    // Takes the settings capability (it rewrites affiliates, balances and
+    // settings), so it is only offered to users who can open it.
+    if ( current_user_can( 'manage_options' ) && function_exists( 'wcusage_migration_page' ) ) {
+        $setup[] = array(
+            'title' => __( 'Migrate from Another Plugin', 'woo-coupon-usage' ),
+            'desc'  => __( 'Import affiliates, coupons, referral history, balances and payouts from AffiliateWP, SliceWP, YITH and other affiliate plugins.', 'woo-coupon-usage' ),
+            'icon'  => 'fa-solid fa-right-left',
+            'url'   => admin_url( 'admin.php?page=wcusage_migration' ),
+        );
+    }
+
+    $setup[] = array(
+        'title' => __( 'Instructions & Plugin Details', 'woo-coupon-usage' ),
+        'desc'  => __( 'A walkthrough of how the plugin fits together, plus a reference for every shortcode it provides.', 'woo-coupon-usage' ),
+        'icon'  => 'fa-solid fa-circle-question',
+        'url'   => admin_url( 'admin.php?page=wcusage_help' ),
     );
 
     // Bulk Editing.

@@ -162,6 +162,9 @@ function wcusage_activity_message($event, $event_id = "", $info = "") {
     case 'registration':
       $event_message = "New affiliate registration (".esc_html($event_id)."):" . " " . wp_kses_post($info);
       break;
+    case 'migration_completed':
+      $event_message = esc_html__( 'Migration completed from', 'woo-coupon-usage' ) . " " . esc_html($info) . " <a href='" . esc_url(admin_url('admin.php?page=wcusage_migration')) . "'>" . esc_html__( 'View', 'woo-coupon-usage' ) . "</a>";
+      break;
     case 'registration_accept':
       $event_message = "Affiliate registration accepted:" . " " . wp_kses_post($info);
       break;

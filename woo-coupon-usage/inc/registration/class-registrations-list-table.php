@@ -162,8 +162,14 @@ class wcusage_registrations_List_Table extends WP_List_Table {
 
   			case 'status':
   				$status = $item['status'];
-          $titlehover = 'style="border-bottom: 1px dotted #000;" title="'. date("M jS, Y (g:ia)", strtotime($item['dateaccepted'])).'"';
   				if($status == "accepted") {
+            // dateaccepted is NULL (or a zero date on older rows) until a registration
+            // is accepted, so only read it here and skip the hover when it isn't set.
+            $titlehover = '';
+            $dateaccepted = !empty($item['dateaccepted']) ? strtotime($item['dateaccepted']) : false;
+            if($dateaccepted && $dateaccepted > 0) {
+              $titlehover = 'style="border-bottom: 1px dotted #000;" title="'. esc_attr(date("M jS, Y (g:ia)", $dateaccepted)).'"';
+            }
   					return '<span class="dashicons dashicons-yes-alt" style="color: green;"></span> <span '.$titlehover.'>' . esc_html__( 'Accepted', 'woo-coupon-usage' ) . '</span>';
   				}
   				if($status == "pending") {

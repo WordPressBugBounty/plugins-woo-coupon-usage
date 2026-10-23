@@ -1,0 +1,688 @@
+/*
+ * General settings tab: the settings column and the live preview panel beside it.
+ * The preview itself is drawn inside a shadow root and styled by
+ * admin-settings-general-preview.css, so nothing here reaches it.
+ */
+
+.wcu-gs {
+    --wcu-gs-accent: #2271b1;
+    --wcu-gs-border: #e4e7ec;
+    --wcu-gs-border-soft: #eef0f3;
+    --wcu-gs-text: #101828;
+    --wcu-gs-muted: #667085;
+    --wcu-gs-sticky-top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+    .wcu-gs {
+        --wcu-gs-sticky-top: 46px;
+    }
+}
+
+.wcu-gs .wcu-gs-visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* -------------------------------------------------------------------------
+ * Layout.
+ * Wide screens: the preview is closed until the "Dashboard Preview" button opens it as a
+ * column beside the settings (.wcu-gs-preview-open).
+ * Small screens (.wcu-gs-stacked, added by the script): the preview is an accordion
+ * at the bottom of the tab, closed until its title is clicked.
+ * ---------------------------------------------------------------------- */
+
+.wcu-gs-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+    align-items: start;
+}
+
+.wcu-gs-layout.wcu-gs-preview-open:not(.wcu-gs-stacked) {
+    grid-template-columns: minmax(0, 1fr) minmax(380px, 44%);
+}
+
+.wcu-gs-main {
+    min-width: 0;
+}
+
+.wcu-gs-layout:not(.wcu-gs-stacked):not(.wcu-gs-preview-open) .wcu-gs-preview {
+    display: none;
+}
+
+.wcu-gs-layout.wcu-gs-stacked .wcu-gs-preview {
+    position: static;
+    margin-top: 10px;
+}
+
+.wcu-gs-layout.wcu-gs-stacked .wcu-gs-preview-body {
+    max-height: 520px;
+}
+
+/* The accordion only exists on small screens; the close button only on wide ones. */
+.wcu-gs-layout:not(.wcu-gs-stacked) .wcu-gs-preview-chevron,
+.wcu-gs-layout.wcu-gs-stacked .wcu-gs-preview-close {
+    display: none;
+}
+
+.wcu-gs-layout:not(.wcu-gs-stacked) .wcu-gs-preview.is-collapsed .wcu-gs-preview-body {
+    display: block;
+}
+
+.wcu-gs .wcu-gs-layout:not(.wcu-gs-stacked) .wcu-gs-preview-title {
+    cursor: default;
+}
+
+/* "Dashboard Preview" button (wide screens, while the preview is closed): a sideways tab
+   reading bottom to top. It sits in a slim right-hand column of the settings box, where
+   the preview opens, and stays in view while scrolling. */
+.wcu-gs-layout:not(.wcu-gs-stacked):not(.wcu-gs-preview-open) {
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.wcu-gs .wcu-gs-preview-fab {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: calc(var(--wcu-gs-sticky-top) + 16px);
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 16px 10px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--wcu-gs-accent);
+    color: #ffffff;
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .1), 0 6px 16px rgba(34, 113, 177, .25);
+    cursor: pointer;
+    transition: background .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+/* Rotated, so translateX(2px) nudges it 2px left (towards the settings). */
+.wcu-gs .wcu-gs-preview-fab:hover {
+    background: #135e96;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .1), 0 8px 20px rgba(34, 113, 177, .32);
+    transform: rotate(180deg) translateX(2px);
+}
+
+.wcu-gs .wcu-gs-preview-fab:focus-visible {
+    outline: 2px solid var(--wcu-gs-accent);
+    outline-offset: 2px;
+}
+
+.wcu-gs-layout.wcu-gs-preview-open .wcu-gs-preview-fab,
+.wcu-gs-layout.wcu-gs-stacked .wcu-gs-preview-fab {
+    display: none;
+}
+
+/* The Statistics tab's settings float their section list beside the options, which
+   does not fit next to the preview, so stack them. */
+.wcu-gs .wcusage-stats-layout-right,
+.wcu-gs .wcusage-stats-layout-left {
+    float: none;
+    width: 100%;
+    max-width: none;
+}
+
+.wcu-gs .wcusage-stats-layout-right {
+    margin-bottom: 20px;
+}
+
+/* -------------------------------------------------------------------------
+ * Preview panel
+ * ---------------------------------------------------------------------- */
+
+.wcu-gs-preview {
+    position: sticky;
+    top: calc(var(--wcu-gs-sticky-top) + 16px);
+    min-width: 0;
+    z-index: 5;
+}
+
+.wcu-gs-preview-inner {
+    background: #ffffff;
+    border: 1px solid var(--wcu-gs-border);
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06), 0 8px 24px rgba(16, 24, 40, 0.05);
+    overflow: hidden;
+}
+
+.wcu-gs-preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px 8px 14px;
+    border-bottom: 1px solid var(--wcu-gs-border-soft);
+    background: #ffffff;
+}
+
+.wcu-gs .wcu-gs-preview-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    margin: 0;
+    padding: 4px 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: 650;
+    font-size: 13.5px;
+    color: var(--wcu-gs-text);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.wcu-gs-preview-chevron {
+    font-size: 11px;
+    color: var(--wcu-gs-muted);
+    transition: transform .2s;
+}
+
+.wcu-gs-preview.is-collapsed .wcu-gs-preview-chevron {
+    transform: rotate(180deg);
+}
+
+.wcu-gs-preview-inner.is-expanded .wcu-gs-preview-chevron {
+    display: none;
+}
+
+.wcu-gs-live-dot {
+    flex: 0 0 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #12b76a;
+    box-shadow: 0 0 0 3px rgba(18, 183, 106, .18);
+}
+
+.wcu-gs-preview-mode {
+    font-weight: 500;
+    font-size: 11.5px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: #f2f4f7;
+    color: #475467;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wcu-gs-preview-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.wcu-gs-seg {
+    display: inline-flex;
+    padding: 2px;
+    background: #f2f4f7;
+    border-radius: 8px;
+}
+
+.wcu-gs .wcu-gs-seg button,
+.wcu-gs .wcu-gs-preview-expand,
+.wcu-gs .wcu-gs-preview-close {
+    margin: 0;
+    width: 30px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #667085;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.wcu-gs .wcu-gs-preview-expand,
+.wcu-gs .wcu-gs-preview-close {
+    height: 30px;
+    border: 1px solid var(--wcu-gs-border);
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.wcu-gs .wcu-gs-seg button:hover:not([disabled]),
+.wcu-gs .wcu-gs-preview-expand:hover,
+.wcu-gs .wcu-gs-preview-close:hover {
+    color: var(--wcu-gs-text);
+}
+
+.wcu-gs .wcu-gs-seg button.is-active {
+    background: #ffffff;
+    color: var(--wcu-gs-text);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .12);
+}
+
+.wcu-gs .wcu-gs-seg button[disabled] {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+.wcu-gs .wcu-gs-seg button:focus-visible,
+.wcu-gs .wcu-gs-preview-expand:focus-visible,
+.wcu-gs .wcu-gs-preview-close:focus-visible,
+.wcu-gs .wcu-gs-preview-title:focus-visible {
+    outline: 2px solid var(--wcu-gs-accent);
+    outline-offset: 1px;
+}
+
+.wcu-gs-preview-body {
+    max-height: calc(100vh - var(--wcu-gs-sticky-top) - 120px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    /* Reserve the scrollbar's space, so it appearing cannot narrow the preview, rescale
+       it and make it disappear again (which made the preview shake). */
+    scrollbar-gutter: stable;
+}
+
+.wcu-gs-preview.is-collapsed .wcu-gs-preview-body {
+    display: none;
+}
+
+.wcu-gs-preview-stage {
+    padding: 16px;
+    background:
+        radial-gradient(circle at 1px 1px, #dfe3ea 1px, transparent 0) 0 0 / 14px 14px,
+        #f5f6f8;
+}
+
+.wcu-gs-preview-host {
+    display: block;
+}
+
+.wcu-gs .wcu-gs-preview-note {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    margin: 0;
+    padding: 9px 14px;
+    font-size: 12px;
+    color: var(--wcu-gs-muted);
+    border-top: 1px solid var(--wcu-gs-border-soft);
+}
+
+/* -------------------------------------------------------------------------
+ * Expanded preview (moved into a full-window overlay by the script)
+ * ---------------------------------------------------------------------- */
+
+body.wcu-gs-overlay-open {
+    overflow: hidden;
+}
+
+.wcu-gs-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3vh 3vw;
+}
+
+.wcu-gs-overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(16, 24, 40, .6);
+    backdrop-filter: blur(2px);
+}
+
+.wcu-gs-overlay-panel {
+    position: relative;
+    width: min(1340px, 100%);
+    height: 100%;
+}
+
+.wcu-gs-preview-inner.is-expanded {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px rgba(16, 24, 40, .35);
+}
+
+.wcu-gs-preview-inner.is-expanded .wcu-gs-preview-title {
+    cursor: default;
+}
+
+.wcu-gs-preview-inner.is-expanded .wcu-gs-preview-body {
+    flex: 1 1 auto;
+    max-height: none;
+}
+
+.wcu-gs-preview-inner.is-expanded .wcu-gs-preview-stage {
+    padding: 24px;
+    min-height: 100%;
+}
+
+/* -------------------------------------------------------------------------
+ * Colours, font and icons
+ * One set of fields serves both layouts: the portal's ("Customise Affiliate Portal
+ * Design" in this tab) and the dashboard page's (the Design tab). The script moves
+ * it to whichever is in use, and .is-dashboard switches its wording.
+ * ---------------------------------------------------------------------- */
+
+.wcu-pd {
+    --wcu-gs-accent: #2271b1;
+    --wcu-gs-border: #e4e7ec;
+    --wcu-gs-border-soft: #eef0f3;
+    --wcu-gs-text: #101828;
+    --wcu-gs-muted: #667085;
+    margin: 6px 0 4px;
+}
+
+.wcu-pd:not(.is-dashboard) .wcu-pd-for-dashboard,
+.wcu-pd.is-dashboard .wcu-pd-for-portal {
+    display: none !important;
+}
+
+/* In the Design tab the section heading above names the colours. */
+.wcu-pd.is-dashboard > .wcu-pd-head:first-child h3 {
+    display: none;
+}
+
+.wcu-pd.is-dashboard > .wcu-pd-head:first-child {
+    margin-top: 0;
+}
+
+.wcusage-settings-form .wcu-pd.is-dashboard > .wcu-pd-head:first-child > p {
+    margin-left: 0;
+}
+
+/* Design tab: the dashboard tab style options, two to a row. */
+.wcusage-settings-style-colors {
+    width: calc(50% - 20px);
+    max-width: 290px;
+    float: left;
+    margin-right: 20px;
+    margin-bottom: 40px;
+}
+
+.wcusage-settings-style-colors h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.wcu-pd-head {
+    margin: 26px 0 12px;
+}
+
+.wcu-pd-head:first-child {
+    margin-top: 10px;
+}
+
+.wcusage-settings-form .wcu-pd h3.wcu-pd-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 4px;
+    padding: 0;
+    border: 0;
+    font-size: 17px !important;
+    font-weight: 650;
+    line-height: 1.35;
+    color: var(--wcu-gs-text);
+}
+
+.wcusage-settings-form .wcu-pd h3.wcu-pd-title > span[class*="fa-"] {
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #eef5fb;
+    color: var(--wcu-gs-accent);
+    font-size: 13px;
+}
+
+.wcusage-settings-form .wcu-pd-head > p {
+    margin: 0 0 0 37px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--wcu-gs-muted);
+}
+
+.wcu-pd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(255px, 100%), 1fr));
+    gap: 12px;
+}
+
+/* Colour groups past the first four, until "Show More" is clicked. */
+.wcu-pd:not(.is-showing-more) .wcu-pd-card-more {
+    display: none;
+}
+
+.wcusage-settings-form .wcu-pd .wcu-pd-more-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.wcu-pd-more-toggle .fa-chevron-down {
+    font-size: 11px;
+    transition: transform .15s ease;
+}
+
+.wcu-pd.is-showing-more .wcu-pd-more-toggle .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.wcu-pd-card {
+    position: relative;
+    min-width: 0;
+    padding: 12px 14px 6px;
+    background: #ffffff;
+    border: 1px solid var(--wcu-gs-border);
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+}
+
+.wcu-pd-card-head {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 10px;
+}
+
+/* A small swatch showing the group's colours together ("Aa" in the text colour on
+   the background colour); kept in step by the script. */
+.wcu-pd-sample {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: inset 0 0 0 1px rgba(16, 24, 40, .14);
+}
+
+.wcu-pd-sample-bar {
+    padding: 0 6px;
+}
+
+.wcu-pd-sample-bar i {
+    display: block;
+    width: 100%;
+    height: 8px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, var(--wcu-pd-bar, #2bc253) 0 62%, transparent 62%);
+}
+
+.wcu-pd-card-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.wcu-pd-card-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--wcu-gs-text);
+}
+
+.wcu-pd-card-desc {
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--wcu-gs-muted);
+}
+
+/* Each colour is one row: label, then swatch / hex / reset. */
+.wcusage-settings-form .wcu-pd-rows > p {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 !important;
+    padding: 7px 0;
+    border-top: 1px solid var(--wcu-gs-border-soft);
+    font-size: 12.5px;
+}
+
+.wcusage-settings-form .wcu-pd-rows > p > br {
+    display: none;
+}
+
+.wcusage-settings-form .wcu-pd-rows > p > strong {
+    font-weight: 500;
+    color: #475467;
+    white-space: nowrap;
+}
+
+.wcusage-settings-form .wcu-pd-rows .wp-picker-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+.wcusage-settings-form .wcu-pd-rows .wp-color-result.button {
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    min-height: 28px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid rgba(16, 24, 40, .2);
+    border-radius: 7px;
+    box-shadow: inset 0 0 0 2px #ffffff;
+    overflow: hidden;
+}
+
+.wcusage-settings-form .wcu-pd-rows .wp-color-result-text {
+    display: none;
+}
+
+.wcusage-settings-form .wcu-pd-rows .wp-picker-input-wrap {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+}
+
+.wcusage-settings-form .wcu-pd-rows .wp-picker-input-wrap label {
+    margin: 0;
+}
+
+.wcusage-settings-form .wcu-pd-rows input[type=text].wp-color-picker {
+    width: 78px;
+    height: 28px;
+    min-height: 28px !important;
+    margin: 0;
+    padding: 0 7px;
+    border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+}
+
+/* The "Default" button (relabelled with an arrow by the script). */
+.wcusage-settings-form .wcu-pd-rows .wp-picker-default,
+.wcusage-settings-form .wcu-pd-rows .wp-picker-clear {
+    width: 28px;
+    height: 28px;
+    min-height: 28px;
+    margin: 0;
+    padding: 0;
+    border-color: var(--wcu-gs-border);
+    border-radius: 6px;
+    background: #ffffff;
+    color: #667085;
+    font-size: 15px;
+    line-height: 26px;
+    text-align: center;
+}
+
+.wcusage-settings-form .wcu-pd-rows .wp-picker-default:hover {
+    color: var(--wcu-gs-accent);
+    border-color: var(--wcu-gs-accent);
+}
+
+/* The picker opens below its row, over the cards beneath. */
+.wcusage-settings-form .wcu-pd-rows .wp-picker-holder {
+    position: absolute;
+    top: 34px;
+    right: 0;
+    z-index: 60;
+}
+
+.wcusage-settings-form .wcu-pd-rows .wp-update-icon,
+.wcusage-settings-form .wcu-pd-rows .wcu-update-icon {
+    margin: 0;
+}
+
+/* Font and icons */
+.wcu-pd-font {
+    padding: 14px 16px 8px;
+}
+
+.wcusage-settings-form .wcu-pd-font > p:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0 0 8px;
+}
+
+.wcusage-settings-form .wcu-pd-font select {
+    width: 100%;
+    max-width: 420px;
+}
+
+.wcu-pd-divider {
+    height: 1px;
+    margin: 14px 0 8px;
+    background: var(--wcu-gs-border-soft);
+}
+
+.wcusage-settings-form .wcu-pd-font p[id$="_p"] {
+    margin: 0 0 6px;
+}

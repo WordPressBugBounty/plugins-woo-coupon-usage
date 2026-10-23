@@ -330,6 +330,12 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
             if ( $disable_commission ) {
                 $wcusage_show_commission = 0;
             }
+            // As above: the MLA dashboard always shows what the parent earned. It has no
+            // coupon, and on PHP 8 an empty ID reads as a coupon with no affiliate, so with
+            // "disable non-affiliate commission" on, a date range hid the column.
+            if ( $type == "mla" ) {
+                $wcusage_show_commission = 1;
+            }
             $stats_total_orders = ( isset( $orders['total_orders'] ) ? (float) $orders['total_orders'] : 0 );
             $stats_full_discount = ( isset( $orders['full_discount'] ) ? (float) $orders['full_discount'] : 0 );
             $stats_total_commission = ( isset( $orders['total_commission'] ) ? (float) $orders['total_commission'] : 0 );
@@ -917,7 +923,15 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                     // MLA Tier Commission
                     $tier = 0;
                     $totalcommissionmla = 0;
-                    if ( $type == "mla" ) {
+                    // What this parent was granted, or the breakdown saved for them - found by the
+                    // parent rather than by their tier, which may have changed since the order.
+                    $mla_entry = ( $type == "mla" && function_exists( 'wcusage_mla_get_order_parent_entry' ) ? wcusage_mla_get_order_parent_entry( $orderid, $user_id ) : null );
+                    if ( $mla_entry && $mla_entry['tier'] ) {
+                        $tier = $mla_entry['tier'];
+                    } elseif ( false === $mla_entry ) {
+                        // Granted to other parents only, so not this one's - whatever the chain is now.
+                        $tier = 0;
+                    } elseif ( $type == "mla" ) {
                         $lifetimeaffiliate = wcusage_order_meta( $orderid, 'lifetime_affiliate_coupon_referrer' );
                         $affiliatereferrer = wcusage_order_meta( $orderid, 'wcusage_referrer_coupon' );
                         if ( $lifetimeaffiliate ) {
@@ -949,6 +963,14 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                                         $tier = array_search( $user_id, $get_parents );
                                     }
                                 }
+                            }
+                        }
+                        // The order's saved breakdown gives this tier to someone else, so this parent
+                        // took it over after the order and earned nothing from it.
+                        if ( $tier && function_exists( 'wcusage_mla_decode_meta' ) ) {
+                            $saved_mla = wcusage_mla_decode_meta( $orderinfo->get_meta( 'wcu_mla_commission', true ) );
+                            if ( !empty( $saved_mla[$tier]['parent_id'] ) && (int) $saved_mla[$tier]['parent_id'] !== (int) $user_id ) {
+                                $tier = 0;
                             }
                         }
                     }
@@ -1021,7 +1043,9 @@ if ( !function_exists( 'wcusage_show_latest_orders_table' ) ) {
                         if ( $wcusage_field_mla_enable && $type == "mla" ) {
                             // Try stored MLA commission from order meta (persisted at order time)
                             $stored_mla = wcusage_order_meta( $orderid, 'wcu_mla_commission', true );
-                            if ( is_array( $stored_mla ) && isset( $stored_mla[$tier]['commission'] ) ) {
+                            if ( $mla_entry ) {
+                                $totalcommission = (float) $mla_entry['commission'];
+                            } elseif ( is_array( $stored_mla ) && isset( $stored_mla[$tier]['commission'] ) ) {
                                 $totalcommission = (float) $stored_mla[$tier]['commission'];
                             } else {
                                 // Fallback: recalculate (for orders before this feature was added)

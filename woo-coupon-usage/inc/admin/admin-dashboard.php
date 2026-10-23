@@ -238,8 +238,8 @@ jQuery(document).ready(function($) {
             array('label' => __( 'Payouts', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-money-bill', 'url' => '#', 'dropdown' => array(
                 array('label' => __( 'View Payouts', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_payouts'), 'icon' => 'fa-solid fa-money-bill'),
                 array('label' => __( 'Create New Payout', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_payouts_create'), 'icon' => 'fa-solid fa-plus'),
-                array('label' => __( 'PDF Invoices', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?post_type=wcu-statements'), 'icon' => 'fa-solid fa-file-invoice-dollar',
-                'disabled' => wcusage_get_setting_value('wcusage_field_payouts_enable_statements', '0')),
+                array('label' => __( 'PDF Invoices', 'woo-coupon-usage' ), 'url' => admin_url('edit.php?post_type=wcu-statements'), 'icon' => 'fa-solid fa-file-invoice-dollar',
+                'disabled' => !wcusage_get_setting_value('wcusage_field_payouts_enable_statements', '0')),
             )),
             array('label' => __( 'Reports', 'woo-coupon-usage' ), 'icon' => 'fa-solid fa-chart-bar', 'url' => '#', 'dropdown' => array(
                 array('label' => __( 'Admin Reports & Analytics', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_admin_reports'), 'icon' => 'fa-solid fa-chart-bar'),
@@ -286,13 +286,13 @@ jQuery(document).ready(function($) {
             ),
             array(
                 'label' => __( 'View Short URLs', 'woo-coupon-usage' ),
-                'url' => admin_url('edit.php?post_type=wcu-short-urls'),
+                'url' => admin_url('edit.php?post_type=wcu-short-url'),
                 'icon' => 'fa-solid fa-link',
                 'disabled' => !wcusage_get_setting_value('wcusage_field_show_shortlink', 0)
             ),
             array(
                 'label' => __( 'Manage Creatives', 'woo-coupon-usage' ),
-                'url' => admin_url('admin.php?page=wcusage_creatives'),
+                'url' => admin_url('edit.php?post_type=wcu-creatives'),
                 'icon' => 'fa-solid fa-image',
                 'disabled' => !wcusage_get_setting_value('wcusage_field_creatives_enable', '1')
             ),
@@ -330,8 +330,8 @@ jQuery(document).ready(function($) {
             array('label' => __( 'Affiliate Groups', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_groups'), 'icon' => 'fa-solid fa-users', 'disabled' => true),
             array('label' => __( 'Performance Bonuses', 'woo-coupon-usage' ), 'url' => admin_url('edit.php?post_type=wcu-bonuses'), 'icon' => 'fa-solid fa-bolt', 'disabled' => true),
             array('label' => __( 'Direct Link Domains', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_domains'), 'icon' => 'fa-solid fa-globe', 'disabled' => true),
-            array('label' => __( 'View Short URLs', 'woo-coupon-usage' ), 'url' => admin_url('edit.php?post_type=wcu-short-urls'), 'icon' => 'fa-solid fa-link', 'disabled' => true),
-            array('label' => __( 'Manage Creatives', 'woo-coupon-usage' ), 'url' => admin_url('admin.php?page=wcusage_creatives'), 'icon' => 'fa-solid fa-image', 'disabled' => true),
+            array('label' => __( 'View Short URLs', 'woo-coupon-usage' ), 'url' => admin_url('edit.php?post_type=wcu-short-url'), 'icon' => 'fa-solid fa-link', 'disabled' => true),
+            array('label' => __( 'Manage Creatives', 'woo-coupon-usage' ), 'url' => admin_url('edit.php?post_type=wcu-creatives'), 'icon' => 'fa-solid fa-image', 'disabled' => true),
         );
     }
     $support_items = array(
@@ -532,19 +532,29 @@ jQuery(document).ready(function($) {
 <div style="clear: both;"></div>
 
 <script type="text/javascript">
-document.getElementById("show-changelog").onclick = function() {
-    document.getElementById("changelog-modal").style.display = "block";
-};
-
-document.getElementById("close-changelog-modal").onclick = function() {
-    document.getElementById("changelog-modal").style.display = "none";
-};
-
-window.onclick = function(event) {
-    if (event.target == document.getElementById("changelog-modal")) {
-        document.getElementById("changelog-modal").style.display = "none";
+(function() {
+    var modal = document.getElementById("changelog-modal");
+    var openLink = document.getElementById("show-changelog");
+    var closeLink = document.getElementById("close-changelog-modal");
+    if (!modal) {
+        return;
     }
-};
+    if (openLink) {
+        openLink.onclick = function() {
+            modal.style.display = "block";
+        };
+    }
+    if (closeLink) {
+        closeLink.onclick = function() {
+            modal.style.display = "none";
+        };
+    }
+    window.addEventListener("click", function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+})();
 </script>
 
 <?php
@@ -1946,6 +1956,7 @@ function wcusage_dashboard_page_html() {
 
         <div class="wcusage-admin-dashboard-layout">
             <div class="wcusage-admin-dashboard-main">
+                <?php do_action('wcusage_hook_dashboard_getting_started'); ?>
                 <div class="wcusage-admin-page-col-section" style="margin-top: -20px;">
                     <div class="wcusage-admin-page-col" style="width: 100%;">
                         <div class="wcu-stats-header">

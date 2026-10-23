@@ -4,7 +4,7 @@
 * Plugin Name: Coupon Affiliates for WooCommerce
 * Plugin URI: https://couponaffiliates.com
 * Description: The most powerful affiliate plugin for WooCommerce. Track commission, generate referral URLs, assign affiliate coupons, and display detailed stats.
-* Version: 8.6.0
+* Version: 8.7.0
 * Author: Elliot Sowersby, RelyWP
 * Author URI: https://couponaffiliates.com/
 * License: GPLv3
@@ -21,7 +21,7 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 // Define plugin version constant
 if ( !defined( 'WCUSAGE_VERSION' ) ) {
-    define( 'WCUSAGE_VERSION', '8.6.0' );
+    define( 'WCUSAGE_VERSION', '8.7.0' );
 }
 if ( function_exists( 'wcu_fs' ) ) {
     wcu_fs()->set_basename( false, __FILE__ );
@@ -835,6 +835,7 @@ if ( function_exists( 'wcu_fs' ) ) {
     if ( wcusage_is_admin_context() ) {
         include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/admin-options-update.php';
         include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/admin-setup.php';
+        include plugin_dir_path( __FILE__ ) . 'inc/admin/admin-quick-start.php';
         include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/options-commission.php';
         include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/options-privacy.php';
         include plugin_dir_path( __FILE__ ) . 'inc/admin/settings/options-debug.php';
@@ -888,6 +889,14 @@ if ( function_exists( 'wcu_fs' ) ) {
         include plugin_dir_path( __FILE__ ) . 'inc/admin/tools/admin-bulk-edit-coupons.php';
         include plugin_dir_path( __FILE__ ) . 'inc/admin/tools/admin-bulk-import-export.php';
         include plugin_dir_path( __FILE__ ) . 'inc/admin/tools/admin-bulk-product-rates.php';
+    }
+    // Migration from other affiliate plugins. The runtime part keeps migrated
+    // orders' commission and the old plugin's referral links working on every
+    // request; the importer itself only loads where it can be run.
+    include plugin_dir_path( __FILE__ ) . 'inc/migration/functions-migration.php';
+    include plugin_dir_path( __FILE__ ) . 'inc/migration/functions-migration-runtime.php';
+    if ( wcusage_is_admin_context() ) {
+        include plugin_dir_path( __FILE__ ) . 'inc/migration/load.php';
     }
     // Activity Log
     $enable_activity_log = wcusage_get_setting_value( 'wcusage_enable_activity_log', '1' );

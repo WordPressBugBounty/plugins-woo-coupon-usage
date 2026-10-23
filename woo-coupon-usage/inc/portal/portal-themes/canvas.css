@@ -1,0 +1,317 @@
+/*
+ * Affiliate portal theme: Canvas
+ *
+ * The sidebar colour wraps the whole page and the content sits on a single rounded
+ * sheet, like an app window. Inside the sheet there are no nested panels: sections are
+ * split by hairlines, statistics are soft filled tiles, and the period switcher uses
+ * the active tab colour. Tabs, buttons, table headings and statistic icons use the
+ * portal colour settings.
+ */
+
+body.wcu-portal-theme-canvas {
+    --pt-frame: var(--wcu-tab);
+    --pt-bg: #ffffff;
+    --pt-panel: #ffffff;
+    --pt-panel-border: #ebebee;
+    --pt-line: #f0f0f2;
+    --pt-line-strong: #e8e8eb;
+    --pt-subtle: #f6f6f8;
+    --pt-row-hover: #f8f8fa;
+    --pt-text: #18181b;
+    --pt-muted: #52525b;
+    --pt-faint: #71717a;
+    --pt-link: var(--wcu-button);
+    --pt-link-hover: var(--wcu-button-hover);
+    --pt-input-border: #dcdce0;
+    --pt-input-bg: #ffffff;
+    --pt-input-height: 40px;
+    --pt-focus: color-mix(in srgb, var(--wcu-button) 18%, transparent);
+    --pt-positive: #15803d;
+    --pt-negative: #b91c1c;
+
+    --pt-radius: 12px;
+    --pt-radius-sm: 10px;
+    --pt-radius-xs: 6px;
+    --pt-radius-btn: 8px;
+    --pt-radius-input: 8px;
+    --pt-shadow: none;
+    --pt-btn-shadow: none;
+    --pt-card-hover-shadow: 0 6px 20px rgba(24, 24, 27, 0.07);
+
+    --pt-header-bg: transparent;
+    --pt-header-border: #efeff1;
+    --pt-header-icon: var(--pt-faint);
+
+    --pt-title-size: 17px;
+    --pt-title-weight: 650;
+    --pt-title-spacing: -0.015em;
+    --pt-page-title-size: 22px;
+
+    --pt-table-border: #ebebee;
+    --pt-th-size: 12.5px;
+    --pt-th-spacing: 0;
+    --pt-th-transform: none;
+    --pt-th-padding: 11px 16px;
+    --pt-cell-align: left;
+    --pt-cell-padding: 13px 16px;
+
+    --pt-box-padding: 20px 20px 20px 72px;
+    --pt-box-value-size: 25px;
+    --pt-box-bg: var(--pt-tile);
+    --pt-box-border: transparent;
+    --pt-box-hover-border: transparent;
+    --pt-box-label-size: 13px;
+    --pt-box-label-weight: 500;
+    --pt-box-label-spacing: 0;
+    --pt-box-label-transform: none;
+
+    --pt-tile: color-mix(in srgb, var(--wcu-tab) 3%, #f7f7f9);
+    --pt-tile-hover: color-mix(in srgb, var(--wcu-tab) 6%, #f2f2f5);
+
+    --pt-control-border: #dcdce0;
+    --pt-control-bg: #ffffff;
+    --pt-inset-bg: var(--pt-tile);
+    --pt-inset-border: transparent;
+
+    --pt-side-border: transparent;
+    --pt-side-hover-bg: rgba(255, 255, 255, 0.09);
+    --pt-side-item-margin: 2px 12px;
+    --pt-side-item-radius: 8px;
+
+    background: var(--pt-frame);
+}
+
+/* ---------- The frame and the sheet ---------- */
+
+body.wcu-portal-theme-canvas .affiliate-portal-container {
+    background: var(--pt-frame);
+}
+
+body.wcu-portal-theme-canvas .sidebar {
+    box-shadow: none;
+    border-right: 0;
+}
+
+@media (min-width: 769px) {
+    body.wcu-portal-theme-canvas .content {
+        margin: 12px 12px 12px 0;
+        border-radius: 16px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 12px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    body.wcu-portal-theme-canvas .content-header {
+        padding-top: 18px;
+        padding-bottom: 18px;
+    }
+
+    body.wcu-portal-theme-canvas .content-body {
+        padding: 30px 40px 64px;
+    }
+}
+
+/* ---------- No nested panels: the sheet is the panel ---------- */
+
+body.wcu-portal-theme-canvas :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent),
+body.wcu-portal-theme-canvas #wcu1 .wcusage-tab-section {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+body.wcu-portal-theme-canvas :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent) {
+    padding: 0;
+}
+
+body.wcu-portal-theme-canvas #wcu1 .wcusage-tab-section {
+    margin: 0;
+    padding: 28px 0;
+    border-top: 1px solid var(--pt-line-strong);
+}
+
+body.wcu-portal-theme-canvas #wcu1 .wcusage-tab-section:first-child {
+    padding-top: 0;
+    border-top: 0;
+}
+
+/* ---------- Statistic tiles ---------- */
+
+body.wcu-portal-theme-canvas .wcusage-info-box {
+    border-radius: 12px;
+    transition: background 0.15s ease;
+}
+
+body.wcu-portal-theme-canvas .wcusage-info-box:hover {
+    background: var(--pt-tile-hover);
+}
+
+body.wcu-portal-theme-canvas .wcusage-info-box::before {
+    left: 20px;
+    font-size: 22px;
+}
+
+body.wcu-portal-theme-canvas .wcusage-info-box p {
+    font-weight: 650;
+}
+
+/* ---------- Period switcher: the active period takes the active tab colour ---------- */
+
+body.wcu-portal-theme-canvas .wcusage-last-days {
+    gap: 4px;
+    padding: 0 !important;
+}
+
+body.wcu-portal-theme-canvas .wcusage-last-days > a:not(.wcusage-refresh-stats-btn) {
+    padding: 7px 13px;
+    border-radius: 8px;
+    font-size: 13.5px;
+}
+
+body.wcu-portal-theme-canvas .wcusage-last-days > a:not(.wcusage-refresh-stats-btn):not(.wcutab-active):hover {
+    background: var(--pt-tile);
+}
+
+body.wcu-portal-theme-canvas .wcusage-last-days > a.wcutab-active {
+    background: var(--wcu-tab-active);
+    color: var(--wcu-tab-active-font) !important;
+}
+
+body.wcu-portal-theme-canvas #wcu1 .wcusage-sales-stats-toggles {
+    margin-bottom: 16px;
+}
+
+/* ---------- Inset boxes and cards ---------- */
+
+body.wcu-portal-theme-canvas .referral-url-box,
+body.wcu-portal-theme-canvas .payouts-box {
+    border: 0;
+    border-radius: 12px;
+}
+
+body.wcu-portal-theme-canvas .wcu-urllink {
+    border-color: transparent;
+    box-shadow: 0 1px 2px rgba(24, 24, 27, 0.06);
+}
+
+/* Creatives: soft tiles like the statistics, the preview in a white well at the top and
+   the text left-aligned under it. */
+body.wcu-portal-theme-canvas {
+    --pt-creative-align: left;
+}
+
+body.wcu-portal-theme-canvas .creatives-box.creatives-box {
+    padding: 12px 12px 16px;
+    background: var(--pt-tile);
+    border: 0;
+    border-radius: 14px;
+}
+
+body.wcu-portal-theme-canvas .creatives-box-type-color.creatives-box-type-color {
+    padding: 16px;
+}
+
+body.wcu-portal-theme-canvas .creatives-box:hover {
+    background: var(--pt-tile-hover);
+    box-shadow: none;
+}
+
+body.wcu-portal-theme-canvas .creatives-box-image {
+    order: -1;
+    margin: 0 0 14px !important;
+    border: 0;
+    border-radius: 10px;
+    background: var(--pt-panel) !important;
+    box-shadow: 0 1px 2px rgba(24, 24, 27, 0.06);
+}
+
+body.wcu-portal-theme-canvas .creatives-box-name,
+body.wcu-portal-theme-canvas .creatives-box-description,
+body.wcu-portal-theme-canvas .creatives-box-last-updated {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+body.wcu-portal-theme-canvas .wcu-color-box {
+    border-radius: 10px;
+}
+
+body.wcu-portal-theme-canvas .wcusage-reward-box,
+body.wcu-portal-theme-canvas .wcu-user-coupon-list,
+body.wcu-portal-theme-canvas .wcu-settings-card,
+body.wcu-portal-theme-canvas .login-form,
+body.wcu-portal-theme-canvas .registration-form {
+    border: 1px solid var(--pt-panel-border);
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+body.wcu-portal-theme-canvas .wcu-settings-card__footer {
+    background: transparent;
+}
+
+body.wcu-portal-theme-canvas .wcusage-reward-box h4 {
+    font-weight: 650;
+}
+
+/* ---------- Header ---------- */
+
+body.wcu-portal-theme-canvas .welcome-header {
+    font-weight: 650;
+}
+
+body.wcu-portal-theme-canvas .wcu-coupon-switcher-toggle {
+    border-radius: 8px;
+}
+
+/* ---------- Sidebar ---------- */
+
+body.wcu-portal-theme-canvas .portal-tabs .portal-tablink:not(.active) {
+    opacity: 0.86;
+}
+
+body.wcu-portal-theme-canvas .portal-tabs .portal-tablink:not(.active):hover {
+    opacity: 1;
+}
+
+body.wcu-portal-theme-canvas .sidebar-logo h2 {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    opacity: 0.8;
+}
+
+/* ---------- Mobile: the sheet goes edge to edge ---------- */
+
+@media (max-width: 768px) {
+    body.wcu-portal-theme-canvas .content {
+        background: var(--pt-bg);
+    }
+
+    body.wcu-portal-theme-canvas #wcu1 .wcusage-tab-section {
+        padding: 22px 0;
+    }
+}
+
+/* ---------- Dark mode ---------- */
+
+body.wcu-portal-theme-canvas.dark-mode {
+    --pt-bg: #17181b;
+    --pt-panel: #17181b;
+    --pt-panel-border: #2a2b30;
+    --pt-line: #232428;
+    --pt-line-strong: #2a2b30;
+    --pt-subtle: #202125;
+    --pt-row-hover: #1d1e22;
+    --pt-text: #ededef;
+    --pt-muted: #b4b4bb;
+    --pt-faint: #8b8b93;
+    --pt-link: color-mix(in srgb, var(--wcu-button) 55%, #ffffff);
+    --pt-link-hover: #ffffff;
+    --pt-input-border: #34353b;
+    --pt-input-bg: #1d1e22;
+    --pt-header-border: #26272b;
+    --pt-table-border: #2a2b30;
+    --pt-control-border: #34353b;
+    --pt-control-bg: #1d1e22;
+    --pt-tile: #202125;
+    --pt-tile-hover: #26272c;
+}

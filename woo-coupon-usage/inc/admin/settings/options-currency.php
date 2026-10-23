@@ -65,10 +65,8 @@ if ( !function_exists( 'wcusage_field_cb_currency' ) ) {
         echo esc_html__( 'Base Store Currency:', 'woo-coupon-usage' );
         ?></strong> <?php 
         echo esc_html( $defaultcurrency );
+        echo wcusage_setting_info_icon( esc_html__( 'This is the base currency for your store, in which totals/commission will be converted to. You can change this in the WooCommerce settings.', 'woo-coupon-usage' ) );
         ?><br/>
-  <i><?php 
-        echo esc_html__( 'This is the base currency for your store, in which totals/commission will be converted to. You can change this in the WooCommerce settings.', 'woo-coupon-usage' );
-        ?></i><br/>
 
   <br/><br/>
 
@@ -78,18 +76,10 @@ if ( !function_exists( 'wcusage_field_cb_currency' ) ) {
             'wcusage_field_enable_currency_save_rate',
             0,
             esc_html__( 'Save the conversion rate for each order.', 'woo-coupon-usage' ),
-            '0px'
+            '0px',
+            esc_html__( 'With this enabled, it will permanently save and use the conversion rate that was set at the time the order is created, even if you update the rates below.', 'woo-coupon-usage' ) . ' ' . esc_html__( '(This is saved as meta data "wcusage_currency_conversion" for the order.)', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Note: When enabled, any existing orders that do not currently have a conversion rate set, will save the rate as the rate set below (when the affiliate dashboard is next loaded).', 'woo-coupon-usage' )
         );
         ?>
-  <i><?php 
-        echo esc_html__( 'With this enabled, it will permanently save and use the conversion rate that was set at the time the order is created, even if you update the rates below.', 'woo-coupon-usage' );
-        ?></i><br/>
-  <i><?php 
-        echo esc_html__( '(This is saved as meta data "wcusage_currency_conversion" for the order.)', 'woo-coupon-usage' );
-        ?></i><br/>
-  <i><?php 
-        echo esc_html__( 'Note: When enabled, any existing orders that do not currently have a conversion rate set, will save the rate as the rate set below (when the affiliate dashboard is next loaded).', 'woo-coupon-usage' );
-        ?></i><br/>
 
   <br/><br/>
 
@@ -102,12 +92,11 @@ if ( !function_exists( 'wcusage_field_cb_currency' ) ) {
             'wcusage_field_currency_number',
             $currencynumber,
             esc_html__( 'Number of Extra Currencies', 'woo-coupon-usage' ),
-            '0px'
+            '0px',
+            1,
+            esc_html__( 'How many extra currencies to set up. The currency settings below update to match as soon as you change this number (with manual saving, once you save).', 'woo-coupon-usage' )
         );
         ?>
-  <i><?php 
-        echo esc_html__( 'Please refresh the page to add/remove the new currency options (found below) when you update this number.', 'woo-coupon-usage' );
-        ?></i><br/>
 
   <br/><hr/>
 

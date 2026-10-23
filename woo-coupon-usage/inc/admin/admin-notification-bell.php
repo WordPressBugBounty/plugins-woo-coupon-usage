@@ -413,7 +413,7 @@ function wcusage_admin_notification_bell() {
         'enabled'      => $notifications_enabled,
     ) );
     // Add inline CSS for bell shake animation
-    $shake_css = "\n    @keyframes wcusage-bell-shake {\n        0% { transform: rotate(0deg); }\n        25% { transform: rotate(-10deg); }\n        50% { transform: rotate(10deg); }\n        75% { transform: rotate(-10deg); }\n        100% { transform: rotate(0deg); }\n    }\n    .wcusage-bell-shake {\n        animation: wcusage-bell-shake 0.5s ease-in-out;\n    }\n    ";
+    $shake_css = "\r\n    @keyframes wcusage-bell-shake {\r\n        0% { transform: rotate(0deg); }\r\n        25% { transform: rotate(-10deg); }\r\n        50% { transform: rotate(10deg); }\r\n        75% { transform: rotate(-10deg); }\r\n        100% { transform: rotate(0deg); }\r\n    }\r\n    .wcusage-bell-shake {\r\n        animation: wcusage-bell-shake 0.5s ease-in-out;\r\n    }\r\n    ";
     wp_add_inline_style( 'wcusage-admin-header-menu', $shake_css );
     $count = ( $prefetch ? 0 : intval( $data['count'] ) );
     ?>
@@ -532,6 +532,6 @@ function wcusage_check_affiliates_exist() {
     // least one matters, so stop at the first match rather than counting them all
     // (LIMIT does nothing on a COUNT, so this used to scan every affiliate coupon).
     global $wpdb;
-    $exists = $wpdb->get_var( $wpdb->prepare( "SELECT pm.post_id\n         FROM {$wpdb->postmeta} pm\n         INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id\n         WHERE pm.meta_key = %s\n         AND CAST(pm.meta_value AS UNSIGNED) > 0\n         AND p.post_type = %s\n         AND p.post_status IN ('publish', 'pending', 'draft')\n         LIMIT 1", 'wcu_select_coupon_user', 'shop_coupon' ) );
+    $exists = $wpdb->get_var( $wpdb->prepare( "SELECT pm.post_id\r\n         FROM {$wpdb->postmeta} pm\r\n         INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id\r\n         WHERE pm.meta_key = %s\r\n         AND CAST(pm.meta_value AS UNSIGNED) > 0\r\n         AND p.post_type = %s\r\n         AND p.post_status IN ('publish', 'pending', 'draft')\r\n         LIMIT 1", 'wcu_select_coupon_user', 'shop_coupon' ) );
     return !empty( $exists );
 }

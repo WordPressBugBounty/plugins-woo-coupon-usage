@@ -377,10 +377,10 @@ add_action('plugins_loaded', 'wcusage_url_cookie', 1);
 
   			if( $thereferral ) {
 
-          $coupon = new WC_Coupon($thereferral);
-          if($coupon) {
-            $coupon_id = $coupon->get_id();
-          }
+          // Look up the ID only. This runs on plugins_loaded, and building a WC_Coupon
+          // reads translated strings (coupon type labels, "Invalid coupon."), which
+          // triggers WordPress's "translation loading triggered too early" notice.
+          $coupon_id = wc_get_coupon_id_by_code($thereferral);
 
           // Track if we replaced the referral cookie/session (used to force new click record)
           $did_replace_referral = false;

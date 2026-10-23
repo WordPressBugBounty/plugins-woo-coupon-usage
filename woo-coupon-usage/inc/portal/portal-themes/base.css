@@ -1,0 +1,2446 @@
+/*
+ * Affiliate portal themes - shared rules.
+ *
+ * Loaded on top of inc/portal/style.css and css/style.css for every theme except
+ * "Classic". Themes restyle the portal; the markup and overall layout stay the same.
+ * Each theme file (sleek.css, modern.css) sets the --pt-* variables used here and adds
+ * its own details. The portal colour settings arrive as --wcu-* variables, printed by
+ * template.php, and every theme uses them for tabs, buttons, table headings and
+ * statistic icons.
+ *
+ * Rules are scoped to body.wcu-portal-themed so they outrank the classic rules and the
+ * !important colour overrides printed by wcusage_custom_styles().
+ */
+
+/* =========================================================================
+ * Variable bridge
+ * The classic stylesheets (portal, settings tab, dark mode) read these. Pointing them
+ * at the theme keeps every screen that uses them in step with the theme.
+ * ========================================================================= */
+
+body.wcu-portal-themed {
+    --background-color: var(--pt-bg);
+    --content-bg: var(--pt-panel);
+    --content-bg2: var(--pt-subtle);
+    --header-footer-bg: var(--pt-header-bg);
+    --text-color: var(--pt-text);
+    --secondary-text-color: var(--pt-muted);
+    --border-color: var(--pt-panel-border);
+    --button-bg: var(--wcu-button);
+    --button-bg-hover: var(--wcu-button-hover);
+    --button-text: var(--wcu-button-font);
+    --accent-color: var(--wcu-button);
+    --table-header-bg: var(--pt-subtle);
+    --table-row-hover-bg: var(--pt-row-hover);
+    --input-bg: var(--pt-panel);
+    --sidebar-bg: var(--wcu-tab);
+    --sidebar-text: var(--wcu-tab-font);
+    --sidebar-bg-link: var(--wcu-tab-active);
+
+    /* Defaults a theme may override. */
+    --pt-box-gap: 12px;
+    --pt-page-title-size: 20px;
+    --pt-page-title-weight: var(--pt-title-weight);
+
+    background: var(--pt-bg);
+    color: var(--pt-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+body.wcu-portal-themed .content {
+    background: var(--pt-bg);
+    min-width: 0;
+}
+
+body.wcu-portal-themed a {
+    color: var(--pt-link);
+}
+
+body.wcu-portal-themed a:hover {
+    color: var(--pt-link-hover);
+}
+
+body.wcu-portal-themed ::selection {
+    background: color-mix(in srgb, var(--wcu-button) 22%, transparent);
+}
+
+/* =========================================================================
+ * Sidebar
+ * ========================================================================= */
+
+body.wcu-portal-themed .sidebar {
+    background: var(--wcu-tab) !important;
+    box-shadow: none;
+    border-right: 1px solid var(--pt-side-border);
+}
+
+body.wcu-portal-themed .sidebar-logo h2 {
+    color: var(--wcu-tab-font) !important;
+}
+
+body.wcu-portal-themed .portal-tabs .portal-tablink {
+    margin: var(--pt-side-item-margin);
+    border: 0 !important;
+    border-radius: var(--pt-side-item-radius);
+    background: transparent !important;
+    color: var(--wcu-tab-font) !important;
+    font-size: 14.5px;
+    font-weight: 500;
+    letter-spacing: 0.005em;
+    transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+body.wcu-portal-themed .portal-tabs .portal-tablink i {
+    width: 16px;
+    margin-right: 12px;
+    text-align: center;
+}
+
+body.wcu-portal-themed .portal-tabs .portal-tablink:hover,
+body.wcu-portal-themed .portal-tabs .portal-tablink:focus-visible {
+    background: var(--pt-side-hover-bg) !important;
+    color: var(--wcu-tab-font) !important;
+}
+
+body.wcu-portal-themed .portal-tabs .portal-tablink.active {
+    background: var(--wcu-tab-active) !important;
+    color: var(--wcu-tab-active-font) !important;
+    border: 0 !important;
+    font-weight: 600;
+}
+
+body.wcu-portal-themed .portal-tabs #tab-page-back {
+    background: transparent !important;
+}
+
+body.wcu-portal-themed .portal-tabs #tab-page-back:hover {
+    background: var(--pt-side-hover-bg) !important;
+}
+
+/* =========================================================================
+ * Header and footer
+ * ========================================================================= */
+
+body.wcu-portal-themed .content-header {
+    background: var(--pt-header-bg);
+    border-bottom: 1px solid var(--pt-header-border);
+}
+
+body.wcu-portal-themed .welcome-header {
+    color: var(--pt-text);
+    letter-spacing: -0.01em;
+}
+
+body.wcu-portal-themed .welcome-header > i.fa-tag {
+    color: var(--pt-header-icon);
+}
+
+body.wcu-portal-themed .welcome-header h1 {
+    color: var(--pt-text) !important;
+}
+
+body.wcu-portal-themed #wcu-coupon-select {
+    background: transparent !important;
+    color: var(--pt-text) !important;
+}
+
+body.wcu-portal-themed .wcu-coupon-switcher-toggle {
+    border: 1px solid var(--pt-panel-border);
+    border-radius: var(--pt-radius-sm);
+    background: var(--pt-panel);
+    color: var(--pt-text);
+}
+
+body.wcu-portal-themed .wcu-coupon-switcher-toggle:hover {
+    border-color: var(--wcu-button);
+}
+
+/* style.css paints every button in dark mode with the sidebar colour (!important). */
+body.wcu-portal-themed.dark-mode .wcu-coupon-switcher-toggle {
+    background: var(--pt-panel) !important;
+    border: 1px solid var(--pt-panel-border) !important;
+    color: var(--pt-text) !important;
+}
+
+body.wcu-portal-themed .wcu-coupon-switcher-menu,
+body.wcu-portal-themed .dropdown-content {
+    background: var(--pt-panel);
+    border: 1px solid var(--pt-panel-border);
+    border-radius: var(--pt-radius-sm);
+    box-shadow: 0 12px 32px rgba(16, 24, 40, 0.14);
+    overflow: hidden;
+}
+
+body.wcu-portal-themed .wcu-coupon-switcher-item,
+body.wcu-portal-themed .dropdown-content a {
+    color: var(--pt-text);
+    font-size: 14px;
+}
+
+body.wcu-portal-themed .wcu-coupon-switcher-item:hover,
+body.wcu-portal-themed .dropdown-content a:hover {
+    background: var(--pt-subtle);
+    color: var(--pt-text);
+}
+
+body.wcu-portal-themed .dark-mode-toggle,
+body.wcu-portal-themed .dropdown-arrow,
+body.wcu-portal-themed .username-in-header {
+    color: var(--pt-muted);
+}
+
+body.wcu-portal-themed .dark-mode-toggle {
+    font-size: 19px;
+}
+
+body.wcu-portal-themed .dark-mode-toggle:hover {
+    color: var(--pt-text);
+}
+
+body.wcu-portal-themed .username-in-header {
+    font-size: 13px;
+}
+
+body.wcu-portal-themed .profile-image {
+    border: 2px solid var(--pt-panel);
+    box-shadow: 0 0 0 1px var(--pt-panel-border);
+}
+
+body.wcu-portal-themed .content-footer {
+    background: transparent;
+    border-top: 1px solid var(--pt-header-border);
+    color: var(--pt-muted);
+}
+
+/* =========================================================================
+ * Spacing
+ * The classic 70px side padding leaves a wide gutter once content sits in panels.
+ * ========================================================================= */
+
+@media (min-width: 769px) {
+    body.wcu-portal-themed .content-header,
+    body.wcu-portal-themed .content-footer {
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+    body.wcu-portal-themed .content-body {
+        padding: 32px 40px 72px;
+    }
+}
+
+/* =========================================================================
+ * Panels
+ * ========================================================================= */
+
+body.wcu-portal-themed :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent) {
+    background: var(--pt-panel);
+    border: 1px solid var(--pt-panel-border);
+    border-radius: var(--pt-radius);
+    box-shadow: var(--pt-shadow);
+    padding: 26px 30px 30px;
+    display: flow-root;
+    box-sizing: border-box;
+    color: var(--pt-text);
+}
+
+/* Statistics and Settings already come in sections: panel each section instead. */
+body.wcu-portal-themed div.portal-tabcontent#wcu1 > .wcutabcontent,
+body.wcu-portal-themed div.portal-tabcontent#wcu6 > .wcutabcontent {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+}
+
+body.wcu-portal-themed #wcu1 .show_statistics > br:first-child {
+    display: none;
+}
+
+body.wcu-portal-themed #wcu1 .wcusage-tab-section {
+    background: var(--pt-panel);
+    border: 1px solid var(--pt-panel-border);
+    border-radius: var(--pt-radius);
+    box-shadow: var(--pt-shadow);
+    padding: 22px 26px 24px;
+    margin-bottom: 20px;
+    display: flow-root;
+}
+
+body.wcu-portal-themed #wcu1 .wcusage-tab-section:empty {
+    display: none;
+}
+
+/* The gap between sections now comes from the panels. */
+body.wcu-portal-themed #wcu1 .wcusage-sales-stats-toggles,
+body.wcu-portal-themed #wcu1 .wcu-charts,
+body.wcu-portal-themed #wcu1 .wcusage-tab-section > div[style*="margin-top"] {
+    margin-top: 0 !important;
+}
+
+/* =========================================================================
+ * Type
+ * css/style.css sets every paragraph and table cell in the tabs to 17px.
+ * ========================================================================= */
+
+body.wcu-portal-themed .wcutabcontent p,
+body.wcu-portal-themed .wcutabcontent code {
+    font-size: 14.5px;
+    line-height: 1.55;
+}
+
+body.wcu-portal-themed .wcutabcontent td,
+body.wcu-portal-themed .wcutabcontent tr,
+body.wcu-portal-themed table.wcuTable .wcuTableCell,
+body.wcu-portal-themed table.wcuTable .orderproductstd {
+    font-size: 14px !important;
+}
+
+body.wcu-portal-themed .wcu-tab-title,
+body.wcu-portal-themed .wcusage-subheader,
+body.wcu-portal-themed .show_statistics .wcusage-stats-title {
+    font-size: var(--pt-title-size) !important;
+    font-weight: var(--pt-title-weight) !important;
+    line-height: 1.35 !important;
+    letter-spacing: var(--pt-title-spacing);
+    color: var(--pt-text) !important;
+}
+
+body.wcu-portal-themed :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent) > .wcu-tab-title:first-child,
+body.wcu-portal-themed :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent) > div:first-child > .wcu-tab-title:first-child {
+    margin-top: 0 !important;
+}
+
+body.wcu-portal-themed .show_statistics .wcusage-stats-title {
+    margin: 0 0 16px !important;
+}
+
+/* Each tab's own title (marked by theme.js): one size and one gap below it on every tab,
+   whatever inline sizes and margins the tab's markup gives it. */
+body.wcu-portal-themed .wcu-tab-title.wcu-pt-page-title {
+    font-size: var(--pt-page-title-size) !important;
+    font-weight: var(--pt-page-title-weight) !important;
+    letter-spacing: -0.02em;
+    margin-top: 0 !important;
+    margin-bottom: 18px !important;
+}
+
+/* Sub-sections inside a tab get a rule above them, so a long tab reads in parts.
+   Floated titles (which share their row with a control) are left alone. */
+body.wcu-portal-themed :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent) .wcusage-subheader:not([style*="float"]) {
+    margin-top: 32px !important;
+    padding-top: 24px;
+    border-top: 1px solid var(--pt-line-strong);
+}
+
+body.wcu-portal-themed .wcusage-stats-title a,
+body.wcu-portal-themed .wcu-tab-title a {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-decoration: none;
+}
+
+body.wcu-portal-themed .wcutabcontent h4 {
+    color: var(--pt-text);
+    letter-spacing: -0.01em;
+}
+
+/* =========================================================================
+ * Statistic boxes
+ * ========================================================================= */
+
+body.wcu-portal-themed .wcusage-info-box {
+    padding: var(--pt-box-padding);
+    background: var(--pt-box-bg);
+    border: 1px solid var(--pt-box-border);
+    border-radius: var(--pt-radius-sm);
+    box-shadow: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+
+body.wcu-portal-themed .wcusage-info-box:hover {
+    background: var(--pt-box-bg);
+    border-color: var(--pt-box-hover-border);
+}
+
+/* Classic floats three boxes a row at 32.3% with a 0.5% margin all round, which insets
+   every row a few pixels from the titles and tables above and below it. Rows here run
+   edge to edge with an exact gap, and only between boxes, so no stray space is left
+   under the last row. ("of .wcusage-info-box" counts only the boxes among the siblings.) */
+body.wcu-portal-themed .wcusage-info-box:not(.wcusage-orders-date-stats > *) {
+    float: none;
+    width: 100%;
+    margin: var(--pt-box-gap) 0 0;
+}
+
+body.wcu-portal-themed .wcusage-info-box:nth-child(1 of .wcusage-info-box):not(.wcusage-orders-date-stats > *) {
+    margin-top: 0;
+}
+
+@media only screen and (min-width: 1060px) {
+    body.wcu-portal-themed .wcusage-info-box:not(.wcusage-orders-date-stats > *) {
+        float: left;
+        width: calc((100% - 2 * var(--pt-box-gap)) / 3);
+        margin: var(--pt-box-gap) var(--pt-box-gap) 0 0;
+    }
+    body.wcu-portal-themed .wcusage-info-box:nth-child(-n + 3 of .wcusage-info-box):not(.wcusage-orders-date-stats > *) {
+        margin-top: 0;
+    }
+    body.wcu-portal-themed .wcusage-info-box:nth-child(3n of .wcusage-info-box):not(.wcusage-orders-date-stats > *) {
+        margin-right: 0;
+    }
+    body.wcu-portal-themed .wcusage-info-box:nth-child(3n + 1 of .wcusage-info-box):not(.wcusage-orders-date-stats > *) {
+        clear: left;
+    }
+}
+
+/* Date-range totals above the orders table already sit in a flex row. */
+body.wcu-portal-themed .wcusage-orders-date-stats {
+    gap: var(--pt-box-gap);
+}
+
+body.wcu-portal-themed .wcusage-orders-date-stats > .wcusage-info-box {
+    margin: 0;
+}
+
+body.wcu-portal-themed .wcusage-info-box::before {
+    left: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px !important;
+    font-size: 24px;
+    color: var(--wcu-stats-icon) !important;
+}
+
+/* Lift the icon colour on dark panels so it stays visible. */
+body.wcu-portal-themed.dark-mode .wcusage-info-box::before {
+    color: color-mix(in srgb, var(--wcu-stats-icon) 60%, #ffffff) !important;
+}
+
+/* The same for other icons drawn in the (usually dark) button colour. */
+body.wcu-portal-themed.dark-mode .wcusage-social-icon,
+body.wcu-portal-themed.dark-mode .wcu-settings-card__icon,
+body.wcu-portal-themed.dark-mode .wcu-tab-title.wcu-pt-page-title::before,
+body.wcu-portal-themed.dark-mode .show_statistics .wcusage-stats-title::before {
+    color: color-mix(in srgb, var(--wcu-button) 60%, #ffffff) !important;
+}
+
+body.wcu-portal-themed .wcusage-info-box p {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    margin: 0 !important;
+    font-size: var(--pt-box-value-size) !important;
+    line-height: 1.2 !important;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+body.wcu-portal-themed .wcusage-info-box p,
+body.wcu-portal-themed .wcusage-info-box span {
+    color: var(--pt-text);
+}
+
+body.wcu-portal-themed .wcusage-info-box .wcusage-info-box-title {
+    width: 100%;
+    margin: 0 0 6px;
+    font-size: var(--pt-box-label-size);
+    font-weight: var(--pt-box-label-weight);
+    line-height: 16px;
+    letter-spacing: var(--pt-box-label-spacing);
+    text-transform: var(--pt-box-label-transform);
+    color: var(--pt-faint);
+}
+
+/* The change against the previous period ("↓ 100%"). Classic positions it absolutely at
+   its static spot and pulls it up with a -30px margin, so depending on the figure's markup
+   it lands on top of the figure. Here it follows the figure on the same baseline. */
+body.wcu-portal-themed .wcusage-info-box .wcusage-num-neg,
+body.wcu-portal-themed .wcusage-info-box .wcusage-num-pos {
+    position: static !important;
+    display: inline-flex !important;
+    align-items: center;
+    align-self: baseline;
+    gap: 3px;
+    margin: 0 !important;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+body.wcu-portal-themed .wcusage-info-box .wcusage-num-neg i,
+body.wcu-portal-themed .wcusage-info-box .wcusage-num-pos i {
+    font-size: 11px;
+}
+
+body.wcu-portal-themed .wcusage-info-box .wcusage-num-neg,
+body.wcu-portal-themed .wcusage-info-box .wcusage-num-neg i {
+    color: var(--pt-negative) !important;
+}
+
+body.wcu-portal-themed .wcusage-info-box .wcusage-num-pos,
+body.wcu-portal-themed .wcusage-info-box .wcusage-num-pos i {
+    color: var(--pt-positive) !important;
+}
+
+/* =========================================================================
+ * Period switcher (All-time / This Month / Last Month)
+ * ========================================================================= */
+
+body.wcu-portal-themed .wcusage-last-days {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    /* Inline 5px left margin in the markup: line it up with the boxes below instead. */
+    margin-left: 0 !important;
+}
+
+body.wcu-portal-themed .wcusage-last-days > span:not([class]) {
+    display: none;
+}
+
+body.wcu-portal-themed .wcusage-last-days > a:not(.wcusage-refresh-stats-btn) {
+    font-size: 13.5px;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--pt-muted) !important;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+body.wcu-portal-themed .wcusage-last-days > a:not(.wcusage-refresh-stats-btn):hover {
+    color: var(--pt-text) !important;
+}
+
+body.wcu-portal-themed .wcusage-last-days > a.wcutab-active {
+    color: var(--pt-text) !important;
+    font-weight: 600;
+}
+
+body.wcu-portal-themed .wcusage-last-days .wcusage-refresh-stats-btn,
+body.wcu-portal-themed .wcusage-last-days .wcusage-refresh-stats-icon {
+    margin-left: 10px !important;
+    color: var(--pt-faint) !important;
+}
+
+/* =========================================================================
+ * Tables
+ * ========================================================================= */
+
+body.wcu-portal-themed .wcuTable,
+body.wcu-portal-themed .wcusage-rewards-log-table {
+    border: 1px solid var(--pt-table-border) !important;
+    border-radius: var(--pt-radius-sm);
+    border-collapse: separate !important;
+    border-spacing: 0;
+    overflow: hidden;
+    background: var(--pt-panel);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    box-shadow: none !important;
+}
+
+body.wcu-portal-themed .wcusage-orders-table-wrap,
+body.wcu-portal-themed .coupon-orders-list {
+    box-shadow: none !important;
+}
+
+body.wcu-portal-themed table.wcuTable .wcuTableHead,
+body.wcu-portal-themed .wcusage-rewards-log-table th {
+    background: var(--wcu-table) !important;
+    color: var(--wcu-table-font) !important;
+    font-size: var(--pt-th-size) !important;
+    font-weight: 600 !important;
+    letter-spacing: var(--pt-th-spacing);
+    text-transform: var(--pt-th-transform);
+    text-align: var(--pt-cell-align) !important;
+    padding: var(--pt-th-padding) !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--pt-table-border) !important;
+    white-space: nowrap;
+}
+
+body.wcu-portal-themed .wcuTableHead span {
+    color: inherit !important;
+}
+
+body.wcu-portal-themed table.wcuTable .wcuTableRow,
+body.wcu-portal-themed table.wcuTable .wcuTableRow td,
+body.wcu-portal-themed table.wcuTable .wcuTableCell {
+    background: transparent !important;
+    color: var(--pt-text) !important;
+}
+
+body.wcu-portal-themed table.wcuTable .wcuTableCell,
+body.wcu-portal-themed .wcusage-rewards-log-table td {
+    text-align: var(--pt-cell-align);
+    padding: var(--pt-cell-padding) !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--pt-line) !important;
+    color: var(--pt-text);
+    vertical-align: middle;
+}
+
+/* No rule under the table's final row (the table's own border closes it). The orders
+   tables put each order in its own <tbody>, followed by hidden product-list bodies, so
+   "last" means: no later <tbody> holds another table row. */
+body.wcu-portal-themed table.wcuTable tbody:not(:has(~ tbody:not(.listtheproducts-summary) > tr.wcuTableRow)) > tr:last-child > td,
+body.wcu-portal-themed .wcusage-rewards-log-table tbody > tr:last-child > td {
+    border-bottom: 0 !important;
+}
+
+body.wcu-portal-themed tbody .wcuTableRow:hover > .wcuTableCell,
+body.wcu-portal-themed .wcusage-rewards-log-table tbody tr:hover > td {
+    background: var(--pt-row-hover) !important;
+}
+
+body.wcu-portal-themed table.wcuTable .wcuTableFoot {
+    background: var(--wcu-table) !important;
+    color: var(--wcu-table-font) !important;
+    font-weight: 700;
+    text-align: var(--pt-cell-align) !important;
+    padding: var(--pt-th-padding) !important;
+    border: 0 !important;
+    border-top: 1px solid var(--pt-table-border) !important;
+}
+
+body.wcu-portal-themed .wcuTableFoot span,
+body.wcu-portal-themed .wcuTableFoot strong span {
+    color: inherit !important;
+}
+
+/* Dark mode: like the classic theme, table headings switch to a dark shade rather than
+   keeping the (usually light) table colour setting. */
+body.wcu-portal-themed.dark-mode table.wcuTable .wcuTableHead,
+body.wcu-portal-themed.dark-mode table.wcuTable .wcuTableFoot,
+body.wcu-portal-themed.dark-mode .wcusage-rewards-log-table th {
+    background: var(--pt-subtle) !important;
+    color: var(--pt-text) !important;
+}
+
+/* Order and payout statuses as small tinted badges (wrapped by theme.js). */
+body.wcu-portal-themed {
+    --pt-good: #15803d;
+    --pt-warn: #b45309;
+    --pt-bad: #b91c1c;
+}
+
+body.wcu-portal-themed.dark-mode {
+    --pt-good: #4ade80;
+    --pt-warn: #fbbf24;
+    --pt-bad: #f87171;
+}
+
+body.wcu-portal-themed .wcu-pt-status {
+    --pt-tone: var(--pt-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 9px 2px 8px;
+    border-radius: var(--pt-badge-radius, 999px);
+    background: color-mix(in srgb, var(--pt-tone) 11%, transparent);
+    color: var(--pt-tone) !important;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+    white-space: nowrap;
+}
+
+body.wcu-portal-themed .wcu-pt-status::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+}
+
+body.wcu-portal-themed .wcu-pt-status--good { --pt-tone: var(--pt-good); }
+body.wcu-portal-themed .wcu-pt-status--warn { --pt-tone: var(--pt-warn); }
+body.wcu-portal-themed .wcu-pt-status--bad { --pt-tone: var(--pt-bad); }
+
+/* Product breakdown opened with MORE under an order or a month: a tinted inset block with
+   its own small headings, a hairline between products, and the same text alignment as
+   the table it sits in. The cells carry inline "padding: 0 / 4px 10px !important", which
+   no stylesheet can override, so the inner spacing comes from transparent borders. */
+body.wcu-portal-themed table.wcuTable .listtheproducts-summary > tr > td {
+    background: var(--pt-subtle) !important;
+    background-clip: border-box;
+    text-align: var(--pt-cell-align) !important;
+    vertical-align: middle;
+    font-size: 13px !important;
+}
+
+body.wcu-portal-themed table.wcuTable .wcuTableHead-summary,
+body.wcu-portal-themed table.wcuTable .listtheproducts-summary > tr > td.wcuTableHead-summary {
+    color: var(--pt-faint) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding: 12px 16px 6px !important;
+    border: 0 !important;
+    box-shadow: inset 0 1px 0 var(--pt-line-strong);
+}
+
+body.wcu-portal-themed table.wcuTable .listtheproducts-summary .wcuTableRowDropdown > td {
+    border: 0 !important;
+    border-top: 5px solid transparent !important;
+    border-bottom: 5px solid transparent !important;
+    border-left: 6px solid transparent !important;
+    border-right: 6px solid transparent !important;
+    box-shadow: inset 0 -1px 0 var(--pt-line);
+    color: var(--pt-text) !important;
+}
+
+/* The product name cell has no padding at all inline. */
+body.wcu-portal-themed table.wcuTable .listtheproducts-summary .wcuTableRowDropdown > td:first-child {
+    border-left-width: 16px !important;
+    border-top-width: 9px !important;
+    border-bottom-width: 9px !important;
+}
+
+body.wcu-portal-themed table.wcuTable .listtheproducts-summary .wcuTableRowDropdown > td a {
+    margin-left: 4px;
+    color: var(--pt-faint) !important;
+}
+
+body.wcu-portal-themed table.wcuTable .listtheproducts-summary .wcuTableRowDropdown > td a:hover {
+    color: var(--pt-link) !important;
+}
+
+body.wcu-portal-themed table.wcuTable .listtheproducts-summary .wcuTableRowDropdown:last-of-type > td {
+    box-shadow: inset 0 -1px 0 var(--pt-line-strong);
+}
+
+/* An empty 15px row closed each breakdown; the block's own edge separates it now. */
+body.wcu-portal-themed table.wcuTable .listtheproducts-summary > tr[style*="height: 15px"] {
+    display: none;
+}
+
+/* The order or month whose products are open reads as the head of the block. */
+body.wcu-portal-themed table.wcuTable tbody:has(+ .listtheproducts-summary[style*="table-row-group"]) > tr > td,
+body.wcu-portal-themed table.wcuTable tr:has(+ .listtheproducts-summary[style*="table-row-group"]) > td {
+    background: var(--pt-subtle) !important;
+    border-bottom-color: transparent !important;
+}
+
+/* Phones get the plain list version of the breakdown: a tinted card under the order, with
+   no empty label column (the stacked rows' 50% inset is for label / value pairs). */
+body.wcu-portal-themed .listtheproducts-small td {
+    background: var(--pt-subtle) !important;
+    font-size: 13px !important;
+}
+
+@media only screen and (max-width: 760px) {
+    body.wcu-portal-themed table.wcuTable tr.listtheproducts-small {
+        margin-top: -6px;
+        border: 1px solid var(--pt-table-border) !important;
+        border-top: 0 !important;
+        border-radius: 0 0 var(--pt-radius-sm) var(--pt-radius-sm);
+        overflow: hidden;
+    }
+    body.wcu-portal-themed table.wcuTable tr.listtheproducts-small > td {
+        padding: 12px 14px 14px !important;
+        border: 0 !important;
+        background: var(--pt-subtle) !important;
+        line-height: 1.6;
+    }
+    body.wcu-portal-themed table.wcuTable tr.listtheproducts-small strong + br {
+        display: none;
+    }
+    body.wcu-portal-themed table.wcuTable tr.listtheproducts-small {
+        padding: 0 !important;
+        background: var(--pt-subtle) !important;
+    }
+    /* The order card and its open list read as one block (the desktop breakdown's tbody,
+       hidden here, can sit between the two). */
+    body.wcu-portal-themed table.wcuTable tbody:has(+ tbody > tr.listtheproducts-small:not([style*="none"])) > tr.wcuTableRow,
+    body.wcu-portal-themed table.wcuTable tbody:has(+ .listtheproducts-summary + tbody > tr.listtheproducts-small:not([style*="none"])) > tr.wcuTableRow {
+        margin-bottom: 0 !important;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    body.wcu-portal-themed table.wcuTable tr.listtheproducts-small > td:before {
+        content: none !important;
+    }
+    body.wcu-portal-themed table.wcuTable tr.listtheproducts-small strong {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--pt-faint);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+}
+
+body.wcu-portal-themed .listproductsbutton,
+body.wcu-portal-themed .listproductsmonthlybutton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border: 1px solid var(--pt-control-border);
+    border-radius: var(--pt-radius-xs);
+    background: var(--pt-control-bg);
+    color: var(--pt-text) !important;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-decoration: none !important;
+    white-space: nowrap;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+body.wcu-portal-themed .listproductsbutton:hover,
+body.wcu-portal-themed .listproductsmonthlybutton:hover {
+    border-color: var(--wcu-button);
+    color: var(--wcu-button) !important;
+}
+
+/* The button is taller than a line of text; without this, rows that have one are taller
+   than rows that do not (months with no orders, for example). */
+body.wcu-portal-themed table.wcuTable .listproductsbutton,
+body.wcu-portal-themed table.wcuTable .listproductsmonthlybutton {
+    margin: -6px 0;
+    vertical-align: middle;
+}
+
+/* Previous / Next under the clicks and orders tables. */
+body.wcu-portal-themed p:has(> .wcusage-clicks-next-page) {
+    margin-top: 12px !important;
+    display: flex;
+    gap: 6px;
+}
+
+body.wcu-portal-themed .wcusage-clicks-prev-page,
+body.wcu-portal-themed .wcusage-clicks-next-page,
+body.wcu-portal-themed .wcusage-orders-pagination .wcusage-orders-page-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border: 1px solid var(--pt-control-border);
+    border-radius: var(--pt-radius-xs);
+    background: var(--pt-control-bg) !important;
+    color: var(--pt-text) !important;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 18px;
+    text-decoration: none !important;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+body.wcu-portal-themed .wcusage-clicks-prev-page:hover,
+body.wcu-portal-themed .wcusage-clicks-next-page:hover,
+body.wcu-portal-themed .wcusage-orders-pagination .wcusage-orders-page-btn:hover {
+    border-color: var(--wcu-button);
+    color: var(--wcu-button) !important;
+}
+
+body.wcu-portal-themed .wcusage-clicks-prev-page i,
+body.wcu-portal-themed .wcusage-clicks-next-page i {
+    font-size: 11px !important;
+}
+
+body.wcu-portal-themed .wcuOrdersStatuses {
+    color: var(--pt-muted);
+    font-size: 13px;
+}
+
+/* Rates: product photos as thumbnails, so each row is a row and not a gallery. */
+body.wcu-portal-themed .wcu-rates-image {
+    width: 64px;
+}
+
+body.wcu-portal-themed .wcu-rates-image img {
+    display: block;
+    width: 44px !important;
+    height: 44px !important;
+    max-width: none;
+    margin: 0 auto;
+    object-fit: cover;
+    border-radius: var(--pt-radius-xs);
+    box-shadow: 0 0 0 1px var(--pt-line-strong);
+}
+
+body.wcu-portal-themed .wcu-rates-product a {
+    font-weight: 500;
+}
+
+body.wcu-portal-themed .wcu-rates-commission {
+    font-weight: 600;
+}
+
+body.wcu-portal-themed .wcusage-search-form input[type="text"] {
+    font-size: 14px !important;
+}
+
+/* Rewards log (Bonuses tab) is a plain table: match the others. */
+body.wcu-portal-themed .wcusage-rewards-log-table th,
+body.wcu-portal-themed .wcusage-rewards-log-table td {
+    text-align: left;
+}
+
+/* Phones: the stacked-card tables from css/style.css, with lighter borders. */
+@media only screen and (max-width: 760px) {
+    body.wcu-portal-themed .wcuTable {
+        border: 0 !important;
+        background: transparent;
+        overflow: visible;
+    }
+    body.wcu-portal-themed .wcuTable tr.wcuTableRow {
+        background: var(--pt-panel) !important;
+        border: 1px solid var(--pt-table-border);
+        border-radius: var(--pt-radius-sm);
+        overflow: hidden;
+    }
+    /* Each stacked cell carries its column label on the left half (td:before). */
+    body.wcu-portal-themed table.wcuTable td,
+    body.wcu-portal-themed table.wcuTable .wcuTableCell {
+        padding: 10px 14px 10px 50% !important;
+        text-align: left !important;
+    }
+    body.wcu-portal-themed .wcuTable td:before {
+        top: 10px;
+        left: 14px;
+        color: var(--pt-muted);
+        font-weight: 600;
+        font-size: 13px;
+    }
+    body.wcu-portal-themed .wcu-rates-image img {
+        margin: 0;
+    }
+}
+
+/* Dark mode: keep links and labels inside tables and the payouts box readable. */
+body.wcu-portal-themed.dark-mode .wcuTable a,
+body.wcu-portal-themed.dark-mode .wcusage-rewards-log-table a {
+    color: var(--pt-link) !important;
+}
+
+body.wcu-portal-themed .payouts-box strong {
+    color: var(--pt-text) !important;
+}
+
+/* =========================================================================
+ * Buttons
+ * ========================================================================= */
+
+body.wcu-portal-themed .wcu-button-export,
+body.wcu-portal-themed #wcu-monthly-orders-button,
+body.wcu-portal-themed #wcu-orders-button,
+body.wcu-portal-themed #wcu-summary-button,
+body.wcu-portal-themed #wcusage_copylink,
+body.wcu-portal-themed #wcu-paypal-button,
+body.wcu-portal-themed #submitpayoutno,
+body.wcu-portal-themed #submitpayoutyes,
+body.wcu-portal-themed .wcu-paypal-button,
+body.wcu-portal-themed #wcu6 .woocommerce-EditAccountForm .woocommerce-Button,
+body.wcu-portal-themed #wcu-add-campaign-button,
+body.wcu-portal-themed #wcu-add-directlink-button,
+body.wcu-portal-themed #wcu-add-mlainvite-button,
+body.wcu-portal-themed .wcu-save-settings-button,
+body.wcu-portal-themed #wcu6 button,
+body.wcu-portal-themed #wcu-register-button,
+body.wcu-portal-themed .wcusage-login-form-col .woocommerce-button,
+body.wcu-portal-themed .wcusage_copylink,
+body.wcu-portal-themed .wcusage_creativelink,
+body.wcu-portal-themed .wcu-coupon-list-button,
+body.wcu-portal-themed .product-rates-search,
+body.wcu-portal-themed .product-rates-copy,
+body.wcu-portal-themed #wcu-download-qr,
+body.wcu-portal-themed .login-registration-container .woocommerce-form-login__submit,
+body.wcu-portal-themed .registration-form input[type="submit"],
+body.wcu-portal-themed .wcu-mobile-menu-close {
+    background: var(--wcu-button) !important;
+    color: var(--wcu-button-font) !important;
+    border: 1px solid var(--wcu-button) !important;
+    border-radius: var(--pt-radius-btn) !important;
+    padding: 8px 15px !important;
+    font-size: 14px !important;
+    font-weight: 600;
+    line-height: 18px !important;
+    letter-spacing: 0.005em;
+    text-shadow: none !important;
+    box-shadow: var(--pt-btn-shadow) !important;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+body.wcu-portal-themed .wcu-button-export:hover,
+body.wcu-portal-themed #wcu-monthly-orders-button:hover,
+body.wcu-portal-themed #wcu-orders-button:hover,
+body.wcu-portal-themed #wcu-summary-button:hover,
+body.wcu-portal-themed #wcusage_copylink:hover,
+body.wcu-portal-themed #wcu-paypal-button:hover,
+body.wcu-portal-themed #submitpayoutno:hover,
+body.wcu-portal-themed #submitpayoutyes:hover,
+body.wcu-portal-themed .wcu-paypal-button:hover,
+body.wcu-portal-themed #wcu6 .woocommerce-EditAccountForm .woocommerce-Button:hover,
+body.wcu-portal-themed #wcu-add-campaign-button:hover,
+body.wcu-portal-themed #wcu-add-directlink-button:hover,
+body.wcu-portal-themed #wcu-add-mlainvite-button:hover,
+body.wcu-portal-themed .wcu-save-settings-button:hover,
+body.wcu-portal-themed #wcu6 button:hover,
+body.wcu-portal-themed #wcu-register-button:hover,
+body.wcu-portal-themed .wcusage-login-form-col .woocommerce-button:hover,
+body.wcu-portal-themed .wcusage_copylink:hover,
+body.wcu-portal-themed .wcusage_creativelink:hover,
+body.wcu-portal-themed .wcu-coupon-list-button:hover,
+body.wcu-portal-themed .product-rates-search:hover,
+body.wcu-portal-themed .product-rates-copy:hover,
+body.wcu-portal-themed #wcu-download-qr:hover,
+body.wcu-portal-themed .login-registration-container .woocommerce-form-login__submit:hover,
+body.wcu-portal-themed .registration-form input[type="submit"]:hover,
+body.wcu-portal-themed .wcu-mobile-menu-close:hover {
+    background: var(--wcu-button-hover) !important;
+    border-color: var(--wcu-button-hover) !important;
+    color: var(--wcu-button-hover-font) !important;
+}
+
+/* Copy and Short URL are 4px apart (a space): give them the same 8px as other button pairs. */
+body.wcu-portal-themed .referral-url-box #generate-short-url {
+    margin-left: 4px;
+}
+
+/* Small inline buttons: copy, short URL, QR, product copy links. */
+body.wcu-portal-themed .referral-url-box .wcusage_copylink,
+body.wcu-portal-themed .referral-url-box #wcusage_copylink,
+body.wcu-portal-themed .product-rates-copy {
+    padding: 5px 11px !important;
+    font-size: 13px !important;
+}
+
+body.wcu-portal-themed .wcusage-social-icon {
+    color: var(--wcu-button) !important;
+    transition: color 0.15s ease;
+}
+
+body.wcu-portal-themed .wcusage-social-icon:hover {
+    color: var(--wcu-button-hover) !important;
+}
+
+/* =========================================================================
+ * Form fields
+ * ========================================================================= */
+
+body.wcu-portal-themed .content-body input[type="text"],
+body.wcu-portal-themed .content-body input[type="email"],
+body.wcu-portal-themed .content-body input[type="url"],
+body.wcu-portal-themed .content-body input[type="number"],
+body.wcu-portal-themed .content-body input[type="date"],
+body.wcu-portal-themed .content-body input[type="month"],
+body.wcu-portal-themed .content-body input[type="week"],
+body.wcu-portal-themed .content-body input[type="time"],
+body.wcu-portal-themed .content-body input[type="datetime-local"],
+body.wcu-portal-themed .content-body input[type="password"],
+body.wcu-portal-themed .content-body input[type="search"],
+body.wcu-portal-themed .content-body input[type="tel"],
+body.wcu-portal-themed .content-body select,
+body.wcu-portal-themed .content-body textarea,
+body.wcu-portal-themed .login-registration-container input[type="text"],
+body.wcu-portal-themed .login-registration-container input[type="email"],
+body.wcu-portal-themed .login-registration-container input[type="password"],
+body.wcu-portal-themed .login-registration-container select,
+body.wcu-portal-themed .login-registration-container textarea {
+    box-sizing: border-box;
+    min-height: var(--pt-input-height);
+    /* Several plugin rules and inline styles trim this to 5px, leaving text against the edge. */
+    padding: 0 12px !important;
+    border: 1px solid var(--pt-input-border) !important;
+    border-radius: var(--pt-radius-input) !important;
+    background: var(--pt-input-bg);
+    color: var(--pt-text);
+    font-size: 14px !important;
+    box-shadow: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* One exact height for every single-line field and select, so fields side by side always
+   match (min-height alone let some grow a few pixels from plugin padding and line height). */
+body.wcu-portal-themed .content-body input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="hidden"]):not([type="file"]):not([type="color"]):not([type="range"]),
+body.wcu-portal-themed .content-body select:not([multiple]),
+body.wcu-portal-themed .login-registration-container input[type="text"],
+body.wcu-portal-themed .login-registration-container input[type="email"],
+body.wcu-portal-themed .login-registration-container input[type="password"],
+body.wcu-portal-themed .login-registration-container select:not([multiple]) {
+    height: var(--pt-input-height) !important;
+}
+
+/* Payout method details (bank, PayPal, Wise fields) are bare inputs: give them air. */
+body.wcu-portal-themed #wcu-settings-card-payout input:not([type="checkbox"]):not([type="radio"]),
+body.wcu-portal-themed #wcu-settings-card-payout select {
+    margin-bottom: 12px;
+}
+
+body.wcu-portal-themed .content-body textarea,
+body.wcu-portal-themed .login-registration-container textarea {
+    padding: 10px 12px !important;
+}
+
+body.wcu-portal-themed .content-body input::placeholder,
+body.wcu-portal-themed .login-registration-container input::placeholder {
+    color: var(--pt-faint);
+    opacity: 1;
+}
+
+body.wcu-portal-themed .content-body input:focus,
+body.wcu-portal-themed .content-body select:focus,
+body.wcu-portal-themed .content-body textarea:focus,
+body.wcu-portal-themed .login-registration-container input:focus,
+body.wcu-portal-themed .login-registration-container textarea:focus {
+    border-color: var(--wcu-button) !important;
+    box-shadow: 0 0 0 3px var(--pt-focus) !important;
+    outline: none !important;
+}
+
+body.wcu-portal-themed .content-body input[type="checkbox"],
+body.wcu-portal-themed .content-body input[type="radio"] {
+    accent-color: var(--wcu-button);
+}
+
+/* Inline forms (add campaign, add direct link, product search): fields and buttons share
+   one height and sit a fixed gap apart, instead of the floats and 2px gaps of the markup. */
+body.wcu-portal-themed #wcu-add-campaign,
+body.wcu-portal-themed #wcu-add-directlink,
+body.wcu-portal-themed #product_search_form {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 0 !important;
+}
+
+body.wcu-portal-themed #wcu-add-campaign > input,
+body.wcu-portal-themed #wcu-add-directlink > input,
+body.wcu-portal-themed #wcu-add-directlink > select,
+body.wcu-portal-themed #product_search_form > input {
+    float: none !important;
+    height: var(--pt-input-height) !important;
+    min-height: var(--pt-input-height) !important;
+    margin: 0 !important;
+    font-size: 14px !important;
+}
+
+body.wcu-portal-themed #wcu-add-campaign > input[type="submit"],
+body.wcu-portal-themed #wcu-add-directlink > input[type="submit"],
+body.wcu-portal-themed #product_search_form > input[type="submit"] {
+    flex: none;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    line-height: 1 !important;
+}
+
+body.wcu-portal-themed #wcu-add-campaign-name {
+    flex: 1 1 0;
+    width: auto !important;
+    min-width: 0;
+}
+
+body.wcu-portal-themed #wcu-add-directlink {
+    margin: 4px 0 16px !important;
+}
+
+/* Its inline "margin-left: 2px !important" cannot be overridden: shift it back instead. */
+body.wcu-portal-themed #wcu-add-directlink-button {
+    position: relative;
+    left: -2px;
+}
+
+body.wcu-portal-themed #wcu-add-directlink-website {
+    flex: 0 1 280px;
+    max-width: none !important;
+}
+
+body.wcu-portal-themed #wcu-add-directlink-campaign {
+    flex: 0 1 200px;
+    min-width: 0 !important;
+    max-width: none !important;
+}
+
+body.wcu-portal-themed #product_search_form > input[type="text"] {
+    width: 260px !important;
+}
+
+/* Rates: the search sits on the title's line, centred on it (classic pulls it up a fixed
+   55px past a <br>). Title line box = size x 1.35; then the 18px gap under the title. */
+body.wcu-portal-themed .wcusage-product-rates > .wcu-pt-page-title + br {
+    display: none;
+}
+
+@media only screen and (min-width: 760px) {
+    body.wcu-portal-themed .wcusage-product-rates > .wcusage-search-form {
+        margin: calc(-18px - var(--pt-page-title-size) * 0.675 - var(--pt-input-height) / 2) 0 0 !important;
+    }
+}
+
+/* Bonuses: a stray <br> doubled the space under the title. */
+body.wcu-portal-themed .show_bonuses > br {
+    display: none;
+}
+
+@media only screen and (max-width: 759px) {
+    body.wcu-portal-themed #wcu-add-directlink > input,
+    body.wcu-portal-themed #wcu-add-directlink > select {
+        flex: 1 1 100%;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
+    /* Product search: the field takes the room the button leaves. */
+    body.wcu-portal-themed #product_search_form > input[type="text"] {
+        flex: 1 1 0;
+        width: auto !important;
+        min-width: 0;
+        max-width: none !important;
+    }
+    body.wcu-portal-themed .wcusage-search-form {
+        float: none !important;
+        height: auto !important;
+        margin: 0 0 14px !important;
+    }
+    /* Export matches the full-width Filter button above it. */
+    body.wcu-portal-themed .wcu-filters-col2 .wcu-button-export {
+        width: 100%;
+    }
+    /* Page URL fields (Referral URL, Creatives) fill the row like the selects beside them. */
+    body.wcu-portal-themed .wcusage_custom_ref_url,
+    body.wcu-portal-themed .wcusage_custom_ref_url_creative {
+        width: 100% !important;
+    }
+    body.wcu-portal-themed #wcu-creatives-campaign {
+        flex: 1 1 100%;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 8px 0 0 !important;
+    }
+}
+
+/* Referral URL: "Page URL" on the left, the campaign picker on the right, both starting
+   on the same line under the tab title, labelled the same way, with a full-width select
+   and the "add campaign" field and button sharing the row beneath it. */
+body.wcu-portal-themed .wcu-campaigns-col1 p,
+body.wcu-portal-themed .wcu-campaigns-col2 p {
+    margin: 0 !important;
+}
+
+body.wcu-portal-themed .wcu-campaigns-col1 p > br,
+body.wcu-portal-themed .wcu-campaigns-col2 p > br,
+body.wcu-portal-themed .wcu-campaigns-col1 > br {
+    display: none;
+}
+
+body.wcu-portal-themed .wcu-campaigns-col1 strong,
+body.wcu-portal-themed .wcu-campaigns-col2 strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--pt-text);
+}
+
+body.wcu-portal-themed .wcu-campaigns-col2 {
+    margin-top: 0 !important;
+    text-align: left !important;
+}
+
+body.wcu-portal-themed #wcu-referral-campaign {
+    float: none !important;
+    display: block;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+body.wcu-portal-themed #wcu-add-campaign {
+    width: 100%;
+    margin: 8px 0 0 !important;
+}
+
+/* The field sits straight under its label, like the select opposite (classic adds 5px). */
+body.wcu-portal-themed .wcusage_custom_ref_url {
+    margin: 0 !important;
+}
+
+/* Side by side from tablet width up. Classic's columns are display: table, which will not
+   shrink below the 300px URL field, so on narrower screens (or in themes with roomier
+   panels) the campaign column dropped below the URL column, leaving a gap above it. As
+   plain blocks the URL column gives way instead, and its field shrinks with it. */
+@media only screen and (min-width: 760px) {
+    body.wcu-portal-themed .wcu-campaigns-col1 {
+        display: block;
+        float: left;
+        width: calc(100% - 300px - 24px);
+    }
+    body.wcu-portal-themed .wcu-campaigns-col2 {
+        display: block;
+        float: right;
+        width: 300px;
+    }
+    body.wcu-portal-themed .wcusage_custom_ref_url {
+        max-width: 100% !important;
+    }
+}
+
+@media only screen and (min-width: 760px) and (max-width: 1100px) {
+    body.wcu-portal-themed .wcu-campaigns-col1 {
+        width: calc(100% - 240px - 20px);
+    }
+    body.wcu-portal-themed .wcu-campaigns-col2 {
+        width: 240px;
+    }
+}
+
+/* Wide screens: the campaign select and the "add campaign" field and button share one row,
+   so the campaign side is one row of controls, level with the Page URL field opposite. */
+@media only screen and (min-width: 1200px) {
+    body.wcu-portal-themed .wcu-campaigns-col1 {
+        width: calc(100% - 560px - 24px);
+    }
+    body.wcu-portal-themed .wcu-campaigns-col2 {
+        display: grid;
+        grid-template-columns: 200px minmax(0, 1fr);
+        column-gap: 8px;
+        align-items: end;
+        width: 560px;
+    }
+    body.wcu-portal-themed .wcu-campaigns-col2 > div[style*="clear"] {
+        display: none;
+    }
+    body.wcu-portal-themed .wcu-campaigns-col2 > p {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    body.wcu-portal-themed .wcu-campaigns-col2 > #wcu-add-campaign {
+        grid-column: 2;
+        grid-row: 1;
+        margin: 0 !important;
+        flex-wrap: nowrap;
+    }
+}
+
+@media only screen and (max-width: 759px) {
+    body.wcu-portal-themed .wcu-campaigns-col1,
+    body.wcu-portal-themed .wcu-campaigns-col2 {
+        text-align: left !important;
+    }
+    body.wcu-portal-themed .wcu-campaigns-col2 {
+        margin-top: 16px !important;
+    }
+}
+
+body.wcu-portal-themed .referral-url-box {
+    margin-top: 20px !important;
+}
+
+/* A <br> and a 25px inline margin left extra space above the Referral Statistics rule. */
+body.wcu-portal-themed .referral-url-box + br {
+    display: none;
+}
+
+body.wcu-portal-themed #wcu-referral-stats-section {
+    margin-top: 0 !important;
+}
+
+/* "Page 1 / 86" on the same line as the Previous / Next buttons. */
+body.wcu-portal-themed .wcu-clicks-pagination > p[style*="float: left"] {
+    margin-top: 12px !important;
+    font-size: 12.5px !important;
+    line-height: 30px;
+    color: var(--pt-muted);
+}
+
+/* Creatives: the page URL field and campaign select are 8px apart (a space plus 4px), and
+   the <br> that comes before them when the tab has no title of its own is dropped. */
+body.wcu-portal-themed br:has(+ .wcusage_custom_ref_url_creative) {
+    display: none;
+}
+
+@media only screen and (min-width: 760px) {
+    body.wcu-portal-themed #wcu-creatives-campaign {
+        max-width: 220px !important;
+        margin-left: 4px;
+    }
+}
+
+/* "Converted Only" beside the Recent Clicks title: same line height as the title, so the
+   two sit on one line, and a label size that matches the other form labels. */
+body.wcu-portal-themed p:has(> label[for="wcu-checkbox-clicks-converted"]) {
+    margin-top: 20px !important;
+    font-size: 13.5px !important;
+    line-height: calc(var(--pt-title-size) * 1.35) !important;
+}
+
+body.wcu-portal-themed label[for="wcu-checkbox-clicks-converted"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--pt-muted);
+    cursor: pointer;
+}
+
+body.wcu-portal-themed #wcu-checkbox-clicks-converted {
+    margin: 0;
+}
+
+body.wcu-portal-themed .wcusage_settings_form label,
+body.wcu-portal-themed .wcu-order-filters-field {
+    font-size: 13.5px;
+    color: var(--pt-muted);
+}
+
+/* Filter bar (Referred Orders, Monthly Summary): the panel padding leaves less room, so
+   give the filters the width the Export button does not need, keeping them on one row. */
+@media only screen and (min-width: 940px) {
+    body.wcu-portal-themed .wcu-filters-col1 {
+        width: calc(100% - 130px);
+    }
+    body.wcu-portal-themed .wcu-filters-col2 {
+        width: 130px;
+    }
+}
+
+/* The filter columns are a fixed 70px tall with the 40px controls centred, which left
+   15px above them on top of the title's gap. The bar now starts right under the title. */
+body.wcu-portal-themed .wcu-filters-col1,
+body.wcu-portal-themed .wcu-filters-col2 {
+    height: auto !important;
+    min-height: 0 !important;
+    margin-bottom: 16px;
+}
+
+/* =========================================================================
+ * Referral URL tab
+ * ========================================================================= */
+
+/* The referral link as a share card. Markup, in order: a <p> with the "Referral Link"
+   label, Copy, Short URL, a <br> and the link (#p1, swapped for #p1short once a short
+   link is made); the share icons; a <p> with "QR Code" and its buttons; the QR panel.
+   Laid out as: the label, then the link in a full-width field with Copy and Short URL
+   beside it, then the share icons on the left and the QR control on the right. */
+body.wcu-portal-themed .referral-url-box {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 16px;
+    align-items: center;
+    padding: 22px 24px !important;
+    background: var(--pt-inset-bg);
+    border: 1px solid var(--pt-inset-border);
+    border-radius: var(--pt-radius-sm);
+}
+
+body.wcu-portal-themed .referral-url-box > * {
+    grid-column: 1 / -1;
+}
+
+body.wcu-portal-themed .referral-url-box > p:empty,
+body.wcu-portal-themed .referral-url-box > div[style*="clear"] {
+    display: none;
+}
+
+/* Label, link field and its two buttons. */
+body.wcu-portal-themed .referral-url-box > p:first-of-type {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
+    align-items: center;
+    margin: 0 0 18px !important;
+}
+
+body.wcu-portal-themed .referral-url-box > p:first-of-type > strong {
+    grid-column: 1 / -1;
+    margin-bottom: -2px;
+    color: var(--pt-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+body.wcu-portal-themed .referral-url-box > p:first-of-type > br {
+    display: none;
+}
+
+body.wcu-portal-themed .referral-url-box > p:first-of-type > .wcu-urllink {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+body.wcu-portal-themed .referral-url-box #wcusage_copylink {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+body.wcu-portal-themed .referral-url-box #generate-short-url {
+    grid-column: 3;
+    grid-row: 2;
+    margin-left: 0;
+    background: var(--pt-control-bg) !important;
+    border-color: var(--pt-control-border) !important;
+    color: var(--pt-text) !important;
+}
+
+body.wcu-portal-themed .referral-url-box #generate-short-url:hover {
+    border-color: var(--wcu-button) !important;
+    color: var(--wcu-button) !important;
+}
+
+body.wcu-portal-themed .referral-url-box #wcusage_copylink,
+body.wcu-portal-themed .referral-url-box #generate-short-url {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: var(--pt-input-height);
+    margin: 0 !important;
+    padding: 0 16px !important;
+    font-size: 13.5px !important;
+    white-space: nowrap;
+}
+
+/* The link itself, as a read-only field. */
+body.wcu-portal-themed .wcu-urllink {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-height: var(--pt-input-height);
+    margin: 0 !important;
+    padding: 0 14px !important;
+    background: var(--pt-panel) !important;
+    border: 1px solid var(--pt-line-strong);
+    border-radius: var(--pt-radius-input);
+    color: var(--pt-text) !important;
+    font-family: Menlo, Consolas, "Courier New", monospace;
+    font-size: 13.5px !important;
+    line-height: calc(var(--pt-input-height) - 2px) !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: all;
+}
+
+/* Share icons as small square buttons. */
+body.wcu-portal-themed .referral-url-box > #wcusage_button_share {
+    grid-column: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0 !important;
+}
+
+body.wcu-portal-themed .referral-url-box .wcusage-social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin: 0 !important;
+    background: var(--pt-control-bg);
+    border: 1px solid var(--pt-control-border);
+    border-radius: var(--pt-radius-xs);
+    text-decoration: none !important;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+body.wcu-portal-themed .referral-url-box .wcusage-social-link:hover {
+    border-color: var(--wcu-button);
+}
+
+body.wcu-portal-themed .referral-url-box .wcusage-social-icon {
+    margin: 0 !important;
+    font-size: 17px !important;
+    line-height: 1;
+}
+
+/* QR control on the right of the share row. */
+body.wcu-portal-themed .referral-url-box > p:nth-of-type(2) {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 !important;
+}
+
+body.wcu-portal-themed .referral-url-box > p:nth-of-type(2) > strong {
+    color: var(--pt-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+body.wcu-portal-themed .referral-url-box .wcusage_landing_qr_show,
+body.wcu-portal-themed .referral-url-box #wcusage_landing_qr_hide {
+    height: 36px;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    line-height: 1 !important;
+    font-size: 13px !important;
+}
+
+/* The QR code (opened on load by theme.js) on the right of the card, beside the link and
+   share icons, with its colour picker and Download button under it. Once it is showing,
+   the "QR Code: Generate / Hide" row is not needed. */
+body.wcu-portal-themed .referral-url-box > .display-qr-code {
+    grid-column: 1 / -1;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: none !important;
+    border: 0 !important;
+    text-align: center;
+}
+
+body.wcu-portal-themed .referral-url-box:has(.display-qr-code canvas, .display-qr-code img) > p:nth-of-type(2) {
+    display: none;
+}
+
+body.wcu-portal-themed .referral-url-box .wcu-qr-code {
+    display: block;
+    line-height: 0;
+}
+
+body.wcu-portal-themed .referral-url-box .wcu-qr-code img,
+body.wcu-portal-themed .referral-url-box .wcu-qr-code canvas {
+    width: 132px !important;
+    height: 132px !important;
+    margin: 0 auto;
+    box-sizing: content-box;
+}
+
+body.wcu-portal-themed .referral-url-box .wcu-qr-code-color-picker {
+    display: inline-flex;
+    vertical-align: middle;
+    margin: 10px 4px 0 0 !important;
+}
+
+body.wcu-portal-themed .referral-url-box .wcu-qr-code-color-picker-input {
+    width: 32px;
+    height: 32px !important;
+    min-height: 0 !important;
+    padding: 2px !important;
+    border: 1px solid var(--pt-control-border) !important;
+    border-radius: var(--pt-radius-xs) !important;
+    background: var(--pt-control-bg);
+    cursor: pointer;
+}
+
+/* Download as a square icon button, the same size as the colour field beside it. The
+   word stays in the markup (at zero size) so screen readers still announce it, and
+   theme.js gives the button a matching tooltip. */
+body.wcu-portal-themed .referral-url-box #wcu-download-qr {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    box-sizing: border-box;
+    width: 32px;
+    height: 32px;
+    margin: 10px 0 0 !important;
+    padding: 0 !important;
+    border-radius: var(--pt-radius-xs) !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+}
+
+body.wcu-portal-themed .referral-url-box #wcu-download-qr i {
+    font-size: 14px;
+    line-height: 1;
+}
+
+@media only screen and (min-width: 1200px) {
+    body.wcu-portal-themed .referral-url-box:has(.display-qr-code canvas, .display-qr-code img) {
+        /* Empty rows above and below centre the link and share icons against the QR. */
+        grid-template-rows: 1fr auto auto 1fr;
+        align-items: start;
+        column-gap: 28px;
+    }
+    body.wcu-portal-themed .referral-url-box:has(.display-qr-code canvas, .display-qr-code img) > p:first-of-type {
+        grid-column: 1;
+        grid-row: 2;
+    }
+    body.wcu-portal-themed .referral-url-box:has(.display-qr-code canvas, .display-qr-code img) > #wcusage_button_share {
+        grid-column: 1;
+        grid-row: 3;
+    }
+    body.wcu-portal-themed .referral-url-box > .display-qr-code:has(canvas, img) {
+        grid-column: 2;
+        grid-row: 1 / -1;
+        align-self: center;
+    }
+}
+
+@media only screen and (min-width: 760px) {
+    /* The code with its colour picker and Download button in a column beside it, so the
+       panel is no taller than the link and share rows opposite. (Only once the code has
+       been drawn; until then the panel keeps the generator's own show / hide.) */
+    body.wcu-portal-themed .referral-url-box > .display-qr-code:has(canvas, img) {
+        display: grid !important;
+        grid-template-columns: auto auto;
+        grid-template-rows: 1fr auto auto 1fr;
+        column-gap: 14px;
+        align-items: center;
+        text-align: left;
+    }
+    body.wcu-portal-themed .referral-url-box .display-qr-code .wcu-qr-code {
+        grid-column: 1;
+        grid-row: 1 / -1;
+        width: max-content;
+    }
+    body.wcu-portal-themed .referral-url-box .display-qr-code .wcu-qr-code-color-picker {
+        grid-column: 2;
+        grid-row: 2;
+        margin: 0 0 8px !important;
+    }
+    body.wcu-portal-themed .referral-url-box .display-qr-code #wcu-download-qr {
+        grid-column: 2;
+        grid-row: 3;
+        margin: 0 !important;
+    }
+    body.wcu-portal-themed .referral-url-box .wcu-qr-code img,
+    body.wcu-portal-themed .referral-url-box .wcu-qr-code canvas {
+        width: 96px !important;
+        height: 96px !important;
+        padding: 8px;
+    }
+}
+
+@media only screen and (min-width: 760px) and (max-width: 1199px) {
+    body.wcu-portal-themed .referral-url-box > .display-qr-code:has(canvas, img) {
+        justify-self: start;
+        margin-top: 18px !important;
+    }
+}
+
+@media only screen and (max-width: 759px) {
+    body.wcu-portal-themed .referral-url-box > .display-qr-code:has(canvas, img) {
+        justify-self: center;
+        margin-top: 18px !important;
+    }
+}
+
+@media only screen and (max-width: 759px) {
+    body.wcu-portal-themed .referral-url-box {
+        padding: 16px !important;
+    }
+    body.wcu-portal-themed .referral-url-box > p:first-of-type {
+        grid-template-columns: 1fr 1fr;
+    }
+    body.wcu-portal-themed .referral-url-box > p:first-of-type > .wcu-urllink {
+        grid-column: 1 / -1;
+    }
+    body.wcu-portal-themed .referral-url-box #wcusage_copylink {
+        grid-column: 1;
+        grid-row: 3;
+    }
+    body.wcu-portal-themed .referral-url-box #generate-short-url {
+        grid-column: 2;
+        grid-row: 3;
+    }
+    /* No Short URL button (feature off): Copy takes the whole row. */
+    body.wcu-portal-themed .referral-url-box #wcusage_copylink:not(:has(~ #generate-short-url)) {
+        grid-column: 1 / -1;
+    }
+    body.wcu-portal-themed .referral-url-box > #wcusage_button_share,
+    body.wcu-portal-themed .referral-url-box > p:nth-of-type(2) {
+        grid-column: 1 / -1;
+    }
+    body.wcu-portal-themed .referral-url-box > p:nth-of-type(2) {
+        margin-top: 14px !important;
+    }
+}
+
+body.wcu-portal-themed .wcu-qr-code img,
+body.wcu-portal-themed .wcu-qr-code canvas {
+    padding: 10px;
+    background: #ffffff;
+    border: 1px solid var(--pt-line-strong);
+    border-radius: var(--pt-radius-sm);
+}
+
+/* =========================================================================
+ * Charts
+ * ========================================================================= */
+
+body.wcu-portal-themed .wcusagechart {
+    box-shadow: none;
+    border-radius: 0;
+    background: transparent;
+}
+
+/* =========================================================================
+ * Payouts
+ * ========================================================================= */
+
+/* The balance card at the top of the Payouts tab. Markup, in order: the "processing
+   commission" chip, a <br>, "Unpaid Commission: <u>amount</u>" (a .wcu-tab-title), the
+   payout method, then (when a payout can be requested) the amount field and button.
+   Laid out as: chip on top, the balance large on the left with the method under it, and
+   the request form on the right, level with the balance. */
+body.wcu-portal-themed .payouts-box {
+    margin-top: 8px;
+    padding: 22px 24px !important;
+    background: var(--pt-inset-bg);
+    border: 1px solid var(--pt-inset-border);
+    border-radius: var(--pt-radius-sm);
+}
+
+body.wcu-portal-themed .payouts-box > br {
+    display: none;
+}
+
+/* "Processing commission" chip. */
+body.wcu-portal-themed .payouts-box > div:first-child {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    margin: 0 0 16px !important;
+    padding: 5px 12px !important;
+    background: var(--pt-panel) !important;
+    border: 1px solid var(--pt-line-strong) !important;
+    border-radius: var(--pt-radius-xs) !important;
+    font-size: 12.5px !important;
+    color: var(--pt-muted);
+}
+
+body.wcu-portal-themed .payouts-box > div:first-child {
+    flex-wrap: wrap;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+body.wcu-portal-themed .payouts-box > div:first-child strong {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* "Unpaid Commission" as a small label, the amount large beneath it. */
+body.wcu-portal-themed .payouts-box > .wcu-tab-title {
+    margin: 0 !important;
+    color: var(--pt-muted) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0;
+}
+
+body.wcu-portal-themed .payouts-box > .wcu-tab-title u {
+    display: block;
+    margin-top: 2px;
+    color: var(--pt-text);
+    font-size: 34px;
+    font-weight: 750;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    text-decoration: none;
+    font-variant-numeric: tabular-nums;
+}
+
+body.wcu-portal-themed .payouts-box > .wcu-tab-title u span {
+    color: inherit !important;
+}
+
+body.wcu-portal-themed .payouts-box p {
+    color: var(--pt-muted);
+}
+
+/* Payout method, and any notes under the balance. */
+body.wcu-portal-themed .payouts-box > p:not(.wcu-tab-title) {
+    margin: 6px 0 0 !important;
+    font-size: 13.5px !important;
+}
+
+/* Request form: the amount field (labelled) and the button side by side. */
+body.wcu-portal-themed .payouts-box .wcu_payout_button {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+    margin: 18px 0 0;
+}
+
+body.wcu-portal-themed .payouts-box .wcu_payout_button > p {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0 !important;
+    color: var(--pt-text);
+    font-size: 13px !important;
+    font-weight: 600;
+}
+
+body.wcu-portal-themed #payout_custom_amount {
+    width: 150px !important;
+    text-align: left !important;
+    font-variant-numeric: tabular-nums;
+}
+
+body.wcu-portal-themed .payouts-box #submitpayoutyes {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: var(--pt-input-height);
+    margin: 0 !important;
+    padding: 0 18px !important;
+}
+
+@media only screen and (min-width: 760px) {
+    body.wcu-portal-themed .payouts-box:has(> .wcu_payout_button) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 32px;
+        align-items: end;
+    }
+    body.wcu-portal-themed .payouts-box:has(> .wcu_payout_button) > * {
+        grid-column: 1;
+    }
+    body.wcu-portal-themed .payouts-box:has(> .wcu_payout_button) > div:first-child {
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+    body.wcu-portal-themed .payouts-box > .wcu_payout_button {
+        grid-column: 2;
+        grid-row: 2 / span 2;
+        align-self: end;
+        margin: 0;
+    }
+}
+
+@media only screen and (max-width: 759px) {
+    body.wcu-portal-themed .payouts-box .wcu_payout_button > p {
+        flex: 1 1 100%;
+    }
+    body.wcu-portal-themed #payout_custom_amount,
+    body.wcu-portal-themed .payouts-box #submitpayoutyes {
+        width: 100% !important;
+        justify-content: center;
+    }
+    body.wcu-portal-themed .payouts-box > .wcu-tab-title u {
+        font-size: 30px;
+    }
+    body.wcu-portal-themed .payouts-box > div:first-child {
+        gap: 3px;
+        padding: 5px 10px !important;
+        font-size: 12px !important;
+    }
+    body.wcu-portal-themed .payouts-box > div:first-child > i {
+        margin-right: 2px !important;
+    }
+    body.wcu-portal-themed .payouts-box > div:first-child .wcu-tooltip {
+        margin-left: 2px !important;
+    }
+}
+
+body.wcu-portal-themed .wcu-table-payouts .wcuTableCell a {
+    font-weight: 500;
+    text-decoration: none;
+}
+
+/* =========================================================================
+ * Creatives
+ * ========================================================================= */
+
+/* Card anatomy (every type): name, description, preview (an image, video, PDF or colour
+   swatch), "Last Updated", then one button per <div>. Colour cards have no date and their
+   button sits straight in the card. Cards in a row are the same height, with the date and
+   buttons along the bottom, so rows read as one even line. */
+body.wcu-portal-themed .creatives-box-container {
+    align-items: stretch;
+}
+
+body.wcu-portal-themed .creatives-box {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 18px;
+    background: var(--pt-panel);
+    color: var(--pt-text);
+    text-align: var(--pt-creative-align, center);
+    border: 1px solid var(--pt-table-border);
+    border-radius: var(--pt-radius-sm);
+    box-shadow: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+body.wcu-portal-themed .creatives-box:hover {
+    border-color: var(--pt-box-hover-border);
+    box-shadow: var(--pt-card-hover-shadow);
+}
+
+body.wcu-portal-themed .creatives-box p,
+body.wcu-portal-themed .creatives-box span {
+    color: var(--pt-text);
+}
+
+body.wcu-portal-themed .creatives-box-name,
+body.wcu-portal-themed .creatives-box-type-color > p:first-of-type {
+    margin: 0 0 3px !important;
+    font-size: 15.5px !important;
+    font-weight: 650 !important;
+    line-height: 1.35 !important;
+    letter-spacing: -0.01em;
+}
+
+body.wcu-portal-themed .creatives-box-description,
+body.wcu-portal-themed .creatives-box-type-color > p:nth-of-type(2) {
+    margin: 0 0 14px !important;
+    color: var(--pt-muted) !important;
+    font-size: 13.5px !important;
+    line-height: 1.45 !important;
+}
+
+/* A neutral fill instead of the transparency checkerboard, and the full width of the
+   card so it lines up with the buttons below it (classic insets it to 90%). */
+body.wcu-portal-themed .creatives-box-image {
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    border: 1px solid var(--pt-line-strong);
+    border-radius: var(--pt-radius-xs);
+    background: var(--pt-subtle) !important;
+}
+
+body.wcu-portal-themed .creatives-box-last-updated {
+    margin: auto 0 12px !important;
+    padding-top: 12px;
+    color: var(--pt-faint) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+}
+
+body.wcu-portal-themed .creatives-box > div:not([class]) + div:not([class]) {
+    margin-top: 8px;
+}
+
+body.wcu-portal-themed .creatives-box .wcusage_creativelink {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    margin: 0 !important;
+}
+
+/* Colour swatches: a solid block with the hex code, and the button at the card's foot. */
+body.wcu-portal-themed .wcu-color-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 72px;
+    margin: 0 0 14px;
+    padding: 0 !important;
+    border-radius: var(--pt-radius-xs);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+    font-family: Menlo, Consolas, "Courier New", monospace;
+    font-size: 15px !important;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: copy;
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* Category headings ("1. Personalised Banners") get the same rhythm as section titles. */
+body.wcu-portal-themed #wcu7 .wcu-tab-title:not(.wcusage-subheader):not(.wcu-pt-page-title) {
+    margin: 32px 0 14px !important;
+}
+
+body.wcu-portal-themed .creatives-box-type-color > .wcusage_creativelink {
+    margin-top: auto !important;
+}
+
+/* Modern, Canvas and Spotlight: buttons two to a row (an odd last one spans the row). */
+body:is(.wcu-portal-theme-modern, .wcu-portal-theme-canvas, .wcu-portal-theme-spotlight) .creatives-box:not(.creatives-box-type-color) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: 8px;
+    align-content: stretch;
+}
+
+body:is(.wcu-portal-theme-modern, .wcu-portal-theme-canvas, .wcu-portal-theme-spotlight) .creatives-box:not(.creatives-box-type-color) > * {
+    grid-column: 1 / -1;
+}
+
+body:is(.wcu-portal-theme-modern, .wcu-portal-theme-canvas, .wcu-portal-theme-spotlight) .creatives-box:not(.creatives-box-type-color) > div:not([class]) {
+    grid-column: auto;
+    margin-top: 0 !important;
+}
+
+body:is(.wcu-portal-theme-modern, .wcu-portal-theme-canvas, .wcu-portal-theme-spotlight) .creatives-box:not(.creatives-box-type-color) > div:not([class]):nth-child(n + 3 of div:not([class])) {
+    margin-top: 8px !important;
+}
+
+body:is(.wcu-portal-theme-modern, .wcu-portal-theme-canvas, .wcu-portal-theme-spotlight) .creatives-box:not(.creatives-box-type-color) > div:not([class]):nth-last-child(1 of div:not([class])):nth-child(odd of div:not([class])) {
+    grid-column: 1 / -1;
+}
+
+body:is(.wcu-portal-theme-modern, .wcu-portal-theme-canvas, .wcu-portal-theme-spotlight) .creatives-box-last-updated {
+    align-self: end;
+}
+
+body:is(.wcu-portal-theme-modern, .wcu-portal-theme-canvas, .wcu-portal-theme-spotlight) .creatives-box .wcusage_creativelink {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    font-size: 13px !important;
+}
+
+/* =========================================================================
+ * Bonuses (their colours come from the bonus colour settings)
+ * ========================================================================= */
+
+body.wcu-portal-themed .wcusage-reward-box {
+    background: var(--pt-panel);
+    border: 1px solid var(--pt-table-border);
+    border-radius: var(--pt-radius-sm);
+    box-shadow: none;
+    box-sizing: border-box;
+    /* Two cards fill the row exactly (classic leaves 20px spare at the right), and their
+       content starts at the top, so the reward tags line up across each row. */
+    width: calc(50% - 10px);
+    justify-content: flex-start;
+    padding: 24px 22px 22px;
+}
+
+@media only screen and (max-width: 920px) {
+    body.wcu-portal-themed .wcusage-reward-box {
+        width: 100%;
+    }
+}
+
+/* The reward tag is a pill sized to its text on every screen size. */
+body.wcu-portal-themed .wcusage-reward-text {
+    align-self: center;
+    width: auto !important;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* The rewards log keeps its columns on phones and scrolls sideways inside the panel. */
+@media only screen and (max-width: 760px) {
+    body.wcu-portal-themed .wcusage-rewards-log {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    body.wcu-portal-themed .wcusage-rewards-log-table {
+        min-width: 560px;
+    }
+}
+
+body.wcu-portal-themed .wcusage-reward-box h4 {
+    font-size: 19px;
+}
+
+body.wcu-portal-themed .wcusage-reward-description {
+    color: var(--pt-muted);
+}
+
+body.wcu-portal-themed .wcusage-reward-text {
+    border-radius: var(--pt-radius-xs);
+    font-size: 14px;
+}
+
+body.wcu-portal-themed .wcusage-progress-bar,
+body.wcu-portal-themed .wcusage-progress-bar > span {
+    border-radius: var(--pt-radius-xs);
+}
+
+body.wcu-portal-themed .wcusage-reward-countdown {
+    color: var(--pt-muted);
+}
+
+/* =========================================================================
+ * Settings tab (css/tab-settings.css reads the bridged variables above)
+ * ========================================================================= */
+
+body.wcu-portal-themed .wcu-settings-modern {
+    /* tab-settings.css draws dividers, the avatar ring and the off toggle track in this
+       colour, so it must stay visible even where a theme's panels have no outline. */
+    --border-color: var(--pt-line-strong);
+    --wcu-set-radius: var(--pt-radius);
+    padding-top: 0;
+}
+
+body.wcu-portal-themed .wcu-settings-card {
+    background: var(--pt-panel);
+    border: 1px solid var(--pt-panel-border);
+    box-shadow: var(--pt-shadow);
+}
+
+body.wcu-portal-themed .wcu-settings-card__header,
+body.wcu-portal-themed .wcu-settings-card__footer,
+body.wcu-portal-themed .wcu-settings-account-card__identity {
+    border-color: var(--pt-line-strong);
+}
+
+body.wcu-portal-themed .wcu-settings-card__footer {
+    background: var(--pt-subtle);
+}
+
+body.wcu-portal-themed .wcu-settings-card__title {
+    color: var(--pt-text);
+    letter-spacing: -0.005em;
+}
+
+body.wcu-portal-themed .wcu-settings-card__icon {
+    color: var(--wcu-button);
+}
+
+body.wcu-portal-themed .wcu-settings-card__eyebrow,
+body.wcu-portal-themed .wcu-settings-hint {
+    color: var(--pt-faint);
+}
+
+/* Every field label in the Settings tab looks the same: the account fields, the statement
+   fields and the payout fields (plain paragraphs, marked .wcu-pt-label by theme.js). */
+body.wcu-portal-themed .wcu-settings-field label,
+body.wcu-portal-themed #wcu6 label:not(.wcu-settings-toggle):not(:has(input)),
+body.wcu-portal-themed #wcu6 .wcu-pt-label {
+    display: block;
+    margin: 0 0 6px !important;
+    color: var(--pt-text) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+}
+
+/* Payout detail fields fill the card like the other settings fields. */
+body.wcu-portal-themed #wcu-settings-card-payout input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+body.wcu-portal-themed #wcu-settings-card-payout select {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+body.wcu-portal-themed #wcu6 strong {
+    font-size: inherit;
+}
+
+body.wcu-portal-themed .wcu-settings-toggle__track {
+    background: var(--pt-input-border);
+}
+
+body.wcu-portal-themed .wcu-settings-toggle__label {
+    color: var(--pt-text);
+}
+
+/* Settings buttons sit in the card footer: keep them compact. */
+body.wcu-portal-themed #wcu6 .wcu-save-settings-button {
+    padding: 9px 18px !important;
+}
+
+/* =========================================================================
+ * Coupon list (an affiliate with several coupons)
+ * ========================================================================= */
+
+body.wcu-portal-themed .wcu-user-coupon-list {
+    background: var(--pt-panel);
+    border: 1px solid var(--pt-panel-border);
+    border-radius: var(--pt-radius);
+    box-shadow: var(--pt-shadow);
+    color: var(--pt-text);
+    font-size: 15px;
+}
+
+body.wcu-portal-themed .wcu-coupon-list-button {
+    display: block;
+    margin-top: 12px;
+}
+
+/* =========================================================================
+ * Tooltips
+ * ========================================================================= */
+
+body.wcu-portal-themed .wcu-tooltip .wcu-tooltip-text {
+    background: #1d2327;
+    border-radius: var(--pt-radius-xs);
+    padding: 8px 11px;
+    font-size: 12.5px;
+    box-shadow: 0 8px 20px rgba(16, 24, 40, 0.2);
+}
+
+body.wcu-portal-themed .wcu-tooltip .wcu-tooltip-text::after {
+    border-color: #1d2327 transparent transparent transparent;
+}
+
+/* =========================================================================
+ * Logged out: login and registration
+ * ========================================================================= */
+
+body.wcu-portal-themed .login-form,
+body.wcu-portal-themed .registration-form {
+    background: var(--pt-panel);
+    border: 1px solid var(--pt-panel-border);
+    border-radius: var(--pt-radius);
+    box-shadow: var(--pt-shadow);
+    box-sizing: border-box;
+}
+
+body.wcu-portal-themed .login-form h2,
+body.wcu-portal-themed .wcusage-register-form-title {
+    color: var(--pt-text);
+    letter-spacing: -0.01em;
+}
+
+body.wcu-portal-themed .registration-form label,
+body.wcu-portal-themed .woocommerce-form-login label {
+    color: var(--pt-text);
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+/* =========================================================================
+ * Custom tabs
+ * A custom tab (and other add-on tabs built the same way) is one element that is both
+ * .portal-tabcontent and .wcutabcontent; the panel rules above match it as well. Its
+ * content is whatever the admin writes, so give that content tidy defaults.
+ * ========================================================================= */
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent {
+    font-size: 14.5px;
+    line-height: 1.6;
+}
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent > :last-child {
+    margin-bottom: 0;
+}
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent :is(h1, h2, h3, h4, h5, h6) {
+    margin: 26px 0 10px;
+    color: var(--pt-text);
+    font-weight: var(--pt-title-weight);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+}
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent :is(h1, h2) { font-size: 20px; }
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent h3 { font-size: 17px; }
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent :is(h4, h5, h6) { font-size: 15px; }
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent :is(ul, ol) {
+    margin: 0 0 14px;
+    padding-left: 22px;
+}
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent li {
+    margin: 4px 0;
+}
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent :is(img, video, iframe) {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--pt-radius-xs);
+}
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent iframe {
+    border: 0;
+}
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent blockquote {
+    margin: 0 0 14px;
+    padding: 12px 16px;
+    border-left: 3px solid var(--wcu-button);
+    border-radius: 0 var(--pt-radius-xs) var(--pt-radius-xs) 0;
+    background: var(--pt-subtle);
+    color: var(--pt-muted);
+}
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent hr {
+    margin: 24px 0;
+    border: 0;
+    border-top: 1px solid var(--pt-line-strong);
+}
+
+/* Plain tables written into the content (not the plugin's own .wcuTable). */
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent table:not(.wcuTable) {
+    width: 100%;
+    margin: 0 0 16px;
+    border: 1px solid var(--pt-table-border);
+    border-radius: var(--pt-radius-sm);
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent table:not(.wcuTable) :is(th, td) {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--pt-line);
+    text-align: left;
+}
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent table:not(.wcuTable) th {
+    background: var(--wcu-table);
+    color: var(--wcu-table-font);
+    font-weight: 600;
+}
+
+body.wcu-portal-themed .wcutabcontent.portal-tabcontent table:not(.wcuTable) tr:last-child > td {
+    border-bottom: 0;
+}
+
+/* =========================================================================
+ * Keyboard focus and tab changes
+ * ========================================================================= */
+
+/* A clear focus ring for keyboard users (the classic styles remove most outlines). */
+body.wcu-portal-themed .portal-tabs .portal-tablink:focus-visible,
+body.wcu-portal-themed .content button:focus-visible,
+body.wcu-portal-themed .content input[type="submit"]:focus-visible,
+body.wcu-portal-themed .content a:focus-visible,
+body.wcu-portal-themed .wcu-settings-toggle input:focus-visible + .wcu-settings-toggle__track {
+    outline: 2px solid var(--wcu-button) !important;
+    outline-offset: 2px;
+}
+
+body.wcu-portal-themed .portal-tabs .portal-tablink:focus-visible {
+    outline-color: var(--wcu-tab-font) !important;
+    outline-offset: -2px;
+}
+
+/* A short fade as a tab opens, so switching tabs does not flash. */
+@keyframes wcu-pt-tab-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+}
+
+body.wcu-portal-themed :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent) {
+    animation: wcu-pt-tab-in 0.18s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.wcu-portal-themed :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent) {
+        animation: none;
+    }
+}
+
+/* =========================================================================
+ * Mobile
+ * ========================================================================= */
+
+@media (max-width: 768px) {
+    body.wcu-portal-themed :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent),
+    body.wcu-portal-themed #wcu1 .wcusage-tab-section {
+        padding: 18px 16px;
+    }
+    /* Classic centres titles on phones; the content under them is left-aligned. */
+    body.wcu-portal-themed .wcu-tab-title,
+    body.wcu-portal-themed .wcusage-subheader,
+    body.wcu-portal-themed .show_statistics .wcusage-stats-title {
+        text-align: left !important;
+    }
+    body.wcu-portal-themed .wcu-mobile-menu-close-wrap {
+        background: inherit;
+        border-top-color: var(--pt-side-border);
+    }
+    body.wcu-portal-themed .referral-url-box,
+    body.wcu-portal-themed .payouts-box {
+        padding: 14px !important;
+    }
+}

@@ -209,4 +209,13 @@ jQuery(document).ready(function($) {
         }
     });
 
+    // Settings info icons: open the tooltip leftwards when it would run off the right of the screen.
+    $(document).on('mouseenter focusin', '.wcu-setting-info', function() {
+        var $info = $(this).removeClass('wcu-setting-info-flip');
+        var tip = $info.children('.wcu-setting-info-text')[0];
+        if (tip && tip.getBoundingClientRect().right > document.documentElement.clientWidth - 12) {
+            $info.addClass('wcu-setting-info-flip');
+        }
+    });
+
 });

@@ -44,6 +44,9 @@ if( !function_exists( 'wcu_fs_uninstall_cleanup' ) ) {
       delete_option( "wcusage_campaigns_db_version" );
       delete_option( "wcusage_field_order_type_custom_isset" );
       delete_option( "wcusage_setup_complete" );
+      delete_option( "wcusage_setup_mode" );
+      delete_metadata( 'user', 0, 'wcusage_settings_view', '', true );
+      delete_metadata( 'user', 0, 'wcusage_getting_started_dismissed', '', true );
 
       // API, Webhooks & AI: the REST API and AI & MCP switches, recent AI
       // activity, and each admin's dismissal of the "Enable AI tools" notice.
@@ -72,6 +75,15 @@ if( !function_exists( 'wcu_fs_uninstall_cleanup' ) ) {
       // Delete Direct Links Table
       $table_name5 = $wpdb->prefix . 'wcusage_directlinks';
       $wpdb->query( "DROP TABLE IF EXISTS " . $table_name5 ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+      // Migration tool: its journal, run history and the old referral links it
+      // kept working.
+      $table_name6 = $wpdb->prefix . 'wcusage_migration_map';
+      $wpdb->query( "DROP TABLE IF EXISTS " . $table_name6 ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+      foreach ( array( 'wcusage_migration_db_version', 'wcusage_migration_state', 'wcusage_migration_runs', 'wcusage_migration_lock', 'wcusage_migration_legacy_links' ) as $migration_option ) {
+        delete_option( $migration_option );
+      }
+      delete_transient( 'wcusage_migration_detected' );
 
     }
 

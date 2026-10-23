@@ -1,0 +1,321 @@
+/*
+ * Affiliate portal theme: Sleek
+ *
+ * Built from the plugin's own admin pages: white boxes on the WordPress grey, crisp
+ * hairlines and small radii, title bars on the statistics panels, icons beside section
+ * titles, uppercase captions, a grey segmented period switcher and the white notch
+ * WordPress puts on the current menu item. Tabs, buttons, table headings and statistic
+ * icons use the portal colour settings.
+ */
+
+body.wcu-portal-theme-sleek {
+    --pt-bg: #f0f0f1;
+    --pt-panel: #ffffff;
+    --pt-panel-border: #dcdcde;
+    --pt-line: #f0f0f1;
+    --pt-line-strong: #e2e4e7;
+    --pt-subtle: #f6f7f7;
+    --pt-row-hover: #f6f7f7;
+    --pt-text: #1d2327;
+    --pt-muted: #50575e;
+    --pt-faint: #646970;
+    --pt-link: #2271b1;
+    --pt-link-hover: #135e96;
+    --pt-input-border: #8c8f94;
+    --pt-input-bg: #ffffff;
+    --pt-input-height: 40px;
+    --pt-focus: color-mix(in srgb, var(--wcu-button) 25%, transparent);
+    --pt-positive: #008a20;
+    --pt-negative: #d63638;
+
+    --pt-radius: 4px;
+    --pt-radius-sm: 4px;
+    --pt-radius-xs: 3px;
+    --pt-radius-btn: 3px;
+    --pt-radius-input: 4px;
+    --pt-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    --pt-btn-shadow: none;
+    --pt-card-hover-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+    --pt-header-bg: #ffffff;
+    --pt-header-border: #dcdcde;
+    --pt-header-icon: var(--wcu-tab);
+
+    --pt-title-size: 16px;
+    --pt-title-weight: 600;
+    --pt-title-spacing: 0;
+
+    --pt-table-border: #e2e4e7;
+    --pt-th-size: 12px;
+    --pt-th-spacing: 0.04em;
+    --pt-th-transform: uppercase;
+    --pt-th-padding: 10px 14px;
+    --pt-cell-align: center;
+    --pt-cell-padding: 11px 14px;
+
+    --pt-box-padding: 18px 18px 18px 74px;
+    --pt-box-value-size: 23px;
+    --pt-box-bg: #ffffff;
+    --pt-box-border: #e2e4e7;
+    --pt-box-hover-border: #c3c4c7;
+    --pt-box-label-size: 11.5px;
+    --pt-box-label-weight: 600;
+    --pt-box-label-spacing: 0.05em;
+    --pt-box-label-transform: uppercase;
+
+    --pt-control-border: #c3c4c7;
+    --pt-control-bg: #f6f7f7;
+    --pt-inset-bg: #f6f7f7;
+    --pt-inset-border: #dcdcde;
+
+    --pt-side-border: transparent;
+    --pt-side-hover-bg: rgba(255, 255, 255, 0.07);
+    --pt-side-item-margin: 0;
+    --pt-side-item-radius: 0;
+}
+
+/* ---------- Sidebar: like the WordPress admin menu ---------- */
+
+body.wcu-portal-theme-sleek .portal-tabs .portal-tablink {
+    position: relative;
+    font-size: 14px;
+}
+
+/* The white notch WordPress uses on the current admin menu item. */
+body.wcu-portal-theme-sleek .portal-tabs .portal-tablink.active::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    margin-top: -8px;
+    border: 8px solid transparent;
+    border-right-color: var(--pt-bg);
+}
+
+body.wcu-portal-theme-sleek .sidebar-logo {
+    padding-bottom: 18px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Header ---------- */
+
+body.wcu-portal-theme-sleek .content-header {
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+/* ---------- Page and statistics titles carry an icon in the button colour ---------- */
+
+body.wcu-portal-theme-sleek .wcu-tab-title.wcu-pt-page-title::before,
+body.wcu-portal-theme-sleek .show_statistics .wcusage-stats-title::before {
+    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free";
+    font-weight: 900;
+    font-size: 0.85em;
+    color: var(--wcu-button);
+    margin-right: 10px;
+    content: "\f200";
+}
+
+body.wcu-portal-theme-sleek #wcu1 .wcusage-tab-section:first-child .wcusage-stats-title::before { content: "\f02b"; }
+body.wcu-portal-theme-sleek #wcu1 .wcu-charts .wcusage-stats-title::before { content: "\f201"; }
+body.wcu-portal-theme-sleek #wcu1 .wcusage-tab-section:has(.wcu-statistics-orders) .wcusage-stats-title::before { content: "\f07a"; }
+body.wcu-portal-theme-sleek #wcu1 .wcusage-tab-section:has(.wcusage-payouts-link) .wcusage-stats-title::before { content: "\f53a"; }
+body.wcu-portal-theme-sleek #wcu2 .wcu-tab-title.wcu-pt-page-title::before { content: "\f073"; }
+body.wcu-portal-theme-sleek #wcu3 .wcu-tab-title.wcu-pt-page-title::before { content: "\f07a"; }
+body.wcu-portal-theme-sleek #wcu4 .wcu-tab-title.wcu-pt-page-title::before { content: "\f0c1"; }
+body.wcu-portal-theme-sleek #wcu7 .wcu-tab-title.wcu-pt-page-title::before { content: "\f302"; }
+body.wcu-portal-theme-sleek #wcu-rates .wcu-tab-title.wcu-pt-page-title::before { content: "\25"; }
+body.wcu-portal-theme-sleek #wcu5 .wcu-tab-title.wcu-pt-page-title::before { content: "\f53a"; }
+body.wcu-portal-theme-sleek #wcubonuses .wcu-tab-title.wcu-pt-page-title::before { content: "\f06b"; }
+/* Custom tabs (and add-on tabs built the same way): a neutral document icon. */
+body.wcu-portal-theme-sleek .wcutabcontent.portal-tabcontent .wcu-tab-title.wcu-pt-page-title::before { content: "\f15c"; }
+
+/* Values inside the payouts box are not section titles. */
+body.wcu-portal-theme-sleek .payouts-box .wcu-tab-title::before {
+    content: none;
+}
+
+/* ---------- Statistics panels: a title bar, like an admin meta box ---------- */
+
+body.wcu-portal-theme-sleek #wcu1 .wcusage-tab-section .wcusage-stats-title {
+    margin: -22px -26px 18px !important;
+    padding: 13px 26px;
+    border-bottom: 1px solid var(--pt-line-strong);
+    font-size: 14px !important;
+}
+
+/* Phones: the panels have 18px / 16px padding (base.css), so the bar pulls out by that. */
+@media (max-width: 768px) {
+    body.wcu-portal-theme-sleek #wcu1 .wcusage-tab-section .wcusage-stats-title {
+        margin: -18px -16px 16px !important;
+        padding: 12px 16px;
+    }
+}
+
+/* The period switcher panel has no title of its own. */
+body.wcu-portal-theme-sleek #wcu1 .wcusage-sales-stats-toggles {
+    margin: -4px 0 14px !important;
+}
+
+/* ---------- Creatives: admin-style boxes with a title strip ---------- */
+
+body.wcu-portal-theme-sleek {
+    --pt-creative-align: left;
+    --pt-badge-radius: 3px;
+}
+
+body.wcu-portal-theme-sleek .creatives-box {
+    padding: 0 16px 16px;
+    border-radius: 4px;
+}
+
+body.wcu-portal-theme-sleek .creatives-box-name,
+body.wcu-portal-theme-sleek .creatives-box-type-color > p:first-of-type {
+    margin: 0 -16px 12px !important;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--pt-line-strong);
+    background: var(--pt-subtle);
+    border-radius: 4px 4px 0 0;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+body.wcu-portal-theme-sleek .creatives-box-description,
+body.wcu-portal-theme-sleek .creatives-box-type-color > p:nth-of-type(2) {
+    margin-bottom: 12px !important;
+}
+
+body.wcu-portal-theme-sleek .creatives-box-image {
+    border-radius: 3px;
+}
+
+/* ---------- Period switcher: grey segmented control ---------- */
+
+body.wcu-portal-theme-sleek .wcusage-last-days {
+    padding: 3px !important;
+    gap: 2px;
+    background: #f0f0f1;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+}
+
+body.wcu-portal-theme-sleek .wcusage-last-days > a:not(.wcusage-refresh-stats-btn) {
+    padding: 5px 14px;
+    border-radius: 3px;
+}
+
+/* Phones: keep the three periods and the refresh button on one line. */
+@media (max-width: 600px) {
+    body.wcu-portal-theme-sleek .wcusage-last-days {
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+    body.wcu-portal-theme-sleek .wcusage-last-days > a:not(.wcusage-refresh-stats-btn) {
+        padding: 5px 10px;
+    }
+    body.wcu-portal-theme-sleek .wcusage-last-days .wcusage-refresh-stats-btn {
+        margin: 0 6px !important;
+    }
+}
+
+body.wcu-portal-theme-sleek .wcusage-last-days > a.wcutab-active {
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+body.wcu-portal-theme-sleek .wcusage-last-days .wcusage-refresh-stats-btn {
+    margin-right: 8px !important;
+}
+
+/* ---------- Tables: list-table weight for the headings ---------- */
+
+body.wcu-portal-theme-sleek table.wcuTable .wcuTableHead {
+    border-bottom-color: #c3c4c7 !important;
+}
+
+/* ---------- Bonuses ---------- */
+
+body.wcu-portal-theme-sleek .wcusage-reward-box {
+    padding-top: 26px;
+}
+
+body.wcu-portal-theme-sleek .wcusage-reward-box h4 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* ---------- Settings: cards as admin boxes ---------- */
+
+body.wcu-portal-theme-sleek .wcu-settings-card__header {
+    padding-top: 13px;
+    padding-bottom: 13px;
+}
+
+body.wcu-portal-theme-sleek .wcu-settings-card__title {
+    font-size: 14.5px;
+}
+
+/* ---------- Dark mode ---------- */
+
+body.wcu-portal-theme-sleek.dark-mode {
+    --pt-bg: #16181c;
+    --pt-panel: #1f2226;
+    --pt-panel-border: #30343a;
+    --pt-line: #2a2d32;
+    --pt-line-strong: #33373d;
+    --pt-subtle: #262a2f;
+    --pt-row-hover: #262a2f;
+    --pt-text: #e9eaec;
+    --pt-muted: #b4b8be;
+    --pt-faint: #8d9299;
+    --pt-link: #72aee6;
+    --pt-link-hover: #9ec2e6;
+    --pt-input-border: #50555c;
+    --pt-input-bg: #1b1e22;
+    --pt-header-bg: #1f2226;
+    --pt-header-border: #30343a;
+    --pt-header-icon: var(--pt-muted);
+    --pt-table-border: #33373d;
+    --pt-box-bg: #1f2226;
+    --pt-box-border: #33373d;
+    --pt-box-hover-border: #4a4f56;
+    --pt-control-border: #3c4047;
+    --pt-control-bg: #262a2f;
+    --pt-inset-bg: #1b1e22;
+    --pt-inset-border: #30343a;
+    --pt-side-border: #2a2d32;
+}
+
+body.wcu-portal-theme-sleek.dark-mode .wcusage-last-days {
+    background: #262a2f;
+    border-color: #33373d;
+}
+
+body.wcu-portal-theme-sleek.dark-mode .wcusage-last-days > a.wcutab-active {
+    background: #34383e;
+}
+
+body.wcu-portal-theme-sleek.dark-mode table.wcuTable .wcuTableHead {
+    border-bottom-color: #3c4047 !important;
+}
+
+/* ---------- Payouts: the balance as an admin notice-style card ---------- */
+
+body.wcu-portal-theme-sleek .payouts-box {
+    background: var(--pt-panel);
+    border: 1px solid var(--pt-line-strong);
+    border-left: 4px solid var(--wcu-button);
+    border-radius: 4px;
+}
+
+body.wcu-portal-theme-sleek .payouts-box > .wcu-tab-title {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 12px !important;
+}
+
+body.wcu-portal-theme-sleek .payouts-box > .wcu-tab-title u {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}

@@ -175,13 +175,18 @@ if ( ! function_exists( 'wcusage_abilities_admin_connector_plugins' ) ) {
 	 * so they cannot use this plugin's MCP server directly. Each plugin listed
 	 * here brings its own OAuth sign-in and exposes abilities registered by
 	 * other plugins, which is what puts the Coupon Affiliates tools in front
-	 * of those apps. All free, on WordPress.org.
+	 * of those apps. All free on WordPress.org, though WPVibe's hosted service
+	 * charges past a daily allowance of actions.
 	 *
 	 * @return array WordPress.org slug => array( name, note ).
 	 */
 	function wcusage_abilities_admin_connector_plugins() {
 
 		$plugins = array(
+			'vibe-ai'                  => array(
+				'name' => 'WPVibe',
+				'note' => __( 'Connects Claude, ChatGPT and Cursor through its hosted service, with a free daily allowance of actions and paid plans for more. The AI finds the Coupon Affiliates abilities through its "discover abilities" tool - no setup needed.', 'woo-coupon-usage' ),
+			),
 			'easy-mcp-ai'              => array(
 				'name' => 'Easy MCP AI',
 				'note' => __( 'OAuth sign-in for Claude and ChatGPT. Tick the Coupon Affiliates abilities under its "Abilities" screen - including any you allow here later, such as actions that change data.', 'woo-coupon-usage' ),
@@ -582,7 +587,7 @@ if ( ! function_exists( 'wcusage_abilities_admin_render_card' ) ) {
 					<ol>
 						<li><?php esc_html_e( 'Keep AI abilities enabled on this tab: a connector plugin can only offer the abilities that are switched on here.', 'woo-coupon-usage' ); ?></li>
 						<li><?php esc_html_e( 'Install one of these plugins, then add the MCP server URL shown in its settings as a custom connector in claude.ai or ChatGPT, and sign in to WordPress when asked.', 'woo-coupon-usage' ); ?></li>
-						<li><?php esc_html_e( 'The Coupon Affiliates tools appear alongside the plugin\'s own. Actions that change data only appear if you allow them below - and, with a plugin that lists abilities one by one, tick them there too. AI apps load their tools when a chat starts, so start a new chat after any change.', 'woo-coupon-usage' ); ?></li>
+						<li><?php esc_html_e( 'The AI can then use the Coupon Affiliates tools alongside the plugin\'s own. Actions that change data only appear if you allow them below - and, with a plugin that lists abilities one by one, tick them there too. AI apps load their tools when a chat starts, so start a new chat after any change.', 'woo-coupon-usage' ); ?></li>
 					</ol>
 					<p class="description"><?php esc_html_e( 'These are third-party plugins, not made by Coupon Affiliates. Your site also has to be reachable from the internet for these connectors to reach it.', 'woo-coupon-usage' ); ?></p>
 				</div>

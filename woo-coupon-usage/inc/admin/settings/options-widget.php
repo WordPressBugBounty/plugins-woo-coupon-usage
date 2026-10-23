@@ -53,8 +53,7 @@ function wcusage_field_cb_widget( $args )
         <br/><hr style="margin-top: 20px;"/>
 
         <!-- Enable Floating Widget -->
-        <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_enable', 0, esc_html__( 'Enable Floating Affiliate Widget', 'woo-coupon-usage' ), '0px'); ?>
-        <i><?php echo esc_html__( 'Display a floating affiliate button on your website that opens a compact dashboard popup.', 'woo-coupon-usage' ); ?></i><br/>
+        <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_enable', 0, esc_html__( 'Enable Floating Affiliate Widget', 'woo-coupon-usage' ), '0px', esc_html__( 'Display a floating affiliate button on your website that opens a compact dashboard popup.', 'woo-coupon-usage' )); ?>
 
         <?php wcusage_setting_toggle('.wcusage_field_floating_widget_enable', '.wcu-field-section-floating-widget'); // Show or Hide ?>
         <span class="wcu-field-section-floating-widget">
@@ -64,20 +63,17 @@ function wcusage_field_cb_widget( $args )
             <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Button Settings', 'woo-coupon-usage' ); ?></h3>
 
             <!-- Button Text for Affiliates -->
-            <?php wcusage_setting_text_option('wcusage_field_floating_widget_text_affiliate', 'Refer & Earn', esc_html__( 'Button Text (For Affiliates)', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Text shown on the floating button for users who are already affiliates.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_text_option('wcusage_field_floating_widget_text_affiliate', 'Refer & Earn', esc_html__( 'Button Text (For Affiliates)', 'woo-coupon-usage' ), '0px', esc_html__( 'Text shown on the floating button for users who are already affiliates.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Button Text for Non-Affiliates -->
-            <?php wcusage_setting_text_option('wcusage_field_floating_widget_text_non_affiliate', 'Refer & Earn', esc_html__( 'Button Text (For Non-Affiliates)', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Text shown on the floating button for users who are not yet affiliates.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_text_option('wcusage_field_floating_widget_text_non_affiliate', 'Refer & Earn', esc_html__( 'Button Text (For Non-Affiliates)', 'woo-coupon-usage' ), '0px', esc_html__( 'Text shown on the floating button for users who are not yet affiliates.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Button Icon -->
-            <?php wcusage_setting_text_option('wcusage_field_floating_widget_icon', '🎁', esc_html__( 'Button Icon', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Icon displayed on the floating button. You can use emojis or text.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_text_option('wcusage_field_floating_widget_icon', '🎁', esc_html__( 'Button Icon', 'woo-coupon-usage' ), '0px', esc_html__( 'Icon displayed on the floating button. You can use emojis or text.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
@@ -115,133 +111,112 @@ function wcusage_field_cb_widget( $args )
             <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Popup Settings', 'woo-coupon-usage' ); ?></h3>
 
             <!-- Popup Title -->
-            <?php wcusage_setting_text_option('wcusage_field_floating_widget_popup_title', 'Affiliate Program', esc_html__( 'Popup Title', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Title shown at the top of the popup window.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_text_option('wcusage_field_floating_widget_popup_title', 'Affiliate Program', esc_html__( 'Popup Title', 'woo-coupon-usage' ), '0px', esc_html__( 'Title shown at the top of the popup window.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Tab Visibility Settings -->
             <h4><?php echo esc_html__( 'Tab Visibility', 'woo-coupon-usage' ); ?></h4>
 
-            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_refer_tab', 1, esc_html__( 'Show "Refer" tab', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Display the tab with coupon code and referral links.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_refer_tab', 1, esc_html__( 'Show "Refer" tab', 'woo-coupon-usage' ), '0px', esc_html__( 'Display the tab with coupon code and referral links.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
-            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_stats_tab', 1, esc_html__( 'Show "Stats" tab', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Display the tab with affiliate statistics.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_stats_tab', 1, esc_html__( 'Show "Stats" tab', 'woo-coupon-usage' ), '0px', esc_html__( 'Display the tab with affiliate statistics.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
-            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_orders_tab', 1, esc_html__( 'Show "Orders" tab', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Display the tab with recent referred orders.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_orders_tab', 1, esc_html__( 'Show "Orders" tab', 'woo-coupon-usage' ), '0px', esc_html__( 'Display the tab with recent referred orders.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
-            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_payouts_tab', 1, esc_html__( 'Show "Payouts" tab', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Display the payouts tab (only shown if payouts are enabled).', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_payouts_tab', 1, esc_html__( 'Show "Payouts" tab', 'woo-coupon-usage' ), '0px', esc_html__( 'Display the payouts tab (only shown if payouts are enabled).', 'woo-coupon-usage' )); ?>
 
             <br/>
 
-            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_creatives_tab', 1, esc_html__( 'Show "Creatives" tab', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Display the creatives tab (only shown if creatives are enabled).', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_creatives_tab', 1, esc_html__( 'Show "Creatives" tab', 'woo-coupon-usage' ), '0px', esc_html__( 'Display the creatives tab (only shown if creatives are enabled).', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Button Visibility Settings -->
             <h4><?php echo esc_html__( 'Button Visibility', 'woo-coupon-usage' ); ?></h4>
 
-            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_payout_button', 1, esc_html__( 'Show "Request Payout" button', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Display the payout request button on the payouts tab (PRO).', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_payout_button', 1, esc_html__( 'Show "Request Payout" button', 'woo-coupon-usage' ), '0px', esc_html__( 'Display the payout request button on the payouts tab (PRO).', 'woo-coupon-usage' )); ?>
 
             <br/>
 
-            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_dashboard_button', 1, esc_html__( 'Show "View Full Dashboard" button', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Display the link to the full affiliate dashboard.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_floating_widget_show_dashboard_button', 1, esc_html__( 'Show "View Full Dashboard" button', 'woo-coupon-usage' ), '0px', esc_html__( 'Display the link to the full affiliate dashboard.', 'woo-coupon-usage' )); ?>
 
             <br/><hr/>
 
-            <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Tab Custom Text', 'woo-coupon-usage' ); ?></h3>
+            <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Tab Custom Text', 'woo-coupon-usage' ); ?><?php echo wcusage_setting_info_icon( esc_html__( 'Add custom text that will appear at the top of each tab (below the section title).', 'woo-coupon-usage' ) ); ?></h3>
 
-            <i><?php echo esc_html__( 'Add custom text that will appear at the top of each tab (below the section title).', 'woo-coupon-usage' ); ?></i><br/>
 
             <br/>
 
             <!-- Refer Tab Custom Text -->
-            <?php wcusage_setting_text_option('wcusage_field_floating_widget_refer_tab_text', '', esc_html__( 'Refer Tab Custom Text', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Custom text shown at the top of the Refer tab.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_text_option('wcusage_field_floating_widget_refer_tab_text', '', esc_html__( 'Refer Tab Custom Text', 'woo-coupon-usage' ), '0px', esc_html__( 'Custom text shown at the top of the Refer tab.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Stats Tab Custom Text -->
-            <?php wcusage_setting_text_option('wcusage_field_floating_widget_stats_tab_text', '', esc_html__( 'Stats Tab Custom Text', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Custom text shown at the top of the Stats tab.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_text_option('wcusage_field_floating_widget_stats_tab_text', '', esc_html__( 'Stats Tab Custom Text', 'woo-coupon-usage' ), '0px', esc_html__( 'Custom text shown at the top of the Stats tab.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Orders Tab Custom Text -->
-            <?php wcusage_setting_text_option('wcusage_field_floating_widget_orders_tab_text', '', esc_html__( 'Orders Tab Custom Text', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Custom text shown at the top of the Orders tab.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_text_option('wcusage_field_floating_widget_orders_tab_text', '', esc_html__( 'Orders Tab Custom Text', 'woo-coupon-usage' ), '0px', esc_html__( 'Custom text shown at the top of the Orders tab.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Payouts Tab Custom Text -->
-            <?php wcusage_setting_text_option('wcusage_field_floating_widget_payouts_tab_text', '', esc_html__( 'Payouts Tab Custom Text', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Custom text shown at the top of the Payouts tab.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_text_option('wcusage_field_floating_widget_payouts_tab_text', '', esc_html__( 'Payouts Tab Custom Text', 'woo-coupon-usage' ), '0px', esc_html__( 'Custom text shown at the top of the Payouts tab.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Creatives Tab Custom Text -->
-            <?php wcusage_setting_text_option('wcusage_field_floating_widget_creatives_tab_text', '', esc_html__( 'Creatives Tab Custom Text', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Custom text shown at the top of the Creatives tab.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_text_option('wcusage_field_floating_widget_creatives_tab_text', '', esc_html__( 'Creatives Tab Custom Text', 'woo-coupon-usage' ), '0px', esc_html__( 'Custom text shown at the top of the Creatives tab.', 'woo-coupon-usage' )); ?>
 
             <br/><hr/>
 
             <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Floating Button Colors', 'woo-coupon-usage' ); ?></h3>
 
             <!-- Floating Button Background Color -->
-            <?php wcusage_setting_color_option('wcusage_field_floating_button_bg_color', '#1b3e47', esc_html__( 'Button Background Color', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Background color for the main floating button.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_color_option('wcusage_field_floating_button_bg_color', '#1b3e47', esc_html__( 'Button Background Color', 'woo-coupon-usage' ), '0px', esc_html__( 'Background color for the main floating button.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Floating Button Text Color -->
-            <?php wcusage_setting_color_option('wcusage_field_floating_button_text_color', '#ffffff', esc_html__( 'Button Text Color', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Text color for the main floating button.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_color_option('wcusage_field_floating_button_text_color', '#ffffff', esc_html__( 'Button Text Color', 'woo-coupon-usage' ), '0px', esc_html__( 'Text color for the main floating button.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Floating Button Hover Color -->
-            <?php wcusage_setting_color_option('wcusage_field_floating_button_hover_color', '#005d75', esc_html__( 'Button Hover Color', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Background color when hovering over the floating button.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_color_option('wcusage_field_floating_button_hover_color', '#005d75', esc_html__( 'Button Hover Color', 'woo-coupon-usage' ), '0px', esc_html__( 'Background color when hovering over the floating button.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Floating Button Border Color -->
-            <?php wcusage_setting_color_option('wcusage_field_floating_button_border_color', '#1b3e47', esc_html__( 'Button Border Color', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Border color for the main floating button.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_color_option('wcusage_field_floating_button_border_color', '#1b3e47', esc_html__( 'Button Border Color', 'woo-coupon-usage' ), '0px', esc_html__( 'Border color for the main floating button.', 'woo-coupon-usage' )); ?>
 
             <br/><hr/>
 
             <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Widget Colors', 'woo-coupon-usage' ); ?></h3>
 
             <!-- Widget Theme Color -->
-            <?php wcusage_setting_color_option('wcusage_field_floating_widget_theme_color', '#1b3e47', esc_html__( 'Theme Color', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Primary color for widget header, benefits box, titles, and values.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_color_option('wcusage_field_floating_widget_theme_color', '#1b3e47', esc_html__( 'Theme Color', 'woo-coupon-usage' ), '0px', esc_html__( 'Primary color for widget header, benefits box, titles, and values.', 'woo-coupon-usage' )); ?>
 
             <br/><hr/>
 
             <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Registration Form Benefits', 'woo-coupon-usage' ); ?></h3>
 
             <!-- Benefits Title -->
-            <?php wcusage_setting_text_option('wcusage_field_floating_widget_benefits_title', 'Join Our Affiliate Program', esc_html__( 'Benefits Section Title', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Title shown in the benefits section for non-affiliates.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_text_option('wcusage_field_floating_widget_benefits_title', 'Join Our Affiliate Program', esc_html__( 'Benefits Section Title', 'woo-coupon-usage' ), '0px', esc_html__( 'Title shown in the benefits section for non-affiliates.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Benefits Subtitle -->
-            <?php wcusage_setting_text_option('wcusage_field_floating_widget_benefits_subtitle', 'Start earning money by referring your friends!', esc_html__( 'Benefits Section Subtitle', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Subtitle shown in the benefits section for non-affiliates.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_text_option('wcusage_field_floating_widget_benefits_subtitle', 'Start earning money by referring your friends!', esc_html__( 'Benefits Section Subtitle', 'woo-coupon-usage' ), '0px', esc_html__( 'Subtitle shown in the benefits section for non-affiliates.', 'woo-coupon-usage' )); ?>
 
             <br/>
 

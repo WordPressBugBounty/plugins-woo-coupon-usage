@@ -16,6 +16,15 @@ if( !function_exists( 'wcusage_get_coupon_info' ) ) {
 
 		// Static cache to reduce database queries
 		static $coupon_info_cache = array();
+		static $generation = 0;
+
+		// Emptied when a coupon is created or reassigned mid-request (see
+		// wcusage_flush_coupon_info_cache()).
+		$current = isset( $GLOBALS['wcusage_coupon_info_generation'] ) ? (int) $GLOBALS['wcusage_coupon_info_generation'] : 0;
+		if ( $current !== $generation ) {
+			$coupon_info_cache = array();
+			$generation        = $current;
+		}
 
 		// Return cached result if available
 		if (isset($coupon_info_cache[$coupon_code])) {
@@ -59,6 +68,19 @@ if( !function_exists( 'wcusage_get_coupon_info' ) ) {
 add_action('wcusage_hook_get_coupon_info', 'wcusage_get_coupon_info', 10, 1);
 
 /**
+ * Forget the coupon details wcusage_get_coupon_info() and wcusage_get_coupon_id()
+ * remembered for this request.
+ *
+ * They keep a coupon's ID, affiliate and rate for the rest of the request. Code
+ * that creates a coupon, or changes who it belongs to or its rate, part-way
+ * through a request (the migration tool, a WP-CLI run) calls this so the
+ * plugin does not go on using the details from before the change.
+ */
+function wcusage_flush_coupon_info_cache() {
+	$GLOBALS['wcusage_coupon_info_generation'] = ( isset( $GLOBALS['wcusage_coupon_info_generation'] ) ? (int) $GLOBALS['wcusage_coupon_info_generation'] : 0 ) + 1;
+}
+
+/**
  * Get coupon ID
  *
  * @param string $coupon_code
@@ -70,6 +92,13 @@ function wcusage_get_coupon_id($coupon_code) {
 
 	// Static cache for coupon IDs
 	static $coupon_id_cache = array();
+	static $generation = 0;
+
+	$current = isset( $GLOBALS['wcusage_coupon_info_generation'] ) ? (int) $GLOBALS['wcusage_coupon_info_generation'] : 0;
+	if ( $current !== $generation ) {
+		$coupon_id_cache = array();
+		$generation      = $current;
+	}
 
     if (!isset($coupon_code)) {
 		return "";

@@ -15,7 +15,7 @@ function wcusage_field_cb_design( $args )
   <hr/>
 
   <!-- Custom "Affiliate" terminology. -->
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Custom Terminology', 'woo-coupon-usage' ); ?></h3>
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Custom Terminology', 'woo-coupon-usage' ); ?><?php echo wcusage_setting_info_icon( esc_html__( 'If you want to change the word "Affiliate" to something else, enter it here. This will change it everywhere in the plugin except the settings page.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'For example, if you want to change it to "Partner", you would enter "Partner" here. It will then change things like "Affiliate Dashboard" to "Partner Dashboard", "Affiliate Registration" to "Partner Registration", etc.', 'woo-coupon-usage' ) ); ?></h3>
 
   <p>
     <div class="wcu-terminology">
@@ -44,8 +44,6 @@ function wcusage_field_cb_design( $args )
     });
     </script>
     <div style="clear: both;"></div>
-    <i><?php echo esc_html__( 'If you want to change the word "Affiliate" to something else, enter it here. This will change it everywhere in the plugin except the settings page.', 'woo-coupon-usage' ); ?></i><br/>
-    <i><?php echo esc_html__( 'For example, if you want to change it to "Partner", you would enter "Partner" here. It will then change things like "Affiliate Dashboard" to "Partner Dashboard", "Affiliate Registration" to "Partner Registration", etc.', 'woo-coupon-usage' ); ?></i>
   </p>
   <script>
   /* Set a placeholder if empty */
@@ -134,149 +132,45 @@ function wcusage_field_cb_design( $args )
 
   </div>
   
-  <span class="affiliate-dashboard-page-settings">
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Tab Colours', 'woo-coupon-usage' ); ?></h3>
-  </span>
-
-  <span class="wcu-field-section-portal">
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Portal Colours', 'woo-coupon-usage' ); ?></h3>
-  </span>
-
-  <!-- Tabs -->
-  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
-    <span class="affiliate-dashboard-page-settings">
-    <h3><?php echo esc_html__( 'Tabs', 'woo-coupon-usage' ); ?></h3>
-    </span>
-
-    <span class="wcu-field-section-portal">
-    <h3><?php echo esc_html__( 'Sidebar Background', 'woo-coupon-usage' ); ?></h3>
-    </span>
-
-    <!-- Background -->
-    <?php wcusage_setting_color_option('wcusage_field_color_tab', '#1b3e47', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
-
-    <!-- Text -->
-    <?php wcusage_setting_color_option('wcusage_field_color_tab_font', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
-
+  <!-- Affiliate portal on: its colours and font are in the General tab, beside the live
+       preview. -->
+  <div class="wcu-field-section-portal">
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Portal Colours & Fonts', 'woo-coupon-usage' ); ?></h3>
+  <p>
+    <?php echo esc_html__( 'The affiliate portal is enabled, so its colours and font are in the "General" settings tab, under "Customise Affiliate Portal Design", next to a live preview of the portal.', 'woo-coupon-usage' ); ?>
+    <a href="#" onclick="wcusage_go_to_settings('#tab-general', '#wcu_section_portal_settings'); return false;"><?php echo esc_html__( 'Go to portal design settings', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
+  </p>
   </div>
 
-  <!-- Tabs Hover -->
-  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
-
-    <span class="affiliate-dashboard-page-settings">
-    <h3><?php echo esc_html__( 'Tabs Hover', 'woo-coupon-usage' ); ?></h3>
-    </span>
-
-    <span class="wcu-field-section-portal">
-    <h3><?php echo esc_html__( 'Sidebar Link Hover', 'woo-coupon-usage' ); ?></h3>
-    </span>
-
-    <!-- Background -->
-    <?php wcusage_setting_color_option('wcusage_field_color_tab_hover', '#005d75', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
-
-    <!-- Text -->
-    <?php wcusage_setting_color_option('wcusage_field_color_tab_hover_font', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
-
+  <!-- Dashboard page in use: the colours are edited here. The fields are shared with the
+       portal (see wcusage_setting_portal_design_colours()), and moved between the two
+       places by js/admin-settings-general.js as the portal is turned on or off. -->
+  <div class="affiliate-dashboard-page-settings">
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Dashboard Colours', 'woo-coupon-usage' ); ?></h3>
+  <div class="wcu-pd-slot" data-wcu-pd-slot="dashboard">
+    <?php if ( function_exists( 'wcusage_settings_portal_design_in_general' ) && ! wcusage_settings_portal_design_in_general() ) { wcusage_setting_portal_design_colours(); } ?>
   </div>
-  <div style="clear: both;"></div>
-
-  <br/><hr/>
-
-  <?php do_action('wcusage_hook_setting_section_colours'); ?>
-
-	<br/><hr/>
-
-  <span class="wcu-field-section-portal">
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Portal Fonts', 'woo-coupon-usage' ); ?></h3>
-  </span>  
-
-  <!-- Portal Font (own section) -->
-  <div class="wcusage-settings-style-colors wcu-field-section-portal" style="margin-bottom: 0;" id="affiliate-portal-font">
-    <?php
-      $saved_font = wcusage_get_setting_value('wcusage_portal_font_family', '');
-
-      // WordPress Font Library fonts
-      $wp_font_options = array();
-      if ( function_exists('wp_get_global_settings') ) {
-          $typography_fonts = wp_get_global_settings( array( 'typography', 'fontFamilies' ) );
-          if ( is_array( $typography_fonts ) ) {
-              foreach ( $typography_fonts as $group_fonts ) {
-                  if ( is_array( $group_fonts ) ) {
-                      foreach ( $group_fonts as $font ) {
-                          $name = isset($font['name']) ? $font['name'] : ( isset($font['slug']) ? $font['slug'] : '' );
-                          $family = isset($font['fontFamily']) ? ( is_array($font['fontFamily']) ? implode(', ', $font['fontFamily']) : $font['fontFamily'] ) : '';
-                          if ( $name && $family ) {
-                              $wp_font_options[$name] = $family;
-                          }
-                      }
-                  }
-              }
-          }
-      }
-
-      // Built-in safe stacks
-      $builtin_font_options = array(
-        esc_html__( 'System Default', 'woo-coupon-usage' ) => 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif',
-        'Inter' => '"Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-        'Roboto' => '"Roboto", "Helvetica Neue", Arial, sans-serif',
-        'Open Sans' => '"Open Sans", Arial, sans-serif',
-        'Lato' => '"Lato", Arial, sans-serif',
-        'Montserrat' => '"Montserrat", Arial, sans-serif',
-        'Poppins' => '"Poppins", Arial, sans-serif',
-        'Nunito' => '"Nunito", Arial, sans-serif',
-        'Source Sans Pro' => '"Source Sans Pro", Arial, sans-serif',
-        'Work Sans' => '"Work Sans", Arial, sans-serif',
-        'Helvetica Neue' => '"Helvetica Neue", Arial, sans-serif',
-        'Arial' => 'Arial, "Helvetica Neue", sans-serif',
-        'Georgia' => 'Georgia, "Times New Roman", Times, serif',
-        'Merriweather' => '"Merriweather", Georgia, serif',
-      );
-    ?>
-    <h3><?php echo esc_html__( 'Primary Font', 'woo-coupon-usage' ); ?></h3>
-    <p>
-      <select id="wcusage_portal_font_family" name="wcusage_options['wcusage_portal_font_family']" style="min-width: 100%;max-width: 100%;">
-        <option value="" <?php selected( $saved_font, '' ); ?>><?php echo esc_html__( 'Default (inherit browser/system)', 'woo-coupon-usage' ); ?></option>
-        <?php if ( !empty( $wp_font_options ) ) : ?>
-        <optgroup label="<?php echo esc_attr__( 'WordPress Font Library', 'woo-coupon-usage' ); ?>">
-          <?php foreach ( $wp_font_options as $label => $value ) : ?>
-            <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $saved_font, $value ); ?>><?php echo esc_html( $label ); ?></option>
-          <?php endforeach; ?>
-        </optgroup>
-        <?php endif; ?>
-        <optgroup label="<?php echo esc_attr__( 'Built-in Safe Fonts', 'woo-coupon-usage' ); ?>">
-          <?php foreach ( $builtin_font_options as $label => $value ) : ?>
-            <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $saved_font, $value ); ?>><?php echo esc_html( $label ); ?></option>
-          <?php endforeach; ?>
-        </optgroup>
-      </select>
-      <i><?php echo wp_kses_post( sprintf( __( 'Applies to all text in the Affiliate Portal. Fonts available from the <a href="%s" target="_blank">WordPress Font Library</a>.', 'woo-coupon-usage' ), esc_url( admin_url( 'customize.php?autofocus[section]=wcusage_font_options' ) ) ) ); ?></i>
-    </p>
-
   </div>
 
-  <div style="clear: both;"></div>
 
   <div class="affiliate-dashboard-page-settings">
   
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Dark Mode', 'woo-coupon-usage' ); ?></h3>
 
   <!-- Enable Dark Mode -->
-  <?php wcusage_setting_toggle_option('wcusage_field_dark_mode_enable', 0, esc_html__( 'Enable Dark Mode', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'When enabled, dark mode styling will be available for the affiliate dashboard.', 'woo-coupon-usage' ); ?></i><br/>
+  <?php wcusage_setting_toggle_option('wcusage_field_dark_mode_enable', 0, esc_html__( 'Enable Dark Mode', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, dark mode styling will be available for the affiliate dashboard.', 'woo-coupon-usage' )); ?>
 
   <br/>
 
   <div id="wcusage_field_dark_mode_options" style="display: none;">
     
     <!-- Display Dark Mode Toggle -->
-    <?php wcusage_setting_toggle_option('wcusage_field_dark_mode_toggle', 1, esc_html__( 'Display Dark Mode Toggle', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'Show a toggle switch on the affiliate dashboard that allows users to switch between light and dark mode.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_toggle_option('wcusage_field_dark_mode_toggle', 1, esc_html__( 'Display Dark Mode Toggle', 'woo-coupon-usage' ), '0px', esc_html__( 'Show a toggle switch on the affiliate dashboard that allows users to switch between light and dark mode.', 'woo-coupon-usage' )); ?>
 
     <br/>
 
     <!-- Enable Dark Mode as Default -->
-    <?php wcusage_setting_toggle_option('wcusage_field_dark_mode_default', 0, esc_html__( 'Enable Dark Mode as Default', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'When enabled, dark mode will be the default theme. Users can still toggle to light mode if the toggle is enabled.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_toggle_option('wcusage_field_dark_mode_default', 0, esc_html__( 'Enable Dark Mode as Default', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, dark mode will be the default theme. Users can still toggle to light mode if the toggle is enabled.', 'woo-coupon-usage' )); ?>
 
   </div>
 
@@ -316,20 +210,17 @@ function wcusage_field_cb_design( $args )
   <br/>
 
   <!-- Use the email address as username. -->
-  <?php wcusage_setting_toggle_option('wcusage_field_form_style_columns', 1, esc_html__( 'Enable 2 Column Layout', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'With this enabled, some of the fields on the form will be displayed in 2 columns, such as first and last name.', 'woo-coupon-usage' ); ?></i><br/>
+  <?php wcusage_setting_toggle_option('wcusage_field_form_style_columns', 1, esc_html__( 'Enable 2 Column Layout', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, some of the fields on the form will be displayed in 2 columns, such as first and last name.', 'woo-coupon-usage' )); ?>
 
   <br/>
 
   <!-- Form Title -->
-  <?php wcusage_setting_text_option('wcusage_field_registration_form_title', '', esc_html__( 'Custom Registration Form Title', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'Default', 'woo-coupon-usage' ); ?>: <?php echo esc_html__( 'Register New Affiliate Account', 'woo-coupon-usage' ); ?></i><br/>
+  <?php wcusage_setting_text_option('wcusage_field_registration_form_title', '', esc_html__( 'Custom Registration Form Title', 'woo-coupon-usage' ), '0px', esc_html__( 'Default', 'woo-coupon-usage' ) . ': ' . esc_html__( 'Register New Affiliate Account', 'woo-coupon-usage' )); ?>
 
   <br/>
 
   <!-- Submit button text field label -->
-  <?php wcusage_setting_text_option('wcusage_field_registration_submit_button_text', '', esc_html__( 'Custom Submit Button Text', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'Default', 'woo-coupon-usage' ); ?>: <?php echo esc_html__( 'Submit Application', 'woo-coupon-usage' ); ?></i><br/>
+  <?php wcusage_setting_text_option('wcusage_field_registration_submit_button_text', '', esc_html__( 'Custom Submit Button Text', 'woo-coupon-usage' ), '0px', esc_html__( 'Default', 'woo-coupon-usage' ) . ': ' . esc_html__( 'Submit Application', 'woo-coupon-usage' )); ?>
 
 	<br/><hr/>
 
@@ -392,149 +283,79 @@ function wcusage_field_cb_design( $args )
 }
 
 /**
- * Settings Section: Colours
+ * Fonts offered for the affiliate portal: the WordPress Font Library, then built-in
+ * font stacks that are safe to use without loading anything.
  *
+ * @return array 'library' and 'builtin' lists of label => CSS font-family.
  */
-add_action( 'wcusage_hook_setting_section_colours', 'wcusage_setting_section_colours', 10, 1 );
-if( !function_exists( 'wcusage_setting_section_colours' ) ) {
-  function wcusage_setting_section_colours() {
+if( !function_exists( 'wcusage_get_portal_font_options' ) ) {
+  function wcusage_get_portal_font_options() {
+    $wp_font_options = array();
+    if ( function_exists('wp_get_global_settings') ) {
+        $typography_fonts = wp_get_global_settings( array( 'typography', 'fontFamilies' ) );
+        if ( is_array( $typography_fonts ) ) {
+            foreach ( $typography_fonts as $group_fonts ) {
+                if ( is_array( $group_fonts ) ) {
+                    foreach ( $group_fonts as $font ) {
+                        $name = isset($font['name']) ? $font['name'] : ( isset($font['slug']) ? $font['slug'] : '' );
+                        $family = isset($font['fontFamily']) ? ( is_array($font['fontFamily']) ? implode(', ', $font['fontFamily']) : $font['fontFamily'] ) : '';
+                        if ( $name && $family ) {
+                            $wp_font_options[$name] = $family;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-  $options = wcusage_get_options();
-  ?>
+    $builtin_font_options = array(
+      esc_html__( 'System Default', 'woo-coupon-usage' ) => 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif',
+      'Inter' => '"Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      'Roboto' => '"Roboto", "Helvetica Neue", Arial, sans-serif',
+      'Open Sans' => '"Open Sans", Arial, sans-serif',
+      'Lato' => '"Lato", Arial, sans-serif',
+      'Montserrat' => '"Montserrat", Arial, sans-serif',
+      'Poppins' => '"Poppins", Arial, sans-serif',
+      'Nunito' => '"Nunito", Arial, sans-serif',
+      'Source Sans Pro' => '"Source Sans Pro", Arial, sans-serif',
+      'Work Sans' => '"Work Sans", Arial, sans-serif',
+      'Helvetica Neue' => '"Helvetica Neue", Arial, sans-serif',
+      'Arial' => 'Arial, "Helvetica Neue", sans-serif',
+      'Georgia' => 'Georgia, "Times New Roman", Times, serif',
+      'Merriweather' => '"Merriweather", Georgia, serif',
+    );
 
-  <style>
-  .wcusage-settings-style-colors {
-      width: calc(50% - 20px);
-      max-width: 290px;
-      float: left;
-      margin-right: 20px;
-      margin-bottom: 40px;
-  }
-  .wcusage-settings-style-colors h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-  }
-  </style>
-
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Other Colours', 'woo-coupon-usage' ); ?></h3>
-
-  <!-- Table Header & Footer -->
-  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
-
-    <h3><?php echo esc_html__( 'Table Header & Footer', 'woo-coupon-usage' ); ?></h3>
-
-    <!-- Background -->
-    <?php wcusage_setting_color_option('wcusage_field_color_table', '#f4f4f4', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
-
-    <!-- Text -->
-    <?php wcusage_setting_color_option('wcusage_field_color_table_font', '#0a0a0a', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
-
-  </div>
-
-  <!-- Buttons -->
-  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
-
-    <h3><?php echo esc_html__( 'Buttons', 'woo-coupon-usage' ); ?></h3>
-
-    <!-- Background -->
-    <?php wcusage_setting_color_option('wcusage_field_color_button', '#005d75', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
-
-    <!-- Text -->
-    <?php wcusage_setting_color_option('wcusage_field_color_button_font', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
-
-  </div>
-
-  <!-- Buttons Hover -->
-  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
-
-    <h3><?php echo esc_html__( 'Buttons Hover', 'woo-coupon-usage' ); ?></h3>
-
-    <!-- Background -->
-    <?php wcusage_setting_color_option('wcusage_field_color_button_hover', '#1b3e47', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
-
-    <!-- Text -->
-    <?php wcusage_setting_color_option('wcusage_field_color_button_font_hover', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
-
-  </div>
-
-  <div style="clear: both;"></div>
-
-  <br/><hr/>
-
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Icons', 'woo-coupon-usage' ); ?></h3>
-
-  <!-- Show icons on affiliate dashboard tabs -->
-  <?php wcusage_setting_toggle_option('wcusage_field_show_tabs_icons', 1, esc_html__( 'Show icons on the affiliate dashboard tabs.', 'woo-coupon-usage' ), '0px'); ?>
-
-  <div style="clear: both;"></div>
-
-  <br/>
-
-  <!-- Stats Icons -->
-  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
-
-    <h3><?php echo esc_html__( 'Icon Colour', 'woo-coupon-usage' ); ?></h3>
-
-    <!-- Main -->
-    <?php wcusage_setting_color_option('wcusage_field_color_stats_icon', '#bebebe', '', '0px'); ?>
-
-  </div>
-
-  <div style="clear: both;"></div>
-
-  <?php if( wcu_fs()->can_use_premium_code() ) { ?>
-  <br/>
-  <!-- Line Graph -->
-  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
-
-    <span <?php if( !wcu_fs()->can_use_premium_code() ) { ?>style="opacity: 0.4 !important; display: block; pointer-events: none;" class="wcu-settings-pro-only"<?php } ?>>
-
-      <h3><?php echo esc_html__( 'Line Graph', 'woo-coupon-usage' ); ?> (PRO)</h3>
-
-      <!-- Main -->
-      <?php wcusage_setting_color_option('wcusage_field_color_line_graph', '#008000', '', '0px'); ?>
-
-    </span>
-
-  </div>
-  <div style="clear: both;"></div>
-  <?php } ?>
-
-  <?php $wcusage_field_bonuses_enable = wcusage_get_setting_value('wcusage_field_bonuses_enable', '0');
-  if( wcu_fs()->can_use_premium_code() && $wcusage_field_bonuses_enable ) { ?>
-
-  <br/><hr/>
-
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Performance Bonuses', 'woo-coupon-usage' ); ?> (PRO)</h3>
-
-  <!-- Bonuses Progress Bar -->
-  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
-
-    <h3><?php echo esc_html__( 'Progress Bar', 'woo-coupon-usage' ); ?></h3>
-
-    <!-- Bar -->
-    <?php wcusage_setting_color_option('wcusage_field_color_bonus_bar', '#2bc253', esc_html__( 'Bar', 'woo-coupon-usage' ), '0px'); ?>
-
-    <!-- Background -->
-    <?php wcusage_setting_color_option('wcusage_field_color_bonus_bar_bg', '#d2d2d2', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
-
-  </div>
-
-  <!-- Bonuses Reward Summary Box -->
-  <div class="wcusage-settings-style-colors" style="margin-bottom: 0;">
-
-    <h3><?php echo esc_html__( 'Reward Summary Box', 'woo-coupon-usage' ); ?></h3>
-
-    <!-- Background -->
-    <?php wcusage_setting_color_option('wcusage_field_color_bonus_box', '#f6d365', esc_html__( 'Background', 'woo-coupon-usage' ), '0px'); ?>
-
-    <!-- Text -->
-    <?php wcusage_setting_color_option('wcusage_field_color_bonus_box_font', '#000000', esc_html__( 'Text', 'woo-coupon-usage' ), '0px'); ?>
-
-  </div>
-  <div style="clear: both;"></div>
-  <?php } ?>
-
-  <?php
+    return array( 'library' => $wp_font_options, 'builtin' => $builtin_font_options );
   }
 }
+
+/**
+ * The portal "Primary Font" dropdown.
+ *
+ * @param string $style Optional inline style for the select.
+ */
+if( !function_exists( 'wcusage_setting_portal_font_select' ) ) {
+  function wcusage_setting_portal_font_select( $style = '' ) {
+    $saved_font = wcusage_get_setting_value('wcusage_portal_font_family', '');
+    $fonts = wcusage_get_portal_font_options();
+    ?>
+      <select id="wcusage_portal_font_family" name="wcusage_options[wcusage_portal_font_family]"<?php if ( $style ) { ?> style="<?php echo esc_attr( $style ); ?>"<?php } ?>>
+        <option value="" <?php selected( $saved_font, '' ); ?>><?php echo esc_html__( 'Default (inherit browser/system)', 'woo-coupon-usage' ); ?></option>
+        <?php if ( !empty( $fonts['library'] ) ) : ?>
+        <optgroup label="<?php echo esc_attr__( 'WordPress Font Library', 'woo-coupon-usage' ); ?>">
+          <?php foreach ( $fonts['library'] as $label => $value ) : ?>
+            <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $saved_font, $value ); ?>><?php echo esc_html( $label ); ?></option>
+          <?php endforeach; ?>
+        </optgroup>
+        <?php endif; ?>
+        <optgroup label="<?php echo esc_attr__( 'Built-in Safe Fonts', 'woo-coupon-usage' ); ?>">
+          <?php foreach ( $fonts['builtin'] as $label => $value ) : ?>
+            <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $saved_font, $value ); ?>><?php echo esc_html( $label ); ?></option>
+          <?php endforeach; ?>
+        </optgroup>
+      </select>
+    <?php
+  }
+}
+
+

@@ -752,7 +752,7 @@ if ( !function_exists( 'wcusage_getUserCouponList' ) ) {
                         }
                     }
                 }
-                if ( $countcouponsloop != 3 ) {
+                if ( $countcouponsloop > 0 ) {
                     echo "</div>";
                 }
             }

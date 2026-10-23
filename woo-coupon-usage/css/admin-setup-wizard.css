@@ -1,0 +1,1155 @@
+/*
+ * Setup wizard theme: matches the settings page theme (css/admin-settings-theme.css)
+ * - one accent colour (the plugin green), quieter secondary buttons, a tighter type
+ * scale and consistent fields. Loaded on the setup wizard only, after admin-style.css,
+ * and scoped to .plugin-setup-settings.
+ */
+
+.plugin-setup-settings {
+    --wcu-st-accent: #1c7a38;
+    --wcu-st-accent-hover: #15602b;
+    --wcu-st-accent-soft: #edf8f0;
+    --wcu-st-ring: rgba(28, 122, 56, .2);
+    --wcu-st-text: #101828;
+    --wcu-st-text-2: #344054;
+    --wcu-st-muted: #475467;
+    --wcu-st-subtle: #667085;
+    --wcu-st-faint: #98a2b3;
+    --wcu-st-border: #e4e7ec;
+    --wcu-st-border-strong: #d0d5dd;
+    --wcu-st-border-soft: #eef0f3;
+    --wcu-st-surface: #f9fafb;
+    --wcu-st-danger: #b42318;
+    --wcu-st-danger-soft: #fef3f2;
+    --wcu-st-shadow-xs: 0 1px 2px rgba(16, 24, 40, .05);
+    --wcu-st-shadow-sm: 0 1px 3px rgba(16, 24, 40, .08), 0 1px 2px rgba(16, 24, 40, .04);
+    accent-color: var(--wcu-st-accent);
+    /* Core checkboxes, radios and buttons read these, so they follow the accent too. */
+    --wp-admin-theme-color: #1c7a38;
+    --wp-admin-theme-color--rgb: 28, 122, 56;
+    --wp-admin-theme-color-darker-10: #15602b;
+    --wp-admin-theme-color-darker-10--rgb: 21, 96, 43;
+    --wp-admin-theme-color-darker-20: #104a21;
+    --wp-admin-theme-color-darker-20--rgb: 16, 74, 33;
+    color: var(--wcu-st-text-2);
+}
+
+/* -------------------------------------------------------------------------
+ * 1. Page and card.
+ * ---------------------------------------------------------------------- */
+
+.plugin-setup-settings .wcu-setup-card {
+    display: block;
+    width: 800px;
+    max-width: calc(100% - 32px);
+    margin: 20px auto;
+    padding: 28px 32px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 1px solid var(--wcu-st-border);
+    border-radius: 12px;
+    box-shadow: var(--wcu-st-shadow-sm);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+    .plugin-setup-settings .wcu-setup-card {
+        padding: 22px 18px;
+    }
+}
+
+/* -------------------------------------------------------------------------
+ * 2. Progress bar.
+ * ---------------------------------------------------------------------- */
+
+.plugin-setup-settings .bar-container {
+    margin: 16px auto 76px;
+}
+
+.plugin-setup-settings .progressbar {
+    margin: 0;
+    padding: 0;
+}
+
+.plugin-setup-settings .progressbar li {
+    width: 128px;
+    color: var(--wcu-st-subtle);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.plugin-setup-settings .progressbar li:before {
+    width: 30px;
+    height: 30px;
+    margin: 0 auto 8px;
+    border: 1px solid var(--wcu-st-border-strong);
+    border-radius: 50%;
+    box-sizing: border-box;
+    background: #fff;
+    color: var(--wcu-st-subtle);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 28px;
+    box-shadow: var(--wcu-st-shadow-xs);
+}
+
+.plugin-setup-settings .progressbar li:after {
+    height: 2px;
+    top: 14px;
+    background-color: var(--wcu-st-border);
+}
+
+.plugin-setup-settings .progressbar a {
+    color: inherit;
+    letter-spacing: 0;
+}
+
+.plugin-setup-settings .progressbar a:hover {
+    color: var(--wcu-st-accent);
+}
+
+.plugin-setup-settings .progressbar li.active {
+    color: var(--wcu-st-text-2);
+}
+
+.plugin-setup-settings .progressbar li.active:before {
+    border-color: var(--wcu-st-accent);
+    background: var(--wcu-st-accent-soft);
+    color: var(--wcu-st-accent);
+}
+
+.plugin-setup-settings .progressbar li.active + li:after {
+    background-color: var(--wcu-st-accent);
+}
+
+.plugin-setup-settings .progressbar li.current {
+    color: var(--wcu-st-text);
+    font-weight: 600;
+}
+
+.plugin-setup-settings .progressbar li.current:before {
+    background: var(--wcu-st-accent);
+    color: #fff;
+    box-shadow: 0 0 0 4px var(--wcu-st-ring);
+}
+
+/* -------------------------------------------------------------------------
+ * 3. Type scale and help text.
+ * ---------------------------------------------------------------------- */
+
+.plugin-setup-settings .wcu-setup-card h1,
+.plugin-setup-settings .wcu-setup-card .wcu-setup-title {
+    margin: 0 0 8px;
+    padding: 0;
+    color: var(--wcu-st-text);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-setup-lead {
+    margin: 0 0 4px;
+    max-width: 70ch;
+    color: var(--wcu-st-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.plugin-setup-settings .wcu-setup-card h2 {
+    color: var(--wcu-st-text);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.plugin-setup-settings .wcusage-settings-form .wcu-setup-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0 10px;
+    color: var(--wcu-st-text);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* The gear icon on every heading adds noise, not meaning. */
+.plugin-setup-settings .wcusage-settings-form .wcu-setup-card h3 > .dashicons-admin-generic {
+    display: none;
+}
+
+.plugin-setup-settings .wcu-setup-card p {
+    color: var(--wcu-st-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Field labels. */
+.plugin-setup-settings .wcu-setup-card p > strong:first-child,
+.plugin-setup-settings .wcu-setup-card .wcu-field-section-registration-settings > strong {
+    color: var(--wcu-st-text-2);
+    font-weight: 600;
+}
+
+.plugin-setup-settings .wcu-setup-card a {
+    color: var(--wcu-st-accent);
+    text-underline-offset: 2px;
+}
+
+.plugin-setup-settings .wcu-setup-card a:hover {
+    color: var(--wcu-st-accent-hover);
+}
+
+.plugin-setup-settings .wcu-setup-card hr {
+    /* Overrides the assorted inline margins (15px 0 25px, 25px 0, ...) on the step markup. */
+    margin: 22px 0 !important;
+    border: 0;
+    border-top: 1px solid var(--wcu-st-border-soft);
+}
+
+/* -------------------------------------------------------------------------
+ * 3b. Spacing.
+ * ---------------------------------------------------------------------- */
+
+/* A <br> straight after a block only adds an empty line. The field helpers and the
+   older step markup use them as spacers, which stacked up into 30-70px gaps, so they
+   are collapsed here and the elements' own margins set the rhythm instead. */
+.plugin-setup-settings .wcu-setup-card :is(p, div, hr, h1, h2, h3, ul, ol, form, table, .setup-hide, span:has(> p, > div)) + br,
+.plugin-setup-settings .wcu-setup-card :is(p, div, hr, h1, h2, h3, ul, ol, form, table, .setup-hide, span:has(> p, > div)) + br + br,
+.plugin-setup-settings .wcu-setup-card :is(.wcu-field-section-registration-settings, .wcu-setting-email-notification-box, [id^="wcu_email_customise"], .setup-hide) > br:first-child,
+.plugin-setup-settings .wcu-setup-card :is(div, form, .wcu-field-section-registration-settings) > br:last-child {
+    display: none;
+}
+
+/* Empty paragraphs left by the field helpers still take up their margins. */
+.plugin-setup-settings .wcu-setup-card p:empty {
+    display: none;
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-setup-note {
+    margin: 16px 0 0;
+    color: var(--wcu-st-subtle);
+    font-size: 13px;
+}
+
+/* One field per paragraph (wcusage_setting_*_option() output). */
+.plugin-setup-settings .wcu-setup-card p[id$="_p"] {
+    margin: 16px 0;
+}
+
+.plugin-setup-settings .wcu-setup-card :is(h1, h3) + p,
+.plugin-setup-settings .wcu-setup-card :is(h1, h3) + br + p {
+    margin-top: 0;
+}
+
+/* Bordered groups (email notifications) sit tight to their heading. */
+.plugin-setup-settings .wcu-setup-card .wcu-setting-email-notification-box {
+    margin-top: 0;
+}
+
+/* "Recipient: Affiliate User" line between the toggle and "Email Customizer".
+   !important beats the margin: 0 !important on these paragraphs in admin-style.css. */
+.plugin-setup-settings .wcu-setup-card .wcu-setting-email-notification-box p:has(> .fa-circle-user) {
+    margin: 12px 0 !important;
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-setting-email-notification-box > :last-child,
+.plugin-setup-settings .wcu-setup-card .wcu-setting-email-notification-box p:last-of-type {
+    margin-bottom: 0;
+}
+
+/* Rows of buttons (finish step). */
+.plugin-setup-settings .wcu-setup-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 16px 0 0;
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-setup-actions a:has(> .button) {
+    max-width: 100%;
+    margin: 0;
+}
+
+/* Long labels wrap on narrow screens instead of running past the card. */
+.plugin-setup-settings .wcu-setup-card .wcu-setup-actions .button {
+    max-width: 100%;
+    height: auto;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    white-space: normal;
+    text-align: center;
+}
+
+/* -------------------------------------------------------------------------
+ * 4. Fields: consistent inputs, numbers sized for numbers, units inside the field.
+ * ---------------------------------------------------------------------- */
+
+.plugin-setup-settings .wcu-setup-card input[type="text"],
+.plugin-setup-settings .wcu-setup-card input[type="number"],
+.plugin-setup-settings .wcu-setup-card input[type="email"],
+.plugin-setup-settings .wcu-setup-card input[type="url"],
+.plugin-setup-settings .wcu-setup-card input[type="password"],
+.plugin-setup-settings .wcu-setup-card select {
+    min-height: 40px;
+    max-width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--wcu-st-border-strong);
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: var(--wcu-st-shadow-xs);
+    color: var(--wcu-st-text);
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.plugin-setup-settings .wcu-setup-card select {
+    padding-right: 32px;
+}
+
+.plugin-setup-settings .wcu-setup-card input[type="text"]:not(.wp-color-picker),
+.plugin-setup-settings .wcu-setup-card input[type="email"],
+.plugin-setup-settings .wcu-setup-card input[type="url"],
+.plugin-setup-settings .wcu-setup-card select {
+    width: 100%;
+    max-width: 400px;
+}
+
+.plugin-setup-settings .wcu-setup-card input[type="number"] {
+    width: 180px;
+}
+
+.plugin-setup-settings .wcu-setup-card textarea {
+    border: 1px solid var(--wcu-st-border-strong);
+    border-radius: 8px;
+    color: var(--wcu-st-text);
+}
+
+.plugin-setup-settings .wcu-setup-card input[type="text"]:focus,
+.plugin-setup-settings .wcu-setup-card input[type="number"]:focus,
+.plugin-setup-settings .wcu-setup-card input[type="email"]:focus,
+.plugin-setup-settings .wcu-setup-card input[type="url"]:focus,
+.plugin-setup-settings .wcu-setup-card input[type="password"]:focus,
+.plugin-setup-settings .wcu-setup-card select:focus,
+.plugin-setup-settings .wcu-setup-card textarea:focus {
+    border-color: var(--wcu-st-accent);
+    box-shadow: 0 0 0 3px var(--wcu-st-ring);
+    outline: none;
+}
+
+.plugin-setup-settings .wcu-setup-card input[type="checkbox"]:focus-visible {
+    box-shadow: 0 0 0 3px var(--wcu-st-ring);
+    outline: none;
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-input-affix {
+    display: inline-flex;
+    align-items: stretch;
+    width: 200px;
+    max-width: 100%;
+    margin: 8px 0 2px;
+    vertical-align: middle;
+    background: #fff;
+    border: 1px solid var(--wcu-st-border-strong);
+    border-radius: 8px;
+    box-shadow: var(--wcu-st-shadow-xs);
+    overflow: hidden;
+    box-sizing: border-box;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-input-affix:focus-within {
+    border-color: var(--wcu-st-accent);
+    box-shadow: 0 0 0 3px var(--wcu-st-ring);
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-input-affix__unit {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    background: var(--wcu-st-surface);
+    color: var(--wcu-st-subtle);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-input-affix__unit:first-child {
+    border-right: 1px solid var(--wcu-st-border);
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-input-affix__unit:last-child {
+    border-left: 1px solid var(--wcu-st-border);
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-input-affix input[type="number"] {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+    min-height: 38px;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-input-affix input[type="number"]:focus {
+    box-shadow: none;
+}
+
+/* Toggles: same geometry as the settings page, flat colours. */
+.plugin-setup-settings .wcusage_row .slider {
+    background-color: var(--wcu-st-border-strong);
+    box-shadow: none;
+}
+
+.plugin-setup-settings .wcusage_row .slider:before {
+    box-shadow: 0 1px 3px rgba(16, 24, 40, .2);
+}
+
+.plugin-setup-settings .wcusage_row input:checked + .slider {
+    background-color: var(--wcu-st-accent);
+    box-shadow: none;
+}
+
+.plugin-setup-settings .wcusage_row input:focus + .slider {
+    box-shadow: none;
+}
+
+.plugin-setup-settings .wcusage_row input:focus-visible + .slider {
+    box-shadow: 0 0 0 3px var(--wcu-st-ring);
+}
+
+/* -------------------------------------------------------------------------
+ * 5. Buttons.
+ * ---------------------------------------------------------------------- */
+
+.plugin-setup-settings .wcu-setup-card .button-primary,
+.plugin-setup-settings .wcu-setup-card .button-secondary,
+.plugin-setup-settings .wcu-setup-card .submit-generate-page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    margin-top: 0;
+    padding: 0 18px !important;
+    border-radius: 8px !important;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    box-shadow: var(--wcu-st-shadow-xs);
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.plugin-setup-settings .wcu-setup-card .button-primary {
+    background: var(--wcu-st-accent);
+    border: 1px solid var(--wcu-st-accent);
+    color: #fff;
+}
+
+.plugin-setup-settings .wcu-setup-card .button-primary:hover,
+.plugin-setup-settings .wcu-setup-card .button-primary:focus {
+    background: var(--wcu-st-accent-hover);
+    border-color: var(--wcu-st-accent-hover);
+    color: #fff;
+}
+
+.plugin-setup-settings .wcu-setup-card .button-secondary,
+.plugin-setup-settings .wcu-setup-card .submit-generate-page {
+    background: #fff;
+    border: 1px solid var(--wcu-st-border-strong);
+    background-image: none;
+    color: var(--wcu-st-text-2);
+}
+
+.plugin-setup-settings .wcu-setup-card .button-secondary:hover,
+.plugin-setup-settings .wcu-setup-card .submit-generate-page:hover {
+    background: var(--wcu-st-accent-soft);
+    border-color: var(--wcu-st-accent);
+    color: var(--wcu-st-accent);
+}
+
+.plugin-setup-settings .wcu-setup-card .button-primary:focus-visible,
+.plugin-setup-settings .wcu-setup-card .button-secondary:focus-visible,
+.plugin-setup-settings .wcu-setup-card .submit-generate-page:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--wcu-st-ring);
+}
+
+/* Links that wrap a button (the finish step): the button carries the styling. */
+.plugin-setup-settings .wcu-setup-card a:has(> .button) {
+    display: inline-block;
+    margin: 0 4px 8px 0;
+    text-decoration: none;
+}
+
+/* "Show" / "Show Settings": outlined, not filled. */
+.plugin-setup-settings .wcu-setup-card .wcu-showhide-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 0;
+    padding: 6px 12px;
+    border: 1px solid var(--wcu-st-border-strong);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--wcu-st-text-2);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    box-shadow: var(--wcu-st-shadow-xs);
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+    white-space: nowrap;
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-showhide-button:hover {
+    border-color: var(--wcu-st-faint);
+    background: var(--wcu-st-surface);
+    color: var(--wcu-st-text);
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-showhide-button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--wcu-st-ring);
+}
+
+.plugin-setup-settings .wcu-setup-card .wcu-showhide-button .fa-solid {
+    font-size: 11px;
+    color: var(--wcu-st-subtle);
+}
+
+/* Skip link under the card. */
+.plugin-setup-settings .wcu-setup-footer {
+    margin: 0 auto;
+    text-align: center;
+    color: var(--wcu-st-subtle);
+    font-size: 13px;
+}
+
+.plugin-setup-settings .wcu-setup-footer a {
+    color: var(--wcu-st-accent);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.plugin-setup-settings .wcu-setup-footer a:hover {
+    color: var(--wcu-st-accent-hover);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------------
+ * 6. Finish step: next-step cards and FAQ.
+ * ---------------------------------------------------------------------- */
+
+.plugin-setup-settings .wcu-setup-card .steps-container {
+    gap: 12px;
+}
+
+.plugin-setup-settings .wcu-setup-card .step-box {
+    padding: 16px 18px;
+    background: #fff;
+    border: 1px solid var(--wcu-st-border);
+    border-radius: 12px;
+    box-shadow: var(--wcu-st-shadow-xs);
+}
+
+.plugin-setup-settings .wcu-setup-card .step-box:hover {
+    transform: none;
+    border-color: var(--wcu-st-border-strong);
+    box-shadow: var(--wcu-st-shadow-sm);
+}
+
+.plugin-setup-settings .wcu-setup-card .step-box h3 {
+    margin: 0 0 6px;
+    font-size: 15px;
+}
+
+.plugin-setup-settings .wcu-setup-card .step-box p {
+    font-size: 13.5px;
+}
+
+.plugin-setup-settings .wcu-setup-card .step-number {
+    color: var(--wcu-st-accent);
+}
+
+.plugin-setup-settings .wcu-setup-card .faq-question {
+    color: var(--wcu-st-text);
+}
+
+.plugin-setup-settings .wcu-setup-card .faq-question:hover {
+    color: var(--wcu-st-accent);
+}
+
+.plugin-setup-settings .wcu-setup-card .faq-question .fa-solid {
+    margin-left: 4px;
+    font-size: 12px;
+    color: var(--wcu-st-subtle);
+}
+
+/* -------------------------------------------------------------------------
+ * 7. Onboarding screens (inc/admin/admin-quick-start.php).
+ * ---------------------------------------------------------------------- */
+
+/* Step indicator: Basics -> First Affiliate -> Done. */
+.plugin-setup-settings .wcu-qs-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 22px;
+    padding: 0;
+    list-style: none;
+    counter-reset: wcu-qs-step;
+}
+
+.plugin-setup-settings .wcu-qs-steps li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 4px 12px 4px 4px;
+    border: 1px solid var(--wcu-st-border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--wcu-st-subtle);
+    font-size: 12.5px;
+    font-weight: 500;
+    counter-increment: wcu-qs-step;
+}
+
+.plugin-setup-settings .wcu-qs-steps li:before {
+    content: counter(wcu-qs-step);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--wcu-st-surface);
+    color: var(--wcu-st-subtle);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.plugin-setup-settings .wcu-qs-steps li.is-done {
+    border-color: transparent;
+    background: var(--wcu-st-accent-soft);
+    color: var(--wcu-st-accent);
+}
+
+.plugin-setup-settings .wcu-qs-steps li.is-done:before {
+    content: "\2713";
+    background: var(--wcu-st-accent);
+    color: #fff;
+}
+
+.plugin-setup-settings .wcu-qs-steps li.current {
+    border-color: var(--wcu-st-accent);
+    color: var(--wcu-st-text);
+    font-weight: 600;
+}
+
+.plugin-setup-settings .wcu-qs-steps li.current:before {
+    background: var(--wcu-st-accent);
+    color: #fff;
+}
+
+.plugin-setup-settings .wcu-qs-intro {
+    margin: 0 0 24px !important;
+}
+
+.plugin-setup-settings .wcu-qs-field {
+    margin: 0 0 20px;
+}
+
+.plugin-setup-settings .wcu-qs-field > label:first-child:not(.wcu-qs-check) {
+    display: block;
+    margin: 0 0 6px;
+    color: var(--wcu-st-text-2);
+    font-weight: 600;
+}
+
+.plugin-setup-settings .wcu-qs-field .wcu-input-affix {
+    margin-top: 0;
+}
+
+.plugin-setup-settings .wcu-qs-field input[type="text"],
+.plugin-setup-settings .wcu-qs-field input[type="email"] {
+    max-width: 360px;
+}
+
+.plugin-setup-settings .wcu-qs-field .description {
+    display: block;
+    margin-top: 6px;
+    max-width: 70ch;
+    color: var(--wcu-st-subtle);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.plugin-setup-settings .wcu-qs-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: var(--wcu-st-text-2);
+    font-weight: 600;
+}
+
+.plugin-setup-settings .wcu-qs-check input[type="checkbox"] {
+    margin: 0;
+}
+
+.plugin-setup-settings .wcu-qs-check + .description {
+    padding-left: 24px;
+}
+
+.plugin-setup-settings .wcu-qs-panel {
+    margin: 4px 0 20px;
+    padding: 14px 18px;
+    border: 1px solid var(--wcu-st-border);
+    border-radius: 10px;
+    background: var(--wcu-st-surface);
+}
+
+.plugin-setup-settings .wcu-qs-panel__title {
+    margin: 0 0 6px !important;
+    color: var(--wcu-st-text-2) !important;
+    font-size: 13px !important;
+    font-weight: 600;
+}
+
+.plugin-setup-settings .wcu-qs-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.plugin-setup-settings .wcu-qs-list li {
+    position: relative;
+    margin: 0 0 6px;
+    padding-left: 24px;
+    color: var(--wcu-st-muted);
+    font-size: 13.5px;
+    line-height: 1.55;
+}
+
+.plugin-setup-settings .wcu-qs-list li:last-child {
+    margin-bottom: 0;
+}
+
+.plugin-setup-settings .wcu-qs-list li:before {
+    content: "\2713";
+    position: absolute;
+    left: 0;
+    top: 1px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--wcu-st-accent-soft);
+    color: var(--wcu-st-accent);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+}
+
+.plugin-setup-settings .wcu-qs-list--steps {
+    counter-reset: wcu-qs-how;
+}
+
+.plugin-setup-settings .wcu-qs-list--steps li {
+    counter-increment: wcu-qs-how;
+}
+
+.plugin-setup-settings .wcu-qs-list--steps li:before {
+    content: counter(wcu-qs-how);
+    font-size: 10px;
+}
+
+.plugin-setup-settings .wcu-qs-error {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 0 0 20px;
+    padding: 12px 14px;
+    border: 1px solid #fecdca;
+    border-radius: 10px;
+    background: var(--wcu-st-danger-soft);
+    color: var(--wcu-st-danger);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.plugin-setup-settings .wcu-qs-success {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin: 0 0 18px;
+}
+
+.plugin-setup-settings .wcu-qs-success__icon {
+    flex: 0 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--wcu-st-accent-soft);
+    color: var(--wcu-st-accent);
+    font-size: 18px;
+}
+
+.plugin-setup-settings .wcu-qs-success .wcu-setup-title {
+    margin: 0;
+}
+
+.plugin-setup-settings .wcu-qs-summary {
+    margin: 0 0 24px;
+    border: 1px solid var(--wcu-st-border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.plugin-setup-settings .wcu-qs-summary__intro {
+    margin: 0 !important;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--wcu-st-border-soft);
+    background: var(--wcu-st-surface);
+    color: var(--wcu-st-text-2) !important;
+    font-weight: 500;
+}
+
+.plugin-setup-settings .wcu-qs-summary dl {
+    margin: 0;
+}
+
+.plugin-setup-settings .wcu-qs-summary__row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 16px;
+    border-top: 1px solid var(--wcu-st-border-soft);
+}
+
+.plugin-setup-settings .wcu-qs-summary__row:first-child {
+    border-top: 0;
+}
+
+.plugin-setup-settings .wcu-qs-summary dt {
+    color: var(--wcu-st-subtle);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.plugin-setup-settings .wcu-qs-summary dd {
+    margin: 0;
+    min-width: 0;
+    color: var(--wcu-st-text);
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.plugin-setup-settings .wcu-qs-summary code {
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--wcu-st-surface);
+    border: 1px solid var(--wcu-st-border);
+    color: var(--wcu-st-text);
+    font-size: 13px;
+}
+
+@media (max-width: 600px) {
+    .plugin-setup-settings .wcu-qs-summary__row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+}
+
+.plugin-setup-settings .wcu-qs-subheading {
+    margin: 0 0 10px !important;
+    color: var(--wcu-st-text) !important;
+    font-size: 15px !important;
+    font-weight: 600;
+}
+
+/* Essentials walkthrough video on the "You're all set!" screen. */
+.plugin-setup-settings .wcu-qs-video {
+    margin-top: 24px;
+}
+
+.plugin-setup-settings .wcu-qs-video iframe {
+    border-radius: 10px;
+    background: #101828;
+}
+
+.plugin-setup-settings .wcu-qs-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--wcu-st-border-soft);
+}
+
+.plugin-setup-settings .wcu-qs-actions .wcu-qs-link {
+    margin-left: 6px;
+    color: var(--wcu-st-subtle);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.plugin-setup-settings .wcu-qs-actions .wcu-qs-link:hover {
+    color: var(--wcu-st-accent);
+}
+
+/* First screen: "What kind of program?" */
+.plugin-setup-settings .wcu-qs-start {
+    padding: 6px 0 0;
+}
+
+.plugin-setup-settings .wcu-qs-start__header {
+    margin: 0 auto 26px;
+    text-align: center;
+}
+
+.plugin-setup-settings .wcu-qs-start__eyebrow {
+    margin: 0 0 6px !important;
+    color: var(--wcu-st-accent) !important;
+    font-size: 12px !important;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.plugin-setup-settings .wcu-qs-start .wcu-qs-start__title {
+    margin: 0 0 10px;
+    padding: 0;
+    color: var(--wcu-st-text);
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.25;
+    text-wrap: balance;
+}
+
+.plugin-setup-settings .wcu-qs-start__lead {
+    margin: 0 !important;
+    color: var(--wcu-st-muted);
+    font-size: 15px !important;
+    line-height: 1.55;
+}
+
+.plugin-setup-settings .wcu-qs-start__choices {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.plugin-setup-settings .wcu-qs-start__choices li {
+    margin: 0;
+}
+
+.plugin-setup-settings .wcu-setup-card a.wcu-qs-option {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 20px;
+    background: #fff;
+    border: 1px solid var(--wcu-st-border);
+    border-radius: 12px;
+    box-shadow: var(--wcu-st-shadow-xs);
+    color: var(--wcu-st-text-2);
+    text-decoration: none;
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+.plugin-setup-settings .wcu-setup-card a.wcu-qs-option:hover {
+    border-color: var(--wcu-st-accent);
+    box-shadow: 0 4px 12px rgba(16, 24, 40, .08);
+    color: var(--wcu-st-text-2);
+}
+
+.plugin-setup-settings .wcu-setup-card a.wcu-qs-option:focus {
+    outline: none;
+}
+
+.plugin-setup-settings .wcu-setup-card a.wcu-qs-option:focus-visible {
+    border-color: var(--wcu-st-accent);
+    box-shadow: 0 0 0 4px var(--wcu-st-ring);
+}
+
+.plugin-setup-settings .wcu-setup-card a.wcu-qs-option--recommended {
+    padding: 17px 19px;
+    border: 2px solid var(--wcu-st-accent);
+    background: linear-gradient(180deg, var(--wcu-st-accent-soft) 0%, #fff 70%);
+}
+
+.plugin-setup-settings .wcu-qs-option__icon {
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--wcu-st-border);
+    border-radius: 10px;
+    background: var(--wcu-st-surface);
+    color: var(--wcu-st-subtle);
+    font-size: 18px;
+}
+
+.plugin-setup-settings .wcu-qs-option:hover .wcu-qs-option__icon {
+    border-color: transparent;
+    background: var(--wcu-st-accent-soft);
+    color: var(--wcu-st-accent);
+}
+
+.plugin-setup-settings .wcu-qs-option--recommended .wcu-qs-option__icon,
+.plugin-setup-settings .wcu-qs-option--recommended:hover .wcu-qs-option__icon {
+    border-color: transparent;
+    background: var(--wcu-st-accent);
+    color: #fff;
+}
+
+.plugin-setup-settings .wcu-qs-option__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.plugin-setup-settings .wcu-qs-option__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    color: var(--wcu-st-text);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.plugin-setup-settings .wcu-qs-option__tag {
+    padding: 1px 8px;
+    border: 1px solid var(--wcu-st-border-strong);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--wcu-st-text-2);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: .02em;
+}
+
+.plugin-setup-settings .wcu-qs-option--recommended .wcu-qs-option__tag {
+    border-color: rgba(28, 122, 56, .35);
+    color: var(--wcu-st-accent);
+}
+
+.plugin-setup-settings .wcu-qs-option__pill {
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--wcu-st-accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: .02em;
+}
+
+.plugin-setup-settings .wcu-qs-option__desc {
+    color: var(--wcu-st-muted);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.plugin-setup-settings .wcu-qs-option__meta {
+    margin-top: 4px;
+    color: var(--wcu-st-subtle);
+    font-size: 12.5px;
+}
+
+.plugin-setup-settings .wcu-qs-option__meta span {
+    margin-right: 3px;
+}
+
+.plugin-setup-settings .wcu-qs-option__arrow {
+    flex: 0 0 auto;
+    align-self: center;
+    color: var(--wcu-st-faint);
+    font-size: 14px;
+    transition: transform .15s ease, color .15s ease;
+}
+
+.plugin-setup-settings .wcu-qs-option:hover .wcu-qs-option__arrow,
+.plugin-setup-settings .wcu-qs-option:focus-visible .wcu-qs-option__arrow {
+    color: var(--wcu-st-accent);
+    transform: translateX(3px);
+}
+
+.plugin-setup-settings .wcu-qs-start__note {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin: 20px 0 0 !important;
+    color: var(--wcu-st-subtle) !important;
+    font-size: 13px !important;
+    line-height: 1.5;
+}
+
+.plugin-setup-settings .wcu-qs-start__note span {
+    margin-top: 3px;
+}
+
+@media (max-width: 600px) {
+    .plugin-setup-settings .wcu-qs-start .wcu-qs-start__title {
+        font-size: 22px;
+    }
+
+    .plugin-setup-settings .wcu-setup-card a.wcu-qs-option {
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .plugin-setup-settings .wcu-setup-card a.wcu-qs-option--recommended {
+        padding: 15px;
+    }
+
+    .plugin-setup-settings .wcu-qs-option__icon {
+        flex-basis: 38px;
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+    }
+
+    .plugin-setup-settings .wcu-qs-option .wcu-qs-option__arrow {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .plugin-setup-settings .wcu-qs-option,
+    .plugin-setup-settings .wcu-qs-option__arrow,
+    .plugin-setup-settings .wcu-setup-card .button-primary,
+    .plugin-setup-settings .wcu-setup-card .button-secondary {
+        transition: none;
+    }
+
+    .plugin-setup-settings .wcu-qs-option:hover .wcu-qs-option__arrow {
+        transform: none;
+    }
+}

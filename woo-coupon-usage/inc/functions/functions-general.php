@@ -15,6 +15,39 @@ add_filter( 'wcu_meta_content', 'shortcode_unautop' );
 add_filter( 'wcu_meta_content', 'prepend_attachment' );
 
 /**
+ * Affiliate portal themes, keyed by the value stored in wcusage_portal_theme.
+ * "classic" is the original look and stays the default. The others only restyle the
+ * portal (same markup and layout), loaded from inc/portal/portal-themes/.
+ *
+ */
+if( !function_exists( 'wcusage_get_portal_themes' ) ) {
+  function wcusage_get_portal_themes() {
+    return array(
+      'classic' => __( 'Classic', 'woo-coupon-usage' ),
+      'sleek'   => __( 'Sleek', 'woo-coupon-usage' ),
+      'modern'  => __( 'Modern', 'woo-coupon-usage' ),
+      'canvas'  => __( 'Canvas', 'woo-coupon-usage' ),
+      'spotlight' => __( 'Spotlight', 'woo-coupon-usage' ),
+    );
+  }
+}
+
+/**
+ * The active affiliate portal theme, falling back to "classic" for unknown values.
+ *
+ */
+if( !function_exists( 'wcusage_get_portal_theme' ) ) {
+  function wcusage_get_portal_theme() {
+    $theme = (string) wcusage_get_setting_value( 'wcusage_portal_theme', 'classic' );
+    $theme = apply_filters( 'wcusage_portal_theme', $theme );
+    if ( ! is_string( $theme ) || ! array_key_exists( $theme, wcusage_get_portal_themes() ) ) {
+      $theme = 'classic';
+    }
+    return $theme;
+  }
+}
+
+/**
  * Load admin ajax only on pages that include main plugin shortcode.
  *
  */

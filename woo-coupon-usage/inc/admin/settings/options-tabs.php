@@ -29,8 +29,7 @@ function wcusage_field_cb_custom_tabs( $args )
 
   <!-- Number of custom tabs -->
   <?php $tabsnumber = wcusage_get_setting_value('wcusage_field_custom_tabs_number', '2'); ?>
-  <?php wcusage_setting_number_option('wcusage_field_custom_tabs_number', $tabsnumber, esc_html__( 'Number of custom tabs', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'Please refresh the page to add/remove the new tab settings (found below) when you update this number.', 'woo-coupon-usage' ); ?></i><br/>
+  <?php wcusage_setting_number_option('wcusage_field_custom_tabs_number', $tabsnumber, esc_html__( 'Number of custom tabs', 'woo-coupon-usage' ), '0px', 1, esc_html__( 'How many custom tabs to add. The tab settings below update to match as soon as you change this number (with manual saving, once you save).', 'woo-coupon-usage' )); ?>
 
  <br/><hr/>
 
@@ -59,17 +58,15 @@ function wcusage_field_cb_custom_tabs( $args )
     }
     echo ' <div class="input_fields_wrap"></div>';
 
-  echo '<strong>' . esc_html__( 'Tab Name:', 'woo-coupon-usage' ) . '</strong><br/>';
+  echo '<strong>' . esc_html__( 'Tab Name:', 'woo-coupon-usage' ) . '</strong>' . wcusage_setting_info_icon( esc_html__('The name of the tab button.', 'woo-coupon-usage') ) . '<br/>';
   echo '<input type="text" id="wcusage_field_custom_tabs" checktype="customnumber" custom1="'.esc_attr($i).'" custom2="name" name="wcusage_options[wcusage_field_custom_tabs]['.esc_attr($i).'][name]" value="'.esc_attr($wcusage_field_custom_tab).'">';
-  echo '<br/><i>' . esc_html__('The name of the tab button.', 'woo-coupon-usage') . '</i>';
 
   echo '<br/><br/>';
 
   // External link toggle using helper
   echo '<div class="wcusage-custom-tab-external-wrapper">';
-  wcusage_setting_toggle_option('wcusage_field_custom_tabs_external_'.esc_attr($i), $legacy_external ? 1 : 0, esc_html__('Open as external link instead of tab?', 'woo-coupon-usage'), '0px');
-  echo '<br/><i style="margin-top:-8px; display:block;">' . esc_html__('If enabled, this tab becomes a link opening in a new browser tab and the header/content settings below are hidden.', 'woo-coupon-usage') . '</i>';
-  echo '<br/></div>';
+  wcusage_setting_toggle_option('wcusage_field_custom_tabs_external_'.esc_attr($i), $legacy_external ? 1 : 0, esc_html__('Open as external link instead of tab?', 'woo-coupon-usage'), '0px', esc_html__('If enabled, this tab becomes a link opening in a new browser tab and the header/content settings below are hidden.', 'woo-coupon-usage'));
+  echo '</div>';
 
   echo '<div class="wcusage-custom-tab-external-url-wrapper wcusage-custom-tab-extra-'.esc_attr($i).'" style="margin-top:10px;'.($wcusage_field_custom_tab_external == '1' ? '' : ' display:none;').'">';
   wcusage_setting_text_option('wcusage_field_custom_tabs_external_url_'.esc_attr($i), $wcusage_field_custom_tab_external_url, esc_html__('External URL:', 'woo-coupon-usage'), '0px');
@@ -78,7 +75,7 @@ function wcusage_field_cb_custom_tabs( $args )
   ?>
   <!-- Select a user role: multi select -->
   <p class="creative-type-user-role">
-      <label for="user_role"><strong><?php echo esc_html__('Limit to certain user roles & groups?', 'woo-coupon-usage'); ?></strong></label>
+      <label for="user_role"><strong><?php echo esc_html__('Limit to certain user roles & groups?', 'woo-coupon-usage'); ?></strong></label><?php echo wcusage_setting_info_icon( esc_html__('The tab will only be visible to affiliates with any of the selected user roles.', 'woo-coupon-usage') . ' ' . esc_html__('If no roles are selected, the tab will be visible to all affiliates.', 'woo-coupon-usage') ); ?>
 
       <br/>
 
@@ -146,9 +143,6 @@ function wcusage_field_cb_custom_tabs( $args )
 
       </span>
 
-      <i><?php echo esc_html__('The tab will only be visible to affiliates with any of the selected user roles.', 'woo-coupon-usage'); ?></i>
-      <br/>
-      <i><?php echo esc_html__('If no roles are selected, the tab will be visible to all affiliates.', 'woo-coupon-usage'); ?></i>
 
     </p>
 
@@ -201,9 +195,8 @@ function wcusage_field_cb_custom_tabs( $args )
   echo '<br/><br/>';
   // Now open internal fields wrapper for header + content only
   echo '<div class="wcusage-custom-tab-internal-fields wcusage-custom-tab-internal-'.esc_attr($i).'"'.($wcusage_field_custom_tab_external == '1' ? ' style="display:none;"' : '').'>'; // open internal fields wrapper
-  echo '<strong>' . esc_html__( 'Tab Header:', 'woo-coupon-usage' ) . '</strong><br/>';
+  echo '<strong>' . esc_html__( 'Tab Header:', 'woo-coupon-usage' ) . '</strong>' . wcusage_setting_info_icon( esc_html__('The header text displayed at the top of the tab content.', 'woo-coupon-usage') ) . '<br/>';
   echo '<input type="text" id="wcusage_field_custom_tabs" checktype="customnumber" custom1="'.esc_attr($i).'" custom2="header" name="wcusage_options[wcusage_field_custom_tabs]['.esc_attr($i).'][header]" value="'.esc_attr($wcusage_field_custom_tab_header).'">';
-  echo '<br/><i>' . esc_html__('The header text displayed at the top of the tab content.', 'woo-coupon-usage') . '</i>';
   echo '<br/><br/>';
     $settingstabscontent = array(
         'wpautop' => true,

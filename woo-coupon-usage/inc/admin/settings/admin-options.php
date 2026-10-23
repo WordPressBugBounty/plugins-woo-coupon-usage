@@ -679,6 +679,11 @@ jQuery( document ).ready(function() {
   <!-- Left Sidebar Navigation (Flat List, No Groups) -->
   <div class="wcu-admin-sidebar">
     <nav class="wcu-admin-sidebar-nav">
+      <?php 
+    if ( function_exists( 'wcusage_settings_view_toggle' ) ) {
+        wcusage_settings_view_toggle();
+    }
+    ?>
       <ul class="wcu-sidebar-menu">
         <li class="wcu-sidebar-menu-item">
           <?php 
@@ -1013,25 +1018,25 @@ jQuery( document ).ready(function() {
     );
     ?>
         </li>
-        <li class="wcu-sidebar-menu-item">
+        <li class="wcu-sidebar-menu-item wcu-sidebar-menu-item--footer">
           <?php 
     wcusage_admin_settings_sidebar_button(
         "tab-help",
         esc_html__( "Help & Support", "woo-coupon-usage" ),
         "fas fa-question-circle",
         0,
-        'background: #2271b1; color: #fff;'
+        ''
     );
     ?>
         </li>
-        <li class="wcu-sidebar-menu-item">
+        <li class="wcu-sidebar-menu-item wcu-sidebar-menu-item--footer">
           <?php 
     wcusage_admin_settings_sidebar_button(
         "tab-pro-details",
         esc_html__( "PRO Modules", "woo-coupon-usage" ),
         "fas fa-star",
         0,
-        'background: #bb9523; color: #fff;'
+        ''
     );
     ?>
         </li>
@@ -1047,6 +1052,7 @@ jQuery( document ).ready(function() {
   
   <!-- Main Content Area -->
   <div class="wcu-admin-content">
+
 <?php 
 }
 
@@ -1085,7 +1091,9 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         settings_errors( 'wcusage_messages' );
         ?>
 
-   <div class="wrap plugin-settings wcusage-settings">
+   <div class="wrap plugin-settings wcusage-settings<?php 
+        echo ( function_exists( 'wcusage_get_settings_view' ) && 'essentials' === wcusage_get_settings_view() ? ' wcu-settings-view-essentials' : '' );
+        ?>">
 
    <?php 
         do_action( 'wcusage_hook_dashboard_page_header', '' );
@@ -1295,77 +1303,52 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
         ?>
 
       <br/><hr/>
-
-      <p style="font-size: 20px; color: green; display: none;" id="wcu-number-settings-saved-message"><i class="fas fa-check-square" style="font-size: 20px; color: green; background: transparent; padding: 0;"></i>&nbsp; <span id="wcu-number-settings-saved">0</span> settings have been successfully updated & saved.</p>
-      <div id="wcu-save-all-container" style="display:none; margin-top:6px;">
-        <button type="button" id="wcu-save-all-button" class="button button-small" style="padding: 0 8px; height: 24px; line-height: 22px;">
-          <?php 
-        echo esc_html__( 'Save All Settings', 'woo-coupon-usage' );
+      
+      <?php 
+        // Pinned to the bottom right of the screen while the settings are in view:
+        // whether changes are saved (kept up to date by js/admin-options-update.js),
+        // and with manual (legacy bulk) saving on, a bar with the Save button so it is
+        // in reach from every tab. The saving mode is chosen just below.
+        $wcusage_manual_saving = '1' === (string) wcusage_get_setting_value( 'wcusage_field_settings_legacy', '0' );
         ?>
-        </button>
-        <span id="wcu-save-all-status" style="margin-left:8px; font-size:12px; color:#666; display:none;"></span>
-      </div>
-
-      <div style="transform: scale(0.7); transform-origin: 0 0; margin-top: 40px;">
-
-        <?php 
-        $wcusage_field_settings_legacy = wcusage_get_setting_value( 'wcusage_field_settings_legacy', '0' );
-        ?>
-        <?php 
-        wcusage_setting_select_option(
-            'wcusage_field_settings_legacy',
-            $wcusage_field_settings_legacy,
-            esc_html__( 'Settings not saving correctly? Switch saving mode', 'woo-coupon-usage' ),
-            '0px',
-            array(
-                '0' => esc_html__( 'Automatic Saving (AJAX)', 'woo-coupon-usage' ),
-                '1' => esc_html__( 'Manual Saving (Legacy bulk)', 'woo-coupon-usage' ),
-            )
+      <div class="wcu-save-dock">
+        <span id="wcu-save-status" class="wcu-save-status is-<?php 
+        echo ( $wcusage_manual_saving ? 'manual' : 'auto' );
+        ?>" role="status" aria-live="polite">
+          <span class="wcu-save-status-icon" aria-hidden="true"></span>
+          <span class="wcu-save-status-text"><?php 
+        echo ( $wcusage_manual_saving ? esc_html__( 'Manual saving is on', 'woo-coupon-usage' ) : esc_html__( 'Changes save automatically', 'woo-coupon-usage' ) );
+        ?></span>
+        </span>
+        <div class="wcu-settings-savebar" id="wcu-settings-savebar">
+          <span class="wcu-settings-savebar-icon" aria-hidden="true"><span class="fa-solid fa-floppy-disk"></span></span>
+          <span class="wcu-settings-savebar-text">
+            <strong class="wcu-settings-savebar-title"><?php 
+        echo esc_html__( 'Manual saving is on', 'woo-coupon-usage' );
+        ?></strong>
+            <span class="wcu-settings-savebar-hint"><?php 
+        echo esc_html__( 'Your changes are kept once you click "Save Settings".', 'woo-coupon-usage' );
+        ?></span>
+            <span class="wcu-settings-savebar-unsaved"><?php 
+        echo esc_html__( 'You have unsaved changes. Click "Save Settings" to keep them.', 'woo-coupon-usage' );
+        ?></span>
+          </span>
+          <span class="wcu-field-section-save">
+            <?php 
+        submit_button(
+            esc_html__( 'Save Settings', 'woo-coupon-usage' ),
+            'primary',
+            'submit',
+            false
         );
         ?>
-        <i style="margin-top: -5px;"><?php 
-        echo esc_html__( 'Selecting manual will disable automatic ajax saving, and instead will enable the "Save Settings" button, and you will save all settings at once.', 'woo-coupon-usage' );
-        ?></i>
-        
-        <br/>
-
-        <script>
-        jQuery( document ).ready(function() {
-          function wcusage_update_save_visibility() {
-            var val = jQuery('#wcusage_field_settings_legacy').val();
-            if (val === '1') {
-              jQuery('.wcu-field-section-save').show();
-            } else {
-              jQuery('.wcu-field-section-save').hide();
-            }
-          }
-          wcusage_update_save_visibility();
-          jQuery('#wcusage_field_settings_legacy').on('change', wcusage_update_save_visibility);
-        });
-        </script>
-        <span class="wcu-field-section-save">
-
-          <?php 
-        submit_button( esc_html__( 'Save Settings', 'woo-coupon-usage' ) );
-        ?>
-
-        </span>
-
-        <?php 
-        // Filled in and shown by js/admin-options-update.js once it has counted what
-        // the form would actually post. This used to warn only when max_input_vars
-        // was below 1000, but the form itself is well past 1000 controls on a site
-        // with the PRO tabs, so a host on PHP's default of exactly 1000 was silently
-        // truncated with no warning at all. It is outside the legacy-only span because
-        // the "Save All Settings" button in automatic mode posts the same form.
-        ?>
-        <p id="wcu-max-input-vars-warning" style="font-size: 14px; color: #b32d2e; display: none;" data-limit="<?php 
-        echo esc_attr( (int) ini_get( 'max_input_vars' ) );
-        ?>"><strong><span class="wcu-max-input-vars-text"></span> <a href="https://couponaffiliates.com/docs/increase-max-input-vars-limit" target="_blank"><?php 
-        echo esc_html__( 'Learn More.', 'woo-coupon-usage' );
-        ?></a></strong></p>
-
+          </span>
+        </div>
       </div>
+
+      <?php 
+        wcusage_setting_section_saving_mode();
+        ?>
 
       <div style="margin-top: 30px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 5px;">
 
@@ -1407,40 +1390,6 @@ if ( !function_exists( 'wcusage_options_page_html' ) ) {
       </span>
 
       </div>
-
-      <?php 
-        // Simple Points and Rewards Ad — show only on PRO, and only if neither variant of the plugin is active
-        $spr_plugins = array('simple-points-and-rewards/simple-points-and-rewards.php', 'simple-points-and-rewards-pro/simple-points-and-rewards.php');
-        $spr_active = false;
-        foreach ( $spr_plugins as $spr_plugin ) {
-            if ( is_plugin_active( $spr_plugin ) ) {
-                $spr_active = true;
-                break;
-            }
-        }
-        if ( wcu_fs()->can_use_premium_code() && !$spr_active ) {
-            ?>
-      <!-- Simple Points and Rewards Ad -->
-      <div style="margin-top: 25px; padding: 10px 14px; background: linear-gradient(145deg, #f8fbff, #ffffff); border: 2px solid #eaeff6; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,100,200,0.05); display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-        <span style="font-size: 14px; color: #1a2a4a; font-weight: 600; flex-shrink: 0;"><?php 
-            echo esc_html__( 'Try our other new plugin!', 'woo-coupon-usage' );
-            ?></span>
-        &#160;
-        <span style="font-size: 14px; color: #c5247fff; font-weight: 600; flex-shrink: 0;"><a style="color: #c5247fff" href="https://relywp.com/plugins/simple-points-rewards-woocommerce/?utm_source=coupon-affiliates&utm_medium=settings-ad&utm_campaign=cross-promote" target="_blank">Simple Points &amp; Rewards</a></span>
-        &#160;
-        <span style="font-size: 14px; color: #4a6a8a; flex: 1; min-width: 120px;"><?php 
-            echo esc_html__( 'Boost customer loyalty with a powerful WooCommerce points and rewards plugin.', 'woo-coupon-usage' );
-            ?></span>
-        <a href="https://relywp.com/plugins/simple-points-rewards-woocommerce/?utm_source=coupon-affiliates&utm_medium=settings-ad&utm_campaign=cross-promote"
-        target="_blank" style="flex-shrink: 0; padding: 5px 12px; background: linear-gradient(145deg, #c5247fff, #a81e6fff); color: #fff; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 600; white-space: nowrap;">
-          <?php 
-            echo esc_html__( 'Get 25% Off + Free Trial', 'woo-coupon-usage' );
-            ?> <span class="dashicons dashicons-external" style="font-size: 12px; width: 12px; height: 12px; vertical-align: middle; margin-top: -1px;"></span>
-        </a>
-      </div>
-      <?php 
-        }
-        ?>
 
   	</form>
     
@@ -1707,7 +1656,7 @@ function wcusage_get_plugin_version(  $pluginname  ) {
  */
 if ( !function_exists( 'wcusage_setting_toggle' ) ) {
     function wcusage_setting_toggle(  $toggleclass, $showclass  ) {
-        $script = "<script>\n    jQuery( document ).ready(function() {\n      if(!jQuery('" . $toggleclass . "').prop('checked')) {\n        jQuery('" . $showclass . "').hide();\n      }\n      jQuery('" . $toggleclass . "').change(function(){\n        if(jQuery(this).prop('checked')) {\n          jQuery('" . $showclass . "').show();\n        } else {\n          jQuery('" . $showclass . "').hide();\n        }\n      });\n    });\n    </script>";
+        $script = "<script>\r\n    jQuery( document ).ready(function() {\r\n      if(!jQuery('" . $toggleclass . "').prop('checked')) {\r\n        jQuery('" . $showclass . "').hide();\r\n      }\r\n      jQuery('" . $toggleclass . "').change(function(){\r\n        if(jQuery(this).prop('checked')) {\r\n          jQuery('" . $showclass . "').show();\r\n        } else {\r\n          jQuery('" . $showclass . "').hide();\r\n        }\r\n      });\r\n    });\r\n    </script>";
         echo $script;
         return $script;
     }
@@ -1722,7 +1671,8 @@ if ( !function_exists( 'wcusage_setting_toggle_option' ) ) {
         $name,
         $default,
         $label,
-        $margin
+        $margin,
+        $tooltip = ""
     ) {
         $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
@@ -1757,7 +1707,9 @@ if ( !function_exists( 'wcusage_setting_toggle_option' ) ) {
       </label>
       <strong style="display: inline-block;"><label for="scales"><?php 
         echo wp_kses_post( $label );
-        ?></label></strong>
+        ?></label><?php 
+        echo wcusage_setting_info_icon( $tooltip );
+        ?></strong>
     </p>
   <?php 
     }
@@ -1772,7 +1724,8 @@ if ( !function_exists( 'wcusage_setting_textarea_option' ) ) {
         $name,
         $default,
         $label,
-        $margin
+        $margin,
+        $tooltip = ""
     ) {
         $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
@@ -1789,7 +1742,9 @@ if ( !function_exists( 'wcusage_setting_textarea_option' ) ) {
         if ( $label ) {
             ?><strong><?php 
             echo wp_kses_post( $label );
-            ?>:</strong><br/><?php 
+            ?>:</strong><?php 
+            echo wcusage_setting_info_icon( $tooltip );
+            ?><br/><?php 
         }
         ?>
     	<textarea rows="3" cols="30" id="<?php 
@@ -1815,7 +1770,8 @@ if ( !function_exists( 'wcusage_setting_select_option' ) ) {
         $default,
         $label,
         $margin,
-        $items
+        $items,
+        $tooltip = ""
     ) {
         $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
@@ -1832,7 +1788,9 @@ if ( !function_exists( 'wcusage_setting_select_option' ) ) {
         if ( $label ) {
             ?><strong><?php 
             echo wp_kses_post( $label );
-            ?>:</strong><br/><?php 
+            ?>:</strong><?php 
+            echo wcusage_setting_info_icon( $tooltip );
+            ?><br/><?php 
         }
         ?>
       <select id="<?php 
@@ -1860,7 +1818,8 @@ if ( !function_exists( 'wcusage_setting_text_option' ) ) {
         $name,
         $default,
         $label,
-        $margin
+        $margin,
+        $tooltip = ""
     ) {
         $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
@@ -1877,7 +1836,9 @@ if ( !function_exists( 'wcusage_setting_text_option' ) ) {
         if ( $label ) {
             ?><strong><?php 
             echo wp_kses_post( $label );
-            ?></strong><br/><?php 
+            ?></strong><?php 
+            echo wcusage_setting_info_icon( $tooltip );
+            ?><br/><?php 
         }
         ?>
     <input type="text" value="<?php 
@@ -1942,7 +1903,8 @@ if ( !function_exists( 'wcusage_setting_password_option' ) ) {
         $name,
         $default,
         $label,
-        $margin
+        $margin,
+        $tooltip = ""
     ) {
         $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
@@ -1957,7 +1919,9 @@ if ( !function_exists( 'wcusage_setting_password_option' ) ) {
         ?>
     <strong><?php 
         echo wp_kses_post( $label );
-        ?></strong><br/>
+        ?></strong><?php 
+        echo wcusage_setting_info_icon( $tooltip );
+        ?><br/>
     <input type="password" value="<?php 
         echo esc_attr( $setting );
         ?>" id="<?php 
@@ -1979,7 +1943,8 @@ if ( !function_exists( 'wcusage_setting_user_role' ) ) {
         $name = "",
         $default = "",
         $label = "",
-        $margin = ""
+        $margin = "",
+        $tooltip = ""
     ) {
         $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
@@ -2005,7 +1970,9 @@ if ( !function_exists( 'wcusage_setting_user_role' ) ) {
         ?>]" >
     <strong><label for="scales"><?php 
         echo esc_attr( $label );
-        ?></label></strong><br/>
+        ?></label></strong><?php 
+        echo wcusage_setting_info_icon( $tooltip );
+        ?><br/>
     <select name="wcusage_options[<?php 
         echo esc_attr( $name );
         ?>]" id="<?php 
@@ -2031,21 +1998,59 @@ function wcu_admin_enqueue_scripts(  $hook_suffix  ) {
         wp_enqueue_style( 'wp-color-picker' );
         wp_enqueue_script( 'jquery-ui-core' );
         wp_enqueue_script( 'jquery-ui-sortable' );
+        $admin_js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin.js';
         wp_enqueue_script(
             'caffs-admin',
             WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin.js',
             array('jquery', 'wp-color-picker', 'jquery-ui-sortable'),
-            '1.1',
+            ( file_exists( $admin_js_path ) ? filemtime( $admin_js_path ) : WCUSAGE_VERSION ),
             true
         );
+        // Setup wizard theme: the settings page look (accent colour, fields, buttons).
+        if ( $_GET['page'] == 'wcusage_setup' ) {
+            $wizard_css_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-setup-wizard.css';
+            wp_enqueue_style(
+                'wcusage-admin-setup-wizard',
+                WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-setup-wizard.css',
+                array('woo-coupon-usage-admin-style'),
+                ( file_exists( $wizard_css_path ) ? filemtime( $wizard_css_path ) : WCUSAGE_VERSION )
+            );
+        }
         // Settings quick search
         if ( isset( $_GET['page'] ) && $_GET['page'] == 'wcusage_settings' ) {
+            $search_js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/settings-search.js';
             wp_enqueue_script(
                 'wcusage-settings-search',
                 WCUSAGE_UNIQUE_PLUGIN_URL . 'js/settings-search.js',
                 array('jquery'),
-                '1.0.0',
+                ( file_exists( $search_js_path ) ? filemtime( $search_js_path ) : WCUSAGE_VERSION ),
                 true
+            );
+            // Settings tabs: each divided section is shown as its own card.
+            $sections_css_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-settings-sections.css';
+            $sections_js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/admin-settings-sections.js';
+            wp_enqueue_style(
+                'wcusage-admin-settings-sections',
+                WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-settings-sections.css',
+                array(),
+                ( file_exists( $sections_css_path ) ? filemtime( $sections_css_path ) : WCUSAGE_VERSION )
+            );
+            wp_enqueue_script(
+                'wcusage-admin-settings-sections',
+                WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-settings-sections.js',
+                array(),
+                ( file_exists( $sections_js_path ) ? filemtime( $sections_js_path ) : WCUSAGE_VERSION ),
+                true
+            );
+            // General settings tab: section navigation and the live dashboard/portal preview.
+            wcusage_enqueue_general_settings_assets();
+            // Settings page theme (accent colour, buttons, type scale, fields); loads last.
+            $theme_css_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'css/admin-settings-theme.css';
+            wp_enqueue_style(
+                'wcusage-admin-settings-theme',
+                WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-settings-theme.css',
+                array('woo-coupon-usage-admin-style', 'wcusage-admin-settings-sections', 'wcusage-admin-settings-general'),
+                ( file_exists( $theme_css_path ) ? filemtime( $theme_css_path ) : WCUSAGE_VERSION )
             );
             // Registrations settings dynamic custom fields handler
             $reg_js_path = WCUSAGE_UNIQUE_PLUGIN_PATH . 'js/registrations-settings.js';
@@ -2120,6 +2125,101 @@ function wcu_admin_enqueue_scripts(  $hook_suffix  ) {
 }
 
 /**
+ * Assets for the General settings tab: its layout, section navigation and the live
+ * preview of the affiliate dashboard / portal (js/admin-settings-general.js).
+ *
+ */
+if ( !function_exists( 'wcusage_enqueue_general_settings_assets' ) ) {
+    function wcusage_enqueue_general_settings_assets() {
+        $ver = function ( $rel ) {
+            $path = WCUSAGE_UNIQUE_PLUGIN_PATH . $rel;
+            return ( file_exists( $path ) ? filemtime( $path ) : WCUSAGE_VERSION );
+        };
+        wp_enqueue_style(
+            'wcusage-admin-settings-general',
+            WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-settings-general.css',
+            array(),
+            $ver( 'css/admin-settings-general.css' )
+        );
+        wp_enqueue_script(
+            'wcusage-admin-settings-general',
+            WCUSAGE_UNIQUE_PLUGIN_URL . 'js/admin-settings-general.js',
+            array('jquery', 'jquery-ui-sortable', 'wp-color-picker'),
+            $ver( 'js/admin-settings-general.js' ),
+            true
+        );
+        $user = wp_get_current_user();
+        $currency_symbol = ( function_exists( 'get_woocommerce_currency_symbol' ) ? html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES, 'UTF-8' ) : '$' );
+        $dashboard_page = wcusage_get_setting_value( 'wcusage_dashboard_page', '' );
+        $affiliate_text = ( function_exists( 'wcusage_get_affiliate_text' ) ? wcusage_get_affiliate_text( __( 'Affiliate', 'woo-coupon-usage' ) ) : __( 'Affiliate', 'woo-coupon-usage' ) );
+        wp_localize_script( 'wcusage-admin-settings-general', 'wcusageGeneralSettings', array(
+            'previewCss'     => WCUSAGE_UNIQUE_PLUGIN_URL . 'css/admin-settings-general-preview.css?ver=' . $ver( 'css/admin-settings-general-preview.css' ),
+            'fontAwesomeCss' => WCUSAGE_UNIQUE_PLUGIN_URL . 'fonts/font-awesome/css/all.min.css?ver=' . WCUSAGE_VERSION,
+            'isPro'          => ( wcu_fs()->can_use_premium_code() ? 1 : 0 ),
+            'currency'       => array(
+                'symbol'   => $currency_symbol,
+                'position' => get_option( 'woocommerce_currency_pos', 'left' ),
+                'decimal'  => ( function_exists( 'wc_get_price_decimal_separator' ) ? wc_get_price_decimal_separator() : '.' ),
+                'thousand' => ( function_exists( 'wc_get_price_thousand_separator' ) ? wc_get_price_thousand_separator() : ',' ),
+                'decimals' => ( function_exists( 'wc_get_price_decimals' ) ? (int) wc_get_price_decimals() : 2 ),
+            ),
+            'userName'       => ( $user && $user->exists() ? $user->display_name : '' ),
+            'userLogin'      => ( $user && $user->exists() ? $user->user_login : '' ),
+            'avatar'         => ( $user && $user->exists() ? get_avatar_url( $user->ID, array(
+                'size' => 64,
+            ) ) : '' ),
+            'demoCoupon'     => 'DEMO10',
+            'locale'         => str_replace( '_', '-', get_locale() ),
+            'siteName'       => html_entity_decode( get_bloginfo( 'name' ), ENT_QUOTES, 'UTF-8' ),
+            'dashboardTitle' => ( $dashboard_page ? html_entity_decode( get_the_title( $dashboard_page ), ENT_QUOTES, 'UTF-8' ) : sprintf( __( '%s Dashboard', 'woo-coupon-usage' ), $affiliate_text ) ),
+            'i18n'           => array(
+                'dashboard'       => __( 'Dashboard Page', 'woo-coupon-usage' ),
+                'portal'          => __( 'Affiliate Portal', 'woo-coupon-usage' ),
+                'couponInfo'      => __( 'Coupon Info', 'woo-coupon-usage' ),
+                'totalUsage'      => __( 'Total Usage', 'woo-coupon-usage' ),
+                'discount'        => __( 'Discount', 'woo-coupon-usage' ),
+                'commission'      => __( 'Commission', 'woo-coupon-usage' ),
+                'allTime'         => __( 'All-time', 'woo-coupon-usage' ),
+                'last30'          => __( 'Last 30 Days', 'woo-coupon-usage' ),
+                'last7'           => __( 'Last 7 Days', 'woo-coupon-usage' ),
+                'thisMonth'       => __( 'This Month', 'woo-coupon-usage' ),
+                'lastMonth'       => __( 'Last Month', 'woo-coupon-usage' ),
+                'totalSales'      => __( 'Total Sales', 'woo-coupon-usage' ),
+                'totalDiscounts'  => __( 'Total Discounts', 'woo-coupon-usage' ),
+                'totalCommission' => __( 'Total Commission', 'woo-coupon-usage' ),
+                'commissionGraph' => __( 'Commission Graph', 'woo-coupon-usage' ),
+                'latestReferrals' => __( 'Latest Referrals', 'woo-coupon-usage' ),
+                'viewMore'        => __( 'View More', 'woo-coupon-usage' ),
+                'subtotal'        => __( 'Subtotal', 'woo-coupon-usage' ),
+                'payouts'         => __( 'Commission Payouts', 'woo-coupon-usage' ),
+                'unpaid'          => __( 'Unpaid Commission', 'woo-coupon-usage' ),
+                'pending'         => __( 'Pending Payments', 'woo-coupon-usage' ),
+                'completed'       => __( 'Completed Payments', 'woo-coupon-usage' ),
+                'date'            => __( 'Date', 'woo-coupon-usage' ),
+                'status'          => __( 'Status', 'woo-coupon-usage' ),
+                'total'           => __( 'Total', 'woo-coupon-usage' ),
+                'more'            => __( 'More', 'woo-coupon-usage' ),
+                'products'        => __( 'Products', 'woo-coupon-usage' ),
+                'completedStatus' => __( 'Completed', 'woo-coupon-usage' ),
+                'processing'      => __( 'Processing', 'woo-coupon-usage' ),
+                'logout'          => __( 'Logout', 'woo-coupon-usage' ),
+                'backToSite'      => __( 'Back to site', 'woo-coupon-usage' ),
+                'statsTabOff'     => __( 'The "Statistics" tab is turned off, so affiliates will open on the first tab instead. Its content is shown here for reference.', 'woo-coupon-usage' ),
+                'noTabs'          => __( 'No tabs are turned on.', 'woo-coupon-usage' ),
+                'exampleData'     => __( 'Example data', 'woo-coupon-usage' ),
+                'exampleDataHint' => __( 'This preview uses made-up example figures, not your real data.', 'woo-coupon-usage' ),
+                'shop'            => __( 'Shop', 'woo-coupon-usage' ),
+                'myAccount'       => __( 'My Account', 'woo-coupon-usage' ),
+                'cart'            => __( 'Cart', 'woo-coupon-usage' ),
+                'checkout'        => __( 'Checkout', 'woo-coupon-usage' ),
+                'noteAuto'        => __( 'Example statistics on the "Statistics" tab. Settings save automatically as you change them.', 'woo-coupon-usage' ),
+                'noteManual'      => __( 'Example statistics on the "Statistics" tab. Manual saving is on: click "Save Settings" to keep your changes.', 'woo-coupon-usage' ),
+            ),
+        ) );
+    }
+
+}
+/**
  * Function for color settings option
  *
  */
@@ -2128,7 +2228,8 @@ if ( !function_exists( 'wcusage_setting_color_option' ) ) {
         $name,
         $default,
         $label,
-        $margin
+        $margin,
+        $tooltip = ""
     ) {
         $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
@@ -2155,7 +2256,7 @@ if ( !function_exists( 'wcusage_setting_color_option' ) ) {
   });
   </script>
 
-  <p style="margin-left: <?php 
+  <p class="wcu-color-row" style="margin-left: <?php 
         echo esc_html( $margin );
         ?>">
       <?php 
@@ -2165,7 +2266,9 @@ if ( !function_exists( 'wcusage_setting_color_option' ) ) {
         if ( $label ) {
             ?><strong><?php 
             echo wp_kses_post( $label );
-            ?>:</strong><br/><?php 
+            ?>:</strong><?php 
+            echo wcusage_setting_info_icon( $tooltip );
+            ?><br/><?php 
         }
         ?>
       <input type="text" value="<?php 
@@ -2192,10 +2295,17 @@ if ( !function_exists( 'wcusage_setting_number_option' ) ) {
         $default,
         $label,
         $margin,
-        $increment = 1
+        $increment = 1,
+        $tooltip = "",
+        $prefix = "",
+        $suffix = ""
     ) {
         $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
+        // Unit shown inside the field, e.g. a currency symbol before or "%" after the number.
+        $prefix = html_entity_decode( (string) $prefix, ENT_QUOTES, 'UTF-8' );
+        $suffix = html_entity_decode( (string) $suffix, ENT_QUOTES, 'UTF-8' );
+        $has_affix = $prefix !== '' || $suffix !== '';
         ?>
   <p style="margin-left: <?php 
         echo esc_attr( $margin );
@@ -2205,7 +2315,21 @@ if ( !function_exists( 'wcusage_setting_number_option' ) ) {
         ?>
     <strong><?php 
         echo wp_kses_post( $label );
-        ?></strong><br/>
+        ?></strong><?php 
+        echo wcusage_setting_info_icon( $tooltip );
+        ?><br/>
+    <?php 
+        if ( $has_affix ) {
+            ?><span class="wcu-input-affix"><?php 
+        }
+        ?>
+    <?php 
+        if ( $prefix !== '' ) {
+            ?><span class="wcu-input-affix__unit" aria-hidden="true"><?php 
+            echo esc_html( $prefix );
+            ?></span><?php 
+        }
+        ?>
     <input type="number" value="<?php 
         echo esc_attr( $setting );
         ?>"
@@ -2217,6 +2341,18 @@ if ( !function_exists( 'wcusage_setting_number_option' ) ) {
     step="<?php 
         echo esc_attr( $increment );
         ?>">
+    <?php 
+        if ( $suffix !== '' ) {
+            ?><span class="wcu-input-affix__unit" aria-hidden="true"><?php 
+            echo esc_html( $suffix );
+            ?></span><?php 
+        }
+        ?>
+    <?php 
+        if ( $has_affix ) {
+            ?></span><?php 
+        }
+        ?>
     <br/>
   </p>
   <?php 
@@ -2233,13 +2369,15 @@ if ( !function_exists( 'wcusage_setting_tinymce_option' ) ) {
         $default,
         $label,
         $margin,
-        $size = "150"
+        $size = "150",
+        $tooltip = ""
     ) {
         $options = wcusage_get_options();
         wcusage_setting_option_set_default( $options, $name, $default );
         ?>
     <strong style="margin-bottom: 5px; display: block;"><?php 
         echo wp_kses_post( $label );
+        echo wcusage_setting_info_icon( $tooltip );
         ?></strong>
     <?php 
         $setting = html_entity_decode( wcusage_get_setting_value( $name, $default ) );
@@ -2751,7 +2889,98 @@ function wcusage_admin_faq_toggle(  $id, $class, $title  ) {
  */
 if ( !function_exists( 'wcusage_admin_tooltip' ) ) {
     function wcusage_admin_tooltip(  $text, $icon = 'dashicons-editor-help'  ) {
-        return "<span class='wcusage-users-affiliate-column' style='margin-left: 5px; display: inline-block;'>\n    <span class='custom-tooltip'><span class='dashicons " . esc_attr( $icon ) . "' style='color: green;'></span>\n        <span class='tooltip-content' style='white-space: normal;'>\n        <span style='font-size: 12px;'>" . $text . "</span>\n        </span>\n    </span>\n    </span>";
+        return "<span class='wcusage-users-affiliate-column' style='margin-left: 5px; display: inline-block;'>\r\n    <span class='custom-tooltip'><span class='dashicons " . esc_attr( $icon ) . "' style='color: green;'></span>\r\n        <span class='tooltip-content' style='white-space: normal;'>\r\n        <span style='font-size: 12px;'>" . $text . "</span>\r\n        </span>\r\n    </span>\r\n    </span>";
+    }
+
+}
+/**
+ * Info icon shown next to a settings label; its description appears on hover or focus.
+ * Styled by .wcu-setting-info in admin-style.css.
+ *
+ */
+if ( !function_exists( 'wcusage_setting_info_icon' ) ) {
+    function wcusage_setting_info_icon(  $text  ) {
+        $text = trim( (string) $text );
+        if ( '' === $text ) {
+            return '';
+        }
+        // A tooltip with a link in it stays open while hovered, so the link can be clicked.
+        $has_link = false !== stripos( $text, '<a ' );
+        return '<span class="wcu-setting-info' . (( $has_link ? ' wcu-setting-info-has-link' : '' )) . '" tabindex="0" role="note" aria-label="' . esc_attr( wp_strip_all_tags( $text ) ) . '">' . '<span class="dashicons dashicons-info-outline" aria-hidden="true"></span>' . '<span class="wcu-setting-info-text"' . (( $has_link ? '' : ' aria-hidden="true"' )) . '>' . wp_kses_post( $text ) . '</span>' . '</span>';
+    }
+
+}
+/**
+ * Bottom of the settings page, below every tab: how settings are saved (automatic
+ * or manual), and a button to save every setting at once.
+ *
+ */
+if ( !function_exists( 'wcusage_setting_section_saving_mode' ) ) {
+    function wcusage_setting_section_saving_mode() {
+        $legacy = (string) wcusage_get_setting_value( 'wcusage_field_settings_legacy', '0' );
+        ?>
+    <div class="wcu-saving-mode">
+
+      <div class="wcu-saving-mode-label" id="wcu-saving-mode-label">
+        <span class="fa-solid fa-floppy-disk" aria-hidden="true"></span>
+        <?php 
+        echo esc_html__( 'Settings not saving correctly? Switch saving mode:', 'woo-coupon-usage' );
+        ?>
+        <?php 
+        echo wcusage_setting_info_icon( esc_html__( 'Settings normally save as soon as you change them. If they are not saving correctly on your site, switch to manual saving: a "Save Settings" button then saves all settings at once.', 'woo-coupon-usage' ) );
+        ?>
+      </div>
+
+      <div class="wcu-saving-mode-controls">
+        <?php 
+        // The _p wrapper is where js/admin-options-update.js reports a failed save.
+        ?>
+        <p id="wcusage_field_settings_legacy_p">
+          <select id="wcusage_field_settings_legacy" aria-labelledby="wcu-saving-mode-label" name="wcusage_options[wcusage_field_settings_legacy]">
+            <option value="0" <?php 
+        selected( $legacy, '0' );
+        ?>><?php 
+        echo esc_html__( 'Automatic Saving (AJAX)', 'woo-coupon-usage' );
+        ?></option>
+            <option value="1" <?php 
+        selected( $legacy, '1' );
+        ?>><?php 
+        echo esc_html__( 'Manual Saving (Legacy bulk)', 'woo-coupon-usage' );
+        ?></option>
+          </select>
+        </p>
+
+        <p id="wcu-save-all-container"<?php 
+        if ( '1' === $legacy ) {
+            echo ' style="display:none;"';
+        }
+        ?>>
+          <button type="button" id="wcu-save-all-button" class="button">
+            <?php 
+        echo esc_html__( 'Save All Settings', 'woo-coupon-usage' );
+        ?>
+          </button>
+          <?php 
+        echo wcusage_setting_info_icon( esc_html__( 'Saves every setting on every tab in one go. Useful if some settings did not save automatically.', 'woo-coupon-usage' ) );
+        ?>
+        </p>
+      </div>
+
+      <span id="wcu-save-all-status" style="display:none;"></span>
+
+      <?php 
+        // Filled in and shown by js/admin-options-update.js once it has counted what
+        // the form would actually post: on a host with PHP's default max_input_vars of
+        // 1000 a bulk save would otherwise silently lose the end of the form.
+        ?>
+      <p id="wcu-max-input-vars-warning" style="display: none;" data-limit="<?php 
+        echo esc_attr( (int) ini_get( 'max_input_vars' ) );
+        ?>"><span class="wcu-max-input-vars-text"></span> <a href="https://couponaffiliates.com/docs/increase-max-input-vars-limit" target="_blank"><?php 
+        echo esc_html__( 'Learn More.', 'woo-coupon-usage' );
+        ?></a></p>
+
+    </div>
+    <?php 
     }
 
 }

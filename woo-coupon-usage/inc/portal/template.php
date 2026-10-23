@@ -18,6 +18,10 @@ $combined_commission = 0;
 $user_no_coupons = 0;
 $options = wcusage_get_options();
 $wcusage_urlprivate = wcusage_get_setting_value( 'wcusage_field_urlprivate', '1' );
+// Portal theme. "classic" keeps the original styling untouched; the other themes are
+// extra stylesheets over the same markup and layout (see inc/portal/portal-themes/).
+$wcusage_portal_theme = ( function_exists( 'wcusage_get_portal_theme' ) ? wcusage_get_portal_theme() : 'classic' );
+$wcusage_portal_themed = 'classic' !== $wcusage_portal_theme;
 // Check if user is logged in
 $current_user_id = get_current_user_id();
 // Check if admin is previewing another user's dashboard
@@ -213,8 +217,63 @@ wp_enqueue_style(
     'wcusage-portal-css',
     WCUSAGE_UNIQUE_PLUGIN_URL . 'inc/portal/style.css',
     array(),
-    '6.3.8'
+    filemtime( WCUSAGE_UNIQUE_PLUGIN_PATH . 'inc/portal/style.css' )
 );
+if ( $wcusage_portal_themed ) {
+    // Load the dashboard stylesheet first, so the theme is printed after it.
+    if ( function_exists( 'wcusage_enqueue_frontend_style' ) ) {
+        wcusage_enqueue_frontend_style();
+    }
+    $wcusage_portal_theme_path = plugin_dir_path( __FILE__ ) . 'portal-themes/';
+    $wcusage_portal_theme_url = WCUSAGE_UNIQUE_PLUGIN_URL . 'inc/portal/portal-themes/';
+    $wcusage_portal_theme_ver = function ( $file ) use($wcusage_portal_theme_path) {
+        return ( file_exists( $wcusage_portal_theme_path . $file ) ? filemtime( $wcusage_portal_theme_path . $file ) : WCUSAGE_VERSION );
+    };
+    wp_enqueue_style(
+        'wcusage-portal-theme-base',
+        $wcusage_portal_theme_url . 'base.css',
+        array('wcusage-portal-css'),
+        $wcusage_portal_theme_ver( 'base.css' )
+    );
+    wp_enqueue_style(
+        'wcusage-portal-theme-' . $wcusage_portal_theme,
+        $wcusage_portal_theme_url . $wcusage_portal_theme . '.css',
+        array('wcusage-portal-theme-base'),
+        $wcusage_portal_theme_ver( $wcusage_portal_theme . '.css' )
+    );
+    wp_enqueue_script(
+        'wcusage-portal-theme',
+        $wcusage_portal_theme_url . 'theme.js',
+        array('jquery'),
+        $wcusage_portal_theme_ver( 'theme.js' ),
+        true
+    );
+    // theme.js finds each table's Status column by its heading, in the site's language,
+    // and maps each translated status name back to its slug to pick the badge colour.
+    $wcusage_portal_status_names = array(
+        'paid'      => __( 'Paid', 'woo-coupon-usage' ),
+        'cancelled' => __( 'Cancelled', 'woo-coupon-usage' ),
+        'pending'   => __( 'Pending', 'woo-coupon-usage' ),
+        'created'   => __( 'Created', 'woo-coupon-usage' ),
+    );
+    if ( function_exists( 'wc_get_order_statuses' ) ) {
+        foreach ( wc_get_order_statuses() as $wcusage_status_slug => $wcusage_status_name ) {
+            $wcusage_portal_status_names[preg_replace( '/^wc-/', '', $wcusage_status_slug )] = $wcusage_status_name;
+        }
+    }
+    $wcusage_portal_status_map = array();
+    foreach ( $wcusage_portal_status_names as $wcusage_status_slug => $wcusage_status_name ) {
+        $wcusage_status_name = trim( wp_strip_all_tags( (string) $wcusage_status_name ) );
+        $wcusage_status_name = ( function_exists( 'mb_strtolower' ) ? mb_strtolower( $wcusage_status_name ) : strtolower( $wcusage_status_name ) );
+        if ( '' !== $wcusage_status_name ) {
+            $wcusage_portal_status_map[$wcusage_status_name] = $wcusage_status_slug;
+        }
+    }
+    wp_localize_script( 'wcusage-portal-theme', 'wcusagePortalTheme', array(
+        'statusLabel' => __( 'Status', 'woo-coupon-usage' ),
+        'statusNames' => $wcusage_portal_status_map,
+    ) );
+}
 do_action( 'wcusage_hook_custom_styles' );
 // Enqueue custom scripts and styles for the registration form
 wp_enqueue_script(
@@ -346,8 +405,41 @@ if ( !empty( $wcusage_portal_font_family ) ) {
     // Remove "quot" text
     $safe_font_family = str_replace( array("'", '"', 'quot'), '', $safe_font_family );
     if ( !empty( $safe_font_family ) ) {
-        echo '<style id="wcusage-portal-font">:root{--primary-font: ' . esc_html( $safe_font_family ) . ';}</style>';
+        // html:root outranks the :root default in style.css, which wp_head() prints after this.
+        echo '<style id="wcusage-portal-font">html:root{--primary-font: ' . esc_html( $safe_font_family ) . ';}</style>';
     }
+}
+// Themes read the dashboard colour settings from CSS variables, instead of the
+// inline styles and hover scripts the classic theme puts on each tab.
+if ( $wcusage_portal_themed ) {
+    $wcusage_portal_theme_colors = array(
+        '--wcu-tab'               => array('wcusage_field_color_tab', '#2c3e50'),
+        '--wcu-tab-font'          => array('wcusage_field_color_tab_font', 'white'),
+        '--wcu-tab-active'        => array('wcusage_field_color_tab_hover', '#34495e'),
+        '--wcu-tab-active-font'   => array('wcusage_field_color_tab_hover_font', 'white'),
+        '--wcu-table'             => array('wcusage_field_color_table', '#f4f4f4'),
+        '--wcu-table-font'        => array('wcusage_field_color_table_font', '#0a0a0a'),
+        '--wcu-button'            => array('wcusage_field_color_button', '#005d75'),
+        '--wcu-button-font'       => array('wcusage_field_color_button_font', '#ffffff'),
+        '--wcu-button-hover'      => array('wcusage_field_color_button_hover', '#1b3e47'),
+        '--wcu-button-hover-font' => array('wcusage_field_color_button_font_hover', '#ffffff'),
+        '--wcu-stats-icon'        => array('wcusage_field_color_stats_icon', '#bebebe'),
+    );
+    $wcusage_portal_theme_css = '';
+    foreach ( $wcusage_portal_theme_colors as $wcusage_var => $wcusage_setting ) {
+        $wcusage_value = trim( (string) wcusage_get_setting_value( $wcusage_setting[0], $wcusage_setting[1] ) );
+        // Colour pickers store hex, but older saves can hold a colour name.
+        if ( !preg_match( '/^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)$/', $wcusage_value ) ) {
+            $wcusage_value = $wcusage_setting[1];
+        }
+        // The stats icon colour defaults to a pale grey chosen for the classic boxes.
+        // Until it is changed, themes tint the icons with the button colour instead.
+        if ( '--wcu-stats-icon' === $wcusage_var && '#bebebe' === strtolower( $wcusage_value ) ) {
+            $wcusage_value = 'var(--wcu-button)';
+        }
+        $wcusage_portal_theme_css .= $wcusage_var . ':' . $wcusage_value . ';';
+    }
+    echo '<style id="wcusage-portal-theme-vars">:root{' . esc_html( $wcusage_portal_theme_css ) . '}</style>';
 }
 // Unenqueue any stylesheets from the site's theme before wp_head() prints them.
 $theme = wp_get_theme();
@@ -379,7 +471,10 @@ wp_head();
 <?php 
 do_action( 'wcusage_portal_hook_before_body' );
 ?>
-<body>
+<body class="wcu-portal-theme-<?php 
+echo esc_attr( $wcusage_portal_theme );
+echo ( $wcusage_portal_themed ? ' wcu-portal-themed' : '' );
+?>">
     <div class="affiliate-portal-container">
         <!-- Left Sidebar with Tabs -->
         <div class="sidebar<?php 
@@ -996,6 +1091,9 @@ function wcusage_portal_tabs(
     $tab_font_color = wcusage_get_setting_value( 'wcusage_field_color_tab_font', 'white' );
     $tab_hover_color = wcusage_get_setting_value( 'wcusage_field_color_tab_hover', '#34495e' );
     $tab_hover_font_color = wcusage_get_setting_value( 'wcusage_field_color_tab_hover_font', 'white' );
+    // Themes colour the tabs from CSS variables, so they skip the inline colours and the
+    // hover scripts below, which would otherwise override the theme's tab styling.
+    $wcusage_portal_themed = function_exists( 'wcusage_get_portal_theme' ) && 'classic' !== wcusage_get_portal_theme();
     $tabs = [
         [
             'tab-id'          => 'tab-page-stats',
@@ -1215,11 +1313,17 @@ function wcusage_portal_tabs(
             ?>" id="<?php 
             echo esc_attr( $tab['tab-id'] );
             ?>"
-            class="portal-tablink" style="margin-top: 75px; background: <?php 
-            echo esc_attr( $tab_color );
-            ?>; color: <?php 
-            echo esc_attr( $tab_font_color );
-            ?>; border: none; padding: 15px 20px; text-align: left; cursor: pointer; font-size: 16px; transition: background 0.3s, color 0.3s; border-left: 4px solid transparent; outline: none;">
+            class="portal-tablink"<?php 
+            if ( $wcusage_portal_themed ) {
+                ?> style="margin-top: 75px;"<?php 
+            } else {
+                ?> style="margin-top: 75px; background: <?php 
+                echo esc_attr( $tab_color );
+                ?>; color: <?php 
+                echo esc_attr( $tab_font_color );
+                ?>; border: none; padding: 15px 20px; text-align: left; cursor: pointer; font-size: 16px; transition: background 0.3s, color 0.3s; border-left: 4px solid transparent; outline: none;"<?php 
+            }
+            ?>>
                 <?php 
             if ( $show_tabs_icons && $tab['icon'] ) {
                 ?><i class="<?php 
@@ -1240,11 +1344,15 @@ function wcusage_portal_tabs(
                     echo esc_attr( $tab['tab-id'] );
                     ?>" class="portal-tablink" href="<?php 
                     echo esc_url( $tab['external_url'] );
-                    ?>" target="_blank" rel="noopener noreferrer" style="background: <?php 
-                    echo esc_attr( $tab_color );
-                    ?>; color: <?php 
-                    echo esc_attr( $tab_font_color );
-                    ?>;">
+                    ?>" target="_blank" rel="noopener noreferrer"<?php 
+                    if ( !$wcusage_portal_themed ) {
+                        ?> style="background: <?php 
+                        echo esc_attr( $tab_color );
+                        ?>; color: <?php 
+                        echo esc_attr( $tab_font_color );
+                        ?>;"<?php 
+                    }
+                    ?>>
                         <?php 
                     if ( $show_tabs_icons && $tab['icon'] ) {
                         ?><i class="<?php 
@@ -1278,11 +1386,15 @@ function wcusage_portal_tabs(
                     echo esc_js( $coupon_code );
                     ?>', '<?php 
                     echo esc_js( $force_refresh_stats );
-                    ?>')" style="background: <?php 
-                    echo esc_attr( $tab_color );
-                    ?>; color: <?php 
-                    echo esc_attr( $tab_font_color );
-                    ?>;">
+                    ?>')"<?php 
+                    if ( !$wcusage_portal_themed ) {
+                        ?> style="background: <?php 
+                        echo esc_attr( $tab_color );
+                        ?>; color: <?php 
+                        echo esc_attr( $tab_font_color );
+                        ?>;"<?php 
+                    }
+                    ?>>
                         <?php 
                     if ( $show_tabs_icons && $tab['icon'] ) {
                         ?><i class="<?php 
@@ -1296,36 +1408,37 @@ function wcusage_portal_tabs(
                     </button>
                 <?php 
                 }
-                ?>
+                if ( !$wcusage_portal_themed ) {
+                    ?>
                 <script>
                 (function(){
                   var el = document.getElementById('<?php 
-                echo esc_js( $tab['tab-id'] );
-                ?>');
+                    echo esc_js( $tab['tab-id'] );
+                    ?>');
                   if(!el) return;
                   el.addEventListener('mouseover', function() {
                       this.style.background = '<?php 
-                echo esc_js( $tab_hover_color );
-                ?>';
+                    echo esc_js( $tab_hover_color );
+                    ?>';
                       this.style.color = '<?php 
-                echo esc_js( $tab_hover_font_color );
-                ?>';
+                    echo esc_js( $tab_hover_font_color );
+                    ?>';
                   });
                   el.addEventListener('mouseout', function() {
                       this.style.background = '<?php 
-                echo esc_js( $tab_color );
-                ?>';
+                    echo esc_js( $tab_color );
+                    ?>';
                       this.style.color = '<?php 
-                echo esc_js( $tab_font_color );
-                ?>';
+                    echo esc_js( $tab_font_color );
+                    ?>';
                   });
                   el.addEventListener('click', function() {
                       this.style.background = '<?php 
-                echo esc_js( $tab_hover_color );
-                ?>';
+                    echo esc_js( $tab_hover_color );
+                    ?>';
                       this.style.color = '<?php 
-                echo esc_js( $tab_hover_font_color );
-                ?>';
+                    echo esc_js( $tab_hover_font_color );
+                    ?>';
                       this.classList.add('active');
                   });
                 })();
@@ -1333,14 +1446,15 @@ function wcusage_portal_tabs(
                 <style>
                 .portal-tablink.active {
                     background: <?php 
-                echo esc_attr( $tab_hover_color );
-                ?> !important;
+                    echo esc_attr( $tab_hover_color );
+                    ?> !important;
                     color: <?php 
-                echo esc_attr( $tab_hover_font_color );
-                ?> !important;
+                    echo esc_attr( $tab_hover_font_color );
+                    ?> !important;
                 }
                 </style>
                 <?php 
+                }
             }
         }
     }

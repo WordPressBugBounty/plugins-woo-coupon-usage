@@ -300,6 +300,7 @@ function wcusage_hook_checklist_function() {
           echo "<span class='fa-solid fa-exclamation-circle' style='color: red;'></span> ";
           echo "<strong>" . esc_html__( "Create the template coupon:", "woo-coupon-usage" ) . "</strong>";
           echo sprintf( " <a href='%s'>%s</a>", esc_url(admin_url('admin.php?page=wcusage_setup&step=2')), esc_html__( "Click here", "woo-coupon-usage" ) );
+          echo sprintf( " %s <a href='%s'>%s</a>", esc_html__( "or", "woo-coupon-usage" ), esc_url( wp_nonce_url( admin_url( 'admin.php?page=wcusage_add_affiliate&wcusage_create_template=1' ), 'wcusage_create_template' ) ), esc_html__( "create one automatically", "woo-coupon-usage" ) );
           echo "</p>";
           $show = true;
         } else {

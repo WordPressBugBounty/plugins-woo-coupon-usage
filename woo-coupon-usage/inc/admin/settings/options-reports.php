@@ -51,11 +51,10 @@ function wcusage_field_cb_reports( $args )
 
             <br/><hr/>
 
-            <h3 id="statements-settings"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Schedule:</h3>
+            <h3 id="statements-settings"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Schedule:<?php echo wcusage_setting_info_icon( wp_kses_post( sprintf( esc_html__( 'Requires cron jobs to be enabled. We recommend using "Real Cron Job" instead of "WP-Cron". This may offer better performance, and will give more accurate delivery (at the specific day & time). %s.', 'woo-coupon-usage' ), '<a href="https://couponaffiliates.com/docs/real-cron-job" target="_blank">' . esc_html__( 'Click here to learn more', 'woo-coupon-usage' ) . '</a>' ) ) ); ?></h3>
 
             <span class="wcu-field-section-reports-freq">
 
-              <?php echo sprintf( '<i>%s</i><br/>', wp_kses_post( sprintf( esc_html__( 'Requires cron jobs to be enabled. We recommend using "Real Cron Job" instead of "WP-Cron". This may offer better performance, and will give more accurate delivery (at the specific day & time). %s.', 'woo-coupon-usage' ), '<a href="https://couponaffiliates.com/docs/real-cron-job" target="_blank">' . esc_html__( 'Click here to learn more', 'woo-coupon-usage' ) . '</a>' ) ) ); ?>
 
               <br/>
 
@@ -63,15 +62,13 @@ function wcusage_field_cb_reports( $args )
             	<p <?php if( !wcu_fs()->can_use_premium_code() || !wcu_fs()->is_premium() ) { ?>style="opacity: 0.4; pointer-events: none;" class="wcu-settings-pro-only"<?php } ?>>
             		<?php $wcusage_field_pdfreports_freq = wcusage_get_setting_value('wcusage_field_pdfreports_freq', 'monthly'); ?>
             		<input type="hidden" value="0" id="wcusage_field_pdfreports_freq" data-custom="custom" name="wcusage_options[wcusage_field_pdfreports_freq]" >
-            		<strong><label for="scales"><?php echo esc_html__( 'How often should a report be sent to affiliates via email?', 'woo-coupon-usage' ); ?></label></strong><br/>
+            		<strong><label for="scales"><?php echo esc_html__( 'How often should a report be sent to affiliates via email?', 'woo-coupon-usage' ); ?></label></strong><?php echo wcusage_setting_info_icon( esc_html__( 'Reports will be automatically scheduled to send on the first day of the week or month.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'In the affiliate report, stats will be shown/calculated based on the previous date range. So monthly reports will show stats from the previous month.', 'woo-coupon-usage' ) ); ?><br/>
             		<select name="wcusage_options[wcusage_field_pdfreports_freq]" id="wcusage_field_pdfreports_freq">
             			<option value="monthly" <?php if($wcusage_field_pdfreports_freq == "monthly") { ?>selected<?php } ?>><?php echo esc_html__( 'Monthly', 'woo-coupon-usage' ); ?></option>
             			<option value="weekly" <?php if($wcusage_field_pdfreports_freq == "weekly") { ?>selected<?php } ?>><?php echo esc_html__( 'Weekly', 'woo-coupon-usage' ); ?></option>
                   <option value="quarterly" <?php if($wcusage_field_pdfreports_freq == "quarterly") { ?>selected<?php } ?>><?php echo esc_html__( 'Quarterly', 'woo-coupon-usage' ); ?></option>
                 </select>
             	</p>
-              <i><?php echo esc_html__( 'Reports will be automatically scheduled to send on the first day of the week or month.', 'woo-coupon-usage' ); ?></i><br/>
-              <i><?php echo esc_html__( 'In the affiliate report, stats will be shown/calculated based on the previous date range. So monthly reports will show stats from the previous month.', 'woo-coupon-usage' ); ?></i><br/>
 
               <br/>
 
@@ -94,16 +91,14 @@ function wcusage_field_cb_reports( $args )
 
             <h3 id="statements-settings"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> General Settings:</h3>
 
-            <?php wcusage_setting_toggle_option('wcusage_field_enable_reports_user_option', 1, esc_html__( 'Give affiliates option to toggle on/off email reports.', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'If enabled, an option will be displayed in the affiliate dashboard settings tab, allowing affiliates to turn off the email reports.', 'woo-coupon-usage' ); ?></i>
+            <?php wcusage_setting_toggle_option('wcusage_field_enable_reports_user_option', 1, esc_html__( 'Give affiliates option to toggle on/off email reports.', 'woo-coupon-usage' ), '0px', esc_html__( 'If enabled, an option will be displayed in the affiliate dashboard settings tab, allowing affiliates to turn off the email reports.', 'woo-coupon-usage' )); ?>
 
             <?php wcusage_setting_toggle('.wcusage_field_enable_reports_user_option', '.wcu-field-section-reports-option'); // Show or Hide ?>
             <span class="wcu-field-section-reports-option">
 
               <br/><br/>
 
-              <?php wcusage_setting_toggle_option('wcusage_field_enable_reports_default', 1, esc_html__( 'Make "Affiliate Reports" enabled by default for all coupon affiliates.', 'woo-coupon-usage' ), '0px'); ?>
-              <i><?php echo esc_html__( 'If enabled, the affiliate reports will be turned on by default for all affiliate users (if they have not yet updated the setting). They can toggle this off in the settings tab of their dashboard. If disabled, then the reports will be turned off by default, and the affiliate user will need to toggle it on to receive the reports.', 'woo-coupon-usage' ); ?></i>
+              <?php wcusage_setting_toggle_option('wcusage_field_enable_reports_default', 1, esc_html__( 'Make "Affiliate Reports" enabled by default for all coupon affiliates.', 'woo-coupon-usage' ), '0px', esc_html__( 'If enabled, the affiliate reports will be turned on by default for all affiliate users (if they have not yet updated the setting). They can toggle this off in the settings tab of their dashboard. If disabled, then the reports will be turned off by default, and the affiliate user will need to toggle it on to receive the reports.', 'woo-coupon-usage' )); ?>
 
             </span>
 
@@ -140,13 +135,12 @@ function wcusage_field_cb_reports( $args )
               </script>
               <p>
                 <?php $report_statements_logo = wcusage_get_setting_value('wcusage_field_pdfreport_statements_logo', ''); ?>
-                <strong><?php echo esc_html__( 'PDF Report Header Image (Logo)', 'woo-coupon-usage' ); ?>:</strong><br/>
+                <strong><?php echo esc_html__( 'PDF Report Header Image (Logo)', 'woo-coupon-usage' ); ?>:</strong><?php echo wcusage_setting_info_icon( esc_html__( 'This is shown at the very top of the PDF report (attached to the email). Recommended size is 340 x 70.', 'woo-coupon-usage' ) ); ?><br/>
                 <input class="wcusage_field_pdfreport_statements_logo_url" type="text"
                 id="wcusage_field_pdfreport_statements_logo"
-                name="wcusage_options['wcusage_field_pdfreport_statements_logo']"
+                name="wcusage_options[wcusage_field_pdfreport_statements_logo]"
                 size="60" value="<?php echo esc_html($report_statements_logo); ?>">
                 <a href="#" class="report_header_logo_upload"><?php echo esc_html__( 'Upload', 'woo-coupon-usage' ); ?></a>
-                <br/><i><?php echo esc_html__( 'This is shown at the very top of the PDF report (attached to the email). Recommended size is 340 x 70.', 'woo-coupon-usage' ); ?></i><br/>
               </p>
 
               <br/>
@@ -181,13 +175,12 @@ function wcusage_field_cb_reports( $args )
               </script>
               <p>
                 <?php $report_statements_email_logo = wcusage_get_setting_value('wcusage_field_pdfreport_statements_email_logo', ''); ?>
-                <strong><?php echo esc_html__( 'Custom Email Header Image / Logo', 'woo-coupon-usage' ); ?>:</strong><br/>
+                <strong><?php echo esc_html__( 'Custom Email Header Image / Logo', 'woo-coupon-usage' ); ?>:</strong><?php echo wcusage_setting_info_icon( esc_html__( 'This will replace your default WooCommerce email template "header image" with a custom one for your reports.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Leave empty to use your default "header image".', 'woo-coupon-usage' ) ); ?><br/>
                 <input class="wcusage_field_pdfreport_statements_email_logo_url" type="text"
                 id="wcusage_field_pdfreport_statements_email_logo"
-                name="wcusage_options['wcusage_field_pdfreport_statements_email_logo']"
+                name="wcusage_options[wcusage_field_pdfreport_statements_email_logo]"
                 size="60" value="<?php echo $report_statements_email_logo; ?>">
                 <a href="#" class="report_header_email_logo_upload"><?php echo esc_html__( 'Upload', 'woo-coupon-usage' ); ?></a>
-                <br/><i><?php echo esc_html__( 'This will replace your default WooCommerce email template "header image" with a custom one for your reports.', 'woo-coupon-usage' ); ?> <?php echo esc_html__( 'Leave empty to use your default "header image".', 'woo-coupon-usage' ); ?></i><br/>
               </p>
 
               <br/>
@@ -274,8 +267,7 @@ function wcusage_field_cb_reports( $args )
 
               <h3 id="statements-settings"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Example Report:</h3>
 
-              <br/><a class="wcu-open-button" popup-open="wcu-popup-1" href="javascript:void(0)">Click here to send an example report &nbsp;<span class="fas fa-share"></span></a><br/>
-              <br/><i><?php echo esc_html__( 'Generate and send an example report to yourself, with the settings/customisations you have set above.', 'woo-coupon-usage' ); ?></i><br/>
+              <br/><a class="wcu-open-button" popup-open="wcu-popup-1" href="javascript:void(0)">Click here to send an example report &nbsp;<span class="fas fa-share"></span></a><?php echo wcusage_setting_info_icon( esc_html__( 'Generate and send an example report to yourself, with the settings/customisations you have set above.', 'woo-coupon-usage' ) ); ?><br/>
 
       </span>
 
@@ -308,16 +300,14 @@ if( !function_exists( 'wcusage_test_report_form' ) ) {
 
           <h3 id="statements-settings"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> Send an example affiliate report:</h3>
 
-    			<p><strong><?php echo esc_html__( 'Coupon Code:', 'woo-coupon-usage' ); ?></strong>
+    			<p><strong><?php echo esc_html__( 'Coupon Code:', 'woo-coupon-usage' ); ?></strong><?php echo wcusage_setting_info_icon( 'Which coupon should it show statistics for?' ); ?>
           <br/>
           <input type="text" id="wcu_example_report_coupon" name="wcu_example_report_coupon" checktype="ignore">
-          <i>Which coupon should it show statistics for?</i>
           </p>
 
-          <p><strong><?php echo esc_html__( 'Email Address:', 'woo-coupon-usage' ); ?></strong>
+          <p><strong><?php echo esc_html__( 'Email Address:', 'woo-coupon-usage' ); ?></strong><?php echo wcusage_setting_info_icon( 'Which email address should the example report be sent to?' ); ?>
           <br/>
           <input type="text" id="wcu_example_report_email" name="wcu_example_report_email" checktype="ignore">
-          <i>Which email address should the example report be sent to?</i>
           </p>
 
           <br/>

@@ -850,7 +850,9 @@ if ( !function_exists( 'wcusage_abilities_request_channel' ) ) {
         if ( '' === $route ) {
             $channel = 'php';
         } elseif ( 0 === strpos( $route, '/wp-abilities/' ) ) {
-            $channel = 'rest';
+            // WPVibe's hosted MCP server runs abilities through these core
+            // routes, and marks its requests with an "X-WPVibe" header.
+            $channel = ( empty( $_SERVER['HTTP_X_WPVIBE'] ) ? 'rest' : 'mcp' );
         } elseif ( false !== stripos( $route, 'mcp' ) ) {
             // The MCP Adapter's routes, this plugin's own server, and the MCP
             // connector plugins suggested on the AI & MCP tab, which serve MCP

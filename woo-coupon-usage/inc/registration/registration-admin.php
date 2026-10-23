@@ -1100,6 +1100,28 @@ function wcusage_admin_new_registration_page() {
     ?>
 
     <?php 
+    $template_result = ( isset( $_GET['wcusage_template'] ) ? sanitize_key( wp_unslash( $_GET['wcusage_template'] ) ) : '' );
+    $create_template_url = wp_nonce_url( admin_url( 'admin.php?page=wcusage_add_affiliate&wcusage_create_template=1' ), 'wcusage_create_template' );
+    if ( 'created' === $template_result ) {
+        ?>
+      <div class="notice notice-success is-dismissible" style="margin-top: 20px;">
+        <p><?php 
+        echo sprintf( wp_kses_post( __( 'Template coupon created: <strong>%s</strong> (10%% off). New affiliate coupons copy their settings from it, and you can <a href="%s">edit it</a> any time.', 'woo-coupon-usage' ) ), esc_html( $template_coupon_code ), esc_url( admin_url( 'post.php?post=' . (int) wc_get_coupon_id_by_code( $template_coupon_code ) . '&action=edit' ) ) );
+        ?></p>
+      </div>
+    <?php 
+    } elseif ( 'failed' === $template_result ) {
+        ?>
+      <div class="notice notice-error is-dismissible" style="margin-top: 20px;">
+        <p><?php 
+        echo esc_html__( 'The template coupon could not be created. Please create a coupon yourself and select it in the registration settings.', 'woo-coupon-usage' );
+        ?></p>
+      </div>
+    <?php 
+    }
+    ?>
+
+    <?php 
     if ( !$template_coupon_code ) {
         ?>
 
@@ -1111,16 +1133,25 @@ function wcusage_admin_new_registration_page() {
         ?>.</a><br/>
     </p>
 
+    <p><?php 
+        echo esc_html__( 'Each new affiliate\'s coupon is copied from the template coupon, including its discount. We can create one for you with a 10% discount, which you can edit later.', 'woo-coupon-usage' );
+        ?></p>
+
+    <a href="<?php 
+        echo esc_url( $create_template_url );
+        ?>" class="button button-primary"><?php 
+        echo esc_html__( 'Create Template Coupon For Me', 'woo-coupon-usage' );
+        ?></a>
     <a href="<?php 
         echo esc_url( admin_url( 'admin.php?page=wcusage_settings&section=tab-registration' ) );
-        ?>" class="button button-primary"><?php 
+        ?>" class="button button-secondary"><?php 
         echo esc_html__( 'Go to Settings', 'woo-coupon-usage' );
         ?></a>
 
     <?php 
     } else {
         ?>
-    
+
     <?php 
         $get_template_coupon = wcusage_get_coupon_info( $template_coupon_code );
         ?>
@@ -1134,6 +1165,11 @@ function wcusage_admin_new_registration_page() {
             echo esc_html__( 'Learn More', 'woo-coupon-usage' );
             ?>.</a><br/>
         </p>
+        <p><a href="<?php 
+            echo esc_url( $create_template_url );
+            ?>" class="button button-secondary"><?php 
+            echo esc_html( sprintf( __( 'Create the "%s" coupon for me (10%% off)', 'woo-coupon-usage' ), $template_coupon_code ) );
+            ?></a></p>
     <?php 
         }
         ?>

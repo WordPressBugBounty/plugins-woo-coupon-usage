@@ -171,7 +171,7 @@ function wcusage_output_pro_sales_sidebar_items() {
   }
   foreach ( wcusage_pro_sales_tabs() as $tab ) {
     ?>
-    <li class="wcu-sidebar-menu-item">
+    <li class="wcu-sidebar-menu-item wcu-sidebar-menu-item--sales">
       <?php wcusage_admin_settings_sidebar_button( $tab['id'], wp_strip_all_tags( html_entity_decode( $tab['label'] ) ), $tab['icon'], 1, '' ); ?>
     </li>
     <?php

@@ -1248,7 +1248,7 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
             foreach ( $sub_coupons as $sub_coupon_id ) {
                 $sub_coupon_names[] = get_the_title( $sub_coupon_id );
                 if ( function_exists( 'wcusage_mla_get_total_commission_earned_tier' ) && $sub_tier_key !== false ) {
-                    $sub_commission += wcusage_mla_get_total_commission_earned_tier( $sub_coupon_id, $sub_tier_key );
+                    $sub_commission += wcusage_mla_get_total_commission_earned_tier( $sub_coupon_id, $sub_tier_key, $root_user_id );
                 }
             }
             $tier_colors = array(
@@ -1472,7 +1472,7 @@ if ( wcu_fs()->can_use_premium_code__premium_only() && $wcusage_field_mla_enable
                     $sub_coupons = wcusage_get_users_coupons_ids( $sub->ID );
                     foreach ( $sub_coupons as $sub_coupon_id ) {
                         if ( function_exists( 'wcusage_mla_get_total_commission_earned_tier' ) ) {
-                            $tier_commission += wcusage_mla_get_total_commission_earned_tier( $sub_coupon_id, $tier_key );
+                            $tier_commission += wcusage_mla_get_total_commission_earned_tier( $sub_coupon_id, $tier_key, $user_id );
                         }
                     }
                 }

@@ -14,7 +14,7 @@ function wcusage_field_cb_debug( $args )
 
   <hr/>
 
-  <strong style="color: green;"><p>- <?php echo esc_html__( 'For most websites, the settings on this page can be ignored (keep them as they are).', 'woo-coupon-usage' ); ?></strong></p>
+  <p>- <strong style="color: green;"><?php echo esc_html__( 'For most websites, the settings on this page can be ignored (keep them as they are).', 'woo-coupon-usage' ); ?></strong></p>
 
 	<p>- <?php echo esc_html__( 'If you are experiencing any performance issues or other bugs with the plugin, please try enabling/disabling relevant settings below.', 'woo-coupon-usage' ); ?></p>
 
@@ -24,12 +24,7 @@ function wcusage_field_cb_debug( $args )
 
   <hr/>
 
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Performance Settings', 'woo-coupon-usage' ); ?> - <?php echo esc_html__( 'Saving Data', 'woo-coupon-usage' ); ?></h3>
-
-  <i><?php echo esc_html__( 'These options will improve loading speed of your affiliate dashboard for large coupons with lots of orders (since it wont need to calculate every time).', 'woo-coupon-usage' ); ?></i><br/>
-  <i><?php echo esc_html__( 'Generally there should not be any reason to turn these off, but it is here just incase, and for debugging.', 'woo-coupon-usage' ); ?></i><br/>
-
-  <br/>
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Performance Settings', 'woo-coupon-usage' ); ?> - <?php echo esc_html__( 'Saving Data', 'woo-coupon-usage' ); ?><?php echo wcusage_setting_info_icon( esc_html__( 'These options will improve loading speed of your affiliate dashboard for large coupons with lots of orders (since it wont need to calculate every time).', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Generally there should not be any reason to turn these off, but it is here just incase, and for debugging.', 'woo-coupon-usage' ) ); ?></h3>
 
   <p>
     <?php wcusage_setting_toggle_option('wcusage_field_enable_order_commission_meta', 1, esc_html__( '(Recommended)', 'woo-coupon-usage' ) . " " . esc_html__( 'Save the calculated "commission" values as meta data on each individual order.', 'woo-coupon-usage' ), '0px'); ?>
@@ -47,10 +42,7 @@ function wcusage_field_cb_debug( $args )
     <br/>
 
     <p>
-      <?php wcusage_setting_toggle_option('wcusage_field_enable_never_update_commission_meta', 0, esc_html__( 'Never update the saved "commission" value for past orders.', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'When disabled, if you change commission rates, it will automatically update the stats/commission for ALL new and past orders on the affiliate dashboard.', 'woo-coupon-usage' ); ?></i><br/>
-      <i><?php echo esc_html__( 'When enabled, the PAST orders will not be affected (even if clicking "refresh data"), and it will only set the updated rates for NEW orders. The only time it WILL be updated is if an order is refunded.', 'woo-coupon-usage' ); ?></i><br/>
-      <i><?php echo esc_html__( 'Please note, the commission displayed for all past orders is calculated the first time the affiliate dashboard is loaded for a coupon. New orders are calculated instantly.', 'woo-coupon-usage' ); ?></i><br/>
+      <?php wcusage_setting_toggle_option('wcusage_field_enable_never_update_commission_meta', 0, esc_html__( 'Never update the saved "commission" value for past orders.', 'woo-coupon-usage' ), '0px', esc_html__( 'When disabled, if you change commission rates, it will automatically update the stats/commission for ALL new and past orders on the affiliate dashboard.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'When enabled, the PAST orders will not be affected (even if clicking "refresh data"), and it will only set the updated rates for NEW orders. The only time it WILL be updated is if an order is refunded.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Please note, the commission displayed for all past orders is calculated the first time the affiliate dashboard is loaded for a coupon. New orders are calculated instantly.', 'woo-coupon-usage' )); ?>
     </p>
 
   </span>
@@ -134,10 +126,7 @@ function wcusage_field_cb_debug( $args )
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Performance Settings', 'woo-coupon-usage' ); ?> - <?php echo esc_html__( 'Other', 'woo-coupon-usage' ); ?></h3>
 
   <p>
-    <?php wcusage_setting_toggle_option('wcusage_field_load_ajax', 1, esc_html__( 'Enable "Ajax Loading" on Affiliate Dashboard.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'This will make the initial page loading much faster for larger coupons, and show a "loading" animation in these sections whilst it loads content (usually takes no longer than a few seconds).', 'woo-coupon-usage' ); ?></i><br/>
-    <i><?php echo esc_html__( 'Please consider clearing your cache after updating this option, if you do not see any changes.', 'woo-coupon-usage' ); ?></i><br/>
-    <i><?php echo esc_html__( 'NOTE: In some rare cases, or certain themes, this option may not work and will show the "loading..." animation continuously. In this case, simply disable it or contact us to look into fixing it for you.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_toggle_option('wcusage_field_load_ajax', 1, esc_html__( 'Enable "Ajax Loading" on Affiliate Dashboard.', 'woo-coupon-usage' ), '0px', esc_html__( 'This will make the initial page loading much faster for larger coupons, and show a "loading" animation in these sections whilst it loads content (usually takes no longer than a few seconds).', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Please consider clearing your cache after updating this option, if you do not see any changes.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'NOTE: In some rare cases, or certain themes, this option may not work and will show the "loading..." animation continuously. In this case, simply disable it or contact us to look into fixing it for you.', 'woo-coupon-usage' )); ?>
   </p>
 
   <?php wcusage_setting_toggle('.wcusage_field_load_ajax', '.wcu-field-section-field-show-refresh'); // Show or Hide ?>
@@ -153,8 +142,7 @@ function wcusage_field_cb_debug( $args )
   <span class="wcu-field-section-show-ajax-batch">
 
     <p>
-      <?php wcusage_setting_number_option('wcusage_field_enable_coupon_all_stats_batch_amount', '100', esc_html__( 'Batch size:', 'woo-coupon-usage' ), '70px'); ?>
-      <i style="margin-left: 70px;"><?php echo esc_html__( 'This is the number of orders that will be calculated at a time. If you experience issues with the ajax loading, try lowering this number (will use more requests, but each one is quicker).', 'woo-coupon-usage' ); ?></i><br/>
+      <?php wcusage_setting_number_option('wcusage_field_enable_coupon_all_stats_batch_amount', '100', esc_html__( 'Batch size:', 'woo-coupon-usage' ), '70px', 1, esc_html__( 'This is the number of orders that will be calculated at a time. If you experience issues with the ajax loading, try lowering this number (will use more requests, but each one is quicker).', 'woo-coupon-usage' )); ?>
     </p>
 
   </span>
@@ -163,14 +151,14 @@ function wcusage_field_cb_debug( $args )
 
   <p>
     <!-- Load each page individually with ajax. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_load_ajax_per_page', 1, esc_html__( 'Load tabs individually with Ajax.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'This will further increase initial loading speed/performance. It will only start loading content for each tab when the tab is clicked, showing the "loading..." animation whilst it loads.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_toggle_option('wcusage_field_load_ajax_per_page', 1, esc_html__( 'Load tabs individually with Ajax.', 'woo-coupon-usage' ), '0px', esc_html__( 'This will further increase initial loading speed/performance. It will only start loading content for each tab when the tab is clicked, showing the "loading..." animation whilst it loads.', 'woo-coupon-usage' )); ?>
   </p>
+
+  <br/>
 
   <p>
     <!-- Front-end ajax endpoint. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_frontend_ajax', 1, esc_html__( 'Use the front-end ajax endpoint.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'The dashboard loads its data from the front-end instead of "wp-admin/admin-ajax.php", which does not have to load every plugin\'s admin code first. This is usually around twice as fast. Only turn this off if your host or a security plugin blocks the requests - the dashboard will detect that on its own and fall back, so you should not normally need to.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_toggle_option('wcusage_field_frontend_ajax', 1, esc_html__( 'Use the front-end ajax endpoint.', 'woo-coupon-usage' ), '0px', esc_html__( 'The dashboard loads its data from the front-end instead of "wp-admin/admin-ajax.php", which does not have to load every plugin\'s admin code first. This is usually around twice as fast. Only turn this off if your host or a security plugin blocks the requests - the dashboard will detect that on its own and fall back, so you should not normally need to.', 'woo-coupon-usage' )); ?>
   </p>
 
   </span>
@@ -194,8 +182,7 @@ function wcusage_field_cb_debug( $args )
 
       <br/>
       <!-- Load tabs on affiliate dashboard as separate pages. -->
-      <?php wcusage_setting_toggle_option('wcusage_field_page_load', 0, esc_html__( 'Load tabs on affiliate dashboard as separate pages.', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'This will make it so when each tab is clicked, it reloads the page, but it only loads the content for the selected tab.', 'woo-coupon-usage' ); ?> <?php echo esc_html__( 'If you experience very high volumes of orders for each coupon, this should help greately with affiliate dashboard speed/performance.', 'woo-coupon-usage' ); ?></i><br/>
+      <?php wcusage_setting_toggle_option('wcusage_field_page_load', 0, esc_html__( 'Load tabs on affiliate dashboard as separate pages.', 'woo-coupon-usage' ), '0px', esc_html__( 'This will make it so when each tab is clicked, it reloads the page, but it only loads the content for the selected tab.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'If you experience very high volumes of orders for each coupon, this should help greately with affiliate dashboard speed/performance.', 'woo-coupon-usage' )); ?>
 
   </span>
 
@@ -203,16 +190,14 @@ function wcusage_field_cb_debug( $args )
 
 	<p>
     <!-- Hide the "all-time" stats on statistics tab and line graph. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_hide_all_time', 0, esc_html__( 'Hide the "all-time" stats on statistics tab and line graph.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'This will still show the "Last 30 Days" and "Last 7 Days". It will also cause the "usage" stat to be calculated slightly different.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_toggle_option('wcusage_field_hide_all_time', 0, esc_html__( 'Hide the "all-time" stats on statistics tab and line graph.', 'woo-coupon-usage' ), '0px', esc_html__( 'This will still show the "Last 30 Days" and "Last 7 Days". It will also cause the "usage" stat to be calculated slightly different.', 'woo-coupon-usage' )); ?>
 	</p>
 
   <br/>
 
 	<p>
     <!-- Auto-check statistics on affiliate dashboard. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_show_refresh_stats', 1, esc_html__( 'Soft re-calculate all-time statistics when affiliates visit their dashboard.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'When enabled, all-time statistics will be automatically soft recalculated (only all-time totals, does not recalculate order totals) in the background (max once per hour) when an affiliate visits their dashboard, and silently updated if needed.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_toggle_option('wcusage_field_show_refresh_stats', 1, esc_html__( 'Soft re-calculate all-time statistics when affiliates visit their dashboard.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, all-time statistics will be automatically soft recalculated (only all-time totals, does not recalculate order totals) in the background (max once per hour) when an affiliate visits their dashboard, and silently updated if needed.', 'woo-coupon-usage' )); ?>
 	</p>
 
   <?php wcusage_setting_toggle('.wcusage_field_show_refresh_stats', '.wcu-field-section-show-refresh-button'); // Show or Hide ?>
@@ -221,8 +206,7 @@ function wcusage_field_cb_debug( $args )
   <br/>
 
   <p>
-    <?php wcusage_setting_toggle_option('wcusage_field_show_refresh_stats_button', 1, esc_html__( 'Show manual "Refresh" button on the affiliate dashboard statistics.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'When enabled, a clickable refresh icon will be shown next to the statistics toggle buttons, allowing affiliates to manually refresh their cached stats.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_toggle_option('wcusage_field_show_refresh_stats_button', 1, esc_html__( 'Show manual "Refresh" button on the affiliate dashboard statistics.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, a clickable refresh icon will be shown next to the statistics toggle buttons, allowing affiliates to manually refresh their cached stats.', 'woo-coupon-usage' )); ?>
   </p>
 
   </span>
@@ -231,16 +215,13 @@ function wcusage_field_cb_debug( $args )
 
   <?php $wcusage_field_user_list_affiliates = wcusage_get_setting_value('wcusage_field_user_list_affiliates', '0'); ?>
   <?php if($wcusage_field_user_list_affiliates) { ?>
-    <?php  wcusage_setting_toggle_option('wcusage_field_user_list_affiliates', 0, esc_html__( 'Only show users with the "coupon affiliate" role when manually assigning users to coupons.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'When assigning users to coupons, if this is enabled, it will only show the list of users with the custom "coupon affiliate" role.', 'woo-coupon-usage' ); ?></i>
-    <br/><i><?php echo esc_html__( 'This means that you will need to manually edit existing users to the "coupon affiliate", or have them automatically assign to this role when filling out the registration form (enable this in "registration settings").', 'woo-coupon-usage' ); ?></i>
-    <br/><br/>
+    <?php  wcusage_setting_toggle_option('wcusage_field_user_list_affiliates', 0, esc_html__( 'Only show users with the "coupon affiliate" role when manually assigning users to coupons.', 'woo-coupon-usage' ), '0px', esc_html__( 'When assigning users to coupons, if this is enabled, it will only show the list of users with the custom "coupon affiliate" role.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'This means that you will need to manually edit existing users to the "coupon affiliate", or have them automatically assign to this role when filling out the registration form (enable this in "registration settings").', 'woo-coupon-usage' )); ?>
+    <br/>
   <?php } ?>
 
   <?php $wcusage_field_hide_coupon_edit_user_list = wcusage_get_setting_value('wcusage_field_hide_coupon_edit_user_list', '0'); ?>
   <?php if($wcusage_field_hide_coupon_edit_user_list) { ?>
-    <?php wcusage_setting_toggle_option('wcusage_field_hide_coupon_edit_user_list', 0, esc_html__( 'Disable the autofill user picker when assigning users to coupon.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'Turn this option on to disable the user search/picker, and to just enter the user ID manually.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_toggle_option('wcusage_field_hide_coupon_edit_user_list', 0, esc_html__( 'Disable the autofill user picker when assigning users to coupon.', 'woo-coupon-usage' ), '0px', esc_html__( 'Turn this option on to disable the user search/picker, and to just enter the user ID manually.', 'woo-coupon-usage' )); ?>
     <br/>
   <?php } ?>
 
@@ -256,20 +237,14 @@ function wcusage_field_cb_debug( $args )
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Affiliate Dashboard - User Access', 'woo-coupon-usage' ); ?>:</h3>
 
   <!-- Show full coupon page info automatically, if there is only one coupon. -->
-  <?php wcusage_setting_toggle_option('wcusage_field_show_coupon_if_single', 1, 'Users Dashboard - ' . esc_html__( 'Show full coupon page info automatically, if there is only one coupon.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'With the "[couponaffiliates]" shortcode, when a user visits this page (without the unique URL ID), enable to show full affiliate dashboard automatically if the affiliate user is only assigned to one coupon.', 'woo-coupon-usage' ); ?></i>
-  <br/><i><?php echo esc_html__( 'Normally it will just show the coupon name, discount, usage, and button to direct them to the unique URL ID, for the affiliate dashboard for that coupon.', 'woo-coupon-usage' ); ?></i>
-  <br/><i><?php echo esc_html__( 'Useful if you simply want a generic "affiliate" page to direct affiliates to, instead of a unique link for each one.', 'woo-coupon-usage' ); ?></i>
+  <?php wcusage_setting_toggle_option('wcusage_field_show_coupon_if_single', 1, 'Users Dashboard - ' . esc_html__( 'Show full coupon page info automatically, if there is only one coupon.', 'woo-coupon-usage' ), '0px', esc_html__( 'With the "[couponaffiliates]" shortcode, when a user visits this page (without the unique URL ID), enable to show full affiliate dashboard automatically if the affiliate user is only assigned to one coupon.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Normally it will just show the coupon name, discount, usage, and button to direct them to the unique URL ID, for the affiliate dashboard for that coupon.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Useful if you simply want a generic "affiliate" page to direct affiliates to, instead of a unique link for each one.', 'woo-coupon-usage' )); ?>
 
   <br/><br/><hr/>
 
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Affiliate Dashboard - Privacy', 'woo-coupon-usage' ); ?>:</h3>
 
   <!-- Make all dashboard URLs private/hidden to everyone except administrators. -->
-  <?php wcusage_setting_toggle_option('wcusage_field_urlprivate', 1, esc_html__( 'Make all dashboard URLs private/hidden to everyone except administrators and assigned user.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'When enabled, all unique affiliate dashboard URLs will ALWAYS be private, and only be visible to the assigned user (and admins).', 'woo-coupon-usage' ); ?></i>
-  <br/><i><?php echo esc_html__( 'You will just need to use the shortcode:', 'woo-coupon-usage' ); ?> [couponaffiliates] - <?php echo esc_html__( 'Then, only users that are assigned to a coupon will be able to see their dashboard (for that coupon) on this page.', 'woo-coupon-usage' ); ?></i>
-  <br/><i><?php echo esc_html__( 'When disabled, if there are no users assigned to a coupon, the dashboard can be viewed by anyone if they visit the unique URL directly. However, if there is a user assigned to it, the URL will be private.', 'woo-coupon-usage' ); ?></i>
+  <?php wcusage_setting_toggle_option('wcusage_field_urlprivate', 1, esc_html__( 'Make all dashboard URLs private/hidden to everyone except administrators and assigned user.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, all unique affiliate dashboard URLs will ALWAYS be private, and only be visible to the assigned user (and admins).', 'woo-coupon-usage' ) . ' ' . esc_html__( 'You will just need to use the shortcode:', 'woo-coupon-usage' ) . ' [couponaffiliates] - ' . esc_html__( 'Then, only users that are assigned to a coupon will be able to see their dashboard (for that coupon) on this page.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'When disabled, if there are no users assigned to a coupon, the dashboard can be viewed by anyone if they visit the unique URL directly. However, if there is a user assigned to it, the URL will be private.', 'woo-coupon-usage' )); ?>
   
   <?php if ( wcu_fs()->can_use_premium_code() ) { ?>
     
@@ -278,8 +253,7 @@ function wcusage_field_cb_debug( $args )
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Affiliate Dashboard - Payouts', 'woo-coupon-usage' ); ?>:</h3>
 
   <!-- Allow admin accounts to view payouts tab (and request payouts) for all coupons. -->
-  <?php wcusage_setting_toggle_option('wcusage_field_payouts_enable_admin', 1, esc_html__( 'Allow admin accounts to view payouts tab (and request payouts) for all coupons.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'With this enabled, admin accounts will also be able to view the "payouts" tab when viewing any of the affiliate coupon dashboard pages.', 'woo-coupon-usage' ); ?></i>
+  <?php wcusage_setting_toggle_option('wcusage_field_payouts_enable_admin', 1, esc_html__( 'Allow admin accounts to view payouts tab (and request payouts) for all coupons.', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, admin accounts will also be able to view the "payouts" tab when viewing any of the affiliate coupon dashboard pages.', 'woo-coupon-usage' )); ?>
 
   <?php } ?>
 
@@ -288,50 +262,38 @@ function wcusage_field_cb_debug( $args )
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Extra Settings', 'woo-coupon-usage' ); ?></h3>
 
   <!-- Remove coupon ID from unique coupon URL. -->
-  <?php wcusage_setting_toggle_option('wcusage_field_justcoupon', 1, esc_html__( 'Remove coupon ID from unique coupon dashboard URLs.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'Enabling this will allow the unique coupon affiliate dashboard URLs to be used without the ID, but both URLs will still work.', 'woo-coupon-usage' ); ?></i><br/>
+  <?php wcusage_setting_toggle_option('wcusage_field_justcoupon', 1, esc_html__( 'Remove coupon ID from unique coupon dashboard URLs.', 'woo-coupon-usage' ), '0px', esc_html__( 'Enabling this will allow the unique coupon affiliate dashboard URLs to be used without the ID, but both URLs will still work.', 'woo-coupon-usage' )); ?>
 
   <br/>
 
   <!-- Hide the "Coupon code applied successfully." -->
-  <?php wcusage_setting_toggle_option('wcusage_field_coupon_applied_hide', 1, esc_html__( 'Hide the "Coupon code applied successfully." message on all pages except for the cart/checkout pages.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'When someone uses the referral URL, if the code is automatically applied, it will show this message on all pages.', 'woo-coupon-usage' ); ?></i><br/>
-  <i><?php echo esc_html__( 'If you dont want the message to always show, toggle this setting on, and it will instead only show on the cart/checkout pages.', 'woo-coupon-usage' ); ?></i><br/>
+  <?php wcusage_setting_toggle_option('wcusage_field_coupon_applied_hide', 1, esc_html__( 'Hide the "Coupon code applied successfully." message on all pages except for the cart/checkout pages.', 'woo-coupon-usage' ), '0px', esc_html__( 'When someone uses the referral URL, if the code is automatically applied, it will show this message on all pages.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'If you dont want the message to always show, toggle this setting on, and it will instead only show on the cart/checkout pages.', 'woo-coupon-usage' )); ?>
   
   <br/><hr/>
 
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Coupon Checkout Settings', 'woo-coupon-usage' ); ?></h3>
 
   <!-- Hide "0.00" value on checkout from referral coupons. -->
-  <?php wcusage_setting_toggle_option('wcusage_field_coupon_hide_zero', 1, esc_html__( 'Hide "0.00" value on checkout from referral coupons.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'When a referral coupon is applied, if the discount is "0.00", it will hide the 0.00 discount line on the checkout page.', 'woo-coupon-usage' ); ?></i><br/>
+  <?php wcusage_setting_toggle_option('wcusage_field_coupon_hide_zero', 1, esc_html__( 'Hide "0.00" value on checkout from referral coupons.', 'woo-coupon-usage' ), '0px', esc_html__( 'When a referral coupon is applied, if the discount is "0.00", it will hide the 0.00 discount line on the checkout page.', 'woo-coupon-usage' )); ?>
 
   <br/>
 
   <!-- Completely hide zero discount affiliate coupons on cart and checkout. -->
-  <?php wcusage_setting_toggle_option('wcusage_field_coupon_hide_zero_coupon', 0, esc_html__( 'Completely hide the applied coupon on cart and checkout if it has 0 discount and is an affiliate coupon.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'When enabled, zero-discount affiliate coupons will remain applied but their coupon row will be hidden on the cart and checkout pages.', 'woo-coupon-usage' ); ?></i><br/>
+  <?php wcusage_setting_toggle_option('wcusage_field_coupon_hide_zero_coupon', 0, esc_html__( 'Completely hide the applied coupon on cart and checkout if it has 0 discount and is an affiliate coupon.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, zero-discount affiliate coupons will remain applied but their coupon row will be hidden on the cart and checkout pages.', 'woo-coupon-usage' )); ?>
 
   <br/>
 
   <!-- Allow any other discount coupon alongside zero-discount affiliate coupons. -->
-  <?php wcusage_setting_toggle_option('wcusage_field_coupon_allow_extra_with_zero', 0, esc_html__( 'Always allow any other non-affiliate discount coupon to be applied alongside zero-discount affiliate coupons, overriding all restrictions.', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'When enabled, customers can apply any additional coupon alongside a zero-discount affiliate coupon, even if individual-use or other coupon restrictions apply.', 'woo-coupon-usage' ); ?></i><br/>
+  <?php wcusage_setting_toggle_option('wcusage_field_coupon_allow_extra_with_zero', 0, esc_html__( 'Always allow any other non-affiliate discount coupon to be applied alongside zero-discount affiliate coupons, overriding all restrictions.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, customers can apply any additional coupon alongside a zero-discount affiliate coupon, even if individual-use or other coupon restrictions apply.', 'woo-coupon-usage' )); ?>
 
   <br/>
 
   <!-- Custom text for "Coupon" on checkout. -->
-  <?php wcusage_setting_text_option('wcusage_field_coupon_custom_text', '', esc_html__( 'Custom text for "Coupon" on checkout for affiliate coupons:', 'woo-coupon-usage' ), '0px'); ?>
-  <i><?php echo esc_html__( 'If you want to change the text "Coupon" to something else on the checkout page, enable this option and enter the custom text below.', 'woo-coupon-usage' ); ?></i><br/>
-  <i><?php echo esc_html__( 'This will only be replaced for coupons with an affiliate assigned to it.', 'woo-coupon-usage' ); ?></i><br/>
+  <?php wcusage_setting_text_option('wcusage_field_coupon_custom_text', '', esc_html__( 'Custom text for "Coupon" on checkout for affiliate coupons:', 'woo-coupon-usage' ), '0px', esc_html__( 'If you want to change the text "Coupon" to something else on the checkout page, enable this option and enter the custom text below.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'This will only be replaced for coupons with an affiliate assigned to it.', 'woo-coupon-usage' )); ?>
 
   <br/><hr/>
 
-  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( '(Admin) WooCommerce Orders "Affiliate Info" Sections', 'woo-coupon-usage' ); ?>:</h3>
-
-	<i><?php echo esc_html__( 'Enable or disable the "affiliate info" sections displayed on WooCommerce orders in the backend.', 'woo-coupon-usage' ); ?></i>
-
-	<br/><br/>
+  <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( '(Admin) WooCommerce Orders "Affiliate Info" Sections', 'woo-coupon-usage' ); ?>:<?php echo wcusage_setting_info_icon( esc_html__( 'Enable or disable the "affiliate info" sections displayed on WooCommerce orders in the backend.', 'woo-coupon-usage' ) ); ?></h3>
 
   <!-- Show "Affiliate Info" Column in orders list. -->
   <?php wcusage_setting_toggle_option('wcusage_field_show_column_code', 1, esc_html__( 'Show "Affiliate Info" Column in orders list.', 'woo-coupon-usage' ), '0px'); ?>
@@ -352,7 +314,7 @@ function wcusage_field_cb_debug( $args )
     ?>
     <input type="hidden" value="0" id="wcusage_field_admin_permission" data-custom="custom" name="wcusage_options[wcusage_field_admin_permission]" >
 
-    <strong><label for="scales"><?php echo esc_html__( 'User role required for plugin admin capabilities:', 'woo-coupon-usage' ); ?></label></strong><br/>
+    <strong><label for="scales"><?php echo esc_html__( 'User role required for plugin admin capabilities:', 'woo-coupon-usage' ); ?></label></strong><?php echo wcusage_setting_info_icon( esc_html__( 'This is the user permission required to have full access for this plugin. Administrator will always have access to everything.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'This excludes the plugin settings which are available to those with the "manage_options" permission.', 'woo-coupon-usage' ) ); ?><br/>
     <select name="wcusage_options[wcusage_field_admin_permission]" id="wcusage_field_admin_permission">
       <?php
       global $wp_roles;
@@ -367,10 +329,6 @@ function wcusage_field_cb_debug( $args )
       }
       ?>
     </select>
-    <br/>
-    <i><?php echo esc_html__( 'This is the user permission required to have full access for this plugin. Administrator will always have access to everything.', 'woo-coupon-usage' ); ?></i>
-    <br/>
-    <i><?php echo esc_html__( 'This excludes the plugin settings which are available to those with the "manage_options" permission.', 'woo-coupon-usage' ); ?></i>
   </p>
 
   <br/><hr/>
@@ -397,9 +355,8 @@ function wcusage_field_cb_debug( $args )
     <span class="off"></span>
   </span>
 	</label>
-		<strong><label for="scales"><?php echo esc_html__( 'Show/enable custom translation settings (discontinued - not recommended).', 'woo-coupon-usage' ); ?></label></strong><br/>
+		<strong><label for="scales"><?php echo esc_html__( 'Show/enable custom translation settings (discontinued - not recommended).', 'woo-coupon-usage' ); ?></label><?php echo wcusage_setting_info_icon( esc_html__( 'Note: We recommended using', 'woo-coupon-usage' ) . ' "<a href="' . esc_url( admin_url( 'plugin-install.php?s=Loco%20Translate&tab=search&type=term' ) ) . '" target="_blank">Loco Translate</a>" ' . esc_html__( 'or', 'woo-coupon-usage' ) . ' "<a href="https://wpml.org" target="_blank">WPML</a>" ' . esc_html__( 'to fully translate this plugin.', 'woo-coupon-usage' ) ); ?></strong>
 	</p>
-  <i><?php echo esc_html__( 'Note: We recommended using', 'woo-coupon-usage' ); ?> "<a href="<?php echo esc_url(admin_url('plugin-install.php?s=Loco%20Translate&tab=search&type=term')); ?>" target="_blank">Loco Translate</a>" <?php echo esc_html__( 'or', 'woo-coupon-usage' ); ?> "<a href="https://wpml.org" target="_blank">WPML</a>" <?php echo esc_html__( 'to fully translate this plugin.', 'woo-coupon-usage' ); ?></i><br/>
 
   <!--
   <br/><hr/>
@@ -426,10 +383,8 @@ function wcusage_field_cb_debug( $args )
     <span class="off"></span>
   </span>
 	</label>
-		<strong><label for="scales"><?php echo esc_html__( 'Delete plugin options and custom database tables on plugin deletion.', 'woo-coupon-usage' ); ?></label></strong>
+		<strong><label for="scales"><?php echo esc_html__( 'Delete plugin options and custom database tables on plugin deletion.', 'woo-coupon-usage' ); ?></label><?php echo wcusage_setting_info_icon( esc_html__( 'If enabled, when uninstalling (deleting) the plugin, most plugin options and custom tables/data created by this plugin will be deleted. Some data will still remain such as custom order & coupon meta data (if any).', 'woo-coupon-usage' ) . ' ' . esc_html__( 'This will not delete your orders or WooCommerce data. If you want to be safe, be sure to make a backup of your website beforehand in-case you want to restore this data.', 'woo-coupon-usage' ) ); ?></strong>
 	</p>
-  <i><?php echo esc_html__( 'If enabled, when uninstalling (deleting) the plugin, most plugin options and custom tables/data created by this plugin will be deleted. Some data will still remain such as custom order & coupon meta data (if any).', 'woo-coupon-usage' ); ?></i>
-  <br/><i><?php echo esc_html__( 'This will not delete your orders or WooCommerce data. If you want to be safe, be sure to make a backup of your website beforehand in-case you want to restore this data.', 'woo-coupon-usage' ); ?></i>
 
 	</div>
 

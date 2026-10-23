@@ -23,56 +23,37 @@ function wcusage_field_cb_fraud( $args )
     <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Coupon Usage Restrictions', 'woo-coupon-usage' ); ?>:</h3>
 
     <!-- Allow affiliate user to apply their own coupon code at cart / checkout. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_allow_assigned_user', 1, esc_html__( 'Allow affiliate user to apply their own coupon code at cart / checkout.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'When disabled, the affiliate user will be prevented from using their own coupon code (coupons they are assigned to) at cart or checkout.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_allow_assigned_user', 1, esc_html__( 'Allow affiliate user to apply their own coupon code at cart / checkout.', 'woo-coupon-usage' ), '0px', esc_html__( 'When disabled, the affiliate user will be prevented from using their own coupon code (coupons they are assigned to) at cart or checkout.', 'woo-coupon-usage' ) . ' <span class="wcusage_field_url_referrals_p_info">' . esc_html__( 'This will also allow them to use their own referral link and earn commission on their own purchases.', 'woo-coupon-usage' ) . '</span> ' . esc_html__( 'Unless you have a specific use case, we suggest keeping this disabled as in general it can cause some issues (commission granted to all coupons).', 'woo-coupon-usage' )); ?>
     <?php wcusage_setting_toggle('.wcusage_field_url_referrals', '.wcusage_field_url_referrals_p_info'); // Show or Hide ?>
-    <br/><i class="wcusage_field_url_referrals_p_info"><?php echo esc_html__( 'This will also allow them to use their own referral link and earn commission on their own purchases.', 'woo-coupon-usage' ); ?></i>
-    <br/>
-    <i><?php echo esc_html__( 'Unless you have a specific use case, we suggest keeping this disabled as in general it can cause some issues (commission granted to all coupons).', 'woo-coupon-usage' ); ?></i>
 
     <?php wcusage_setting_toggle('.wcusage_field_allow_assigned_user', '.wcu-field-section-assigned-user-commission'); // Show sub-option only when the parent option is enabled ?>
     <span class="wcu-field-section-assigned-user-commission">
       <br/><br/>
-      <?php wcusage_setting_toggle_option('wcusage_field_assigned_user_no_commission', 0, esc_html__( 'Do not give the affiliate commission when they use their own coupon code.', 'woo-coupon-usage' ), '30px'); ?>
-      <i style="display: block; margin-left: 30px;"><?php echo esc_html__( 'When enabled, the affiliate can still apply their own coupon and receive the discount, but no commission will be generated on purchases they make themselves. Commission for other customers using the coupon is not affected.', 'woo-coupon-usage' ); ?></i>
+      <?php wcusage_setting_toggle_option('wcusage_field_assigned_user_no_commission', 0, esc_html__( 'Do not give the affiliate commission when they use their own coupon code.', 'woo-coupon-usage' ), '30px', esc_html__( 'When enabled, the affiliate can still apply their own coupon and receive the discount, but no commission will be generated on purchases they make themselves. Commission for other customers using the coupon is not affected.', 'woo-coupon-usage' )); ?>
     </span>
 
     <br/><br/>
 
     <!-- Allow multiple affiliate coupons to be used in the same order. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_allow_multiple_coupons', 0, esc_html__( 'Allow multiple affiliate coupons to be used in the same order.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'When disabled, it will only allow 1 affiliate coupon to be used per order. (This is any coupons that have an affiliate user assigned to them.)', 'woo-coupon-usage' ); ?></i>
-    <br/>
-    <i><?php echo esc_html__( 'We highly recommend that you keep this option DISABLED, as it may cause some issues, or paying too much commission.', 'woo-coupon-usage' ); ?></i>
-    <br/>
-    <i><?php echo esc_html__( '- Currently with this option enabled, if multiple affiliate coupons are applied with different custom commission rates, it will apply the commission rate for the first coupon to all affiliate coupons.', 'woo-coupon-usage' ); ?></i>
-    <br/>
-    <?php
-    $wcusage_field_mla_enable = wcusage_get_setting_value('wcusage_field_mla_enable', '0');
-    if($wcusage_field_mla_enable) { ?>
-    <i><?php echo esc_html__( '- MLA commission will also only apply to the first affiliate coupon.', 'woo-coupon-usage' ); ?></i>
-    <br/>
-    <?php } ?>
+    <?php $wcusage_field_mla_enable = wcusage_get_setting_value('wcusage_field_mla_enable', '0'); ?>
+    <?php wcusage_setting_toggle_option('wcusage_field_allow_multiple_coupons', 0, esc_html__( 'Allow multiple affiliate coupons to be used in the same order.', 'woo-coupon-usage' ), '0px', esc_html__( 'When disabled, it will only allow 1 affiliate coupon to be used per order. (This is any coupons that have an affiliate user assigned to them.)', 'woo-coupon-usage' ) . ' ' . esc_html__( 'We highly recommend that you keep this option DISABLED, as it may cause some issues, or paying too much commission.', 'woo-coupon-usage' ) . '<br/>' . esc_html__( '- Currently with this option enabled, if multiple affiliate coupons are applied with different custom commission rates, it will apply the commission rate for the first coupon to all affiliate coupons.', 'woo-coupon-usage' ) . ( $wcusage_field_mla_enable ? '<br/>' . esc_html__( '- MLA commission will also only apply to the first affiliate coupon.', 'woo-coupon-usage' ) : '' )); ?>
     <br/>
 
     <!-- Require referral link before affiliate coupons can be applied. -->
-    <?php wcusage_setting_toggle_option('wcusage_field_require_referral_link', 0, esc_html__( 'Require customers to visit the affiliate referral link before applying their coupon.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'When enabled, affiliate coupons can only be applied if the customer currently has the tracking cookie from that affiliate referral link.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_require_referral_link', 0, esc_html__( 'Require customers to visit the affiliate referral link before applying their coupon.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, affiliate coupons can only be applied if the customer currently has the tracking cookie from that affiliate referral link.', 'woo-coupon-usage' )); ?>
 
-    <br/><br/>
+    <br/>
 
     <!-- Allow affiliate coupons to be used by existing and new customers. -->
     <p>
       <?php $wcusage_field_allow_all_customers = wcusage_get_setting_value('wcusage_field_allow_all_customers', '1'); ?>
       <input type="hidden" value="0" id="wcusage_field_allow_all_customers" data-custom="custom" name="wcusage_options[wcusage_field_allow_all_customers]" >
-      <strong><label for="scales"><?php echo esc_html__( 'Who can apply affiliate coupons to their cart?', 'woo-coupon-usage' ); ?></label></strong><br/>
+      <strong><label for="scales"><?php echo esc_html__( 'Who can apply affiliate coupons to their cart?', 'woo-coupon-usage' ); ?></label></strong><?php echo wcusage_setting_info_icon( esc_html__( '(Only applies to coupons that have an affiliate user assigned to them.)', 'woo-coupon-usage' ) . ' ' . esc_html__( 'If preferred, you can enable "New Customers Only" for individual coupons in the "Usage limits" coupon settings tab.', 'woo-coupon-usage' ) . ' <a href="https://couponaffiliates.com/docs/new-customers-only/" target="_blank">' . esc_html__( 'Learn More.', 'woo-coupon-usage' ) . '</a>' ); ?><br/>
       <select name="wcusage_options[wcusage_field_allow_all_customers]" id="wcusage_field_allow_all_customers">
         <option value="1" <?php if($wcusage_field_allow_all_customers == "1") { ?>selected<?php } ?>><?php echo esc_html__( 'All Existing & New Customers', 'woo-coupon-usage' ); ?></option>
         <option value="0" <?php if($wcusage_field_allow_all_customers == "0") { ?>selected<?php } ?>><?php echo esc_html__( 'New Customers Only (First Order)', 'woo-coupon-usage' ); ?></option>
       </select>
     </p>
-    <i><?php echo esc_html__( '(Only applies to coupons that have an affiliate user assigned to them.)', 'woo-coupon-usage' ); ?></i><br/>
-    <i><?php echo esc_html__( 'If preferred, you can enable "New Customers Only" for individual coupons in the "Usage limits" coupon settings tab.', 'woo-coupon-usage' ); ?> <a href="https://couponaffiliates.com/docs/new-customers-only/" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a></i><br/>
 
     <br/><hr/>
 
@@ -83,8 +64,7 @@ function wcusage_field_cb_fraud( $args )
     <br/>
 
     <!-- Blocked Domains -->
-    <?php wcusage_setting_textarea_option('wcusage_field_fraud_block_ips', "", esc_html__( 'Blocked "Visitor ID" or "IP Address" List', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'Enter one per line.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_textarea_option('wcusage_field_fraud_block_ips', "", esc_html__( 'Blocked "Visitor ID" or "IP Address" List', 'woo-coupon-usage' ), '0px', esc_html__( 'Enter one per line.', 'woo-coupon-usage' )); ?>
 
     <div <?php if( !wcu_fs()->can_use_premium_code() || !wcu_fs()->is_premium() ) { ?>style="opacity: 0.4; pointer-events: none;" class="wcu-settings-pro-only"<?php } ?>>
 
@@ -103,14 +83,12 @@ function wcusage_field_cb_fraud( $args )
       <br/>
 
       <!-- Blocked Domains -->
-      <?php wcusage_setting_textarea_option('wcusage_field_fraud_block_domains', "", esc_html__( 'Blocked Domains List', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'Enter one per line. You do not need to include "http://", "https://", or "www." in the domain.', 'woo-coupon-usage' ); ?></i><br/>
+      <?php wcusage_setting_textarea_option('wcusage_field_fraud_block_domains', "", esc_html__( 'Blocked Domains List', 'woo-coupon-usage' ), '0px', esc_html__( 'Enter one per line. You do not need to include "http://", "https://", or "www." in the domain.', 'woo-coupon-usage' )); ?>
 
       <br/>
 
       <!-- Allow manually application of affiliate coupons. -->
-      <?php wcusage_setting_toggle_option('wcusage_field_fraud_block_domains_manual', 0, esc_html__( 'Also block MANUAL use of affiliate coupons, if referred by a blocked domain.', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'When enabled, visitors referred by blocked domains will be completely blocked from entering any affiliate coupons manually (as long as the cookie is saved).', 'woo-coupon-usage' ); ?></i>
+      <?php wcusage_setting_toggle_option('wcusage_field_fraud_block_domains_manual', 0, esc_html__( 'Also block MANUAL use of affiliate coupons, if referred by a blocked domain.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, visitors referred by blocked domains will be completely blocked from entering any affiliate coupons manually (as long as the cookie is saved).', 'woo-coupon-usage' )); ?>
 
       <br/><br/><hr/>
 
@@ -132,8 +110,7 @@ function wcusage_field_cb_fraud( $args )
 
         <br/><br/>
 
-        <?php wcusage_setting_toggle_option('wcusage_field_enable_directlinks_protection', 0, esc_html__( 'Only allow affiliate coupons to be applied when directly linked by an approved domain.', 'woo-coupon-usage' ), '0px'); ?>
-        <i><?php echo esc_html__( 'Enabling this option will prevent ALL affiliate coupons and referral links from working UNLESS the customer was directly linked by the approved domain that is assigned to that coupon.', 'woo-coupon-usage' ); ?></i><br/>
+        <?php wcusage_setting_toggle_option('wcusage_field_enable_directlinks_protection', 0, esc_html__( 'Only allow affiliate coupons to be applied when directly linked by an approved domain.', 'woo-coupon-usage' ), '0px', esc_html__( 'Enabling this option will prevent ALL affiliate coupons and referral links from working UNLESS the customer was directly linked by the approved domain that is assigned to that coupon.', 'woo-coupon-usage' )); ?>
 
       </span>
 

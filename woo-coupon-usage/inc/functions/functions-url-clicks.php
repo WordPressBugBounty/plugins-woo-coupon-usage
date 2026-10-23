@@ -297,15 +297,29 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
         ?>
 
 		<!-- Table Mobile Labels -->
+		<?php 
+        // One label per column, in the same order and with the same optional columns as the table below.
+        $wcusage_clicks_mobile_labels = array(__( 'ID', 'woo-coupon-usage' ));
+        if ( $show_converted_col ) {
+            $wcusage_clicks_mobile_labels[] = __( 'Converted', 'woo-coupon-usage' );
+        }
+        $wcusage_clicks_mobile_labels[] = __( 'Landing Page', 'woo-coupon-usage' );
+        $wcusage_clicks_mobile_labels[] = __( 'Referring URL', 'woo-coupon-usage' );
+        if ( wcu_fs()->is__premium_only() && wcu_fs()->can_use_premium_code() && $wcusage_field_show_campaigns ) {
+            $wcusage_clicks_mobile_labels[] = __( 'Campaign', 'woo-coupon-usage' );
+        }
+        $wcusage_clicks_mobile_labels[] = __( 'Date', 'woo-coupon-usage' );
+        ?>
 		<style>
 		@media only screen and (max-width: 760px) {
-			.wcu-table-clicks td:nth-of-type(1):before { content: "ID"; }
-			.wcu-table-clicks td:nth-of-type(2):before { content: "Landing Page"; }
-			.wcu-table-clicks td:nth-of-type(3):before { content: "Referring URL"; }
-			.wcu-table-clicks td:nth-of-type(4):before { content: "Converted"; }
 			<?php 
+        foreach ( $wcusage_clicks_mobile_labels as $wcusage_label_index => $wcusage_label ) {
+            // A CSS string: escape backslashes and double quotes.
+            $wcusage_label_css = str_replace( array('\\', '"'), array('\\\\', '\\"'), wp_strip_all_tags( $wcusage_label ) );
+            echo '.wcu-table-clicks td:nth-of-type(' . (int) ($wcusage_label_index + 1) . '):before { content: "' . $wcusage_label_css . '"; }' . "\n";
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped for a CSS string above.
+        }
         ?>
-			.wcu-table-clicks td:nth-of-type(6):before { content: "Date"; }
 		}
 		</style>
 
@@ -350,12 +364,14 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
             foreach ( $result2 as $result ) {
                 echo "<tr class='wcuTableRow'>";
                 echo "<td class='wcuTableCell' style='max-width: 100%;'>" . esc_html( $result->id ) . "</td>";
-                if ( $result->converted == 1 ) {
-                    $convertedicon = '<i class="fas fa-check" style="color: green;" title="' . esc_html__( "Converted", "woo-coupon-usage" ) . '"></i>';
-                } else {
-                    $convertedicon = '<i class="fas fa-times" title="' . esc_html__( "Not Converted", "woo-coupon-usage" ) . '"></i>';
+                if ( $show_converted_col ) {
+                    if ( $result->converted == 1 ) {
+                        $convertedicon = '<i class="fas fa-check" style="color: green;" title="' . esc_html__( "Converted", "woo-coupon-usage" ) . '"></i>';
+                    } else {
+                        $convertedicon = '<i class="fas fa-times" title="' . esc_html__( "Not Converted", "woo-coupon-usage" ) . '"></i>';
+                    }
+                    echo "<td class='wcuTableCell' style='max-width: 100%;'>" . wp_kses_post( $convertedicon ) . "</td>";
                 }
-                echo "<td class='wcuTableCell' style='max-width: 100%;'>" . wp_kses_post( $convertedicon ) . "</td>";
                 // Display landing page with proper handling for homepage/empty values
                 if ( $result->page && $result->page != '0' && $result->page != 0 ) {
                     // Regular page/post

@@ -1,0 +1,537 @@
+/*
+ * Settings page theme: one accent colour (the plugin green) for every interactive
+ * control, quieter secondary buttons, a tighter type scale and fields sized to what
+ * they hold. Loaded on the settings page only, after admin-style.css and the card
+ * styles (admin-settings-sections.css), so it is scoped to .wcusage-settings.
+ */
+
+.wcusage-settings {
+    --wcu-st-accent: #1c7a38;
+    --wcu-st-accent-hover: #15602b;
+    --wcu-st-accent-soft: #edf8f0;
+    --wcu-st-ring: rgba(28, 122, 56, .2);
+    --wcu-st-pro: #b08a1e;
+    --wcu-st-pro-soft: #fbf5e3;
+    --wcu-st-text: #101828;
+    --wcu-st-text-2: #344054;
+    --wcu-st-muted: #475467;
+    --wcu-st-subtle: #667085;
+    --wcu-st-faint: #98a2b3;
+    --wcu-st-border: #e4e7ec;
+    --wcu-st-border-strong: #d0d5dd;
+    --wcu-st-border-soft: #eef0f3;
+    --wcu-st-surface: #f9fafb;
+    --wcu-st-shadow-xs: 0 1px 2px rgba(16, 24, 40, .05);
+    accent-color: var(--wcu-st-accent);
+    /* Core checkboxes, radios and buttons read these, so they follow the accent too. */
+    --wp-admin-theme-color: #1c7a38;
+    --wp-admin-theme-color--rgb: 28, 122, 56;
+    --wp-admin-theme-color-darker-10: #15602b;
+    --wp-admin-theme-color-darker-10--rgb: 21, 96, 43;
+    --wp-admin-theme-color-darker-20: #104a21;
+    --wp-admin-theme-color-darker-20--rgb: 16, 74, 33;
+}
+
+/* -------------------------------------------------------------------------
+ * 1. Accent: links, focus rings, toggles, primary buttons.
+ * ---------------------------------------------------------------------- */
+
+/* Text links: unclassed links anywhere, and classed ones inside running text,
+   leaving anything styled as a button alone. */
+.wcusage-settings .wcu-settings-header a:not([class]),
+.wcusage-settings .wcusage-settings-form .wcusage_row a:not([class]),
+.wcusage-settings .wcusage-settings-form .wcusage_row :is(p, li) a:not([class*="button"]):not([class*="btn"]) {
+    color: var(--wcu-st-accent);
+    text-underline-offset: 2px;
+}
+
+.wcusage-settings .wcu-settings-header a:not([class]):hover,
+.wcusage-settings .wcusage-settings-form .wcusage_row a:not([class]):hover,
+.wcusage-settings .wcusage-settings-form .wcusage_row :is(p, li) a:not([class*="button"]):not([class*="btn"]):hover {
+    color: var(--wcu-st-accent-hover);
+}
+
+.wcusage-settings .wcusage-settings-form input[type="text"]:focus,
+.wcusage-settings .wcusage-settings-form input[type="number"]:focus,
+.wcusage-settings .wcusage-settings-form input[type="email"]:focus,
+.wcusage-settings .wcusage-settings-form input[type="url"]:focus,
+.wcusage-settings .wcusage-settings-form input[type="password"]:focus,
+.wcusage-settings .wcusage-settings-form select:focus,
+.wcusage-settings .wcusage-settings-form textarea:focus,
+.wcusage-settings #wcu-settings-search:focus {
+    border-color: var(--wcu-st-accent);
+    box-shadow: 0 0 0 3px var(--wcu-st-ring);
+    outline: none;
+}
+
+.wcusage-settings .wcusage-settings-form .button-primary {
+    background: var(--wcu-st-accent);
+    border-color: var(--wcu-st-accent);
+}
+
+.wcusage-settings .wcusage-settings-form .button-primary:hover,
+.wcusage-settings .wcusage-settings-form .button-primary:focus {
+    background: var(--wcu-st-accent-hover);
+    border-color: var(--wcu-st-accent-hover);
+}
+
+/* Toggles: same geometry as before, flat colours. */
+.wcusage-settings .wcusage_row .slider,
+.wcusage-settings .wcusage_row_setting .slider {
+    background-color: var(--wcu-st-border-strong);
+    box-shadow: none;
+}
+
+.wcusage-settings .wcusage_row .slider:before,
+.wcusage-settings .wcusage_row_setting .slider:before {
+    box-shadow: 0 1px 3px rgba(16, 24, 40, .2);
+}
+
+.wcusage-settings .wcusage_row input:checked + .slider,
+.wcusage-settings .wcusage_row_setting input:checked + .slider {
+    background-color: var(--wcu-st-accent);
+    box-shadow: none;
+}
+
+.wcusage-settings .wcusage_row input:focus + .slider,
+.wcusage-settings .wcusage_row_setting input:focus + .slider {
+    box-shadow: none;
+}
+
+.wcusage-settings .wcusage_row input:focus-visible + .slider,
+.wcusage-settings .wcusage_row_setting input:focus-visible + .slider {
+    box-shadow: 0 0 0 3px var(--wcu-st-ring);
+}
+
+/* Header actions next to the page title. */
+.wcusage-settings .wcusage-settings-button {
+    border-color: var(--wcu-st-border-strong);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--wcu-st-text-2);
+    box-shadow: var(--wcu-st-shadow-xs);
+}
+
+.wcusage-settings .wcusage-settings-button:hover {
+    border-color: var(--wcu-st-accent);
+    background: var(--wcu-st-accent-soft);
+    color: var(--wcu-st-accent);
+    box-shadow: var(--wcu-st-shadow-xs);
+    transform: none;
+}
+
+/* -------------------------------------------------------------------------
+ * 3. Secondary buttons: "Show Settings" / "Show" are outlined, not filled.
+ * ---------------------------------------------------------------------- */
+
+.wcusage-settings .wcusage-settings-form .wcu-showhide-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--wcu-st-border-strong);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--wcu-st-text-2);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    box-shadow: var(--wcu-st-shadow-xs);
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+    white-space: nowrap;
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-showhide-button:hover {
+    border-color: var(--wcu-st-faint);
+    background: var(--wcu-st-surface);
+    color: var(--wcu-st-text);
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-showhide-button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--wcu-st-ring);
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-showhide-button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-showhide-button .fa-solid {
+    font-size: 11px;
+    color: var(--wcu-st-subtle);
+}
+
+/* Dashboard tab rows: one bordered list with dividers. The whole header opens the
+   row's settings (script in options-general.php). */
+.wcusage-settings .wcusage-tabs-order-list {
+    border: 1px solid var(--wcu-st-border);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.wcusage-settings .wcusage-tab-item {
+    margin: 0;
+    border-top: 1px solid var(--wcu-st-border-soft);
+    background: #fff;
+}
+
+.wcusage-settings .wcusage-tab-item:first-child {
+    border-top: 0;
+    border-radius: 10px 10px 0 0;
+}
+
+.wcusage-settings .wcusage-tab-item:last-child {
+    border-radius: 0 0 10px 10px;
+}
+
+.wcusage-settings .wcusage-tab-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 8px 14px;
+    box-sizing: border-box;
+    border-radius: inherit;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+
+.wcusage-settings .wcusage-tab-header:hover,
+.wcusage-settings .wcusage-tab-item.is-open > .wcusage-tab-header {
+    background: var(--wcu-st-surface);
+}
+
+.wcusage-settings .wcusage-tab-item.is-open > .wcusage-tab-header {
+    border-bottom: 1px solid var(--wcu-st-border-soft);
+    border-radius: 0;
+}
+
+.wcusage-settings .wcusage-tab-item:first-child.is-open > .wcusage-tab-header {
+    border-radius: 10px 10px 0 0;
+}
+
+.wcusage-settings .wcusage-tab-header .dashicons-move {
+    color: var(--wcu-st-faint);
+    cursor: grab;
+}
+
+.wcusage-settings .wcusage-tab-header .dashicons-move:hover {
+    color: var(--wcu-st-text-2);
+}
+
+.wcusage-settings .wcusage-tab-header .wcu-tab-name-display {
+    color: var(--wcu-st-text);
+    font-weight: 600;
+}
+
+.wcusage-settings .wcusage-tab-header .wcu-tab-name-display,
+.wcusage-settings .wcusage-tab-header .wcu-tab-name-wrap {
+    cursor: pointer !important;
+}
+
+.wcusage-settings .wcu-tab-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wcusage-settings .wcu-tab-note {
+    color: var(--wcu-st-subtle);
+    font-size: 12px;
+}
+
+.wcusage-settings .wcusage-tab-item.is-disabled .wcusage-tab-header {
+    background: var(--wcu-st-surface);
+}
+
+.wcusage-settings .wcusage-tab-item.is-disabled .wcu-tab-name-wrap,
+.wcusage-settings .wcusage-tab-item.is-disabled .wcu-showhide-button {
+    opacity: .55;
+}
+
+.wcusage-settings .wcusage-tab-item .wcu_section_settings {
+    background: #fff;
+}
+
+/* -------------------------------------------------------------------------
+ * 4. Type scale and help text.
+ * ---------------------------------------------------------------------- */
+
+.wcusage-settings .wcusage-settings-form .wcusage_row h1 {
+    color: var(--wcu-st-text);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-settings-card h3.wcu-settings-card-title {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    background: var(--wcu-st-surface);
+    font-size: 15px;
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-settings-card h3.wcu-settings-card-heading:not(.wcu-settings-card-title) {
+    font-size: 14px;
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-settings-header-text,
+.wcusage-settings .wcusage-settings-form .wcu-settings-intro {
+    max-width: 75ch;
+    font-size: 13.5px;
+    line-height: 1.6;
+}
+
+/* Field labels. */
+.wcusage-settings .wcusage-settings-form .wcu-settings-card p > strong:first-child {
+    color: var(--wcu-st-text-2);
+    font-weight: 600;
+}
+
+/* Paragraphs that only explain (no control in them) read as help text. */
+.wcusage-settings .wcusage-settings-form .wcu-settings-card p:not(:has(input, select, textarea, button, .switch)) {
+    max-width: 75ch;
+    color: var(--wcu-st-muted);
+    font-size: 13.5px;
+    line-height: 1.6;
+}
+
+/* Help paragraphs typed as "- text" get a drawn bullet (js/admin-settings-sections.js). */
+.wcusage-settings .wcusage-settings-form p.wcu-help-bullet {
+    position: relative;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-left: 16px;
+}
+
+.wcusage-settings .wcusage-settings-form p.wcu-help-bullet::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: .7em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--wcu-st-faint);
+}
+
+/* -------------------------------------------------------------------------
+ * 5. Fields: consistent inputs, numbers sized for numbers, units inside the field.
+ * ---------------------------------------------------------------------- */
+
+.wcusage-settings .wcusage-settings-form input[type="text"],
+.wcusage-settings .wcusage-settings-form input[type="number"],
+.wcusage-settings .wcusage-settings-form input[type="email"],
+.wcusage-settings .wcusage-settings-form input[type="url"],
+.wcusage-settings .wcusage-settings-form input[type="password"] {
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--wcu-st-border-strong);
+    border-radius: 8px;
+    box-shadow: var(--wcu-st-shadow-xs);
+    color: var(--wcu-st-text);
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-settings-card input[type="number"] {
+    width: 180px;
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-input-affix {
+    display: inline-flex;
+    align-items: stretch;
+    width: 200px;
+    max-width: 100%;
+    margin: 8px 0 2px;
+    vertical-align: middle;
+    background: #fff;
+    border: 1px solid var(--wcu-st-border-strong);
+    border-radius: 8px;
+    box-shadow: var(--wcu-st-shadow-xs);
+    overflow: hidden;
+    box-sizing: border-box;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-input-affix:focus-within {
+    border-color: var(--wcu-st-accent);
+    box-shadow: 0 0 0 3px var(--wcu-st-ring);
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-input-affix__unit {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    background: var(--wcu-st-surface);
+    color: var(--wcu-st-subtle);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-input-affix__unit:first-child {
+    border-right: 1px solid var(--wcu-st-border);
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-input-affix__unit:last-child {
+    border-left: 1px solid var(--wcu-st-border);
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-input-affix input[type="number"] {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+    min-height: 38px;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-input-affix input[type="number"]:focus {
+    box-shadow: none;
+}
+
+/* -------------------------------------------------------------------------
+ * Colour pickers: every colour field uses the "Portal Colours" row (label on
+ * the left; swatch, hex and reset on the right). The Portal Colours rows keep
+ * their own rules in admin-settings-general.css.
+ * ---------------------------------------------------------------------- */
+
+.wcusage-settings .wcusage-settings-form :not(.wcu-pd-rows) > p.wcu-color-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 480px;
+    margin: 0 !important;
+    padding: 9px 0;
+    border-top: 1px solid var(--wcu-st-border-soft);
+    font-size: 13px;
+}
+
+/* The first row in a card sits straight under its title. */
+.wcusage-settings .wcusage-settings-form :not(.wcu-pd-rows) > p.wcu-color-row.wcu-card-first {
+    border-top: 0;
+}
+
+.wcusage-settings .wcusage-settings-form :not(.wcu-pd-rows) > p.wcu-color-row + * {
+    margin-top: 12px;
+}
+
+.wcusage-settings .wcusage-settings-form p.wcu-color-row > br {
+    display: none;
+}
+
+.wcusage-settings .wcusage-settings-form :not(.wcu-pd-rows) > p.wcu-color-row > strong {
+    color: var(--wcu-st-muted);
+    font-weight: 500;
+}
+
+.wcusage-settings .wcusage-settings-form p.wcu-color-row .wp-picker-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 0 auto;
+}
+
+.wcusage-settings .wcusage-settings-form p.wcu-color-row .wp-color-result.button {
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    min-height: 28px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid rgba(16, 24, 40, .2);
+    border-radius: 7px;
+    box-shadow: inset 0 0 0 2px #ffffff;
+    overflow: hidden;
+}
+
+.wcusage-settings .wcusage-settings-form p.wcu-color-row .wp-color-result-text {
+    display: none;
+}
+
+.wcusage-settings .wcusage-settings-form p.wcu-color-row .wp-picker-input-wrap {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+}
+
+.wcusage-settings .wcusage-settings-form p.wcu-color-row .wp-picker-input-wrap label {
+    margin: 0;
+}
+
+.wcusage-settings .wcusage-settings-form p.wcu-color-row input[type=text].wp-color-picker {
+    width: 78px;
+    min-width: 78px;
+    max-width: 170px;
+    height: 28px;
+    min-height: 28px !important;
+    margin: 0;
+    padding: 0 7px;
+    border-radius: 6px;
+    box-shadow: none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 26px;
+}
+
+/* Grows to fit longer values such as "rgba(0,0,0,0.7)" where supported. */
+@supports (field-sizing: content) {
+    .wcusage-settings .wcusage-settings-form p.wcu-color-row input[type=text].wp-color-picker {
+        width: auto;
+        field-sizing: content;
+    }
+}
+
+/* "Default" / "Clear", relabelled ↺ / × by js/admin-settings-general.js. */
+.wcusage-settings .wcusage-settings-form p.wcu-color-row .wp-picker-default,
+.wcusage-settings .wcusage-settings-form p.wcu-color-row .wp-picker-clear {
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    min-height: 28px;
+    margin: 0;
+    padding: 0;
+    border-color: var(--wcu-st-border);
+    border-radius: 6px;
+    background: #ffffff;
+    color: var(--wcu-st-subtle);
+    font-size: 15px;
+    line-height: 26px;
+    text-align: center;
+}
+
+.wcusage-settings .wcusage-settings-form p.wcu-color-row .wp-picker-default:hover,
+.wcusage-settings .wcusage-settings-form p.wcu-color-row .wp-picker-clear:hover {
+    border-color: var(--wcu-st-accent);
+    color: var(--wcu-st-accent);
+}
+
+/* The picker opens below its row, over the fields beneath. */
+.wcusage-settings .wcusage-settings-form p.wcu-color-row .wp-picker-holder {
+    position: absolute;
+    top: 34px;
+    right: 0;
+    z-index: 60;
+}
+
+/* Email Reports lays fields out in narrow grid cells, one field per cell: the label
+   keeps its own line and the swatch / hex / reset sit beneath it. */
+.wcusage-settings .wcusage-settings-form .wcu-rs-field > p.wcu-color-row {
+    flex-wrap: wrap;
+    padding: 0;
+    border-top: 0;
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-rs-field > p.wcu-color-row > strong {
+    color: var(--wcu-st-text-2);
+    font-weight: 600;
+}
+
+.wcusage-settings .wcusage-settings-form .wcu-rs-field > p.wcu-color-row .wp-picker-container {
+    flex-basis: 100%;
+    margin: 4px 0 0;
+}

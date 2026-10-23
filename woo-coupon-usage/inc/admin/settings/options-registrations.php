@@ -82,8 +82,7 @@ function wcusage_field_cb_registration( $args )
   	<br/><hr style="margin-top: 20px;"/>
 
       <!-- Enable Affiliate Registration Features -->
-      <?php wcusage_setting_toggle_option('wcusage_field_registration_enable', 1, esc_html__( 'Enable Affiliate Registration Features', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'This will enable the coupon affiliate registration system on your website.', 'woo-coupon-usage' ); ?></i><br/>
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_enable', 1, esc_html__( 'Enable Affiliate Registration Features', 'woo-coupon-usage' ), '0px', esc_html__( 'This will enable the coupon affiliate registration system on your website.', 'woo-coupon-usage' )); ?>
 
       <?php wcusage_setting_toggle('.wcusage_field_registration_enable', '.wcu-field-section-registration-settings'); // Show or Hide ?>
       <span class="wcu-field-section-registration-settings">
@@ -137,6 +136,41 @@ function wcusage_field_cb_registration( $args )
 
         </div>
 
+        <br/>
+
+        <!-- FAQ: How to create new affiliates & coupons? -->
+        <div class="wcu-admin-faq">
+
+          <?php wcusage_admin_faq_toggle(
+          "wcu_show_section_qna_create_affiliates",
+          "wcu_qna_create_affiliates",
+          esc_html__( 'FAQ: How do I create new affiliates & coupons?', 'woo-coupon-usage' ));
+          ?>
+
+          <div class="wcu-admin-faq-content wcu_qna_create_affiliates" id="wcu_qna_create_affiliates" style="display: none;">
+
+            <?php echo esc_html__( 'To add new affiliates and assign them to a specific coupon, you can do any of the following 3 options:', 'woo-coupon-usage' ); ?>
+            
+            <br/>
+            
+            <ul>
+              <li style="margin-left: 5px; margin-bottom: 10px;">
+              &bull; <?php echo esc_html__( 'Option 1', 'woo-coupon-usage' ); ?> - <strong><?php echo esc_html__( 'Edit Coupons Manually', 'woo-coupon-usage' ); ?></strong>: <?php echo esc_html__( 'Go to the', 'woo-coupon-usage' ); ?> <a href="<?php echo esc_url(admin_url("admin.php?page=wcusage_coupons")); ?>" target="_blank"><?php echo esc_html__( 'coupons management page', 'woo-coupon-usage' ); ?></a>, <?php echo esc_html__( 'and add or edit a coupon, then assign users under the "coupon affiliates" tab', 'woo-coupon-usage' ); ?>. (<a href="https://couponaffiliates.com/docs/how-do-i-assign-users-to-coupons" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a>)
+              </li>
+              <li style="margin-left: 5px; margin-bottom: 10px;">
+              &bull; <?php echo esc_html__( 'Option 2', 'woo-coupon-usage' ); ?> - <strong><?php echo esc_html__( 'Add New Affiliates', 'woo-coupon-usage' ); ?></strong>: <?php echo sprintf(wp_kses_post(__( 'Go to the <a href="%s" target="_blank">Add New Affiliate</a> page to add new affiliates here, which will automatically generate the coupon code for them.', 'woo-coupon-usage' )), esc_url(admin_url('admin.php?page=wcusage_add_affiliate'))); ?> (<a href="https://couponaffiliates.com/docs/manual-affiliate-registrations/" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a>)
+              </li>
+              <li style="margin-left: 5px; margin-bottom: 10px;">
+              &bull; <?php echo esc_html__( 'Option 3', 'woo-coupon-usage' ); ?> - <strong><?php echo esc_html__( 'Registration Form', 'woo-coupon-usage' ); ?></strong>: <?php echo sprintf(wp_kses_post(__( 'Direct users to the <a href="%s" target="_blank">Affiliate Registration</a> page to allow them to register themselves. When accepted, this will then automatically create the coupon and assign them to it.', 'woo-coupon-usage' )), esc_url(admin_url('admin.php?page=wcusage_registrations'))); ?> (<a href="https://couponaffiliates.com/docs/pro-affiliate-registration" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a>)
+              </li>
+            </ul>
+
+            <?php echo esc_html__( 'The affiliate user can then visit the "affiliate dashboard page" to view their affiliate statistics, commissions, referral URLs, etc, for the coupons they are assigned to.', 'woo-coupon-usage' ); ?>
+
+          </div>
+
+        </div>
+
         <br/><hr/>
 
         <!-- Template Coupon -->
@@ -171,37 +205,30 @@ function wcusage_field_cb_registration( $args )
           <br/>
 
           <!-- Show registration form on affiliate page for logged in users -->
-          <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_register_loggedin', 1, esc_html__( 'Show for logged in users.', 'woo-coupon-usage' ), '40px'); ?>
-          <i style="margin-left: 40px;"><?php echo esc_html__( 'If the user is not already registered as an affiliate and has no active coupons, this will show the registration from on the affiliate dashboard page.', 'woo-coupon-usage' ); ?></i><br/>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_register_loggedin', 1, esc_html__( 'Show for logged in users.', 'woo-coupon-usage' ), '40px', esc_html__( 'If the user is not already registered as an affiliate and has no active coupons, this will show the registration from on the affiliate dashboard page.', 'woo-coupon-usage' )); ?>
 
           <br/>
           
           <!-- Show registration form on affiliate page for logged out users. -->
-          <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_login', 1, esc_html__( 'Show for logged out users.', 'woo-coupon-usage' ), '40px'); ?>
-          <i style="margin-left: 40px;"><?php echo esc_html__( 'This will show the affiliate application/registration form automatically on the affiliate page for logged out users (alongside the login form).', 'woo-coupon-usage' ); ?></i><br/>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_login', 1, esc_html__( 'Show for logged out users.', 'woo-coupon-usage' ), '40px', esc_html__( 'This will show the affiliate application/registration form automatically on the affiliate page for logged out users (alongside the login form).', 'woo-coupon-usage' )); ?>
 
         </div>
 
         <br/>
 
         <!-- Allow logged out users to register for an affiliate coupon. -->
-        <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_logout', 1, esc_html__( 'Allow logged out users to register as an affiliate.', 'woo-coupon-usage' ), '0px'); ?>
-        <i><?php echo esc_html__( 'With this enabled, logged out users can view the registration form (with some extra fields). When submitted it will create a new account for them, and submit the affiliate application.', 'woo-coupon-usage' ); ?></i><br/>
-        <i><?php echo esc_html__( 'With this disabled, only logged in users can apply.', 'woo-coupon-usage' ); ?></i><br/>
+        <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_logout', 1, esc_html__( 'Allow logged out users to register as an affiliate.', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, logged out users can view the registration form (with some extra fields). When submitted it will create a new account for them, and submit the affiliate application.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'With this disabled, only logged in users can apply.', 'woo-coupon-usage' )); ?>
 
         <br/>
 
         <!-- Disable form for existing affiliates -->
-        <?php wcusage_setting_toggle_option('wcusage_field_registration_disable_existing', 1, esc_html__( 'Disable registration form for existing affiliate users.', 'woo-coupon-usage' ), '0px'); ?>
-        <i><?php echo esc_html__( 'If enabled, then the registration form shortcode will be disabled/hidden for any affiliate user that is already assigned to an affiliate coupon.', 'woo-coupon-usage' ); ?></i><br/>
+        <?php wcusage_setting_toggle_option('wcusage_field_registration_disable_existing', 1, esc_html__( 'Disable registration form for existing affiliate users.', 'woo-coupon-usage' ), '0px', esc_html__( 'If enabled, then the registration form shortcode will be disabled/hidden for any affiliate user that is already assigned to an affiliate coupon.', 'woo-coupon-usage' )); ?>
 
         <?php $wcusage_field_registration_enable_admincan = wcusage_get_setting_value('wcusage_field_registration_enable_admincan', '0'); ?>
         <?php if($wcusage_field_registration_enable_admincan) { ?>
         <br/>
         <!-- Allow administrator users to fill out the registration form for new users. -->
-        <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_admincan', 0, esc_html__( 'Allow administrator users to fill out the registration form for new users.', 'woo-coupon-usage' ), '0px'); ?>
-        <i><?php echo esc_html__( 'With this enabled, "administrator" users will be able to fill out the affiliate registration form for new users (custom username/email etc), whilst logged in.', 'woo-coupon-usage' ); ?></i><br/>
-        <i><?php echo esc_html__( 'As an admin, you can also manually add new affiliate registrations easily in the "Registrations" admin page, via the "Create New Registration" button.', 'woo-coupon-usage' ); ?></i><br/>
+        <?php wcusage_setting_toggle_option('wcusage_field_registration_enable_admincan', 0, esc_html__( 'Allow administrator users to fill out the registration form for new users.', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, "administrator" users will be able to fill out the affiliate registration form for new users (custom username/email etc), whilst logged in.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'As an admin, you can also manually add new affiliate registrations easily in the "Registrations" admin page, via the "Create New Registration" button.', 'woo-coupon-usage' )); ?>
         <?php } ?>
 
       <br/><hr/>
@@ -209,20 +236,17 @@ function wcusage_field_cb_registration( $args )
       <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Basic Fields Customisation', 'woo-coupon-usage' ); ?></h3>
       
       <!-- First name and last name. -->
-      <?php wcusage_setting_toggle_option('wcusage_field_registration_name_required', 0, esc_html__( 'First & Last Name Required', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'With this enabled, the first name and last name fields will be required.', 'woo-coupon-usage' ); ?></i><br/>
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_name_required', 0, esc_html__( 'First & Last Name Required', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, the first name and last name fields will be required.', 'woo-coupon-usage' )); ?>
 
       <br/>
 
       <!-- Use the email address as username. -->
-      <?php wcusage_setting_toggle_option('wcusage_field_registration_emailusername', 0, esc_html__( 'Use the email address as username.', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'With this enabled, the username field will be hidden, and the email address will be used as their username instead.', 'woo-coupon-usage' ); ?></i><br/>
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_emailusername', 0, esc_html__( 'Use the email address as username.', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, the username field will be hidden, and the email address will be used as their username instead.', 'woo-coupon-usage' )); ?>
 
       <br/>
 
       <!-- First name and last name. -->
-      <?php wcusage_setting_toggle_option('wcusage_field_registration_password_confirm', 0, esc_html__( 'Show "Confirm Password" Field', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'With this enabled, a second password field will be shown to require users to confirm their password.', 'woo-coupon-usage' ); ?></i><br/>
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_password_confirm', 0, esc_html__( 'Show "Confirm Password" Field', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, a second password field will be shown to require users to confirm their password.', 'woo-coupon-usage' )); ?>
 
       <br/>
 
@@ -267,9 +291,8 @@ function wcusage_field_cb_registration( $args )
         <!-- Terms and Conditions Message -->
         <?php
         $terms1message = wcusage_get_setting_value('wcusage_field_registration_terms_message', 'I have read and agree to the Affiliate Terms and Privacy Policy.');
-        wcusage_setting_tinymce_option('wcusage_field_registration_terms_message', $terms1message, esc_html__( 'Terms and Conditions Message', 'woo-coupon-usage' ), '0px');
+        wcusage_setting_tinymce_option('wcusage_field_registration_terms_message', $terms1message, esc_html__( 'Terms and Conditions Message', 'woo-coupon-usage' ), '0px', "150", esc_html__( 'Enter your terms acceptance message. Make sure you edit the message to include links to your terms and privacy policy!', 'woo-coupon-usage' ));
         ?>
-        <i><?php echo esc_html__( 'Enter your terms acceptance message. Make sure you edit the message to include links to your terms and privacy policy!', 'woo-coupon-usage' ); ?></i><br/>
       </div>
 
       <?php if( !wcu_fs()->can_use_premium_code() ) { ?>
@@ -330,9 +353,8 @@ function wcusage_field_cb_registration( $args )
         <!-- Message -->
         <?php
         $terms2message = wcusage_get_setting_value('wcusage_field_registration_accept_message', 'Your affiliate application for the coupon code "{coupon}" has been submitted.');
-        wcusage_setting_tinymce_option('wcusage_field_registration_accept_message', $terms2message, esc_html__( 'Submission Message', 'woo-coupon-usage' ), '0px');
+        wcusage_setting_tinymce_option('wcusage_field_registration_accept_message', $terms2message, esc_html__( 'Submission Message', 'woo-coupon-usage' ), '0px', "150", esc_html__( 'This is the message shown on the page as soon as the user submits the application form. The {couponcode} placeholder will be replaced with their chosen coupon code.', 'woo-coupon-usage' ));
         ?>
-        <i><?php echo esc_html__( 'This is the message shown on the page as soon as the user submits the application form. The {couponcode} placeholder will be replaced with their chosen coupon code.', 'woo-coupon-usage' ); ?></i><br/>
       </div>
 
       <!-- DROPDOWN - Redirect to page -->
@@ -393,8 +415,7 @@ function wcusage_field_cb_registration( $args )
       <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( '"Coupon Affiliate" User Role', 'woo-coupon-usage' ); ?></h3>
 
       <!-- Upon new registration, assign user to custom "coupon affiliate" user role. -->
-      <?php wcusage_setting_toggle_option('wcusage_field_register_role', 1, esc_html__( 'Upon new registration, assign user to custom "coupon affiliate" user role.', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'With this enabled, instead of using the default WordPress "subscriber" user role, new affiliate users will be assigned to the custom "coupon affiliate" user role (or the custom role defined below) instead.', 'woo-coupon-usage' ); ?></i><br/>
+      <?php wcusage_setting_toggle_option('wcusage_field_register_role', 1, esc_html__( 'Upon new registration, assign user to custom "coupon affiliate" user role.', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, instead of using the default WordPress "subscriber" user role, new affiliate users will be assigned to the custom "coupon affiliate" user role (or the custom role defined below) instead.', 'woo-coupon-usage' )); ?>
 
       <br/>
 
@@ -428,8 +449,7 @@ function wcusage_field_cb_registration( $args )
         <br/>
 
         <!-- Set a different user role for pending affiliate users. -->
-        <?php wcusage_setting_toggle_option('wcusage_field_register_role_only_accept', 0, esc_html__( 'Set a different user role for pending affiliate users.', 'woo-coupon-usage' ), '0px'); ?>
-        <i><?php echo esc_html__( 'With this enabled, the new user account created will be assigned to the default "Subscriber" role (or the custom role defined below) initially, and only when their affiliate application is accepted will they be assigned to the "coupon affiliate" user role instead.', 'woo-coupon-usage' ); ?></i><br/>
+        <?php wcusage_setting_toggle_option('wcusage_field_register_role_only_accept', 0, esc_html__( 'Set a different user role for pending affiliate users.', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, the new user account created will be assigned to the default "Subscriber" role (or the custom role defined below) initially, and only when their affiliate application is accepted will they be assigned to the "coupon affiliate" user role instead.', 'woo-coupon-usage' )); ?>
 
         <br/>
 
@@ -466,8 +486,7 @@ function wcusage_field_cb_registration( $args )
         <br/>
 
         <!-- Remove the pending affiliate role from user when their affiliate application is accepted. -->
-        <?php wcusage_setting_toggle_option('wcusage_field_register_role_remove_pending', 1, esc_html__( 'Remove the pending affiliate role from user when their affiliate application is accepted.', 'woo-coupon-usage' ), '0px'); ?>
-        <i><?php echo esc_html__( 'With this enabled, the pending user role will be removed from the affiliate when the application is accepted.', 'woo-coupon-usage' ); ?></i><br/>
+        <?php wcusage_setting_toggle_option('wcusage_field_register_role_remove_pending', 1, esc_html__( 'Remove the pending affiliate role from user when their affiliate application is accepted.', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, the pending user role will be removed from the affiliate when the application is accepted.', 'woo-coupon-usage' )); ?>
 
         <br/>
 
@@ -486,13 +505,11 @@ function wcusage_field_cb_registration( $args )
       <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Form CAPTCHA - Spam Protection', 'woo-coupon-usage' ); ?></h3>
 
       <!-- Enable HoneyPot Spam Protection -->
-      <?php wcusage_setting_toggle_option('wcusage_registration_enable_honeypot', 1, esc_html__( 'Enable HoneyPot Spam Prevention', 'woo-coupon-usage' ), '0px'); ?>
-      <i><?php echo esc_html__( 'With this enabled, a hidden field will be added to the registration form to help prevent spam.', 'woo-coupon-usage' ); ?></i><br/>
-      <i><?php echo esc_html__( 'This is only a basic spam protection method, and is not as effective as CAPTCHA.', 'woo-coupon-usage' ); ?></i><br/>
+      <?php wcusage_setting_toggle_option('wcusage_registration_enable_honeypot', 1, esc_html__( 'Enable HoneyPot Spam Prevention', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, a hidden field will be added to the registration form to help prevent spam.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'This is only a basic spam protection method, and is not as effective as CAPTCHA.', 'woo-coupon-usage' )); ?>
 
       <br/>
 
-      <Strong><?php echo esc_html__( 'Advanced CAPTCHA Spam Protection', 'woo-coupon-usage' ); ?>:</Strong><br/>
+      <Strong><?php echo esc_html__( 'Advanced CAPTCHA Spam Protection', 'woo-coupon-usage' ); ?>:</Strong><?php echo wcusage_setting_info_icon( esc_html__( 'Setup a CAPTCHA on your affiliate registration form to help prevent spam.', 'woo-coupon-usage' ) ); ?><br/>
 
       <!-- Enable Spam CAPTCHA -->
       <?php
@@ -539,7 +556,6 @@ function wcusage_field_cb_registration( $args )
       });
       </script>
 
-      <br/><i><?php echo esc_html__( 'Setup a CAPTCHA on your affiliate registration form to help prevent spam.', 'woo-coupon-usage' ); ?></i><br/>
 
       <div class="wcu-field-section-registration-captcha">
 
@@ -578,8 +594,7 @@ function wcusage_field_cb_registration( $args )
           <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Auto-Accept Registrations', 'woo-coupon-usage' ); ?></h3>
 
           <!-- Automatically accept all affiliate registrations. -->
-          <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_accept', 0, esc_html__( 'Automatically accept all affiliate registrations.', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
-          <i><?php echo esc_html__( 'With this enabled, affiliate registrations will be automatically accepted (and coupon auto-created instantly), instead of manual approval.', 'woo-coupon-usage' ); ?></i><br/>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_accept', 0, esc_html__( 'Automatically accept all affiliate registrations.', 'woo-coupon-usage' ) . esc_html($probrackets), '0px', esc_html__( 'With this enabled, affiliate registrations will be automatically accepted (and coupon auto-created instantly), instead of manual approval.', 'woo-coupon-usage' )); ?>
 
 
           <?php wcusage_setting_toggle('.wcusage_field_registration_auto_accept', '.wcu-field-section-registration-auto-accept-roles-limit'); // Show or Hide ?>
@@ -588,8 +603,7 @@ function wcusage_field_cb_registration( $args )
             <br/>
 
             <!-- Limit auto-accept to certain roles/groups -->
-            <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_accept_limit', 0, esc_html__( 'Only auto-accept for certain user roles & groups?', 'woo-coupon-usage' ), '20px'); ?>
-            <i style="margin-left: 20px; display: inline-block;"><?php echo esc_html__( 'If enabled, only users with one of the selected roles/groups (or the role/group assigned to the selected template) will be auto-accepted.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_accept_limit', 0, esc_html__( 'Only auto-accept for certain user roles & groups?', 'woo-coupon-usage' ), '20px', esc_html__( 'If enabled, only users with one of the selected roles/groups (or the role/group assigned to the selected template) will be auto-accepted.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'If none are selected, auto-accept will apply to all registrations.', 'woo-coupon-usage' )); ?>
 
             <?php wcusage_setting_toggle('.wcusage_field_registration_auto_accept_limit', '.wcu-field-section-registration-auto-accept-roles'); // Show or Hide ?>
             <div class="wcu-field-section-registration-auto-accept-roles" style="margin-left: 40px;">
@@ -648,7 +662,6 @@ function wcusage_field_cb_registration( $args )
               ?>
 
               </span>
-              <i style="display:block; margin-top: 6px;"><?php echo esc_html__( 'If none are selected, auto-accept will apply to all registrations.', 'woo-coupon-usage' ); ?></i>
             </div>
 
           </span>
@@ -664,11 +677,8 @@ function wcusage_field_cb_registration( $args )
           <br/>
 
           <!-- Automatically generate coupon code? -->
-          <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_coupon', 0, esc_html__( 'Generate a dynamic coupon name automatically.', 'woo-coupon-usage' ), '0px'); ?>
-          <i><?php echo esc_html__( 'With this enabled, instead of the user entering their "preferred coupon code", a code will be generated for them automatically.', 'woo-coupon-usage' ); ?></i><br/>
-          <i><?php echo esc_html__( 'You will still be able to review and edit the generated code before approving.', 'woo-coupon-usage' ); ?></i>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_coupon', 0, esc_html__( 'Generate a dynamic coupon name automatically.', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, instead of the user entering their "preferred coupon code", a code will be generated for them automatically.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'You will still be able to review and edit the generated code before approving.', 'woo-coupon-usage' )); ?>
 
-          <br/>
 
           <?php wcusage_setting_toggle('.wcusage_field_registration_auto_coupon', '.wcu-field-section-registration-auto-coupon-text'); // Show or Hide ?>
           <span class="wcu-field-section-registration-auto-coupon-text">
@@ -806,8 +816,7 @@ function wcusage_field_cb_registration( $args )
 
           <hr/>
 
-          <h3 style="margin-bottom: 0px;"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Custom Form Fields', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?></h3>
-          <p style="margin: 6px 0 14px 0;"><i><?php echo esc_html__( 'Add your own fields to the registration form. Drag the handle to reorder them, and choose per field whether affiliates can edit it later on their dashboard Account Details.', 'woo-coupon-usage' ); ?></i></p>
+          <h3 style="margin-bottom: 0px;"><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Custom Form Fields', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?><?php echo wcusage_setting_info_icon( esc_html__( 'Add your own fields to the registration form. Drag the handle to reorder them, and choose per field whether affiliates can edit it later on their dashboard Account Details.', 'woo-coupon-usage' ) ); ?></h3>
 
           <?php
           /**
@@ -952,18 +961,14 @@ function wcusage_field_cb_registration( $args )
           <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Automatic Affiliate Registration', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?></h3>
 
           <!-- Automatically register all new users as an affiliate. -->
-          <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_new_user', 0, esc_html__( 'Automatically register all new users as an affiliate.', 'woo-coupon-usage' ), '0px'); ?>
-          <i><?php echo esc_html__( 'If enabled, whenever a new user is created (in any way), an affiliate registration will also be submitted for them automatically.', 'woo-coupon-usage' ); ?></i><br/>
-          <i><?php echo esc_html__( 'The username will be used as the coupon code by default, unless you have the "Dynamic Code Generator" enabled.', 'woo-coupon-usage' ); ?></i><br/>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_auto_new_user', 0, esc_html__( 'Automatically register all new users as an affiliate.', 'woo-coupon-usage' ), '0px', esc_html__( 'If enabled, whenever a new user is created (in any way), an affiliate registration will also be submitted for them automatically.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'The username will be used as the coupon code by default, unless you have the "Dynamic Code Generator" enabled.', 'woo-coupon-usage' )); ?>
 
           <br/><hr/>
 
           <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Checkout Page: Join Affiliate Program', 'woo-coupon-usage' ); ?><?php echo esc_html($probrackets); ?></h3>
 
           <!-- Join affiliate program checkbox -->
-          <?php wcusage_setting_toggle_option('wcusage_field_registration_checkout_checkbox', 0, esc_html__( 'Show a "join our affiliate program" checkbox on the store checkout.', 'woo-coupon-usage' ), '0px'); ?>
-          <i><?php echo esc_html__( 'When enabled, a new checkbox will appear on store checkout, under order notes, for them to join the affiliate program. This will submit an affiliate registration application for the user.', 'woo-coupon-usage' ); ?></i><br/>
-          <i><?php echo esc_html__( 'Note: This will only show for users that are not currently assigned to any affiliate coupons. They must also be logged in, or have selected "Create an account?" for it to show.', 'woo-coupon-usage' ); ?></i><br/>
+          <?php wcusage_setting_toggle_option('wcusage_field_registration_checkout_checkbox', 0, esc_html__( 'Show a "join our affiliate program" checkbox on the store checkout.', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, a new checkbox will appear on store checkout, under order notes, for them to join the affiliate program. This will submit an affiliate registration application for the user.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Note: This will only show for users that are not currently assigned to any affiliate coupons. They must also be logged in, or have selected "Create an account?" for it to show.', 'woo-coupon-usage' )); ?>
 
           <?php wcusage_setting_toggle('.wcusage_field_registration_checkout_checkbox', '.wcu-field-section-checkout-checkbox-text'); // Show or Hide ?>
           <span class="wcu-field-section-checkout-checkbox-text">
@@ -972,15 +977,13 @@ function wcusage_field_cb_registration( $args )
             <?php wcusage_setting_text_option('wcusage_field_registration_checkout_checkbox_text', 'Click here to join our affiliate program', esc_html__( 'Checkbox label', 'woo-coupon-usage' ), '0px'); ?>
             <br/>
             <!-- Join affiliate program checked by default? -->
-            <?php wcusage_setting_toggle_option('wcusage_field_registration_checkout_checkbox_checked', 0, esc_html__( 'Checkbox ticked by default?', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'When enabled, the checkbox to join the affiliate program will be checked automatically.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_registration_checkout_checkbox_checked', 0, esc_html__( 'Checkbox ticked by default?', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, the checkbox to join the affiliate program will be checked automatically.', 'woo-coupon-usage' )); ?>
           </span>
 
           <br/><hr/>
 
-          <h3><span class="dashicons dashicons-admin-generic" id="wcu-setting-header-mailing-lists" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Mailing List Integrations', 'woo-coupon-usage' ); ?></h3>
+          <h3><span class="dashicons dashicons-admin-generic" id="wcu-setting-header-mailing-lists" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Mailing List Integrations', 'woo-coupon-usage' ); ?><?php echo wcusage_setting_info_icon( esc_html__( 'Connect your affiliate registration system to a mailing list. When a user joins your affiliate program, they will be automatically added to your mailing list.', 'woo-coupon-usage' ) ); ?></h3>
 
-          <i><?php echo esc_html__( 'Connect your affiliate registration system to a mailing list. When a user joins your affiliate program, they will be automatically added to your mailing list.', 'woo-coupon-usage' ); ?></i><br/><br/>
           
           <?php
           $wcusage_mailing_list = wcusage_get_setting_value('wcusage_mailing_list', '');
@@ -1094,13 +1097,11 @@ function wcusage_field_cb_registration( $args )
               foreach ( wcusage_get_fluentcrm_items( 'tags' ) as $fluentcrm_tag ) {
                 $wcusage_fluentcrm_tags[ $fluentcrm_tag['id'] ] = $fluentcrm_tag['title'];
               }
-              wcusage_setting_select_option('wcusage_fluentcrm_tag_id', '', esc_html__( 'Apply tag to subscriber', 'woo-coupon-usage' ), '0px', $wcusage_fluentcrm_tags);
+              wcusage_setting_select_option('wcusage_fluentcrm_tag_id', '', esc_html__( 'Apply tag to subscriber', 'woo-coupon-usage' ), '0px', $wcusage_fluentcrm_tags, esc_html__( 'You can create lists and tags in FluentCRM under "Contacts > Lists" and "Contacts > Tags".', 'woo-coupon-usage' ));
               ?>
-              <p><i><?php echo esc_html__( 'You can create lists and tags in FluentCRM under "Contacts > Lists" and "Contacts > Tags".', 'woo-coupon-usage' ); ?></i></p>
               <br/>
               <!-- Double Opt-In -->
-              <?php wcusage_setting_toggle_option('wcusage_fluentcrm_double_optin', 0, esc_html__( 'Require double opt-in?', 'woo-coupon-usage' ), '0px'); ?>
-              <i><?php echo esc_html__( 'When enabled, the contact is added with a "pending" status and FluentCRM sends them a confirmation email.', 'woo-coupon-usage' ); ?></i><br/>
+              <?php wcusage_setting_toggle_option('wcusage_fluentcrm_double_optin', 0, esc_html__( 'Require double opt-in?', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, the contact is added with a "pending" status and FluentCRM sends them a confirmation email.', 'woo-coupon-usage' )); ?>
               <?php } else { ?>
               <p><?php echo esc_html__( 'FluentCRM is not installed or activated.', 'woo-coupon-usage' ); ?></p>
               <p><?php echo esc_html__( 'Please install and activate the FluentCRM plugin to use this feature.', 'woo-coupon-usage' ); ?></p>
@@ -1235,7 +1236,7 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
     <?php if (!class_exists('SitePress')) { ?>
 
       <!-- Registration Form Page Dropdown -->
-      <strong><?php echo esc_html__( 'Registration Form Page:', 'woo-coupon-usage' ); ?></strong><br/>
+      <strong><?php echo esc_html__( 'Registration Form Page:', 'woo-coupon-usage' ); ?></strong><?php echo wcusage_setting_info_icon( esc_html__( '(The page that has the [couponaffiliates-register] shortcode on.)', 'woo-coupon-usage' ) ); ?><br/>
       <?php
       $registrationpage = "";
       if ( isset($options['wcusage_registration_page']) && $options['wcusage_registration_page'] ) {
@@ -1265,7 +1266,6 @@ if( !function_exists( 'wcusage_setting_section_registration_page' ) ) {
       wp_dropdown_pages( $dropdown_args );
       ?>
 
-      <br/><i><?php echo esc_html__( '(The page that has the [couponaffiliates-register] shortcode on.)', 'woo-coupon-usage' ); ?></i>
       
       <br/>
 
@@ -1541,9 +1541,8 @@ if( !function_exists( 'wcusage_setting_section_registration_template' ) ) {
     <?php } ?>
 
       <!-- Template coupon code for new affiliate coupon generation -->
-      <?php wcusage_setting_text_option('wcusage_field_registration_coupon_template', '', esc_html__( 'Template coupon code:', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_text_option('wcusage_field_registration_coupon_template', '', esc_html__( 'Template coupon code:', 'woo-coupon-usage' ), '0px', esc_html__( 'Make sure this matches the exact name of an existing template coupon code (case sensitive).', 'woo-coupon-usage' )); ?>
       <p><div id="edit_link"></div></p>
-      <i><?php echo esc_html__( 'Make sure this matches the exact name of an existing template coupon code (case sensitive).', 'woo-coupon-usage' ); ?></i>
       <script>
         jQuery('#wcusage_field_registration_coupon_template').on('keyup', function() {
           jQuery('.registration_template_1 #wcusage_field_registration_coupon_template').val(jQuery('#wcusage_field_registration_coupon_template').val());
@@ -1611,11 +1610,8 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
     <div id="pro-settings" <?php if ( !wcu_fs()->can_use_premium_code() ) { ?>class="settings-area setup-hide premium-only-settings"
     title="<?php echo esc_attr__( 'Available with Pro version.', 'woo-coupon-usage' ); ?>" style="pointer-events:none; opacity: 0.4;"<?php } else { ?>class="settings-area setup-hide"<?php } ?>>
 
-      <br/>
-
       <!-- Multiple Template Coupons -->
-      <?php wcusage_setting_toggle_option('wcusage_field_registration_multiple_template', 0, esc_html__( 'Enable Multiple Templates', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
-      <i><?php echo esc_html__( 'With this enabled, multiple template coupons will be available and the affiliate will be able to choose which type they want via the registration form.', 'woo-coupon-usage' ); ?></i>
+      <?php wcusage_setting_toggle_option('wcusage_field_registration_multiple_template', 0, esc_html__( 'Enable Multiple Templates', 'woo-coupon-usage' ) . esc_html($probrackets), '0px', esc_html__( 'With this enabled, multiple template coupons will be available and the affiliate will be able to choose which type they want via the registration form.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Make sure template codes match the exact name of an existing template coupon code, otherwise the coupon may not be created automatically.', 'woo-coupon-usage' )); ?>
 
       <script>
       jQuery( document ).ready(function() {
@@ -1635,15 +1631,13 @@ if( !function_exists( 'wcusage_setting_section_registration_template2' ) ) {
       <?php wcusage_setting_toggle('.wcusage_field_registration_multiple_template', '.wcu-field-section-registration-templates'); // Show or Hide ?>
       <span class="wcu-field-section-registration-templates">
 
-        <br/><i><?php echo esc_html__( 'Make sure template codes match the exact name of an existing template coupon code, otherwise the coupon may not be created automatically.', 'woo-coupon-usage' ); ?></i>
         <br/><br/>
 
         <?php wcusage_setting_text_option('wcusage_field_registration_coupon_template_field', 'What type of coupon would you like?', esc_html__( 'Select field label:', 'woo-coupon-usage' ), '0px'); ?>
 
         <br/>
 
-        <?php wcusage_setting_toggle_option('wcusage_field_registration_multiple_template_roles', 0, esc_html__( 'Assign user roles (groups) to specific templates', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
-        <i><?php echo esc_html__( 'With this enabled, you will be able assign a user role to a template coupon, so when someone registers via that template option, they will also be assigned to this user role.', 'woo-coupon-usage' ); ?></i>
+        <?php wcusage_setting_toggle_option('wcusage_field_registration_multiple_template_roles', 0, esc_html__( 'Assign user roles (groups) to specific templates', 'woo-coupon-usage' ) . esc_html($probrackets), '0px', esc_html__( 'With this enabled, you will be able assign a user role to a template coupon, so when someone registers via that template option, they will also be assigned to this user role.', 'woo-coupon-usage' )); ?>
         
         <script>
         jQuery( document ).ready(function() {

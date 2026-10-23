@@ -1,0 +1,469 @@
+/*
+ * Affiliate portal theme: Spotlight
+ *
+ * A band in the sidebar colour runs across the top of the page behind the header, so
+ * the sidebar and band frame the page, and the first panel of each tab overlaps it.
+ * Panels float on soft shadows without outlines, and statistics are large figures split
+ * by thin dividers. Tabs, buttons, table headings and statistic icons use the portal
+ * colour settings.
+ */
+
+body.wcu-portal-theme-spotlight {
+    --pt-band: 214px;
+    --pt-on-band: var(--wcu-tab-font);
+
+    --pt-bg: #f3f4f6;
+    --pt-panel: #ffffff;
+    --pt-panel-border: transparent;
+    --pt-line: #f0f1f4;
+    --pt-line-strong: #e7e9ed;
+    --pt-subtle: #f6f7f9;
+    --pt-row-hover: #f8f9fb;
+    --pt-text: #111827;
+    --pt-muted: #4b5563;
+    --pt-faint: #6b7280;
+    --pt-link: var(--wcu-button);
+    --pt-link-hover: var(--wcu-button-hover);
+    --pt-input-border: #d6d9df;
+    --pt-input-bg: #ffffff;
+    --pt-input-height: 40px;
+    --pt-focus: color-mix(in srgb, var(--wcu-button) 20%, transparent);
+    --pt-positive: #047857;
+    --pt-negative: #be123c;
+
+    --pt-radius: 14px;
+    --pt-radius-sm: 10px;
+    --pt-radius-xs: 7px;
+    --pt-radius-btn: 8px;
+    --pt-radius-input: 8px;
+    --pt-shadow: 0 1px 2px rgba(17, 24, 39, 0.05), 0 10px 30px rgba(17, 24, 39, 0.07);
+    --pt-btn-shadow: 0 1px 2px rgba(17, 24, 39, 0.12);
+    --pt-card-hover-shadow: 0 10px 28px rgba(17, 24, 39, 0.1);
+
+    --pt-header-bg: transparent;
+    --pt-header-border: transparent;
+    --pt-header-icon: var(--pt-on-band);
+
+    --pt-title-size: 17px;
+    --pt-title-weight: 700;
+    --pt-title-spacing: -0.015em;
+    --pt-page-title-size: 22px;
+
+    --pt-table-border: #e9ebef;
+    --pt-th-size: 12px;
+    --pt-th-spacing: 0.04em;
+    --pt-th-transform: uppercase;
+    --pt-th-padding: 12px 16px;
+    --pt-cell-align: left;
+    --pt-cell-padding: 14px 16px;
+
+    --pt-box-padding: 14px 18px 14px 70px;
+    --pt-box-value-size: 30px;
+    --pt-box-bg: transparent;
+    --pt-box-border: transparent;
+    --pt-box-hover-border: transparent;
+    --pt-box-label-size: 13px;
+    --pt-box-label-weight: 500;
+    --pt-box-label-spacing: 0;
+    --pt-box-label-transform: none;
+
+    --pt-control-border: #e2e5ea;
+    --pt-control-bg: #ffffff;
+    --pt-inset-bg: color-mix(in srgb, var(--wcu-tab) 5%, #f7f8fa);
+    --pt-inset-border: transparent;
+
+    --pt-side-border: transparent;
+    --pt-side-hover-bg: rgba(255, 255, 255, 0.09);
+    --pt-side-item-margin: 2px 12px;
+    --pt-side-item-radius: 8px;
+}
+
+/* ---------- The band ---------- */
+
+body.wcu-portal-theme-spotlight .content {
+    background:
+        linear-gradient(var(--wcu-tab), var(--wcu-tab)) top / 100% var(--pt-band) no-repeat,
+        var(--pt-bg);
+}
+
+/* The sidebar and the band share a colour: a faint rule (a tint of the tab text colour, so
+   it shows on light and dark tab colours alike) keeps the two apart. */
+body.wcu-portal-theme-spotlight .sidebar {
+    box-shadow: none;
+    border-right: 1px solid color-mix(in srgb, var(--wcu-tab-font) 16%, transparent) !important;
+}
+
+/* A slightly wider sidebar on desktop (classic: 220px), with roomier menu items. */
+@media (min-width: 769px) {
+    body.wcu-portal-theme-spotlight .sidebar {
+        width: 248px;
+        min-width: 248px;
+        box-sizing: border-box;
+    }
+    body.wcu-portal-theme-spotlight {
+        --pt-side-item-margin: 2px 14px;
+    }
+    body.wcu-portal-theme-spotlight .portal-tabs .portal-tablink {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+}
+
+/* ---------- Header: sits on the band ---------- */
+
+body.wcu-portal-theme-spotlight .content-header {
+    border-bottom: 0;
+}
+
+body.wcu-portal-theme-spotlight .welcome-header,
+body.wcu-portal-theme-spotlight .welcome-header h1,
+body.wcu-portal-theme-spotlight #wcu-coupon-select,
+body.wcu-portal-theme-spotlight .hamburger-menu {
+    color: var(--pt-on-band) !important;
+}
+
+body.wcu-portal-theme-spotlight .welcome-header {
+    font-weight: 700;
+}
+
+body.wcu-portal-theme-spotlight .welcome-header > i.fa-tag {
+    opacity: 0.6;
+}
+
+body.wcu-portal-theme-spotlight .dark-mode-toggle,
+body.wcu-portal-theme-spotlight .dropdown-arrow,
+body.wcu-portal-theme-spotlight .username-in-header {
+    color: color-mix(in srgb, var(--pt-on-band) 78%, transparent);
+}
+
+body.wcu-portal-theme-spotlight .dark-mode-toggle:hover {
+    color: var(--pt-on-band);
+}
+
+body.wcu-portal-theme-spotlight .wcu-coupon-switcher-toggle,
+body.wcu-portal-theme-spotlight.dark-mode .wcu-coupon-switcher-toggle {
+    background: color-mix(in srgb, var(--pt-on-band) 12%, transparent) !important;
+    border: 1px solid color-mix(in srgb, var(--pt-on-band) 28%, transparent) !important;
+    color: var(--pt-on-band) !important;
+}
+
+body.wcu-portal-theme-spotlight .wcu-coupon-switcher-toggle:hover,
+body.wcu-portal-theme-spotlight.dark-mode .wcu-coupon-switcher-toggle:hover {
+    background: color-mix(in srgb, var(--pt-on-band) 20%, transparent) !important;
+    border-color: color-mix(in srgb, var(--pt-on-band) 45%, transparent) !important;
+}
+
+body.wcu-portal-theme-spotlight .profile-image {
+    border-color: color-mix(in srgb, var(--pt-on-band) 85%, transparent);
+    box-shadow: none;
+}
+
+/* Page titles that sit straight on the band (coupon list). */
+body.wcu-portal-theme-spotlight .content-body > .wcu-user-coupon-title {
+    color: var(--pt-on-band) !important;
+}
+
+body.wcu-portal-theme-spotlight .content-body > .wcu-user-coupon-title + hr,
+body.wcu-portal-theme-spotlight .content-body > .wcu-user-coupon-linebreak {
+    border-color: color-mix(in srgb, var(--pt-on-band) 22%, transparent);
+    background: color-mix(in srgb, var(--pt-on-band) 22%, transparent);
+}
+
+@media (min-width: 769px) {
+    body.wcu-portal-theme-spotlight .content-header {
+        padding-top: 22px;
+        padding-bottom: 22px;
+    }
+
+    body.wcu-portal-theme-spotlight .content-body {
+        padding-top: 16px;
+    }
+}
+
+/* ---------- Panels ---------- */
+
+@media (min-width: 769px) {
+    body.wcu-portal-theme-spotlight :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent) {
+        padding: 28px 32px 32px;
+    }
+
+    body.wcu-portal-theme-spotlight #wcu1 .wcusage-tab-section {
+        padding: 24px 28px 26px;
+    }
+}
+
+body.wcu-portal-theme-spotlight #wcu1 .wcusage-tab-section {
+    margin-bottom: 22px;
+}
+
+/* ---------- Statistics: large figures on soft tiles ---------- */
+
+/* Each figure sits on its own tile: a faint tint of the sidebar colour with a hairline
+   edge, 12px apart, so the figures read as a set inside the floating panel. */
+body.wcu-portal-theme-spotlight {
+    --pt-box-gap: 12px;
+    --pt-box-padding: 18px 20px 18px 72px;
+    --pt-box-bg: color-mix(in srgb, var(--wcu-tab) 2.5%, #fbfcfd);
+    --pt-box-border: color-mix(in srgb, var(--wcu-tab) 8%, #e9ebef);
+    --pt-box-hover-border: color-mix(in srgb, var(--wcu-tab-active) 30%, #e9ebef);
+}
+
+body.wcu-portal-theme-spotlight .wcusage-info-box {
+    border-radius: 12px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.wcu-portal-theme-spotlight .wcusage-info-box:hover {
+    box-shadow: 0 4px 14px rgba(17, 24, 39, 0.06);
+}
+
+body.wcu-portal-theme-spotlight .wcusage-info-box::before {
+    left: 22px;
+}
+
+body.wcu-portal-theme-spotlight .wcusage-info-box p {
+    font-weight: 750;
+    letter-spacing: -0.03em;
+}
+
+body.wcu-portal-theme-spotlight .wcusage-info-box .wcusage-info-box-title {
+    margin-bottom: 4px;
+    letter-spacing: 0;
+}
+
+/* ---------- Period switcher: a tray with the active period filled ---------- */
+
+body.wcu-portal-theme-spotlight .wcusage-last-days {
+    gap: 2px;
+    padding: 4px !important;
+    border-radius: 10px;
+    background: var(--pt-subtle);
+    box-shadow: inset 0 0 0 1px var(--pt-line-strong);
+}
+
+body.wcu-portal-theme-spotlight .wcusage-last-days > a:not(.wcusage-refresh-stats-btn) {
+    padding: 6px 14px;
+    border-radius: 7px;
+    font-size: 13.5px;
+}
+
+body.wcu-portal-theme-spotlight .wcusage-last-days > a.wcutab-active {
+    background: var(--wcu-tab-active);
+    color: var(--wcu-tab-active-font) !important;
+    box-shadow: 0 1px 2px rgba(17, 24, 39, 0.15);
+}
+
+body.wcu-portal-theme-spotlight .wcusage-last-days .wcusage-refresh-stats-btn {
+    margin: 0 6px 0 8px !important;
+}
+
+body.wcu-portal-theme-spotlight #wcu1 .wcusage-sales-stats-toggles {
+    margin-bottom: 18px;
+}
+
+/* ---------- Tables ---------- */
+
+body.wcu-portal-theme-spotlight table.wcuTable .wcuTableHead {
+    font-weight: 650 !important;
+}
+
+/* ---------- Inset boxes and cards ---------- */
+
+body.wcu-portal-theme-spotlight .referral-url-box,
+body.wcu-portal-theme-spotlight .payouts-box {
+    border: 0;
+    border-radius: 12px;
+}
+
+body.wcu-portal-theme-spotlight .wcusage-reward-box {
+    border: 1px solid var(--pt-line-strong);
+    border-radius: 12px;
+}
+
+/* Creatives: floating cards that lift on hover, the preview on a tinted well. */
+body.wcu-portal-theme-spotlight .creatives-box {
+    padding: 20px;
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 0 0 1px var(--pt-line-strong), 0 6px 18px rgba(17, 24, 39, 0.06);
+}
+
+body.wcu-portal-theme-spotlight .creatives-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 1px var(--pt-line-strong), 0 14px 32px rgba(17, 24, 39, 0.12);
+}
+
+body.wcu-portal-theme-spotlight .creatives-box-image {
+    border: 0;
+    border-radius: 10px;
+    background: var(--pt-inset-bg) !important;
+}
+
+body.wcu-portal-theme-spotlight .wcu-color-box {
+    border-radius: 10px;
+}
+
+body.wcu-portal-theme-spotlight.dark-mode .creatives-box {
+    box-shadow: 0 0 0 1px var(--pt-line-strong);
+}
+
+body.wcu-portal-theme-spotlight .wcu-user-coupon-list,
+body.wcu-portal-theme-spotlight .wcu-settings-card,
+body.wcu-portal-theme-spotlight .login-form,
+body.wcu-portal-theme-spotlight .registration-form {
+    border: 0;
+    border-radius: 14px;
+}
+
+body.wcu-portal-theme-spotlight .wcu-settings-card__footer {
+    background: transparent;
+}
+
+body.wcu-portal-theme-spotlight .wcu-settings-card__title {
+    font-weight: 700;
+}
+
+/* ---------- Sidebar ---------- */
+
+body.wcu-portal-theme-spotlight .portal-tabs .portal-tablink:not(.active) {
+    opacity: 0.86;
+}
+
+body.wcu-portal-theme-spotlight .portal-tabs .portal-tablink:not(.active):hover {
+    opacity: 1;
+}
+
+body.wcu-portal-theme-spotlight .portal-tabs .portal-tablink.active {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+/* ---------- Mobile: a shorter band under the stacked header ---------- */
+
+@media (max-width: 768px) {
+    body.wcu-portal-theme-spotlight {
+        --pt-band: 190px;
+    }
+}
+
+@media (max-width: 600px) {
+    body.wcu-portal-theme-spotlight .wcusage-last-days {
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+
+    body.wcu-portal-theme-spotlight .wcusage-last-days > a:not(.wcusage-refresh-stats-btn) {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    body.wcu-portal-theme-spotlight .wcusage-last-days .wcusage-refresh-stats-btn {
+        margin: 0 4px 0 6px !important;
+    }
+}
+
+/* ---------- Dark mode ---------- */
+
+body.wcu-portal-theme-spotlight.dark-mode {
+    --pt-bg: #0f1115;
+    --pt-panel: #1a1d23;
+    --pt-line: #252930;
+    --pt-line-strong: #2c3038;
+    --pt-subtle: #21252c;
+    --pt-row-hover: #1f2329;
+    --pt-text: #eceef2;
+    --pt-muted: #b3b8c2;
+    --pt-faint: #8b919c;
+    --pt-link: color-mix(in srgb, var(--wcu-button) 55%, #ffffff);
+    --pt-link-hover: #ffffff;
+    --pt-input-border: #363b44;
+    --pt-input-bg: #15181d;
+    --pt-table-border: #2c3038;
+    --pt-control-border: #363b44;
+    --pt-control-bg: #21252c;
+    --pt-inset-bg: #21252c;
+    --pt-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.25);
+    --pt-box-bg: #20242b;
+    --pt-box-border: #2c3038;
+    --pt-box-hover-border: #3a3f48;
+}
+
+body.wcu-portal-theme-spotlight.dark-mode .wcusage-info-box:hover {
+    box-shadow: none;
+}
+
+/* ---------- Payouts: the balance on a card in the sidebar colour, like the band ---------- */
+
+body.wcu-portal-theme-spotlight .payouts-box {
+    padding: 26px 28px !important;
+    background: var(--wcu-tab);
+    border: 0;
+    border-radius: 14px;
+    color: var(--wcu-tab-font);
+}
+
+body.wcu-portal-theme-spotlight .payouts-box p,
+body.wcu-portal-theme-spotlight .payouts-box > .wcu-tab-title,
+body.wcu-portal-theme-spotlight .payouts-box .wcu_payout_button > p {
+    color: color-mix(in srgb, var(--wcu-tab-font) 72%, transparent) !important;
+}
+
+body.wcu-portal-theme-spotlight .payouts-box > .wcu-tab-title u {
+    color: var(--wcu-tab-font);
+    font-size: 40px;
+}
+
+body.wcu-portal-theme-spotlight .payouts-box > div:first-child {
+    background: color-mix(in srgb, var(--wcu-tab-font) 10%, transparent) !important;
+    border-color: color-mix(in srgb, var(--wcu-tab-font) 18%, transparent) !important;
+    color: color-mix(in srgb, var(--wcu-tab-font) 80%, transparent);
+}
+
+body.wcu-portal-theme-spotlight .payouts-box > div:first-child strong,
+body.wcu-portal-theme-spotlight .payouts-box > div:first-child span,
+body.wcu-portal-theme-spotlight .payouts-box > div:first-child i {
+    color: inherit !important;
+}
+
+body.wcu-portal-theme-spotlight .payouts-box > div:first-child .wcu-tooltip-text {
+    color: #ffffff !important;
+}
+
+body.wcu-portal-theme-spotlight .payouts-box #payout_custom_amount {
+    border-color: transparent !important;
+}
+
+/* ---------- Referral link: a share card in the sidebar colour, like the band ---------- */
+
+body.wcu-portal-theme-spotlight .referral-url-box {
+    padding: 24px 26px !important;
+    background: var(--wcu-tab);
+    border: 0;
+    border-radius: 14px;
+    color: var(--wcu-tab-font);
+}
+
+body.wcu-portal-theme-spotlight .referral-url-box > p:first-of-type > strong,
+body.wcu-portal-theme-spotlight .referral-url-box > p:nth-of-type(2) > strong {
+    color: color-mix(in srgb, var(--wcu-tab-font) 72%, transparent) !important;
+}
+
+body.wcu-portal-theme-spotlight .referral-url-box .wcu-urllink {
+    border-color: transparent;
+}
+
+body.wcu-portal-theme-spotlight .referral-url-box #generate-short-url,
+body.wcu-portal-theme-spotlight .referral-url-box .wcusage-social-link {
+    background: color-mix(in srgb, var(--wcu-tab-font) 10%, transparent) !important;
+    border-color: color-mix(in srgb, var(--wcu-tab-font) 20%, transparent) !important;
+    color: var(--wcu-tab-font) !important;
+}
+
+body.wcu-portal-theme-spotlight .referral-url-box #generate-short-url:hover,
+body.wcu-portal-theme-spotlight .referral-url-box .wcusage-social-link:hover {
+    background: color-mix(in srgb, var(--wcu-tab-font) 18%, transparent) !important;
+    border-color: color-mix(in srgb, var(--wcu-tab-font) 40%, transparent) !important;
+}
+
+body.wcu-portal-theme-spotlight .referral-url-box .wcusage-social-icon {
+    color: var(--wcu-tab-font) !important;
+}

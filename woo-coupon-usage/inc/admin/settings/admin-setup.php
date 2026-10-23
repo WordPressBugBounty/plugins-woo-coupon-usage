@@ -19,9 +19,16 @@ function wcusage_setup_page_html() {
   $options = wcusage_get_options();
 
   if(isset($_GET['step'])) {
-    $step = $_GET['step'];
+    $step = sanitize_key( wp_unslash( $_GET['step'] ) );
   } else {
-    $step = "";
+    $step = "start";
+  }
+
+  // "What kind of program?" first screen, and the quick-start path for small programs.
+  $quickstart_steps = array( 'start', 'quick', 'quick-affiliate', 'quick-done' );
+  $is_quickstart_step = in_array( $step, $quickstart_steps, true ) && function_exists( 'wcusage_setup_render_quickstart_step' );
+  if ( ! $is_quickstart_step && ! is_numeric( $step ) ) {
+    $step = "1";
   }
   ?>
 
@@ -53,6 +60,7 @@ function wcusage_setup_page_html() {
 
     </center>
 
+    <?php if ( ! $is_quickstart_step ) { ?>
     <div class="bar-container">
       <ul class="progressbar">
         <li class="<?php if(!$step || $step >= "1") { ?>active<?php } ?><?php if(!$step || $step == "1") { ?> current<?php } ?>">
@@ -77,6 +85,7 @@ function wcusage_setup_page_html() {
         </li>
       </ul>
     </div>
+    <?php } ?>
 
     <?php
     if ( !class_exists( 'WooCommerce' ) ) {
@@ -97,17 +106,17 @@ function wcusage_setup_page_html() {
     ?>
 
     <div class="wcusage_row wcusage-settings-form" style="width: 100%;<?php if ( !class_exists( 'WooCommerce' ) ) { ?>display: none;<?php } ?>">
-      <div style="display: block; width: 800px; max-width: calc(100% - 50px); margin: 20px auto; padding: 15px 25px; background: #FFF; border: 2px solid #e3e3e3; border-radius: 10px;">
+      <div class="wcu-setup-card">
+
+        <?php if ( $is_quickstart_step ) { wcusage_setup_render_quickstart_step( $step ); } ?>
 
         <!-- Step 1 -->
 
         <?php if(!$step || $step == "1") { ?>
 
-          <p style="font-size: 20px;">
-            <strong><?php echo esc_html__('Welcome to the Coupon Affiliates setup wizard!', 'woo-coupon-usage'); ?></strong>
-          </p>
+          <h1 class="wcu-setup-title"><?php echo esc_html__('Welcome to the Coupon Affiliates setup wizard!', 'woo-coupon-usage'); ?></h1>
 
-          <p>
+          <p class="wcu-setup-lead">
             <?php echo esc_html__('We are going to run you through some of the most important settings in the Coupon Affiliates plugin, to help you get everything setup!', 'woo-coupon-usage'); ?>
             <strong><?php echo sprintf( wp_kses_post( __('You will be able to customise more options in the <a href="%s" target="_blank">settings page</a> later.', 'woo-coupon-usage') ), esc_url(get_admin_url()) . 'admin.php?page=wcusage_settings'); ?></strong>
             <strong><?php echo esc_html__('Lets get started...', 'woo-coupon-usage'); ?></strong>
@@ -146,13 +155,14 @@ function wcusage_setup_page_html() {
           </div>
 
           <form action="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_setup&step=2" method="post">
+          <?php wp_nonce_field( 'wcusage_setup_step', '_wcusage_setup_nonce' ); ?>
 
             <?php do_action( 'wcusage_hook_setting_section_dashboard_page' ); ?>
 
             <hr style="margin: 25px 0;" />
 
             <button type="submit" name="submit_step1" id="submit_step1" class="button button-primary"
-            style="padding: 5px 20px; margin-bottom: 0px; font-size: 15px;"><?php echo esc_html__('Save & Continue', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span></button>
+            ><?php echo esc_html__('Save & Continue', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span></button>
 
           </form>
 
@@ -170,6 +180,7 @@ function wcusage_setup_page_html() {
           ?>
 
           <form action="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_setup&step=3" method="post">
+          <?php wp_nonce_field( 'wcusage_setup_step', '_wcusage_setup_nonce' ); ?>
 
             <h3><span class="dashicons dashicons-admin-generic"></span> <?php echo esc_html__( 'Affiliate Registration System', 'woo-coupon-usage' ); ?>:</h3>
 
@@ -179,8 +190,7 @@ function wcusage_setup_page_html() {
             </p>
 
             <!-- Enable Affiliate Registration Features -->
-            <?php wcusage_setting_toggle_option('wcusage_field_registration_enable', 1, esc_html__( 'Enable Affiliate Registration Features', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'This will enable the coupon affiliate registration features on your website.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_registration_enable', 1, esc_html__( 'Enable Affiliate Registration Features', 'woo-coupon-usage' ), '0px', esc_html__( 'This will enable the coupon affiliate registration features on your website.', 'woo-coupon-usage' )); ?>
 
             <?php wcusage_setting_toggle('.wcusage_field_registration_enable', '.wcu-field-section-registration-settings'); // Show or Hide ?>
             <span class="wcu-field-section-registration-settings">
@@ -253,16 +263,14 @@ function wcusage_setup_page_html() {
               <!-- Template Coupon -->
               <?php do_action( 'wcusage_hook_setting_section_registration_template' ); ?>
 
-              <br/><hr style="margin: 15px 0 25px 0;"/>
-
-              <?php echo esc_html__('Note: You can customise the registration system more in the plugin settings page.', 'woo-coupon-usage'); ?>
+              <p class="wcu-setup-note"><?php echo esc_html__('Note: You can customise the registration system more in the plugin settings page.', 'woo-coupon-usage'); ?></p>
 
             </span>
 
             <hr style="margin: 25px 0;" />
 
             <button type="submit" name="submit_step2" id="submit_step2" class="button button-primary"
-            style="padding: 5px 20px; margin-bottom: 0px; font-size: 15px;"><?php echo esc_html__('Save & Continue', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span></button>
+            ><?php echo esc_html__('Save & Continue', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span></button>
 
           </form>
 
@@ -275,15 +283,33 @@ function wcusage_setup_page_html() {
           ?>
 
           <form action="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_setup&step=<?php if ( 'yes' === get_option( 'woocommerce_calc_taxes' ) ) { ?>4<?php } else { ?>5<?php } ?>" method="post">
+          <?php wp_nonce_field( 'wcusage_setup_step', '_wcusage_setup_nonce' ); ?>
 
             <!-- Commission -->
             <h3><span class="dashicons dashicons-admin-generic"></span> <?php echo esc_html__( 'Commission Amounts', 'woo-coupon-usage' ); ?>:</h3>
             <?php do_action( 'wcusage_hook_setting_section_commission_amounts' ); ?>
 
+            <?php
+            // First run only: suggest 10% instead of leaving the rate at 0, which would
+            // mean affiliates earn nothing. Never changes a rate that has been saved.
+            $stored_options = get_option( 'wcusage_options' );
+            if ( ! get_option( 'wcusage_setup_complete' ) && ( ! is_array( $stored_options ) || ! isset( $stored_options['wcusage_field_affiliate'] ) ) ) {
+            ?>
+            <p class="wcu-setup-commission-hint" style="color: #2271b1;"><span class="dashicons dashicons-lightbulb"></span> <?php echo esc_html__( 'We\'ve suggested 10% commission, a common starting point. Change it to whatever suits you, or set it to 0 if you only want a fixed commission.', 'woo-coupon-usage' ); ?></p>
+            <script>
+            jQuery(function($) {
+              var $rate = $('#wcusage_field_affiliate');
+              if ($rate.length && (parseFloat($rate.val()) || 0) === 0) {
+                $rate.val('10').trigger('change');
+              }
+            });
+            </script>
+            <?php } ?>
+
             <hr style="margin: 25px 0 25px 0;" />
 
             <button type="submit" name="submit_step3" id="submit_step3" class="button button-primary"
-            style="padding: 5px 20px; margin-bottom: 0px; font-size: 15px;"><?php echo esc_html__('Save & Continue', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span></button>
+            ><?php echo esc_html__('Save & Continue', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span></button>
 
           </form>
 
@@ -293,6 +319,7 @@ function wcusage_setup_page_html() {
         <?php if($step == "4") { ?>
 
           <form action="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_setup&step=5" method="post">
+          <?php wp_nonce_field( 'wcusage_setup_step', '_wcusage_setup_nonce' ); ?>
 
             <!-- Tax -->
             <h3><span class="dashicons dashicons-admin-generic"></span> <?php echo esc_html__( 'Tax Settings', 'woo-coupon-usage' ); ?>:</h3>
@@ -306,7 +333,7 @@ function wcusage_setup_page_html() {
             <hr style="margin: 25px 0 25px 0;" />
 
             <button type="submit" name="submit_step4" id="submit_step4" class="button button-primary"
-            style="padding: 5px 20px; margin-bottom: 0px; font-size: 15px;"><?php echo esc_html__('Save & Continue', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span></button>
+            ><?php echo esc_html__('Save & Continue', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span></button>
 
           </form>
 
@@ -316,6 +343,7 @@ function wcusage_setup_page_html() {
         <?php if($step == "5") { ?>
 
           <form action="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_setup&step=6" method="post">
+          <?php wp_nonce_field( 'wcusage_setup_step', '_wcusage_setup_nonce' ); ?>
 
             <h3><span class="dashicons dashicons-admin-generic"></span> <?php echo esc_html__('General Email Settings', 'woo-coupon-usage'); ?>:</h3>
             
@@ -330,7 +358,7 @@ function wcusage_setup_page_html() {
             <hr style="margin: 25px 0 25px 0;" />
 
             <button type="submit" name="submit_step5" id="submit_step5" class="button button-primary"
-            style="padding: 5px 20px; margin-bottom: 0px; font-size: 15px;"><?php echo esc_html__('Save & Continue', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span></button>
+            ><?php echo esc_html__('Save & Continue', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span></button>
 
           </form>
 
@@ -406,7 +434,7 @@ function wcusage_setup_page_html() {
             </div>
 
             <?php
-            $template = $options['wcusage_field_registration_coupon_template'];
+            $template = isset( $options['wcusage_field_registration_coupon_template'] ) ? $options['wcusage_field_registration_coupon_template'] : '';
             $get_template = wcusage_get_coupon_info($template);
             $template_id = $get_template[2];
             $registrationpage = "";
@@ -425,6 +453,7 @@ function wcusage_setup_page_html() {
                 </p>
               <?php } else { ?>
                 <p><?php echo sprintf( wp_kses_post( __('Don\'t forget to <a href="%s" target="_blank">create your template coupon</a> and set this in the plugin settings! <a href="%s" target="_blank">Learn More</a>.', 'woo-coupon-usage') ), esc_url(admin_url("post-new.php?post_type=shop_coupon")), 'https://couponaffiliates.com/docs/template-coupon-code/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step'); ?></p>
+                <p><a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wcusage_add_affiliate&wcusage_create_template=1' ), 'wcusage_create_template' ) ); ?>"><?php echo esc_html__( 'Or create one for me automatically', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-circle-arrow-right"></span></a></p>
               <?php } ?>
             </div>
 
@@ -452,51 +481,41 @@ function wcusage_setup_page_html() {
           </div>
 
           <p><strong><?php echo wp_kses_post( __('Be sure to watch the setup guide video below, for a detailed walkthrough.', 'woo-coupon-usage') ); ?>
-          <?php echo wp_kses_post(__('Need help?', 'woo-coupon-usage')); ?> <a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank" style="text-decoration: none;"><?php echo esc_html__('Create a new support ticket', 'woo-coupon-usage'); ?></a>.</strong><br/></p>
+          <?php echo wp_kses_post(__('Need help?', 'woo-coupon-usage')); ?> <a href="https://wordpress.org/support/plugin/woo-coupon-usage/#new-topic-0" target="_blank" style="text-decoration: none;"><?php echo esc_html__('Create a new support ticket', 'woo-coupon-usage'); ?></a>.</strong></p>
 
-          <br/>
+          <div class="wcu-setup-actions">
+            <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_settings">
+              <button type="submit" class="button button-primary">
+                <?php echo esc_html__('Continue to Settings Page', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
+              </button></a>
+            <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_add_affiliate">
+              <button type="submit" class="button button-secondary">
+                <?php echo esc_html__('Create Your First Affiliate', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
+              </button></a>
+          </div>
 
-          <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_settings">
-            <button type="submit" class="button button-primary" style="padding: 7px 20px;">
-              <?php echo esc_html__('Continue to Settings Page', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
-            </button></a>
-          &nbsp;
-          <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_add_affiliate">
-            <button type="submit" class="button button-secondary" style="padding: 7px 20px;">
-              <?php echo esc_html__('Create Your First Affiliate', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
-            </button></a>
-
-          <br/><br/>
-
-          <hr style="margin: 20px 0 20px 0;" />
+          <hr />
 
           <h1><?php echo esc_html__('How To Get Started', 'woo-coupon-usage'); ?>:</h1>
 
-          <p style="font-weight: bold;"><?php echo esc_html__('Here is a video guide explaining how to get started with the plugin', 'woo-coupon-usage'); ?>...</p>
-
-          <br/>
+          <p style="font-weight: bold; margin-bottom: 14px;"><?php echo esc_html__('Here is a video guide explaining how to get started with the plugin', 'woo-coupon-usage'); ?>...</p>
 
           <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/1231989950?badge=0&autopause=0&player_id=0&app_id=58479/embed#t=2m25.9s' ); ?>
-          
-          <br/>
 
-          <p style="margin: 0 0 10px 0;"><a href="https://couponaffiliates.com/docs/setup-guide-free/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step" target="_blank" style="text-decoration: none;"><?php echo esc_html__('Open setup guide in new tab', 'woo-coupon-usage'); ?> <i class="fa-solid fa-arrow-up-right-from-square"></i></a></p>
+          <p style="margin: 12px 0 0 0;"><a href="https://couponaffiliates.com/docs/setup-guide-free/?utm_campaign=plugin&utm_source=setup-wizard-link&utm_medium=final-step" target="_blank" style="text-decoration: none;"><?php echo esc_html__('Open setup guide in new tab', 'woo-coupon-usage'); ?> <i class="fa-solid fa-arrow-up-right-from-square"></i></a></p>
 
-          <br/>
+          <div class="wcu-setup-actions">
+            <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_settings">
+              <button type="submit" class="button button-primary">
+                <?php echo esc_html__('Continue to Settings Page', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
+              </button></a>
+            <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_add_affiliate">
+              <button type="submit" class="button button-secondary">
+                <?php echo esc_html__('Create Your First Affiliate', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
+              </button></a>
+          </div>
 
-          <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_settings">
-            <button type="submit" class="button button-primary" style="padding: 7px 20px;">
-              <?php echo esc_html__('Continue to Settings Page', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
-            </button></a>
-          &nbsp;
-          <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_add_affiliate"
-          <button type="submit" class="button button-secondary" style="padding: 7px 20px;">
-              <?php echo esc_html__('Create Your First Affiliate', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
-            </button></a>
-
-          <br/><br/>
-
-          <hr style="margin: 20px 0 20px 0;" />
+          <hr />
 
           <h1><?php echo esc_html__('Frequently Asked Questions:', 'woo-coupon-usage'); ?></h1>
 
@@ -566,7 +585,7 @@ function wcusage_setup_page_html() {
                   <?php if(isset($qa['id']) && $qa['id'] == 'payouts') { ?>
                     <br/><br/><strong><?php echo esc_html__('Commission payouts setup guide (PRO):', 'woo-coupon-usage'); ?></strong>
                     <br/><br/>
-                    <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/837140385?badge=0&autopause=0&player_id=0&app_id=58479/embed' ); ?>
+                    <?php echo wcusage_admin_vimeo_embed( 'https://player.vimeo.com/video/1236860902?badge=0&autopause=0&player_id=0&app_id=58479/embed' ); ?>
                   <?php } ?>
                   <?php } ?>
 
@@ -598,26 +617,25 @@ function wcusage_setup_page_html() {
           });
           </script>
 
-          <br/>
+          <div class="wcu-setup-actions">
+            <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_settings">
+              <button type="submit" class="button button-primary">
+                <?php echo esc_html__('Continue to Settings Page', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
+              </button></a>
+            <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_add_affiliate">
+              <button type="submit" class="button button-secondary">
+                <?php echo esc_html__('Create Your First Affiliate', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
+              </button></a>
+          </div>
 
-          <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_settings">
-            <button type="submit" class="button button-primary" style="padding: 7px 20px;">
-              <?php echo esc_html__('Continue to Settings Page', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
-            </button></a>
-          &nbsp;
-          <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_add_affiliate"
-          <button type="submit" class="button button-secondary" style="padding: 7px 20px;">
-              <?php echo esc_html__('Create Your First Affiliate', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
-            </button></a>
-            
             <?php if( !wcu_fs()->can_use_premium_code() ) { ?>
 
-              <br/><br/><hr style="margin: 20px 0 20px 0;" />
+              <hr />
 
               <h1><?php echo esc_html__('Want more advanced features?', 'woo-coupon-usage'); ?></h1>
 
               <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage-pricing">
-                <button type="submit"class="button button-primary" style="background: #40965d; border: 1px solid #333; padding: 5px 20px; font-size: 15px; margin-top: 10px;">
+                <button type="submit" class="button button-primary">
                   <?php echo esc_html__('Upgrade to Pro', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span>
                 </button>
               </a>
@@ -636,23 +654,20 @@ function wcusage_setup_page_html() {
 
             <?php } ?>
 
-          <br/>
-          
-
         <?php } // End Step 6 ?>
-
-        <br/>
 
       </div>
     </div>
 
     <br/>
 
-    <p style="text-align: center; font-size: 12px;"><?php echo esc_html__('Note: There are lots more options available in the settings page.', 'woo-coupon-usage'); ?></p>
-
-    <p style="text-align: center; font-weight: bold;">
-      <a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_settings" style="font-size: 15px; text-decoration: none;"><?php echo esc_html__('Skip Setup Wizard / Go To Settings Page', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span></a>
-    </p>
+    <?php // The first screen already offers "I'll set it up myself", so the skip link would repeat it. ?>
+    <?php if ( 'start' !== $step ) { ?>
+    <div class="wcu-setup-footer">
+      <p><?php echo esc_html__('Note: There are lots more options available in the settings page.', 'woo-coupon-usage'); ?></p>
+      <p><a href="<?php echo esc_url(get_admin_url()); ?>admin.php?page=wcusage_settings"><?php echo esc_html__('Skip Setup Wizard / Go To Settings Page', 'woo-coupon-usage'); ?> <span class="fa-solid fa-circle-arrow-right"></span></a></p>
+    </div>
+    <?php } ?>
 
     <br/>
 
@@ -671,6 +686,12 @@ function wcusage_setup_page_update() {
   // check user capabilities
   if ( ! wcusage_check_admin_access() ) {
   return;
+  }
+
+  // The step forms carry a nonce, so a page elsewhere can't post settings here.
+  if ( preg_grep( '/^submit_step[1-5]$/', array_keys( $_POST ) )
+    && ( ! isset( $_POST['_wcusage_setup_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wcusage_setup_nonce'] ) ), 'wcusage_setup_step' ) ) ) {
+    return;
   }
 
   $option_group = wcusage_get_options();
@@ -717,6 +738,21 @@ function wcusage_setup_page_update() {
     // wcusage_portal_dark_mode
     if( isset( $_POST['wcusage_options']['wcusage_portal_dark_mode'] ) ) {
       $option_group['wcusage_portal_dark_mode'] = sanitize_text_field( $_POST['wcusage_options']['wcusage_portal_dark_mode'] );
+    }
+
+    // wcusage_portal_theme
+    if( isset( $_POST['wcusage_options']['wcusage_portal_theme'] ) && function_exists('wcusage_get_portal_themes') ) {
+      $portal_theme = sanitize_key( wp_unslash( $_POST['wcusage_options']['wcusage_portal_theme'] ) );
+      if( array_key_exists( $portal_theme, wcusage_get_portal_themes() ) ) {
+        $option_group['wcusage_portal_theme'] = $portal_theme;
+      }
+    }
+
+    // wcusage_field_loginform and wcusage_field_enable_portal_registration (shown in the dashboard and portal sections)
+    foreach( array( 'wcusage_field_loginform', 'wcusage_field_enable_portal_registration' ) as $step1_toggle ) {
+      if( isset( $_POST['wcusage_options'][$step1_toggle] ) ) {
+        $option_group[$step1_toggle] = sanitize_text_field( $_POST['wcusage_options'][$step1_toggle] );
+      }
     }
 
   }

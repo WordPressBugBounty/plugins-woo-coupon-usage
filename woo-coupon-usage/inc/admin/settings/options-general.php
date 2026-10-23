@@ -11,7 +11,7 @@ function wcusage_field_cb( $args ) {
     $probrackets = ( $ispro ? "" : " (PRO)" );
     ?>
 
-<div id="general-settings" class="settings-area">
+<div id="general-settings" class="settings-area wcu-gs">
 
 	<h1><?php echo esc_html__( "General Settings", "woo-coupon-usage" ); ?></h1>
 
@@ -26,46 +26,15 @@ function wcusage_field_cb( $args ) {
 
   <hr/>
 
+  <!-- Settings on the left, live preview of the dashboard / portal on the right. -->
+  <div class="wcu-gs-layout">
+  <div class="wcu-gs-main">
+
   <!-- Dashboard Page -->
   <h3 class="affiliate-dashboard-page-settings"><span class="dashicons dashicons-admin-generic " style="margin-top: 2px;"></span> <?php echo esc_html__( 'Dashboard Page', 'woo-coupon-usage' ); ?>:</h3>
   <?php do_action( 'wcusage_hook_setting_section_dashboard_page' ); ?>
 
   <br/><hr/>
-
-  <!-- FAQ: How to create new affiliates & coupons? -->
-  <div class="wcu-admin-faq">
-
-    <?php wcusage_admin_faq_toggle(
-    "wcu_show_section_qna_create_affiliates",
-    "wcu_qna_create_affiliates",
-    esc_html__( 'FAQ: How do I create new affiliates & coupons?', 'woo-coupon-usage' ));
-    ?>
-
-    <div class="wcu-admin-faq-content wcu_qna_create_affiliates" id="wcu_qna_create_affiliates" style="display: none;">
-
-      <?php echo esc_html__( 'To add new affiliates and assign them to a specific coupon, you can do any of the following 3 options:', 'woo-coupon-usage' ); ?>
-      
-      <br/>
-      
-      <ul>
-        <li style="margin-left: 5px; margin-bottom: 10px;">
-        &bull; <?php echo esc_html__( 'Option 1', 'woo-coupon-usage' ); ?> - <strong><?php echo esc_html__( 'Edit Coupons Manually', 'woo-coupon-usage' ); ?></strong>: <?php echo esc_html__( 'Go to the', 'woo-coupon-usage' ); ?> <a href="<?php echo esc_url(admin_url("admin.php?page=wcusage_coupons")); ?>" target="_blank"><?php echo esc_html__( 'coupons management page', 'woo-coupon-usage' ); ?></a>, <?php echo esc_html__( 'and add or edit a coupon, then assign users under the "coupon affiliates" tab', 'woo-coupon-usage' ); ?>. (<a href="https://couponaffiliates.com/docs/how-do-i-assign-users-to-coupons" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a>)
-        </li>
-        <li style="margin-left: 5px; margin-bottom: 10px;">
-        &bull; <?php echo esc_html__( 'Option 2', 'woo-coupon-usage' ); ?> - <strong><?php echo esc_html__( 'Add New Affiliates', 'woo-coupon-usage' ); ?></strong>: <?php echo sprintf(wp_kses_post(__( 'Go to the <a href="%s" target="_blank">Add New Affiliate</a> page to add new affiliates here, which will automatically generate the coupon code for them.', 'woo-coupon-usage' )), esc_url(admin_url('admin.php?page=wcusage_add_affiliate'))); ?> (<a href="https://couponaffiliates.com/docs/manual-affiliate-registrations/" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a>)
-        </li>
-        <li style="margin-left: 5px; margin-bottom: 10px;">
-        &bull; <?php echo esc_html__( 'Option 3', 'woo-coupon-usage' ); ?> - <strong><?php echo esc_html__( 'Registration Form', 'woo-coupon-usage' ); ?></strong>: <?php echo sprintf(wp_kses_post(__( 'Direct users to the <a href="%s" target="_blank">Affiliate Registration</a> page to allow them to register themselves. When accepted, this will then automatically create the coupon and assign them to it.', 'woo-coupon-usage' )), esc_url(admin_url('admin.php?page=wcusage_registrations'))); ?> (<a href="https://couponaffiliates.com/docs/pro-affiliate-registration" target="_blank"><?php echo esc_html__( 'Learn More.', 'woo-coupon-usage' ); ?></a>)
-        </li>
-      </ul>
-
-      <?php echo esc_html__( 'The affiliate user can then visit the "affiliate dashboard page" to view their affiliate statistics, commissions, referral URLs, etc, for the coupons they are assigned to.', 'woo-coupon-usage' ); ?>
-
-    </div>
-
-  </div>
-
-  <br/><hr style="margin-top: 14px;"/>
 
   <!-- Order/Sales Tracking -->
   <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Order/Sales Tracking', 'woo-coupon-usage' ); ?>:</h3>
@@ -249,7 +218,7 @@ function wcusage_field_cb( $args ) {
           ?>
           <br/>
           <p class="creative-type-user-role">
-            <label><strong><?php echo esc_html__('Limit to certain user roles & groups?', 'woo-coupon-usage'); ?></strong></label>
+            <label><strong><?php echo esc_html__('Limit to certain user roles & groups?', 'woo-coupon-usage'); ?></strong></label><?php echo wcusage_setting_info_icon( esc_html__('The tab will only be visible to affiliates with any of the selected user roles.', 'woo-coupon-usage') . ' ' . esc_html__('If no roles are selected, the tab will be visible to all affiliates.', 'woo-coupon-usage') ); ?>
             <br/>
             <span class="payouts-role-select-wrapper">
               <span style="height: 50px; width: 250px; overflow-y: auto; display: block; border: 1px solid #ddd; padding: 10px;">
@@ -302,9 +271,6 @@ function wcusage_field_cb( $args ) {
               ?>
               </span>
             </span>
-            <i><?php echo esc_html__('The tab will only be visible to affiliates with any of the selected user roles.', 'woo-coupon-usage'); ?></i>
-            <br/>
-            <i><?php echo esc_html__('If no roles are selected, the tab will be visible to all affiliates.', 'woo-coupon-usage'); ?></i>
           </p>
           <?php
         }
@@ -475,8 +441,7 @@ function wcusage_field_cb( $args ) {
             
             <br/>
 
-            <?php wcusage_setting_text_option("wcusage_field_text", "", esc_html__( 'Custom Text / Information', 'woo-coupon-usage' ), "0px"); ?>
-            <i><?php echo esc_html__( 'Displayed at top the "statistics" section on the coupon affiliate dashboard page. HTML tags enabled.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_text_option("wcusage_field_text", "", esc_html__( 'Custom Text / Information', 'woo-coupon-usage' ), "0px", esc_html__( 'Displayed at top the "statistics" section on the coupon affiliate dashboard page. HTML tags enabled.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
@@ -536,8 +501,7 @@ function wcusage_field_cb( $args ) {
             <br/>
 
             <!-- Show Latest Referrals -->
-            <?php wcusage_setting_toggle_option('wcusage_field_statistics_latest', 1, esc_html__( 'Show "Latest Referrals" summary.', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'Show a summary of the 5 latest orders/referrals on the "Statistics" tab.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_statistics_latest', 1, esc_html__( 'Show "Latest Referrals" summary.', 'woo-coupon-usage' ), '0px', esc_html__( 'Show a summary of the 5 latest orders/referrals on the "Statistics" tab.', 'woo-coupon-usage' )); ?>
             
             <script>
             jQuery(document).ready(function($) {
@@ -562,8 +526,7 @@ function wcusage_field_cb( $args ) {
 
               <!-- Show Commission Payouts -->
               <?php $probrackets = ( wcu_fs()->can_use_premium_code() ? "" : " (PRO)" ); ?>
-              <?php wcusage_setting_toggle_option('wcusage_field_statistics_commissionpayouts', 1, esc_html__( 'Show "Commission Payouts" summary.', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
-              <i><?php echo esc_html__( 'Show a payouts summary of the "Unpaid Commission", "Pending Payments", "Completed Payments".', 'woo-coupon-usage' ); ?></i><br/>
+              <?php wcusage_setting_toggle_option('wcusage_field_statistics_commissionpayouts', 1, esc_html__( 'Show "Commission Payouts" summary.', 'woo-coupon-usage' ) . esc_html($probrackets), '0px', esc_html__( 'Show a payouts summary of the "Unpaid Commission", "Pending Payments", "Completed Payments".', 'woo-coupon-usage' )); ?>
               
               <script>
               jQuery(document).ready(function($) {
@@ -587,8 +550,7 @@ function wcusage_field_cb( $args ) {
               <br/>
 
               <!-- Show Commission Graphs -->
-              <?php wcusage_setting_toggle_option('wcusage_field_show_graphs', 1, esc_html__( 'Show "Commission Graphs".', 'woo-coupon-usage' ) . esc_html($probrackets), '0px'); ?>
-              <i><?php echo esc_html__( 'These are line graphs that show the commission earnings for every day in the past 90 days, 30 days or 7 days.', 'woo-coupon-usage' ); ?></i><br/>
+              <?php wcusage_setting_toggle_option('wcusage_field_show_graphs', 1, esc_html__( 'Show "Commission Graphs".', 'woo-coupon-usage' ) . esc_html($probrackets), '0px', esc_html__( 'These are line graphs that show the commission earnings for every day in the past 90 days, 30 days or 7 days.', 'woo-coupon-usage' )); ?>
               
               <script>
               jQuery(document).ready(function($) {
@@ -625,24 +587,21 @@ function wcusage_field_cb( $args ) {
           ob_start();
           ?>
           <!-- Recent Orders Number -->
-          <?php wcusage_setting_number_option('wcusage_field_orders', '10', esc_html__( 'Default amount of "latest orders" to show:', 'woo-coupon-usage' ), '0px'); ?>
-          <i><?php echo esc_html__( 'Amount of orders to show on the affiliate dashboard by default.', 'woo-coupon-usage' ); ?></i>
+          <?php wcusage_setting_number_option('wcusage_field_orders', '10', esc_html__( 'Default amount of "latest orders" to show:', 'woo-coupon-usage' ), '0px', 1, esc_html__( 'Amount of orders to show on the affiliate dashboard by default.', 'woo-coupon-usage' )); ?>
 
-          <br/><br/>
+          <br/>
 
           <!-- Max Orders Number -->
-          <?php wcusage_setting_number_option('wcusage_field_max_orders', '250', esc_html__( 'Maximum amount of "latest orders" to show at once:', 'woo-coupon-usage' ), '0px'); ?>
-          <i><?php echo esc_html__( 'The maximum number of orders to show when filtered by date. Too many could make it take significantly longer to load.', 'woo-coupon-usage' ); ?></i>
+          <?php wcusage_setting_number_option('wcusage_field_max_orders', '250', esc_html__( 'Maximum amount of "latest orders" to show at once:', 'woo-coupon-usage' ), '0px', 1, esc_html__( 'The maximum number of orders to show when filtered by date. Too many could make it take significantly longer to load.', 'woo-coupon-usage' )); ?>
 
-          <br/><br/>
+          <br/>
 
           <!-- Show order ID. -->
           <?php wcusage_setting_toggle_option('wcusage_field_orderid', 0, esc_html__( 'Show order "ID".', 'woo-coupon-usage' ), '0px'); ?>
             
           <?php wcusage_setting_toggle('.wcusage_field_orderid', '.wcu-field-orders-id-show'); ?>
           <span class="wcu-field-orders-id-show">
-            <?php wcusage_setting_toggle_option('wcusage_field_orderid_click', 0, esc_html__( 'Make the order "ID" clickable for admins.', 'woo-coupon-usage' ), '40px'); ?>
-            <i style="margin-left: 40px;"><?php echo esc_html__( 'If the user is an admin, then the ID will also be clickable to open the order page in the backend.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_orderid_click', 0, esc_html__( 'Make the order "ID" clickable for admins.', 'woo-coupon-usage' ), '40px', esc_html__( 'If the user is an admin, then the ID will also be clickable to open the order page in the backend.', 'woo-coupon-usage' )); ?>
           </span>
 
           <br/>
@@ -659,14 +618,12 @@ function wcusage_field_cb( $args ) {
           <?php wcusage_setting_toggle('.wcusage_field_status', '.wcu-field-status-tables'); ?>
           <span class="wcu-field-status-tables">
             <!-- Show "Status" totals. -->
-            <?php wcusage_setting_toggle_option('wcusage_field_show_orders_table_status_totals', 1, esc_html__( 'Show order status totals below the table.', 'woo-coupon-usage' ), '40px'); ?>
-            <i style="margin-left: 40px;"><?php echo esc_html__( 'When selected, below the orders table it will show the total number of orders for each status. The "Status" column needs to be enabled.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_show_orders_table_status_totals', 1, esc_html__( 'Show order status totals below the table.', 'woo-coupon-usage' ), '40px', esc_html__( 'When selected, below the orders table it will show the total number of orders for each status. The "Status" column needs to be enabled.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
             <!-- Show "Status" filter. -->
-            <?php wcusage_setting_toggle_option('wcusage_field_show_orders_table_filter_status', 1, esc_html__( 'Show "Status" dropdown filter.', 'woo-coupon-usage' ), '40px'); ?>
-            <i style="margin-left: 40px;"><?php echo esc_html__( 'When selected, a "Status" dropdown will be shown as an option when filtering by date range. Will only show if you have more than 1 status enabled.', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_show_orders_table_filter_status', 1, esc_html__( 'Show "Status" dropdown filter.', 'woo-coupon-usage' ), '40px', esc_html__( 'When selected, a "Status" dropdown will be shown as an option when filtering by date range. Will only show if you have more than 1 status enabled.', 'woo-coupon-usage' )); ?>
           </span>
 
           <br/>
@@ -692,12 +649,12 @@ function wcusage_field_cb( $args ) {
           <br/>
 
           <!-- Show customer "first name". -->
-          <?php wcusage_setting_toggle_option('wcusage_field_ordername', 0, esc_html__( 'Show customer "first name".', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_ordername', 0, esc_html__( 'Show customer "first name".', 'woo-coupon-usage' ), '0px', esc_html__( 'Beware of privacy issues when showing customer names. This is not recommended.', 'woo-coupon-usage' )); ?>
 
           <br/>
 
           <!-- Show customer "last name". -->
-          <?php wcusage_setting_toggle_option('wcusage_field_ordernamelast', 0, esc_html__( 'Show customer "last name".', 'woo-coupon-usage' ), '0px'); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_ordernamelast', 0, esc_html__( 'Show customer "last name".', 'woo-coupon-usage' ), '0px', esc_html__( 'Beware of privacy issues when showing customer names. This is not recommended.', 'woo-coupon-usage' )); ?>
 
           <!-- Show only the first letter of the last name. -->
           <?php wcusage_setting_toggle_option('wcusage_field_ordernamelast_initial', 0, esc_html__( 'Only show the first letter of the last name.', 'woo-coupon-usage' ), '20px'); ?>
@@ -716,9 +673,6 @@ function wcusage_field_cb( $args ) {
           });
           </script>
 
-          <i>
-          <?php echo esc_html__( 'Beware of privacy issues when showing customer names. This is not recommended.', 'woo-coupon-usage' ); ?>
-          </i><br/>
 
           <br/>
 
@@ -738,8 +692,7 @@ function wcusage_field_cb( $args ) {
           <br/>
 
           <!-- Show the combined totals for all orders within the selected date range. -->
-          <?php wcusage_setting_toggle_option('wcusage_field_show_orders_table_totals', 1, esc_html__( 'Show the combined totals for all orders within the selected date range.', 'woo-coupon-usage' ), '0px'); ?>
-          <i><?php echo esc_html__( 'When selected, the totals for all orders within the selected date range will be shown in a new row at the bottom of the recent orders and monthly summary table.', 'woo-coupon-usage' ); ?></i><br/>
+          <?php wcusage_setting_toggle_option('wcusage_field_show_orders_table_totals', 1, esc_html__( 'Show the combined totals for all orders within the selected date range.', 'woo-coupon-usage' ), '0px', esc_html__( 'When selected, the totals for all orders within the selected date range will be shown in a new row at the bottom of the recent orders and monthly summary table.', 'woo-coupon-usage' )); ?>
           <?php
           wcusage_render_tab_role_selector('wcusage_field_tab_roles_orders');
           return ob_get_clean();
@@ -779,24 +732,20 @@ function wcusage_field_cb( $args ) {
           <?php wcusage_setting_select_option('wcusage_field_settings_tab_layout', 'modern', esc_html__( 'Settings Tab Layout', 'woo-coupon-usage' ), '0px', array(
             'modern' => esc_html__( 'Modern (boxed sections)', 'woo-coupon-usage' ),
             'legacy' => esc_html__( 'Legacy (tabs)', 'woo-coupon-usage' ),
-          )); ?>
-          <i><?php echo esc_html__( 'Choose how the "Settings" tab is displayed on the affiliate dashboard. "Modern" shows the account details and each section in clean boxed cards. "Legacy" uses the original tabbed layout.', 'woo-coupon-usage' ); ?></i>
+          ), esc_html__( 'Choose how the "Settings" tab is displayed on the affiliate dashboard. "Modern" shows the account details and each section in clean boxed cards. "Legacy" uses the original tabbed layout.', 'woo-coupon-usage' )); ?>
 
-          <br/><br/>
+          <br/>
 
           <!-- Show "Account Details" section in the "Settings" tab. -->
-          <?php wcusage_setting_toggle_option('wcusage_field_show_settings_tab_account', 1, esc_html__( 'Show "Account Details" section in the "Settings" tab.', 'woo-coupon-usage' ), '0px'); ?>
-          <i><?php echo esc_html__( 'This will show the WooCommerce "Account Details" fields directly in the "settings" tab on the affiliate dashboard, along with a logout link.', 'woo-coupon-usage' ); ?></i>
+          <?php wcusage_setting_toggle_option('wcusage_field_show_settings_tab_account', 1, esc_html__( 'Show "Account Details" section in the "Settings" tab.', 'woo-coupon-usage' ), '0px', esc_html__( 'This will show the WooCommerce "Account Details" fields directly in the "settings" tab on the affiliate dashboard, along with a logout link.', 'woo-coupon-usage' )); ?>
 
-          <br/><br/>
+          <br/>
 
-          <?php wcusage_setting_toggle_option('wcusage_field_show_settings_tab_gravatar', 1, esc_html__( 'Show Gravatar in the "Settings" tab.', 'woo-coupon-usage' ), '0px'); ?>
-          <i><?php echo esc_html__( 'This will show the Gravatar image and link to edit their gravatar in the "Settings" tab on the affiliate dashboard.', 'woo-coupon-usage' ); ?></i>
+          <?php wcusage_setting_toggle_option('wcusage_field_show_settings_tab_gravatar', 1, esc_html__( 'Show Gravatar in the "Settings" tab.', 'woo-coupon-usage' ), '0px', esc_html__( 'This will show the Gravatar image and link to edit their gravatar in the "Settings" tab on the affiliate dashboard.', 'woo-coupon-usage' )); ?>
 
-          <br/><br/>
+          <br/>
 
-          <?php wcusage_setting_toggle_option('wcusage_field_show_settings_tab_custom_fields', 1, esc_html__( 'Show registration custom fields in the "Account Details" section.', 'woo-coupon-usage' ), '0px'); ?>
-          <i><?php echo esc_html__( 'This will show the custom fields from the registration form in the "Account Details" section of the affiliate dashboard "Settings" tab, pre-filled with the values submitted at registration, and allow affiliates to update them. Configure the fields in the "Registrations" settings tab.', 'woo-coupon-usage' ); ?></i>
+          <?php wcusage_setting_toggle_option('wcusage_field_show_settings_tab_custom_fields', 1, esc_html__( 'Show registration custom fields in the "Account Details" section.', 'woo-coupon-usage' ), '0px', esc_html__( 'This will show the custom fields from the registration form in the "Account Details" section of the affiliate dashboard "Settings" tab, pre-filled with the values submitted at registration, and allow affiliates to update them. Configure the fields in the "Registrations" settings tab.', 'woo-coupon-usage' )); ?>
           <?php
           wcusage_render_tab_role_selector('wcusage_field_tab_roles_settings');
           return ob_get_clean();
@@ -808,8 +757,7 @@ function wcusage_field_cb( $args ) {
           ob_start();
           ?>
           <!-- Default number of months to show -->
-          <?php wcusage_setting_number_option('wcusage_field_months_table_total', '6', esc_html__( 'Default number of months to show', 'woo-coupon-usage' ), '0px'); ?>
-          <i><?php echo esc_html__( 'How many months to show on the "monthly summary" table by default.', 'woo-coupon-usage' ); ?></i><br/>
+          <?php wcusage_setting_number_option('wcusage_field_months_table_total', '6', esc_html__( 'Default number of months to show', 'woo-coupon-usage' ), '0px', 1, esc_html__( 'How many months to show on the "monthly summary" table by default.', 'woo-coupon-usage' )); ?>
 
           <br/>
 
@@ -852,9 +800,7 @@ function wcusage_field_cb( $args ) {
           ob_start();
           ?>
           <p>
-            <?php wcusage_setting_toggle_option('wcusage_field_creatives_enable', 1, esc_html__( 'Enable "creatives" features.', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'This will enable "Creatives" in the admin menu, where you can upload your own banners (creatives) for affiliates to use.', 'woo-coupon-usage' ); ?></i><br/>
-            <i><?php echo esc_html__( 'A new "creatives" tab will be shown in the affiliate dashboard displaying these creatives, including a HTML code for them to copy and paste, to show the banner on their own site (with the referral link).', 'woo-coupon-usage' ); ?></i><br/>
+            <?php wcusage_setting_toggle_option('wcusage_field_creatives_enable', 1, esc_html__( 'Enable "creatives" features.', 'woo-coupon-usage' ), '0px', esc_html__( 'This will enable "Creatives" in the admin menu, where you can upload your own banners (creatives) for affiliates to use.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'A new "creatives" tab will be shown in the affiliate dashboard displaying these creatives, including a HTML code for them to copy and paste, to show the banner on their own site (with the referral link).', 'woo-coupon-usage' )); ?>
           </p>
 
           <?php wcusage_setting_toggle('.wcusage_field_creatives_enable', '.wcu-field-section-creatives'); ?>
@@ -894,10 +840,7 @@ function wcusage_field_cb( $args ) {
           <br/>
 
           <p>
-            <?php wcusage_setting_toggle_option('wcusage_field_rates_show_all_variations', 0, esc_html__( 'Show All Product Variations', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'If enabled, all variations of a product will be shown in the table as seperate rows.', 'woo-coupon-usage' ); ?></i>
-            <br/>
-            <i><?php echo esc_html__( 'If disabled, only the parent product will be shown - and variations that have per-variation commission rates set different to the parent.', 'woo-coupon-usage' ); ?></i>
+            <?php wcusage_setting_toggle_option('wcusage_field_rates_show_all_variations', 0, esc_html__( 'Show All Product Variations', 'woo-coupon-usage' ), '0px', esc_html__( 'If enabled, all variations of a product will be shown in the table as seperate rows.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'If disabled, only the parent product will be shown - and variations that have per-variation commission rates set different to the parent.', 'woo-coupon-usage' )); ?>
           </p>
 
           <?php wcusage_setting_toggle('.wcusage_field_rates_show_all_variations', '.wcu-field-rates-show-all-variations'); ?>
@@ -906,10 +849,7 @@ function wcusage_field_cb( $args ) {
             <br/>
 
             <p>
-              <?php wcusage_setting_toggle_option('wcusage_field_rates_hide_variations_parent', 0, esc_html__( 'Hide Parent Product', 'woo-coupon-usage' ), '40px'); ?>
-              <i style="margin-left: 40px;"><?php echo esc_html__( 'If enabled, the parent product will be hidden from the table if at-least 1 variation.', 'woo-coupon-usage' ); ?></i>
-              <br/>
-              <i style="margin-left: 40px;"><?php echo esc_html__( 'If disabled, the parent product will be shown in the table.', 'woo-coupon-usage' ); ?></i>
+              <?php wcusage_setting_toggle_option('wcusage_field_rates_hide_variations_parent', 0, esc_html__( 'Hide Parent Product', 'woo-coupon-usage' ), '40px', esc_html__( 'If enabled, the parent product will be hidden from the table if at-least 1 variation.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'If disabled, the parent product will be shown in the table.', 'woo-coupon-usage' )); ?>
             </p>
 
           </span>
@@ -918,7 +858,7 @@ function wcusage_field_cb( $args ) {
 
           <!-- Product category -->
           <p>
-            <strong><label for="wcusage_field_rates_category"><?php echo esc_html__( 'Product Category', 'woo-coupon-usage' ); ?>:</label></strong>
+            <strong><label for="wcusage_field_rates_category"><?php echo esc_html__( 'Product Category', 'woo-coupon-usage' ); ?>:</label></strong><?php echo wcusage_setting_info_icon( esc_html__( 'Select a product category to filter the products shown in the table.', 'woo-coupon-usage' ) ); ?>
             <br/>
             <?php
             // Fetch product categories with error handling
@@ -951,15 +891,12 @@ function wcusage_field_cb( $args ) {
               }
               ?>
             </select>
-            <br/>
-            <i><?php echo esc_html__( 'Select a product category to filter the products shown in the table.', 'woo-coupon-usage' ); ?></i>
           </p>
 
           <br/>
 
           <p>
-            <?php wcusage_setting_toggle_option('wcusage_field_rates_hide_hidden_products', 0, esc_html__( 'Hide "Hidden" Products', 'woo-coupon-usage' ), '0px'); ?>
-            <i><?php echo esc_html__( 'If enabled, products with their catalog visibility set to "Hidden" will not be shown in the rates table.', 'woo-coupon-usage' ); ?></i>
+            <?php wcusage_setting_toggle_option('wcusage_field_rates_hide_hidden_products', 0, esc_html__( 'Hide "Hidden" Products', 'woo-coupon-usage' ), '0px', esc_html__( 'If enabled, products with their catalog visibility set to "Hidden" will not be shown in the rates table.', 'woo-coupon-usage' )); ?>
           </p>
 
           <br/>
@@ -1096,6 +1033,19 @@ function wcusage_field_cb( $args ) {
         'tab-page-settings'  => 'wcusage_field_tab_name_settings',
       );
 
+      // Icons shown on each tab in the dashboard / portal menu, used by the live preview.
+      $tab_icon_map = array(
+        'tab-page-stats'     => 'fas fa-chart-line',
+        'tab-page-monthly'   => 'fas fa-calendar-alt',
+        'tab-page-orders'    => 'fas fa-shopping-cart',
+        'tab-page-links'     => 'fas fa-link',
+        'tab-page-creatives' => 'fas fa-photo-video',
+        'tab-page-rates'     => 'fa-solid fa-percent',
+        'tab-page-payouts'   => 'fas fa-money-bill-wave',
+        'tab-page-bonuses'   => 'fas fa-gift',
+        'tab-page-settings'  => 'fas fa-cog',
+      );
+
       echo '<div id="wcusage-dashboard-tabs-order" class="wcusage-sortable wcusage-tabs-order-list" style="max-width:100%;">';
       foreach($stored_tabs_array as $tab_key) {
         if(!isset($candidate_tabs[$tab_key])) { continue; }
@@ -1115,19 +1065,32 @@ function wcusage_field_cb( $args ) {
         // Generate unique IDs for each tab's settings section
         $settings_section_id = 'wcu_tab_settings_' . str_replace('-', '_', $tab_key);
         
-        // Add styling for disabled tabs
-        $box_style = 'border:1px solid #ddd;margin:10px 0;background:#fff;';
-        $header_style = 'display:flex;align-items:center;gap:10px;padding:15px;background:#f9f9f9;border-bottom:1px solid #ddd;';
-        if(!$is_enabled) {
-          $box_style = 'border:1px solid #ddd;margin:10px 0;background:#f5f5f5;opacity:0.6;';
-          $header_style = 'display:flex;align-items:center;gap:10px;padding:15px;background:#e9e9e9;border-bottom:1px solid #ddd;';
+        // Disabled tabs are dimmed (css/admin-settings-theme.css).
+        $item_class = 'wcusage-tab-item' . ( $is_enabled ? '' : ' is-disabled' );
+
+        // Default label and icon, read by the live preview.
+        $preview_label = $label;
+        $preview_icon = isset($tab_icon_map[$tab_key]) ? $tab_icon_map[$tab_key] : 'fas fa-folder';
+        if(strpos($tab_key,'tab-custom-') === 0) {
+          $custom_tab_index = (int) substr($tab_key, strlen('tab-custom-'));
+          $preview_label = isset($options['wcusage_field_custom_tabs'][$custom_tab_index]['name']) ? $options['wcusage_field_custom_tabs'][$custom_tab_index]['name'] : $label;
+          $custom_tab_icon = wcusage_get_setting_value('wcusage_field_custom_tabs_icon_' . $custom_tab_index, isset($options['wcusage_field_custom_tabs'][$custom_tab_index]['icon']) ? $options['wcusage_field_custom_tabs'][$custom_tab_index]['icon'] : '');
+          $custom_tab_icon = trim(preg_replace('/[^a-zA-Z0-9\-\_\s]/', '', (string) $custom_tab_icon));
+          if ($custom_tab_icon && strpos($custom_tab_icon, 'fa-') === false) {
+            $custom_tab_icon = 'fas fa-' . $custom_tab_icon;
+          } elseif ($custom_tab_icon && strpos($custom_tab_icon, ' fa-') === false) {
+            $custom_tab_icon = 'fas ' . $custom_tab_icon;
+          }
+          if ($custom_tab_icon) {
+            $preview_icon = $custom_tab_icon;
+          }
         }
-        
-        echo '<div id="'.esc_attr($tab_key).'" class="wcusage-tab-item" style="'.esc_attr($box_style).'">';
-        
+
+        echo '<div id="'.esc_attr($tab_key).'" class="'.esc_attr($item_class).'" data-label="'.esc_attr($preview_label).'" data-icon="'.esc_attr($preview_icon).'">';
+
         // Header with drag handle, toggle, label, and show/hide button
-        echo '<div class="wcusage-tab-header" style="'.esc_attr($header_style).'">';
-        echo '<span class="dashicons dashicons-move" style="cursor:move;opacity:0.7;" title="'.esc_html__('Drag to reorder','woo-coupon-usage').'"></span>';
+        echo '<div class="wcusage-tab-header">';
+        echo '<span class="dashicons dashicons-move" title="'.esc_html__('Drag to reorder','woo-coupon-usage').'"></span>';
 
         // Build inline-editable tab name HTML
         $tab_name_html = '<span class="wcu-tab-name-wrap" style="flex:1;display:flex;align-items:center;gap:6px;">';
@@ -1140,24 +1103,24 @@ function wcusage_field_cb( $args ) {
         $tab_name_html .= '</span>';
 
         if(strpos($tab_key,'tab-custom-') === 0) {
-          echo '<input type="checkbox" checked disabled style="margin:0;" />';
+          echo '<input type="checkbox" checked disabled />';
           echo $tab_name_html;
-          echo '<span style="font-size:11px;opacity:0.7;margin-right:auto;">('.esc_html__('custom','woo-coupon-usage').')</span>';
+          echo '<span class="wcu-tab-note">('.esc_html__('custom','woo-coupon-usage').')</span>';
           $settings_button_disabled = !$is_enabled ? 'disabled' : '';
-          echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')" style="font-size:14px;padding:6px 12px;" '.esc_attr($settings_button_disabled).'>'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
+          echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')" '.esc_attr($settings_button_disabled).'>'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
         } elseif(!$linked_option) {
-          echo '<input type="checkbox" checked disabled style="margin:0;" />';
+          echo '<input type="checkbox" checked disabled />';
           echo $tab_name_html;
-          echo '<span style="font-size:11px;opacity:0.7;margin-right:auto;">('.esc_html__('always on','woo-coupon-usage').')</span>';
-          echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')" style="font-size:14px;padding:6px 12px;">'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
+          echo '<span class="wcu-tab-note">('.esc_html__('always on','woo-coupon-usage').')</span>';
+          echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')">'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
         } else {
           $toggle_html = wcusage_render_inline_toggle($linked_option, '1', '');
           // Add onchange event to handle toggle changes
           $toggle_html = str_replace('<input', '<input onchange="wcusage_handle_tab_toggle(this, \''.esc_attr($tab_key).'\')"', $toggle_html);
-          echo '<div style="display:flex;align-items:center;gap:6px;">'.$toggle_html.'</div>';
+          echo '<div class="wcu-tab-toggle">'.$toggle_html.'</div>';
           echo $tab_name_html;
           $settings_button_disabled = !$is_enabled ? 'disabled' : '';
-          echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')" style="font-size:14px;padding:6px 12px;" '.esc_attr($settings_button_disabled).'>'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
+          echo '<button type="button" class="wcu-showhide-button" onclick="wcusage_toggle_settings(\''.esc_attr($settings_section_id).'\')" '.esc_attr($settings_button_disabled).'>'.esc_html__('Show Settings','woo-coupon-usage').' <span class="fa-solid fa-arrow-down"></span></button>';
         }
         echo '</div>';
         
@@ -1221,10 +1184,11 @@ function wcusage_field_cb( $args ) {
       function wcusage_toggle_settings(sectionId) {
         var section = document.getElementById(sectionId);
         var button = event.target.closest("button");
-        var arrow = button.querySelector(".fa-solid");
-        
+        var tabItem = section.closest(".wcusage-tab-item");
+
         if (section.style.display === "none" || !section.style.display) {
           section.style.display = "block";
+          if (tabItem) tabItem.classList.add("is-open");
           button.innerHTML = "'.esc_js(__('Hide Settings','woo-coupon-usage')).' <span class=\"fa-solid fa-arrow-up\"></span>";
           // If this section contains the Statistics layout list, (re)initialize sortable
           try {
@@ -1234,6 +1198,7 @@ function wcusage_field_cb( $args ) {
           } catch(e) {}
         } else {
           section.style.display = "none";
+          if (tabItem) tabItem.classList.remove("is-open");
           button.innerHTML = "'.esc_js(__('Show Settings','woo-coupon-usage')).' <span class=\"fa-solid fa-arrow-down\"></span>";
         }
       }
@@ -1244,20 +1209,14 @@ function wcusage_field_cb( $args ) {
         var showButton = tabItem.querySelector(".wcu-showhide-button");
         var settingsSection = tabItem.querySelector(".wcu_section_settings");
         
+        tabItem.classList.toggle("is-disabled", !checkbox.checked);
         if (checkbox.checked) {
-          // Enable the tab
-          tabItem.style.opacity = "1";
-          tabItem.style.background = "#fff";
-          tabItem.querySelector("div").style.background = "#f9f9f9";
           if (showButton) showButton.disabled = false;
         } else {
-          // Disable the tab
-          tabItem.style.opacity = "0.6";
-          tabItem.style.background = "#f5f5f5";
-          tabItem.querySelector("div").style.background = "#e9e9e9";
           if (showButton) showButton.disabled = true;
           if (settingsSection && settingsSection.style.display === "block") {
             settingsSection.style.display = "none";
+            tabItem.classList.remove("is-open");
             if (showButton) showButton.innerHTML = "'.esc_js(__('Show Settings','woo-coupon-usage')).' <span class=\"fa-solid fa-arrow-down\"></span>";
           }
         }
@@ -1278,6 +1237,17 @@ function wcusage_field_cb( $args ) {
       // Inline tab name editing
       (function($) {
         $(document).ready(function() {
+
+          // The whole row header opens its settings, not just the button.
+          $(document).on("click", ".wcusage-tab-header", function(e) {
+            if ($(e.target).closest("button, input, label, a, .dashicons-move, .wcu-tab-name-edit-icon, .wcu-tab-toggle").length) {
+              return;
+            }
+            var btn = $(this).find(".wcu-showhide-button")[0];
+            if (btn && !btn.disabled) {
+              btn.click();
+            }
+          });
 
           // Click on edit icon to enter edit mode
           $(document).on("click", ".wcu-tab-name-edit-icon", function(e) {
@@ -1373,10 +1343,9 @@ function wcusage_field_cb( $args ) {
 
     <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Affiliate Dashboard - Header', 'woo-coupon-usage' ); ?>:</h3>
 
-    <?php wcusage_setting_text_option("wcusage_before_title", "", esc_html__( 'Coupon Title Prefix', 'woo-coupon-usage' ), "0px"); ?>
-    <i><?php echo esc_html__( 'This will be shown before the coupon code shown in the header of the affiliate dashboard page, for example you could set it to "Coupon code:".', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_text_option("wcusage_before_title", "", esc_html__( 'Coupon Title Prefix', 'woo-coupon-usage' ), "0px", esc_html__( 'This will be shown before the coupon code shown in the header of the affiliate dashboard page, for example you could set it to "Coupon code:".', 'woo-coupon-usage' )); ?>
 
-    <br/><br/>
+    <br/>
 
     <!-- Click coupon code in header to copy to clipboard. -->
     <?php wcusage_setting_toggle_option('wcusage_field_header_copy_coupon', 1, esc_html__( 'Allow clicking the coupon code in the header to copy it to the clipboard.', 'woo-coupon-usage' ), '0px'); ?>
@@ -1390,8 +1359,7 @@ function wcusage_field_cb( $args ) {
 
     <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( 'Affiliate Dashboard - Login Form', 'woo-coupon-usage' ); ?>:</h3>
 
-    <?php wcusage_setting_toggle_option('wcusage_field_loginform', 1, esc_html__( 'Show WooCommerce login form on affiliate dashboard page when users are logged out.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'This will allow affiliate users to login to the dashboard if they visit the base dashboard URL.', 'woo-coupon-usage' ); ?></i><br/>
+    <?php wcusage_setting_toggle_option('wcusage_field_loginform', 1, esc_html__( 'Show WooCommerce login form on affiliate dashboard page when users are logged out.', 'woo-coupon-usage' ), '0px', esc_html__( 'This will allow affiliate users to login to the dashboard if they visit the base dashboard URL.', 'woo-coupon-usage' )); ?>
 
     <br/><hr/>
 
@@ -1426,21 +1394,18 @@ function wcusage_field_cb( $args ) {
     <!-- Assign Affiliates to Coupons -->
     <h3><span class="dashicons dashicons-admin-generic" style="margin-top: 2px;"></span> <?php echo esc_html__( '"My Account" Menu Link', 'woo-coupon-usage' ); ?>:</h3>
 
-    <?php wcusage_setting_toggle_option('wcusage_field_account_tab', 1, esc_html__( 'Add an "Affiliate" menu link to the "My Account" page.', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'With this enabled, a new "Affiliate" link will appear on the users "My Account" page menu. This will take them to the affiliate dashboard page selected above.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_field_account_tab', 1, esc_html__( 'Add an "Affiliate" menu link to the "My Account" page.', 'woo-coupon-usage' ), '0px', esc_html__( 'With this enabled, a new "Affiliate" link will appear on the users "My Account" page menu. This will take them to the affiliate dashboard page selected above.', 'woo-coupon-usage' )); ?>
 
     <?php wcusage_setting_toggle('.wcusage_field_account_tab', '.wcu-field-section-show-tab'); // Show or Hide ?>
     <span class="wcu-field-section-show-tab">
 
       <br/><br/>
 
-      <?php wcusage_setting_toggle_option('wcusage_field_account_tab_affonly', 0, esc_html__( 'Hide link for non-affiliate users.', 'woo-coupon-usage' ), '30px'); ?>
-      <i style="margin-left: 30px;"><?php echo esc_html__( 'With this enabled, the link will be hidden for users that are not assigned to a coupon.', 'woo-coupon-usage' ); ?></i>
+      <?php wcusage_setting_toggle_option('wcusage_field_account_tab_affonly', 0, esc_html__( 'Hide link for non-affiliate users.', 'woo-coupon-usage' ), '30px', esc_html__( 'With this enabled, the link will be hidden for users that are not assigned to a coupon.', 'woo-coupon-usage' )); ?>
       
-      <br/><br/>
+      <br/>
 
-      <?php wcusage_setting_toggle_option('wcusage_field_account_tab_create', 0, esc_html__( 'Display the affiliate dashboard as a page within the "My Account" section.', 'woo-coupon-usage' ), '30px'); ?>
-      <i style="margin-left: 30px;"><?php echo esc_html__( 'With this enabled, when the "Affiliate" tab is clicked, instead of redirecting to the normal affiliate dashboard page, it will show the affiliate dashboard as a page/section within "My Account".', 'woo-coupon-usage' ); ?></i>
+      <?php wcusage_setting_toggle_option('wcusage_field_account_tab_create', 0, esc_html__( 'Display the affiliate dashboard as a page within the "My Account" section.', 'woo-coupon-usage' ), '30px', esc_html__( 'With this enabled, when the "Affiliate" tab is clicked, instead of redirecting to the normal affiliate dashboard page, it will show the affiliate dashboard as a page/section within "My Account".', 'woo-coupon-usage' )); ?>
 
     </span>
 
@@ -1448,9 +1413,266 @@ function wcusage_field_cb( $args ) {
 
   </div>
 
+  </div><!-- .wcu-gs-main -->
+
+  <?php wcusage_settings_general_preview_panel(); ?>
+
+  </div><!-- .wcu-gs-layout -->
+
 </div>
 
  <?php
+}
+
+/**
+ * Live preview panel for the General settings tab. The preview itself is drawn by
+ * js/admin-settings-general.js from the current values of the settings fields.
+ *
+ */
+if( !function_exists( 'wcusage_settings_general_preview_panel' ) ) {
+  function wcusage_settings_general_preview_panel() {
+    ?>
+    <aside class="wcu-gs-preview" id="wcu-gs-preview" aria-label="<?php echo esc_attr__( 'Live preview', 'woo-coupon-usage' ); ?>">
+      <div class="wcu-gs-preview-inner">
+        <div class="wcu-gs-preview-bar">
+          <button type="button" class="wcu-gs-preview-title" aria-expanded="true" aria-controls="wcu-gs-preview-body">
+            <span class="wcu-gs-live-dot" aria-hidden="true"></span>
+            <span><?php echo esc_html__( 'Live Preview', 'woo-coupon-usage' ); ?></span>
+            <span class="wcu-gs-preview-mode"></span>
+            <span class="wcu-gs-preview-chevron fa-solid fa-chevron-up" aria-hidden="true"></span>
+          </button>
+          <div class="wcu-gs-preview-controls">
+            <div class="wcu-gs-seg" data-control="device" role="group" aria-label="<?php echo esc_attr__( 'Preview size', 'woo-coupon-usage' ); ?>">
+              <button type="button" data-value="desktop" class="is-active" title="<?php echo esc_attr__( 'Desktop', 'woo-coupon-usage' ); ?>" aria-pressed="true"><span class="fa-solid fa-desktop" aria-hidden="true"></span><span class="wcu-gs-visually-hidden"><?php echo esc_html__( 'Desktop', 'woo-coupon-usage' ); ?></span></button>
+              <button type="button" data-value="mobile" title="<?php echo esc_attr__( 'Mobile', 'woo-coupon-usage' ); ?>" aria-pressed="false"><span class="fa-solid fa-mobile-screen" aria-hidden="true"></span><span class="wcu-gs-visually-hidden"><?php echo esc_html__( 'Mobile', 'woo-coupon-usage' ); ?></span></button>
+            </div>
+            <div class="wcu-gs-seg" data-control="scheme" role="group" aria-label="<?php echo esc_attr__( 'Colour scheme', 'woo-coupon-usage' ); ?>">
+              <button type="button" data-value="light" class="is-active" title="<?php echo esc_attr__( 'Light mode', 'woo-coupon-usage' ); ?>" aria-pressed="true"><span class="fa-solid fa-sun" aria-hidden="true"></span><span class="wcu-gs-visually-hidden"><?php echo esc_html__( 'Light mode', 'woo-coupon-usage' ); ?></span></button>
+              <button type="button" data-value="dark" title="<?php echo esc_attr__( 'Dark mode', 'woo-coupon-usage' ); ?>" aria-pressed="false"><span class="fa-solid fa-moon" aria-hidden="true"></span><span class="wcu-gs-visually-hidden"><?php echo esc_html__( 'Dark mode', 'woo-coupon-usage' ); ?></span></button>
+            </div>
+            <button type="button" class="wcu-gs-preview-expand" title="<?php echo esc_attr__( 'Expand preview', 'woo-coupon-usage' ); ?>" data-title-expand="<?php echo esc_attr__( 'Expand preview', 'woo-coupon-usage' ); ?>" data-title-close="<?php echo esc_attr__( 'Close (Esc)', 'woo-coupon-usage' ); ?>">
+              <span class="fa-solid fa-up-right-and-down-left-from-center" aria-hidden="true"></span>
+              <span class="wcu-gs-visually-hidden"><?php echo esc_html__( 'Expand preview', 'woo-coupon-usage' ); ?></span>
+            </button>
+            <button type="button" class="wcu-gs-preview-close" title="<?php echo esc_attr__( 'Close preview', 'woo-coupon-usage' ); ?>">
+              <span class="fa-solid fa-xmark" aria-hidden="true"></span>
+              <span class="wcu-gs-visually-hidden"><?php echo esc_html__( 'Close preview', 'woo-coupon-usage' ); ?></span>
+            </button>
+          </div>
+        </div>
+        <div class="wcu-gs-preview-body" id="wcu-gs-preview-body">
+          <div class="wcu-gs-preview-stage">
+            <div class="wcu-gs-preview-host"></div>
+          </div>
+          <p class="wcu-gs-preview-note"><span class="fa-solid fa-circle-info" aria-hidden="true"></span> <span class="wcu-gs-preview-note-text"><?php echo esc_html__( 'Example statistics on the "Statistics" tab. Settings save automatically as you change them.', 'woo-coupon-usage' ); ?></span></p>
+        </div>
+      </div>
+    </aside>
+    <button type="button" class="wcu-gs-preview-fab" aria-controls="wcu-gs-preview" aria-expanded="false">
+      <span class="fa-solid fa-eye" aria-hidden="true"></span>
+      <span class="wcu-gs-preview-fab-text"><?php echo esc_html__( 'Dashboard Preview', 'woo-coupon-usage' ); ?></span>
+    </button>
+    <?php
+  }
+}
+
+/**
+ * Whether the portal colours and font are drawn in the General tab's "Customise
+ * Affiliate Portal Design" section (beside the live preview) rather than the Design tab.
+ * That is the case on the settings page while the affiliate portal is enabled.
+ *
+ */
+if( !function_exists( 'wcusage_settings_portal_design_in_general' ) ) {
+  function wcusage_settings_portal_design_in_general() {
+    if ( ! isset( $_GET['page'] ) || 'wcusage_settings' !== $_GET['page'] ) {
+      return false;
+    }
+    return '1' == wcusage_get_setting_value( 'wcusage_field_portal_enable', '0' );
+  }
+}
+
+/**
+ * Portal colours, font and menu icons, for the General tab's "Customise Affiliate
+ * Portal Design" section. Each colour group is a small card with a sample swatch that
+ * js/admin-settings-general.js keeps in step with the chosen colours.
+ *
+ */
+if( !function_exists( 'wcusage_setting_portal_design_colours' ) ) {
+  function wcusage_setting_portal_design_colours() {
+    // Each group: title, short description, sample (bg / fg setting, or an icon), fields.
+    $groups = array(
+      array(
+        'title'  => esc_html__( 'Sidebar', 'woo-coupon-usage' ),
+        'desc'   => esc_html__( 'Menu background and links', 'woo-coupon-usage' ),
+        // The same colours style the dashboard page's tabs.
+        'dashboard_title' => esc_html__( 'Tabs', 'woo-coupon-usage' ),
+        'dashboard_desc'  => esc_html__( 'Tab buttons', 'woo-coupon-usage' ),
+        'sample' => array( 'bg' => 'wcusage_field_color_tab', 'fg' => 'wcusage_field_color_tab_font' ),
+        'fields' => array(
+          array( 'wcusage_field_color_tab', '#1b3e47', esc_html__( 'Background', 'woo-coupon-usage' ) ),
+          array( 'wcusage_field_color_tab_font', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ) ),
+        ),
+      ),
+      array(
+        'title'  => esc_html__( 'Sidebar Link Hover', 'woo-coupon-usage' ),
+        'desc'   => esc_html__( 'Hovered and current menu link', 'woo-coupon-usage' ),
+        'dashboard_title' => esc_html__( 'Tabs Hover', 'woo-coupon-usage' ),
+        'dashboard_desc'  => esc_html__( 'Hovered and current tab', 'woo-coupon-usage' ),
+        'sample' => array( 'bg' => 'wcusage_field_color_tab_hover', 'fg' => 'wcusage_field_color_tab_hover_font' ),
+        'fields' => array(
+          array( 'wcusage_field_color_tab_hover', '#005d75', esc_html__( 'Background', 'woo-coupon-usage' ) ),
+          array( 'wcusage_field_color_tab_hover_font', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ) ),
+        ),
+      ),
+      array(
+        'title'  => esc_html__( 'Buttons', 'woo-coupon-usage' ),
+        'desc'   => esc_html__( 'Buttons and copy links', 'woo-coupon-usage' ),
+        'sample' => array( 'bg' => 'wcusage_field_color_button', 'fg' => 'wcusage_field_color_button_font' ),
+        'fields' => array(
+          array( 'wcusage_field_color_button', '#005d75', esc_html__( 'Background', 'woo-coupon-usage' ) ),
+          array( 'wcusage_field_color_button_font', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ) ),
+        ),
+      ),
+      array(
+        'title'  => esc_html__( 'Buttons Hover', 'woo-coupon-usage' ),
+        'desc'   => esc_html__( 'Buttons under the mouse', 'woo-coupon-usage' ),
+        'sample' => array( 'bg' => 'wcusage_field_color_button_hover', 'fg' => 'wcusage_field_color_button_font_hover' ),
+        'fields' => array(
+          array( 'wcusage_field_color_button_hover', '#1b3e47', esc_html__( 'Background', 'woo-coupon-usage' ) ),
+          array( 'wcusage_field_color_button_font_hover', '#ffffff', esc_html__( 'Text', 'woo-coupon-usage' ) ),
+        ),
+      ),
+      array(
+        'title'  => esc_html__( 'Table Header & Footer', 'woo-coupon-usage' ),
+        'desc'   => esc_html__( 'Table headings and totals', 'woo-coupon-usage' ),
+        'sample' => array( 'bg' => 'wcusage_field_color_table', 'fg' => 'wcusage_field_color_table_font' ),
+        'fields' => array(
+          array( 'wcusage_field_color_table', '#f4f4f4', esc_html__( 'Background', 'woo-coupon-usage' ) ),
+          array( 'wcusage_field_color_table_font', '#0a0a0a', esc_html__( 'Text', 'woo-coupon-usage' ) ),
+        ),
+      ),
+      array(
+        'title'  => esc_html__( 'Statistics Icons', 'woo-coupon-usage' ),
+        'desc'   => esc_html__( 'Icons in the statistics boxes', 'woo-coupon-usage' ),
+        'sample' => array( 'fg' => 'wcusage_field_color_stats_icon', 'icon' => 'fa-solid fa-users' ),
+        'fields' => array(
+          array( 'wcusage_field_color_stats_icon', '#bebebe', esc_html__( 'Icon', 'woo-coupon-usage' ) ),
+        ),
+      ),
+    );
+
+    if ( wcu_fs()->can_use_premium_code() ) {
+      $groups[] = array(
+        'title'  => esc_html__( 'Line Graph', 'woo-coupon-usage' ) . ' (PRO)',
+        'desc'   => esc_html__( 'The commission graph line', 'woo-coupon-usage' ),
+        'sample' => array( 'fg' => 'wcusage_field_color_line_graph', 'icon' => 'fa-solid fa-chart-line' ),
+        'fields' => array(
+          array( 'wcusage_field_color_line_graph', '#008000', esc_html__( 'Line', 'woo-coupon-usage' ) ),
+        ),
+      );
+      if ( wcusage_get_setting_value( 'wcusage_field_bonuses_enable', '0' ) ) {
+        $groups[] = array(
+          'title'  => esc_html__( 'Bonuses Progress Bar', 'woo-coupon-usage' ) . ' (PRO)',
+          'desc'   => esc_html__( 'Progress towards a bonus', 'woo-coupon-usage' ),
+          'sample' => array( 'bg' => 'wcusage_field_color_bonus_bar_bg', 'bar' => 'wcusage_field_color_bonus_bar' ),
+          'fields' => array(
+            array( 'wcusage_field_color_bonus_bar', '#2bc253', esc_html__( 'Bar', 'woo-coupon-usage' ) ),
+            array( 'wcusage_field_color_bonus_bar_bg', '#d2d2d2', esc_html__( 'Background', 'woo-coupon-usage' ) ),
+          ),
+        );
+        $groups[] = array(
+          'title'  => esc_html__( 'Bonuses Reward Box', 'woo-coupon-usage' ) . ' (PRO)',
+          'desc'   => esc_html__( 'Reward summary box', 'woo-coupon-usage' ),
+          'sample' => array( 'bg' => 'wcusage_field_color_bonus_box', 'fg' => 'wcusage_field_color_bonus_box_font' ),
+          'fields' => array(
+            array( 'wcusage_field_color_bonus_box', '#f6d365', esc_html__( 'Background', 'woo-coupon-usage' ) ),
+            array( 'wcusage_field_color_bonus_box_font', '#000000', esc_html__( 'Text', 'woo-coupon-usage' ) ),
+          ),
+        );
+      }
+    }
+    // Drawn in the layout in use when the page loads: the portal's, or the dashboard
+    // page's (the Design tab). js/admin-settings-general.js moves it when that changes.
+    $dashboard_mode = ! wcusage_settings_portal_design_in_general();
+    ?>
+    <div class="wcu-pd<?php echo $dashboard_mode ? ' is-dashboard' : ''; ?>" id="affiliate-dashboard-colors">
+
+      <div class="wcu-pd-head">
+        <h3 class="wcu-pd-title"><span class="fa-solid fa-palette" aria-hidden="true"></span> <?php echo esc_html__( 'Portal Colours', 'woo-coupon-usage' ); ?></h3>
+      </div>
+
+      <?php
+      // The first four colour groups show straight away; "Show More" opens the rest.
+      $visible_groups = 4;
+      ?>
+      <div class="wcu-pd-grid">
+        <?php foreach ( $groups as $group_index => $group ) {
+          $sample = $group['sample'];
+          ?>
+          <div class="wcu-pd-card<?php echo $group_index >= $visible_groups ? ' wcu-pd-card-more' : ''; ?>">
+            <div class="wcu-pd-card-head">
+              <span class="wcu-pd-sample<?php echo ! empty( $sample['bar'] ) ? ' wcu-pd-sample-bar' : ''; ?>" aria-hidden="true"
+                <?php if ( ! empty( $sample['bg'] ) ) { ?>data-bg="<?php echo esc_attr( $sample['bg'] ); ?>"<?php } ?>
+                <?php if ( ! empty( $sample['fg'] ) ) { ?>data-fg="<?php echo esc_attr( $sample['fg'] ); ?>"<?php } ?>
+                <?php if ( ! empty( $sample['bar'] ) ) { ?>data-bar="<?php echo esc_attr( $sample['bar'] ); ?>"<?php } ?>>
+                <?php if ( ! empty( $sample['bar'] ) ) { ?>
+                  <i></i>
+                <?php } elseif ( ! empty( $sample['icon'] ) ) { ?>
+                  <span class="<?php echo esc_attr( $sample['icon'] ); ?>"></span>
+                <?php } else { ?>
+                  Aa
+                <?php } ?>
+              </span>
+              <span class="wcu-pd-card-text">
+                <?php if ( ! empty( $group['dashboard_title'] ) ) { ?>
+                  <span class="wcu-pd-card-title wcu-pd-for-portal"><?php echo esc_html( $group['title'] ); ?></span>
+                  <span class="wcu-pd-card-desc wcu-pd-for-portal"><?php echo esc_html( $group['desc'] ); ?></span>
+                  <span class="wcu-pd-card-title wcu-pd-for-dashboard"><?php echo esc_html( $group['dashboard_title'] ); ?></span>
+                  <span class="wcu-pd-card-desc wcu-pd-for-dashboard"><?php echo esc_html( $group['dashboard_desc'] ); ?></span>
+                <?php } else { ?>
+                  <span class="wcu-pd-card-title"><?php echo esc_html( $group['title'] ); ?></span>
+                  <span class="wcu-pd-card-desc"><?php echo esc_html( $group['desc'] ); ?></span>
+                <?php } ?>
+              </span>
+            </div>
+            <div class="wcu-pd-rows">
+              <?php foreach ( $group['fields'] as $field ) {
+                wcusage_setting_color_option( $field[0], $field[1], $field[2], '0px' );
+              } ?>
+            </div>
+          </div>
+        <?php } ?>
+      </div>
+
+      <?php if ( count( $groups ) > $visible_groups ) { ?>
+        <button type="button" class="button wcu-pd-more-toggle" aria-expanded="false"
+          data-label-more="<?php echo esc_attr__( 'Show More', 'woo-coupon-usage' ); ?>"
+          data-label-less="<?php echo esc_attr__( 'Show Less', 'woo-coupon-usage' ); ?>">
+          <span class="wcu-pd-more-label"><?php echo esc_html__( 'Show More', 'woo-coupon-usage' ); ?></span> <span class="fa-solid fa-chevron-down" aria-hidden="true"></span>
+        </button>
+      <?php } ?>
+
+      <div class="wcu-pd-head">
+        <h3 class="wcu-pd-title"><span class="fa-solid fa-font wcu-pd-for-portal" aria-hidden="true"></span><span class="fa-solid fa-icons wcu-pd-for-dashboard" aria-hidden="true"></span> <span class="wcu-pd-for-portal"><?php echo esc_html__( 'Portal Font & Icons', 'woo-coupon-usage' ); ?></span><span class="wcu-pd-for-dashboard"><?php echo esc_html__( 'Icons', 'woo-coupon-usage' ); ?></span></h3>
+      </div>
+
+      <div class="wcu-pd-card wcu-pd-font" id="affiliate-portal-font">
+        <!-- The font applies to the portal only; the dashboard page uses the site's. -->
+        <div class="wcu-pd-for-portal">
+          <p id="wcusage_portal_font_family_p">
+            <label for="wcusage_portal_font_family"><strong><?php echo esc_html__( 'Primary Font', 'woo-coupon-usage' ); ?></strong></label><?php echo wcusage_setting_info_icon( sprintf( __( 'Applies to all text in the Affiliate Portal. Fonts available from the <a href="%s" target="_blank">WordPress Font Library</a>.', 'woo-coupon-usage' ), esc_url( admin_url( 'customize.php?autofocus[section]=wcusage_font_options' ) ) ) ); ?>
+            <?php if ( function_exists( 'wcusage_setting_portal_font_select' ) ) { wcusage_setting_portal_font_select(); } ?>
+          </p>
+
+          <div class="wcu-pd-divider"></div>
+        </div>
+
+        <?php wcusage_setting_toggle_option('wcusage_field_show_tabs_icons', 1, '<span class="wcu-pd-for-portal">' . esc_html__( 'Show icons on the portal menu links.', 'woo-coupon-usage' ) . '</span><span class="wcu-pd-for-dashboard">' . esc_html__( 'Show icons on the affiliate dashboard tabs.', 'woo-coupon-usage' ) . '</span>', '0px'); ?>
+      </div>
+
+    </div>
+    <?php
+  }
 }
 
 /**
@@ -1469,7 +1691,7 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
     <?php if (!class_exists('SitePress') || isset($options['wcusage_dashboard_page'])) { ?>
 
       <!-- Dashboard Page Dropdown -->
-      <p><strong><?php echo esc_html__( 'Affiliate Dashboard Page:', 'woo-coupon-usage' ); ?><?php if ( !$options['wcusage_dashboard_page'] ) { ?> <span class="dashicons dashicons-warning" title="<?php echo esc_attr__( 'Important', 'woo-coupon-usage' ); ?>" style="color: red;"></span><?php } ?></strong></p>
+      <p><strong><?php echo esc_html__( 'Affiliate Dashboard Page:', 'woo-coupon-usage' ); ?><?php if ( !$options['wcusage_dashboard_page'] ) { ?> <span class="dashicons dashicons-warning" title="<?php echo esc_attr__( 'Important', 'woo-coupon-usage' ); ?>" style="color: red;"></span><?php } ?></strong><?php echo wcusage_setting_info_icon( esc_html__( '(The page that has the [couponaffiliates] shortcode on.)', 'woo-coupon-usage' ) ); ?></p>
       <?php
       $dashboardpage = "";
       if ( isset($options['wcusage_dashboard_page']) ) {
@@ -1560,11 +1782,9 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
     <?php } else { ?>
 
       <!-- Showing number input if WPML installed -->
-      <?php wcusage_setting_number_option('wcusage_dashboard_page', '', esc_html__( 'Affiliate Dashboard Page (ID):', 'woo-coupon-usage' ), '0px'); ?>
+      <?php wcusage_setting_number_option('wcusage_dashboard_page', '', esc_html__( 'Affiliate Dashboard Page (ID):', 'woo-coupon-usage' ), '0px', 1, esc_html__( '(The page that has the [couponaffiliates] shortcode on.)', 'woo-coupon-usage' )); ?>
 
     <?php } ?>
-
-    <i><?php echo esc_html__( '(The page that has the [couponaffiliates] shortcode on.)', 'woo-coupon-usage' ); ?></i>
 
     <br/>
 
@@ -1685,11 +1905,9 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
     <p>
       <?php echo esc_html__( 'The "Affiliate Portal" is an alternative to the normal "affiliate dashboard" page.', 'woo-coupon-usage' ); ?>
     </p>
-    <br class="setup-hide"/>
     <p>
       <?php echo esc_html__( 'Instead of being a shortcode displayed on a page within your theme, the affiliate portal is its own standalone full-screen page with a modern unique design.', 'woo-coupon-usage' ); ?>
     </p>
-    <br class="setup-hide"/>
     <p>
       <?php echo esc_html__( 'If enabled, all dashboard links will direct to the portal page, instead of the regular dashboard page.', 'woo-coupon-usage' ); ?>
     </p>
@@ -1764,6 +1982,11 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
     <?php echo wcu_admin_settings_showhide_toggle("wcu_show_section_portal_settings", "wcu_section_portal_settings", esc_html__( 'Show', 'woo-coupon-usage' ), esc_html__( 'Hide', 'woo-coupon-usage' )); ?>
     </p>
     <div class="wcu_section_settings" id="wcu_section_portal_settings" style="display: none; margin-top: 10px;">
+
+    <!-- Portal Theme -->
+    <?php wcusage_setting_select_option('wcusage_portal_theme', 'classic', esc_html__( 'Portal Theme', 'woo-coupon-usage' ), '0px', wcusage_get_portal_themes()); ?>
+
+    <br/>
 
     <!-- Portal Page Title -->
     <?php wcusage_setting_text_option("wcusage_portal_title", "Affiliate Portal", esc_html__( 'Portal Page Title', 'woo-coupon-usage' ), "0px"); ?>
@@ -1863,13 +2086,12 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
     </script>
     <p>
       <?php $wcusage_portal_logo = wcusage_get_setting_value('wcusage_portal_logo', ''); ?>
-      <strong><?php echo esc_html__( 'Affiliate Portal Logo', 'woo-coupon-usage' ); ?></strong><br/>
+      <strong><?php echo esc_html__( 'Affiliate Portal Logo', 'woo-coupon-usage' ); ?></strong><?php echo wcusage_setting_info_icon( esc_html__( 'This is shown at the very top left of the affiliate portal. Recommended size is 200px width.', 'woo-coupon-usage' ) ); ?><br/>
       <input class="wcusage_portal_logo" type="text"
       id="wcusage_portal_logo"
-      name="wcusage_options['wcusage_portal_logo']"
+      name="wcusage_options[wcusage_portal_logo]"
       size="60" value="<?php echo esc_html($wcusage_portal_logo); ?>">
       <a href="#" class="wcusage_portal_logo_upload"><?php echo esc_html__( 'Upload', 'woo-coupon-usage' ); ?></a>
-      <br/><i><?php echo esc_html__( 'This is shown at the very top left of the affiliate portal. Recommended size is 200px width.', 'woo-coupon-usage' ); ?></i><br/>
     </p>
 
     <br/><br/>
@@ -1880,18 +2102,20 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
     <br/>
 
     <!-- Show Dark Mode Toggle -->
-    <?php wcusage_setting_toggle_option('wcusage_portal_dark_mode', 1, esc_html__( 'Show Dark Mode Toggle', 'woo-coupon-usage' ), '0px'); ?>
-    <i><?php echo esc_html__( 'This will show a toggle switch at the top right of the portal to switch between light and dark mode.', 'woo-coupon-usage' ); ?></i>
+    <?php wcusage_setting_toggle_option('wcusage_portal_dark_mode', 1, esc_html__( 'Show Dark Mode Toggle', 'woo-coupon-usage' ), '0px', esc_html__( 'This will show a toggle switch at the top right of the portal to switch between light and dark mode.', 'woo-coupon-usage' )); ?>
 
-    <br/><br/>
+    <br/>
 
     <span class="setup-hide">
 
         <?php if ( get_option( 'users_can_register' ) ) { ?>
 
-        <strong><?php echo esc_html__( 'Login & Registration', 'woo-coupon-usage' ); ?></strong>
-
-        <br/>
+        <!-- Same heading style as "Portal Colours" and "Portal Font & Icons" below. -->
+        <div class="wcu-pd wcu-pd-login">
+          <div class="wcu-pd-head">
+            <h3 class="wcu-pd-title" style="margin-bottom: 20px;"><span class="fa-solid fa-right-to-bracket" aria-hidden="true"></span> <?php echo esc_html__( 'Login & Registration', 'woo-coupon-usage' ); ?></h3>
+          </div>
+        </div>
 
         <?php wcusage_setting_toggle_option('wcusage_field_loginform', 1, esc_html__( 'Show login form on affiliate portal', 'woo-coupon-usage' ), '0px'); ?>
 
@@ -1903,19 +2127,12 @@ if( !function_exists( 'wcusage_setting_section_dashboard_page' ) ) {
 
         <br/>
 
-        <strong><?php echo esc_html__( 'Portal Colors', 'woo-coupon-usage' ); ?></strong>
-
-        <p>
-            <?php echo sprintf( esc_html__( 'You can customise the colors of the affiliate portal in the %s.', 'woo-coupon-usage' ), '<a href="#" onclick="wcusage_go_to_settings(\'#tab-design\', \'#affiliate-dashboard-colors\');">design settings tab</a>' ); ?>
-        </p>
-
-        <br/>
-
-        <strong><?php echo esc_html__( 'Portal Font', 'woo-coupon-usage' ); ?></strong>
-
-        <p>
-          <?php echo sprintf( esc_html__( 'You can change the primary font used in the affiliate portal in the %s.', 'woo-coupon-usage' ), '<a href="#" onclick="wcusage_go_to_settings(\'#tab-design\', \'#affiliate-portal-font\');">design settings tab</a>' ); ?>
-        </p>
+        <!-- Colours and font. The one set of fields sits here while the portal is on, and in
+             the Design tab while the dashboard page is used; js/admin-settings-general.js
+             moves it when the portal is turned on or off. -->
+        <div class="wcu-pd-slot" data-wcu-pd-slot="portal">
+          <?php if ( wcusage_settings_portal_design_in_general() ) { wcusage_setting_portal_design_colours(); } ?>
+        </div>
 
       </span>
 
@@ -1982,7 +2199,7 @@ if( !function_exists( 'wcusage_setting_section_ordersalestracking' ) ) {
       ?>
 
       <!-- Order Status Type Field -->
-      <strong><label for="scales"><?php echo esc_html__( 'Required order status to show on affiliate dashboard:', 'woo-coupon-usage' ); ?></label></strong><br/>
+      <strong><label for="scales"><?php echo esc_html__( 'Required order status to show on affiliate dashboard:', 'woo-coupon-usage' ); ?></label></strong><?php echo wcusage_setting_info_icon( esc_html__( 'This will affect the coupon usage stats, orders list, commission, and monthly summary.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Affiliate stats will be automatically refreshed when changing these statuses.', 'woo-coupon-usage' ) . ' ' . esc_html__( 'For "unpaid commission" to be granted (PRO), the order status must be "completed".', 'woo-coupon-usage' ) . ' ' . esc_html__( 'Cancelled, Refunded, and Failed orders will show stats as "0.00".', 'woo-coupon-usage' ) ); ?><br/>
 
         <?php
         if( function_exists('wc_get_order_statuses') ) {
@@ -2114,28 +2331,11 @@ if( !function_exists( 'wcusage_setting_section_ordersalestracking' ) ) {
         update_option( 'wcusage_field_order_type_custom_isset', 1 );
         ?>
 
-        <br/><i><?php echo esc_html__( 'This will affect the coupon usage stats, orders list, commission, and monthly summary.', 'woo-coupon-usage' ); ?></i>
-        
-        <br/><i><?php echo esc_html__( 'Affiliate stats will be automatically refreshed when changing these statuses.', 'woo-coupon-usage' ); ?></i>
-
-        <br/><i><?php echo esc_html__( 'For "unpaid commission" to be granted (PRO), the order status must be "completed".', 'woo-coupon-usage' ); ?></i>
-        
-        <br/><i><?php echo esc_html__( 'Cancelled, Refunded, and Failed orders will show stats as "0.00".', 'woo-coupon-usage' ); ?></i>
-
       </p>
 
       <div class="setup-hide">
 
         <?php $wcusage_field_order_sort = wcusage_get_setting_value('wcusage_field_order_sort', 'paiddate'); ?>
-
-        <?php if( $wcusage_field_order_sort != "completeddate" ) { ?>
-        <br/>
-        <p><strong><?php echo esc_html__( 'Advanced Orders Settings', 'woo-coupon-usage' ); ?>:</strong>
-        <button type="button" class="wcu-showhide-button" id="wcu_show_orders_advanced"><?php echo esc_html__( 'Show', 'woo-coupon-usage' ); ?> <span class="fa-solid fa-arrow-down"></span></button></p>
-
-        <?php echo wcu_admin_settings_showhide_toggle("wcu_show_orders_advanced", "wcu_orders_advanced", esc_html__( 'Show', 'woo-coupon-usage' ), esc_html__( 'Hide', 'woo-coupon-usage' )); ?>
-        <div id="wcu_orders_advanced" style="display: none;">
-        <?php } ?>
 
         <br/>
 
@@ -2165,12 +2365,11 @@ if( !function_exists( 'wcusage_setting_section_ordersalestracking' ) ) {
           }
         }
         </script>
-        <strong><label for="scales"><?php echo esc_html__( 'By which date should orders be sorted on the affiliate dashboard?', 'woo-coupon-usage' ); ?></label></strong><br/>
+        <strong><label for="scales"><?php echo esc_html__( 'Sort orders by:', 'woo-coupon-usage' ); ?></label></strong><?php echo wcusage_setting_info_icon( esc_html__( 'This will determine how the orders are sorted on the affiliate dashboard, either by the day they were paid for, or the day it was set to completed.', 'woo-coupon-usage' ) ); ?><br/>
         <select name="wcusage_options[wcusage_field_order_sort]" id="wcusage_field_order_sort" onchange="check_order_sort_dropdown()">
           <option class="wcusage_field_order_sort_option" value="paiddate" <?php if($wcusage_field_order_sort == "paiddate") { ?>selected<?php } ?>><?php echo esc_html__( 'Created Date (Recommended)', 'woo-coupon-usage' ); ?></option>
           <option class="wcusage_field_order_sort_option" value="completeddate" <?php if($wcusage_field_order_sort == "completeddate") { ?>selected<?php } ?>><?php echo esc_html__( 'Completed Date', 'woo-coupon-usage' ); ?></option>
         </select>
-        <br/><i><?php echo esc_html__( 'This will determine how the orders are sorted on the affiliate dashboard, either by the day they were paid for, or the day it was set to completed.', 'woo-coupon-usage' ); ?></i>
         <span class="wcu-field-section-message-orders-sort-completed" style="display: none;">
           <br/>
           <i style="color: red; font-size: 15px; font-weight: bold;">
@@ -2180,10 +2379,6 @@ if( !function_exists( 'wcusage_setting_section_ordersalestracking' ) ) {
             <?php echo esc_html__( 'Ideally you should only enable "completed" order statuses above if you have "Completed Date" selected.', 'woo-coupon-usage' ); ?>
           </i>
         </span>
-
-      <?php if( $wcusage_field_order_sort != "completeddate" ) { ?>
-      </div>
-      <?php } ?>
 
       </div>
 

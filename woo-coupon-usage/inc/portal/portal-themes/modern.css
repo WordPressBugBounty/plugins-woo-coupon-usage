@@ -1,0 +1,316 @@
+/*
+ * Affiliate portal theme: Modern
+ *
+ * Soft, rounded and airy, built around a coupon-ticket motif: the coupon code in the
+ * header is drawn as a dashed ticket, sections inside a tab are split by perforated
+ * (dashed) rules, and bonus and coupon cards are cut like tickets. The page background
+ * takes a faint tint of the portal tab colour, so it follows each site's brand. Tabs,
+ * buttons, table headings and statistic icons use the portal colour settings.
+ */
+
+body.wcu-portal-theme-modern {
+    --pt-bg: color-mix(in srgb, var(--wcu-tab) 5%, #f6f7f9);
+    --pt-panel: #ffffff;
+    --pt-panel-border: #e9ebef;
+    --pt-line: #f0f2f5;
+    --pt-line-strong: #e6e8ec;
+    --pt-subtle: #f7f8fa;
+    --pt-row-hover: color-mix(in srgb, var(--wcu-tab-active) 4%, #ffffff);
+    --pt-text: #121826;
+    --pt-muted: #4a5466;
+    --pt-faint: #6b7487;
+    --pt-link: var(--wcu-button);
+    --pt-link-hover: var(--wcu-button-hover);
+    --pt-input-border: #d6dae1;
+    --pt-input-bg: #fbfcfd;
+    --pt-input-height: 40px;
+    --pt-focus: color-mix(in srgb, var(--wcu-button) 20%, transparent);
+    --pt-positive: #0f7b3f;
+    --pt-negative: #c4320a;
+
+    --pt-radius: 16px;
+    --pt-radius-sm: 12px;
+    --pt-radius-xs: 8px;
+    --pt-radius-btn: 10px;
+    --pt-radius-input: 10px;
+    --pt-shadow: 0 1px 2px rgba(18, 24, 38, 0.04), 0 6px 20px rgba(18, 24, 38, 0.04);
+    --pt-btn-shadow: 0 1px 2px rgba(18, 24, 38, 0.1);
+    --pt-card-hover-shadow: 0 8px 24px rgba(18, 24, 38, 0.08);
+
+    --pt-header-bg: transparent;
+    --pt-header-border: transparent;
+    --pt-header-icon: var(--pt-faint);
+
+    --pt-title-size: 18px;
+    --pt-title-weight: 700;
+    --pt-title-spacing: -0.015em;
+    --pt-page-title-size: 22px;
+
+    --pt-table-border: #eceef2;
+    --pt-th-size: 12.5px;
+    --pt-th-spacing: 0;
+    --pt-th-transform: none;
+    --pt-th-padding: 12px 18px;
+    --pt-cell-align: left;
+    --pt-cell-padding: 14px 18px;
+
+    --pt-box-padding: 18px 20px 18px 74px;
+    --pt-box-value-size: 26px;
+    --pt-box-bg: #fbfcfd;
+    --pt-box-border: #e9ebef;
+    --pt-box-hover-border: color-mix(in srgb, var(--wcu-tab-active) 35%, #e9ebef);
+    --pt-box-label-size: 13px;
+    --pt-box-label-weight: 500;
+    --pt-box-label-spacing: 0;
+    --pt-box-label-transform: none;
+
+    --pt-control-border: #e2e5ea;
+    --pt-control-bg: #ffffff;
+    --pt-inset-bg: color-mix(in srgb, var(--wcu-tab-active) 4%, #ffffff);
+    --pt-inset-border: color-mix(in srgb, var(--wcu-tab-active) 30%, transparent);
+
+    --pt-side-border: transparent;
+    --pt-side-hover-bg: rgba(255, 255, 255, 0.09);
+    --pt-side-item-margin: 2px 12px;
+    --pt-side-item-radius: 10px;
+
+    --pt-ticket: color-mix(in srgb, var(--wcu-tab-active) 6%, #ffffff);
+}
+
+/* ---------- Sidebar: rounded highlights inset from the edge ---------- */
+
+body.wcu-portal-theme-modern .portal-tabs .portal-tablink {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+}
+
+body.wcu-portal-theme-modern .portal-tabs .portal-tablink:not(.active) {
+    opacity: 0.84;
+}
+
+body.wcu-portal-theme-modern .portal-tabs .portal-tablink:not(.active):hover {
+    opacity: 1;
+}
+
+body.wcu-portal-theme-modern .portal-tabs .portal-tablink.active {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+body.wcu-portal-theme-modern .sidebar-logo h2 {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.75;
+}
+
+/* ---------- Header: sits on the page, the coupon code drawn as a ticket ---------- */
+
+body.wcu-portal-theme-modern .welcome-header > i.fa-tag {
+    display: none;
+}
+
+body.wcu-portal-theme-modern .welcome-header .wcu-coupon-title {
+    display: inline-block;
+    padding: 4px 16px;
+    border: 1.5px dashed color-mix(in srgb, var(--wcu-tab-active) 55%, transparent);
+    border-radius: 8px;
+    background: var(--pt-ticket);
+    color: var(--pt-text);
+    font-family: Menlo, Consolas, "Courier New", monospace;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+body.wcu-portal-theme-modern .welcome-header .wcu-coupon-title-prefix {
+    font-size: 0.7em;
+    font-weight: 600;
+    color: var(--pt-muted);
+}
+
+body.wcu-portal-theme-modern .wcu-coupon-switcher-toggle {
+    border-radius: 8px;
+}
+
+/* ---------- Panels ---------- */
+
+@media (min-width: 769px) {
+    body.wcu-portal-theme-modern :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent) {
+        padding: 28px 32px 32px;
+    }
+}
+
+/* Sections inside a tab are split by a perforated rule, like a ticket stub. */
+body.wcu-portal-theme-modern :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent) .wcusage-subheader:not([style*="float"]) {
+    border-top-style: dashed;
+    border-top-color: #dfe3e8;
+}
+
+/* ---------- Statistic boxes: soft rounded tiles ---------- */
+
+body.wcu-portal-theme-modern .wcusage-info-box {
+    border-radius: 12px;
+}
+
+/* Inside the Referral URL tab the boxes have no panel title above them. */
+body.wcu-portal-theme-modern #wcu-referral-statistics .wcusage-info-box {
+    margin-top: 4px;
+}
+
+/* ---------- Period switcher: underlined tabs ---------- */
+
+body.wcu-portal-theme-modern .wcusage-last-days {
+    /* A full-width tab strip, with the refresh button at the far end. */
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 24px;
+    padding: 0 !important;
+    border-bottom: 1px solid var(--pt-line-strong);
+}
+
+body.wcu-portal-theme-modern .wcusage-last-days > a:not(.wcusage-refresh-stats-btn) {
+    padding: 8px 0 11px;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    font-size: 14px;
+}
+
+body.wcu-portal-theme-modern .wcusage-last-days > a.wcutab-active {
+    border-bottom-color: var(--wcu-tab-active);
+}
+
+/* ---------- Tables ---------- */
+
+body.wcu-portal-theme-modern table.wcuTable .wcuTableHead {
+    font-weight: 600 !important;
+}
+
+/* ---------- Referral link ---------- */
+
+body.wcu-portal-theme-modern .referral-url-box,
+body.wcu-portal-theme-modern .payouts-box {
+    border-style: dashed;
+    border-width: 1.5px;
+}
+
+body.wcu-portal-theme-modern .wcu-urllink {
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--wcu-tab-active) 40%, transparent);
+}
+
+/* ---------- Creatives ---------- */
+
+/* The preview runs edge to edge across the top of the card, on the ticket tint, with the
+   name and description left-aligned beneath it. */
+body.wcu-portal-theme-modern {
+    --pt-creative-align: left;
+}
+
+body.wcu-portal-theme-modern .creatives-box {
+    padding: 0 18px 18px;
+    overflow: hidden;
+    border-color: var(--pt-panel-border);
+    border-radius: 16px;
+}
+
+body.wcu-portal-theme-modern .creatives-box-type-color {
+    padding-top: 18px;
+}
+
+body.wcu-portal-theme-modern .creatives-box:hover {
+    transform: translateY(-1px);
+}
+
+body.wcu-portal-theme-modern .creatives-box-image {
+    order: -1;
+    width: calc(100% + 36px);
+    margin: 0 -18px 16px !important;
+    border: 0;
+    border-bottom: 1px solid var(--pt-panel-border);
+    border-radius: 0;
+    background: var(--pt-ticket) !important;
+}
+
+body.wcu-portal-theme-modern .wcu-color-box {
+    border-radius: 12px;
+}
+
+/* ---------- Bonuses and coupon cards: cut like tickets ---------- */
+
+body.wcu-portal-theme-modern .wcusage-reward-box,
+body.wcu-portal-theme-modern .wcu-user-coupon-list {
+    border: 0;
+    background: var(--pt-ticket);
+    box-shadow: none;
+    -webkit-mask:
+        radial-gradient(circle 12px at 0 50%, transparent 97%, #000 100%) left / 51% 100% no-repeat,
+        radial-gradient(circle 12px at 100% 50%, transparent 97%, #000 100%) right / 51% 100% no-repeat;
+    mask:
+        radial-gradient(circle 12px at 0 50%, transparent 97%, #000 100%) left / 51% 100% no-repeat,
+        radial-gradient(circle 12px at 100% 50%, transparent 97%, #000 100%) right / 51% 100% no-repeat;
+}
+
+body.wcu-portal-theme-modern .wcusage-reward-box h4 {
+    font-size: 19px;
+    font-weight: 700;
+}
+
+body.wcu-portal-theme-modern .wcusage-progress-bar {
+    background-color: rgba(18, 24, 38, 0.08);
+}
+
+/* ---------- Settings ---------- */
+
+body.wcu-portal-theme-modern .wcu-settings-card__header {
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+body.wcu-portal-theme-modern .wcu-settings-card__title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+body.wcu-portal-theme-modern .wcu-settings-card__footer {
+    background: transparent;
+}
+
+/* ---------- Dark mode ---------- */
+
+body.wcu-portal-theme-modern.dark-mode {
+    --pt-bg: color-mix(in srgb, var(--wcu-tab) 12%, #111317);
+    --pt-panel: #1b1e23;
+    --pt-panel-border: #2b2f36;
+    --pt-line: #24272d;
+    --pt-line-strong: #2b2f36;
+    --pt-subtle: #20242a;
+    --pt-row-hover: #20242a;
+    --pt-text: #eceef1;
+    --pt-muted: #b3b9c3;
+    --pt-faint: #8a919c;
+    --pt-link: color-mix(in srgb, var(--wcu-button) 55%, #ffffff);
+    --pt-link-hover: #ffffff;
+    --pt-input-border: #3a3f47;
+    --pt-input-bg: #171a1e;
+    --pt-table-border: #2b2f36;
+    --pt-control-border: #3a3f47;
+    --pt-control-bg: #20242a;
+    --pt-inset-bg: color-mix(in srgb, var(--wcu-tab-active) 10%, #1b1e23);
+    --pt-inset-border: color-mix(in srgb, var(--wcu-tab-active) 45%, transparent);
+    --pt-side-border: #2b2f36;
+    --pt-shadow: none;
+    --pt-box-bg: #20242a;
+    --pt-box-border: #2b2f36;
+    --pt-box-hover-border: #3a3f47;
+    --pt-ticket: color-mix(in srgb, var(--wcu-tab-active) 14%, #1b1e23);
+}
+
+body.wcu-portal-theme-modern.dark-mode :is(.portal-tabcontent > .wcutabcontent, .wcutabcontent.portal-tabcontent) .wcusage-subheader:not([style*="float"]) {
+    border-top-color: #33373e;
+}
+
+body.wcu-portal-theme-modern .wcusage-last-days .wcusage-refresh-stats-btn {
+    margin-left: auto !important;
+}
