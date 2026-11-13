@@ -667,6 +667,15 @@ function wcusage_create_new_registration(
     } else {
         $userid = "";
     }
+    // An application nobody with admin access is adding or accepting (the checkout
+    // checkbox, "register all new users", the public form) cannot take a coupon code
+    // that is already in use. With auto-accept on, a taken code would otherwise
+    // become a second coupon with the same code, which WooCommerce then uses in
+    // place of the original. The user's own earlier application for the same code
+    // (a double submit) is left to the duplicate check in wcusage_install_register_data().
+    if ( !$accept && $couponcode !== '' && !wcusage_check_admin_access() && !wcusage_registration_coupon_available( $couponcode ) && !wcusage_registration_coupon_applied_for_by( $couponcode, $userid ) ) {
+        return false;
+    }
     // Add register data
     if ( $userid ) {
         $getregisterid = wcusage_install_register_data(
@@ -1169,6 +1178,8 @@ function wcusage_register_verify(  $post_field_values  ) {
         $output = "<p style='color: red; font-weight: bold;'>" . esc_html__( 'This user does not exist, please enter a valid user, or enter an email address to create a new account.', 'woo-coupon-usage' ) . "</p>";
     } elseif ( $field_password_confirm && $password != $password_confirm ) {
         $output = "<p style='color: red; font-weight: bold;'>" . esc_html__( 'The passwords do not match. Please try again.', 'woo-coupon-usage' ) . "</p>";
+    } elseif ( !wcusage_check_admin_access() && !wcusage_registration_coupon_code_valid( wcusage_registration_posted_coupon_code() ) ) {
+        $output = "<p style='color: red; font-weight: bold;'>" . esc_html( wcusage_registration_coupon_code_invalid_message() ) . "</p>";
     } elseif ( !is_admin() && !wcusage_registration_coupon_available( $couponcode ) ) {
         $output = "<p style='color: red; font-weight: bold;'>" . sprintf( esc_html__( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ), esc_html( $couponcode ) ) . "</p>";
     } else {
@@ -1212,7 +1223,9 @@ function wcusage_login_after_registration() {
                     if ( !wcusage_registration_coupon_available( $couponcode ) ) {
                         return;
                     }
-                    // Add User
+                    // Add User. The "New Account" email is sent below, after the auto-login:
+                    // wp_signon() clears the user's password reset key, so a {passwordurl} link
+                    // made before it would no longer work.
                     $new_affiliate_user = wcusage_add_new_affiliate_user(
                         $username,
                         $password,
@@ -1221,7 +1234,9 @@ function wcusage_login_after_registration() {
                         $lastname,
                         $couponcode,
                         $website,
-                        $info
+                        $info,
+                        '',
+                        false
                     );
                     $userid = ( isset( $new_affiliate_user['userid'] ) ? $new_affiliate_user['userid'] : '' );
                     $new_password = ( isset( $new_affiliate_user['new_password'] ) ? $new_affiliate_user['new_password'] : '' );
@@ -1258,6 +1273,17 @@ function wcusage_login_after_registration() {
                                 error_log( 'Failed to auto login after affiliate registration. Error: ' . $user->get_error_message() );
                             }
                         }
+                    }
+                    // Send New Account Email
+                    $wcusage_email_registration_new_enable = wcusage_get_setting_value( 'wcusage_field_email_registration_new_enable', '1' );
+                    if ( $userid && $wcusage_email_registration_new_enable ) {
+                        wcusage_email_affiliate_register_new(
+                            $email,
+                            $couponcode,
+                            $firstname,
+                            $username,
+                            $userid
+                        );
                     }
                 }
             }
@@ -1597,6 +1623,73 @@ function wcusage_registration_form_verify_captcha(  $adminpost  ) {
         $captchaverify = true;
     }
     return $captchaverify;
+}
+
+/**
+ * Whether a coupon code an applicant chose is made of allowed characters only:
+ * letters and numbers (in any language), spaces, and - _ . @ % +
+ *
+ * The code is shown in many places (admin tables, emails, the dashboard, inline
+ * scripts and shortcodes), so characters such as quotes, brackets, "&" and ";"
+ * are refused here rather than relied on being escaped everywhere. An empty code
+ * is not judged here: whether one is required is up to the caller.
+ *
+ * @param string $couponcode
+ *
+ * @return bool
+ */
+function wcusage_registration_coupon_code_valid(  $couponcode  ) {
+    $couponcode = (string) $couponcode;
+    if ( $couponcode === '' ) {
+        return true;
+    }
+    $valid = @preg_match( '/^[\\p{L}\\p{N}\\p{M} ._@%+\\-]+$/u', $couponcode );
+    // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+    if ( false === $valid ) {
+        // No Unicode support in PCRE, or the code is not valid UTF-8.
+        $valid = preg_match( '/^[A-Za-z0-9 ._@%+\\-]+$/', $couponcode );
+    }
+    return (bool) $valid;
+}
+
+/**
+ * Whether a user already has a pending or accepted application for a coupon code.
+ *
+ * @param string $couponcode
+ * @param int    $userid
+ *
+ * @return bool
+ */
+function wcusage_registration_coupon_applied_for_by(  $couponcode, $userid  ) {
+    $userid = absint( $userid );
+    if ( !$userid || (string) $couponcode === '' ) {
+        return false;
+    }
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'wcusage_register';
+    return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table_name} WHERE couponcode = %s AND userid = %d AND status != 'declined' LIMIT 1", $couponcode, $userid ) );
+    // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter
+}
+
+/**
+ * The coupon code an applicant typed into the registration form, if any.
+ *
+ * Only this is held to wcusage_registration_coupon_code_valid(): a code generated
+ * from the store's own "Coupon Format" setting may use other characters.
+ *
+ * @return string
+ */
+function wcusage_registration_posted_coupon_code() {
+    return ( isset( $_POST['wcu-input-coupon'] ) ? sanitize_text_field( wp_unslash( $_POST['wcu-input-coupon'] ) ) : '' );
+}
+
+/**
+ * The message shown when wcusage_registration_coupon_code_valid() refuses a code.
+ *
+ * @return string
+ */
+function wcusage_registration_coupon_code_invalid_message() {
+    return __( 'The coupon code can only contain letters, numbers, spaces and these characters: - _ . @ % +', 'woo-coupon-usage' );
 }
 
 /*

@@ -205,6 +205,30 @@ if ( !function_exists( 'wcusage_get_product_category_rates' ) ) {
     }
 
 }
+/**
+ * A commission rate returned by the "wcusage_product_commission_rates" filter, in
+ * the form the rate checks expect.
+ *
+ * Those checks test `!= ""`, and on PHP 7 a number 0 equals "", so a filter
+ * returning 0 would read as "no rate". Numbers become strings; strings are kept
+ * exactly as they are.
+ *
+ * @param mixed $value Rate.
+ *
+ * @return string|mixed
+ */
+if ( !function_exists( 'wcusage_normalise_filtered_rate' ) ) {
+    function wcusage_normalise_filtered_rate(  $value  ) {
+        if ( is_int( $value ) || is_float( $value ) ) {
+            return (string) $value;
+        }
+        if ( null === $value || false === $value ) {
+            return "";
+        }
+        return $value;
+    }
+
+}
 /*
  * Make order meta lower case if certain meta
  *
@@ -1018,7 +1042,12 @@ if ( !function_exists( 'wcusage_calculate_order_data' ) ) {
                 // this function for them from inside the filter would run it again.
                 // An order whose commission is set by other means (an amount imported from
                 // another affiliate plugin) is passed through even when none is worked out.
-                if ( $all_commission || apply_filters( 'wcusage_filter_zero_order_commission', false, $orderid ) ) {
+                if ( $all_commission || apply_filters(
+                    'wcusage_filter_zero_order_commission',
+                    false,
+                    $orderid,
+                    $couponid
+                ) ) {
                     $all_commission = apply_filters(
                         'wcusage_calculate_edit_commission',
                         $all_commission,
@@ -1160,20 +1189,141 @@ if ( !function_exists( 'wcusage_round_commission_amount' ) ) {
 
 }
 /**
+ * Whether an affiliate earns commission on orders they place themselves.
+ *
+ * Only with the defaults: "Allow affiliate user to apply their own coupon code at
+ * cart / checkout" (wcusage_field_allow_assigned_user) on, and "Do not give the
+ * affiliate commission when they use their own coupon code"
+ * (wcusage_field_assigned_user_no_commission) off. Blocking their own coupon means
+ * their own orders are not referrals either, however the order reached them - a
+ * referral link, a lifetime link, or an order another plugin creates (an upsell).
+ *
+ * @return bool
+ */
+if ( !function_exists( 'wcusage_affiliate_earns_on_own_orders' ) ) {
+    function wcusage_affiliate_earns_on_own_orders() {
+        $allow_assigned_user = wcusage_get_setting_value( 'wcusage_field_allow_assigned_user', 1 );
+        $no_commission = wcusage_get_setting_value( 'wcusage_field_assigned_user_no_commission', 0 );
+        $earns = $allow_assigned_user && !$no_commission;
+        /**
+         * Filters whether affiliates earn commission on orders they place themselves.
+         *
+         * When false, an affiliate's own orders earn them no commission, are not
+         * credited to them through their referral link, and do not make them their
+         * own lifetime customer.
+         *
+         * @param bool $earns From the "own coupon" settings in Fraud Prevention.
+         */
+        return (bool) apply_filters( 'wcusage_affiliate_earns_on_own_orders', $earns );
+    }
+
+}
+/**
+ * Whether an order was placed by the affiliate it would be credited to.
+ *
+ * The order's customer account is the affiliate, or its billing email is the
+ * affiliate's account email or saved billing email (a guest checkout, or an order
+ * another plugin created from one, such as an upsell).
+ *
+ * @param WC_Order|int $order        Order or order ID.
+ * @param int          $affiliate_id User ID of the affiliate.
+ *
+ * @return bool
+ */
+if ( !function_exists( 'wcusage_is_affiliates_own_order' ) ) {
+    function wcusage_is_affiliates_own_order(  $order, $affiliate_id  ) {
+        $affiliate_id = (int) $affiliate_id;
+        if ( !$affiliate_id ) {
+            return false;
+        }
+        if ( !$order instanceof WC_Order ) {
+            $order = ( $order ? wc_get_order( $order ) : false );
+        }
+        if ( !$order instanceof WC_Order ) {
+            return false;
+        }
+        $customer_id = (int) $order->get_customer_id();
+        if ( $customer_id && $customer_id === $affiliate_id ) {
+            return true;
+        }
+        $billing_email = strtolower( trim( (string) $order->get_billing_email() ) );
+        if ( '' === $billing_email ) {
+            return false;
+        }
+        $affiliate = get_userdata( $affiliate_id );
+        if ( !$affiliate ) {
+            return false;
+        }
+        $affiliate_emails = array_filter( array(strtolower( trim( (string) $affiliate->user_email ) ), strtolower( trim( (string) get_user_meta( $affiliate_id, 'billing_email', true ) ) )) );
+        return in_array( $billing_email, $affiliate_emails, true );
+    }
+
+}
+/**
+ * Whether an order is an affiliate's own purchase that must not be credited to them.
+ *
+ * @param WC_Order|int $order       Order or order ID.
+ * @param string       $coupon_code Affiliate coupon the order would be credited to.
+ *
+ * @return bool True when the coupon's affiliate placed the order and the settings
+ *              say affiliates earn nothing on their own orders.
+ */
+if ( !function_exists( 'wcusage_is_blocked_own_order' ) ) {
+    function wcusage_is_blocked_own_order(  $order, $coupon_code  ) {
+        if ( !$coupon_code || wcusage_affiliate_earns_on_own_orders() ) {
+            return false;
+        }
+        $coupon_id = wc_get_coupon_id_by_code( $coupon_code );
+        $affiliate_id = ( $coupon_id ? (int) get_post_meta( $coupon_id, 'wcu_select_coupon_user', true ) : 0 );
+        return $affiliate_id && wcusage_is_affiliates_own_order( $order, $affiliate_id );
+    }
+
+}
+/**
+ * When this site started running the 8.7.2 rules for affiliates' own orders and the
+ * Performance Bonus commission increase, as a Unix timestamp.
+ *
+ * Recorded on the first request after updating (on "init"). Orders placed before it
+ * keep what they earned under the earlier rules when they are recalculated - a stats
+ * refresh, a partial refund - so commission that may already have been paid is never
+ * taken back, nor handed out, after the event.
+ *
+ * @return int
+ */
+if ( !function_exists( 'wcusage_get_own_order_rules_since' ) ) {
+    function wcusage_get_own_order_rules_since() {
+        $since = (int) get_option( 'wcusage_own_order_rules_since', 0 );
+        if ( !$since ) {
+            $since = time();
+            add_option( 'wcusage_own_order_rules_since', $since );
+        }
+        return $since;
+    }
+
+    add_action( 'init', 'wcusage_get_own_order_rules_since', 1 );
+}
+/**
  * Remove affiliate commission on an affiliate's own purchases.
  *
- * Applies only when BOTH of these settings are enabled:
- * - "Allow affiliate user to apply their own coupon code at cart / checkout"
- *   (wcusage_field_allow_assigned_user), and
- * - "Do not give the affiliate commission when they use their own coupon code"
- *   (wcusage_field_assigned_user_no_commission).
+ * Applies unless affiliates earn on their own orders (see
+ * wcusage_affiliate_earns_on_own_orders()): that is, when "Allow affiliate user to
+ * apply their own coupon code" is off, or "Do not give the affiliate commission when
+ * they use their own coupon code" is on.
  *
- * The affiliate can still apply their own coupon and receive the customer discount;
- * this only zeroes the commission when the buyer is the affiliate the coupon is
- * assigned to. Purchases made by other customers using the same coupon are unaffected.
+ * With the coupon allowed, the affiliate still gets the customer discount; this only
+ * zeroes the commission when the buyer is the affiliate the coupon is assigned to.
+ * With it blocked, it catches the orders that never went through the cart check: an
+ * order another plugin creates on its own, such as a funnel's upsell order.
+ * Purchases made by other customers using the same coupon are unaffected.
  *
  * Hooked to the same filter used in both commission calculation paths
- * (wcusage_calculate_order_data and wcusage_get_order_calculate_data).
+ * (wcusage_calculate_order_data and wcusage_get_order_calculate_data), so it covers
+ * every way an order is credited to the coupon: the coupon itself, the referral
+ * link and a lifetime link.
+ *
+ * Orders placed before 8.7.2 was installed keep the earlier rule: only with both
+ * settings on, and only for orders from the affiliate's account or account email
+ * (see wcusage_get_own_order_rules_since()).
  *
  * @param float $commission Calculated commission for this order/coupon.
  * @param int   $orderid    Order ID.
@@ -1192,27 +1342,23 @@ if ( !function_exists( 'wcusage_remove_own_coupon_commission' ) ) {
         if ( empty( $commission ) || empty( $couponuser ) || empty( $orderid ) ) {
             return $commission;
         }
-        $allow_assigned_user = wcusage_get_setting_value( 'wcusage_field_allow_assigned_user', 1 );
-        $no_commission = wcusage_get_setting_value( 'wcusage_field_assigned_user_no_commission', 0 );
-        if ( !$allow_assigned_user || !$no_commission ) {
+        if ( wcusage_affiliate_earns_on_own_orders() ) {
             return $commission;
         }
         $order = wc_get_order( $orderid );
-        if ( !$order ) {
+        if ( !$order instanceof WC_Order || !wcusage_is_affiliates_own_order( $order, $couponuser ) ) {
             return $commission;
         }
-        // Buyer is logged in as the affiliate assigned to the coupon.
-        $customer_id = $order->get_customer_id();
-        if ( $customer_id && (int) $customer_id === (int) $couponuser ) {
-            return 0;
+        if ( wcusage_get_order_rate_timestamp( $order ) < wcusage_get_own_order_rules_since() ) {
+            $allow_assigned_user = wcusage_get_setting_value( 'wcusage_field_allow_assigned_user', 1 );
+            $no_commission = wcusage_get_setting_value( 'wcusage_field_assigned_user_no_commission', 0 );
+            $affiliate = get_userdata( $couponuser );
+            $earlier_rule = $allow_assigned_user && $no_commission && ((int) $order->get_customer_id() === (int) $couponuser || $affiliate && $order->get_billing_email() && strtolower( $order->get_billing_email() ) === strtolower( $affiliate->user_email ));
+            if ( !$earlier_rule ) {
+                return $commission;
+            }
         }
-        // Or the order was placed using the affiliate account's email (e.g. guest checkout).
-        $affiliate = get_userdata( $couponuser );
-        $billing_email = $order->get_billing_email();
-        if ( $affiliate && !empty( $affiliate->user_email ) && $billing_email && strtolower( $billing_email ) === strtolower( $affiliate->user_email ) ) {
-            return 0;
-        }
-        return $commission;
+        return 0;
     }
 
     add_filter(
@@ -1220,6 +1366,302 @@ if ( !function_exists( 'wcusage_remove_own_coupon_commission' ) ) {
         'wcusage_remove_own_coupon_commission',
         10,
         4
+    );
+}
+/**
+ * When an order was placed, as a Unix timestamp, for looking up the rates in force then.
+ *
+ * @param WC_Order|null $order
+ *
+ * @return int The current time when there is no order or it has no date yet.
+ */
+if ( !function_exists( 'wcusage_get_order_rate_timestamp' ) ) {
+    function wcusage_get_order_rate_timestamp(  $order  ) {
+        $date = ( $order instanceof WC_Order ? $order->get_date_created() : null );
+        return ( $date ? (int) $date->getTimestamp() : time() );
+    }
+
+}
+/**
+ * A coupon's own commission rates, as they were when an order was placed.
+ *
+ * A Performance Bonus with "Set New Commission Rates" replaces the coupon's rates
+ * from the moment it is earned. Orders placed before then keep the rates they were
+ * earned at: the rates it replaced are kept in "wcu_commission_rate_history", each
+ * entry holding the rates that applied until its "until" time (see
+ * wcusage_record_coupon_commission_rates()). Recalculating an older order - a stats
+ * refresh, a refund - used to pay it at the bonus rate, so every order the affiliate
+ * ever had moved to the new tier.
+ *
+ * Changing the rates by hand is not recorded: that still applies to every order the
+ * stats refresh recalculates, as it always has (see "Never update the saved
+ * commission value for past orders" in the Debug settings).
+ *
+ * @param int           $coupon_id
+ * @param WC_Order|null $order Order to resolve the rates for. Without one, the current rates.
+ *
+ * @return array {
+ *     @type string $percent       "wcu_text_coupon_commission", "" when not set.
+ *     @type string $fixed_order   "wcu_text_coupon_commission_fixed_order", "" when not set.
+ *     @type string $fixed_product "wcu_text_coupon_commission_fixed_product", "" when not set.
+ * }
+ */
+if ( !function_exists( 'wcusage_get_coupon_commission_rates' ) ) {
+    function wcusage_get_coupon_commission_rates(  $coupon_id, $order = null  ) {
+        $rates = array(
+            'percent'       => get_post_meta( $coupon_id, 'wcu_text_coupon_commission', true ),
+            'fixed_order'   => get_post_meta( $coupon_id, 'wcu_text_coupon_commission_fixed_order', true ),
+            'fixed_product' => get_post_meta( $coupon_id, 'wcu_text_coupon_commission_fixed_product', true ),
+        );
+        if ( !$order instanceof WC_Order || !$coupon_id ) {
+            return $rates;
+        }
+        $history = get_post_meta( $coupon_id, 'wcu_commission_rate_history', true );
+        if ( empty( $history ) || !is_array( $history ) ) {
+            return $rates;
+        }
+        $placed = wcusage_get_order_rate_timestamp( $order );
+        // Oldest first: the first change made after the order was placed holds the
+        // rates the order was placed under. An order placed in the same second as the
+        // change counts as placed before it: the order that earns a bonus is checked
+        // in the same request when it is paid at checkout, and keeps its rates.
+        foreach ( $history as $entry ) {
+            if ( is_array( $entry ) && isset( $entry['until'] ) && $placed <= (int) $entry['until'] ) {
+                foreach ( array_keys( $rates ) as $key ) {
+                    $rates[$key] = ( isset( $entry[$key] ) ? (string) $entry[$key] : '' );
+                }
+                break;
+            }
+        }
+        return $rates;
+    }
+
+}
+/**
+ * Keep a coupon's current commission rates as the rates of orders placed until now.
+ *
+ * Call it right before replacing the coupon's rates in a way that must not reach
+ * back to orders already placed. See wcusage_get_coupon_commission_rates().
+ *
+ * @param int $coupon_id
+ */
+if ( !function_exists( 'wcusage_record_coupon_commission_rates' ) ) {
+    function wcusage_record_coupon_commission_rates(  $coupon_id  ) {
+        $coupon_id = (int) $coupon_id;
+        if ( !$coupon_id ) {
+            return;
+        }
+        $history = get_post_meta( $coupon_id, 'wcu_commission_rate_history', true );
+        if ( empty( $history ) || !is_array( $history ) ) {
+            $history = array();
+        }
+        $entry = wcusage_get_coupon_commission_rates( $coupon_id );
+        $entry['until'] = time();
+        $history[] = $entry;
+        update_post_meta( $coupon_id, 'wcu_commission_rate_history', $history );
+    }
+
+}
+/**
+ * The percentage a Performance Bonus increases an affiliate's commission by, on an order.
+ *
+ * "Increase Commission %" saves the percentage as the affiliate's
+ * "wcusage_reward_commission_increase" (also editable as "Bonus Commission
+ * Percentage" on their user profile): 5 turns $100 of commission into $105. Every
+ * change to it is recorded with the time it was made in
+ * "wcusage_reward_commission_increase_history", so an order gets the increase that
+ * applied when it was placed: earning the bonus never reaches back to the orders
+ * that earned it. Before 8.7.2 the percentage was saved and shown to the affiliate
+ * but never added to their commission.
+ *
+ * @param int           $affiliate_id User ID of the affiliate.
+ * @param WC_Order|null $order        Order to resolve it for. Without one, the current increase.
+ *
+ * @return float Percentage to increase the order's commission by.
+ */
+if ( !function_exists( 'wcusage_get_bonus_commission_increase' ) ) {
+    function wcusage_get_bonus_commission_increase(  $affiliate_id, $order = null  ) {
+        $affiliate_id = (int) $affiliate_id;
+        if ( !$affiliate_id ) {
+            return 0.0;
+        }
+        $history = get_user_meta( $affiliate_id, 'wcusage_reward_commission_increase_history', true );
+        if ( empty( $history ) || !is_array( $history ) ) {
+            $current = get_user_meta( $affiliate_id, 'wcusage_reward_commission_increase', true );
+            if ( '' === $current || !is_numeric( $current ) || !(float) $current ) {
+                return 0.0;
+            }
+            // Set before changes were recorded, when it was never applied: it applies
+            // to orders placed since this version was installed, never to earlier ones.
+            $history = wcusage_record_bonus_commission_increase( $affiliate_id, $current, wcusage_get_own_order_rules_since() - 1 );
+        }
+        $at = ( $order instanceof WC_Order ? wcusage_get_order_rate_timestamp( $order ) : time() );
+        // An order placed in the same second as a change counts as placed before it,
+        // as in wcusage_get_coupon_commission_rates(): the order that earns a bonus is
+        // never paid at the bonus rate.
+        $increase = 0.0;
+        foreach ( $history as $entry ) {
+            if ( !is_array( $entry ) || !isset( $entry['from'] ) ) {
+                continue;
+            }
+            if ( ( $order instanceof WC_Order ? (int) $entry['from'] >= $at : (int) $entry['from'] > $at ) ) {
+                continue;
+            }
+            $increase = ( isset( $entry['increase'] ) && is_numeric( $entry['increase'] ) ? (float) $entry['increase'] : 0.0 );
+        }
+        /**
+         * Filters the percentage a Performance Bonus increases an affiliate's commission by.
+         *
+         * @param float         $increase     Percentage the order's commission is increased by.
+         * @param int           $affiliate_id User ID of the affiliate.
+         * @param WC_Order|null $order        Order being calculated, or null for the current rate.
+         */
+        return (float) apply_filters(
+            'wcusage_bonus_commission_increase',
+            $increase,
+            $affiliate_id,
+            $order
+        );
+    }
+
+}
+/**
+ * Record a change to an affiliate's bonus commission percentage, from now on.
+ *
+ * Runs whenever "wcusage_reward_commission_increase" is written or deleted, by a
+ * Performance Bonus or by hand on the user profile.
+ *
+ * @param int          $affiliate_id
+ * @param string|float $increase     The new percentage; "" or 0 for none.
+ *
+ * @return array The history now saved.
+ */
+if ( !function_exists( 'wcusage_record_bonus_commission_increase' ) ) {
+    function wcusage_record_bonus_commission_increase(  $affiliate_id, $increase, $from = null  ) {
+        $history = get_user_meta( $affiliate_id, 'wcusage_reward_commission_increase_history', true );
+        if ( empty( $history ) || !is_array( $history ) ) {
+            $history = array();
+        }
+        $increase = ( is_numeric( $increase ) ? (float) $increase : 0.0 );
+        $last = end( $history );
+        if ( is_array( $last ) && isset( $last['increase'] ) && (float) $last['increase'] === $increase ) {
+            return $history;
+        }
+        if ( !$history && !$increase ) {
+            return $history;
+        }
+        $history[] = array(
+            'from'     => ( null === $from ? time() : (int) $from ),
+            'increase' => $increase,
+        );
+        update_user_meta( $affiliate_id, 'wcusage_reward_commission_increase_history', $history );
+        return $history;
+    }
+
+}
+/**
+ * Record every write of "wcusage_reward_commission_increase". See
+ * wcusage_record_bonus_commission_increase().
+ *
+ * @param int|array $meta_id
+ * @param int       $user_id
+ * @param string    $meta_key
+ * @param mixed     $meta_value
+ */
+if ( !function_exists( 'wcusage_on_bonus_commission_increase_meta' ) ) {
+    function wcusage_on_bonus_commission_increase_meta(
+        $meta_id,
+        $user_id,
+        $meta_key,
+        $meta_value = ''
+    ) {
+        if ( 'wcusage_reward_commission_increase' !== $meta_key ) {
+            return;
+        }
+        $value = ( doing_action( 'deleted_user_meta' ) ? '' : $meta_value );
+        wcusage_record_bonus_commission_increase( (int) $user_id, $value );
+    }
+
+    add_action(
+        'added_user_meta',
+        'wcusage_on_bonus_commission_increase_meta',
+        10,
+        4
+    );
+    add_action(
+        'updated_user_meta',
+        'wcusage_on_bonus_commission_increase_meta',
+        10,
+        4
+    );
+    add_action(
+        'deleted_user_meta',
+        'wcusage_on_bonus_commission_increase_meta',
+        10,
+        4
+    );
+}
+/**
+ * Add the affiliate's Performance Bonus commission increase to an order's commission.
+ *
+ * Acts on the order's whole commission - the percentage and fixed parts together,
+ * after the per-order maximum - so only on the "total" figure and the "saved" one
+ * rebuilt from the order's saved parts. The "percentage" part is filtered first and
+ * is already included in "total", so increasing it too would count it twice.
+ *
+ * Runs first (priority 5): before Multi-Level Affiliates takes the parents' share out
+ * of the sub-affiliate's commission (10), so that share is worked out on the
+ * increased figure the parents' grant is later built from; before the own-purchase
+ * rule (10), which zeroes it either way; and before a migrated order's imported
+ * amount (99), which replaces it.
+ *
+ * @param float  $commission
+ * @param int    $orderid
+ * @param int    $couponid
+ * @param int    $couponuser User ID of the affiliate assigned to the coupon.
+ * @param string $context    "percentage", "total" or "saved".
+ *
+ * @return float
+ */
+if ( !function_exists( 'wcusage_apply_bonus_commission_increase' ) ) {
+    function wcusage_apply_bonus_commission_increase(
+        $commission,
+        $orderid = 0,
+        $couponid = 0,
+        $couponuser = 0,
+        $context = ''
+    ) {
+        if ( !$commission || !$couponuser || !$orderid || !in_array( $context, array('total', 'saved'), true ) ) {
+            return $commission;
+        }
+        // Part of Performance Bonuses: with the module switched off, its screens and the
+        // "Bonus Commission Percentage" profile field are gone, so no increase applies.
+        if ( !wcusage_get_setting_value( 'wcusage_field_bonuses_enable', '0' ) ) {
+            return $commission;
+        }
+        $order = wc_get_order( $orderid );
+        if ( !$order instanceof WC_Order ) {
+            return $commission;
+        }
+        $increase = wcusage_get_bonus_commission_increase( $couponuser, $order );
+        if ( !$increase ) {
+            return $commission;
+        }
+        $increased = (float) $commission + (float) $commission * ($increase / 100);
+        // Both callers apply "Maximum commission per order" before this filter, so the
+        // increase must not take the order above it either.
+        $max_commission = wcusage_get_setting_value( 'wcusage_field_order_max_commission', '' );
+        if ( $max_commission && $increased > (float) $max_commission ) {
+            $increased = max( (float) $commission, (float) $max_commission );
+        }
+        return $increased;
+    }
+
+    add_filter(
+        'wcusage_calculate_edit_commission',
+        'wcusage_apply_bonus_commission_increase',
+        5,
+        5
     );
 }
 /**
@@ -1299,8 +1741,11 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         $affiliate_per_user = wcusage_get_setting_value( 'wcusage_field_affiliate_per_user', '0' );
         // ***** Get Affiliate Fixed Per Order Amount ***** //
         $fixed_order_commission = wcusage_get_setting_value( 'wcusage_field_affiliate_fixed_order', '0' );
+        // The coupon's own rates, as they were when this order was placed - a Performance
+        // Bonus that replaced them later must not reach back to it.
+        $coupon_rates = wcusage_get_coupon_commission_rates( $couponid, $order );
         // Overwrite with custom coupon amount
-        $wcu_text_coupon_commission_fixed_order = get_post_meta( $couponid, 'wcu_text_coupon_commission_fixed_order', true );
+        $wcu_text_coupon_commission_fixed_order = $coupon_rates['fixed_order'];
         if ( $wcu_text_coupon_commission_fixed_order !== "" && is_numeric( $wcu_text_coupon_commission_fixed_order ) && $wcu_text_coupon_commission_fixed_order >= 0 ) {
             if ( (float) $wcu_text_coupon_commission_fixed_order > 0 || (float) $fixed_order_commission <= 0 ) {
                 $fixed_order_commission = $wcu_text_coupon_commission_fixed_order;
@@ -1316,7 +1761,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
         // which it never is (the default is "0"), so a per-product percentage was ignored
         // on every order unless priority was set to "product".
         $has_custom_affiliate_rate = false;
-        $wcu_text_coupon_commission = get_post_meta( $couponid, 'wcu_text_coupon_commission', true );
+        $wcu_text_coupon_commission = $coupon_rates['percent'];
         if ( $wcu_text_coupon_commission != "" && $wcu_text_coupon_commission >= 0 ) {
             $option_affiliate = $wcu_text_coupon_commission;
             $has_custom_affiliate_rate = true;
@@ -1387,8 +1832,8 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                 // than once per item. On an order with a dozen lines this was a dozen
                 // post-meta reads, a dozen role-rate lookups and a dozen settings reads
                 // that all returned the same answer.
-                $wcu_text_coupon_commission_fixed_product = get_post_meta( $couponid, 'wcu_text_coupon_commission_fixed_product', true );
-                // Get Coupon Fixed Per Product
+                $wcu_text_coupon_commission_fixed_product = $coupon_rates['fixed_product'];
+                // Get Coupon Fixed Per Product (as when the order was placed)
                 $fixed_product_role_amount = "";
                 if ( wcu_fs()->is__premium_only() && $affiliate_per_user ) {
                     $fixed_product_role_amount = wcusage_get_role_rate( $user, 'wcusage_field_affiliate_fixed_product_role_' );
@@ -1563,6 +2008,40 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                                 }
                             }
                         }
+                        /**
+                         * Filters the commission rates set for a product.
+                         *
+                         * Runs once per line item, after the category, product and per-affiliate
+                         * product rates have been resolved. An empty string means no rate is set
+                         * for the product, so the coupon's or the shop-wide rate applies. A rate
+                         * that is set is used when "Commission Priority" is "product", or when
+                         * the coupon has no custom rate of its own.
+                         *
+                         * @param array         $rates {
+                         *     @type string|float $percent Percentage rate for the product, or "".
+                         *     @type string|float $fixed   Fixed amount per item, or "".
+                         * }
+                         * @param int           $product_id  Product (or variation) ID on the line.
+                         * @param int           $parent_id   Parent product ID.
+                         * @param string        $coupon_code Affiliate coupon being calculated.
+                         * @param WC_Order|null $order       Order, or null when the affiliate's
+                         *                                   "Product Rates" tab shows the rate.
+                         */
+                        $product_rates = apply_filters(
+                            'wcusage_product_commission_rates',
+                            array(
+                                'percent' => $product_percent,
+                                'fixed'   => $fixed_product_commission,
+                            ),
+                            (int) $this_id,
+                            (int) $parent_id,
+                            $coupon_code,
+                            $order
+                        );
+                        if ( is_array( $product_rates ) ) {
+                            $product_percent = wcusage_normalise_filtered_rate( ( isset( $product_rates['percent'] ) ? $product_rates['percent'] : "" ) );
+                            $fixed_product_commission = wcusage_normalise_filtered_rate( ( isset( $product_rates['fixed'] ) ? $product_rates['fixed'] : "" ) );
+                        }
                         // Deduct custom percent - $deduct_percent is computed once above the loop.
                         // Get Commission Amount Percentage (Decimal)
                         if ( is_numeric( $option_affiliate ) ) {
@@ -1627,9 +2106,11 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                                 $commission_base_total += (float) $this_line_total * (float) $deduct_percent;
                             }
                         }
-                        $totalcommission += $this_line_total_commission;
                         $affiliate_commission_amount = 0;
                         // Reset Value
+                        // What the fixed per-product total held before this line, so the line's
+                        // own fixed amount can be told apart for the item filter below.
+                        $fixed_product_commission_total_before = $fixed_product_commission_total;
                         //  ***** Get Per Product Commission ***** //
                         if ( $item_coupon_restricted ) {
                             // Coupon's usage restrictions excluded this product - no fixed per-product
@@ -1656,6 +2137,43 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                             }
                             $iscommissionproduct = true;
                         }
+                        $this_line_fixed_commission = (float) $fixed_product_commission_total - (float) $fixed_product_commission_total_before;
+                        /**
+                         * Filters the commission one line item of an order earns.
+                         *
+                         * Runs for every product line, after the rates are applied and before the
+                         * order-level adjustments (fees, shipping, store credit, the per-order cap
+                         * and "wcusage_calculate_edit_commission"). Refunded quantities are
+                         * already taken off.
+                         *
+                         * @param array                 $line_commission {
+                         *     @type float $percentage Commission from the percentage rate.
+                         *     @type float $fixed      Fixed per-product commission, for the whole quantity.
+                         * }
+                         * @param WC_Order_Item_Product $item        Line item.
+                         * @param WC_Order              $order       Order.
+                         * @param string                $coupon_code Affiliate coupon being calculated.
+                         * @param int                   $quantity    Quantity left after refunds.
+                         */
+                        if ( has_filter( 'wcusage_order_item_commission' ) ) {
+                            $line_commission = apply_filters(
+                                'wcusage_order_item_commission',
+                                array(
+                                    'percentage' => (float) $this_line_total_commission,
+                                    'fixed'      => $this_line_fixed_commission,
+                                ),
+                                $item_values,
+                                $order,
+                                $coupon_code,
+                                (int) $this_quantity2
+                            );
+                            if ( is_array( $line_commission ) ) {
+                                $this_line_total_commission = ( isset( $line_commission['percentage'] ) ? (float) $line_commission['percentage'] : 0 );
+                                $this_line_fixed_commission = ( isset( $line_commission['fixed'] ) ? (float) $line_commission['fixed'] : 0 );
+                                $fixed_product_commission_total = $fixed_product_commission_total_before + $this_line_fixed_commission;
+                            }
+                        }
+                        $totalcommission += $this_line_total_commission;
                         // Count Items
                         if ( is_numeric( $this_quantity2 ) ) {
                             $itemcount += $this_quantity2;
@@ -1669,7 +2187,7 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                             $this_product_id = $item_data['product_id'];
                         }
                         if ( $this_quantity2 > 0 ) {
-                            $this_product_total_combined_commission = $this_line_total_commission + (float) $fixed_product_commission * (int) $this_quantity2;
+                            $this_product_total_combined_commission = $this_line_total_commission + $this_line_fixed_commission;
                             if ( !is_array( $commission_summary ) || empty( $commission_summary ) ) {
                                 $commission_summary = array();
                             }
@@ -1816,7 +2334,9 @@ if ( !function_exists( 'wcusage_get_order_calculate_data' ) ) {
                 }
                 // Filter for other store credit plugins
                 $store_credit_used = apply_filters( 'wcusage_order_store_credit', $store_credit_used, $order );
-                if ( $store_credit_used > 0 ) {
+                // Store credit is a custom discount (see the setting's description), so the
+                // "Include custom discounts in % commission calculations" setting skips it too.
+                if ( $store_credit_used > 0 && !$wcusage_field_commission_before_discount_custom ) {
                     $store_credit_commission_deduction = $store_credit_used * $blended_commission_rate;
                     $totalcommission = $totalcommission - $store_credit_commission_deduction;
                     // Update Commission Summary

@@ -120,6 +120,13 @@ function wcusage_ajax_submit_registration() {
             'message' => 'Captcha verification failed. Please try again.',
         ) );
     }
+    // Check the coupon code the applicant typed only uses allowed characters (a code
+    // generated from the "Coupon Format" setting is the store's own and is not checked)
+    if ( function_exists( 'wcusage_registration_coupon_code_valid' ) && !wcusage_registration_coupon_code_valid( wcusage_registration_posted_coupon_code() ) ) {
+        wp_send_json_error( array(
+            'message' => wcusage_registration_coupon_code_invalid_message(),
+        ) );
+    }
     // Check if the coupon code is available (not already taken by another registration or existing WooCommerce coupon)
     if ( !empty( $couponcode ) && function_exists( 'wcusage_registration_coupon_available' ) && !wcusage_registration_coupon_available( $couponcode ) ) {
         wp_send_json_error( array(

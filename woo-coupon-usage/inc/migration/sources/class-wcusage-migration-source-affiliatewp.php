@@ -305,30 +305,30 @@ class WCUsage_Migration_Source_AffiliateWP extends WCUsage_Migration_Source {
 		}
 
 		if ( $this->global_rate_is_per_product() ) {
-			$lines[] = __( 'The default flat rate per product (AffiliateWP paid it per order line, Coupon Affiliates pays it per unit)', 'woo-coupon-usage' );
+			$lines['commission_settings'] = __( 'The default flat rate per product (AffiliateWP paid it per order line, Coupon Affiliates pays it per unit)', 'woo-coupon-usage' );
 		}
 		$per_product = $this->affiliates_with_per_product_rate();
 		if ( $per_product ) {
 			/* translators: %d: number of affiliates */
-			$lines[] = sprintf( _n( '%d affiliate\'s own flat rate per product (paid per order line in AffiliateWP, per unit here): they earn the default rate', '%d affiliates\' own flat rates per product (paid per order line in AffiliateWP, per unit here): they earn the default rate', $per_product, 'woo-coupon-usage' ), $per_product );
+			$lines['coupon_rates'] = sprintf( _n( '%d affiliate\'s own flat rate per product (paid per order line in AffiliateWP, per unit here): they earn the default rate', '%d affiliates\' own flat rates per product (paid per order line in AffiliateWP, per unit here): they earn the default rate', $per_product, 'woo-coupon-usage' ), $per_product );
 		}
 
-		$lines[] = __( 'Multi-tier commissions and affiliate parents (past tier commission is still added to the earning affiliate\'s balance)', 'woo-coupon-usage' );
-		$lines[] = __( 'Lifetime customer links', 'woo-coupon-usage' );
+		$lines['mla']      = __( 'Multi-tier commissions and affiliate parents (past tier commission is still added to the earning affiliate\'s balance)', 'woo-coupon-usage' );
+		$lines['lifetime'] = __( 'Lifetime customer links', 'woo-coupon-usage' );
 
 		// The groups table also holds creative categories.
 		$groups = $this->t( 'groups' );
 		if ( $this->count_rows( $groups, $this->has_column( $groups, 'type' ) ? "type LIKE '%affiliate%'" : '' ) ) {
-			$lines[] = __( 'Affiliate groups and their rates', 'woo-coupon-usage' );
+			$lines['groups'] = __( 'Affiliate groups and their rates', 'woo-coupon-usage' );
 		}
 
-		$lines[] = __( 'Commission rates set on products and product categories', 'woo-coupon-usage' );
-		$lines[] = __( 'Custom affiliate slugs: old referral links with the affiliate ID or username still work', 'woo-coupon-usage' );
+		$lines['product_rates'] = __( 'Commission rates set on products and product categories', 'woo-coupon-usage' );
+		$lines[]                = __( 'Custom affiliate slugs: old referral links with the affiliate ID or username still work', 'woo-coupon-usage' );
 
-		$lines[] = __( 'Add-on rates: per-affiliate product rates, recurring rates and tiered rates', 'woo-coupon-usage' );
-		$lines[] = __( 'Affiliate landing pages', 'woo-coupon-usage' );
-		$lines[] = __( 'Program settings other than the default rate, cookie length and referrer credit', 'woo-coupon-usage' );
-		$lines[] = __( 'Stripe and Payouts Service accounts affiliates connected (their payout method is migrated, but they connect again here)', 'woo-coupon-usage' );
+		$lines['addon_rates']   = __( 'Add-on rates: per-affiliate product rates, recurring rates and tiered rates', 'woo-coupon-usage' );
+		$lines['landing_pages'] = __( 'Affiliate landing pages', 'woo-coupon-usage' );
+		$lines['settings']      = __( 'Program settings other than the default rate, cookie length and referrer credit', 'woo-coupon-usage' );
+		$lines['stripe']        = __( 'Stripe and Payouts Service accounts affiliates connected (their payout method is migrated, but they connect again here)', 'woo-coupon-usage' );
 
 		return $lines;
 	}

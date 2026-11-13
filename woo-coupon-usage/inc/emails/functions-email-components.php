@@ -22,6 +22,84 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Send one of the plugin's emails.
+ *
+ * Every email the plugin sends goes through here, so the two filters below apply
+ * to all of them.
+ *
+ * @param string          $type        Which email: see the list on "wcusage_email_args".
+ * @param string|string[] $to          Recipient(s).
+ * @param string          $subject     Subject.
+ * @param string          $message     Body (HTML unless the headers say otherwise).
+ * @param string|string[] $headers     Headers.
+ * @param string[]        $attachments File paths to attach.
+ * @param array           $context     Details about what the email is for, such as
+ *                                     "user_id", "coupon_code", "order_id" or "payout_id".
+ *
+ * @return bool Whether wp_mail() accepted it. False when a filter cancelled it.
+ */
+if ( ! function_exists( 'wcusage_mail' ) ) {
+  function wcusage_mail( $type, $to, $subject, $message, $headers = '', $attachments = array(), $context = array() ) {
+
+    $args = array(
+      'to'          => $to,
+      'subject'     => $subject,
+      'message'     => $message,
+      'headers'     => $headers,
+      'attachments' => $attachments,
+    );
+    $context = (array) $context;
+
+    /**
+     * Filters whether one of the plugin's emails is sent.
+     *
+     * Return false to stop it. The plugin's own on/off settings have already been
+     * checked by the time this runs.
+     *
+     * @param bool   $send    Whether to send. Default true.
+     * @param string $type    Which email (see "wcusage_email_args").
+     * @param array  $args    to, subject, message, headers and attachments.
+     * @param array  $context Details about what the email is for.
+     */
+    if ( ! apply_filters( 'wcusage_send_email', true, $type, $args, $context ) ) {
+      return false;
+    }
+
+    /**
+     * Filters the recipient, subject, body, headers and attachments of one of the
+     * plugin's emails.
+     *
+     * $type is one of:
+     * - new_order: affiliate, an order was referred.
+     * - order_refunded: affiliate, a referred order was refunded or cancelled.
+     * - registration_received, registration_new_user, registration_admin,
+     *   registration_accepted, registration_declined, coupon_assigned.
+     * - payout_request_admin, payout_scheduled_admin, payout_paid.
+     * - direct_link_admin, direct_link_accepted, direct_link_declined.
+     * - mla_invite, mla_sub_referral, mla_sub_signup, mla_sub_registration.
+     * - reward_earned, affiliate_report, newsletter, newsletter_test.
+     *
+     * @param array  $args {
+     *     @type string|string[] $to          Recipient(s).
+     *     @type string          $subject     Subject.
+     *     @type string          $message     Body.
+     *     @type string|string[] $headers     Headers.
+     *     @type string[]        $attachments File paths to attach.
+     * }
+     * @param string $type    Which email.
+     * @param array  $context Details about what the email is for.
+     */
+    $filtered = apply_filters( 'wcusage_email_args', $args, $type, $context );
+    if ( is_array( $filtered ) ) {
+      $args = array_merge( $args, $filtered );
+    }
+
+    return wp_mail( $args['to'], $args['subject'], $args['message'], $args['headers'], $args['attachments'] );
+
+  }
+}
+
+/**
  * The colour and type tokens every component draws from.
  *
  * The accent defaults to the affiliate dashboard's button colour so reports look

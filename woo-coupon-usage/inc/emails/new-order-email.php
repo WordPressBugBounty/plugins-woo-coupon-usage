@@ -103,6 +103,10 @@ if ( ! function_exists( 'wcusage_admin_order_email' ) ) {
             if ( $affiliate ) {
 
                 $user_info = get_userdata( $affiliate );
+                // An affiliate whose account has since been deleted.
+                if ( ! $user_info ) {
+                    return;
+                }
                 $user_login = $user_info->user_login;
                 $user_email = $user_info->user_email;
 
@@ -166,6 +170,46 @@ if ( ! function_exists( 'wcusage_admin_order_email' ) ) {
 add_action( 'woocommerce_email_customer_details', 'wcusage_admin_order_email', 999, 4 );
 
 /**
+ * The {listproducts} list in the affiliate's "New Order Referral" email.
+ *
+ * With "Only list products that earn commission" on, products that earned the affiliate
+ * nothing are left out - unless none of them earned anything (the commission is a fixed
+ * amount per order, say), when every product is listed.
+ *
+ * @param WC_Order $order
+ * @param array    $commission_summary The order's "commission_summary" from wcusage_calculate_order_data().
+ *
+ * @return string
+ *
+ */
+if( !function_exists( 'wcusage_get_new_order_email_products' ) ) {
+	function wcusage_get_new_order_email_products( $order, $commission_summary = array() ) {
+
+		$only_earning = wcusage_get_setting_value('wcusage_field_email_list_commission_products', '0');
+		if( !is_array( $commission_summary ) ) {
+			$commission_summary = array();
+		}
+
+		$all_products = "";
+		$earning_products = "";
+		foreach( $order->get_items() as $item_id => $item ) {
+			$line = "- " . $item->get_name() . " x " . $item->get_quantity() . "<br/>";
+			$all_products .= $line;
+			if( $only_earning && $item instanceof WC_Order_Item_Product ) {
+				// Keyed as wcusage_calculate_order_data() keys it: the variation, or else the product.
+				$product_id = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
+				if( isset( $commission_summary[ $product_id ]['commission'] ) && (float) $commission_summary[ $product_id ]['commission'] > 0 ) {
+					$earning_products .= $line;
+				}
+			}
+		}
+
+		return ( $only_earning && $earning_products !== "" ) ? $earning_products : $all_products;
+
+	}
+}
+
+/**
  * Creates email notification to affiliate for new order
  *
  * @param string $coupon_code
@@ -190,11 +234,25 @@ function wcusage_new_order_affiliate_email_create($coupon_code, $order_id = "", 
 
 	if( $wcu_enable_notifications && $valueuser && $order_id ) {
 
+		// The coupon can still name an affiliate whose account was deleted.
+		$user_info = get_userdata($valueuser);
+		if( !$user_info ) {
+			return;
+		}
+
 		$order = wc_get_order( $order_id );
+		if( !$order ) {
+			return;
+		}
 
 		$calculateorder = wcusage_calculate_order_data( $order_id, $coupon_code, 0, 1 );
 		$totalcommission = $calculateorder['totalcommission'];
 		$totalcommission = number_format((float)$totalcommission, 2, '.', '');
+
+		// "Only send when the order earns the affiliate commission"
+		if( wcusage_get_setting_value('wcusage_field_email_require_commission', '0') && (float)$totalcommission <= 0 ) {
+			return;
+		}
 
 		$discount_type = $coupon->get_discount_type(); // Get coupon discount type
 		$coupon_amount = $coupon->get_amount(); // Get coupon amount
@@ -206,14 +264,7 @@ function wcusage_new_order_affiliate_email_create($coupon_code, $order_id = "", 
 		$valuecommission = wcusage_format_price( number_format((float)$totalcommission, 2, '.', '') );
 		$valuecommission_plain = wcusage_format_price_plain( number_format((float)$totalcommission, 2, '.', '') );
 
-		$list_products = "";
-		foreach( $order->get_items() as $item_id => $item ) {
-			$product_name = $item->get_name();
-			$product_qty = $item->get_quantity();
-			$list_products .= "- " . $product_name . " x " . $product_qty . "<br/>";
-		}
-
-		$user_info = get_userdata($valueuser);
+		$list_products = wcusage_get_new_order_email_products( $order, isset( $calculateorder['commission_summary'] ) ? $calculateorder['commission_summary'] : array() );
 
 		$user_name = $user_info->display_name;
 		$user_email = $user_info->user_email;
@@ -275,7 +326,7 @@ function wcusage_new_order_affiliate_email_create($coupon_code, $order_id = "", 
 		// Style the wrapped message with woocommerce inline styles
 		$html_message = $wc_email->style_inline($wrapped_message);
 
-		wp_mail( $to, $subject, $html_message, $headers );
+		wcusage_mail( 'new_order', $to, $subject, $html_message, $headers, array(), array( 'order_id' => (int) $order_id, 'coupon_code' => $coupon_code, 'user_id' => (int) $valueuser, 'commission' => (float) $totalcommission ) );
 
 	}
 

@@ -86,17 +86,17 @@ class WCUsage_Migration_Source_SliceWP extends WCUsage_Migration_Source {
 	public function get_not_migrated() {
 		$lines = array();
 		if ( ! $this->coupon_reader() ) {
-			$lines[] = __( 'Coupons linked to affiliates by the Affiliate Coupons add-on (SliceWP Pro), unless the add-on is active while migrating: each affiliate gets a coupon here instead', 'woo-coupon-usage' );
+			$lines['coupons'] = __( 'Coupons linked to affiliates by the Affiliate Coupons add-on (SliceWP Pro), unless the add-on is active while migrating: each affiliate gets a coupon here instead', 'woo-coupon-usage' );
 		}
 		return array_merge(
 			$lines,
 			array(
 				__( 'Custom affiliate slugs: old referral links with the affiliate ID still work', 'woo-coupon-usage' ),
-				__( 'Multi-level affiliate parents (past multi-level commission is still added to the parent\'s balance)', 'woo-coupon-usage' ),
-				__( 'Lifetime customer links', 'woo-coupon-usage' ),
-				__( 'Commission switched off on product categories or single variations', 'woo-coupon-usage' ),
-				__( 'Commission rates for subscriptions and other commission types (only the sale rate is migrated)', 'woo-coupon-usage' ),
-				__( 'Shipping and tax exclusion, email notifications and the other program settings', 'woo-coupon-usage' ),
+				'mla'              => __( 'Multi-level affiliate parents (past multi-level commission is still added to the parent\'s balance)', 'woo-coupon-usage' ),
+				'lifetime'         => __( 'Lifetime customer links', 'woo-coupon-usage' ),
+				'exclude_products' => __( 'Commission switched off on product categories or single variations', 'woo-coupon-usage' ),
+				'subscriptions'    => __( 'Commission rates for subscriptions and other commission types (only the sale rate is migrated)', 'woo-coupon-usage' ),
+				'settings'         => __( 'Shipping and tax exclusion, email notifications and the other program settings', 'woo-coupon-usage' ),
 			)
 		);
 	}

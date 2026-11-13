@@ -29,13 +29,11 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
                     $show_order = 1;
                 }
                 if ( !$show_order ) {
-                    $wcusage_field_order_type_custom = wcusage_get_setting_value( 'wcusage_field_order_type_custom', '' );
-                    if ( $wcusage_field_order_type_custom ) {
-                        if ( isset( $options['wcusage_field_order_type_custom']['wc-pending'] ) && isset( $options['wcusage_field_order_type_custom']['wc-processing'] ) ) {
-                            if ( $status_from == "pending" && $status_to == "processing" ) {
-                                wcusage_update_order_meta( $order_id, 'wcusage_all_updated', 1 );
-                                $show_order = 1;
-                            }
+                    $commission_statuses = wcusage_get_commission_order_statuses();
+                    if ( isset( $commission_statuses['wc-pending'] ) && isset( $commission_statuses['wc-processing'] ) ) {
+                        if ( $status_from == "pending" && $status_to == "processing" ) {
+                            wcusage_update_order_meta( $order_id, 'wcusage_all_updated', 1 );
+                            $show_order = 1;
                         }
                     }
                 }
@@ -50,6 +48,10 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
             $coupon_refresh = wcusage_order_meta( $order_id, 'wcusage_referrer_refresh' );
             $coupon_refresh_prev = wcusage_order_meta( $order_id, 'wcusage_referrer_refresh_prev' );
             $meta_data = [];
+            // Coupons the order is credited to, with their calculated order data, and
+            // for an order leaving the stats what each was counted with.
+            $credited = array();
+            $removed_commission = array();
             if ( $order ) {
                 // Set the currency conversion rate for order.
                 $enablecurrency = wcusage_get_setting_value( 'wcusage_field_enable_currency', '0' );
@@ -65,6 +67,9 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
                 // Update All-Time Stats
                 $wcusage_field_enable_coupon_all_stats_meta = wcusage_get_setting_value( 'wcusage_field_enable_coupon_all_stats_meta', '1' );
                 if ( $lifetimeaffiliate ) {
+                    if ( $remove_order ) {
+                        $removed_commission[$lifetimeaffiliate] = wcusage_get_order_counted_commission( $order_id, $lifetimeaffiliate );
+                    }
                     $calculateorder = wcusage_calculate_order_data(
                         $order_id,
                         $lifetimeaffiliate,
@@ -72,6 +77,7 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
                         0,
                         1
                     );
+                    $credited[$lifetimeaffiliate] = $calculateorder;
                     // If is a lifetime affiliate order.
                     if ( $wcusage_field_enable_coupon_all_stats_meta ) {
                         if ( $show_order ) {
@@ -108,6 +114,9 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
                         $paidcommission
                     );
                 } elseif ( $affiliatereferrer ) {
+                    if ( $remove_order ) {
+                        $removed_commission[$affiliatereferrer] = wcusage_get_order_counted_commission( $order_id, $affiliatereferrer );
+                    }
                     $calculateorder = wcusage_calculate_order_data(
                         $order_id,
                         $affiliatereferrer,
@@ -115,6 +124,7 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
                         0,
                         1
                     );
+                    $credited[$affiliatereferrer] = $calculateorder;
                     if ( $wcusage_field_enable_coupon_all_stats_meta ) {
                         // Update Coupon Stats
                         if ( $show_order ) {
@@ -160,6 +170,9 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
                             $coupons_array = $order->get_used_coupons();
                         }
                         foreach ( $coupons_array as $coupon_code ) {
+                            if ( $remove_order ) {
+                                $removed_commission[$coupon_code] = wcusage_get_order_counted_commission( $order_id, $coupon_code );
+                            }
                             $calculateorder = wcusage_calculate_order_data(
                                 $order_id,
                                 $coupon_code,
@@ -167,6 +180,7 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
                                 0,
                                 1
                             );
+                            $credited[$coupon_code] = $calculateorder;
                             if ( $wcusage_field_enable_coupon_all_stats_meta ) {
                                 // Update Coupon Stats
                                 if ( $show_order ) {
@@ -203,6 +217,17 @@ if ( !function_exists( 'wcusage_new_order_update_stats' ) ) {
                                 $paidcommission
                             );
                         }
+                    }
+                }
+                if ( $show_order || $remove_order ) {
+                    foreach ( $credited as $credited_code => $credited_data ) {
+                        wcusage_do_referral_change_action(
+                            ( $show_order ? 'added' : 'removed' ),
+                            $order,
+                            $credited_code,
+                            $credited_data,
+                            ( isset( $removed_commission[$credited_code] ) ? $removed_commission[$credited_code] : null )
+                        );
                     }
                 }
                 if ( $coupon_refresh ) {
@@ -297,6 +322,43 @@ function wcusage_on_new_order_set_coupon_referrer(  $order_id  ) {
         $coupons_array = $order->get_coupon_codes();
     } else {
         $coupons_array = $order->get_used_coupons();
+    }
+    /**
+     * Filters the referral link coupon an order is credited to.
+     *
+     * Runs at checkout with the coupon from the visitor's referral cookie. Return
+     * another affiliate coupon's code to credit that affiliate instead, or an empty
+     * string to ignore the referral link. Coupons used on the order itself are
+     * credited as normal either way; use WooCommerce's coupon validation filters to
+     * stop one being used.
+     *
+     * @param string   $coupon_code   Coupon from the referral cookie, or empty.
+     * @param WC_Order $order         Order being placed.
+     * @param string[] $order_coupons Coupon codes used on the order.
+     */
+    $filtered_cookie = apply_filters(
+        'wcusage_order_referral_coupon',
+        $cookie,
+        $order,
+        $coupons_array
+    );
+    if ( $filtered_cookie !== $cookie ) {
+        $cookie = sanitize_text_field( (string) $filtered_cookie );
+        $url_applied = "";
+    }
+    // A suspended affiliate is not credited through their referral link. The cookie
+    // may have been set before the suspension, so it is checked here too. Dropping it
+    // lets the order fall back to any affiliate coupon used on it.
+    if ( $cookie && wcusage_is_coupon_suspended( wc_get_coupon_id_by_code( $cookie ) ) ) {
+        $cookie = "";
+        $url_applied = "";
+    }
+    // Nor is an affiliate credited through their own referral link, when the settings
+    // say they earn nothing on their own orders. This used to look only at the
+    // logged-in user, so a guest checkout with the affiliate's own email was credited.
+    if ( $cookie && wcusage_is_blocked_own_order( $order, $cookie ) ) {
+        $cookie = "";
+        $url_applied = "";
     }
     if ( $cookie ) {
         if ( !in_array( $cookie, $coupons_array ) ) {
@@ -406,3 +468,231 @@ add_action(
     20,
     1
 );
+/**
+ * The affiliate coupons an order is credited to, and how.
+ *
+ * Follows the same order of precedence as the stats: a lifetime referrer, then a
+ * referral link (or an applied coupon that replaced a lifetime referrer), then the
+ * affiliate coupons used on the order.
+ *
+ * @param WC_Order $order Order.
+ *
+ * @return array[] List of array( 'coupon_code', 'affiliate_id', 'source' ), where
+ *                 source is "lifetime", "url" or "coupon". Coupons with no affiliate
+ *                 assigned are left out.
+ */
+if ( !function_exists( 'wcusage_get_order_referral_attribution' ) ) {
+    function wcusage_get_order_referral_attribution(  $order  ) {
+        if ( !is_a( $order, 'WC_Order' ) ) {
+            return array();
+        }
+        $order_id = $order->get_id();
+        $order_coupons = array_map( 'strtolower', $order->get_coupon_codes() );
+        $candidates = array();
+        $lifetimeaffiliate = wcusage_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer' );
+        $affiliatereferrer = wcusage_order_meta( $order_id, 'wcusage_referrer_coupon' );
+        if ( $lifetimeaffiliate ) {
+            $candidates[$lifetimeaffiliate] = 'lifetime';
+        } elseif ( $affiliatereferrer ) {
+            $candidates[$affiliatereferrer] = ( in_array( strtolower( $affiliatereferrer ), $order_coupons, true ) ? 'coupon' : 'url' );
+        } else {
+            foreach ( $order->get_coupon_codes() as $coupon_code ) {
+                $candidates[$coupon_code] = 'coupon';
+            }
+        }
+        $attribution = array();
+        foreach ( $candidates as $coupon_code => $source ) {
+            $coupon_info = wcusage_get_coupon_info( $coupon_code );
+            $affiliate_id = ( isset( $coupon_info[1] ) ? (int) $coupon_info[1] : 0 );
+            if ( $affiliate_id ) {
+                $attribution[] = array(
+                    'coupon_code'  => (string) $coupon_code,
+                    'affiliate_id' => $affiliate_id,
+                    'source'       => $source,
+                );
+            }
+        }
+        return $attribution;
+    }
+
+}
+/**
+ * Fire "wcusage_order_referral_attributed" once a checkout has decided who the order is credited to.
+ *
+ * Runs after the lifetime check (priority 1) and the referral link check
+ * (priority 10) on the same checkout hooks.
+ *
+ * @param int|WC_Order $order_id Order.
+ */
+if ( !function_exists( 'wcusage_on_new_order_referral_attributed' ) ) {
+    function wcusage_on_new_order_referral_attributed(  $order_id  ) {
+        $order = ( is_a( $order_id, 'WC_Order' ) ? $order_id : wc_get_order( absint( $order_id ) ) );
+        if ( !$order ) {
+            return;
+        }
+        // A failed payment retried through the checkout runs these hooks again for
+        // the same order.
+        if ( wcusage_order_meta( $order->get_id(), '_wcusage_referral_attributed' ) ) {
+            return;
+        }
+        $attribution = wcusage_get_order_referral_attribution( $order );
+        if ( empty( $attribution ) ) {
+            return;
+        }
+        wcusage_update_order_meta( $order->get_id(), '_wcusage_referral_attributed', 1 );
+        foreach ( $attribution as $credit ) {
+            /**
+             * Fires at checkout for each affiliate an order is credited to.
+             *
+             * Fires once per order and affiliate coupon, whatever the order's status;
+             * commission is granted later, as the order moves through its statuses (see
+             * "wcusage_referral_added"). Orders created in wp-admin do not fire it.
+             *
+             * @param WC_Order $order        Order.
+             * @param string   $coupon_code  Affiliate coupon the order is credited to.
+             * @param int      $affiliate_id User ID of the affiliate.
+             * @param string   $source       How: "coupon" (used on the order), "url"
+             *                               (referral link) or "lifetime" (lifetime
+             *                               commission referrer).
+             */
+            do_action(
+                'wcusage_order_referral_attributed',
+                $order,
+                $credit['coupon_code'],
+                $credit['affiliate_id'],
+                $credit['source']
+            );
+        }
+    }
+
+}
+add_action(
+    'woocommerce_checkout_order_processed',
+    'wcusage_on_new_order_referral_attributed',
+    20,
+    1
+);
+add_action(
+    'woocommerce_store_api_checkout_order_processed',
+    'wcusage_on_new_order_referral_attributed',
+    20,
+    1
+);
+/**
+ * The commission one coupon's referral of an order was counted with.
+ *
+ * Resolved the way wcusage_update_all_stats_single() takes it back: the coupon's
+ * own snapshot on an order with several affiliate coupons, what a coupon that
+ * does not own the order's commission was granted or has pending, otherwise the
+ * order's saved commission. Read it before the stats are updated, which drops
+ * the snapshot.
+ *
+ * @param int    $order_id    Order ID.
+ * @param string $coupon_code Coupon.
+ *
+ * @return float
+ */
+if ( !function_exists( 'wcusage_get_order_counted_commission' ) ) {
+    function wcusage_get_order_counted_commission(  $order_id, $coupon_code  ) {
+        if ( function_exists( 'wcusage_order_alltime_commission_key' ) ) {
+            $own = wcusage_order_meta( $order_id, wcusage_order_alltime_commission_key( $coupon_code ), true );
+            if ( is_numeric( $own ) ) {
+                return (float) $own;
+            }
+        }
+        if ( function_exists( 'wcusage_coupon_owns_order_commission' ) && !wcusage_coupon_owns_order_commission( $order_id, $coupon_code ) ) {
+            foreach ( array('wcusage_order_granted_commission_key', 'wcusage_order_pending_commission_key') as $key_function ) {
+                if ( function_exists( $key_function ) ) {
+                    $value = wcusage_order_meta( $order_id, $key_function( $coupon_code ), true );
+                    if ( is_numeric( $value ) ) {
+                        return (float) $value;
+                    }
+                }
+            }
+            return 0.0;
+        }
+        return (float) wcusage_get_order_saved_commission( $order_id, false );
+    }
+
+}
+/**
+ * Fire "wcusage_referral_added" or "wcusage_referral_removed" for one coupon on an order.
+ *
+ * @param string   $change      "added" or "removed".
+ * @param WC_Order $order       Order.
+ * @param string   $coupon_code Affiliate coupon the order is credited to.
+ * @param array    $order_data  The order's calculated data for that coupon
+ *                              (wcusage_calculate_order_data()).
+ * @param float|null $commission For "removed": the coupon's counted commission,
+ *                              read with wcusage_get_order_counted_commission()
+ *                              before the stats were updated. Null reads it now.
+ */
+if ( !function_exists( 'wcusage_do_referral_change_action' ) ) {
+    function wcusage_do_referral_change_action(
+        $change,
+        $order,
+        $coupon_code,
+        $order_data = array(),
+        $commission = null
+    ) {
+        $coupon_info = wcusage_get_coupon_info( $coupon_code );
+        $affiliate_id = ( isset( $coupon_info[1] ) ? (int) $coupon_info[1] : 0 );
+        if ( !$affiliate_id ) {
+            return;
+        }
+        if ( $change === 'removed' ) {
+            // The calculation reports nothing for a cancelled, failed or refunded order,
+            // so use what this coupon was counted with.
+            $commission = ( null === $commission ? wcusage_get_order_counted_commission( $order->get_id(), $coupon_code ) : (float) $commission );
+        } else {
+            $commission = ( isset( $order_data['totalcommission'] ) ? (float) $order_data['totalcommission'] : 0.0 );
+        }
+        if ( $change === 'added' ) {
+            /**
+             * Fires when an order starts counting towards an affiliate's referrals.
+             *
+             * That is when it first reaches a status that counts (see
+             * "wcusage_commission_order_statuses"), once per order and coupon. Whether
+             * the commission is unpaid yet depends on the payout settings: listen to
+             * "wcusage_hook_after_update_commission" for that.
+             *
+             * @param WC_Order $order        Order.
+             * @param string   $coupon_code  Affiliate coupon credited.
+             * @param int      $affiliate_id User ID of the affiliate.
+             * @param float    $commission   Commission the order earns the affiliate.
+             * @param array    $order_data   The order's calculated data for that coupon.
+             */
+            do_action(
+                'wcusage_referral_added',
+                $order,
+                (string) $coupon_code,
+                $affiliate_id,
+                $commission,
+                (array) $order_data
+            );
+        } elseif ( $change === 'removed' ) {
+            /**
+             * Fires when an order stops counting towards an affiliate's referrals.
+             *
+             * That is when it moves to a status that does not count (cancelled, failed),
+             * or is refunded in full.
+             *
+             * @param WC_Order $order        Order.
+             * @param string   $coupon_code  Affiliate coupon it was credited to.
+             * @param int      $affiliate_id User ID of the affiliate.
+             * @param float    $commission   Commission the order was last saved as earning.
+             * @param array    $order_data   The order's data as calculated now (zero
+             *                               amounts for a cancelled, failed or refunded order).
+             */
+            do_action(
+                'wcusage_referral_removed',
+                $order,
+                (string) $coupon_code,
+                $affiliate_id,
+                $commission,
+                (array) $order_data
+            );
+        }
+    }
+
+}

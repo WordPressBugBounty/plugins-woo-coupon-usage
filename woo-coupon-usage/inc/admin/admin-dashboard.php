@@ -65,7 +65,7 @@ function wcusage_dashboard_page_header() {
         $clicks_data = $cached_stats['clicks_data'];
     } else {
         $wcusage_field_order_type_custom = wcusage_get_setting_value('wcusage_field_order_type_custom', '');
-        $statuses = !$wcusage_field_order_type_custom ? array_diff_key(wc_get_order_statuses(), ['wc-refunded' => '']) : $wcusage_field_order_type_custom;
+        $statuses = !$wcusage_field_order_type_custom ? array_diff_key(wc_get_order_statuses(), ['wc-refunded' => '']) : wcusage_get_commission_order_statuses();
 
         /**
          * Ceiling on how many orders the admin dashboard chart reads.
@@ -935,7 +935,7 @@ function wcusage_dashboard_paginate_ajax() {
 
         case 'referrals':
             $wcusage_field_order_type_custom = wcusage_get_setting_value('wcusage_field_order_type_custom', '');
-            $statuses = !$wcusage_field_order_type_custom ? array_diff_key(wc_get_order_statuses(), ['wc-refunded' => '']) : $wcusage_field_order_type_custom;
+            $statuses = !$wcusage_field_order_type_custom ? array_diff_key(wc_get_order_statuses(), ['wc-refunded' => '']) : wcusage_get_commission_order_statuses();
             // robust total via SQL count
             $allowed_statuses = array_keys($statuses);
             if (!empty($allowed_statuses)) {
@@ -1374,7 +1374,7 @@ function wcusage_dashboard_page_section_activity() {
 add_action( 'wcusage_hook_dashboard_page_section_referrals', 'wcusage_dashboard_page_section_referrals' );
 function wcusage_dashboard_page_section_referrals() {
     $wcusage_field_order_type_custom = wcusage_get_setting_value('wcusage_field_order_type_custom', '');
-    $statuses = !$wcusage_field_order_type_custom ? array_diff_key(wc_get_order_statuses(), ['wc-refunded' => '']) : $wcusage_field_order_type_custom;
+    $statuses = !$wcusage_field_order_type_custom ? array_diff_key(wc_get_order_statuses(), ['wc-refunded' => '']) : wcusage_get_commission_order_statuses();
 
     $per_page = 5;
     $orders = wc_get_orders(array(

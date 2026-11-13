@@ -189,24 +189,25 @@ class WCUsage_Migration_Source_Solid extends WCUsage_Migration_Source {
 	public function get_not_migrated() {
 
 		$lines = array(
-			__( 'Program settings, including the default and recurring rates and the cookie length', 'woo-coupon-usage' ),
+			'settings' => __( 'Program settings, including the default and recurring rates and the cookie length', 'woo-coupon-usage' ),
 			__( 'Old referral links (such as ?sld=123) and custom affiliate slugs', 'woo-coupon-usage' ),
 		);
 
 		if ( $this->count_rows( $this->solid_table( 'customer_links' ) ) ) {
-			$lines[] = __( 'Lifetime customer links', 'woo-coupon-usage' );
+			$lines['lifetime'] = __( 'Lifetime customer links', 'woo-coupon-usage' );
 		}
 
-		$lines[] = __( 'Commission rates set on products and product categories, and categories with commission switched off', 'woo-coupon-usage' );
+		$lines['product_rates'] = __( 'Commission rates set on products and product categories, and categories with commission switched off', 'woo-coupon-usage' );
 
 		$rates = $this->count_rows( $this->solid_table( 'product_rates' ) );
 		if ( $rates ) {
 			/* translators: %d: number of rates */
-			$lines[] = sprintf( _n( '%d affiliate-specific product rate, including auto-referrals (no equivalent here)', '%d affiliate-specific product rates, including auto-referrals (no equivalent here)', $rates, 'woo-coupon-usage' ), $rates );
+			$lines['affiliate_product_rates'] = sprintf( _n( '%d affiliate-specific product rate (auto-referrals have no equivalent here)', '%d affiliate-specific product rates (auto-referrals have no equivalent here)', $rates, 'woo-coupon-usage' ), $rates );
 		}
 
-		$lines[] = __( 'Bank details from the registration form (payment emails are migrated)', 'woo-coupon-usage' );
-		$lines[] = __( 'Affiliate tags and store credit balances', 'woo-coupon-usage' );
+		$lines['payout_details'] = __( 'Bank details from the registration form (payment emails are migrated)', 'woo-coupon-usage' );
+		$lines[]                 = __( 'Affiliate tags', 'woo-coupon-usage' );
+		$lines['store_credit']   = __( 'Store credit balances', 'woo-coupon-usage' );
 
 		return $lines;
 	}

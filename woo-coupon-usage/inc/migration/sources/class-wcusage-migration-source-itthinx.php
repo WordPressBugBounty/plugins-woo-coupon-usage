@@ -97,11 +97,11 @@ class WCUsage_Migration_Source_Itthinx extends WCUsage_Migration_Source {
 	public function get_not_migrated() {
 		return array(
 			__( 'Deleted affiliates, and their referrals', 'woo-coupon-usage' ),
-			__( 'Commission rates from Affiliates Pro / Enterprise (Rates, and rates set on individual affiliates)', 'woo-coupon-usage' ),
-			__( 'Coupons assigned to affiliates in Affiliates Pro / Enterprise (each affiliate gets a new coupon)', 'woo-coupon-usage' ),
-			__( 'Campaigns (Affiliates Pro / Enterprise)', 'woo-coupon-usage' ),
-			__( 'Multi-tier levels (Affiliates Enterprise)', 'woo-coupon-usage' ),
-			__( 'Other program settings (only the default rate, cookie length and click attribution are copied)', 'woo-coupon-usage' ),
+			'rates'     => __( 'Commission rates from Affiliates Pro / Enterprise (Rates, and rates set on individual affiliates)', 'woo-coupon-usage' ),
+			'coupons'   => __( 'Coupons assigned to affiliates in Affiliates Pro / Enterprise (each affiliate gets a new coupon)', 'woo-coupon-usage' ),
+			'campaigns' => __( 'Campaigns (Affiliates Pro / Enterprise)', 'woo-coupon-usage' ),
+			'mla'       => __( 'Multi-tier levels (Affiliates Enterprise)', 'woo-coupon-usage' ),
+			'settings'  => __( 'Other program settings (only the default rate, cookie length and click attribution are copied)', 'woo-coupon-usage' ),
 		);
 	}
 

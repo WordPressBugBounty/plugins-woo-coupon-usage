@@ -1093,6 +1093,8 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
                 jQuery('.show_statistics').html(data);
                 jQuery('.wcutablinks').css("opacity", "1");
                 jQuery('.wcutablinks').css("pointer-events", "auto");
+                // The affiliate portal's tabs (dimmed by inc/portal/template.php).
+                jQuery('.portal-tablink').css({"opacity": "", "pointer-events": ""});
                 <?php 
                 if ( wcu_fs()->can_use_premium_code() ) {
                     ?>
@@ -1123,9 +1125,10 @@ if ( !function_exists( 'wcusage_dashboard_tab_content_statistics' ) ) {
                 }
                 jQuery('.show_statistics').html('<?php 
                 echo wp_kses_post( $ajaxerrormessage );
-                ?><br/><br/>' + errorMessage); 
+                ?><br/><br/>' + errorMessage);
                 jQuery('.wcutablinks').css("opacity", "1");
                 jQuery('.wcutablinks').css("pointer-events", "auto");
+                jQuery('.portal-tablink').css({"opacity": "", "pointer-events": ""});
                 jQuery('.wcu-loading-stats-main').hide();
               }
           });

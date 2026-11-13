@@ -116,23 +116,25 @@ if ( is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php'
             if ( $parent_order_id ) {
                 $parentorder = wc_get_order( $parent_order_id );
                 if ( $parentorder ) {
+                    // A suspended affiliate is not credited with renewals either. The parent
+                    // order keeps its referrer, so renewals after the suspension is lifted are.
                     $parent_coupons = $parentorder->get_used_coupons();
                     foreach ( $parent_coupons as $parent_coupon ) {
                         $coupon = new WC_Coupon($parent_coupon);
                         $coupon_meta = get_post_meta( $coupon->get_id() );
                         $coupon_info = wcusage_get_coupon_info( $parent_coupon );
-                        if ( $coupon_info[1] ) {
+                        if ( $coupon_info[1] && !wcusage_is_coupon_suspended( $coupon->get_id() ) ) {
                             $order_id = $order->get_id();
                             wcusage_update_order_meta( $order_id, 'wcusage_referrer_coupon', $parent_coupon );
                         }
                     }
                     $wcusage_referrer_coupon = $parentorder->get_meta( 'wcusage_referrer_coupon' );
-                    if ( $wcusage_referrer_coupon ) {
+                    if ( $wcusage_referrer_coupon && !wcusage_is_coupon_suspended( wc_get_coupon_id_by_code( $wcusage_referrer_coupon ) ) ) {
                         $order_id = $order->get_id();
                         wcusage_update_order_meta( $order_id, 'wcusage_referrer_coupon', $wcusage_referrer_coupon );
                     }
                     $lifetimeaffiliateparent = $parentorder->get_meta( 'lifetime_affiliate_coupon_referrer' );
-                    if ( $lifetimeaffiliateparent ) {
+                    if ( $lifetimeaffiliateparent && !wcusage_is_coupon_suspended( wc_get_coupon_id_by_code( $lifetimeaffiliateparent ) ) ) {
                         $order_id = $order->get_id();
                         wcusage_update_order_meta( $order_id, 'lifetime_affiliate_coupon_referrer', $lifetimeaffiliateparent );
                     }

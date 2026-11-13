@@ -4,6 +4,12 @@
 if ( !defined( 'ABSPATH' ) ) {
     exit;
 }
+// Hold whatever the code below prints before the page starts - the custom styles,
+// and the odd <style> or <script> - and print it inside <head> instead. Printed
+// before <!DOCTYPE html>, it put the whole portal in quirks mode, where browsers
+// size tables, heights and inline images by old rules: distorted tables and
+// layouts that do not scroll as they should, on phones especially.
+ob_start();
 // Initialize variables as in the shortcode
 $urlid = "";
 $postid = "";
@@ -190,7 +196,7 @@ if ( !wp_script_is( 'woo-coupon-usage', 'enqueued' ) ) {
             'woo-coupon-usage',
             WCUSAGE_UNIQUE_PLUGIN_URL . 'js/woo-coupon-usage.js',
             array('jquery'),
-            '5.8.0',
+            WCUSAGE_VERSION,
             false
         );
     }
@@ -318,7 +324,8 @@ if ( $force_refresh_stats ) {
     if ( $wcusage_field_load_ajax ) {
         ?>
     <script>
-    jQuery(document).ready(function() {
+    // Printed in <head>, before wp_head() loads jQuery, so wait for the page.
+    document.addEventListener('DOMContentLoaded', function() {
     jQuery('#tab-page-monthly, #tab-page-orders').css("opacity", "0.5");
     jQuery('#tab-page-monthly, #tab-page-orders').css("pointer-events", "none");
     });
@@ -360,8 +367,8 @@ if ( $wcusage_portal_suspended ) {
 $register_loggedin = wcusage_get_setting_value( 'wcusage_field_registration_enable_register_loggedin', '1' );
 $wcusage_portal_login_enabled = wcusage_get_setting_value( 'wcusage_field_loginform', '1' );
 $wcusage_portal_registration_enabled = wcusage_get_setting_value( 'wcusage_field_enable_portal_registration', '1' );
+$wcusage_portal_pre_head = ob_get_clean();
 ?>
-
 <!DOCTYPE html>
 <html lang="<?php 
 echo esc_attr( get_locale() );
@@ -372,6 +379,12 @@ do_action( 'wcusage_portal_hook_before_head' );
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php 
+// First in <head>, where browsers used to place it, so it overrides the same
+// stylesheets it always has. Already-escaped markup from the plugin's own output.
+echo $wcusage_portal_pre_head;
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+?>
     <title><?php 
 echo esc_html( $wcusage_portal_title );
 ?></title>
@@ -442,26 +455,14 @@ if ( $wcusage_portal_themed ) {
     echo '<style id="wcusage-portal-theme-vars">:root{' . esc_html( $wcusage_portal_theme_css ) . '}</style>';
 }
 // Unenqueue any stylesheets from the site's theme before wp_head() prints them.
-$theme = wp_get_theme();
-$theme_name = strtolower( $theme->get( 'Name' ) );
-$theme_template_uri = strtolower( get_template_directory_uri() );
-$theme_stylesheet_uri = strtolower( get_stylesheet_directory_uri() );
-global $wp_styles;
-$styles = ( isset( $wp_styles->queue ) ? $wp_styles->queue : array() );
-foreach ( $styles as $style ) {
-    if ( empty( $wp_styles->registered[$style] ) ) {
-        continue;
-    }
-    $style_obj = $wp_styles->registered[$style];
-    $style_handle = $style_obj->handle;
-    $style_src = strtolower( (string) $style_obj->src );
-    if ( $style_handle === 'wcusage-portal-font-awesome' || $style_handle === 'wcusage-portal-css' || $style_handle === 'woo-coupon-usage-style' || strpos( $style_handle, 'wcusage' ) === 0 || strpos( $style_handle, 'woo-coupon-usage' ) === 0 ) {
-        continue;
-    }
-    if ( strpos( $style_src, $theme_name ) !== false || strpos( $style_src, $theme_template_uri ) !== false || strpos( $style_src, $theme_stylesheet_uri ) !== false || strpos( $style_src, '/themes/' ) !== false || strpos( $style_src, 'woocommerce' ) !== false || strpos( $style_src, 'wc-' ) !== false || strpos( $style_src, 'global-styles' ) !== false || strpos( $style_src, 'global' ) !== false ) {
-        wp_dequeue_style( $style_handle );
-    }
-}
+//
+// Themes enqueue their stylesheets on "wp_enqueue_scripts", which only fires
+// inside wp_head() - so going through the queue here, before it, missed them and
+// the theme's CSS reached the portal on most sites: its fonts, colours and its
+// rules for the page itself (body overflow and the like) distorted the layout and
+// could stop it scrolling. It now also runs just before the styles are printed.
+wcusage_portal_dequeue_theme_styles();
+add_action( 'wp_print_styles', 'wcusage_portal_dequeue_theme_styles', 1 );
 ?>
     <?php 
 wp_head();
@@ -677,7 +678,7 @@ if ( !$current_user_id ) {
                                 <?php 
         $currentuserid = get_current_user_id();
         if ( $currentuserid == $couponuser ) {
-            echo '<a href="javascript:void(0);" onclick="wcusage_portal_open_tab(event, \'tab-page-settings\', \'wcu6\', \'' . esc_js( $postid ) . '\', \'' . esc_js( $coupon_code ) . '\', \'' . esc_js( $force_refresh_stats ) . '\');">' . esc_html__( 'Settings', 'woo-coupon-usage' ) . '</a>';
+            echo '<a href="javascript:void(0);" onclick="wcusage_portal_open_tab(event, \'tab-page-settings\', \'wcu6\', \'' . esc_js( $postid ) . '\', ' . wcusage_js_string_attr( $coupon_code ) . ', \'' . esc_js( $force_refresh_stats ) . '\');">' . esc_html__( 'Settings', 'woo-coupon-usage' ) . '</a>';
         }
         $wcusage_field_show_logout_link = wcusage_get_setting_value( 'wcusage_field_show_logout_link', '1' );
         if ( $wcusage_field_show_logout_link ) {
@@ -923,7 +924,7 @@ if ( !$current_user_id ) {
                                 <?php 
         $currentuserid = get_current_user_id();
         if ( $currentuserid == $couponuser ) {
-            echo '<a href="javascript:void(0);" onclick="wcusage_portal_open_tab(event, \'tab-page-settings\', \'wcu6\', \'' . esc_js( $postid ) . '\', \'' . esc_js( $coupon_code ) . '\', \'' . esc_js( $force_refresh_stats ) . '\');">' . esc_html__( 'Settings', 'woo-coupon-usage' ) . '</a>';
+            echo '<a href="javascript:void(0);" onclick="wcusage_portal_open_tab(event, \'tab-page-settings\', \'wcu6\', \'' . esc_js( $postid ) . '\', ' . wcusage_js_string_attr( $coupon_code ) . ', \'' . esc_js( $force_refresh_stats ) . '\');">' . esc_html__( 'Settings', 'woo-coupon-usage' ) . '</a>';
         }
         $logoutredirectpage = get_page_link( wcusage_get_coupon_shortcode_page_id() );
         $wcusage_field_portal_enable = wcusage_get_setting_value( 'wcusage_field_portal_enable', '0' );
@@ -1382,9 +1383,9 @@ function wcusage_portal_tabs(
                     echo esc_attr( $tab['content-id'] );
                     ?>', '<?php 
                     echo esc_js( $postid );
-                    ?>', '<?php 
-                    echo esc_js( $coupon_code );
-                    ?>', '<?php 
+                    ?>', <?php 
+                    echo wcusage_js_string_attr( $coupon_code );
+                    ?>, '<?php 
                     echo esc_js( $force_refresh_stats );
                     ?>')"<?php 
                     if ( !$wcusage_portal_themed ) {

@@ -116,6 +116,192 @@ function wcusage_migration_enqueue( $hook ) {
 add_action( 'admin_enqueue_scripts', 'wcusage_migration_enqueue' );
 
 /**
+ * Where to set up again, in Coupon Affiliates, what a source does not migrate.
+ * Keyed by the keys sources give their get_not_migrated() lines, so the
+ * screen does not read as if these features were missing here.
+ *
+ * @return array[] name, pro, how, url, link.
+ */
+function wcusage_migration_feature_hints() {
+
+	$settings = admin_url( 'admin.php?page=wcusage_settings' );
+	$tab      = function ( $tab ) use ( $settings ) {
+		return add_query_arg( 'section', 'tab-' . $tab, $settings );
+	};
+
+	return array(
+		'coupons'               => array(
+			'name' => __( 'Affiliate coupons', 'woo-coupon-usage' ),
+			'pro'  => false,
+			'how'  => __( 'To give an affiliate an existing coupon instead of their new one, edit the coupon and pick them as the "Affiliate User" on its Coupon Affiliates & Commission tab.', 'woo-coupon-usage' ),
+			'url'  => admin_url( 'edit.php?post_type=shop_coupon' ),
+			'link' => __( 'Open coupons', 'woo-coupon-usage' ),
+		),
+		'groups'                  => array(
+			'name' => __( 'Affiliate Groups', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Create groups with their own commission rates, then add affiliates to a group from their user profile.', 'woo-coupon-usage' ),
+			'url'  => admin_url( 'admin.php?page=wcusage_groups' ),
+			'link' => __( 'Manage groups', 'woo-coupon-usage' ),
+		),
+		'rates'                   => array(
+			'name' => __( 'Custom commission rates', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Set a rate on an affiliate\'s coupon (Custom Commission), on a product or category, or for a user role or group.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'commission' ),
+			'link' => __( 'Commission settings', 'woo-coupon-usage' ),
+		),
+		'coupon_rates'            => array(
+			'name' => __( 'Per-affiliate commission rates', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Give an affiliate their own rate: edit their coupon and fill in Custom Commission on its Coupon Affiliates & Commission tab.', 'woo-coupon-usage' ),
+			'url'  => admin_url( 'admin.php?page=wcusage_coupons' ),
+			'link' => __( 'Affiliate coupons', 'woo-coupon-usage' ),
+		),
+		'product_rates'           => array(
+			'name' => __( 'Product and category rates', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Set a rate on a product, variation or product category in its Coupon Affiliates fields. A rate of 0 switches commission off for it.', 'woo-coupon-usage' ),
+			'url'  => admin_url( 'edit.php?post_type=product' ),
+			'link' => __( 'Open products', 'woo-coupon-usage' ),
+		),
+		'affiliate_product_rates' => array(
+			'name' => __( 'Per-affiliate product rates', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Give an affiliate their own rate on a product under "Per-Affiliate Product Commission Rates" on the product\'s Coupon Affiliates & Commission tab.', 'woo-coupon-usage' ),
+			'url'  => admin_url( 'edit.php?post_type=product' ),
+			'link' => __( 'Open products', 'woo-coupon-usage' ),
+		),
+		'addon_rates'             => array(
+			'name' => __( 'Advanced commission rates', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Per-affiliate product rates are set on each product, renewal commission under Settings > Subscriptions, and higher rates for top performers with Performance Bonuses.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'commission' ),
+			'link' => __( 'Commission settings', 'woo-coupon-usage' ),
+		),
+		'commission_settings'     => array(
+			'name' => __( 'Fixed commission per product', 'woo-coupon-usage' ),
+			'pro'  => false,
+			'how'  => __( 'Coupon Affiliates can pay a fixed amount per product sold: set it under Settings > Commission if paying per unit suits you.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'commission' ),
+			'link' => __( 'Commission settings', 'woo-coupon-usage' ),
+		),
+		'exclude_products'        => array(
+			'name' => __( 'Excluding products from commission', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Set the commission rate of a product, variation or category to 0 in its Coupon Affiliates fields.', 'woo-coupon-usage' ),
+			'url'  => admin_url( 'edit.php?post_type=product' ),
+			'link' => __( 'Open products', 'woo-coupon-usage' ),
+		),
+		'mla'                     => array(
+			'name' => __( 'Multi-Level Affiliates', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Turn on MLA and set your tier rates, then pick each affiliate\'s parent on their user profile.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'mla' ),
+			'link' => __( 'MLA settings', 'woo-coupon-usage' ),
+		),
+		'lifetime'                => array(
+			'name' => __( 'Lifetime Commission', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Turn it on under Settings > Commission, then link customers to an affiliate with "Link a Customer" on the Lifetime tab of their affiliate page.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'commission' ),
+			'link' => __( 'Commission settings', 'woo-coupon-usage' ),
+		),
+		'registration_fields'     => array(
+			'name' => __( 'Custom registration form fields', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Add your own questions to the affiliate registration form under Custom Form Fields.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'registration' ),
+			'link' => __( 'Registration settings', 'woo-coupon-usage' ),
+		),
+		'registrations'           => array(
+			'name' => __( 'Affiliate registration', 'woo-coupon-usage' ),
+			'pro'  => false,
+			'how'  => __( 'Ask them to apply again through your Coupon Affiliates registration form; you approve applications under Coupon Affiliates > Registrations.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'registration' ),
+			'link' => __( 'Registration settings', 'woo-coupon-usage' ),
+		),
+		'add_affiliates'          => array(
+			'name' => __( 'Adding affiliates', 'woo-coupon-usage' ),
+			'pro'  => false,
+			'how'  => __( 'Add any of them you still want as an affiliate from Coupon Affiliates > Add New Affiliate.', 'woo-coupon-usage' ),
+			'url'  => admin_url( 'admin.php?page=wcusage_add_affiliate' ),
+			'link' => __( 'Add an affiliate', 'woo-coupon-usage' ),
+		),
+		'referral_links'          => array(
+			'name' => __( 'Referral link generator', 'woo-coupon-usage' ),
+			'pro'  => false,
+			'how'  => __( 'Affiliates can make a referral link to any page of your site from their affiliate dashboard.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'urls' ),
+			'link' => __( 'Referral link settings', 'woo-coupon-usage' ),
+		),
+		'landing_pages'           => array(
+			'name' => __( 'Affiliate Landing Pages', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Turn them on under Settings > Referral Links, then enter the affiliate\'s coupon code in the "Coupon Affiliate Landing Pages" box when editing a page.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'urls' ),
+			'link' => __( 'Referral link settings', 'woo-coupon-usage' ),
+		),
+		'campaigns'               => array(
+			'name' => __( 'Referral Campaigns', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Turn on Referral Campaigns under Settings > Referral Links; affiliates then create their own campaigns from their dashboard.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'urls' ),
+			'link' => __( 'Referral link settings', 'woo-coupon-usage' ),
+		),
+		'creatives'               => array(
+			'name' => __( 'Creatives', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Add banners, images and other promotional content for affiliates to use.', 'woo-coupon-usage' ),
+			'url'  => admin_url( 'edit.php?post_type=wcu-creatives' ),
+			'link' => __( 'Manage creatives', 'woo-coupon-usage' ),
+		),
+		'subscriptions'           => array(
+			'name' => __( 'Subscription renewal commission', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Pay commission on WooCommerce Subscriptions renewals under Settings > Subscriptions (shown while WooCommerce Subscriptions is active).', 'woo-coupon-usage' ),
+			'url'  => $tab( 'subscriptions' ),
+			'link' => __( 'Subscription settings', 'woo-coupon-usage' ),
+		),
+		'bonuses'                 => array(
+			'name' => __( 'Performance Bonuses', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Reward affiliates with a bonus, a higher rate or a new group when they reach a target, or with a welcome bonus when they join. There is no pay-per-click commission.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'bonuses' ),
+			'link' => __( 'Bonus settings', 'woo-coupon-usage' ),
+		),
+		'payout_details'          => array(
+			'name' => __( 'Payout methods', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Turn on Direct Bank Transfer (or PayPal, Stripe, Wise or store credit); affiliates then add their details in the Settings tab of their dashboard.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'payouts' ),
+			'link' => __( 'Payout settings', 'woo-coupon-usage' ),
+		),
+		'stripe'                  => array(
+			'name' => __( 'Stripe Payouts', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Turn on Stripe Payouts; affiliates then connect their Stripe account from their dashboard.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'payouts' ),
+			'link' => __( 'Payout settings', 'woo-coupon-usage' ),
+		),
+		'store_credit'            => array(
+			'name' => __( 'Store Credit / Wallet', 'woo-coupon-usage' ),
+			'pro'  => true,
+			'how'  => __( 'Pay commission as store credit by turning on the Store Credit / Wallet payout method.', 'woo-coupon-usage' ),
+			'url'  => $tab( 'payouts' ),
+			'link' => __( 'Payout settings', 'woo-coupon-usage' ),
+		),
+		'settings'                => array(
+			'name' => __( 'Program settings', 'woo-coupon-usage' ),
+			'pro'  => false,
+			'how'  => __( 'Set your commission rates, what commission is worked out on (shipping, tax, discounts), cookie length, emails and everything else in the Coupon Affiliates settings.', 'woo-coupon-usage' ),
+			'url'  => $settings,
+			'link' => __( 'Open settings', 'woo-coupon-usage' ),
+		),
+	);
+}
+
+/**
  * Labels for the counters a run keeps.
  *
  * @return array
@@ -909,7 +1095,21 @@ function wcusage_migration_render_setup( $source ) {
 			<?php endif; ?>
 		</div>
 
-		<?php $not_migrated = $source->get_not_migrated(); ?>
+		<?php
+		// Split what is left behind into features Coupon Affiliates has too
+		// (set up again by hand) and what has no equivalent here.
+		$not_migrated = $source->get_not_migrated();
+		$hints        = wcusage_migration_feature_hints();
+		$set_up_again = array();
+		$no_match     = array();
+		foreach ( $not_migrated as $key => $item ) {
+			if ( is_string( $key ) && isset( $hints[ $key ] ) ) {
+				$set_up_again[] = array( 'item' => $item, 'hint' => $hints[ $key ] );
+			} else {
+				$no_match[] = $item;
+			}
+		}
+		?>
 		<?php if ( $not_migrated ) : ?>
 			<div class="wcusage-migration-card wcusage-migration-section wcusage-migration-not-migrated">
 				<h3 class="wcusage-migration-section-title">
@@ -920,12 +1120,70 @@ function wcusage_migration_render_setup( $source ) {
 					?>
 				</h3>
 				<div class="wcusage-migration-not-migrated-body">
-					<p><?php esc_html_e( 'These are left in the old plugin, so set them up again in Coupon Affiliates if you need them:', 'woo-coupon-usage' ); ?></p>
-					<ul>
-						<?php foreach ( $not_migrated as $item ) : ?>
-							<li><?php echo esc_html( $item ); ?></li>
-						<?php endforeach; ?>
-					</ul>
+					<?php if ( $set_up_again ) : ?>
+						<p class="wcusage-migration-not-migrated-intro">
+							<?php
+							/* translators: %s: plugin name */
+							echo esc_html( sprintf( __( 'These are not copied from %s because they cannot be carried over exactly. Coupon Affiliates has these features too, so you can set them up again yourself once the migration is done.', 'woo-coupon-usage' ), $source->get_name() ) );
+							?>
+						</p>
+						<h4 class="wcusage-migration-not-migrated-heading is-available">
+							<i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+							<?php esc_html_e( 'Available in Coupon Affiliates: add these yourself', 'woo-coupon-usage' ); ?>
+						</h4>
+						<?php // Two lists side by side, so opening a row only moves the rows under it. ?>
+						<div class="wcusage-migration-features-cols">
+							<?php foreach ( array_chunk( $set_up_again, (int) ceil( count( $set_up_again ) / 2 ) ) as $column ) : ?>
+								<ul class="wcusage-migration-features">
+									<?php foreach ( $column as $row ) : ?>
+										<li class="wcusage-migration-feature">
+											<details>
+												<summary class="wcusage-migration-feature-name">
+													<span class="wcusage-migration-feature-tag"><?php esc_html_e( 'Available', 'woo-coupon-usage' ); ?></span>
+													<span class="wcusage-migration-feature-title">
+														<?php echo esc_html( $row['hint']['name'] ); ?>
+														<?php if ( $row['hint']['pro'] && ! $pro ) : ?>
+															<span class="wcusage-tools-badge"><?php esc_html_e( 'PRO', 'woo-coupon-usage' ); ?></span>
+														<?php endif; ?>
+													</span>
+													<i class="fa-solid fa-chevron-down wcusage-migration-feature-toggle" aria-hidden="true"></i>
+												</summary>
+												<div class="wcusage-migration-feature-details">
+													<span class="wcusage-migration-feature-from">
+														<?php
+														/* translators: %s: what is not migrated */
+														echo esc_html( sprintf( __( 'Not migrated: %s', 'woo-coupon-usage' ), $row['item'] ) );
+														?>
+													</span>
+													<span class="wcusage-migration-feature-how"><?php echo esc_html( $row['hint']['how'] ); ?></span>
+													<a class="wcusage-migration-feature-link" href="<?php echo esc_url( $row['hint']['url'] ); ?>" target="_blank" rel="noopener noreferrer">
+														<?php echo esc_html( $row['hint']['link'] ); ?>
+														<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+														<span class="screen-reader-text"><?php esc_html_e( '(opens in a new tab)', 'woo-coupon-usage' ); ?></span>
+													</a>
+												</div>
+											</details>
+										</li>
+									<?php endforeach; ?>
+								</ul>
+							<?php endforeach; ?>
+						</div>
+					<?php endif; ?>
+					<?php if ( $no_match ) : ?>
+						<?php if ( $set_up_again ) : ?>
+							<h4 class="wcusage-migration-not-migrated-heading">
+								<i class="fa-solid fa-circle-minus" aria-hidden="true"></i>
+								<?php esc_html_e( 'Also left behind', 'woo-coupon-usage' ); ?>
+							</h4>
+						<?php else : ?>
+							<p class="wcusage-migration-not-migrated-intro"><?php esc_html_e( 'These are left in the old plugin:', 'woo-coupon-usage' ); ?></p>
+						<?php endif; ?>
+						<ul class="wcusage-migration-left-behind">
+							<?php foreach ( $no_match as $item ) : ?>
+								<li><?php echo esc_html( $item ); ?></li>
+							<?php endforeach; ?>
+						</ul>
+					<?php endif; ?>
 				</div>
 			</div>
 		<?php endif; ?>

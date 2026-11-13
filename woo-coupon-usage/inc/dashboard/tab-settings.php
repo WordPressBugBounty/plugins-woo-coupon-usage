@@ -103,6 +103,16 @@ function wcusage_ajax_update_settings() {
         'wisebank_account_number_intl' => 'wcu_wisebank_account_number'
     ];
 
+    // The PayPal Payouts address is sent to PayPal as the payout's recipient, so
+    // it has to be an email address and nothing else.
+    if (isset($_POST['paypalemailapi'])) {
+        $paypalemailapi = sanitize_text_field(wp_unslash($_POST['paypalemailapi']));
+        if ($paypalemailapi !== '' && !is_email($paypalemailapi)) {
+            wp_send_json_error(esc_html__('Please enter a valid PayPal email address.', 'woo-coupon-usage'));
+            wp_die();
+        }
+    }
+
     $updated_payout_fields = [];
     foreach($payout_fields as $post_key => $meta_key) {
         if(isset($_POST[$post_key])) {

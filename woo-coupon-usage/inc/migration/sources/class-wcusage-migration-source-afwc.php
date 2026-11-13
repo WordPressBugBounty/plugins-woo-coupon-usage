@@ -145,19 +145,19 @@ class WCUsage_Migration_Source_AFWC extends WCUsage_Migration_Source {
 	 */
 	public function get_not_migrated() {
 		$lines = array(
-			__( 'Commission plans other than the storewide one (for affiliates, affiliate tags, products or categories)', 'woo-coupon-usage' ),
+			'rates'            => __( 'Commission plans other than the storewide one (for affiliates, affiliate tags, products or categories)', 'woo-coupon-usage' ),
 			__( 'Affiliate tags', 'woo-coupon-usage' ),
-			__( 'Multi-tier parents (past multi-tier commission is still added to the parent\'s balance)', 'woo-coupon-usage' ),
-			__( 'Lifetime customers', 'woo-coupon-usage' ),
-			__( 'Products excluded from commission', 'woo-coupon-usage' ),
-			__( 'Landing pages assigned to affiliates', 'woo-coupon-usage' ),
-			__( 'Campaign content (visits keep their campaign name)', 'woo-coupon-usage' ),
-			__( 'Other program settings (only the storewide rate, cookie length and click attribution are copied)', 'woo-coupon-usage' ),
+			'mla'              => __( 'Multi-tier parents (past multi-tier commission is still added to the parent\'s balance)', 'woo-coupon-usage' ),
+			'lifetime'         => __( 'Lifetime customers', 'woo-coupon-usage' ),
+			'exclude_products' => __( 'Products excluded from commission', 'woo-coupon-usage' ),
+			'landing_pages'    => __( 'Landing pages assigned to affiliates', 'woo-coupon-usage' ),
+			'creatives'        => __( 'Campaign content (visits keep their campaign name)', 'woo-coupon-usage' ),
+			'settings'         => __( 'Other program settings (only the storewide rate, cookie length and click attribution are copied)', 'woo-coupon-usage' ),
 		);
 
 		// See affiliate_ids_sql().
 		if ( $this->affiliate_roles() ) {
-			$lines[] = __( 'Users who are affiliates only through their role ("Affiliate user roles" setting) and have no referrals, visits or coupon', 'woo-coupon-usage' );
+			$lines['add_affiliates'] = __( 'Users who are affiliates only through their role ("Affiliate user roles" setting) and have no referrals, visits or coupon', 'woo-coupon-usage' );
 		}
 
 		return $lines;

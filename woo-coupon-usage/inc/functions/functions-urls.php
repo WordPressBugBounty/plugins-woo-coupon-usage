@@ -280,6 +280,108 @@ if( !function_exists( 'wcusage_get_mla_referral_value' ) ) {
 }
 
 /**
+ * How many days a referral cookie lasts.
+ *
+ * @param string $coupon_code Coupon the cookie is for, or empty when not known.
+ *
+ * @return int
+ */
+if( !function_exists( 'wcusage_get_referral_cookie_days' ) ) {
+  function wcusage_get_referral_cookie_days( $coupon_code = '' ) {
+
+    $days = wcusage_get_setting_value('wcusage_urls_cookie_days', '30');
+    if( $days === '' ) { $days = 30; }
+
+    /**
+     * Filters how many days a referral cookie lasts.
+     *
+     * Referral links are tracked on "plugins_loaded", so add this from a plugin
+     * or mu-plugin: a theme's functions.php loads too late.
+     *
+     * @param int    $days        Days, from the "Cookie Expiry" setting.
+     * @param string $coupon_code Affiliate coupon the cookie is for. Empty where
+     *                            the coupon is not known yet (the direct link
+     *                            script, for example).
+     */
+    return (int) apply_filters( 'wcusage_referral_cookie_days', (int) $days, (string) $coupon_code );
+
+  }
+}
+
+/**
+ * The domain the visitor came from, without "www.", or empty.
+ *
+ * @return string
+ */
+if( !function_exists( 'wcusage_get_referrer_domain' ) ) {
+  function wcusage_get_referrer_domain() {
+
+    if( empty( $_SERVER['HTTP_REFERER'] ) ) {
+      return '';
+    }
+    $refpage = (string) wp_parse_url( wp_unslash( $_SERVER['HTTP_REFERER'] ), PHP_URL_HOST );
+    $refpage = (string) strtok( $refpage, '?' );
+
+    return (string) preg_replace( '/^www\./i', '', $refpage );
+
+  }
+}
+
+/**
+ * Whether a visit through a referral link should be tracked.
+ *
+ * @param string $coupon_code Coupon in the referral link.
+ * @param string $refpage     Domain the visitor came from.
+ * @param string $campaign    Campaign in the link.
+ *
+ * @return bool
+ */
+if( !function_exists( 'wcusage_should_track_referral' ) ) {
+  function wcusage_should_track_referral( $coupon_code, $refpage = '', $campaign = '' ) {
+
+    // Decided once per request: the cookie, the session and the coupon auto-apply
+    // all ask, and must agree.
+    $key = strtolower( (string) $coupon_code ) . '|' . strtolower( (string) $refpage ) . '|' . (string) $campaign;
+    if( isset( $GLOBALS['wcusage_referral_track_decisions'][ $key ] ) ) {
+      return $GLOBALS['wcusage_referral_track_decisions'][ $key ];
+    }
+
+    // A suspended affiliate's link is ignored outright, so it neither sets the
+    // cookie nor replaces a referral the visitor already carries. Their coupon
+    // could not be applied or credited at checkout anyway.
+    if( function_exists( 'wcusage_is_coupon_suspended' ) && wcusage_is_coupon_suspended( wc_get_coupon_id_by_code( (string) $coupon_code ) ) ) {
+      $GLOBALS['wcusage_referral_track_decisions'][ $key ] = false;
+      return false;
+    }
+
+    /**
+     * Filters whether a visit through a referral link is tracked.
+     *
+     * Return false to ignore the visit: no referral cookie or session is set, no
+     * click is recorded and the link does not auto-apply the coupon. Useful for
+     * bots, staff or internal traffic. Blocked referrer domains and links of
+     * suspended affiliates are already ignored before this runs. Asked once
+     * per visit.
+     *
+     * Referral links are tracked on "plugins_loaded", so add this from a plugin
+     * or mu-plugin: a theme's functions.php loads too late.
+     *
+     * @param bool   $track       Whether to track the visit. Default true.
+     * @param string $coupon_code Coupon in the referral link.
+     * @param string $refpage     Domain the visitor came from, without "www.".
+     *                            Empty when the browser sent none.
+     * @param string $campaign    Campaign in the link, if any.
+     */
+    $track = (bool) apply_filters( 'wcusage_should_track_referral', true, (string) $coupon_code, (string) $refpage, (string) $campaign );
+
+    $GLOBALS['wcusage_referral_track_decisions'][ $key ] = $track;
+
+    return $track;
+
+  }
+}
+
+/**
  * Applies cookie when URL is clicked on init
  *
  */
@@ -360,7 +462,11 @@ add_action('plugins_loaded', 'wcusage_url_cookie', 1);
       $campaign = sanitize_text_field( $campaign );
   		$cookie = sanitize_text_field($cookie);
 
-  		$wcusage_urls_cookie_days = wcusage_get_setting_value('wcusage_urls_cookie_days', '30');
+      if( $thereferral && !wcusage_should_track_referral( $thereferral, (string) $refpage, $campaign ) ) {
+        return;
+      }
+
+  		$wcusage_urls_cookie_days = wcusage_get_referral_cookie_days( $thereferral );
   		$wcusage_urls_enable = wcusage_get_setting_value('wcusage_field_urls_enable', '1');
   		$wcusage_field_track_all_clicks = wcusage_get_setting_value('wcusage_field_track_all_clicks', '1');
       $wcusage_field_show_click_history = wcusage_get_setting_value('wcusage_field_show_click_history', 1 );
@@ -368,8 +474,6 @@ add_action('plugins_loaded', 'wcusage_url_cookie', 1);
   		$coupon_id = "";
 
   		if( $wcusage_urls_enable ) {
-
-  			if($wcusage_urls_cookie_days == "") { $wcusage_urls_cookie_days = 30; }
 
   			// Ref URL
 
@@ -440,8 +544,8 @@ add_action('plugins_loaded', 'wcusage_url_cookie', 1);
             $wcusage_field_show_click_history = wcusage_get_setting_value('wcusage_field_show_click_history', 1 );
             // If replacement occurred OR not currently a click ID OR track all clicks enabled, add click
             if( $did_replace_referral || !$clickcookie || ($wcusage_field_track_all_clicks && !$clickcookie_recent) ) {
-              $addclick = wcusage_install_clicks_data($coupon_id, $campaign, '', $refpage, 0, $ipaddress);
-              if($wcusage_store_cookies) {
+              $addclick = wcusage_install_clicks_data($coupon_id, $campaign, '', $refpage, 0, $ipaddress, array( 'source' => 'referral_url' ));
+              if($wcusage_store_cookies && $addclick) {
                 wcusage_set_cookie('wcusage_referral_click', $addclick, $expiry); // Updates click ID cookie
                 wcusage_set_cookie('wcusage_referral_click_recent', 'true', time() + 60);
               }
@@ -479,6 +583,10 @@ if( !function_exists( 'wcusage_store_referral_session_from_url' ) ) {
 
     $thereferral = wcusage_get_referral_value();
     if ( ! $thereferral ) {
+      return;
+    }
+
+    if ( ! wcusage_should_track_referral( $thereferral, wcusage_get_referrer_domain(), wcusage_get_campaign_value() ) ) {
       return;
     }
 
@@ -598,6 +706,9 @@ if( !function_exists( 'wcusage_apply_coupon_to_cart' ) ) {
 
     // Apply Coupon Via Referral Link
     $thereferral = wcusage_get_referral_value();
+    if($thereferral && !wcusage_should_track_referral( $thereferral, wcusage_get_referrer_domain(), wcusage_get_campaign_value() )) {
+      $thereferral = '';
+    }
     if($thereferral && $wcusage_apply_enable && $wcusage_field_apply_instant_enable) {
       // In first-click mode, if a referral cookie already exists, do not auto-apply new coupon
       if( $first_click && $has_ref_cookie && strtolower($existing_ref_source) !== strtolower($thereferral) ) {
@@ -855,7 +966,7 @@ if( !function_exists( 'wcusage_action_woocommerce_removed_coupon' ) ) {
       $wcusage_field_url_referrals = wcusage_get_setting_value('wcusage_field_url_referrals', '0');
       $wcusage_store_cookies = wcusage_get_setting_value('wcusage_field_store_cookies', '1');
       if($wcusage_field_url_referrals && $wcusage_store_cookies) {
-        $wcusage_urls_cookie_days = wcusage_get_setting_value('wcusage_urls_cookie_days', '30');
+        $wcusage_urls_cookie_days = wcusage_get_referral_cookie_days( $coupon_code );
         $expiry = strtotime('+'.$wcusage_urls_cookie_days.' days');
         wcusage_set_cookie('wcusage_referral_code', $coupon_code, $expiry);
       }
@@ -1001,42 +1112,21 @@ if( !function_exists( 'wcusage_clicks_log_converted' ) ) {
 
         if($lifetimeaffiliate) {
 
-          $coupon_code = $lifetimeaffiliate;
-          $coupon = new WC_Coupon($coupon_code);
-          $couponid = $coupon->get_id();
-
-          if($couponid) {
-            global $wpdb;
-            $table_name2 = $wpdb->prefix . 'wcusage_clicks';
-            $results2 = $wpdb->update( $table_name2, array( 'converted' => 1, 'orderid' => $order_id ), array( 'id' => $clickcookie, 'couponid' => $couponid ) );
-          }
+          $coupon = new WC_Coupon($lifetimeaffiliate);
+          wcusage_mark_click_converted( $clickcookie, $coupon->get_id(), $order );
 
         } elseif($affiliatereferrer) {
-  
-          $coupon_code = $affiliatereferrer;
-          $coupon = new WC_Coupon($coupon_code);
-          $couponid = $coupon->get_id();
 
-          if($couponid) {
-            global $wpdb;
-            $table_name2 = $wpdb->prefix . 'wcusage_clicks';
-            $results2 = $wpdb->update( $table_name2, array( 'converted' => 1, 'orderid' => $order_id ), array( 'id' => $clickcookie, 'couponid' => $couponid ) );
-          }
+          $coupon = new WC_Coupon($affiliatereferrer);
+          wcusage_mark_click_converted( $clickcookie, $coupon->get_id(), $order );
 
         } else {
 
           // Loop Coupons
           foreach( $order->get_coupon_codes() as $coupon_code ) {
 
-            $coupon_code = sanitize_text_field($coupon_code);
-            $coupon = new WC_Coupon($coupon_code);
-            $couponid = $coupon->get_id();
-
-            if($couponid) {
-              global $wpdb;
-              $table_name2 = $wpdb->prefix . 'wcusage_clicks';
-              $results2 = $wpdb->update( $table_name2, array( 'converted' => 1, 'orderid' => $order_id ), array( 'id' => $clickcookie, 'couponid' => $couponid ) );
-            }
+            $coupon = new WC_Coupon( sanitize_text_field($coupon_code) );
+            wcusage_mark_click_converted( $clickcookie, $coupon->get_id(), $order );
 
           }
 
@@ -1050,6 +1140,50 @@ if( !function_exists( 'wcusage_clicks_log_converted' ) ) {
 	}
 }
 add_action( 'woocommerce_thankyou', 'wcusage_clicks_log_converted', 1, 1  );
+
+/**
+ * Mark a recorded click as converted by an order.
+ *
+ * Only a click recorded against that coupon is marked, so a click ID from a
+ * cookie cannot convert another affiliate's click.
+ *
+ * @param int      $click_id  Click ID.
+ * @param int      $coupon_id Coupon the order is credited to.
+ * @param WC_Order $order     Order that was placed.
+ *
+ * @return bool Whether a click was marked.
+ */
+if( !function_exists( 'wcusage_mark_click_converted' ) ) {
+	function wcusage_mark_click_converted( $click_id, $coupon_id, $order ) {
+
+    $click_id = absint( $click_id );
+    $coupon_id = absint( $coupon_id );
+    if( !$click_id || !$coupon_id || !is_a( $order, 'WC_Order' ) ) {
+      return false;
+    }
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'wcusage_clicks';
+    $updated = $wpdb->update( $table_name, array( 'converted' => 1, 'orderid' => $order->get_id() ), array( 'id' => $click_id, 'couponid' => $coupon_id ) );
+    if( !$updated ) {
+      return false;
+    }
+
+    /**
+     * Fires after a referral click is marked as converted by an order.
+     *
+     * Runs once per click, when the customer reaches the order received page.
+     *
+     * @param int      $click_id  ID of the click.
+     * @param int      $coupon_id Coupon the click and the order are credited to.
+     * @param WC_Order $order     Order that converted it.
+     */
+    do_action( 'wcusage_click_converted', $click_id, $coupon_id, $order );
+
+    return true;
+
+  }
+}
 
 /**
  * Hook to show referral URL stats / boxes for the affiliate dashboard

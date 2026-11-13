@@ -269,3 +269,57 @@ jQuery(document).ready(function($) {
 	}
 
 });
+
+/*
+ * Wide tables: let a table scroll sideways inside its box (".wcusage-table-scroll")
+ * only while it is wider than the box. A box that scrolls also clips what pokes out
+ * of it, such as tooltips opening above its first rows, so tables that fit are left
+ * alone. Checked again when the window resizes, when a tab is opened and when tables
+ * are loaded or replaced (AJAX). See ".wcusage-table-scrolls" in css/style.css.
+ */
+(function() {
+	if (window.wcusageTableScrollInit) {
+		return; // The script can be on the page twice.
+	}
+	window.wcusageTableScrollInit = true;
+
+	var timer = null;
+
+	function check() {
+		timer = null;
+		var boxes = document.querySelectorAll('.wcusage-table-scroll, .wcusage-orders-table-wrap');
+		for (var i = 0; i < boxes.length; i++) {
+			var box = boxes[i];
+			var table = box.querySelector('table');
+			if (!table || !box.offsetParent) {
+				continue; // Not shown (an inactive tab): checked once it is.
+			}
+			var scrolls = table.offsetWidth > box.clientWidth + 1;
+			if (scrolls !== box.classList.contains('wcusage-table-scrolls')) {
+				box.classList[scrolls ? 'add' : 'remove']('wcusage-table-scrolls');
+			}
+		}
+	}
+
+	function queue() {
+		if (!timer) {
+			timer = setTimeout(check, 150);
+		}
+	}
+
+	function start() {
+		queue();
+		if (window.MutationObserver && document.body) {
+			new MutationObserver(queue).observe(document.body, { childList: true, subtree: true });
+		}
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', start);
+	} else {
+		start();
+	}
+	window.addEventListener('load', queue);
+	window.addEventListener('resize', queue);
+	document.addEventListener('click', queue);
+})();

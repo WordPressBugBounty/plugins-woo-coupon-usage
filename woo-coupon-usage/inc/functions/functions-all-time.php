@@ -622,22 +622,7 @@ function wcusage_get_refresh_date_windows(  $coupon_code  ) {
     $coupon_info = wcusage_get_coupon_info( $coupon_code );
     // The same statuses wcusage_wh_getOrderbyCouponCode() counts. Using a wider
     // set here would create windows that return nothing when they are queried.
-    $wcusage_field_order_type_custom = wcusage_get_setting_value( 'wcusage_field_order_type_custom', '' );
-    if ( !$wcusage_field_order_type_custom ) {
-        $wcusage_field_order_type = wcusage_get_setting_value( 'wcusage_field_order_type', '' );
-        if ( $wcusage_field_order_type == 'completed' ) {
-            $statuses = array(
-                'wc-completed' => 'Completed',
-            );
-        } else {
-            $statuses = array(
-                'wc-completed'  => 'Completed',
-                'wc-processing' => 'Processing',
-            );
-        }
-    } else {
-        $statuses = $wcusage_field_order_type_custom;
-    }
+    $statuses = wcusage_get_commission_order_statuses();
     if ( empty( $statuses ) ) {
         return array();
     }
@@ -808,6 +793,8 @@ function wcusage_update_all_stats_batch_ajax(  $coupon_code, $the_coupon_usage  
       jQuery('#updated_total').html(message);
       jQuery('.wcutablinks').css('opacity', '1');
       jQuery('.wcutablinks').css('pointer-events', 'auto');
+      // The affiliate portal's tabs (dimmed by inc/portal/template.php).
+      jQuery('.portal-tablink').css({'opacity': '', 'pointer-events': ''});
     }
 
     function wcusageGetAjaxError(jqXHR, textStatus, errorThrown) {

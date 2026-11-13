@@ -187,6 +187,10 @@ abstract class WCUsage_Migration_Source {
 	 * the admin knows what to set up again by hand. Only what this importer is
 	 * sure of is carried over; the rest is listed here.
 	 *
+	 * A line's key names the Coupon Affiliates feature the admin can set it up
+	 * again with (see wcusage_migration_feature_hints()), so the screen can say
+	 * where; lines with no equivalent here keep a numeric key.
+	 *
 	 * @return string[] One short line each.
 	 */
 	public function get_not_migrated() {

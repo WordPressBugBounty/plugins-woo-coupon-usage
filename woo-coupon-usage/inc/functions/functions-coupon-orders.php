@@ -6,6 +6,51 @@ if ( ! defined( 'ABSPATH' ) ) {
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
+ * The order statuses whose orders count towards affiliate stats and commission.
+ *
+ * From the "Order Status Types" setting, or processing and completed (completed
+ * only, with the older "completed orders only" setting) when that is not set.
+ *
+ * @return array 'wc-' prefixed status key => label.
+ *
+ */
+if( !function_exists( 'wcusage_get_commission_order_statuses' ) ) {
+  function wcusage_get_commission_order_statuses() {
+
+    $wcusage_field_order_type_custom = wcusage_get_setting_value('wcusage_field_order_type_custom', '');
+    if( $wcusage_field_order_type_custom && is_array( $wcusage_field_order_type_custom ) ) {
+      $statuses = $wcusage_field_order_type_custom;
+    } else {
+      $wcusage_field_order_type = wcusage_get_setting_value('wcusage_field_order_type', '');
+      if($wcusage_field_order_type == 'completed') {
+        $statuses = array('wc-completed' => 'Completed');
+      } else {
+        $statuses = array('wc-completed' => 'Completed', 'wc-processing' => 'Processing');
+      }
+    }
+
+    /**
+     * Filters which order statuses count towards affiliate stats and commission.
+     *
+     * Used when deciding whether an order counts, and by the referral order
+     * lists, all-time stats and leaderboard queries. With the status setting left
+     * at its default, the admin dashboard and reports still list orders in every
+     * status except refunded.
+     *
+     * Changing it does not recalculate orders already counted: refresh the
+     * affiliate stats (Tools) after changing which statuses count.
+     *
+     * @param array $statuses 'wc-' prefixed status key => label, for example
+     *                        array( 'wc-completed' => 'Completed' ).
+     */
+    $statuses = apply_filters( 'wcusage_commission_order_statuses', $statuses );
+
+    return is_array( $statuses ) ? $statuses : array();
+
+  }
+}
+
+/**
  * The order statuses that count towards a coupon's referrals.
  *
  * Shared by wcusage_wh_getOrderbyCouponCode() and
@@ -19,19 +64,9 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 if( !function_exists( 'wcusage_get_coupon_order_statuses' ) ) {
   function wcusage_get_coupon_order_statuses( $status_filter_key = '' ) {
 
-    $wcusage_field_order_type_custom = wcusage_get_setting_value('wcusage_field_order_type_custom', '');
-    if(!$wcusage_field_order_type_custom) {
-      // Match the statuses that check_status_show() allows to avoid
-      // fetching orders that will be filtered out in rendering.
-      $wcusage_field_order_type = wcusage_get_setting_value('wcusage_field_order_type', '');
-      if($wcusage_field_order_type == 'completed') {
-        $statuses = array('wc-completed' => 'Completed');
-      } else {
-        $statuses = array('wc-completed' => 'Completed', 'wc-processing' => 'Processing');
-      }
-    } else {
-      $statuses = $wcusage_field_order_type_custom;
-    }
+    // The statuses check_status_show() allows, to avoid fetching orders that
+    // will be filtered out in rendering.
+    $statuses = wcusage_get_commission_order_statuses();
 
     if ($status_filter_key) {
       if (isset($statuses[$status_filter_key])) {
@@ -933,37 +968,15 @@ if( !function_exists( 'wcusage_wh_getOrderbyCouponCode' ) ) {
 if( !function_exists( 'wcusage_check_status_show' ) ) {
 	function wcusage_check_status_show($theorderstatus) {
 
-		$wcusage_field_order_type = wcusage_get_setting_value('wcusage_field_order_type', '');
-		$wcusage_field_order_type_custom = wcusage_get_setting_value('wcusage_field_order_type_custom', '');
-
 		$isthistrue = false;
 
-    if(is_string($theorderstatus)) {
+    if(is_string($theorderstatus) && $theorderstatus !== '') {
 
-  		// Check Old Settings
-  		if(!$wcusage_field_order_type_custom) {
-  			if($wcusage_field_order_type != "completed") {
-  				if ( $theorderstatus == "processing" || $theorderstatus == "completed" ) {
-  					$isthistrue = true;
-  				}
-  			}
-  			if($wcusage_field_order_type == "completed") {
-  				if ( $theorderstatus == "completed" ) {
-  					$isthistrue = true;
-  				}
-  			}
-  		}
-
-  		// Check New Settings
-  		if($wcusage_field_order_type_custom) {
-  			foreach( $wcusage_field_order_type_custom as $key2 => $status2 ) {
-  				$thestatus = wc_get_order_status_name( $key2 );
-  				$thisstatusname = wc_get_order_status_name( $theorderstatus );
-  				if( $thisstatusname == $thestatus ) {
-  					$isthistrue = true;
-  				}
-  			}
-  		}
+      // "processing" and "wc-processing" both match. A direct key lookup: this
+      // runs once per order in the order lists and stats refreshes.
+      $status_key = ( 0 === strpos( $theorderstatus, 'wc-' ) ) ? $theorderstatus : 'wc-' . $theorderstatus;
+      $statuses = wcusage_get_commission_order_statuses();
+      $isthistrue = isset( $statuses[ $status_key ] ) || isset( $statuses[ substr( $status_key, 3 ) ] );
 
     }
 

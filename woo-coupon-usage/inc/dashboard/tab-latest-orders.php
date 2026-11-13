@@ -1663,16 +1663,10 @@ if ( !function_exists( 'wcusage_tab_latest_orders_filters' ) ) {
             $orderstatuses = wc_get_order_statuses();
             $show_statuses = array();
             $show_statuses_num = 0;
+            $wcusage_field_order_type_custom = wcusage_get_setting_value( 'wcusage_field_order_type_custom', '' );
+            $commission_statuses = ( $wcusage_field_order_type_custom ? wcusage_get_commission_order_statuses() : array() );
             foreach ( $orderstatuses as $key => $status ) {
-                $checked = false;
-                $wcusage_field_order_type_custom = wcusage_get_setting_value( 'wcusage_field_order_type_custom', '' );
-                if ( $wcusage_field_order_type_custom ) {
-                    if ( isset( $options['wcusage_field_order_type_custom'][$key] ) ) {
-                        if ( $options['wcusage_field_order_type_custom'][$key] ) {
-                            $checked = true;
-                        }
-                    }
-                }
+                $checked = !empty( $commission_statuses[$key] );
                 if ( $checked ) {
                     $show_statuses_num++;
                     array_push( $show_statuses, array(

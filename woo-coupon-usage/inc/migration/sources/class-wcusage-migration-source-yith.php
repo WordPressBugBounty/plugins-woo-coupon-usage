@@ -140,9 +140,9 @@ class WCUsage_Migration_Source_YITH extends WCUsage_Migration_Source {
 	 */
 	public function get_not_migrated() {
 		return array(
-			__( 'Commission rate rules from YITH Premium, such as rates per product or category (each affiliate\'s own rate is copied)', 'woo-coupon-usage' ),
-			__( 'Customers permanently linked to an affiliate (YITH Premium)', 'woo-coupon-usage' ),
-			__( 'Other program settings (only the default rate, cookie length and click attribution are copied)', 'woo-coupon-usage' ),
+			'rates'    => __( 'Commission rate rules from YITH Premium, such as rates per product or category (each affiliate\'s own rate is copied)', 'woo-coupon-usage' ),
+			'lifetime' => __( 'Customers permanently linked to an affiliate (YITH Premium)', 'woo-coupon-usage' ),
+			'settings' => __( 'Other program settings (only the default rate, cookie length and click attribution are copied)', 'woo-coupon-usage' ),
 		);
 	}
 

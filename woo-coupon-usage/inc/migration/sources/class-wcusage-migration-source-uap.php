@@ -305,23 +305,23 @@ class WCUsage_Migration_Source_UAP extends WCUsage_Migration_Source {
 		$pending = $this->pending_count();
 		if ( $pending ) {
 			/* translators: %d: number of applications */
-			$lines[] = sprintf( _n( '%d affiliate application still waiting for approval (the applicant is not imported)', '%d affiliate applications still waiting for approval (the applicants are not imported)', $pending, 'woo-coupon-usage' ), $pending );
+			$lines['registrations'] = sprintf( _n( '%d affiliate application still waiting for approval (the applicant is not imported)', '%d affiliate applications still waiting for approval (the applicants are not imported)', $pending, 'woo-coupon-usage' ), $pending );
 		}
 		if ( $this->count_rows( $this->t( 'mlm_relations' ) ) ) {
-			$lines[] = __( 'Multi-level (MLM) affiliate parents (past MLM commission is still added to the earning affiliate\'s balance)', 'woo-coupon-usage' );
+			$lines['mla'] = __( 'Multi-level (MLM) affiliate parents (past MLM commission is still added to the earning affiliate\'s balance)', 'woo-coupon-usage' );
 		}
 		if ( $this->count_rows( $this->t( 'affiliate_referral_users_relations' ) ) ) {
-			$lines[] = __( 'Lifetime customer links', 'woo-coupon-usage' );
+			$lines['lifetime'] = __( 'Lifetime customer links', 'woo-coupon-usage' );
 		}
 
-		$lines[] = __( 'Program settings, such as the cookie length and the rank new affiliates start on', 'woo-coupon-usage' );
-		$lines[] = __( 'Commission rates set on individual coupons (affiliates earn their rank\'s rate, or the default)', 'woo-coupon-usage' );
-		$lines[] = __( 'Bank transfer details and the payout method each affiliate chose (PayPal emails are migrated)', 'woo-coupon-usage' );
+		$lines['settings']       = __( 'Program settings, such as the cookie length and the rank new affiliates start on', 'woo-coupon-usage' );
+		$lines['coupon_rates']   = __( 'Commission rates set on individual coupons (affiliates earn their rank\'s rate, or the default)', 'woo-coupon-usage' );
+		$lines['payout_details'] = __( 'Bank transfer details and the payout method each affiliate chose (PayPal emails are migrated)', 'woo-coupon-usage' );
 		/* translators: %s: referral link parameter, such as "ref" */
-		$lines[] = sprintf( __( 'Custom affiliate slugs and friendly /%1$s/ links: old ?%1$s= links still work', 'woo-coupon-usage' ), $this->referral_variable() );
-		$lines[] = __( 'Ultimate Affiliate Pro\'s referral cookie, for visitors who clicked an old link before the switch', 'woo-coupon-usage' );
-		$lines[] = __( 'Registration form answers', 'woo-coupon-usage' );
-		$lines[] = __( 'Offers, pay-per-click and sign-up commissions, and automatic rank changes', 'woo-coupon-usage' );
+		$lines[]                      = sprintf( __( 'Custom affiliate slugs and friendly /%1$s/ links: old ?%1$s= links still work', 'woo-coupon-usage' ), $this->referral_variable() );
+		$lines[]                      = __( 'Ultimate Affiliate Pro\'s referral cookie, for visitors who clicked an old link before the switch', 'woo-coupon-usage' );
+		$lines['registration_fields'] = __( 'Registration form answers', 'woo-coupon-usage' );
+		$lines['bonuses']             = __( 'Offers, pay-per-click and sign-up commissions, and automatic rank changes', 'woo-coupon-usage' );
 
 		return $lines;
 	}

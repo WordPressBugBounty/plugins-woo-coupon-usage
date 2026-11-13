@@ -67,8 +67,11 @@ add_action( 'plugins_loaded', 'wcusage_update_clicks_db_check' );
  * @param string $refpage
  * @param bool $converted
  * @param int $ipaddress
+ * @param array $context Extra details passed to the "wcusage_should_record_click"
+ *                       filter and "wcusage_click_recorded" action, such as
+ *                       "source" (referral_url, direct_link or api).
  *
- * @return int
+ * @return int|false
  *
  */
 if ( !function_exists( 'wcusage_install_clicks_data' ) ) {
@@ -78,7 +81,8 @@ if ( !function_exists( 'wcusage_install_clicks_data' ) ) {
         $page,
         $refpage,
         $converted,
-        $ipaddress
+        $ipaddress,
+        $context = array()
     ) {
         global $wpdb;
         // Check the table exists, if not, create it
@@ -101,6 +105,46 @@ if ( !function_exists( 'wcusage_install_clicks_data' ) ) {
         if ( empty( $coupon_id ) ) {
             return false;
         }
+        // The details as saved, plus anything the caller added (its "source", say).
+        $args = array_merge( (array) $context, array(
+            'campaign'  => $campaign,
+            'page'      => $page,
+            'referrer'  => $refpage,
+            'ip'        => $ipaddress,
+            'converted' => (bool) $converted,
+        ) );
+        if ( empty( $args['source'] ) ) {
+            $args['source'] = 'other';
+        }
+        /**
+         * Filters whether a referral click is recorded.
+         *
+         * Return false to skip it, for a bot or an internal visit say. The referral
+         * cookie is still set; use "wcusage_should_track_referral" to ignore the
+         * visit completely.
+         *
+         * @param bool  $record    Whether to record the click. Default true.
+         * @param int   $coupon_id Coupon the click is for.
+         * @param array $args {
+         *     The click's details.
+         *
+         *     @type string $campaign  Campaign.
+         *     @type int    $page      Landing page post ID (0 for the homepage).
+         *     @type string $referrer  Referring domain.
+         *     @type string $ip        Visitor IP, or a random ID when not storing IPs.
+         *     @type bool   $converted Whether it already led to an order.
+         *     @type string $source    Where it came from: "referral_url", "direct_link",
+         *                             "api" (wcusage_record_click()) or "other".
+         * }
+         */
+        if ( !apply_filters(
+            'wcusage_should_record_click',
+            true,
+            $coupon_id,
+            $args
+        ) ) {
+            return false;
+        }
         $table_name = $wpdb->prefix . 'wcusage_clicks';
         $insert_data = [
             'couponid'  => $coupon_id,
@@ -117,7 +161,25 @@ if ( !function_exists( 'wcusage_install_clicks_data' ) ) {
             // Handle the error as needed.
             return false;
         }
-        return $wpdb->insert_id;
+        $click_id = (int) $wpdb->insert_id;
+        /**
+         * Fires after a referral click has been recorded.
+         *
+         * Runs for every click: referral links, direct links and
+         * wcusage_record_click().
+         *
+         * @param int   $click_id  ID of the click that was saved.
+         * @param int   $coupon_id Coupon the click was recorded against.
+         * @param array $args      Details the click was recorded with. See the
+         *                         "wcusage_should_record_click" filter.
+         */
+        do_action(
+            'wcusage_click_recorded',
+            $click_id,
+            $coupon_id,
+            $args
+        );
+        return $click_id;
     }
 
 }
@@ -205,34 +267,20 @@ if ( !function_exists( 'wcusage_record_click' ) ) {
         if ( $ipaddress === null ) {
             $ipaddress = wcusage_get_visitor_ip();
         }
-        // Put the tidied values back, so anything listening below is told what was
-        // actually saved rather than what was passed in.
-        $args['referrer'] = $referrer;
-        $args['ip'] = $ipaddress;
-        $click_id = wcusage_install_clicks_data(
+        if ( empty( $args['source'] ) ) {
+            $args['source'] = 'api';
+        }
+        // wcusage_install_clicks_data() fires "wcusage_click_recorded", with the
+        // values it actually saved in place of the ones passed in.
+        return wcusage_install_clicks_data(
             $coupon_id,
             $args['campaign'],
             $args['page'],
-            $args['referrer'],
+            $referrer,
             $args['converted'],
-            $args['ip']
+            $ipaddress,
+            $args
         );
-        if ( $click_id ) {
-            /**
-             * Fires after a referral click has been recorded.
-             *
-             * @param int    $click_id  ID of the click that was saved.
-             * @param int    $coupon_id Coupon the click was recorded against.
-             * @param array  $args      Details the click was recorded with.
-             */
-            do_action(
-                'wcusage_click_recorded',
-                $click_id,
-                $coupon_id,
-                $args
-            );
-        }
-        return $click_id;
     }
 
 }
@@ -350,7 +398,7 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
     <!-- Show the clicks table -->
     <?php 
         if ( $totalresults > 0 ) {
-            echo "<table class='wcuTable wcu-table-clicks'>";
+            echo "<div class='wcusage-table-scroll'><table class='wcuTable wcu-table-clicks'>";
             echo "<tr class='wcu-thetitlerow'>";
             echo "<td class='wcuTableHead'>#</td>";
             if ( $show_converted_col ) {
@@ -400,7 +448,7 @@ if ( !function_exists( 'wcusage_display_coupon_url_clicks' ) ) {
                 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Safe internal output; verified in manual audit.
                 echo "</tr>";
             }
-            echo "</table>";
+            echo "</table></div>";
         } else {
             if ( $page == 0 ) {
                 ?>

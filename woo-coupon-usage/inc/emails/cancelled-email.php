@@ -53,6 +53,21 @@ function wcusage_order_refund_email($order_id, $coupon_code, $status) {
 
     $valueuser = get_post_meta( $id, "wcu_select_coupon_user", true );
 
+    $wcu_enable_notifications = get_post_meta( $id, 'wcu_enable_notifications', true );
+    if($wcu_enable_notifications == "") { $wcu_enable_notifications = 1; }
+
+    // Same rules as the new order email: only an affiliate's coupon, and only
+    // while its notifications are on. This used to carry on regardless, so a
+    // cancelled order with an ordinary coupon read a user that did not exist.
+    if( !$wcu_enable_notifications || !$valueuser || !$order_id ) {
+        return;
+    }
+
+    $user_info = get_userdata($valueuser);
+    if( !$user_info ) {
+        return;
+    }
+
     $calculateorder = wcusage_calculate_order_data( $order_id, $coupon_code, 0, 1 );
     $totalcommission = isset($calculateorder['totalcommission']) ? $calculateorder['totalcommission'] : 0;
 
@@ -66,22 +81,11 @@ function wcusage_order_refund_email($order_id, $coupon_code, $status) {
 
     $valuecommission = wcusage_format_price( number_format((float)$totalcommission, 2, '.', '') );
 
-    $wcu_enable_notifications = get_post_meta( $id, 'wcu_enable_notifications', true );
-    if($wcu_enable_notifications == "") { $wcu_enable_notifications = 1; }
-
     if ( wcu_fs()->can_use_premium_code() ) {
         $wcu_notifications_extra = sanitize_text_field( get_post_meta( $id, 'wcu_notifications_extra', true ) );
     } else {
         $wcu_notifications_extra = "";
     }
-
-    if( $wcu_enable_notifications && $valueuser && $order_id ) {
-
-        $order = wc_get_order( $order_id );
-
-    }
-
-    $user_info = get_userdata($valueuser);
 
     $user_name = $user_info->display_name;
     $user_email = $user_info->user_email;
@@ -136,6 +140,6 @@ function wcusage_order_refund_email($order_id, $coupon_code, $status) {
     // Style the wrapped message with woocommerce inline styles
     $html_message = $wc_email->style_inline($wrapped_message);
 
-    wp_mail( $to, $subject, $html_message, $headers );
+    wcusage_mail( 'order_refunded', $to, $subject, $html_message, $headers, array(), array( 'order_id' => (int) $order_id, 'coupon_code' => $coupon_code, 'user_id' => (int) $valueuser, 'status' => $status, 'commission' => (float) $totalcommission ) );
 
 }

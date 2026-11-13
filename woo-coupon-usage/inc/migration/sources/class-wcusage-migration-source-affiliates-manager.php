@@ -97,8 +97,8 @@ class WCUsage_Migration_Source_AffiliatesManager extends WCUsage_Migration_Sourc
 	 */
 	public function get_not_migrated() {
 		return array(
-			__( 'Coupons linked to affiliates by the paid "WooCommerce Coupons" add-on (each affiliate gets a new coupon)', 'woo-coupon-usage' ),
-			__( 'Other program settings (only the default rate, cookie length and click attribution are copied)', 'woo-coupon-usage' ),
+			'coupons'  => __( 'Coupons linked to affiliates by the paid "WooCommerce Coupons" add-on (each affiliate gets a new coupon)', 'woo-coupon-usage' ),
+			'settings' => __( 'Other program settings (only the default rate, cookie length and click attribution are copied)', 'woo-coupon-usage' ),
 		);
 	}
 

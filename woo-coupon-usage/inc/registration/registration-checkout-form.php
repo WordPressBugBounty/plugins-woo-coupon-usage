@@ -85,6 +85,47 @@ function wcusage_checkout_affiliate_register_fields() {
 }
 
 /**
+ * Checks the preferred coupon code before the order is placed, so the customer
+ * can correct it: it must only use allowed characters and not already be in use.
+ *
+ * @param array    $data   Posted checkout data.
+ * @param WP_Error $errors Validation errors.
+ *
+ */
+add_action( 'woocommerce_after_checkout_validation', 'wcusage_checkout_affiliate_register_field_validate', 10, 2 );
+function wcusage_checkout_affiliate_register_field_validate( $data, $errors ) {
+
+  if ( empty( $_POST['wcusage_join_affiliate_program'] ) || !isset( $_POST['wcusage_join_affiliate_program_coupon'] ) ) {
+    return;
+  }
+
+  // The code is generated automatically, so the posted one is not used.
+  if ( wcusage_get_setting_value('wcusage_field_registration_auto_coupon', '0') && wcu_fs()->can_use_premium_code__premium_only() ) {
+    return;
+  }
+
+  // No account on this order means no application is made from it.
+  if ( !is_user_logged_in() && empty( $data['createaccount'] ) && !WC()->checkout()->is_registration_required() ) {
+    return;
+  }
+
+  $couponcode = wc_sanitize_coupon_code( $_POST['wcusage_join_affiliate_program_coupon'] );
+  if ( $couponcode === '' ) {
+    return;
+  }
+
+  if ( !wcusage_registration_coupon_code_valid( $couponcode ) ) {
+    $errors->add( 'wcusage_affiliate_coupon', esc_html( wcusage_registration_coupon_code_invalid_message() ) );
+  } elseif ( !wcusage_registration_coupon_available( $couponcode ) ) {
+    $errors->add( 'wcusage_affiliate_coupon', sprintf(
+      esc_html__( 'The "%s" coupon already exists. Please try again with a different coupon code.', 'woo-coupon-usage' ),
+      esc_html( $couponcode )
+    ) );
+  }
+
+}
+
+/**
  * On order complete add to affiliate program if checked.
  *
  * @param int $order_id

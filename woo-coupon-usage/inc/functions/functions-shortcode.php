@@ -30,7 +30,7 @@ function wcusage_couponusage(  $atts  ) {
                         'woo-coupon-usage',
                         WCUSAGE_UNIQUE_PLUGIN_URL . 'js/woo-coupon-usage.js',
                         array('jquery'),
-                        '5.8.0',
+                        WCUSAGE_VERSION,
                         false
                     );
                 }

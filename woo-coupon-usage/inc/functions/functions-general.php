@@ -48,6 +48,71 @@ if( !function_exists( 'wcusage_get_portal_theme' ) ) {
 }
 
 /**
+ * Remove the site theme's stylesheets (and WooCommerce's) from the affiliate portal pages.
+ *
+ * The portals are full pages of their own with their own stylesheets. Called by
+ * their templates before wp_head(), and hooked by them to "wp_print_styles" so it
+ * also catches what is enqueued inside wp_head() on "wp_enqueue_scripts" - where
+ * themes enqueue their stylesheets.
+ */
+if( !function_exists( 'wcusage_portal_dequeue_theme_styles' ) ) {
+  function wcusage_portal_dequeue_theme_styles() {
+
+    global $wp_styles;
+    if ( ! $wp_styles instanceof WP_Styles || empty( $wp_styles->queue ) ) {
+      return;
+    }
+
+    $theme_template_uri = strtolower( get_template_directory_uri() );
+    $theme_stylesheet_uri = strtolower( get_stylesheet_directory_uri() );
+
+    // The theme's companion plugins ("blocksy-companion", "astra-addon"), by the
+    // theme's folder name at the start of a plugin folder. Not any mention of the
+    // theme's name anywhere in the URL: this also runs on the styles other plugins
+    // enqueue, and a short name ("Go") would match unrelated ones.
+    $theme_plugin_prefixes = array();
+    foreach ( array_unique( array( get_template(), get_stylesheet() ) ) as $theme_slug ) {
+      $theme_slug = strtolower( (string) $theme_slug );
+      if ( $theme_slug !== '' ) {
+        $theme_plugin_prefixes[] = '/plugins/' . $theme_slug;
+      }
+    }
+
+    foreach ( $wp_styles->queue as $style ) {
+      if ( empty( $wp_styles->registered[ $style ] ) ) {
+        continue;
+      }
+      $style_obj = $wp_styles->registered[ $style ];
+      $style_handle = $style_obj->handle;
+      $style_src = strtolower( (string) $style_obj->src );
+      if ( $style_handle === 'wcusage-portal-font-awesome' || $style_handle === 'wcusage-portal-css' || $style_handle === 'woo-coupon-usage-style' || strpos( $style_handle, 'wcusage' ) === 0 || strpos( $style_handle, 'woo-coupon-usage' ) === 0 ) {
+        continue;
+      }
+      $from_theme_plugin = false;
+      foreach ( $theme_plugin_prefixes as $prefix ) {
+        if ( strpos( $style_src, $prefix ) !== false ) {
+          $from_theme_plugin = true;
+          break;
+        }
+      }
+      // An empty needle matches every string, so each one is only tested when set.
+      // No bare "global" check: it removed any plugin's stylesheet with the word in
+      // its path (a login form's or a captcha's, say).
+      if ( $from_theme_plugin
+      || ( $theme_template_uri !== '' && strpos( $style_src, $theme_template_uri ) !== false )
+      || ( $theme_stylesheet_uri !== '' && strpos( $style_src, $theme_stylesheet_uri ) !== false )
+      || strpos( $style_src, '/themes/' ) !== false
+      || strpos( $style_src, 'woocommerce' ) !== false
+      || strpos( $style_src, 'wc-' ) !== false
+      || strpos( $style_src, 'global-styles' ) !== false ) {
+        wp_dequeue_style( $style_handle );
+      }
+    }
+
+  }
+}
+
+/**
  * Load admin ajax only on pages that include main plugin shortcode.
  *
  */
@@ -947,6 +1012,32 @@ if (!function_exists('wcusage_check_if_refresh_needed')) {
         return $force_refresh_stats;
 
     }
+}
+
+if( !function_exists( 'wcusage_js_string_attr' ) ) {
+	/**
+	 * Returns a value as a complete JavaScript string literal (quotes included)
+	 * that is safe to print inside an HTML event attribute such as onclick="...".
+	 *
+	 * Use this instead of '<?php echo esc_js( $value ); ?>' in an attribute.
+	 * esc_js() leaves HTML entities in the value as they are, and the browser
+	 * decodes an attribute's entities before running it as script, so a value
+	 * holding "&#92;" becomes a backslash that cancels the escaping of the quote
+	 * after it. Here "&", quotes and angle brackets are written as \uXXXX
+	 * escapes instead, so there is nothing for the browser to decode.
+	 *
+	 * Example: onclick="openTab(<?php echo wcusage_js_string_attr( $code ); ?>);"
+	 *
+	 * @param mixed $value Value to print. Cast to a string.
+	 * @return string Escaped for an HTML attribute; print as is.
+	 */
+	function wcusage_js_string_attr( $value ) {
+		$json = wp_json_encode( (string) $value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+		if ( false === $json ) {
+			$json = '""';
+		}
+		return esc_attr( $json );
+	}
 }
 
 if( !function_exists( 'wcusage_csv_escape_cell' ) ) {

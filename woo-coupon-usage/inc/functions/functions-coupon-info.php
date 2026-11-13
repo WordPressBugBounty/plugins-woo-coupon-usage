@@ -81,6 +81,121 @@ function wcusage_flush_coupon_info_cache() {
 }
 
 /**
+ * Remember a coupon's affiliate before its "wcu_select_coupon_user" meta changes.
+ *
+ * Hooked to the add/update/delete metadata short-circuit filters, which it never
+ * short-circuits.
+ *
+ * @param mixed  $check      Short-circuit value, passed through.
+ * @param int    $object_id  Post ID (none for a delete across every post).
+ * @param string $meta_key   Meta key.
+ * @param mixed  $meta_value Value being saved, or the value to delete.
+ * @param bool   $delete_all For a delete: whether it is across every post
+ *                           (delete_post_meta_by_key()).
+ * @return mixed
+ */
+function wcusage_coupon_affiliate_meta_remember( $check, $object_id, $meta_key, $meta_value = '', $delete_all = false ) {
+	if ( 'wcu_select_coupon_user' !== $meta_key || null !== $check ) {
+		return $check;
+	}
+
+	if ( $delete_all && 'delete_post_metadata' === current_filter() ) {
+		// No single post: remember every coupon the delete is about to clear.
+		global $wpdb;
+		$sql    = "SELECT pm.post_id, pm.meta_value FROM {$wpdb->postmeta} pm INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE pm.meta_key = %s AND p.post_type = 'shop_coupon'";
+		$params = array( $meta_key );
+		if ( '' !== $meta_value && null !== $meta_value && false !== $meta_value ) {
+			$sql     .= ' AND pm.meta_value = %s';
+			$params[] = maybe_serialize( $meta_value );
+		}
+		$GLOBALS['wcusage_coupon_affiliate_bulk_before'] = wp_list_pluck( (array) $wpdb->get_results( $wpdb->prepare( $sql, $params ) ), 'meta_value', 'post_id' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return $check;
+	}
+
+	$object_id = (int) $object_id;
+	if ( $object_id > 0 && 'shop_coupon' === get_post_type( $object_id ) ) {
+		$GLOBALS['wcusage_coupon_affiliate_before'][ $object_id ] = (string) get_post_meta( $object_id, 'wcu_select_coupon_user', true );
+	}
+	return $check;
+}
+add_filter( 'add_post_metadata', 'wcusage_coupon_affiliate_meta_remember', 9999, 5 );
+add_filter( 'update_post_metadata', 'wcusage_coupon_affiliate_meta_remember', 9999, 5 );
+add_filter( 'delete_post_metadata', 'wcusage_coupon_affiliate_meta_remember', 9999, 5 );
+
+/**
+ * Same, for changes made by meta ID (update_metadata_by_mid(), delete_metadata_by_mid()),
+ * which skip the filters above. WooCommerce saves a coupon's existing meta this
+ * way, so "$coupon->update_meta_data(); $coupon->save();" goes through here.
+ *
+ * @param int|int[] $meta_ids  Meta ID(s).
+ * @param int       $object_id Post ID.
+ * @param string    $meta_key  Meta key.
+ */
+function wcusage_coupon_affiliate_meta_remember_by_mid( $meta_ids, $object_id, $meta_key ) {
+	wcusage_coupon_affiliate_meta_remember( null, $object_id, $meta_key );
+}
+add_action( 'update_post_meta', 'wcusage_coupon_affiliate_meta_remember_by_mid', 10, 3 );
+add_action( 'delete_post_meta', 'wcusage_coupon_affiliate_meta_remember_by_mid', 10, 3 );
+
+/**
+ * Fire "wcusage_coupon_affiliate_changed" once a coupon's affiliate meta has changed.
+ *
+ * @param int|int[] $meta_id    Meta ID(s).
+ * @param int       $object_id  Post ID.
+ * @param string    $meta_key   Meta key.
+ * @param mixed     $meta_value New value (the deleted value for a delete).
+ */
+function wcusage_coupon_affiliate_meta_changed( $meta_id, $object_id, $meta_key, $meta_value ) {
+
+	if ( 'wcu_select_coupon_user' !== $meta_key ) {
+		return;
+	}
+	$object_id = (int) $object_id;
+
+	// A delete across every coupon (delete_post_meta_by_key()).
+	if ( ! $object_id && 'deleted_post_meta' === current_action() && isset( $GLOBALS['wcusage_coupon_affiliate_bulk_before'] ) ) {
+		$cleared = $GLOBALS['wcusage_coupon_affiliate_bulk_before'];
+		unset( $GLOBALS['wcusage_coupon_affiliate_bulk_before'] );
+		foreach ( $cleared as $coupon_id => $before ) {
+			if ( (int) $before ) {
+				/** This action is documented below. */
+				do_action( 'wcusage_coupon_affiliate_changed', (int) $coupon_id, 0, (int) $before );
+			}
+		}
+		return;
+	}
+
+	if ( ! $object_id || ! isset( $GLOBALS['wcusage_coupon_affiliate_before'][ $object_id ] ) ) {
+		return;
+	}
+
+	$before = $GLOBALS['wcusage_coupon_affiliate_before'][ $object_id ];
+	unset( $GLOBALS['wcusage_coupon_affiliate_before'][ $object_id ] );
+
+	$after = 'deleted_post_meta' === current_action() ? '' : (string) get_post_meta( $object_id, 'wcu_select_coupon_user', true );
+	if ( (int) $before === (int) $after ) {
+		return;
+	}
+
+	/**
+	 * Fires after a coupon is assigned to an affiliate, moved to another one, or unassigned.
+	 *
+	 * Runs however the change was made: wp-admin, an accepted registration, the
+	 * REST API, the migration tool or code saving the coupon's
+	 * "wcu_select_coupon_user" meta.
+	 *
+	 * @param int $coupon_id   Coupon ID.
+	 * @param int $new_user_id Affiliate now assigned, or 0 when unassigned.
+	 * @param int $old_user_id Affiliate assigned before, or 0 when there was none.
+	 */
+	do_action( 'wcusage_coupon_affiliate_changed', $object_id, (int) $after, (int) $before );
+
+}
+add_action( 'added_post_meta', 'wcusage_coupon_affiliate_meta_changed', 10, 4 );
+add_action( 'updated_post_meta', 'wcusage_coupon_affiliate_meta_changed', 10, 4 );
+add_action( 'deleted_post_meta', 'wcusage_coupon_affiliate_meta_changed', 10, 4 );
+
+/**
  * Get coupon ID
  *
  * @param string $coupon_code

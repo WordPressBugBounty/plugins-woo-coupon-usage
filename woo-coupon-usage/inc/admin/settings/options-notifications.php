@@ -370,7 +370,7 @@ function wcusage_field_cb_notifications( $args )
           ** [Parent Email] Affiliate Program Invitation
           ********************
           -->
-          <?php wcusage_setting_toggle_option('wcusage_field_email_mla_sub_referral_enable', 1, esc_html__( 'New Sub-Affiliate Referral', 'woo-coupon-usage' ), '0px', esc_html__( 'Send an email to parent affiliate when a sub-affiliate refers a new order (and it is completed).', 'woo-coupon-usage' )); ?>
+          <?php wcusage_setting_toggle_option('wcusage_field_email_mla_sub_referral_enable', 1, esc_html__( 'New Sub-Affiliate Referral', 'woo-coupon-usage' ), '0px', esc_html__( 'Send an email to parent affiliates when a sub-affiliate refers a new order that earns them commission. It is sent when the commission is granted, but never while the order is still pending payment.', 'woo-coupon-usage' )); ?>
 
           <br/><br/><p><span class="fa-solid fa-circle-user"></span> <strong><?php echo esc_html__( 'Recipient', 'woo-coupon-usage' ); ?>:</strong> <?php echo esc_html__( 'Parent Affiliate User', 'woo-coupon-usage' ); ?></p>
 
@@ -378,6 +378,11 @@ function wcusage_field_cb_notifications( $args )
 
           <?php echo wcu_admin_settings_showhide_toggle("wcu_show_email_mla_sub_referral_customise", "wcu_email_mla_sub_referral_customise", esc_html__( "Show", "woo-coupon-usage" ), esc_html__( "Hide", "woo-coupon-usage" )); ?>
           <div id="wcu_email_mla_sub_referral_customise" style="display: none;">
+
+            <br/>
+
+            <!-- Only send when the sub-affiliate earns commission -->
+            <?php wcusage_setting_toggle_option('wcusage_field_email_mla_sub_referral_require_commission', 0, esc_html__( 'Only send when the sub-affiliate earns commission on the order', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, the email is not sent for an order that earns the sub-affiliate no commission, even if the parent still earns a fixed amount or a percentage of the order total from it.', 'woo-coupon-usage' )); ?>
 
             <br/>
 
@@ -565,6 +570,16 @@ if( !function_exists( 'wcusage_setting_sectio_email_free' ) ) {
 
         <br/>
 
+        <!-- Only send when the order earns commission -->
+        <?php wcusage_setting_toggle_option('wcusage_field_email_require_commission', 0, esc_html__( 'Only send when the order earns the affiliate commission', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, no email is sent for an order that earns the affiliate no commission, for example when every product in it is excluded from commission or has a 0% rate. (PRO) The affiliate\'s new order SMS follows this too.', 'woo-coupon-usage' )); ?>
+
+        <br/>
+
+        <!-- Only list products that earn commission -->
+        <?php wcusage_setting_toggle_option('wcusage_field_email_list_commission_products', 0, esc_html__( 'Only list products that earn commission', 'woo-coupon-usage' ), '0px', esc_html__( 'When enabled, the {listproducts} list leaves out products that earned the affiliate no commission. If none of them did (for example, the commission is a fixed amount per order), every product is listed.', 'woo-coupon-usage' )); ?>
+
+        <br/>
+
         <!-- Email Notification Subject -->
         <?php wcusage_setting_text_option('wcusage_field_email_subject', esc_html__( "You have made a new referral sale!", "woo-coupon-usage" ), esc_html__( 'Email Notification Subject', 'woo-coupon-usage' ), '0px'); ?>
 
@@ -745,7 +760,7 @@ if( !function_exists( 'wcusage_setting_sectio_email_registration' ) ) {
 
           <br/>
 
-          <?php echo wcusage_email_merge_tags(array("coupon", "dashboardurl", "referralurl", "message", "username", "name")); ?>
+          <?php echo wcusage_email_merge_tags(array("coupon", "dashboardurl", "referralurl", "message", "username", "name", "passwordurl")); ?>
 
         </div>
 

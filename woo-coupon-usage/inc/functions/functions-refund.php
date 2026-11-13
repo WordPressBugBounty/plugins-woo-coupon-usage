@@ -87,7 +87,16 @@ if( !function_exists( 'wcusage_order_update_stats_refund' ) ) {
         $order_was_counted = wcusage_check_status_show( $order->get_status() ) || wcusage_order_meta( $order_id, 'wcusage_all_updated' );
         $update_alltime_stats = !$full_refund || $order_was_counted;
         $change_usage = ( $full_refund && $order_was_counted ) ? 1 : 0;
-        
+
+        // A full refund takes the order out of the referrals ("wcusage_referral_removed"
+        // below). Read what each coupon was counted with before the stats drop it.
+        $removed_referrals = array();
+        if( $full_refund && wcusage_order_meta( $order_id, 'wcusage_all_updated' ) ) {
+          foreach( wcusage_get_order_referral_attribution( $order ) as $credit ) {
+            $removed_referrals[ $credit['coupon_code'] ] = wcusage_get_order_counted_commission( $order_id, $credit['coupon_code'] );
+          }
+        }
+
         $lifetimeaffiliate = wcusage_order_meta($order_id,'lifetime_affiliate_coupon_referrer');
         $affiliatereferrer = wcusage_order_meta($order_id,'wcusage_referrer_coupon');
 
@@ -116,6 +125,10 @@ if( !function_exists( 'wcusage_order_update_stats_refund' ) ) {
         }
 
         if($full_refund) {
+          // The order no longer counts towards the affiliate's referrals.
+          foreach( $removed_referrals as $removed_code => $removed_commission ) {
+            wcusage_do_referral_change_action( 'removed', $order, $removed_code, array(), $removed_commission );
+          }
           wcusage_delete_order_meta( $order_id, 'wcusage_all_updated' );
         }
 

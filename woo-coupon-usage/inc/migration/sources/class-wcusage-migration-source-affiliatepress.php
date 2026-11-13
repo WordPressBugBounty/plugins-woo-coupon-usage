@@ -153,14 +153,14 @@ class WCUsage_Migration_Source_AffiliatePress extends WCUsage_Migration_Source {
 	 */
 	public function get_not_migrated() {
 		return array(
-			__( 'Coupons assigned to affiliates with the AffiliatePress Pro Coupon Code add-on (each affiliate gets a new coupon)', 'woo-coupon-usage' ),
-			__( 'Affiliate groups (AffiliatePress Pro)', 'woo-coupon-usage' ),
-			__( 'Commission rates set on individual affiliates or products (AffiliatePress Pro)', 'woo-coupon-usage' ),
-			__( 'Multi-level affiliate parents (AffiliatePress Pro)', 'woo-coupon-usage' ),
-			__( 'Lifetime customer links (AffiliatePress Pro)', 'woo-coupon-usage' ),
-			__( 'Custom registration form fields and their answers', 'woo-coupon-usage' ),
-			__( 'Custom links affiliates saved in their dashboard (the links themselves still work)', 'woo-coupon-usage' ),
-			__( 'Other program settings (only the default rate, cookie length and click attribution are copied)', 'woo-coupon-usage' ),
+			'coupons'             => __( 'Coupons assigned to affiliates with the AffiliatePress Pro Coupon Code add-on (each affiliate gets a new coupon)', 'woo-coupon-usage' ),
+			'groups'              => __( 'Affiliate groups (AffiliatePress Pro)', 'woo-coupon-usage' ),
+			'rates'               => __( 'Commission rates set on individual affiliates or products (AffiliatePress Pro)', 'woo-coupon-usage' ),
+			'mla'                 => __( 'Multi-level affiliate parents (AffiliatePress Pro)', 'woo-coupon-usage' ),
+			'lifetime'            => __( 'Lifetime customer links (AffiliatePress Pro)', 'woo-coupon-usage' ),
+			'registration_fields' => __( 'Custom registration form fields and their answers', 'woo-coupon-usage' ),
+			'referral_links'      => __( 'Custom links affiliates saved in their dashboard (the links themselves still work)', 'woo-coupon-usage' ),
+			'settings'            => __( 'Other program settings (only the default rate, cookie length and click attribution are copied)', 'woo-coupon-usage' ),
 		);
 	}
 

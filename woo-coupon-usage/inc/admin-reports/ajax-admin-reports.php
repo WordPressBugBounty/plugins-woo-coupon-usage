@@ -181,7 +181,7 @@ function wcusage_load_admin_reports() {
         $statuses = wc_get_order_statuses();
         unset($statuses['wc-refunded']);
     } else {
-        $statuses = $wcusage_field_order_type_custom;
+        $statuses = wcusage_get_commission_order_statuses();
     }
     $status_keys = array_map(function($k) { return sanitize_text_field($k); }, array_keys($statuses));
     $status_list = "'" . implode("','", array_map('esc_sql', $status_keys)) . "'";

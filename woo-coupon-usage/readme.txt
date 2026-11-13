@@ -5,7 +5,7 @@ Donate link: https://couponaffiliates.com
 Requires at least: 5.3
 Requires PHP: 7.0
 Tested up to: 7.1
-Stable tag: 8.7.1
+Stable tag: 8.7.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -16,6 +16,8 @@ The most powerful affiliate plugin for WooCommerce. Track commission, generate r
 Coupon Affiliates is a powerful affiliate plugin for WooCommerce, that is designed to help you grow traffic and increase sales.
 
 Give your affiliates access to a user-friendly affiliate dashboard for their coupons, to view coupon usage statistics, recent orders, commission earned, referral URLs and more.
+
+[youtube https://www.youtube.com/watch?v=BOLK6z3k1nk]
 
 ## Why is Coupon Affiliates the best WooCommerce affiliate plugin?
 
@@ -193,8 +195,6 @@ Learn more about Pro and upgrade at <a href="https://couponaffiliates.com">www.c
 
 <a href="https://couponaffiliates.com">UPGRADE TO PRO</a>
 
-[youtube https://www.youtube.com/watch?v=REzNmqjvg2E]
-
 ## ⚙️ Integrations
 
 Coupon Affiliates was built exclusively as a WooCommerce Affiliate Plugin, however it can also be integrated with other popular eCommerce plugins such as LifterLMS, LearnDash, TutorLMS, MemberPress, and Paid Memberships Pro. <a href="https://couponaffiliates.com/docs-category/integrations">Click here</a> to learn more. It also integrates well with other coupon plugins such as Smart Coupons, and Advanced Coupons.
@@ -257,7 +257,7 @@ Yes! The built-in Migration Tool (Beta), found on the "Migration" page under "Ad
 
 It imports your affiliates and their user accounts, coupons (including AffiliateWP dynamic coupons), affiliate applications, referral history with the commission recorded, visits and settings, and keeps your affiliates' old referral links working. With the Pro version, it also imports commission balances, payouts, payout details, custom commission rates, affiliate groups and creatives.
 
-You can choose what to import, preview the migration before it runs, and see a list of anything that cannot be migrated. Your old plugin's data is never changed, and every migration can be undone in full. Migrations can also be run with WP-CLI ("wp wcusage-migrate").
+You can choose what to import, preview the migration before it runs, and see a list of anything that cannot be migrated, with where to set it up again in Coupon Affiliates. Your old plugin's data is never changed, and every migration can be undone in full. Migrations can also be run with WP-CLI ("wp wcusage-migrate").
 
 = How do the affiliate referral URLs work? =
 
@@ -323,7 +323,46 @@ Please report security bugs found in the source code of the plugin through the [
 
 <a href="https://couponaffiliates.com/changelog/">View the full changelog.</a> Older versions are also in changelog.txt.
 
+= Version 8.7.2 - 12th November 2026 =
+- New: Email Notifications > New "Only send when the order earns the affiliate commission" option for the "New Order Referral" email, so affiliates are not emailed about orders that earn them nothing. The affiliate's (PRO) new order SMS follows it too.
+- New: Email Notifications > New "Only list products that earn commission" option for the "New Order Referral" email's {listproducts} list.
+- New: (PRO) Multi-Level Affiliates > New "Only pay parent affiliates when the sub-affiliate earns commission on the order" option. Fixed and "% of order" tier rates then pay nothing on orders that earn the sub-affiliate no commission.
+- New: (PRO) Email Notifications > New "Only send when the sub-affiliate earns commission on the order" option for the "New Sub-Affiliate Referral" email.
+- New: Email Notifications > The "Affiliate Application Accepted" email now supports the {passwordurl} merge tag: a link for the affiliate to set their password, so it can be sent when their application is approved instead of relying on the default WordPress new user email. Before, the tag was left in the email as plain text. When an application is auto-accepted and the "New Account" email also has the tag, both emails get the same working link.
+- New: (PRO) Performance Bonuses > The "Increase all future commission earnings by percentage" action is now available, and works: the affiliate's commission on orders placed after the bonus is earned is increased by that percentage. Their current increase is shown, and can be changed or removed, as "Bonus Commission Percentage" on their user profile. An increase an affiliate already had saved applies to their orders placed from this update on. With (PRO) Multi-Level Affiliates set to take the parents' share out of the sub-affiliate's commission, the share is taken out of the increased commission. The increase applies while Performance Bonuses is switched on, and never takes an order above the "Maximum commission per order".
+- Tweak: (PRO) Corrected the "New Sub-Affiliate Referral" email's description: it is sent when the parent earns commission, and never while the order is still pending payment.
+- Tweak: Fraud Prevention > The "own coupon" settings now explain which of an affiliate's own orders they cover.
+- Tweak: (PRO) Performance Bonuses > The bonus editor now explains that the commission rate actions only apply to orders placed after the bonus is earned, and notes that with a "Single Order" requirement, one qualifying order changes the rates for all of the affiliate's later orders. This replaces the old warning about statistics refreshes.
+- Fix: Suspending an affiliate now also stops orders (including subscription renewals) being credited to them through their referral link or (PRO) lifetime commission, and their referral links no longer set a cookie. A customer's lifetime link is kept, so it resumes once the suspension is lifted. (PRO) With the lifetime "coupon priority" option on, a suspended affiliate's coupon on an order no longer takes the customer over from their lifetime affiliate.
+- Fix: Registration > The "New Account" email's {passwordurl} link no longer stops working when the affiliate is logged in automatically after registering through the registration form.
+- Fix: The "order cancelled" affiliate email ignored the coupon's notification setting, and gave a PHP warning for coupons with no affiliate.
+- Fix: The "New Order Referral" email, and the affiliate details in the admin's WooCommerce "New Order" email, no longer give a PHP warning when the coupon's affiliate user has been deleted.
+- Fix: With "Include custom discounts in % commission calculations & order totals" switched on, store credit from WebToffee Smart Coupons (or from plugins using the "wcusage_order_store_credit" filter) was still deducted from the affiliate's commission, shown as "Store Credit" in the order's Commission Breakdown. Store credit now follows that setting, the same as negative fees and other custom discounts. Existing orders can be updated with "Recalculate" in the order's "Coupon Affiliate" box.
+- Fix: Affiliates' own orders: with "Allow affiliate user to apply their own coupon code" off, or "Do not give the affiliate commission when they use their own coupon code" on, an affiliate no longer earns commission on orders placed from their account or with their email address however the order reaches them - including orders another plugin creates, such as funnel upsell orders. Their own orders are no longer credited to them through their referral link (a guest checkout with their email was), and (PRO) they are no longer linked to themselves for lifetime commission, including through "Replace Lifetime Referrer", which no longer lets their own coupon take them over from the affiliate who referred them. Orders placed before this update keep the commission they earned under the earlier rules, even when they are recalculated.
+- Fix: (PRO) Performance Bonuses > "Set new commission rates" no longer changes the commission of orders placed before the bonus was earned when the statistics are refreshed or an order is recalculated: those keep the rates they were placed under, and only later orders get the new ones.
+- Fix: (PRO) Performance Bonuses > The "Single Order: Referred Order Total" requirement now compares the order's referred total, as the affiliate's order list shows it, instead of its grand total with tax and shipping.
+- Fix: (PRO) Performance Bonuses > The record of an order having earned a bonus, and the payment method of a "Free Product Order" reward, are now saved through the order itself, so they are kept with High-Performance Order Storage.
+- Fix: (PRO) Security > Performance Bonuses > The bonus fields on a user's profile are now only shown to, and saved for, users who can edit other users. Before, a user with access to their own WordPress profile could change which bonuses they had received.
+- Fix: Affiliate Portal > The portal (and the PRO Multi-Level portal) no longer renders in "quirks mode", which distorted tables and could stop pages scrolling properly, on phones especially. This also fixes a script error when the portal's statistics needed refreshing.
+- Fix: Affiliate Portal > The site theme's stylesheets are now kept out of the portal (and the PRO Multi-Level portal) as intended. They were only removed when enqueued early, which most themes do not do, so the theme's fonts, colours and page rules could distort the portal's layout. Other plugins' stylesheets are left alone, apart from WooCommerce's and the theme's companion plugin's: before, any whose address contained "global" or the theme's name was removed too.
+- Fix: Affiliate Portal > Pages no longer run wider than the screen on phones (the hidden coupon switcher widened them), the (PRO) Bonuses log scrolls on phones instead of being cut off, and the Settings tab stacks its two columns until there is room for both.
+- Fix: Affiliate Dashboard & Portal > Wide tables (Referred Orders, Referral URL clicks, and (PRO) Monthly Summary, Product Rates and Payouts) now scroll sideways on tablets and phones held sideways instead of being cut off (only when a table is wider than the screen, and tooltips in their top rows open downwards so they are not cut off either), and (PRO) YouTube and video creatives fit their box instead of being cropped.
+- Fix: (PRO) Security > Payouts > The custom amount on a payout request must now be a valid number, and is only used when custom payout amounts are enabled.
+- Fix: (PRO) Security > Payouts > The PayPal Payouts email must now be a valid email address, both when it is saved and when a payout is sent.
+- Fix: (PRO) Security > Payouts > A payout that is accepted automatically is now only paid through the affiliate's saved payout method.
+- Fix: Security > Registration > Coupon codes chosen by applicants can now only contain letters, numbers, spaces and - _ . @ % +, and are escaped more strictly on the Registrations page and in the affiliate portal.
+- Fix: (PRO) Security > Registration > The checkout checkbox and "register all new users" can no longer create a second coupon with a code that is already in use.
+- Fix: (PRO) Security > Affiliate Groups > The groups on a user's profile are now only shown to, and saved for, users who can edit other users.
+- Fix: (PRO) Security > Multi-Level Affiliates > A parent can now only approve or decline sub-affiliate registrations when they are an affiliate themselves, with MLA access and not suspended.
+- Dev: New filters: "wcusage_affiliate_earns_on_own_orders" and (PRO) "wcusage_bonus_commission_increase".
+- Dev: New filters: "wcusage_should_track_referral", "wcusage_referral_cookie_days", "wcusage_should_record_click", "wcusage_order_referral_coupon", "wcusage_commission_order_statuses", "wcusage_product_commission_rates", "wcusage_order_item_commission", "wcusage_send_email", "wcusage_email_args" and (PRO) "wcusage_lifetime_link_customer" and "wcusage_mla_tier_rates".
+- Dev: New actions: "wcusage_click_converted", "wcusage_order_referral_attributed", "wcusage_referral_added", "wcusage_referral_removed", "wcusage_coupon_affiliate_changed" and (PRO) "wcusage_lifetime_customer_linked" and "wcusage_payout_status_changed". "wcusage_click_recorded" now fires for every click.
+- Dev: (PRO) The "New Sub-Affiliate Referral" email now gives the "wcusage_send_email" and "wcusage_email_args" filters the order ID, coupon code, the sub-affiliate's commission and the parent's tier.
+
 = Version 8.7.1 - 23rd October 2026 =
+- Tweak: Security hardening: nonce check on the "update notice" dismissal, escaped order statuses in SQL, and removed unused order meta code.
+- Tweak: The admin Reports PDF libraries and the coupon screen's jQuery UI styles now load locally instead of from CDNs.
+- Tweak: "Requires at least" raised to WordPress 5.3, which the plugin already needed.
 - Fix: Security > Refreshing dashboard statistics no longer accepts totals sent by the browser, so affiliates cannot change their own all-time stats.
 - Fix: Security > Users given "Admin Permissions" (e.g. Shop Manager) can no longer edit or delete administrators.
 - Fix: (PRO) Security > "Add New Affiliate" now only accepts affiliate group roles, so it cannot create admin-level accounts.
@@ -332,9 +371,6 @@ Please report security bugs found in the source code of the plugin through the [
 - Fix: URL Clicks > Removing an IP from the blacklist no longer edits other IPs that contain it.
 - Fix: (PRO) Floating Widget > QR codes now load from the plugin, instead of a CDN library that did not work with the widget.
 - Fix: Removed a stray hidden character printed on the admin "View Affiliate" page.
-- Tweak: Security hardening: nonce check on the "update notice" dismissal, escaped order statuses in SQL, and removed unused order meta code.
-- Tweak: The admin Reports PDF libraries and the coupon screen's jQuery UI styles now load locally instead of from CDNs.
-- Tweak: "Requires at least" raised to WordPress 5.3, which the plugin already needed.
 
 = Version 8.7.0 - 23rd October 2026 =
 - New: Migration Tool (Beta) > A new "Migration" page (under "Admin Tools") moves your program over from AffiliateWP, Affiliate For WooCommerce, SliceWP, YITH WooCommerce Affiliates, Solid Affiliate, Ultimate Affiliate Pro, Affiliates (itthinx), AffiliatePress or Affiliates Manager. Imports affiliates, coupons, applications, referral history, visits and settings, and keeps old referral links working. (PRO) Also imports balances, payouts, custom rates, groups and creatives. Includes a preview, never changes the old plugin's data, can be fully undone, and is available through WP-CLI ("wp wcusage-migrate").

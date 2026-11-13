@@ -467,7 +467,7 @@ function wcusage_migration_handle_legacy_cookies( $config ) {
 				continue;
 			}
 
-			$days   = (int) wcusage_get_setting_value( 'wcusage_urls_cookie_days', '30' );
+			$days   = function_exists( 'wcusage_get_referral_cookie_days' ) ? wcusage_get_referral_cookie_days( $code ) : (int) wcusage_get_setting_value( 'wcusage_urls_cookie_days', '30' );
 			$expiry = time() + max( 1, $days ) * DAY_IN_SECONDS;
 
 			// Not allowed to store the plugin's own cookie (no consent yet, say):

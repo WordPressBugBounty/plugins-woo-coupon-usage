@@ -71,6 +71,16 @@ body.dark-mode {
     --input-bg: #3a3a3a; /* Dark input background */
 }
 
+/* The portal is laid out with border-box sizing throughout (as is the settings
+   preview that mirrors it). It used to get this from the site theme's stylesheet,
+   which reached the portal by mistake - with a theme that did not set it, or now
+   that theme stylesheets are kept out, padded boxes overflowed their columns. */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     font-family: var(--primary-font) !important;
@@ -125,6 +135,16 @@ textarea {
 
 .wcu-tab-title {
     margin-top: 10px;
+}
+
+/* The Settings tab's two columns (550px + the rest) stack below 860px of window, but
+   in the portal the sidebar and the page padding take up ~360px of that, so up to a
+   1230px window the second column was squeezed down to a sliver. */
+@media (max-width: 1240px) {
+    /* ".content" so it outranks css/tab-settings.css, which loads after this file. */
+    .content .wcu-settings-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
 .sidebar {
@@ -184,6 +204,10 @@ textarea {
 
 .content {
     flex: 1;
+    /* A flex item will not shrink below its widest content by default, so one wide
+       table or chart pushed the whole page past the edge of the screen. Wide content
+       scrolls inside its own box instead. */
+    min-width: 0;
     padding: 0; /* Reset padding for custom layout */
     transition: margin-left 0.3s ease-in-out; /* Smooth transition for content shift */
     background: var(--content-bg); /* Use variable for content background */
@@ -375,16 +399,30 @@ textarea {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     padding: 6px;
     z-index: 100;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-6px);
-    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+    /* Not displayed while closed. A closed menu that was only made invisible still
+       took up room, and on phones it reached past the right edge of the screen and
+       made the whole portal wider than it. */
+    display: none;
 }
 
 .wcu-coupon-switcher.open .wcu-coupon-switcher-menu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+    display: block;
+    animation: wcu-coupon-switcher-in 0.15s ease;
+}
+
+@keyframes wcu-coupon-switcher-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* On narrow screens the switcher sits mid-way across, so open the menu leftwards
+   from the toggle and never wider than the screen. */
+@media (max-width: 768px) {
+    .wcu-coupon-switcher-menu {
+        left: auto;
+        right: 0;
+        max-width: calc(100vw - 32px);
+    }
 }
 
 .wcu-coupon-switcher-item {

@@ -47,7 +47,7 @@ function wcusage_email_affiliate_register($user_email, $coupon_code, $firstname)
       $wc_email = new WC_Email;
       $html_message = $wc_email->style_inline($wrapped_message);
 
-      wp_mail( $to, $subject, $html_message, $headers );
+      wcusage_mail( 'registration_received', $to, $subject, $html_message, $headers, array(), array( 'coupon_code' => $coupon_code ) );
 
     }
 
@@ -110,7 +110,7 @@ function wcusage_email_affiliate_register_new($user_email, $coupon_code, $firstn
       $wc_email = new WC_Email;
       $html_message = $wc_email->style_inline($wrapped_message);
 
-      wp_mail( $to, $subject, $html_message, $headers );
+      wcusage_mail( 'registration_new_user', $to, $subject, $html_message, $headers, array(), array( 'coupon_code' => $coupon_code, 'user_id' => (int) $user_id ) );
 
     }
 
@@ -127,6 +127,17 @@ function wcusage_generate_password_reset_url($user_id) {
         return false;
     }
 
+    // One link per user per request. Each new link replaces the user's reset key, so
+    // when two emails in one request both have {passwordurl} - the "New Account" email
+    // and then the accepted email, when an application is auto-accepted - the first
+    // email's link would stop working. Reused only while the key it was made with is
+    // still the saved one, so a password reset since then still gets a fresh link.
+    static $links = array();
+    $user_id = (int) $user->ID;
+    if (isset($links[$user_id]) && $links[$user_id]['saved_key'] === (string) $user->user_activation_key) {
+        return $links[$user_id]['url'];
+    }
+
     $user_data = get_userdata($user_id);
     $user_login = $user->user_login;
     $key = get_password_reset_key($user_data);
@@ -134,6 +145,10 @@ function wcusage_generate_password_reset_url($user_id) {
     if (is_wp_error($key)) {
         return false;
     }
+
+    // get_password_reset_key() clears the user cache, so this reads the key just saved.
+    $saved_user = get_user_by('id', $user_id);
+    $saved_key = $saved_user ? (string) $saved_user->user_activation_key : '';
 
     // Try WooCommerce my account lost-password endpoint first, fall back to wp-login.php
     $account_page_url = wc_get_page_permalink('myaccount');
@@ -153,6 +168,13 @@ function wcusage_generate_password_reset_url($user_id) {
                 'login'  => rawurlencode($user_login),
             ),
             wp_login_url()
+        );
+    }
+
+    if ($saved_key !== '') {
+        $links[$user_id] = array(
+            'saved_key' => $saved_key,
+            'url'       => $rp_link,
         );
     }
 
@@ -241,7 +263,7 @@ function wcusage_email_admin_affiliate_register($username, $coupon_code, $referr
       $wc_email = new WC_Email;
       $html_message = $wc_email->style_inline($wrapped_message);
 
-      wp_mail( $to, $subject, $html_message, $headers );
+      wcusage_mail( 'registration_admin', $to, $subject, $html_message, $headers, array(), array( 'coupon_code' => $coupon_code, 'username' => $username ) );
 
     }
 
@@ -280,6 +302,22 @@ function wcusage_email_affiliate_register_accepted($user_email, $coupon_code, $m
         $body = str_replace("{message}", $message, $body);
       }
 
+      // {passwordurl}: a "set your password" link, so stores can send it on approval
+      // instead of relying on the default WordPress new user email. Only made when the
+      // template uses it, as making one replaces any reset key the user already has.
+      if($body && strpos($body, "{passwordurl}") !== false) {
+        $password_url = "";
+        $password_user = $username ? get_user_by( 'login', $username ) : false;
+        if(!$password_user && $user_email) {
+          $password_user = get_user_by( 'email', $user_email );
+        }
+        // Only for the user this email is going to.
+        if($password_user && $password_user->user_email == $to) {
+          $password_url = wcusage_generate_password_reset_url($password_user->ID);
+        }
+        $body = str_replace("{passwordurl}", $password_url ? esc_url( $password_url ) : "", $body);
+      }
+
       $dashboardurl = wcusage_get_coupon_shortcode_page(0);
       $dashboardurl = "<a href='".$dashboardurl."'>" . $dashboardurl . "</a>";
       $body = str_replace("{dashboardurl}", $dashboardurl, $body);
@@ -295,7 +333,7 @@ function wcusage_email_affiliate_register_accepted($user_email, $coupon_code, $m
       $wc_email = new WC_Email;
       $html_message = $wc_email->style_inline($wrapped_message);
 
-      wp_mail( $to, $subject, $html_message, $headers );
+      wcusage_mail( 'registration_accepted', $to, $subject, $html_message, $headers, array(), array( 'coupon_code' => $coupon_code, 'username' => $username ) );
 
     }
 
@@ -337,7 +375,7 @@ function wcusage_email_affiliate_register_declined($user_email, $coupon_code, $m
       $wc_email = new WC_Email;
       $html_message = $wc_email->style_inline($wrapped_message);
 
-      wp_mail( $to, $subject, $html_message, $headers );
+      wcusage_mail( 'registration_declined', $to, $subject, $html_message, $headers, array(), array( 'coupon_code' => $coupon_code ) );
 
     }
 
@@ -411,7 +449,7 @@ function wcusage_email_affiliate_coupon_assigned($user_email, $coupon_code, $fir
   $wc_email = new WC_Email;
   $html_message = $wc_email->style_inline($wrapped_message);
 
-  wp_mail( $to, $subject, $html_message, $headers );
+  wcusage_mail( 'coupon_assigned', $to, $subject, $html_message, $headers, array(), array( 'coupon_code' => $coupon_code, 'username' => $username ) );
 
 }
 
